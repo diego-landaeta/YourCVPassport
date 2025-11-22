@@ -324,13 +324,10 @@ const LeadsInboxModern: React.FC = () => {
       <div className="w-96 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-dark-border">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <EnvelopeIcon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             {t.leadsInbox.title}
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Manage job offers, collaboration requests, and messages from recruiters. Respond directly, accept or decline opportunities, and keep all your professional communications organized in one place.
-          </p>
 
           {/* Search */}
           <div className="relative">
