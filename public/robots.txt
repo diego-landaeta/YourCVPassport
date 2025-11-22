@@ -1,0 +1,14 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow crawling of private user and admin areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow development routes
+Disallow: /dev/
+
+# Point crawlers to the sitemap for efficient indexing
+Sitemap: https://www.yourcvpassport.com/sitemap.xml

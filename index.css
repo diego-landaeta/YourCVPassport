@@ -1,0 +1,235 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Print Styles - Only show CV content with colors */
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Hide header, footer, navigation, and other UI elements */
+  header,
+  nav,
+  footer,
+  .no-print,
+  [class*="header"]:not(.cv-template *),
+  [class*="navigation"],
+  [class*="navbar"],
+  [class*="sidebar"],
+  [class*="menu"],
+  button:not(.cv-template button),
+  .print-hide {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show only the CV template content */
+  .cv-template,
+  .cv-template * {
+    visibility: visible !important;
+  }
+
+  /* Position CV template at top of page */
+  .cv-template {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* CRITICAL: Force color printing - MUST enable "Background graphics" in print dialog */
+  html {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Force backgrounds and colors to print */
+  .cv-template,
+  .cv-template *,
+  .cv-template *::before,
+  .cv-template *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Remove page margins for full-bleed printing */
+  @page {
+    margin: 0;
+    size: A4 portrait;
+  }
+
+  /* Ensure proper page breaks */
+  .cv-template {
+    page-break-inside: avoid;
+    page-break-before: auto;
+    page-break-after: auto;
+  }
+
+  /* Remove transitions and animations for print */
+  * {
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Ensure body background */
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove any overlays or modals */
+  [class*="modal"],
+  [class*="overlay"],
+  [class*="popup"],
+  [class*="toast"],
+  [class*="notification"] {
+    display: none !important;
+  }
+
+  /* Ensure links maintain their styling */
+  .cv-template a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* Optimize images for print */
+  .cv-template img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* Dark mode support (not for print) */
+@media screen {
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* Custom animations for messaging interface */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: all 0.2s ease-in-out;
+}

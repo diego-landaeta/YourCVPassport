@@ -1,0 +1,432 @@
+/* ============================================
+   MESSAGING PRO - ESTILOS AVANZADOS
+   Sistema de mensajería moderno estilo WhatsApp
+   ============================================ */
+
+/* ----- SCROLLBAR PERSONALIZADO ----- */
+.messaging-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.messaging-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messaging-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.messaging-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+/* Dark mode scrollbar */
+.dark .messaging-scroll::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.4);
+}
+
+.dark .messaging-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.7);
+}
+
+/* ----- ANIMACIONES DE MENSAJES ----- */
+@keyframes slideInMessage {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.message-bubble {
+  animation: slideInMessage 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ----- BURBUJAS DE CHAT ESTILO WHATSAPP ----- */
+.message-sent {
+  background: #dcf8c6;
+  border-radius: 12px;
+  border-top-right-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .message-sent {
+  background: rgba(37, 99, 235, 0.25);
+}
+
+.message-received {
+  background: #ffffff;
+  border-radius: 12px;
+  border-top-left-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .message-received {
+  background: rgba(55, 65, 81, 0.8);
+}
+
+/* Efecto hover en mensajes */
+.message-bubble:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* ----- INDICADOR DE ESCRITURA ----- */
+@keyframes typingDot {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+}
+
+.typing-indicator span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #9ca3af;
+  border-radius: 50%;
+  animation: typingDot 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.dark .typing-indicator span {
+  background: #6b7280;
+}
+
+/* ----- TRANSICIONES SUAVES ----- */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-transition-fast {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----- HOVER EFFECTS EN CONVERSACIONES ----- */
+.conversation-item {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.conversation-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.conversation-item:hover::before {
+  opacity: 1;
+}
+
+.conversation-item:hover {
+  transform: translateX(2px);
+}
+
+/* ----- BADGES Y NOTIFICACIONES ----- */
+.unread-badge {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* ----- CHECKMARKS DE LECTURA ----- */
+.read-check {
+  transition: all 0.3s ease;
+}
+
+.read-check.is-read {
+  color: #3b82f6;
+  animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ----- PANEL COLAPSABLE ----- */
+.panel-slide-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.panel-slide-exit {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ----- SOMBRAS PERSONALIZADAS ----- */
+.shadow-message {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-card-subtle {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.dark .shadow-message {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ----- GRADIENTES DE FONDO ----- */
+.bg-whatsapp-pattern {
+  background-color: #efeae2;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.03) 10px,
+      rgba(255, 255, 255, 0.03) 20px
+    );
+}
+
+.dark .bg-whatsapp-pattern {
+  background-color: #0f1419;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.01) 10px,
+      rgba(255, 255, 255, 0.01) 20px
+    );
+}
+
+/* ----- INPUT FLOTANTE ----- */
+.input-message {
+  transition: all 0.2s ease;
+}
+
+.input-message:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* ----- AVATAR MEJORADO ----- */
+.avatar-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.dark .avatar-gradient {
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+}
+
+/* ----- TIMESTAMP MEJORADO ----- */
+.timestamp {
+  font-size: 0.6875rem;
+  opacity: 0.7;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ----- HOVER INTERACTIONS ----- */
+.interactive-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-hover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark .interactive-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ----- LOADING SKELETON ----- */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.dark .skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    #1f2937 0%,
+    #374151 50%,
+    #1f2937 100%
+  );
+}
+
+/* ----- SCROLL SNAP PARA MENSAJES ----- */
+.messages-container {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+.message-bubble {
+  scroll-snap-align: start;
+}
+
+/* ----- SEPARADORES DE FECHA ----- */
+.date-separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.date-separator::before,
+.date-separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark .date-separator::before,
+.dark .date-separator::after {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.date-separator span {
+  padding: 0 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dark .date-separator span {
+  background: rgba(31, 41, 55, 0.9);
+  color: #9ca3af;
+}
+
+/* ----- RESPONSIVE UTILITIES ----- */
+@media (max-width: 1024px) {
+  .message-bubble {
+    max-width: 85%;
+  }
+}
+
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 90%;
+  }
+
+  .conversation-item {
+    padding: 0.75rem;
+  }
+}
+
+/* ----- ACCESSIBILITY ----- */
+.focus-visible:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.dark .focus-visible:focus {
+  outline-color: #60a5fa;
+}
+
+/* ----- PRINT STYLES ----- */
+@media print {
+  .messaging-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .message-bubble {
+    break-inside: avoid;
+  }
+}
+
+/* ----- ANIMATIONS PERFORMANCE ----- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
