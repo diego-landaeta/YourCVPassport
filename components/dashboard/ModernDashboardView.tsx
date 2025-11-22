@@ -129,6 +129,69 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
           </p>
         </div>
 
+        {/* Quick Actions Widget */}
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 shadow-lg border border-gray-200 dark:border-dark-border mb-8">
+          <div className="flex items-center gap-2 mb-5">
+            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Update Profile */}
+            <button
+              onClick={() => onSectionChange('mi-perfil:identity')}
+              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 hover:from-blue-100 dark:hover:from-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-800 transition-all hover:shadow-md group"
+            >
+              <div className="w-12 h-12 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">Update Profile</span>
+            </button>
+
+            {/* Export CV */}
+            <button
+              onClick={() => onSectionChange('exportar')}
+              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 dark:hover:from-green-900/30 rounded-xl border border-green-200 dark:border-green-800 transition-all hover:shadow-md group"
+            >
+              <div className="w-12 h-12 bg-green-600 dark:bg-green-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">Export CV</span>
+            </button>
+
+            {/* Share CV */}
+            <button
+              onClick={() => onSectionChange('compartir')}
+              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 dark:hover:from-purple-900/30 rounded-xl border border-purple-200 dark:border-purple-800 transition-all hover:shadow-md group"
+            >
+              <div className="w-12 h-12 bg-purple-600 dark:bg-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">Share CV</span>
+            </button>
+
+            {/* View Analytics */}
+            <button
+              onClick={() => onSectionChange('analitica')}
+              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 hover:from-orange-100 dark:hover:from-orange-900/30 rounded-xl border border-orange-200 dark:border-orange-800 transition-all hover:shadow-md group"
+            >
+              <div className="w-12 h-12 bg-orange-600 dark:bg-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">Analytics</span>
+            </button>
+          </div>
+        </div>
+
         {/* Profile Status Alert - Always visible */}
         {stats.profileCompleteness < 100 ? (
           <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300">
