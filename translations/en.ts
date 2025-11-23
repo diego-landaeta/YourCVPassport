@@ -2426,5 +2426,127 @@ export const translations = {
         success: {
             applied: "✓ Improvement applied successfully"
         }
+    },
+
+    aiQuestionnaire: {
+        sections: {
+            identity: { name: 'Personal Information', icon: '👤' },
+            experience: { name: 'Work Experience', icon: '💼' },
+            education: { name: 'Education', icon: '🎓' },
+            skills: { name: 'Skills', icon: '⚡' },
+            languages: { name: 'Languages', icon: '🌍' },
+            preferences: { name: 'Preferences', icon: '⚙️' },
+            template: { name: 'CV Template', icon: '🎨' }
+        },
+        progress: {
+            step: 'Step',
+            of: 'of'
+        },
+        navigation: {
+            previous: 'Previous',
+            next: 'Next',
+            finish: 'Finish',
+            saving: 'Saving...'
+        },
+        identity: {
+            name: 'Name',
+            namePlaceholder: 'John Doe',
+            title: 'Title',
+            titlePlaceholder: 'Full Stack Developer',
+            email: 'Email',
+            emailPlaceholder: 'email@example.com',
+            phone: 'Phone',
+            phonePlaceholder: '+1 555 123 4567',
+            location: 'Location',
+            locationPlaceholder: 'New York, USA',
+            linkedin: 'LinkedIn',
+            linkedinPlaceholder: 'linkedin.com/in/username',
+            github: 'GitHub',
+            githubPlaceholder: 'github.com/username',
+            portfolio: 'Portfolio',
+            portfolioPlaceholder: 'portfolio.com',
+            summary: 'Summary',
+            summaryPlaceholder: 'Describe your professional journey...'
+        },
+        experience: {
+            label: 'Experience',
+            position: 'Position',
+            positionPlaceholder: 'Senior Developer',
+            company: 'Company',
+            companyPlaceholder: 'Tech Company',
+            startDate: 'Start',
+            endDate: 'End',
+            currentJob: 'Current job',
+            description: 'Description',
+            descriptionPlaceholder: 'Responsibilities and achievements...'
+        },
+        education: {
+            label: 'Education',
+            institution: 'Institution',
+            institutionPlaceholder: 'University',
+            degree: 'Degree',
+            degreePlaceholder: 'Bachelor',
+            field: 'Field',
+            fieldPlaceholder: 'Engineering',
+            startDate: 'Start',
+            endDate: 'End',
+            description: 'Description',
+            descriptionPlaceholder: 'Achievements and relevant courses...'
+        },
+        skills: {
+            label: 'Skill',
+            skill: 'Skill',
+            skillPlaceholder: 'JavaScript',
+            level: 'Level',
+            levelSelect: 'Select',
+            levelBasic: 'Basic',
+            levelIntermediate: 'Intermediate',
+            levelAdvanced: 'Advanced',
+            levelExpert: 'Expert',
+            years: 'Years'
+        },
+        languages: {
+            label: 'Language',
+            language: 'Language',
+            languagePlaceholder: 'English',
+            level: 'Level',
+            levelSelect: 'Select',
+            levelA1: 'A1 - Basic',
+            levelA2: 'A2 - Pre-intermediate',
+            levelB1: 'B1 - Intermediate',
+            levelB2: 'B2 - Upper-intermediate',
+            levelC1: 'C1 - Advanced',
+            levelC2: 'C2 - Mastery',
+            levelNative: 'Native'
+        },
+        preferences: {
+            availability: 'Availability',
+            availabilitySelect: 'Select',
+            availabilityImmediate: 'Immediate',
+            availability1Week: '1 week',
+            availability2Weeks: '2 weeks',
+            availability1Month: '1 month',
+            availabilityMore: 'More than 1 month',
+            workMode: 'Work Mode',
+            workModeSelect: 'Select',
+            workModeRemote: 'Remote',
+            workModeOnsite: 'On-site',
+            workModeHybrid: 'Hybrid',
+            expectedSalary: 'Expected Salary',
+            expectedSalaryPlaceholder: '$50,000 - $60,000',
+            relocationWilling: 'Willing to relocate'
+        },
+        template: {
+            selectTemplate: 'Select a template'
+        },
+        messages: {
+            loadingError: 'Error loading profile',
+            savingError: 'Error saving profile',
+            completedTitle: 'Profile completed!',
+            completedMessage: 'Your profile has been saved successfully',
+            optimizing: 'Optimizing...',
+            aiNotAvailable: 'AI Assistant not available'
+        },
+        required: '*'
     }
 };

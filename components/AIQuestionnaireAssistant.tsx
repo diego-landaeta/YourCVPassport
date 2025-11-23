@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslations } from '../hooks/useTranslations';
 import { supabase } from '../supabase/client';
 import { templates } from './templates/templateData';
 import AlertModal from './AlertModal';
@@ -15,17 +16,6 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/solid';
 
-// Definición de secciones del cuestionario
-const SECTIONS = [
-  { id: 'identity', name: 'Información Personal', icon: '👤' },
-  { id: 'experience', name: 'Experiencia Laboral', icon: '💼' },
-  { id: 'education', name: 'Educación', icon: '🎓' },
-  { id: 'skills', name: 'Habilidades', icon: '⚡' },
-  { id: 'languages', name: 'Idiomas', icon: '🌍' },
-  { id: 'preferences', name: 'Preferencias', icon: '⚙️' },
-  { id: 'template', name: 'Plantilla de CV', icon: '🎨' },
-];
-
 interface AIQuestionnaireAssistantProps {
   onComplete?: () => void;
 }
@@ -33,6 +23,20 @@ interface AIQuestionnaireAssistantProps {
 export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionnaireAssistantProps) {
   const { user, profile, refetchProfile } = useAuth();
   const { lang } = useLanguage();
+  const t = useTranslations();
+  const q = t.aiQuestionnaire;
+
+  // Definición de secciones del cuestionario usando traducciones
+  const SECTIONS = [
+    { id: 'identity', name: q.sections.identity.name, icon: q.sections.identity.icon },
+    { id: 'experience', name: q.sections.experience.name, icon: q.sections.experience.icon },
+    { id: 'education', name: q.sections.education.name, icon: q.sections.education.icon },
+    { id: 'skills', name: q.sections.skills.name, icon: q.sections.skills.icon },
+    { id: 'languages', name: q.sections.languages.name, icon: q.sections.languages.icon },
+    { id: 'preferences', name: q.sections.preferences.name, icon: q.sections.preferences.icon },
+    { id: 'template', name: q.sections.template.name, icon: q.sections.template.icon },
+  ];
+
   const [currentSection, setCurrentSection] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -163,7 +167,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
-      setError('Error al cargar el perfil');
+      setError(q.messages.loadingError);
     } finally {
       setIsLoadingProfile(false);
     }
@@ -293,15 +297,15 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       setIsCompleted(true);
       showAlert({
-        title: '¡Perfil completado!',
-        message: 'Tu perfil se ha guardado correctamente',
+        title: q.messages.completedTitle,
+        message: q.messages.completedMessage,
         type: 'success'
       });
 
       if (onComplete) onComplete();
     } catch (error: any) {
       console.error('Error saving profile:', error);
-      setError('Error al guardar el perfil');
+      setError(q.messages.savingError);
     } finally {
       setIsProcessing(false);
     }
@@ -326,37 +330,37 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
         return (
           <div className="grid grid-cols-4 gap-2 h-full">
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Nombre *</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.name} {q.required}</label>
               <input
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => updateFormData('full_name', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Juan Pérez"
+                placeholder={q.identity.namePlaceholder}
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Título *</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.title} {q.required}</label>
               <input
                 type="text"
                 value={formData.headline}
                 onChange={(e) => updateFormData('headline', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Desarrollador Full Stack"
+                placeholder={q.identity.titlePlaceholder}
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Email</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.email}</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => updateFormData('email', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="email@ejemplo.com"
+                placeholder={q.identity.emailPlaceholder}
               />
             </div>
             <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Teléfono</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.phone}</label>
               <input
                 type="tel"
                 value={formData.phone}
@@ -365,58 +369,58 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   updateFormData('phone', value);
                 }}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="+34 600 123 456"
+                placeholder={q.identity.phonePlaceholder}
                 maxLength={20}
               />
             </div>
             <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Ubicación</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.location}</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => updateFormData('location', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Madrid, España"
+                placeholder={q.identity.locationPlaceholder}
               />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">LinkedIn</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.linkedin}</label>
               <input
                 type="url"
                 value={formData.linkedin_url}
                 onChange={(e) => updateFormData('linkedin_url', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="linkedin.com/in/usuario"
+                placeholder={q.identity.linkedinPlaceholder}
               />
             </div>
             <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">GitHub</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.github}</label>
               <input
                 type="url"
                 value={formData.github_url}
                 onChange={(e) => updateFormData('github_url', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="github.com/usuario"
+                placeholder={q.identity.githubPlaceholder}
               />
             </div>
             <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Portfolio</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.portfolio}</label>
               <input
                 type="url"
                 value={formData.portfolio_url}
                 onChange={(e) => updateFormData('portfolio_url', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="portfolio.com"
+                placeholder={q.identity.portfolioPlaceholder}
               />
             </div>
             <div className="col-span-4">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Resumen *</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.summary} {q.required}</label>
               <textarea
                 value={formData.summary}
                 onChange={(e) => updateFormData('summary', e.target.value)}
                 rows={3}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                placeholder="Describe tu trayectoria profesional..."
+                placeholder={q.identity.summaryPlaceholder}
               />
             </div>
           </div>
@@ -432,7 +436,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {formData.experiences.map((_, idx) => (
-                  <option key={idx} value={idx}>Experiencia {idx + 1}</option>
+                  <option key={idx} value={idx}>{q.experience.label} {idx + 1}</option>
                 ))}
               </select>
               <div className="flex gap-1">
@@ -461,27 +465,27 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
             <div className="grid grid-cols-4 gap-2 flex-1">
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Cargo *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.position} {q.required}</label>
                 <input
                   type="text"
                   value={exp.position}
                   onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'position', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Desarrollador Senior"
+                  placeholder={q.experience.positionPlaceholder}
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Empresa *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.company} {q.required}</label>
                 <input
                   type="text"
                   value={exp.company_name}
                   onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'company_name', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Tech Company"
+                  placeholder={q.experience.companyPlaceholder}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Inicio</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.startDate}</label>
                 <input
                   type="month"
                   value={exp.start_date}
@@ -490,7 +494,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Fin</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.endDate}</label>
                 <input
                   type="month"
                   value={exp.end_date}
@@ -506,16 +510,16 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'is_current', e.target.checked)}
                   className="h-3 w-3"
                 />
-                <label className="ml-1 text-[10px] text-gray-700 dark:text-gray-300">Trabajo actual</label>
+                <label className="ml-1 text-[10px] text-gray-700 dark:text-gray-300">{q.experience.currentJob}</label>
               </div>
               <div className="col-span-4">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Descripción</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.description}</label>
                 <textarea
                   value={exp.description}
                   onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'description', e.target.value)}
                   rows={4}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                  placeholder="Responsabilidades y logros..."
+                  placeholder={q.experience.descriptionPlaceholder}
                 />
               </div>
             </div>
@@ -532,7 +536,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {formData.education.map((_, idx) => (
-                  <option key={idx} value={idx}>Educación {idx + 1}</option>
+                  <option key={idx} value={idx}>{q.education.label} {idx + 1}</option>
                 ))}
               </select>
               <div className="flex gap-1">
@@ -561,37 +565,37 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
             <div className="grid grid-cols-4 gap-2 flex-1">
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Institución *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.institution} {q.required}</label>
                 <input
                   type="text"
                   value={edu.institution_name}
                   onChange={(e) => updateArrayItem('education', selectedEduIndex, 'institution_name', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Universidad"
+                  placeholder={q.education.institutionPlaceholder}
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Título *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.degree} {q.required}</label>
                 <input
                   type="text"
                   value={edu.degree}
                   onChange={(e) => updateArrayItem('education', selectedEduIndex, 'degree', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Licenciatura"
+                  placeholder={q.education.degreePlaceholder}
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Campo</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.field}</label>
                 <input
                   type="text"
                   value={edu.field_of_study}
                   onChange={(e) => updateArrayItem('education', selectedEduIndex, 'field_of_study', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Ingeniería"
+                  placeholder={q.education.fieldPlaceholder}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Inicio</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.startDate}</label>
                 <input
                   type="month"
                   value={edu.start_date}
@@ -600,7 +604,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Fin</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.endDate}</label>
                 <input
                   type="month"
                   value={edu.end_date}
@@ -609,13 +613,13 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 />
               </div>
               <div className="col-span-4">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Descripción</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.description}</label>
                 <textarea
                   value={edu.description}
                   onChange={(e) => updateArrayItem('education', selectedEduIndex, 'description', e.target.value)}
                   rows={3}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                  placeholder="Logros y cursos relevantes..."
+                  placeholder={q.education.descriptionPlaceholder}
                 />
               </div>
             </div>
@@ -632,7 +636,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {formData.skills.map((s, idx) => (
-                  <option key={idx} value={idx}>{s.name || `Habilidad ${idx + 1}`}</option>
+                  <option key={idx} value={idx}>{s.name || `${q.skills.label} ${idx + 1}`}</option>
                 ))}
               </select>
               <div className="flex gap-1">
@@ -661,31 +665,31 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
             <div className="grid grid-cols-4 gap-2">
               <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Habilidad *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.skill} {q.required}</label>
                 <input
                   type="text"
                   value={skill.name}
                   onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'name', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="JavaScript"
+                  placeholder={q.skills.skillPlaceholder}
                 />
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Nivel</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.level}</label>
                 <select
                   value={skill.level}
                   onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'level', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="Básico">Básico</option>
-                  <option value="Intermedio">Intermedio</option>
-                  <option value="Avanzado">Avanzado</option>
-                  <option value="Experto">Experto</option>
+                  <option value="">{q.skills.levelSelect}</option>
+                  <option value={q.skills.levelBasic}>{q.skills.levelBasic}</option>
+                  <option value={q.skills.levelIntermediate}>{q.skills.levelIntermediate}</option>
+                  <option value={q.skills.levelAdvanced}>{q.skills.levelAdvanced}</option>
+                  <option value={q.skills.levelExpert}>{q.skills.levelExpert}</option>
                 </select>
               </div>
               <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Años</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.years}</label>
                 <input
                   type="number"
                   value={skill.years_of_experience}
@@ -709,7 +713,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 {formData.languages.map((l, idx) => (
-                  <option key={idx} value={idx}>{l.language || `Idioma ${idx + 1}`}</option>
+                  <option key={idx} value={idx}>{l.language || `${q.languages.label} ${idx + 1}`}</option>
                 ))}
               </select>
               <div className="flex gap-1">
@@ -738,30 +742,30 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Idioma *</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.languages.language} {q.required}</label>
                 <input
                   type="text"
                   value={lang.language}
                   onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'language', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Español"
+                  placeholder={q.languages.languagePlaceholder}
                 />
               </div>
               <div>
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Nivel</label>
+                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.languages.level}</label>
                 <select
                   value={lang.proficiency}
                   onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'proficiency', e.target.value)}
                   className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  <option value="">Seleccionar</option>
-                  <option value="A1">A1 - Básico</option>
-                  <option value="A2">A2 - Pre-intermedio</option>
-                  <option value="B1">B1 - Intermedio</option>
-                  <option value="B2">B2 - Intermedio-alto</option>
-                  <option value="C1">C1 - Avanzado</option>
-                  <option value="C2">C2 - Maestría</option>
-                  <option value="Nativo">Nativo</option>
+                  <option value="">{q.languages.levelSelect}</option>
+                  <option value="A1">{q.languages.levelA1}</option>
+                  <option value="A2">{q.languages.levelA2}</option>
+                  <option value="B1">{q.languages.levelB1}</option>
+                  <option value="B2">{q.languages.levelB2}</option>
+                  <option value="C1">{q.languages.levelC1}</option>
+                  <option value="C2">{q.languages.levelC2}</option>
+                  <option value={q.languages.levelNative}>{q.languages.levelNative}</option>
                 </select>
               </div>
             </div>
@@ -772,41 +776,41 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
         return (
           <div className="grid grid-cols-4 gap-2 h-full">
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Disponibilidad</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.availability}</label>
               <select
                 value={formData.availability}
                 onChange={(e) => updateFormData('availability', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="">Seleccionar</option>
-                <option value="Inmediata">Inmediata</option>
-                <option value="1 semana">1 semana</option>
-                <option value="2 semanas">2 semanas</option>
-                <option value="1 mes">1 mes</option>
-                <option value="Más de 1 mes">Más de 1 mes</option>
+                <option value="">{q.preferences.availabilitySelect}</option>
+                <option value={q.preferences.availabilityImmediate}>{q.preferences.availabilityImmediate}</option>
+                <option value={q.preferences.availability1Week}>{q.preferences.availability1Week}</option>
+                <option value={q.preferences.availability2Weeks}>{q.preferences.availability2Weeks}</option>
+                <option value={q.preferences.availability1Month}>{q.preferences.availability1Month}</option>
+                <option value={q.preferences.availabilityMore}>{q.preferences.availabilityMore}</option>
               </select>
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Modalidad</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.workMode}</label>
               <select
                 value={formData.work_mode}
                 onChange={(e) => updateFormData('work_mode', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                <option value="">Seleccionar</option>
-                <option value="Remoto">Remoto</option>
-                <option value="Presencial">Presencial</option>
-                <option value="Híbrido">Híbrido</option>
+                <option value="">{q.preferences.workModeSelect}</option>
+                <option value={q.preferences.workModeRemote}>{q.preferences.workModeRemote}</option>
+                <option value={q.preferences.workModeOnsite}>{q.preferences.workModeOnsite}</option>
+                <option value={q.preferences.workModeHybrid}>{q.preferences.workModeHybrid}</option>
               </select>
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Salario esperado</label>
+              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.expectedSalary}</label>
               <input
                 type="text"
                 value={formData.expected_salary}
                 onChange={(e) => updateFormData('expected_salary', e.target.value)}
                 className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="50.000€ - 60.000€"
+                placeholder={q.preferences.expectedSalaryPlaceholder}
               />
             </div>
             <div className="col-span-2 flex items-center">
@@ -816,7 +820,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 onChange={(e) => updateFormData('relocation_willing', e.target.checked)}
                 className="h-3 w-3"
               />
-              <label className="ml-2 text-[10px] text-gray-700 dark:text-gray-300">Dispuesto a relocalizarse</label>
+              <label className="ml-2 text-[10px] text-gray-700 dark:text-gray-300">{q.preferences.relocationWilling}</label>
             </div>
           </div>
         );
@@ -869,7 +873,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
           <div>
             <h1 className="text-sm font-bold leading-tight">{section.name}</h1>
             <div className="flex items-center gap-1.5 text-[10px] text-white/80">
-              <span>Paso {currentSection + 1}/{SECTIONS.length}</span>
+              <span>{q.progress.step} {currentSection + 1}/{SECTIONS.length}</span>
               <span>•</span>
               <span className="font-bold">{progress}%</span>
             </div>
@@ -909,7 +913,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
       {isCorrectingText && (
         <div className="bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-500 px-4 py-2 flex items-center gap-2 shrink-0">
           <SparklesIcon className="h-4 w-4 text-purple-600 animate-spin" />
-          <span className="text-xs text-purple-700 dark:text-purple-300 font-medium">Optimizando...</span>
+          <span className="text-xs text-purple-700 dark:text-purple-300 font-medium">{q.messages.optimizing}</span>
         </div>
       )}
 
@@ -928,7 +932,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
           className="flex items-center gap-1.5 px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-medium transition-all"
         >
           <ArrowLeftIcon className="h-3.5 w-3.5" />
-          Anterior
+          {q.navigation.previous}
         </button>
 
         <div className="flex gap-1">
@@ -950,16 +954,16 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
           {isProcessing ? (
             <>
               <div className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
-              Guardando...
+              {q.navigation.saving}
             </>
           ) : currentSection === SECTIONS.length - 1 ? (
             <>
               <CheckCircleIcon className="h-3.5 w-3.5" />
-              Finalizar
+              {q.navigation.finish}
             </>
           ) : (
             <>
-              Siguiente
+              {q.navigation.next}
               <ArrowRightIcon className="h-3.5 w-3.5" />
             </>
           )}

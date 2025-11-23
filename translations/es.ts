@@ -2411,5 +2411,127 @@ export const translations = {
         success: {
             applied: "✓ Mejora aplicada exitosamente"
         }
+    },
+
+    aiQuestionnaire: {
+        sections: {
+            identity: { name: 'Información Personal', icon: '👤' },
+            experience: { name: 'Experiencia Laboral', icon: '💼' },
+            education: { name: 'Educación', icon: '🎓' },
+            skills: { name: 'Habilidades', icon: '⚡' },
+            languages: { name: 'Idiomas', icon: '🌍' },
+            preferences: { name: 'Preferencias', icon: '⚙️' },
+            template: { name: 'Plantilla de CV', icon: '🎨' }
+        },
+        progress: {
+            step: 'Paso',
+            of: 'de'
+        },
+        navigation: {
+            previous: 'Anterior',
+            next: 'Siguiente',
+            finish: 'Finalizar',
+            saving: 'Guardando...'
+        },
+        identity: {
+            name: 'Nombre',
+            namePlaceholder: 'Juan Pérez',
+            title: 'Título',
+            titlePlaceholder: 'Desarrollador Full Stack',
+            email: 'Email',
+            emailPlaceholder: 'email@ejemplo.com',
+            phone: 'Teléfono',
+            phonePlaceholder: '+34 600 123 456',
+            location: 'Ubicación',
+            locationPlaceholder: 'Madrid, España',
+            linkedin: 'LinkedIn',
+            linkedinPlaceholder: 'linkedin.com/in/usuario',
+            github: 'GitHub',
+            githubPlaceholder: 'github.com/usuario',
+            portfolio: 'Portfolio',
+            portfolioPlaceholder: 'portfolio.com',
+            summary: 'Resumen',
+            summaryPlaceholder: 'Describe tu trayectoria profesional...'
+        },
+        experience: {
+            label: 'Experiencia',
+            position: 'Cargo',
+            positionPlaceholder: 'Desarrollador Senior',
+            company: 'Empresa',
+            companyPlaceholder: 'Tech Company',
+            startDate: 'Inicio',
+            endDate: 'Fin',
+            currentJob: 'Trabajo actual',
+            description: 'Descripción',
+            descriptionPlaceholder: 'Responsabilidades y logros...'
+        },
+        education: {
+            label: 'Educación',
+            institution: 'Institución',
+            institutionPlaceholder: 'Universidad',
+            degree: 'Título',
+            degreePlaceholder: 'Licenciatura',
+            field: 'Campo',
+            fieldPlaceholder: 'Ingeniería',
+            startDate: 'Inicio',
+            endDate: 'Fin',
+            description: 'Descripción',
+            descriptionPlaceholder: 'Logros y cursos relevantes...'
+        },
+        skills: {
+            label: 'Habilidad',
+            skill: 'Habilidad',
+            skillPlaceholder: 'JavaScript',
+            level: 'Nivel',
+            levelSelect: 'Seleccionar',
+            levelBasic: 'Básico',
+            levelIntermediate: 'Intermedio',
+            levelAdvanced: 'Avanzado',
+            levelExpert: 'Experto',
+            years: 'Años'
+        },
+        languages: {
+            label: 'Idioma',
+            language: 'Idioma',
+            languagePlaceholder: 'Español',
+            level: 'Nivel',
+            levelSelect: 'Seleccionar',
+            levelA1: 'A1 - Básico',
+            levelA2: 'A2 - Pre-intermedio',
+            levelB1: 'B1 - Intermedio',
+            levelB2: 'B2 - Intermedio-alto',
+            levelC1: 'C1 - Avanzado',
+            levelC2: 'C2 - Maestría',
+            levelNative: 'Nativo'
+        },
+        preferences: {
+            availability: 'Disponibilidad',
+            availabilitySelect: 'Seleccionar',
+            availabilityImmediate: 'Inmediata',
+            availability1Week: '1 semana',
+            availability2Weeks: '2 semanas',
+            availability1Month: '1 mes',
+            availabilityMore: 'Más de 1 mes',
+            workMode: 'Modalidad',
+            workModeSelect: 'Seleccionar',
+            workModeRemote: 'Remoto',
+            workModeOnsite: 'Presencial',
+            workModeHybrid: 'Híbrido',
+            expectedSalary: 'Salario esperado',
+            expectedSalaryPlaceholder: '50.000€ - 60.000€',
+            relocationWilling: 'Dispuesto a relocalizarse'
+        },
+        template: {
+            selectTemplate: 'Selecciona una plantilla'
+        },
+        messages: {
+            loadingError: 'Error al cargar el perfil',
+            savingError: 'Error al guardar el perfil',
+            completedTitle: '¡Perfil completado!',
+            completedMessage: 'Tu perfil se ha guardado correctamente',
+            optimizing: 'Optimizando...',
+            aiNotAvailable: 'Asistente de IA no disponible'
+        },
+        required: '*'
     }
 };
