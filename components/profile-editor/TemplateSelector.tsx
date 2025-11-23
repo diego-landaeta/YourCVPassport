@@ -187,6 +187,36 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
   return (
     <>
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+        {/* Upgrade Prompt */}
+        {!isPro && (
+          <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  {t.upgradeTitle}
+                </h4>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  {t.upgradeDescription(templates.filter(t => t.isPro).length)}
+                </p>
+                <a
+                  href="/pricing"
+                  className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors"
+                >
+                  {t.upgradeCta}
+                  <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {templates.map((template) => {
             const isLocked = template.isPro && !isPro;
@@ -277,36 +307,6 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
             );
           })}
         </div>
-
-      {/* Upgrade Prompt */}
-      {!isPro && (
-        <div className="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                {t.upgradeTitle}
-              </h4>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {t.upgradeDescription(templates.filter(t => t.isPro).length)}
-              </p>
-              <a
-                href="/pricing"
-                className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors"
-              >
-                {t.upgradeCta}
-                <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
 
         {isSaving && (
           <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
