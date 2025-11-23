@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
+import { useTranslations } from '../../hooks/useTranslations';
 import {
   SparklesIcon,
   CheckCircleIcon,
@@ -28,6 +29,8 @@ interface SuggestionItem {
 
 const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusChange }) => {
   const { profile, session } = useAuth();
+  const t = useTranslations();
+  const aiT = t.aiAssistantSection;
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [selectedTab, setSelectedTab] = useState<'summary' | 'experience' | 'education'>('summary');
@@ -84,7 +87,7 @@ INSTRUCCIONES:
     } catch (error) {
       console.error('Error analyzing summary:', error);
       if (onSaveStatusChange) {
-        onSaveStatusChange('Error al analizar el resumen profesional');
+        onSaveStatusChange(aiT.errors.analyzingSummary);
       }
     } finally {
       setIsAnalyzing(false);
@@ -106,7 +109,7 @@ INSTRUCCIONES:
       if (error) throw error;
       if (!experiences || experiences.length === 0) {
         if (onSaveStatusChange) {
-          onSaveStatusChange('No hay experiencias laborales para analizar');
+          onSaveStatusChange(aiT.errors.noExperiences);
         }
         setIsAnalyzing(false);
         return;
@@ -157,7 +160,7 @@ INSTRUCCIONES:
     } catch (error) {
       console.error('Error analyzing experiences:', error);
       if (onSaveStatusChange) {
-        onSaveStatusChange('Error al analizar experiencias laborales');
+        onSaveStatusChange(aiT.errors.analyzingExperiences);
       }
     } finally {
       setIsAnalyzing(false);
@@ -179,7 +182,7 @@ INSTRUCCIONES:
       if (error) throw error;
       if (!education || education.length === 0) {
         if (onSaveStatusChange) {
-          onSaveStatusChange('No hay educación para analizar');
+          onSaveStatusChange(aiT.errors.noEducation);
         }
         setIsAnalyzing(false);
         return;
@@ -229,7 +232,7 @@ INSTRUCCIONES:
     } catch (error) {
       console.error('Error analyzing education:', error);
       if (onSaveStatusChange) {
-        onSaveStatusChange('Error al analizar educación');
+        onSaveStatusChange(aiT.errors.analyzingEducation);
       }
     } finally {
       setIsAnalyzing(false);
@@ -273,7 +276,7 @@ INSTRUCCIONES:
       );
 
       if (onSaveStatusChange) {
-        onSaveStatusChange('✓ Mejora aplicada exitosamente', new Date().toISOString());
+        onSaveStatusChange(aiT.success.applied, new Date().toISOString());
       }
 
       // Recargar la página después de 1 segundo para ver los cambios
@@ -283,7 +286,7 @@ INSTRUCCIONES:
     } catch (error) {
       console.error('Error applying suggestion:', error);
       if (onSaveStatusChange) {
-        onSaveStatusChange('Error al aplicar la mejora');
+        onSaveStatusChange(aiT.errors.applyingSuggestion);
       }
     } finally {
       setIsApplying(null);
@@ -314,32 +317,32 @@ INSTRUCCIONES:
             </div>
             <div className="flex-1">
               <h3 className="text-2xl font-bold text-yellow-900 dark:text-yellow-200 mb-3">
-                🤖 Asistente de IA No Disponible
+                🤖 {aiT.notConfigured.title}
               </h3>
               <p className="text-yellow-800 dark:text-yellow-300 mb-4 text-lg">
-                El asistente de IA no está configurado actualmente. Esta función requiere una API Key de Google AI para funcionar.
+                {aiT.notConfigured.description}
               </p>
               <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
                 <h4 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">
-                  ¿Qué puedes hacer mientras tanto?
+                  {aiT.notConfigured.whatCanYouDo}
                 </h4>
                 <ul className="space-y-2 text-yellow-800 dark:text-yellow-300">
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-600 dark:text-yellow-400">✓</span>
-                    <span>Edita manualmente tu perfil en las otras secciones</span>
+                    <span>{aiT.notConfigured.alternatives.editManually}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-600 dark:text-yellow-400">✓</span>
-                    <span>Usa las plantillas profesionales disponibles</span>
+                    <span>{aiT.notConfigured.alternatives.useTemplates}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-600 dark:text-yellow-400">✓</span>
-                    <span>Exporta tu CV en formato PDF</span>
+                    <span>{aiT.notConfigured.alternatives.exportPDF}</span>
                   </li>
                 </ul>
               </div>
               <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                <strong>Nota para administradores:</strong> Configura la variable de entorno <code className="bg-yellow-200 dark:bg-yellow-800 px-2 py-1 rounded">VITE_GOOGLE_AI_API_KEY</code> para habilitar esta función.
+                <strong>{aiT.notConfigured.adminNote}:</strong> <code className="bg-yellow-200 dark:bg-yellow-800 px-2 py-1 rounded">VITE_GOOGLE_AI_API_KEY</code>
               </p>
             </div>
           </div>
@@ -359,10 +362,10 @@ INSTRUCCIONES:
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Asistente de IA
+                {aiT.title}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Mejora tu CV con inteligencia artificial
+                {aiT.subtitle}
               </p>
             </div>
           </div>
@@ -376,12 +379,12 @@ INSTRUCCIONES:
             {isAnalyzing ? (
               <>
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                Analizando...
+                {aiT.analyzingButton}
               </>
             ) : (
               <>
                 <SparklesIcon className="w-5 h-5" />
-                Analizar
+                {aiT.analyzeButton}
               </>
             )}
           </button>
@@ -398,7 +401,7 @@ INSTRUCCIONES:
             }`}
           >
             <DocumentTextIcon className="w-5 h-5" />
-            Resumen
+            {aiT.tabs.summary}
           </button>
           <button
             onClick={() => setSelectedTab('experience')}
@@ -409,7 +412,7 @@ INSTRUCCIONES:
             }`}
           >
             <BriefcaseIcon className="w-5 h-5" />
-            Experiencia
+            {aiT.tabs.experience}
           </button>
           <button
             onClick={() => setSelectedTab('education')}
@@ -420,7 +423,7 @@ INSTRUCCIONES:
             }`}
           >
             <AcademicCapIcon className="w-5 h-5" />
-            Educación
+            {aiT.tabs.education}
           </button>
         </div>
       </div>
@@ -433,7 +436,7 @@ INSTRUCCIONES:
               <ChatBubbleLeftRightIcon className="w-5 h-5 text-cv-blue dark:text-blue-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Sugerencias de Mejora ({filteredSuggestions.length})
+              {aiT.suggestions.title} ({filteredSuggestions.length})
             </h3>
           </div>
 
@@ -448,7 +451,7 @@ INSTRUCCIONES:
                 <div>
                   <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
-                    Texto Original
+                    {aiT.suggestions.originalText}
                   </h4>
                   <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -461,7 +464,7 @@ INSTRUCCIONES:
                 <div>
                   <h4 className="text-xs font-bold text-green-600 dark:text-green-400 mb-3 uppercase tracking-wider flex items-center gap-2">
                     <SparklesIcon className="w-4 h-4" />
-                    Mejorado por IA
+                    {aiT.suggestions.improvedText}
                   </h4>
                   <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-800/50 rounded-lg">
                     <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
@@ -476,7 +479,7 @@ INSTRUCCIONES:
                 {suggestion.applied ? (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
                     <CheckCircleIcon className="w-6 h-6" />
-                    <span>Aplicado exitosamente</span>
+                    <span>{aiT.suggestions.appliedSuccess}</span>
                   </div>
                 ) : (
                   <button
@@ -487,12 +490,12 @@ INSTRUCCIONES:
                     {isApplying === suggestion.id ? (
                       <>
                         <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                        Aplicando...
+                        {aiT.suggestions.applyingButton}
                       </>
                     ) : (
                       <>
                         <CheckCircleIcon className="w-5 h-5" />
-                        Aplicar Mejora
+                        {aiT.suggestions.applyButton}
                       </>
                     )}
                   </button>
@@ -510,10 +513,10 @@ INSTRUCCIONES:
             <SparklesIcon className="w-12 h-12 text-cv-blue dark:text-blue-400" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-            No hay sugerencias todavía
+            {aiT.emptyState.title}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto text-lg">
-            Haz clic en <span className="font-semibold text-cv-blue dark:text-blue-400">Analizar</span> para generar mejoras inteligentes de tu {selectedTab === 'summary' ? 'resumen' : selectedTab === 'experience' ? 'experiencia' : 'educación'}
+            {aiT.emptyState.description[selectedTab]}
           </p>
         </div>
       )}

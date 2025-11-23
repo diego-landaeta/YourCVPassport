@@ -2377,5 +2377,54 @@ export const translations = {
             success: "Settings saved successfully",
             error: "Error saving settings"
         }
+    },
+    aiAssistantSection: {
+        title: "AI Assistant",
+        subtitle: "Enhance your CV with artificial intelligence",
+        analyzeButton: "Analyze",
+        analyzingButton: "Analyzing...",
+        tabs: {
+            summary: "Summary",
+            experience: "Experience",
+            education: "Education"
+        },
+        suggestions: {
+            title: "Improvement Suggestions",
+            originalText: "Original Text",
+            improvedText: "AI-Enhanced",
+            applyButton: "Apply Improvement",
+            applyingButton: "Applying...",
+            appliedSuccess: "Applied successfully"
+        },
+        emptyState: {
+            title: "No suggestions yet",
+            description: {
+                summary: "Click Analyze to generate intelligent improvements for your summary",
+                experience: "Click Analyze to generate intelligent improvements for your experience",
+                education: "Click Analyze to generate intelligent improvements for your education"
+            }
+        },
+        notConfigured: {
+            title: "AI Assistant Not Available",
+            description: "The AI assistant is not currently configured. This feature requires a Google AI API Key to function.",
+            whatCanYouDo: "What can you do in the meantime?",
+            alternatives: {
+                editManually: "Edit your profile manually in the other sections",
+                useTemplates: "Use the available professional templates",
+                exportPDF: "Export your CV in PDF format"
+            },
+            adminNote: "Note for administrators: Configure the environment variable"
+        },
+        errors: {
+            analyzingSummary: "Error analyzing professional summary",
+            analyzingExperiences: "Error analyzing work experiences",
+            analyzingEducation: "Error analyzing education",
+            applyingSuggestion: "Error applying improvement",
+            noExperiences: "No work experiences to analyze",
+            noEducation: "No education to analyze"
+        },
+        success: {
+            applied: "✓ Improvement applied successfully"
+        }
     }
 };

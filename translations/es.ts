@@ -2362,5 +2362,54 @@ export const translations = {
             success: "Configuración guardada correctamente",
             error: "Error al guardar la configuración"
         }
+    },
+    aiAssistantSection: {
+        title: "Asistente de IA",
+        subtitle: "Mejora tu CV con inteligencia artificial",
+        analyzeButton: "Analizar",
+        analyzingButton: "Analizando...",
+        tabs: {
+            summary: "Resumen",
+            experience: "Experiencia",
+            education: "Educación"
+        },
+        suggestions: {
+            title: "Sugerencias de Mejora",
+            originalText: "Texto Original",
+            improvedText: "Mejorado por IA",
+            applyButton: "Aplicar Mejora",
+            applyingButton: "Aplicando...",
+            appliedSuccess: "Aplicado exitosamente"
+        },
+        emptyState: {
+            title: "No hay sugerencias todavía",
+            description: {
+                summary: "Haz clic en Analizar para generar mejoras inteligentes de tu resumen",
+                experience: "Haz clic en Analizar para generar mejoras inteligentes de tu experiencia",
+                education: "Haz clic en Analizar para generar mejoras inteligentes de tu educación"
+            }
+        },
+        notConfigured: {
+            title: "Asistente de IA No Disponible",
+            description: "El asistente de IA no está configurado actualmente. Esta función requiere una API Key de Google AI para funcionar.",
+            whatCanYouDo: "¿Qué puedes hacer mientras tanto?",
+            alternatives: {
+                editManually: "Edita manualmente tu perfil en las otras secciones",
+                useTemplates: "Usa las plantillas profesionales disponibles",
+                exportPDF: "Exporta tu CV en formato PDF"
+            },
+            adminNote: "Nota para administradores: Configura la variable de entorno"
+        },
+        errors: {
+            analyzingSummary: "Error al analizar el resumen profesional",
+            analyzingExperiences: "Error al analizar experiencias laborales",
+            analyzingEducation: "Error al analizar educación",
+            applyingSuggestion: "Error al aplicar la mejora",
+            noExperiences: "No hay experiencias laborales para analizar",
+            noEducation: "No hay educación para analizar"
+        },
+        success: {
+            applied: "✓ Mejora aplicada exitosamente"
+        }
     }
 };
