@@ -349,17 +349,17 @@ INSTRUCCIONES:
   }
 
   return (
-    <div className="w-full">
-      {/* Compact Header */}
-      <div className="bg-gradient-to-r from-cv-blue/10 to-purple-500/10 dark:from-cv-blue/20 dark:to-purple-500/20 rounded-xl p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-cv-blue/20 dark:bg-cv-blue/30 p-3 rounded-lg">
-              <SparklesIcon className="w-6 h-6 text-cv-blue dark:text-blue-400" />
+    <div className="w-full max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-dark-border p-6 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-gradient-to-br from-cv-blue to-purple-600 p-3 rounded-xl shadow-lg">
+              <SparklesIcon className="w-7 h-7 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                AI Assistant
+                Asistente de IA
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Mejora tu CV con inteligencia artificial
@@ -367,11 +367,11 @@ INSTRUCCIONES:
             </div>
           </div>
 
-          {/* Analyze Button - Moved to header */}
+          {/* Analyze Button */}
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing}
-            className="flex items-center gap-2 px-6 py-3 bg-cv-blue text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-lg font-semibold hover:from-cv-blue/90 hover:to-purple-600/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
             {isAnalyzing ? (
               <>
@@ -387,49 +387,51 @@ INSTRUCCIONES:
           </button>
         </div>
 
-        {/* Compact Tabs */}
-        <div className="mt-4 flex gap-2">
+        {/* Tabs */}
+        <div className="flex gap-2 border-t border-gray-200 dark:border-dark-border pt-4">
           <button
             onClick={() => setSelectedTab('summary')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
               selectedTab === 'summary'
-                ? 'bg-cv-blue text-white shadow-md'
-                : 'bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800'
+                ? 'bg-gradient-to-r from-cv-blue to-purple-600 text-white shadow-md'
+                : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            <DocumentTextIcon className="w-4 h-4" />
+            <DocumentTextIcon className="w-5 h-5" />
             Resumen
           </button>
           <button
             onClick={() => setSelectedTab('experience')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
               selectedTab === 'experience'
-                ? 'bg-cv-blue text-white shadow-md'
-                : 'bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800'
+                ? 'bg-gradient-to-r from-cv-blue to-purple-600 text-white shadow-md'
+                : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            <BriefcaseIcon className="w-4 h-4" />
+            <BriefcaseIcon className="w-5 h-5" />
             Experiencia
           </button>
           <button
             onClick={() => setSelectedTab('education')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${
               selectedTab === 'education'
-                ? 'bg-cv-blue text-white shadow-md'
-                : 'bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800'
+                ? 'bg-gradient-to-r from-cv-blue to-purple-600 text-white shadow-md'
+                : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            <AcademicCapIcon className="w-4 h-4" />
+            <AcademicCapIcon className="w-5 h-5" />
             Educación
           </button>
         </div>
       </div>
 
-      {/* Suggestions List - Compact Layout */}
+      {/* Suggestions List */}
       {filteredSuggestions.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <ChatBubbleLeftRightIcon className="w-5 h-5 text-cv-blue" />
+          <div className="flex items-center gap-3 mb-6 px-1">
+            <div className="bg-gradient-to-br from-cv-blue/20 to-purple-600/20 dark:from-cv-blue/30 dark:to-purple-600/30 p-2 rounded-lg">
+              <ChatBubbleLeftRightIcon className="w-5 h-5 text-cv-blue dark:text-blue-400" />
+            </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Sugerencias de Mejora ({filteredSuggestions.length})
             </h3>
@@ -438,58 +440,58 @@ INSTRUCCIONES:
           {filteredSuggestions.map((suggestion) => (
             <div
               key={suggestion.id}
-              className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-xl p-6 shadow-sm hover:shadow-lg transition-all"
             >
-              {/* Compact Comparison View */}
-              <div className="space-y-4">
-                {/* Original Text - Compact */}
+              {/* Comparison View */}
+              <div className="space-y-5">
+                {/* Original Text */}
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide flex items-center gap-2">
-                    <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
                     Texto Original
                   </h4>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                       {suggestion.originalText}
                     </p>
                   </div>
                 </div>
 
-                {/* Improved Text - Compact */}
+                {/* Improved Text */}
                 <div>
-                  <h4 className="text-xs font-semibold text-green-600 dark:text-green-400 mb-2 uppercase tracking-wide flex items-center gap-2">
-                    <SparklesIcon className="w-3 h-3" />
+                  <h4 className="text-xs font-bold text-green-600 dark:text-green-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <SparklesIcon className="w-4 h-4" />
                     Mejorado por IA
                   </h4>
-                  <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800/50 rounded-lg">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-800/50 rounded-lg">
+                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
                       {suggestion.improvedText}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Action Button - Inline */}
-              <div className="mt-4 flex justify-end">
+              {/* Action Button */}
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-dark-border flex justify-end">
                 {suggestion.applied ? (
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium text-sm">
-                    <CheckCircleIcon className="w-5 h-5" />
-                    Aplicado
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                    <CheckCircleIcon className="w-6 h-6" />
+                    <span>Aplicado exitosamente</span>
                   </div>
                 ) : (
                   <button
                     onClick={() => applySuggestion(suggestion)}
                     disabled={isApplying === suggestion.id}
-                    className="px-5 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm shadow-md hover:shadow-lg transform hover:scale-105"
+                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-xl"
                   >
                     {isApplying === suggestion.id ? (
                       <>
-                        <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                        <ArrowPathIcon className="w-5 h-5 animate-spin" />
                         Aplicando...
                       </>
                     ) : (
                       <>
-                        <CheckCircleIcon className="w-4 h-4" />
+                        <CheckCircleIcon className="w-5 h-5" />
                         Aplicar Mejora
                       </>
                     )}
@@ -501,17 +503,17 @@ INSTRUCCIONES:
         </div>
       )}
 
-      {/* Compact Empty State */}
+      {/* Empty State */}
       {!isAnalyzing && filteredSuggestions.length === 0 && (
-        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-800/50 dark:to-blue-900/10 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-          <div className="bg-gray-100 dark:bg-gray-800 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <SparklesIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+        <div className="text-center py-20 bg-white dark:bg-dark-bg-secondary rounded-xl border-2 border-dashed border-gray-300 dark:border-dark-border shadow-sm">
+          <div className="bg-gradient-to-br from-cv-blue/10 to-purple-600/10 dark:from-cv-blue/20 dark:to-purple-600/20 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <SparklesIcon className="w-12 h-12 text-cv-blue dark:text-blue-400" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             No hay sugerencias todavía
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            Haz clic en <strong>"Analizar"</strong> para generar mejoras inteligentes de tu {selectedTab === 'summary' ? 'resumen' : selectedTab === 'experience' ? 'experiencia' : 'educación'}
+          <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto text-lg">
+            Haz clic en <span className="font-semibold text-cv-blue dark:text-blue-400">Analizar</span> para generar mejoras inteligentes de tu {selectedTab === 'summary' ? 'resumen' : selectedTab === 'experience' ? 'experiencia' : 'educación'}
           </p>
         </div>
       )}
