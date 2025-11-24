@@ -10,7 +10,7 @@ import {
 interface Message {
   id: string;
   lead_id: string;
-  sender_id: string;
+  sender_id: string | null; // NULL for external/anonymous messages
   sender_name: string;
   content: string;
   is_read: boolean;
@@ -50,10 +50,10 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (profile) {
+    if (user) {
       loadConversations();
     }
-  }, [profile]);
+  }, [user]);
 
   useEffect(() => {
     if (selectedLeadId) {
@@ -103,18 +103,18 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   };
 
   const loadConversations = async () => {
-    if (!profile) {
-      console.warn('⚠️ Cannot load conversations: no profile');
+    if (!user) {
+      console.warn('⚠️ Cannot load conversations: no user');
       return;
     }
 
-    console.log('📥 Loading conversations for profile:', profile.id);
+    console.log('📥 Loading conversations for user:', user.id);
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('conversation_summaries')
         .select('*')
-        .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
+        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
         .order('last_message_at', { ascending: false });
 
       if (error) {
@@ -123,7 +123,20 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
       }
 
       console.log('✅ Conversations loaded:', data?.length || 0);
-      setConversations(data || []);
+
+      // Recalculate unread_count for each conversation from the user's perspective
+      const conversationsWithCorrectUnread = await Promise.all((data || []).map(async (conv) => {
+        const { count } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('lead_id', conv.lead_id)
+          .eq('is_read', false)
+          .neq('sender_id', user.id);
+
+        return { ...conv, unread_count: count || 0 };
+      }));
+
+      setConversations(conversationsWithCorrectUnread);
     } catch (err: any) {
       console.error('❌ Failed to load conversations:', err);
       // Don't show alert here as it's called on mount
@@ -158,12 +171,33 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
     if (!user) return;
 
     try {
-      await supabase
+      // Get all unread messages that are not from me
+      const { data: unreadMessages } = await supabase
+        .from('messages')
+        .select('id, sender_id')
+        .eq('lead_id', leadId)
+        .eq('is_read', false);
+
+      if (!unreadMessages || unreadMessages.length === 0) return;
+
+      // Filter messages that are not from me
+      const messagesToMark = unreadMessages.filter((msg: any) => {
+        // Mark as read if sender_id is null (external) or different from me
+        return msg.sender_id === null || msg.sender_id !== user.id;
+      });
+
+      if (messagesToMark.length === 0) return;
+
+      // Mark filtered messages as read
+      const { error } = await supabase
         .from('messages')
         .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('lead_id', leadId)
-        .neq('sender_id', user.id)
-        .eq('is_read', false);
+        .in('id', messagesToMark.map(m => m.id));
+
+      if (error) {
+        console.error('Error updating messages:', error);
+        return;
+      }
 
       // Reload conversations to update unread count
       loadConversations();
@@ -253,9 +287,9 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   };
 
   const selectedConversation = conversations.find(c => c.lead_id === selectedLeadId);
-  const otherPersonName = selectedConversation 
-    ? (selectedConversation.sender_id === profile?.id 
-        ? selectedConversation.recipient_name 
+  const otherPersonName = selectedConversation
+    ? (selectedConversation.sender_id === user?.id
+        ? selectedConversation.recipient_name
         : selectedConversation.sender_name)
     : '';
 
@@ -295,7 +329,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
             </div>
           ) : (
             conversations.map((conv) => {
-              const isMe = conv.sender_id === profile?.id;
+              const isMe = conv.sender_id === user?.id;
               const otherPerson = isMe ? conv.recipient_name : conv.sender_name;
               const isSelected = conv.lead_id === selectedLeadId;
 

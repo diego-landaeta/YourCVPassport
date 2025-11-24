@@ -69,10 +69,10 @@ const LeadsInboxModern: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (profile) {
+    if (user) {
       loadLeads();
     }
-  }, [profile]);
+  }, [user]);
 
   useEffect(() => {
     applyFilters();
@@ -115,31 +115,52 @@ const LeadsInboxModern: React.FC = () => {
   };
 
   const loadLeads = async () => {
+    if (!user) {
+      console.warn('⚠️ Cannot load leads: no user');
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('leads')
-        .select(`
-          *,
-          messages(count)
-        `)
-        .eq('recipient_id', profile?.id)
-        .order('created_at', { ascending: false });
+        .from('conversation_summaries')
+        .select('*')
+        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+        .order('last_message_at', { ascending: false });
 
       if (error) throw error;
 
-      const leadsWithCount = await Promise.all((data || []).map(async (lead) => {
+      // Map conversation_summaries to Lead format and recalculate unread_count
+      const mappedLeads = await Promise.all((data || []).map(async (conv) => {
+        // Recalculate unread_count from user's perspective
         const { count } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })
-          .eq('lead_id', lead.id)
+          .eq('lead_id', conv.lead_id)
           .eq('is_read', false)
-          .neq('sender_id', profile?.id);
+          .neq('sender_id', user.id);
 
-        return { ...lead, unread_count: count || 0 };
+        return {
+          id: conv.lead_id,
+          sender_id: conv.sender_id,
+          sender_name: conv.sender_id === user.id ? conv.recipient_name : conv.sender_name,
+          sender_email: '', // Not available in conversation_summaries
+          sender_company: null,
+          lead_type: conv.lead_type,
+          subject: conv.subject,
+          message: conv.last_message || '',
+          company_name: null,
+          position_offered: null,
+          salary_range: null,
+          location: null,
+          status: conv.status,
+          created_at: conv.last_message_at,
+          read_at: null,
+          unread_count: count || 0
+        };
       }));
 
-      setLeads(leadsWithCount);
+      setLeads(mappedLeads);
     } catch (error) {
       console.error('Error loading leads:', error);
     } finally {

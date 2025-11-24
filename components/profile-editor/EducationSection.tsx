@@ -24,6 +24,7 @@ import { CSS } from '@dnd-kit/utilities';
 interface EducationSectionProps {
   initialData?: EducationFormData[];
   onSave: (data: EducationFormData[]) => Promise<void>;
+  onNavigateToVerifications?: () => void;
 }
 
 interface SortableEducationItemProps {
@@ -139,7 +140,7 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   );
 };
 
-const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], onSave }) => {
+const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const [education, setEducation] = useState<EducationFormData[]>(initialData);
@@ -307,7 +308,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
                   : 'Aumenta tu credibilidad verificando tu formación académica. Ve a la sección de Verificaciones para enviar tus certificados o diplomas.'}
               </p>
               <button
-                onClick={() => window.location.href = '#verificaciones'}
+                onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
               >
                 {translations.lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}

@@ -7,6 +7,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 interface LanguagesSectionProps {
   initialData?: LanguageFormData[];
   onSave: (data: LanguageFormData[]) => Promise<void>;
+  onNavigateToVerifications?: () => void;
 }
 
 const COMMON_LANGUAGES = [
@@ -16,7 +17,7 @@ const COMMON_LANGUAGES = [
 
 const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native'] as const;
 
-const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], onSave }) => {
+const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const [languages, setLanguages] = useState<LanguageFormData[]>(initialData);
@@ -104,7 +105,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                   : 'Verifica tu nivel de idioma con certificados oficiales (TOEFL, IELTS, DELE, DELF, etc.). Ve a Verificaciones para subir tus certificados de idioma.'}
               </p>
               <button
-                onClick={() => window.location.href = '#verificaciones'}
+                onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
               >
                 {translations.lang === 'en' ? 'Upload Language Certificate' : 'Subir Certificado de Idioma'}

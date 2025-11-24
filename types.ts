@@ -574,12 +574,21 @@ export interface CVVersion {
   notes?: string | null;
 }
 
+// Template type - all available templates
+export type TemplateType =
+  | 'passport' | 'classic' | 'modern-professional' | 'corporate-classic'
+  | 'creative-minimalist' | 'academic-standard' | 'modern-minimalist'
+  | 'creative-bold' | 'professional-classic' | 'healthcare-professional'
+  | 'minimalist-yellow' | 'gradient-blue' | 'coral-pink' | 'green-minimal'
+  | 'creative-orange' | 'classic-sidebar' | 'modern-clean' | 'elegant-minimal'
+  | 'professional-blue' | 'creative-modern';
+
 export interface CreateCVVersionRequest {
   version_name: string;
   country?: string;
   role?: string;
   sections: CVSectionType[];
-  template?: 'classic' | 'modern' | 'minimal';
+  template?: TemplateType;
   template_color?: string;
   export_options?: CVVersionExportOptions;
   notes?: string;
@@ -590,7 +599,7 @@ export interface UpdateCVVersionRequest {
   country?: string;
   role?: string;
   sections?: CVSectionType[];
-  template?: 'classic' | 'modern' | 'minimal';
+  template?: TemplateType;
   template_color?: string;
   export_options?: CVVersionExportOptions;
   is_active?: boolean;

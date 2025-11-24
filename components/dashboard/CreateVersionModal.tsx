@@ -27,6 +27,8 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { TemplatePreviewSelector, ALL_TEMPLATES } from './TemplatePreviewSelector';
+import { useAuth } from '../../contexts/AuthContext';
 
 // SVG Icons as simple functions
 function FiX({ className = "w-5 h-5" }: { className?: string }) {
@@ -107,18 +109,16 @@ const AVAILABLE_SECTIONS: Array<{
   { id: 'stats', label: 'Estadísticas', description: 'Métricas y logros' }
 ];
 
-const TEMPLATES = [
-  { id: 'classic' as const, label: 'Clásico', description: 'Diseño tradicional y profesional' },
-  { id: 'modern' as const, label: 'Moderno', description: 'Diseño actual con colores vibrantes' },
-  { id: 'minimal' as const, label: 'Minimalista', description: 'Diseño limpio y simple' }
-];
+// Template type - support all template IDs
+type TemplateType = typeof ALL_TEMPLATES[number]['id'];
 
 export function CreateVersionModal({
   isOpen,
   onClose,
   editingVersion
 }: CreateVersionModalProps) {
-  const { createVersion, updateVersion, isCreating } = useCVVersions();
+  const { createVersion, updateVersion, isCreating, error: hookError } = useCVVersions();
+  const { profile } = useAuth();
 
   // Form state
   const [versionName, setVersionName] = useState('');
@@ -131,9 +131,12 @@ export function CreateVersionModal({
     'skills',
     'languages'
   ]);
-  const [template, setTemplate] = useState<'classic' | 'modern' | 'minimal'>('modern');
+  const [template, setTemplate] = useState<TemplateType>('passport');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Check if user is PRO
+  const userIsPro = profile?.is_pro || false;
 
   // Load editing version data
   useEffect(() => {
@@ -150,7 +153,7 @@ export function CreateVersionModal({
       setCountry('');
       setRole('');
       setSelectedSections(['profile', 'experience', 'education', 'skills', 'languages']);
-      setTemplate('modern');
+      setTemplate('passport');
       setNotes('');
     }
     setError(null);
@@ -212,22 +215,32 @@ export function CreateVersionModal({
 
     try {
       if (editingVersion) {
+        console.log('Updating version with data:', request);
         const updated = await updateVersion(editingVersion.id, request);
+        console.log('Update result:', updated);
         if (updated) {
           onClose();
         } else {
-          setError('Error al actualizar la versión');
+          // Get the error from the hook state
+          const errorMsg = hookError || 'Error al actualizar la versión';
+          setError(errorMsg);
+          console.error('Update failed with error:', hookError);
         }
       } else {
         const created = await createVersion(request);
         if (created) {
           onClose();
         } else {
-          setError('Error al crear la versión');
+          // Get the error from the hook state
+          const errorMsg = hookError || 'Error al crear la versión';
+          setError(errorMsg);
+          console.error('Create failed with error:', hookError);
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      setError(errorMessage);
+      console.error('Exception during save:', err);
     }
   };
 
@@ -242,109 +255,152 @@ export function CreateVersionModal({
           onClick={onClose}
         />
 
-        {/* Modal */}
-        <div className="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        {/* Modal - Clean and Spacious Layout */}
+        <div className="inline-block w-full max-w-6xl my-6 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-dark-bg-secondary shadow-2xl rounded-xl">
+          {/* Header - Ultra Compact */}
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-5 py-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-white">
-                {editingVersion ? 'Editar Versión de CV' : 'Nueva Versión de CV'}
-              </h3>
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  {editingVersion ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Editar Versión
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Nueva Versión
+                    </>
+                  )}
+                </h3>
+                <p className="text-blue-100 text-[11px] mt-0.5">
+                  {editingVersion ? 'Personaliza tu CV para diferentes necesidades' : 'Crea una versión personalizada de tu CV'}
+                </p>
+              </div>
               <button
                 onClick={onClose}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1"
               >
-                <FiX className="w-6 h-6" />
+                <FiX className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Error Message */}
+          {/* Content - Smooth Scroll with Better Spacing */}
+          <form onSubmit={handleSubmit} className="p-4 space-y-3 max-h-[calc(100vh-160px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            {/* Error Message - Compact */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-                {error}
+              <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 px-3 py-2 rounded">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-red-700 dark:text-red-400 text-sm">{error}</span>
+                </div>
               </div>
             )}
 
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FiFileText className="inline w-4 h-4 mr-1" />
-                  Nombre de la versión *
-                </label>
-                <input
-                  type="text"
-                  value={versionName}
-                  onChange={(e) => setVersionName(e.target.value)}
-                  placeholder="Ej: CV USA - Frontend Developer"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
+            {/* Basic Information - Ultra Compact */}
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/30 dark:to-gray-800/10 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2.5 flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Información Básica
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Nombre de la versión *
+                  </label>
+                  <input
+                    type="text"
+                    value={versionName}
+                    onChange={(e) => setVersionName(e.target.value)}
+                    placeholder="Ej: CV USA - Frontend Developer"
+                    className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FiGlobe className="inline w-4 h-4 mr-1" />
-                  País (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="Ej: Estados Unidos, España"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    País (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="Ej: Estados Unidos"
+                    className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FiBriefcase className="inline w-4 h-4 mr-1" />
-                  Rol (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  placeholder="Ej: Frontend Developer"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            {/* Template Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <FiPalette className="inline w-4 h-4 mr-1" />
-                Plantilla
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {TEMPLATES.map((tmpl) => (
-                  <button
-                    key={tmpl.id}
-                    type="button"
-                    onClick={() => setTemplate(tmpl.id)}
-                    className={`p-4 border-2 rounded-lg text-left transition-all ${
-                      template === tmpl.id
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30'
-                        : 'border-gray-200 dark:border-dark-border hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="font-medium text-gray-900 dark:text-white">{tmpl.label}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{tmpl.description}</div>
-                  </button>
-                ))}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Rol (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    placeholder="Ej: Frontend Developer"
+                    className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Section Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Secciones a incluir ({selectedSections.length} seleccionadas)
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            {/* Template Selection - Ultra Compact */}
+            <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800/50 dark:via-gray-800/40 dark:to-gray-800/30 rounded-lg p-3 border border-blue-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-1.5">
+                  <FiPalette className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Plantilla
+                  </h4>
+                </div>
+                <div className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 text-[10px] font-medium text-gray-600 dark:text-gray-400">
+                  {userIsPro ? (
+                    <span className="flex items-center gap-1">
+                      <svg className="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Acceso completo
+                    </span>
+                  ) : '10 gratis + 10 PRO'}
+                </div>
+              </div>
+              <TemplatePreviewSelector
+                selectedTemplate={template}
+                onSelectTemplate={(templateId) => setTemplate(templateId as TemplateType)}
+                userIsPro={userIsPro}
+              />
+            </div>
+
+            {/* Section Selection - Ultra Compact */}
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/30 dark:to-gray-800/10 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Secciones
+                  </h4>
+                </div>
+                <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                  <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                    {selectedSections.length} seleccionada{selectedSections.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2.5">
                 {AVAILABLE_SECTIONS.map((section) => {
                   const isSelected = selectedSections.includes(section.id);
                   return (
@@ -352,23 +408,20 @@ export function CreateVersionModal({
                       key={section.id}
                       type="button"
                       onClick={() => toggleSection(section.id)}
-                      className={`p-3 border-2 rounded-lg text-left transition-all ${
+                      className={`p-2.5 border-2 rounded-lg text-left transition-all ${
                         isSelected
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                          : 'border-gray-200 dark:border-dark-border hover:border-gray-300 dark:hover:border-gray-600'
+                          : 'border-gray-200 dark:border-dark-border hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
                             {section.label}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {section.description}
                           </div>
                         </div>
                         {isSelected && (
-                          <FiCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          <FiCheck className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                         )}
                       </div>
                     </button>
@@ -376,12 +429,17 @@ export function CreateVersionModal({
                 })}
               </div>
 
-              {/* Section Reordering */}
+              {/* Section Reordering - Compact */}
               {selectedSections.length > 0 && (
-                <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                    <FiMove className="w-4 h-4" />
-                    Orden de las secciones (arrastra para reordenar)
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FiMove className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Orden
+                    </span>
+                    <span className="ml-auto text-[10px] text-gray-500 dark:text-gray-400 italic">
+                      Arrastra para reordenar
+                    </span>
                   </div>
                   <DndContext
                     sensors={sensors}
@@ -411,33 +469,36 @@ export function CreateVersionModal({
               )}
             </div>
 
-            {/* Notes */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {/* Notes - Compact */}
+            <div className="bg-white dark:bg-gray-800/30 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
                 Notas (opcional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Añade notas sobre esta versión..."
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Añade notas (ej: 'Versión sin foto para EE.UU.')..."
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-dark-border">
+            {/* Actions - Fixed at bottom */}
+            <div className="flex justify-end gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-dark-bg-secondary -mx-5 -mb-5 px-5 pb-5">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
+                className="px-5 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium transition-all text-sm"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isCreating}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {isCreating ? (
                   <span className="flex items-center gap-2">
@@ -445,7 +506,23 @@ export function CreateVersionModal({
                     {editingVersion ? 'Actualizando...' : 'Creando...'}
                   </span>
                 ) : (
-                  editingVersion ? 'Actualizar Versión' : 'Crear Versión'
+                  <span className="flex items-center gap-2">
+                    {editingVersion ? (
+                      <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Actualizar Versión
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Crear Versión
+                      </>
+                    )}
+                  </span>
                 )}
               </button>
             </div>
@@ -483,13 +560,15 @@ function SortableSectionItem({ id, index, label }: SortableSectionItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-lg cursor-move hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+      className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg cursor-move hover:border-blue-400 dark:hover:border-blue-600 transition-all"
       {...attributes}
       {...listeners}
     >
-      <FiMove className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-      <span className="font-medium text-gray-500 dark:text-gray-400">{index + 1}.</span>
-      <span className="text-gray-900 dark:text-white">{label}</span>
+      <FiMove className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+      <div className="flex items-center justify-center w-5 h-5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold flex-shrink-0">
+        {index + 1}
+      </div>
+      <span className="text-sm text-gray-900 dark:text-white font-medium truncate">{label}</span>
     </div>
   );
 }

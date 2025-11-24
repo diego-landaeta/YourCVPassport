@@ -24,6 +24,7 @@ import { CSS } from '@dnd-kit/utilities';
 interface ExperienceSectionProps {
   initialData?: ExperienceFormData[];
   onSave: (data: ExperienceFormData[]) => Promise<void>;
+  onNavigateToVerifications?: () => void;
 }
 
 interface SortableExperienceItemProps {
@@ -123,7 +124,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   );
 };
 
-const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [], onSave }) => {
+const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const [experiences, setExperiences] = useState<ExperienceFormData[]>(initialData);
@@ -323,7 +324,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
                   : 'Añade credibilidad a tu perfil verificando tu experiencia laboral. Ve a la sección de Verificaciones para enviar la documentación.'}
               </p>
               <button
-                onClick={() => window.location.href = '#verificaciones'}
+                onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
                 {translations.lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}

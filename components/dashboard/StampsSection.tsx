@@ -20,7 +20,8 @@ import {
     ExclamationTriangleIcon,
     CloudArrowUpIcon,
     ShieldCheckIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    LanguageIcon
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon as CheckBadgeSolidIcon } from '@heroicons/react/24/solid';
 
@@ -186,13 +187,20 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                             Verifica tus credenciales para generar confianza con empleadores
                         </p>
                     </div>
-                    <a
-                        href="#available-stamps"
+                    <button
+                        onClick={() => {
+                            setTimeout(() => {
+                                const element = document.getElementById('available-stamps');
+                                if (element) {
+                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }, 100);
+                        }}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                         <PlusIcon className="w-5 h-5" />
                         Ver Verificaciones
-                    </a>
+                    </button>
                 </div>
 
                 {/* Summary Cards */}
@@ -265,13 +273,20 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                         Solicita tu primera verificación para aumentar la confianza en tu perfil
                     </p>
-                    <a
-                        href="#available-stamps"
+                    <button
+                        onClick={() => {
+                            setTimeout(() => {
+                                const element = document.getElementById('available-stamps');
+                                if (element) {
+                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            }, 100);
+                        }}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                         <PlusIcon className="w-5 h-5" />
                         Ver Verificaciones Disponibles
-                    </a>
+                    </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
@@ -367,9 +382,9 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                     {/* Certification Stamp */}
                     <StampCard
                         type="CERTIFICATION"
-                        icon={DocumentTextIcon}
-                        title="Certificación"
-                        description="Verifica certificados profesionales"
+                        icon={LanguageIcon}
+                        title="Idiomas"
+                        description="Verifica certificados de idiomas (TOEFL, IELTS, DELE, DELF, etc.)"
                         requiresDocument={true}
                         onClick={() => {
                             setSelectedStampType('CERTIFICATION');

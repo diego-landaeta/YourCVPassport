@@ -323,103 +323,126 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     const exp = formData.experiences[selectedExpIndex] || formData.experiences[0];
     const edu = formData.education[selectedEduIndex] || formData.education[0];
     const skill = formData.skills[selectedSkillIndex] || formData.skills[0];
-    const lang = formData.languages[selectedLangIndex] || formData.languages[0];
+    const language = formData.languages[selectedLangIndex] || formData.languages[0];
 
     switch (section.id) {
       case 'identity':
         return (
-          <div className="grid grid-cols-4 gap-2 h-full">
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.name} {q.required}</label>
-              <input
-                type="text"
-                value={formData.full_name}
-                onChange={(e) => updateFormData('full_name', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.namePlaceholder}
-              />
+          <div className="space-y-8">
+            {/* Header Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{lang === 'es' ? 'Información Básica' : 'Basic Information'}</h2>
+              <p className="text-gray-600 dark:text-gray-400">{lang === 'es' ? 'Cuéntanos sobre ti' : 'Tell us about yourself'}</p>
             </div>
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.title} {q.required}</label>
-              <input
-                type="text"
-                value={formData.headline}
-                onChange={(e) => updateFormData('headline', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.titlePlaceholder}
-              />
+
+            {/* Form Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {q.identity.name} <span className="text-red-500">{q.required}</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.full_name}
+                  onChange={(e) => updateFormData('full_name', e.target.value)}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder={q.identity.namePlaceholder}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {q.identity.title} <span className="text-red-500">{q.required}</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.headline}
+                  onChange={(e) => updateFormData('headline', e.target.value)}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder={q.identity.titlePlaceholder}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.email}</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => updateFormData('email', e.target.value)}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder={q.identity.emailPlaceholder}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.phone}</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9+\s()-]/g, '');
+                    updateFormData('phone', value);
+                  }}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder={q.identity.phonePlaceholder}
+                  maxLength={20}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.location}</label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => updateFormData('location', e.target.value)}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder={q.identity.locationPlaceholder}
+                />
+              </div>
             </div>
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.email}</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => updateFormData('email', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.emailPlaceholder}
-              />
+
+            {/* Social Links Section */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{lang === 'es' ? 'Enlaces Profesionales' : 'Professional Links'}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.linkedin}</label>
+                  <input
+                    type="url"
+                    value={formData.linkedin_url}
+                    onChange={(e) => updateFormData('linkedin_url', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.identity.linkedinPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.github}</label>
+                  <input
+                    type="url"
+                    value={formData.github_url}
+                    onChange={(e) => updateFormData('github_url', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.identity.githubPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.portfolio}</label>
+                  <input
+                    type="url"
+                    value={formData.portfolio_url}
+                    onChange={(e) => updateFormData('portfolio_url', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.identity.portfolioPlaceholder}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.phone}</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9+\s()-]/g, '');
-                  updateFormData('phone', value);
-                }}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.phonePlaceholder}
-                maxLength={20}
-              />
-            </div>
-            <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.location}</label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => updateFormData('location', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.locationPlaceholder}
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.linkedin}</label>
-              <input
-                type="url"
-                value={formData.linkedin_url}
-                onChange={(e) => updateFormData('linkedin_url', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.linkedinPlaceholder}
-              />
-            </div>
-            <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.github}</label>
-              <input
-                type="url"
-                value={formData.github_url}
-                onChange={(e) => updateFormData('github_url', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.githubPlaceholder}
-              />
-            </div>
-            <div className="col-span-1">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.portfolio}</label>
-              <input
-                type="url"
-                value={formData.portfolio_url}
-                onChange={(e) => updateFormData('portfolio_url', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.identity.portfolioPlaceholder}
-              />
-            </div>
-            <div className="col-span-4">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.identity.summary} {q.required}</label>
+
+            {/* Professional Summary Section */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{q.identity.summary} <span className="text-red-500">{q.required}</span></h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{lang === 'es' ? 'Describe tu perfil profesional en pocas palabras' : 'Describe your professional profile in a few words'}</p>
               <textarea
                 value={formData.summary}
                 onChange={(e) => updateFormData('summary', e.target.value)}
-                rows={3}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                rows={5}
+                className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                 placeholder={q.identity.summaryPlaceholder}
               />
             </div>
@@ -428,26 +451,36 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       case 'experience':
         return (
-          <div className="h-full flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <select
-                value={selectedExpIndex}
-                onChange={(e) => setSelectedExpIndex(Number(e.target.value))}
-                className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {formData.experiences.map((_, idx) => (
-                  <option key={idx} value={idx}>{q.experience.label} {idx + 1}</option>
-                ))}
-              </select>
-              <div className="flex gap-1">
+          <div className="space-y-8">
+            {/* Header with Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {lang === 'es' ? 'Experiencia Profesional' : 'Professional Experience'}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Añade tus empleos anteriores' : 'Add your previous jobs'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedExpIndex}
+                  onChange={(e) => setSelectedExpIndex(Number(e.target.value))}
+                  className="px-4 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  {formData.experiences.map((_, idx) => (
+                    <option key={idx} value={idx}>{q.experience.label} {idx + 1}</option>
+                  ))}
+                </select>
                 <button
                   onClick={() => {
                     addArrayItem('experiences', { position: '', company_name: '', start_date: '', end_date: '', description: '', is_current: false });
                     setSelectedExpIndex(formData.experiences.length);
                   }}
-                  className="px-2 py-1 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-3 w-3" />
+                  <PlusIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
                 </button>
                 {formData.experiences.length > 1 && (
                   <button
@@ -455,70 +488,82 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                       removeArrayItem('experiences', selectedExpIndex);
                       setSelectedExpIndex(Math.max(0, selectedExpIndex - 1));
                     }}
-                    className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-3 w-3" />
+                    <TrashIcon className="h-5 w-5" />
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 flex-1">
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.position} {q.required}</label>
-                <input
-                  type="text"
-                  value={exp.position}
-                  onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'position', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.experience.positionPlaceholder}
-                />
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.experience.position} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={exp.position}
+                    onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'position', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.experience.positionPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.experience.company} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={exp.company_name}
+                    onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'company_name', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.experience.companyPlaceholder}
+                  />
+                </div>
               </div>
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.company} {q.required}</label>
-                <input
-                  type="text"
-                  value={exp.company_name}
-                  onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'company_name', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.experience.companyPlaceholder}
-                />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.experience.startDate}</label>
+                  <input
+                    type="month"
+                    value={exp.start_date}
+                    onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'start_date', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.experience.endDate}</label>
+                  <input
+                    type="month"
+                    value={exp.end_date}
+                    onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'end_date', e.target.value)}
+                    disabled={exp.is_current}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+                <div className="flex items-center gap-3 h-12">
+                  <input
+                    type="checkbox"
+                    id="is-current"
+                    checked={exp.is_current}
+                    onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'is_current', e.target.checked)}
+                    className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <label htmlFor="is-current" className="text-sm font-medium text-gray-700 dark:text-gray-300">{q.experience.currentJob}</label>
+                </div>
               </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.startDate}</label>
-                <input
-                  type="month"
-                  value={exp.start_date}
-                  onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'start_date', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.endDate}</label>
-                <input
-                  type="month"
-                  value={exp.end_date}
-                  onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'end_date', e.target.value)}
-                  disabled={exp.is_current}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50"
-                />
-              </div>
-              <div className="col-span-2 flex items-center">
-                <input
-                  type="checkbox"
-                  checked={exp.is_current}
-                  onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'is_current', e.target.checked)}
-                  className="h-3 w-3"
-                />
-                <label className="ml-1 text-[10px] text-gray-700 dark:text-gray-300">{q.experience.currentJob}</label>
-              </div>
-              <div className="col-span-4">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.experience.description}</label>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.experience.description}</label>
                 <textarea
                   value={exp.description}
                   onChange={(e) => updateArrayItem('experiences', selectedExpIndex, 'description', e.target.value)}
-                  rows={4}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                  rows={6}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                   placeholder={q.experience.descriptionPlaceholder}
                 />
               </div>
@@ -528,26 +573,36 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       case 'education':
         return (
-          <div className="h-full flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <select
-                value={selectedEduIndex}
-                onChange={(e) => setSelectedEduIndex(Number(e.target.value))}
-                className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {formData.education.map((_, idx) => (
-                  <option key={idx} value={idx}>{q.education.label} {idx + 1}</option>
-                ))}
-              </select>
-              <div className="flex gap-1">
+          <div className="space-y-8">
+            {/* Header with Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {lang === 'es' ? 'Educación' : 'Education'}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Añade tu formación académica' : 'Add your academic background'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedEduIndex}
+                  onChange={(e) => setSelectedEduIndex(Number(e.target.value))}
+                  className="px-4 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  {formData.education.map((_, idx) => (
+                    <option key={idx} value={idx}>{q.education.label} {idx + 1}</option>
+                  ))}
+                </select>
                 <button
                   onClick={() => {
                     addArrayItem('education', { institution_name: '', degree: '', field_of_study: '', start_date: '', end_date: '', description: '' });
                     setSelectedEduIndex(formData.education.length);
                   }}
-                  className="px-2 py-1 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-3 w-3" />
+                  <PlusIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
                 </button>
                 {formData.education.length > 1 && (
                   <button
@@ -555,70 +610,81 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                       removeArrayItem('education', selectedEduIndex);
                       setSelectedEduIndex(Math.max(0, selectedEduIndex - 1));
                     }}
-                    className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-3 w-3" />
+                    <TrashIcon className="h-5 w-5" />
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 flex-1">
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.institution} {q.required}</label>
-                <input
-                  type="text"
-                  value={edu.institution_name}
-                  onChange={(e) => updateArrayItem('education', selectedEduIndex, 'institution_name', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.education.institutionPlaceholder}
-                />
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.education.institution} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={edu.institution_name}
+                    onChange={(e) => updateArrayItem('education', selectedEduIndex, 'institution_name', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.education.institutionPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.education.degree} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={edu.degree}
+                    onChange={(e) => updateArrayItem('education', selectedEduIndex, 'degree', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.education.degreePlaceholder}
+                  />
+                </div>
               </div>
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.degree} {q.required}</label>
-                <input
-                  type="text"
-                  value={edu.degree}
-                  onChange={(e) => updateArrayItem('education', selectedEduIndex, 'degree', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.education.degreePlaceholder}
-                />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.education.field}</label>
+                  <input
+                    type="text"
+                    value={edu.field_of_study}
+                    onChange={(e) => updateArrayItem('education', selectedEduIndex, 'field_of_study', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.education.fieldPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.education.startDate}</label>
+                  <input
+                    type="month"
+                    value={edu.start_date}
+                    onChange={(e) => updateArrayItem('education', selectedEduIndex, 'start_date', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.education.endDate}</label>
+                  <input
+                    type="month"
+                    value={edu.end_date}
+                    onChange={(e) => updateArrayItem('education', selectedEduIndex, 'end_date', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  />
+                </div>
               </div>
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.field}</label>
-                <input
-                  type="text"
-                  value={edu.field_of_study}
-                  onChange={(e) => updateArrayItem('education', selectedEduIndex, 'field_of_study', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.education.fieldPlaceholder}
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.startDate}</label>
-                <input
-                  type="month"
-                  value={edu.start_date}
-                  onChange={(e) => updateArrayItem('education', selectedEduIndex, 'start_date', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.endDate}</label>
-                <input
-                  type="month"
-                  value={edu.end_date}
-                  onChange={(e) => updateArrayItem('education', selectedEduIndex, 'end_date', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="col-span-4">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.education.description}</label>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.education.description}</label>
                 <textarea
                   value={edu.description}
                   onChange={(e) => updateArrayItem('education', selectedEduIndex, 'description', e.target.value)}
-                  rows={3}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                  rows={5}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                   placeholder={q.education.descriptionPlaceholder}
                 />
               </div>
@@ -628,26 +694,36 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       case 'skills':
         return (
-          <div className="h-full flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <select
-                value={selectedSkillIndex}
-                onChange={(e) => setSelectedSkillIndex(Number(e.target.value))}
-                className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {formData.skills.map((s, idx) => (
-                  <option key={idx} value={idx}>{s.name || `${q.skills.label} ${idx + 1}`}</option>
-                ))}
-              </select>
-              <div className="flex gap-1">
+          <div className="space-y-8">
+            {/* Header with Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {lang === 'es' ? 'Habilidades' : 'Skills'}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Añade tus competencias técnicas y profesionales' : 'Add your technical and professional skills'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedSkillIndex}
+                  onChange={(e) => setSelectedSkillIndex(Number(e.target.value))}
+                  className="px-4 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  {formData.skills.map((s, idx) => (
+                    <option key={idx} value={idx}>{s.name || `${q.skills.label} ${idx + 1}`}</option>
+                  ))}
+                </select>
                 <button
                   onClick={() => {
                     addArrayItem('skills', { name: '', level: '', years_of_experience: 0 });
                     setSelectedSkillIndex(formData.skills.length);
                   }}
-                  className="px-2 py-1 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-3 w-3" />
+                  <PlusIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
                 </button>
                 {formData.skills.length > 1 && (
                   <button
@@ -655,49 +731,54 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                       removeArrayItem('skills', selectedSkillIndex);
                       setSelectedSkillIndex(Math.max(0, selectedSkillIndex - 1));
                     }}
-                    className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-3 w-3" />
+                    <TrashIcon className="h-5 w-5" />
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-2">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.skill} {q.required}</label>
-                <input
-                  type="text"
-                  value={skill.name}
-                  onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'name', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.skills.skillPlaceholder}
-                />
-              </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.level}</label>
-                <select
-                  value={skill.level}
-                  onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'level', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">{q.skills.levelSelect}</option>
-                  <option value={q.skills.levelBasic}>{q.skills.levelBasic}</option>
-                  <option value={q.skills.levelIntermediate}>{q.skills.levelIntermediate}</option>
-                  <option value={q.skills.levelAdvanced}>{q.skills.levelAdvanced}</option>
-                  <option value={q.skills.levelExpert}>{q.skills.levelExpert}</option>
-                </select>
-              </div>
-              <div className="col-span-1">
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.skills.years}</label>
-                <input
-                  type="number"
-                  value={skill.years_of_experience}
-                  onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'years_of_experience', Number(e.target.value))}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  min="0"
-                  max="50"
-                />
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.skills.skill} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={skill.name}
+                    onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'name', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.skills.skillPlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.skills.level}</label>
+                  <select
+                    value={skill.level}
+                    onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'level', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  >
+                    <option value="">{q.skills.levelSelect}</option>
+                    <option value={q.skills.levelBasic}>{q.skills.levelBasic}</option>
+                    <option value={q.skills.levelIntermediate}>{q.skills.levelIntermediate}</option>
+                    <option value={q.skills.levelAdvanced}>{q.skills.levelAdvanced}</option>
+                    <option value={q.skills.levelExpert}>{q.skills.levelExpert}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.skills.years}</label>
+                  <input
+                    type="number"
+                    value={skill.years_of_experience}
+                    onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'years_of_experience', Number(e.target.value))}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    min="0"
+                    max="50"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -705,26 +786,36 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       case 'languages':
         return (
-          <div className="h-full flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <select
-                value={selectedLangIndex}
-                onChange={(e) => setSelectedLangIndex(Number(e.target.value))}
-                className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {formData.languages.map((l, idx) => (
-                  <option key={idx} value={idx}>{l.language || `${q.languages.label} ${idx + 1}`}</option>
-                ))}
-              </select>
-              <div className="flex gap-1">
+          <div className="space-y-8">
+            {/* Header with Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {lang === 'es' ? 'Idiomas' : 'Languages'}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Indica los idiomas que dominas' : 'Indicate the languages you speak'}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={selectedLangIndex}
+                  onChange={(e) => setSelectedLangIndex(Number(e.target.value))}
+                  className="px-4 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  {formData.languages.map((l, idx) => (
+                    <option key={idx} value={idx}>{l.language || `${q.languages.label} ${idx + 1}`}</option>
+                  ))}
+                </select>
                 <button
                   onClick={() => {
                     addArrayItem('languages', { language: '', proficiency: '' });
                     setSelectedLangIndex(formData.languages.length);
                   }}
-                  className="px-2 py-1 text-[10px] bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-3 w-3" />
+                  <PlusIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
                 </button>
                 {formData.languages.length > 1 && (
                   <button
@@ -732,41 +823,46 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                       removeArrayItem('languages', selectedLangIndex);
                       setSelectedLangIndex(Math.max(0, selectedLangIndex - 1));
                     }}
-                    className="px-2 py-1 text-[10px] bg-red-500 text-white rounded hover:bg-red-600"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-3 w-3" />
+                    <TrashIcon className="h-5 w-5" />
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.languages.language} {q.required}</label>
-                <input
-                  type="text"
-                  value={lang.language}
-                  onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'language', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={q.languages.languagePlaceholder}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.languages.level}</label>
-                <select
-                  value={lang.proficiency}
-                  onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'proficiency', e.target.value)}
-                  className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="">{q.languages.levelSelect}</option>
-                  <option value="A1">{q.languages.levelA1}</option>
-                  <option value="A2">{q.languages.levelA2}</option>
-                  <option value="B1">{q.languages.levelB1}</option>
-                  <option value="B2">{q.languages.levelB2}</option>
-                  <option value="C1">{q.languages.levelC1}</option>
-                  <option value="C2">{q.languages.levelC2}</option>
-                  <option value={q.languages.levelNative}>{q.languages.levelNative}</option>
-                </select>
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.languages.language} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={language.language}
+                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'language', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.languages.languagePlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.languages.level}</label>
+                  <select
+                    value={language.proficiency}
+                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'proficiency', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  >
+                    <option value="">{q.languages.levelSelect}</option>
+                    <option value="A1">{q.languages.levelA1}</option>
+                    <option value="A2">{q.languages.levelA2}</option>
+                    <option value="B1">{q.languages.levelB1}</option>
+                    <option value="B2">{q.languages.levelB2}</option>
+                    <option value="C1">{q.languages.levelC1}</option>
+                    <option value="C2">{q.languages.levelC2}</option>
+                    <option value={q.languages.levelNative}>{q.languages.levelNative}</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -774,80 +870,133 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       case 'preferences':
         return (
-          <div className="grid grid-cols-4 gap-2 h-full">
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.availability}</label>
-              <select
-                value={formData.availability}
-                onChange={(e) => updateFormData('availability', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">{q.preferences.availabilitySelect}</option>
-                <option value={q.preferences.availabilityImmediate}>{q.preferences.availabilityImmediate}</option>
-                <option value={q.preferences.availability1Week}>{q.preferences.availability1Week}</option>
-                <option value={q.preferences.availability2Weeks}>{q.preferences.availability2Weeks}</option>
-                <option value={q.preferences.availability1Month}>{q.preferences.availability1Month}</option>
-                <option value={q.preferences.availabilityMore}>{q.preferences.availabilityMore}</option>
-              </select>
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {lang === 'es' ? 'Preferencias Laborales' : 'Work Preferences'}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                {lang === 'es' ? 'Indica tus preferencias de trabajo' : 'Indicate your work preferences'}
+              </p>
             </div>
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.workMode}</label>
-              <select
-                value={formData.work_mode}
-                onChange={(e) => updateFormData('work_mode', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="">{q.preferences.workModeSelect}</option>
-                <option value={q.preferences.workModeRemote}>{q.preferences.workModeRemote}</option>
-                <option value={q.preferences.workModeOnsite}>{q.preferences.workModeOnsite}</option>
-                <option value={q.preferences.workModeHybrid}>{q.preferences.workModeHybrid}</option>
-              </select>
-            </div>
-            <div className="col-span-2">
-              <label className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">{q.preferences.expectedSalary}</label>
-              <input
-                type="text"
-                value={formData.expected_salary}
-                onChange={(e) => updateFormData('expected_salary', e.target.value)}
-                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder={q.preferences.expectedSalaryPlaceholder}
-              />
-            </div>
-            <div className="col-span-2 flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.relocation_willing}
-                onChange={(e) => updateFormData('relocation_willing', e.target.checked)}
-                className="h-3 w-3"
-              />
-              <label className="ml-2 text-[10px] text-gray-700 dark:text-gray-300">{q.preferences.relocationWilling}</label>
+
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.preferences.availability}</label>
+                  <select
+                    value={formData.availability}
+                    onChange={(e) => updateFormData('availability', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  >
+                    <option value="">{q.preferences.availabilitySelect}</option>
+                    <option value={q.preferences.availabilityImmediate}>{q.preferences.availabilityImmediate}</option>
+                    <option value={q.preferences.availability1Week}>{q.preferences.availability1Week}</option>
+                    <option value={q.preferences.availability2Weeks}>{q.preferences.availability2Weeks}</option>
+                    <option value={q.preferences.availability1Month}>{q.preferences.availability1Month}</option>
+                    <option value={q.preferences.availabilityMore}>{q.preferences.availabilityMore}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.preferences.workMode}</label>
+                  <select
+                    value={formData.work_mode}
+                    onChange={(e) => updateFormData('work_mode', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  >
+                    <option value="">{q.preferences.workModeSelect}</option>
+                    <option value={q.preferences.workModeRemote}>{q.preferences.workModeRemote}</option>
+                    <option value={q.preferences.workModeOnsite}>{q.preferences.workModeOnsite}</option>
+                    <option value={q.preferences.workModeHybrid}>{q.preferences.workModeHybrid}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.preferences.expectedSalary}</label>
+                  <input
+                    type="text"
+                    value={formData.expected_salary}
+                    onChange={(e) => updateFormData('expected_salary', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    placeholder={q.preferences.expectedSalaryPlaceholder}
+                  />
+                </div>
+                <div className="flex items-center h-full pt-8">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="relocation-willing"
+                      checked={formData.relocation_willing}
+                      onChange={(e) => updateFormData('relocation_willing', e.target.checked)}
+                      className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <label htmlFor="relocation-willing" className="text-sm font-medium text-gray-700 dark:text-gray-300">{q.preferences.relocationWilling}</label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
 
       case 'template':
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto max-h-96">
-            {templates.map((template) => (
-              <div
-                key={template.id}
-                onClick={() => updateFormData('template_id', template.id)}
-                className={`cursor-pointer border-2 rounded-lg p-3 transition-all hover:scale-105 ${
-                  formData.template_id === template.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 shadow-sm'
-                }`}
-              >
-                <div className="text-xs font-semibold text-gray-900 dark:text-white mb-1">
-                  {template.name.es}
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {lang === 'es' ? 'Elige tu Plantilla' : 'Choose Your Template'}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                {lang === 'es' ? 'Selecciona el diseño que mejor represente tu estilo profesional' : 'Select the design that best represents your professional style'}
+              </p>
+            </div>
+
+            {/* Template Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[500px] pr-2">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => updateFormData('template_id', template.id)}
+                  className={`cursor-pointer border-3 rounded-2xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                    formData.template_id === template.id
+                      ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 shadow-2xl ring-4 ring-blue-200 dark:ring-blue-800'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 shadow-lg bg-white dark:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-base font-bold text-gray-900 dark:text-white">
+                      {lang === 'es' ? template.name.es : template.name.en}
+                    </div>
+                    {formData.template_id === template.id && (
+                      <CheckCircleIcon className="h-6 w-6 text-blue-600" />
+                    )}
+                  </div>
+
+                  {template.isPro && (
+                    <div className="mb-3">
+                      <span className="inline-block text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full font-bold shadow-md">
+                        ✨ PRO
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    {lang === 'es'
+                      ? template.isPro
+                        ? 'Diseño premium con características avanzadas'
+                        : 'Diseño profesional y elegante'
+                      : template.isPro
+                        ? 'Premium design with advanced features'
+                        : 'Professional and elegant design'
+                    }
+                  </div>
                 </div>
-                {template.isPro && (
-                  <span className="inline-block text-[8px] bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-2 py-0.5 rounded-full font-bold">
-                    PRO
-                  </span>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         );
 
@@ -865,109 +1014,158 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
   }
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
-      {/* Ultra Compact Top Bar */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{section.icon}</span>
-          <div>
-            <h1 className="text-sm font-bold leading-tight">{section.name}</h1>
-            <div className="flex items-center gap-1.5 text-[10px] text-white/80">
-              <span>{q.progress.step} {currentSection + 1}/{SECTIONS.length}</span>
-              <span>•</span>
-              <span className="font-bold">{progress}%</span>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Modern Header with Progress */}
+      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* Section Title with Icon */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl shadow-lg transform hover:scale-105 transition-transform">
+                {section.icon}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{section.name}</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {q.progress.step} {currentSection + 1} {q.progress.of} {SECTIONS.length} • {progress}% {lang === 'es' ? 'completado' : 'complete'}
+                </p>
+              </div>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={onComplete}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title={lang === 'es' ? 'Cerrar' : 'Close'}
+            >
+              <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="relative">
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-500 ease-out shadow-sm"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            {/* Step Indicators */}
+            <div className="flex justify-between mt-4">
+              {SECTIONS.map((s, idx) => (
+                <div
+                  key={s.id}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg transition-all duration-300 ${
+                      idx === currentSection
+                        ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg scale-110'
+                        : idx < currentSection
+                        ? 'bg-green-500 text-white shadow-md'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                    }`}
+                  >
+                    {idx < currentSection ? '✓' : s.icon}
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    idx === currentSection
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : idx < currentSection
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-gray-400 dark:text-gray-500'
+                  }`}>
+                    {s.name.split(' ')[0]}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Compact Progress Steps */}
-        <div className="flex gap-1.5 items-center">
-          {SECTIONS.map((s, idx) => (
-            <div
-              key={s.id}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all ${
-                idx === currentSection
-                  ? 'bg-white text-blue-600 font-bold scale-105'
-                  : idx < currentSection
-                  ? 'bg-green-400 text-white'
-                  : 'bg-white/20 text-white/60'
-              }`}
-            >
-              {idx < currentSection ? '✓' : s.icon}
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Inline Alerts */}
+      {/* Alerts */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 px-4 py-2 flex items-center gap-2 shrink-0">
-          <svg className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-xs text-red-700 dark:text-red-300 flex-1">{error}</span>
-          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 font-bold">×</button>
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 px-6 py-4 rounded-lg flex items-start gap-3 shadow-sm">
+            <svg className="h-6 w-6 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm text-red-700 dark:text-red-300 flex-1">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 text-xl font-bold">×</button>
+          </div>
         </div>
       )}
 
       {isCorrectingText && (
-        <div className="bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-500 px-4 py-2 flex items-center gap-2 shrink-0">
-          <SparklesIcon className="h-4 w-4 text-purple-600 animate-spin" />
-          <span className="text-xs text-purple-700 dark:text-purple-300 font-medium">{q.messages.optimizing}</span>
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="bg-purple-50 dark:bg-purple-900/30 border-l-4 border-purple-500 px-6 py-4 rounded-lg flex items-center gap-3 shadow-sm">
+            <SparklesIcon className="h-6 w-6 text-purple-600 animate-spin" />
+            <span className="text-sm text-purple-700 dark:text-purple-300 font-medium">{q.messages.optimizing}</span>
+          </div>
         </div>
       )}
 
-      {/* Content Area - Maximized */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50 dark:bg-gray-900 px-4 py-3">
-        <div className="max-w-5xl mx-auto">
-          {renderSectionContent()}
+      {/* Content Area - Modern Card Design */}
+      <div className="flex-1 overflow-y-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 md:p-12">
+            {renderSectionContent()}
+          </div>
         </div>
       </div>
 
-      {/* Ultra Compact Bottom Bar */}
-      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between shrink-0">
-        <button
-          onClick={handleBack}
-          disabled={currentSection === 0}
-          className="flex items-center gap-1.5 px-4 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-medium transition-all"
-        >
-          <ArrowLeftIcon className="h-3.5 w-3.5" />
-          {q.navigation.previous}
-        </button>
+      {/* Modern Bottom Navigation */}
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+          <button
+            onClick={handleBack}
+            disabled={currentSection === 0}
+            className="flex items-center gap-3 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed font-semibold transition-all shadow-md hover:shadow-lg"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+            <span>{q.navigation.previous}</span>
+          </button>
 
-        <div className="flex gap-1">
-          {SECTIONS.map((_, idx) => (
-            <div
-              key={idx}
-              className={`h-1 rounded-full transition-all ${
-                idx <= currentSection ? 'w-6 bg-blue-600' : 'w-3 bg-gray-300 dark:bg-gray-600'
-              }`}
-            />
-          ))}
+          <div className="flex-1 max-w-md mx-8">
+            <div className="flex gap-2 justify-center">
+              {SECTIONS.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx <= currentSection ? 'w-12 bg-gradient-to-r from-blue-600 to-purple-600' : 'w-8 bg-gray-300 dark:bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={handleNext}
+            disabled={!isCurrentSectionValid() || isProcessing}
+            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed font-semibold transition-all shadow-md hover:shadow-xl transform hover:scale-105"
+          >
+            {isProcessing ? (
+              <>
+                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                <span>{q.navigation.saving}</span>
+              </>
+            ) : currentSection === SECTIONS.length - 1 ? (
+              <>
+                <span>{q.navigation.finish}</span>
+                <CheckCircleIcon className="h-5 w-5" />
+              </>
+            ) : (
+              <>
+                <span>{q.navigation.next}</span>
+                <ArrowRightIcon className="h-5 w-5" />
+              </>
+            )}
+          </button>
         </div>
-
-        <button
-          onClick={handleNext}
-          disabled={!isCurrentSectionValid() || isProcessing}
-          className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-xs font-medium transition-all"
-        >
-          {isProcessing ? (
-            <>
-              <div className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
-              {q.navigation.saving}
-            </>
-          ) : currentSection === SECTIONS.length - 1 ? (
-            <>
-              <CheckCircleIcon className="h-3.5 w-3.5" />
-              {q.navigation.finish}
-            </>
-          ) : (
-            <>
-              {q.navigation.next}
-              <ArrowRightIcon className="h-3.5 w-3.5" />
-            </>
-          )}
-        </button>
       </div>
 
       {/* Alert Modal */}

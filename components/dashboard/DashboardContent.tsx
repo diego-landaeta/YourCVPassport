@@ -384,7 +384,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         supabase
           .from('leads')
           .select('id, created_at')
-          .eq('recipient_id', session.user.id)
+          .eq('profile_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(2),
 
@@ -1274,6 +1274,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <ExperienceSection
                 initialData={experiences}
                 onSave={handleExperienceSave}
+                onNavigateToVerifications={() => onSectionChange('stamps')}
               />
             )}
 
@@ -1281,6 +1282,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <EducationSection
                 initialData={education}
                 onSave={handleEducationSave}
+                onNavigateToVerifications={() => onSectionChange('stamps')}
               />
             )}
 
@@ -1295,6 +1297,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <LanguagesSection
                 initialData={languages}
                 onSave={handleLanguagesSave}
+                onNavigateToVerifications={() => onSectionChange('stamps')}
               />
             )}
 

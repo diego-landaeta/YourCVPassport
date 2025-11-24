@@ -5,6 +5,8 @@
 
 import { useState } from 'react';
 import { useCVVersions } from '../../hooks/useCVVersions';
+import { useATSExport } from '../../hooks/useATSExport';
+import { useAuth } from '../../contexts/AuthContext';
 import { CVVersion } from '../../types';
 import { CreateVersionModal } from './CreateVersionModal';
 
@@ -63,7 +65,443 @@ const TrashIcon = () => (
   </svg>
 );
 
+// Helper function to get template-specific styles
+function getTemplateStyles(template: string): string {
+  const baseStyles = `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { line-height: 1.6; color: #333; padding: 40px; max-width: 900px; margin: 0 auto; }
+    .version-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+    .header { margin-bottom: 30px; padding-bottom: 20px; }
+    .headline { margin-bottom: 12px; }
+    .contact-info { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
+    .section { margin-bottom: 24px; page-break-inside: avoid; }
+    .item { margin-bottom: 16px; page-break-inside: avoid; }
+    .item-title { font-weight: 600; }
+    .item-subtitle { color: #666; font-size: 15px; }
+    .item-date { color: #888; font-size: 14px; margin-bottom: 8px; }
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    @media print { body { padding: 20px; } .no-print { display: none; } }
+  `;
+
+  switch (template) {
+    // Basic Free Templates
+    case 'classic':
+      return baseStyles + `
+        body { font-family: 'Times New Roman', Georgia, serif; background: #fafafa; }
+        .version-badge { background: #8b4513; color: white; }
+        h1 { font-size: 36px; margin-bottom: 8px; color: #1a1a1a; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 3px double #1a1a1a; color: #1a1a1a; font-weight: 700; text-transform: uppercase; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px double #1a1a1a; }
+        .headline { font-size: 18px; color: #555; font-style: italic; }
+        .contact-info { justify-content: center; color: #555; }
+        .skill-tag { background: #e8e8e8; padding: 6px 14px; border-radius: 4px; font-size: 14px; border: 1px solid #ccc; }
+      `;
+
+    case 'modern':
+      return baseStyles + `
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif; }
+        .version-badge { background: #2563eb; color: white; }
+        h1 { font-size: 32px; margin-bottom: 8px; color: #2563eb; font-weight: 700; }
+        h2 { font-size: 22px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        h3 { font-size: 18px; margin-bottom: 4px; font-weight: 600; color: #111; }
+        .header { text-align: center; border-bottom: 2px solid #e5e7eb; }
+        .headline { font-size: 18px; color: #666; }
+        .contact-info { justify-content: center; color: #666; }
+        .skill-tag { background: #dbeafe; padding: 6px 14px; border-radius: 16px; font-size: 14px; color: #1e40af; font-weight: 500; }
+      `;
+
+    case 'minimal':
+      return baseStyles + `
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
+        .version-badge { background: #6b7280; color: white; }
+        h1 { font-size: 42px; margin-bottom: 8px; color: #111; font-weight: 300; letter-spacing: -1px; }
+        h2 { font-size: 16px; margin: 28px 0 12px; padding-bottom: 4px; border-bottom: 1px solid #e5e5e5; color: #666; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 500; color: #111; }
+        .header { text-align: left; border-bottom: none; padding-bottom: 16px; }
+        .headline { font-size: 16px; color: #666; font-weight: 300; }
+        .contact-info { justify-content: flex-start; color: #999; font-size: 13px; }
+        .skill-tag { background: white; padding: 4px 12px; border-radius: 2px; font-size: 13px; border: 1px solid #e5e5e5; font-weight: 300; }
+        .item-date { font-weight: 300; }
+      `;
+
+    // Premium Templates
+    case 'passport':
+      return baseStyles + `
+        body { font-family: 'Courier New', monospace; background: #f5f5dc; }
+        .version-badge { background: #8b0000; color: white; }
+        h1 { font-size: 28px; margin-bottom: 8px; color: #8b0000; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+        h2 { font-size: 18px; margin: 20px 0 12px; padding: 8px 0; border-top: 2px solid #8b0000; border-bottom: 2px solid #8b0000; color: #8b0000; font-weight: 700; text-transform: uppercase; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border: 3px solid #8b0000; padding: 20px; }
+        .headline { font-size: 16px; color: #333; text-transform: uppercase; }
+        .contact-info { justify-content: center; color: #555; }
+        .skill-tag { background: #fff; padding: 4px 10px; border-radius: 0; font-size: 13px; border: 1px solid #8b0000; }
+      `;
+
+    case 'modern-professional':
+      return baseStyles + `
+        body { font-family: 'Arial', sans-serif; background: #fff; }
+        .version-badge { background: #1e3a8a; color: white; }
+        h1 { font-size: 34px; margin-bottom: 8px; color: #1e3a8a; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 3px solid #1e3a8a; color: #1e3a8a; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; color: #111; }
+        .header { text-align: center; border-bottom: 4px solid #1e3a8a; }
+        .headline { font-size: 17px; color: #555; }
+        .contact-info { justify-content: center; color: #666; }
+        .skill-tag { background: #eff6ff; padding: 6px 14px; border-radius: 4px; font-size: 14px; color: #1e3a8a; font-weight: 500; }
+      `;
+
+    case 'corporate-classic':
+      return baseStyles + `
+        body { font-family: 'Georgia', serif; background: #fafafa; }
+        .version-badge { background: #374151; color: white; }
+        h1 { font-size: 32px; margin-bottom: 8px; color: #1f2937; font-weight: 700; }
+        h2 { font-size: 19px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #374151; color: #374151; font-weight: 700; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #374151; }
+        .headline { font-size: 17px; color: #4b5563; font-style: italic; }
+        .contact-info { justify-content: center; color: #6b7280; }
+        .skill-tag { background: #f3f4f6; padding: 6px 12px; border-radius: 3px; font-size: 14px; border: 1px solid #d1d5db; }
+      `;
+
+    case 'creative-minimalist':
+      return baseStyles + `
+        body { font-family: 'Futura', 'Trebuchet MS', sans-serif; font-weight: 300; }
+        .version-badge { background: #10b981; color: white; }
+        h1 { font-size: 40px; margin-bottom: 8px; color: #10b981; font-weight: 300; letter-spacing: -1px; }
+        h2 { font-size: 18px; margin: 28px 0 12px; padding-bottom: 4px; border-bottom: 2px solid #10b981; color: #10b981; font-weight: 400; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 500; }
+        .header { text-align: left; border-bottom: none; }
+        .headline { font-size: 16px; color: #6b7280; font-weight: 300; }
+        .contact-info { justify-content: flex-start; color: #9ca3af; }
+        .skill-tag { background: #d1fae5; padding: 5px 12px; border-radius: 20px; font-size: 13px; color: #047857; }
+      `;
+
+    case 'academic-standard':
+      return baseStyles + `
+        body { font-family: 'Times New Roman', serif; background: #fff; }
+        .version-badge { background: #4f46e5; color: white; }
+        h1 { font-size: 30px; margin-bottom: 8px; color: #1f2937; font-weight: 700; text-align: center; }
+        h2 { font-size: 18px; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #4b5563; color: #1f2937; font-weight: 700; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 600; font-style: italic; }
+        .header { text-align: center; border-bottom: 2px solid #1f2937; }
+        .headline { font-size: 16px; color: #4b5563; }
+        .contact-info { justify-content: center; color: #6b7280; font-size: 13px; }
+        .skill-tag { background: #f3f4f6; padding: 4px 10px; border-radius: 2px; font-size: 13px; border: 1px solid #d1d5db; }
+      `;
+
+    case 'yellow-minimalist':
+      return baseStyles + `
+        body { font-family: 'Arial', sans-serif; background: #fffbeb; }
+        .version-badge { background: #f59e0b; color: white; }
+        h1 { font-size: 36px; margin-bottom: 8px; color: #d97706; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 3px solid #fbbf24; color: #92400e; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #fbbf24; }
+        .headline { font-size: 17px; color: #78350f; }
+        .contact-info { justify-content: center; color: #92400e; }
+        .skill-tag { background: #fef3c7; padding: 6px 14px; border-radius: 16px; font-size: 14px; color: #92400e; font-weight: 500; }
+      `;
+
+    case 'blue-gradient':
+      return baseStyles + `
+        body { font-family: 'Helvetica', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+        .version-badge { background: #fff; color: #667eea; }
+        h1 { font-size: 34px; margin-bottom: 8px; color: #fff; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #fff; color: #fff; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; color: #fff; }
+        .header { text-align: center; border-bottom: 2px solid rgba(255,255,255,0.5); }
+        .headline { font-size: 17px; color: rgba(255,255,255,0.9); }
+        .contact-info { justify-content: center; color: rgba(255,255,255,0.8); }
+        .item-subtitle { color: rgba(255,255,255,0.8); }
+        .item-date { color: rgba(255,255,255,0.7); }
+        .skill-tag { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 16px; font-size: 14px; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+      `;
+
+    case 'coral-pink':
+      return baseStyles + `
+        body { font-family: 'Poppins', sans-serif; background: #fff5f5; }
+        .version-badge { background: #f472b6; color: white; }
+        h1 { font-size: 34px; margin-bottom: 8px; color: #ec4899; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #f472b6; color: #be185d; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #fbcfe8; }
+        .headline { font-size: 17px; color: #9f1239; }
+        .contact-info { justify-content: center; color: #be185d; }
+        .skill-tag { background: #fce7f3; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #be185d; font-weight: 500; }
+      `;
+
+    case 'green-minimal':
+      return baseStyles + `
+        body { font-family: 'Roboto', sans-serif; background: #f0fdf4; }
+        .version-badge { background: #22c55e; color: white; }
+        h1 { font-size: 36px; margin-bottom: 8px; color: #16a34a; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #22c55e; color: #15803d; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: left; border-bottom: 3px solid #86efac; }
+        .headline { font-size: 17px; color: #166534; }
+        .contact-info { justify-content: flex-start; color: #15803d; }
+        .skill-tag { background: #dcfce7; padding: 6px 14px; border-radius: 4px; font-size: 14px; color: #166534; font-weight: 500; }
+      `;
+
+    case 'creative-orange':
+      return baseStyles + `
+        body { font-family: 'Ubuntu', sans-serif; background: #fff7ed; }
+        .version-badge { background: #f97316; color: white; }
+        h1 { font-size: 38px; margin-bottom: 8px; color: #ea580c; font-weight: 700; }
+        h2 { font-size: 21px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 3px solid #fb923c; color: #c2410c; font-weight: 600; }
+        h3 { font-size: 18px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #fed7aa; }
+        .headline { font-size: 18px; color: #9a3412; }
+        .contact-info { justify-content: center; color: #c2410c; }
+        .skill-tag { background: #ffedd5; padding: 6px 14px; border-radius: 8px; font-size: 14px; color: #9a3412; font-weight: 500; }
+      `;
+
+    case 'classic-sidebar':
+      return baseStyles + `
+        body { font-family: 'Garamond', serif; background: #f9fafb; display: grid; grid-template-columns: 250px 1fr; gap: 30px; }
+        .version-badge { background: #6366f1; color: white; }
+        h1 { font-size: 30px; margin-bottom: 8px; color: #1e293b; font-weight: 700; }
+        h2 { font-size: 18px; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #6366f1; color: #475569; font-weight: 700; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: left; border-bottom: 2px solid #cbd5e1; }
+        .headline { font-size: 16px; color: #64748b; }
+        .contact-info { justify-content: flex-start; color: #64748b; flex-direction: column; }
+        .skill-tag { background: #e0e7ff; padding: 5px 12px; border-radius: 4px; font-size: 13px; color: #4338ca; }
+      `;
+
+    case 'modern-clean':
+      return baseStyles + `
+        body { font-family: 'Open Sans', sans-serif; background: #fff; }
+        .version-badge { background: #06b6d4; color: white; }
+        h1 { font-size: 35px; margin-bottom: 8px; color: #0e7490; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #06b6d4; color: #155e75; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 2px solid #cffafe; }
+        .headline { font-size: 17px; color: #164e63; }
+        .contact-info { justify-content: center; color: #0e7490; }
+        .skill-tag { background: #cffafe; padding: 6px 14px; border-radius: 12px; font-size: 14px; color: #164e63; font-weight: 500; }
+      `;
+
+    case 'elegant-minimal':
+      return baseStyles + `
+        body { font-family: 'Didot', 'Bodoni MT', serif; font-weight: 300; background: #fafafa; }
+        .version-badge { background: #737373; color: white; }
+        h1 { font-size: 44px; margin-bottom: 8px; color: #171717; font-weight: 300; letter-spacing: -1px; }
+        h2 { font-size: 17px; margin: 28px 0 12px; padding-bottom: 4px; border-bottom: 1px solid #d4d4d4; color: #525252; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 500; }
+        .header { text-align: center; border-bottom: 1px solid #e5e5e5; }
+        .headline { font-size: 16px; color: #737373; font-weight: 300; }
+        .contact-info { justify-content: center; color: #a3a3a3; font-size: 13px; }
+        .skill-tag { background: #fff; padding: 4px 12px; border-radius: 0; font-size: 13px; border: 1px solid #d4d4d4; font-weight: 300; }
+      `;
+
+    case 'professional-blue':
+      return baseStyles + `
+        body { font-family: 'Calibri', Arial, sans-serif; background: #eff6ff; }
+        .version-badge { background: #3b82f6; color: white; }
+        h1 { font-size: 32px; margin-bottom: 8px; color: #1e40af; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; color: #1e3a8a; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #3b82f6; }
+        .headline { font-size: 17px; color: #1e40af; }
+        .contact-info { justify-content: center; color: #1e40af; }
+        .skill-tag { background: #dbeafe; padding: 6px 14px; border-radius: 4px; font-size: 14px; color: #1e40af; font-weight: 500; }
+      `;
+
+    case 'creative-modern':
+      return baseStyles + `
+        body { font-family: 'Montserrat', sans-serif; background: #fafafa; }
+        .version-badge { background: #8b5cf6; color: white; }
+        h1 { font-size: 36px; margin-bottom: 8px; color: #7c3aed; font-weight: 700; }
+        h2 { font-size: 20px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 3px solid #c4b5fd; color: #6d28d9; font-weight: 600; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #ddd6fe; }
+        .headline { font-size: 17px; color: #5b21b6; }
+        .contact-info { justify-content: center; color: #6d28d9; }
+        .skill-tag { background: #ede9fe; padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #6d28d9; font-weight: 500; }
+      `;
+
+    case 'modern-minimalist':
+      return baseStyles + `
+        body { font-family: 'Inter', sans-serif; font-weight: 400; background: #fff; }
+        .version-badge { background: #1f2937; color: white; }
+        h1 { font-size: 38px; margin-bottom: 8px; color: #111827; font-weight: 600; }
+        h2 { font-size: 18px; margin: 26px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #1f2937; color: #374151; font-weight: 500; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 500; }
+        .header { text-align: left; border-bottom: none; }
+        .headline { font-size: 16px; color: #6b7280; font-weight: 400; }
+        .contact-info { justify-content: flex-start; color: #9ca3af; font-size: 14px; }
+        .skill-tag { background: #f3f4f6; padding: 5px 12px; border-radius: 6px; font-size: 13px; color: #1f2937; font-weight: 400; }
+      `;
+
+    case 'creative-bold':
+      return baseStyles + `
+        body { font-family: 'Impact', 'Arial Black', sans-serif; background: #0f172a; color: #fff; }
+        .version-badge { background: #ef4444; color: white; }
+        h1 { font-size: 40px; margin-bottom: 8px; color: #fbbf24; font-weight: 900; text-transform: uppercase; }
+        h2 { font-size: 22px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 3px solid #ef4444; color: #fbbf24; font-weight: 700; text-transform: uppercase; }
+        h3 { font-size: 18px; margin-bottom: 4px; font-weight: 700; color: #fff; }
+        .header { text-align: center; border-bottom: 3px solid #ef4444; }
+        .headline { font-size: 18px; color: #cbd5e1; }
+        .contact-info { justify-content: center; color: #e2e8f0; }
+        .item-subtitle { color: #cbd5e1; }
+        .item-date { color: #94a3b8; }
+        .skill-tag { background: #dc2626; padding: 6px 14px; border-radius: 0; font-size: 14px; color: #fff; font-weight: 700; }
+      `;
+
+    case 'professional-classic':
+      return baseStyles + `
+        body { font-family: 'Palatino', 'Book Antiqua', serif; background: #fff; }
+        .version-badge { background: #059669; color: white; }
+        h1 { font-size: 32px; margin-bottom: 8px; color: #064e3b; font-weight: 700; }
+        h2 { font-size: 19px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #059669; color: #065f46; font-weight: 700; }
+        h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 2px solid #065f46; }
+        .headline { font-size: 17px; color: #047857; font-style: italic; }
+        .contact-info { justify-content: center; color: #059669; }
+        .skill-tag { background: #d1fae5; padding: 6px 14px; border-radius: 4px; font-size: 14px; color: #065f46; font-weight: 500; }
+      `;
+
+    case 'healthcare-professional':
+      return baseStyles + `
+        body { font-family: 'Verdana', sans-serif; background: #f0fdfa; }
+        .version-badge { background: #0d9488; color: white; }
+        h1 { font-size: 30px; margin-bottom: 8px; color: #0f766e; font-weight: 700; }
+        h2 { font-size: 18px; margin: 22px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #14b8a6; color: #115e59; font-weight: 700; }
+        h3 { font-size: 16px; margin-bottom: 4px; font-weight: 600; }
+        .header { text-align: center; border-bottom: 3px solid #14b8a6; }
+        .headline { font-size: 16px; color: #134e4a; }
+        .contact-info { justify-content: center; color: #0f766e; }
+        .skill-tag { background: #ccfbf1; padding: 5px 12px; border-radius: 4px; font-size: 13px; color: #115e59; font-weight: 500; }
+      `;
+
+    default:
+      // Fallback to modern template
+      return baseStyles + `
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif; }
+        .version-badge { background: #2563eb; color: white; }
+        h1 { font-size: 32px; margin-bottom: 8px; color: #2563eb; font-weight: 700; }
+        h2 { font-size: 22px; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+        h3 { font-size: 18px; margin-bottom: 4px; font-weight: 600; color: #111; }
+        .header { text-align: center; border-bottom: 2px solid #e5e7eb; }
+        .headline { font-size: 18px; color: #666; }
+        .contact-info { justify-content: center; color: #666; }
+        .skill-tag { background: #dbeafe; padding: 6px 14px; border-radius: 16px; font-size: 14px; color: #1e40af; font-weight: 500; }
+      `;
+  }
+}
+
+// Helper function to generate HTML from snapshot data
+function generateHTMLFromSnapshot(data: any, versionName: string, template: string): string {
+  const profile = data?.profile || {};
+  const experiences = data?.experiences || [];
+  const education = data?.education || [];
+  const skills = data?.skills || [];
+  const languages = data?.languages || [];
+
+  const styles = getTemplateStyles(template);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${versionName} - ${profile.full_name || 'CV'}</title>
+  <style>
+    ${styles}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="version-badge no-print">📄 ${versionName}</div>
+    <h1>${profile.full_name || 'Sin nombre'}</h1>
+    <p class="headline">${profile.headline || ''}</p>
+    <div class="contact-info">
+      ${profile.email ? `<span>✉️ ${profile.email}</span>` : ''}
+      ${profile.phone ? `<span>📱 ${profile.phone}</span>` : ''}
+      ${profile.location ? `<span>📍 ${profile.location}</span>` : ''}
+    </div>
+  </div>
+
+  ${profile.summary ? `
+  <div class="section">
+    <h2>Resumen Profesional</h2>
+    <p>${profile.summary}</p>
+  </div>
+  ` : ''}
+
+  ${experiences.length > 0 ? `
+  <div class="section">
+    <h2>Experiencia Laboral</h2>
+    ${experiences.map((exp: any) => `
+      <div class="item">
+        <h3 class="item-title">${exp.position || exp.title || 'Posición'}</h3>
+        <p class="item-subtitle">${exp.company_name || exp.company || 'Empresa'}</p>
+        <p class="item-date">
+          ${formatDate(exp.start_date)} - ${exp.is_current ? 'Presente' : formatDate(exp.end_date)}
+        </p>
+        ${exp.description ? `<p>${exp.description}</p>` : ''}
+      </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  ${education.length > 0 ? `
+  <div class="section">
+    <h2>Educación</h2>
+    ${education.map((edu: any) => `
+      <div class="item">
+        <h3 class="item-title">${edu.degree || 'Título'}</h3>
+        <p class="item-subtitle">${edu.institution || 'Institución'}</p>
+        <p class="item-date">
+          ${formatDate(edu.start_date)} - ${formatDate(edu.end_date)}
+        </p>
+        ${edu.field_of_study ? `<p>${edu.field_of_study}</p>` : ''}
+      </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  ${skills.length > 0 ? `
+  <div class="section">
+    <h2>Habilidades</h2>
+    <div class="skills-grid">
+      ${skills.map((skill: any) => `<span class="skill-tag">${skill.name}</span>`).join('')}
+    </div>
+  </div>
+  ` : ''}
+
+  ${languages.length > 0 ? `
+  <div class="section">
+    <h2>Idiomas</h2>
+    ${languages.map((lang: any) => `
+      <div class="item">
+        <span class="item-title">${lang.name}</span> -
+        <span class="item-subtitle">${lang.proficiency || lang.level}</span>
+      </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  <div class="no-print" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #999; font-size: 12px;">
+    <p>Generado con YourCVPassport - ${new Date().toLocaleDateString()}</p>
+    <p style="margin-top: 8px;">Usa Ctrl+P (Cmd+P en Mac) para guardar como PDF</p>
+  </div>
+</body>
+</html>
+  `;
+
+  function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short' });
+  }
+}
+
 export function CVVersionsSection() {
+  const { session } = useAuth();
   const {
     versions,
     stats,
@@ -72,6 +510,8 @@ export function CVVersionsSection() {
     deleteVersion,
     duplicateVersion
   } = useCVVersions();
+
+  const { exportAndDownload, isExporting: isExportingFile } = useATSExport({ preferServerSide: true });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<CVVersion | null>(null);
@@ -114,20 +554,45 @@ export function CVVersionsSection() {
   };
 
   const handleExport = async (version: CVVersion) => {
+    if (!session?.user?.id) {
+      alert('Debes iniciar sesión para exportar');
+      return;
+    }
+
     setExportingId(version.id);
 
     try {
-      // Simple alert for now - full export functionality requires PDF generation
-      alert(`Exportando versión: ${version.version_name}\n\nFuncionalidad de exportación completa próximamente.`);
+      // Use snapshot_data from the version for export
+      const snapshotData = version.snapshot_data;
 
-      // TODO: Implement full PDF export with:
-      // 1. Generate PDF from snapshot_data
-      // 2. Apply template and styling
-      // 3. Download file
+      if (!snapshotData) {
+        throw new Error('No hay datos disponibles para exportar en esta versión');
+      }
+
+      // Extract template from version or use default
+      const template = version.template || 'modern';
+
+      // Generate HTML content from snapshot_data
+      const htmlContent = generateHTMLFromSnapshot(snapshotData, version.version_name, template);
+
+      // Create a temporary window with the CV data
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('No se pudo abrir la ventana de impresión. Verifica los bloqueadores de pop-ups.');
+      }
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      // Trigger print dialog
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
 
     } catch (error) {
       console.error('Error exporting version:', error);
-      alert('Error al exportar la versión');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al exportar la versión: ${errorMessage}\n\nPor favor, intenta nuevamente.`);
     } finally {
       setExportingId(null);
     }
