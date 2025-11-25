@@ -68,6 +68,39 @@ else
 fi
 echo ""
 
+# Deploy send-password-reset
+echo "🔐 Deploying send-password-reset..."
+supabase functions deploy send-password-reset --no-verify-jwt
+if [ $? -eq 0 ]; then
+    echo "✅ send-password-reset deployed successfully"
+else
+    echo "❌ Failed to deploy send-password-reset"
+    exit 1
+fi
+echo ""
+
+# Deploy send-email-confirmation
+echo "📬 Deploying send-email-confirmation..."
+supabase functions deploy send-email-confirmation --no-verify-jwt
+if [ $? -eq 0 ]; then
+    echo "✅ send-email-confirmation deployed successfully"
+else
+    echo "❌ Failed to deploy send-email-confirmation"
+    exit 1
+fi
+echo ""
+
+# Deploy send-magic-link
+echo "✨ Deploying send-magic-link..."
+supabase functions deploy send-magic-link --no-verify-jwt
+if [ $? -eq 0 ]; then
+    echo "✅ send-magic-link deployed successfully"
+else
+    echo "❌ Failed to deploy send-magic-link"
+    exit 1
+fi
+echo ""
+
 echo "🎉 All functions deployed successfully!"
 echo ""
 echo "⚠️  IMPORTANT: Don't forget to set environment variables in Supabase Dashboard:"

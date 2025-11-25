@@ -59,6 +59,19 @@ serve(async (req) => {
       )
     }
 
+    // Check for required environment variables
+    console.log('Available Env Vars:', JSON.stringify(Object.keys(Deno.env.toObject())))
+    
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY')
+      throw new Error('Server configuration error: Missing email provider key')
+    }
+
+    // Get sender email from env or use default
+    // Note: onboarding@resend.dev only works for testing if sending to the registered admin email
+    const SENDER_EMAIL = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
+    const SENDER_NAME = 'YourCVPassport'
+
     // Generate 6-digit verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
 
@@ -140,6 +153,8 @@ serve(async (req) => {
 
     const userName = profile?.full_name || 'Usuario'
 
+    console.log(`Sending email to ${email} from ${SENDER_EMAIL}`)
+
     // Send email via Resend
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -148,7 +163,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`
       },
       body: JSON.stringify({
-        from: 'YourCVPassport <verify@yourcvpassport.com>',
+        from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
         to: email,
         subject: 'Verifica tu email - YourCVPassport',
         html: `
@@ -205,6 +220,7 @@ serve(async (req) => {
 
     if (!resendResponse.ok) {
       const error = await resendResponse.json()
+      console.error('Resend API Error:', error)
       throw new Error(`Resend error: ${JSON.stringify(error)}`)
     }
 
@@ -223,11 +239,12 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in send-verification-email:', error)
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred',
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
+        details: error.toString()
       }),
       {
         status: 500,

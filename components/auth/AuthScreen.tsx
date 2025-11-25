@@ -116,15 +116,19 @@ const AuthScreen: React.FC = () => {
           if (authError.message?.includes('already registered')) {
             setError(t.errors.emailAlreadyExists);
           } else if (authError.message?.includes('Password')) {
-            setError(t.errors.weakPassword);
-          } else {
-            setError(t.errors.serverError);
+            setError(t.errors.passwordTooShort); // Fallback to passwordTooShort if weakPassword missing
+            // Show the actual error message from the server/edge function
+            const errorMsg = authError.message || t.errors.serverError;
+            setError(errorMsg);
           }
           setIsLoading(false);
           return;
         }
 
-        setSuccessMessage(t.success.signupSuccess);
+        setSuccessMessage(t.success.signUpSuccess);
+        // Show popup as requested by user
+        window.alert(`${t.signup.checkEmail}\n${t.signup.checkEmailAction}`);
+        
         setIsLoading(false);
         setTimeout(() => {
           navigate('/login');

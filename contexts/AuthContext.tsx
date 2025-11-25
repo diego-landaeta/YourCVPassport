@@ -216,19 +216,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, password: string, userData: { full_name: string }) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: userData.full_name,
-          },
-          emailRedirectTo: `${window.location.origin}/confirm`,
-        },
+      // Use Edge Function to create user and send custom confirmation email via Resend
+      const { data: funcData, error: funcError } = await supabase.functions.invoke('signup', {
+        body: {
+          email,
+          password,
+          full_name: userData.full_name,
+          redirectTo: `${window.location.origin}/confirm`
+        }
       });
-      return { error };
+
+      if (funcError) {
+        console.error('Edge Function error:', funcError);
+        let errorMessage = funcError.message;
+        
+        // Try to parse the response body if available
+        if (funcError instanceof Error && 'context' in funcError) {
+          try {
+            const response = (funcError as any).context as Response;
+            if (response && typeof response.json === 'function') {
+              const errorBody = await response.json();
+              if (errorBody && errorBody.error) {
+                errorMessage = errorBody.error;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing Edge Function response:', e);
+          }
+        }
+        
+        return { data: { user: null, session: null }, error: new Error(errorMessage) };
+      }
+
+      if (funcData?.error) {
+        console.error('Edge Function returned error:', funcData.error);
+        return { data: { user: null, session: null }, error: new Error(funcData.error) };
+      }
+
+      // Return structure mimicking supabase.auth.signUp
+      return { 
+        data: { 
+          user: funcData.user, 
+          session: null // Session is null because email confirmation is required
+        }, 
+        error: null 
+      };
     } catch (error) {
-      return { error };
+      console.error('Sign up error:', error);
+      return { data: { user: null, session: null }, error };
     }
   };
 
@@ -262,25 +297,86 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMagicLink = async (email: string) => {
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/callback`,
-        },
+      // Use Edge Function to send custom magic link via Resend
+      const { data, error } = await supabase.functions.invoke('send-magic-link', {
+        body: {
+          email,
+          redirectTo: `${window.location.origin}/callback`
+        }
       });
-      return { error };
+
+      if (error) {
+        console.error('Edge Function error:', error);
+        let errorMessage = error.message;
+        
+        // Try to parse the response body if available
+        if (error instanceof Error && 'context' in error) {
+          try {
+            const response = (error as any).context as Response;
+            if (response && typeof response.json === 'function') {
+              const errorBody = await response.json();
+              if (errorBody && errorBody.error) {
+                errorMessage = errorBody.error;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing Edge Function response:', e);
+          }
+        }
+        return { error: new Error(errorMessage) };
+      }
+
+      if (data?.error) {
+        console.error('Edge Function returned error:', data.error);
+        return { error: new Error(data.error) };
+      }
+
+      return { error: null };
     } catch (error) {
+      console.error('Magic link error:', error);
       return { error };
     }
   };
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/recovery`,
+      // Use Edge Function to bypass Supabase Auth rate limits and use custom email template
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: { 
+          email,
+          redirectTo: `${window.location.origin}/recovery`
+        }
       });
-      return { error };
+
+      if (error) {
+        console.error('Edge Function error:', error);
+        let errorMessage = error.message;
+        
+        // Try to parse the response body if available
+        if (error instanceof Error && 'context' in error) {
+          try {
+            const response = (error as any).context as Response;
+            if (response && typeof response.json === 'function') {
+              const errorBody = await response.json();
+              if (errorBody && errorBody.error) {
+                errorMessage = errorBody.error;
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing Edge Function response:', e);
+          }
+        }
+        return { error: new Error(errorMessage) };
+      }
+
+      if (data?.error) {
+        console.error('Edge Function returned error:', data.error);
+        return { error: new Error(data.error) };
+      }
+
+      return { error: null };
     } catch (error) {
+      console.error('Reset password error:', error);
       return { error };
     }
   };

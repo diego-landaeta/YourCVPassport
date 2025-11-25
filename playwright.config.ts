@@ -38,6 +38,12 @@ export default defineConfig({
 
     // Screenshot on failure
     screenshot: 'only-on-failure',
+
+    // Pass environment variables to tests
+    extraHTTPHeaders: {
+      'x-supabase-url': process.env.VITE_SUPABASE_URL || '',
+      'x-supabase-key': process.env.VITE_SUPABASE_ANON_KEY || '',
+    },
   },
 
   // Configure projects for major browsers

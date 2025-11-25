@@ -68,6 +68,39 @@ if ($LASTEXITCODE -eq 0) {
 }
 Write-Host ""
 
+# Deploy send-password-reset
+Write-Host "🔐 Deploying send-password-reset..." -ForegroundColor Yellow
+supabase functions deploy send-password-reset --no-verify-jwt
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ send-password-reset deployed successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to deploy send-password-reset" -ForegroundColor Red
+    exit 1
+}
+Write-Host ""
+
+# Deploy send-email-confirmation
+Write-Host "📬 Deploying send-email-confirmation..." -ForegroundColor Yellow
+supabase functions deploy send-email-confirmation --no-verify-jwt
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ send-email-confirmation deployed successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to deploy send-email-confirmation" -ForegroundColor Red
+    exit 1
+}
+Write-Host ""
+
+# Deploy send-magic-link
+Write-Host "✨ Deploying send-magic-link..." -ForegroundColor Yellow
+supabase functions deploy send-magic-link --no-verify-jwt
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ send-magic-link deployed successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to deploy send-magic-link" -ForegroundColor Red
+    exit 1
+}
+Write-Host ""
+
 Write-Host "🎉 All functions deployed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "⚠️  IMPORTANT: Don't forget to set environment variables in Supabase Dashboard:" -ForegroundColor Yellow

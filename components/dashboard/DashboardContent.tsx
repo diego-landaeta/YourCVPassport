@@ -1523,8 +1523,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </button>
           </div>
 
-          {/* ATS Export - NEW */}
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border hover:shadow-lg transition-shadow">
+          {/* ATS Export - TEMPORARILY HIDDEN */}
+          {/* <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-lg mb-4">
               <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1561,7 +1561,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               </svg>
               {lang === 'en' ? 'Export ATS PDF' : 'Exportar PDF ATS'}
             </button>
-          </div>
+          </div> */}
+
 
           {/* Public Link */}
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border hover:shadow-lg transition-shadow">

@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+<import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4';
 import { Redis } from 'https://esm.sh/@upstash/redis@1.34.3';
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@2.0.3';
