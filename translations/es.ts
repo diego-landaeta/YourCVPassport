@@ -1301,6 +1301,16 @@ export const translations = {
                 title: "Exportar PDF",
                 description: "Descarga tu CV en formato PDF",
                 button: "Descargar PDF",
+                printDialog: {
+                    title: "Generando PDF de tu CV",
+                    description: "Tu CV se está procesando y descargará automáticamente como archivo PDF con todos los colores y diseño.",
+                    preparing: "Preparando CV...",
+                    capturing: "Capturando diseño...",
+                    generating: "Generando PDF...",
+                    downloading: "Descargando...",
+                    tip: "El archivo PDF se guardará en tu carpeta de descargas con todos los colores y gráficos.",
+                    confirm: "Descargar PDF",
+                },
             },
             json: {
                 title: "Exportar JSON",

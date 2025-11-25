@@ -3048,3 +3048,3150 @@ SCRIPTS:
 -- =====================================================================================
 -- FIN DE REGISTRO - ARCHIVOS SQL PROCESADOS - 2025-01-19
 -- =====================================================================================
+## [000_diagnose_database.sql]
+Fecha de consolidación: 2025-11-24 18:58:15
+
+`sql
+-- =============================================
+-- DiagnÃ³stico de Base de Datos - YourCVPassport
+-- =============================================
+-- Ejecuta este script PRIMERO para ver quÃ© falta en tu base de datos
+-- Los resultados te dirÃ¡n exactamente quÃ© necesitas corregir
+
+-- =============================================
+-- 1. Verificar si existe la tabla 'leads'
+-- =============================================
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'leads'
+    ) THEN
+        RAISE NOTICE 'âœ… Tabla "leads" existe';
+    ELSE
+        RAISE WARNING 'âŒ Tabla "leads" NO existe - necesitas crearla primero';
+    END IF;
+END $$;
+
+-- =============================================
+-- 2. Verificar columnas de la tabla 'leads'
+-- =============================================
+DO $$
+DECLARE
+    has_recipient_id BOOLEAN;
+    has_profile_id BOOLEAN;
+    column_list TEXT;
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'leads') THEN
+
+        -- Verificar recipient_id
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'recipient_id'
+        ) INTO has_recipient_id;
+
+        -- Verificar profile_id
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'profile_id'
+        ) INTO has_profile_id;
+
+        -- Obtener lista de columnas
+        SELECT string_agg(column_name, ', ' ORDER BY ordinal_position)
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads'
+        INTO column_list;
+
+        RAISE NOTICE '';
+        RAISE NOTICE 'ðŸ“‹ Columnas en tabla "leads": %', column_list;
+        RAISE NOTICE '';
+
+        IF has_recipient_id THEN
+            RAISE NOTICE 'âœ… Columna "recipient_id" existe en leads';
+        ELSIF has_profile_id THEN
+            RAISE NOTICE 'âš ï¸  Columna "profile_id" existe pero deberÃ­a llamarse "recipient_id"';
+            RAISE NOTICE '   AcciÃ³n sugerida: Renombrar profile_id a recipient_id';
+        ELSE
+            RAISE WARNING 'âŒ Columna "recipient_id" NO existe en leads';
+            RAISE NOTICE '   AcciÃ³n sugerida: Agregar columna recipient_id';
+        END IF;
+    END IF;
+END $$;
+
+-- =============================================
+-- 3. Verificar si existe la tabla 'messages'
+-- =============================================
+DO $$
+DECLARE
+    msg_count INTEGER;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'messages'
+    ) THEN
+        SELECT COUNT(*) FROM public.messages INTO msg_count;
+        RAISE NOTICE 'âœ… Tabla "messages" existe (% mensajes)', msg_count;
+    ELSE
+        RAISE WARNING 'âŒ Tabla "messages" NO existe - se crearÃ¡ con el script de migraciÃ³n';
+    END IF;
+END $$;
+
+-- =============================================
+-- 4. Verificar si existe la vista 'conversation_summaries'
+-- =============================================
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.views
+        WHERE table_schema = 'public' AND table_name = 'conversation_summaries'
+    ) THEN
+        RAISE NOTICE 'âœ… Vista "conversation_summaries" existe';
+    ELSE
+        RAISE WARNING 'âŒ Vista "conversation_summaries" NO existe - se crearÃ¡ con el script de migraciÃ³n';
+    END IF;
+END $$;
+
+-- =============================================
+-- 5. Verificar si existe la tabla 'profiles'
+-- =============================================
+DO $$
+DECLARE
+    profile_count INTEGER;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'profiles'
+    ) THEN
+        SELECT COUNT(*) FROM public.profiles INTO profile_count;
+        RAISE NOTICE 'âœ… Tabla "profiles" existe (% perfiles)', profile_count;
+    ELSE
+        RAISE WARNING 'âŒ Tabla "profiles" NO existe - la vista conversation_summaries la necesita';
+    END IF;
+END $$;
+
+-- =============================================
+-- 6. Verificar polÃ­ticas RLS
+-- =============================================
+DO $$
+DECLARE
+    rls_enabled BOOLEAN;
+    policy_count INTEGER;
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'messages') THEN
+
+        -- Verificar si RLS estÃ¡ habilitado
+        SELECT relrowsecurity
+        FROM pg_class
+        WHERE relname = 'messages' AND relnamespace = 'public'::regnamespace
+        INTO rls_enabled;
+
+        -- Contar polÃ­ticas
+        SELECT COUNT(*)
+        FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'messages'
+        INTO policy_count;
+
+        IF rls_enabled THEN
+            RAISE NOTICE 'âœ… RLS habilitado en "messages" (% polÃ­ticas)', policy_count;
+        ELSE
+            RAISE WARNING 'âŒ RLS NO habilitado en "messages"';
+        END IF;
+    END IF;
+END $$;
+
+-- =============================================
+-- 7. Verificar Realtime
+-- =============================================
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM pg_publication_tables
+        WHERE pubname = 'supabase_realtime' AND tablename = 'messages'
+    ) THEN
+        RAISE NOTICE 'âœ… Realtime habilitado para "messages"';
+    ELSE
+        RAISE WARNING 'âŒ Realtime NO habilitado para "messages"';
+    END IF;
+END $$;
+
+-- =============================================
+-- RESUMEN
+-- =============================================
+DO $$
+BEGIN
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE 'DIAGNÃ“STICO COMPLETADO';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸ“ SIGUIENTE PASO:';
+    RAISE NOTICE '   1. Revisa los mensajes de arriba';
+    RAISE NOTICE '   2. Si hay âŒ, ejecuta: 002_fix_leads_and_messaging.sql';
+    RAISE NOTICE '   3. Si todo tiene âœ…, tu base de datos estÃ¡ lista';
+    RAISE NOTICE '';
+END $$;
+
+``r
+---
+## [001_create_messaging_tables.sql]
+Fecha de consolidación: 2025-11-24 18:58:15
+
+`sql
+-- =============================================
+-- YourCVPassport - Messaging System Database Schema
+-- =============================================
+-- Este archivo contiene todas las tablas y vistas necesarias
+-- para el sistema de mensajerÃ­a entre usuarios y reclutadores
+
+-- =============================================
+-- 1. TABLA: messages
+-- =============================================
+-- Almacena todos los mensajes enviados en conversaciones
+
+CREATE TABLE IF NOT EXISTS public.messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    lead_id UUID NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    sender_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ãndices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS idx_messages_lead_id ON public.messages(lead_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON public.messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON public.messages(is_read) WHERE is_read = FALSE;
+
+-- =============================================
+-- 2. VISTA: conversation_summaries
+-- =============================================
+-- Genera un resumen de todas las conversaciones con contadores de mensajes
+
+CREATE OR REPLACE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    l.sender_id,
+    l.sender_name,
+    l.recipient_id,
+    p.full_name AS recipient_name,
+    l.lead_type,
+    l.subject,
+    l.status,
+    -- Obtener el Ãºltimo mensaje
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Obtener la fecha del Ãºltimo mensaje
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at
+    ) AS last_message_at,
+    -- Contar mensajes no leÃ­dos para el destinatario
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != l.recipient_id
+    )::INTEGER AS unread_count,
+    -- Contar total de mensajes
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    )::INTEGER AS message_count,
+    l.created_at
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.recipient_id
+WHERE l.status != 'REJECTED' -- Excluir conversaciones rechazadas
+ORDER BY last_message_at DESC;
+
+-- =============================================
+-- 3. POLÃTICAS RLS (Row Level Security)
+-- =============================================
+
+-- Habilitar RLS en la tabla messages
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+-- PolÃ­tica: Los usuarios pueden ver mensajes de conversaciones en las que participan
+CREATE POLICY "Users can view messages in their conversations"
+ON public.messages
+FOR SELECT
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR l.recipient_id = auth.uid())
+    )
+);
+
+-- PolÃ­tica: Los usuarios pueden insertar mensajes en conversaciones en las que participan
+CREATE POLICY "Users can send messages in their conversations"
+ON public.messages
+FOR INSERT
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR l.recipient_id = auth.uid())
+    )
+    AND sender_id = auth.uid()
+);
+
+-- PolÃ­tica: Los usuarios pueden actualizar sus propios mensajes (marcar como leÃ­dos)
+CREATE POLICY "Users can update messages in their conversations"
+ON public.messages
+FOR UPDATE
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR l.recipient_id = auth.uid())
+    )
+);
+
+-- =============================================
+-- 4. TRIGGER: Actualizar updated_at automÃ¡ticamente
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_messages_updated_at
+    BEFORE UPDATE ON public.messages
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+
+-- =============================================
+-- 5. REALTIME: Habilitar publicaciones en tiempo real
+-- =============================================
+
+-- Habilitar Realtime para la tabla messages
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+
+-- =============================================
+-- 6. FUNCIÃ“N: Marcar mensajes como leÃ­dos
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.mark_messages_as_read(p_lead_id UUID)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE public.messages
+    SET is_read = TRUE, read_at = NOW()
+    WHERE lead_id = p_lead_id
+    AND sender_id != auth.uid()
+    AND is_read = FALSE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================
+-- VERIFICACIÃ“N
+-- =============================================
+-- Para verificar que todo se creÃ³ correctamente, ejecuta:
+-- SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('messages');
+-- SELECT table_name FROM information_schema.views WHERE table_schema = 'public' AND table_name = 'conversation_summaries';
+
+``r
+---
+## [002_fix_leads_and_messaging.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- YourCVPassport - Fix Leads Table & Messaging System
+-- =============================================
+-- Este script corrige la tabla leads y crea el sistema de mensajerÃ­a
+
+-- =============================================
+-- PASO 1: Verificar y actualizar la tabla leads
+-- =============================================
+
+-- Verificar si la columna recipient_id existe, si no, agregarla
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'recipient_id'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN recipient_id UUID REFERENCES auth.users(id);
+        RAISE NOTICE 'Column recipient_id added to leads table';
+    END IF;
+END $$;
+
+-- Verificar si la columna profile_id existe (puede ser el equivalente a recipient_id)
+DO $$
+BEGIN
+    -- Si existe profile_id pero no recipient_id, copiar los valores
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'profile_id'
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'recipient_id'
+    ) THEN
+        ALTER TABLE public.leads RENAME COLUMN profile_id TO recipient_id;
+        RAISE NOTICE 'Column profile_id renamed to recipient_id';
+    END IF;
+END $$;
+
+-- =============================================
+-- PASO 2: Crear tabla messages si no existe
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS public.messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    lead_id UUID NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    sender_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ãndices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS idx_messages_lead_id ON public.messages(lead_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON public.messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON public.messages(is_read) WHERE is_read = FALSE;
+
+-- =============================================
+-- PASO 3: Crear vista conversation_summaries
+-- =============================================
+
+-- Primero eliminar la vista si existe para recrearla
+DROP VIEW IF EXISTS public.conversation_summaries;
+
+CREATE OR REPLACE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    l.sender_id,
+    l.sender_name,
+    l.recipient_id,
+    COALESCE(p.full_name, 'Usuario') AS recipient_name,
+    l.lead_type,
+    l.subject,
+    COALESCE(l.status, 'PENDING') AS status,
+    -- Obtener el Ãºltimo mensaje
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Obtener la fecha del Ãºltimo mensaje
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at
+    ) AS last_message_at,
+    -- Contar mensajes no leÃ­dos para el destinatario
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != COALESCE(l.recipient_id, l.sender_id)
+    )::INTEGER AS unread_count,
+    -- Contar total de mensajes
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    )::INTEGER AS message_count,
+    l.created_at
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.recipient_id
+WHERE COALESCE(l.status, 'PENDING') != 'REJECTED' -- Excluir conversaciones rechazadas
+ORDER BY last_message_at DESC;
+
+-- =============================================
+-- PASO 4: Configurar RLS (Row Level Security)
+-- =============================================
+
+-- Habilitar RLS en la tabla messages
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+-- Eliminar polÃ­ticas existentes si existen
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+
+-- PolÃ­tica: Los usuarios pueden ver mensajes de conversaciones en las que participan
+CREATE POLICY "Users can view messages in their conversations"
+ON public.messages
+FOR SELECT
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR COALESCE(l.recipient_id, l.sender_id) = auth.uid())
+    )
+);
+
+-- PolÃ­tica: Los usuarios pueden insertar mensajes en conversaciones en las que participan
+CREATE POLICY "Users can send messages in their conversations"
+ON public.messages
+FOR INSERT
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR COALESCE(l.recipient_id, l.sender_id) = auth.uid())
+    )
+    AND sender_id = auth.uid()
+);
+
+-- PolÃ­tica: Los usuarios pueden actualizar mensajes en sus conversaciones
+CREATE POLICY "Users can update messages in their conversations"
+ON public.messages
+FOR UPDATE
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (l.sender_id = auth.uid() OR COALESCE(l.recipient_id, l.sender_id) = auth.uid())
+    )
+);
+
+-- =============================================
+-- PASO 5: Triggers
+-- =============================================
+
+-- FunciÃ³n para actualizar updated_at
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para messages
+DROP TRIGGER IF EXISTS update_messages_updated_at ON public.messages;
+CREATE TRIGGER update_messages_updated_at
+    BEFORE UPDATE ON public.messages
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+
+-- =============================================
+-- PASO 6: Habilitar Realtime
+-- =============================================
+
+-- Intentar habilitar Realtime (puede fallar si ya estÃ¡ habilitado)
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+    RAISE NOTICE 'Realtime enabled for messages table';
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'Realtime already enabled for messages table';
+END $$;
+
+-- =============================================
+-- PASO 7: FunciÃ³n auxiliar para marcar como leÃ­do
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.mark_messages_as_read(p_lead_id UUID)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE public.messages
+    SET is_read = TRUE, read_at = NOW()
+    WHERE lead_id = p_lead_id
+    AND sender_id != auth.uid()
+    AND is_read = FALSE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================
+-- VERIFICACIÃ“N FINAL
+-- =============================================
+
+-- Verificar que las tablas y vistas existen
+DO $$
+DECLARE
+    messages_exists BOOLEAN;
+    view_exists BOOLEAN;
+BEGIN
+    -- Verificar tabla messages
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'messages'
+    ) INTO messages_exists;
+
+    -- Verificar vista conversation_summaries
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.views
+        WHERE table_schema = 'public' AND table_name = 'conversation_summaries'
+    ) INTO view_exists;
+
+    IF messages_exists AND view_exists THEN
+        RAISE NOTICE 'âœ… SUCCESS: All tables and views created successfully!';
+        RAISE NOTICE '   - messages table: âœ“';
+        RAISE NOTICE '   - conversation_summaries view: âœ“';
+    ELSE
+        IF NOT messages_exists THEN
+            RAISE WARNING 'âŒ messages table was not created';
+        END IF;
+        IF NOT view_exists THEN
+            RAISE WARNING 'âŒ conversation_summaries view was not created';
+        END IF;
+    END IF;
+END $$;
+
+``r
+---
+## [003_final_fix_messaging.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- YourCVPassport - CorrecciÃ³n Completa del Sistema de MensajerÃ­a
+-- =============================================
+-- Script definitivo que verifica TODAS las columnas necesarias
+
+-- =============================================
+-- PASO 1: Verificar estructura de la tabla leads
+-- =============================================
+
+-- Agregar columna sender_id si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'sender_id'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN sender_id UUID REFERENCES auth.users(id);
+        RAISE NOTICE 'âœ“ Columna sender_id agregada a leads';
+    ELSE
+        RAISE NOTICE 'âœ“ Columna sender_id ya existe';
+    END IF;
+END $$;
+
+-- Agregar columna sender_name si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'sender_name'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN sender_name TEXT;
+        RAISE NOTICE 'âœ“ Columna sender_name agregada a leads';
+    ELSE
+        RAISE NOTICE 'âœ“ Columna sender_name ya existe';
+    END IF;
+END $$;
+
+-- Agregar columna recipient_id si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'recipient_id'
+    ) THEN
+        -- Verificar si existe profile_id para renombrar
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'profile_id'
+        ) THEN
+            ALTER TABLE public.leads RENAME COLUMN profile_id TO recipient_id;
+            RAISE NOTICE 'âœ“ Columna profile_id renombrada a recipient_id';
+        ELSE
+            ALTER TABLE public.leads ADD COLUMN recipient_id UUID REFERENCES auth.users(id);
+            RAISE NOTICE 'âœ“ Columna recipient_id agregada a leads';
+        END IF;
+    ELSE
+        RAISE NOTICE 'âœ“ Columna recipient_id ya existe';
+    END IF;
+END $$;
+
+-- Agregar columna lead_type si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'lead_type'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN lead_type TEXT DEFAULT 'INQUIRY';
+        RAISE NOTICE 'âœ“ Columna lead_type agregada a leads';
+    ELSE
+        RAISE NOTICE 'âœ“ Columna lead_type ya existe';
+    END IF;
+END $$;
+
+-- Agregar columna subject si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'subject'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN subject TEXT;
+        RAISE NOTICE 'âœ“ Columna subject agregada a leads';
+    ELSE
+        RAISE NOTICE 'âœ“ Columna subject ya existe';
+    END IF;
+END $$;
+
+-- Agregar columna status si no existe
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'status'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN status TEXT DEFAULT 'PENDING';
+        RAISE NOTICE 'âœ“ Columna status agregada a leads';
+    ELSE
+        RAISE NOTICE 'âœ“ Columna status ya existe';
+    END IF;
+END $$;
+
+-- =============================================
+-- PASO 2: Crear tabla messages
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS public.messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    lead_id UUID NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    sender_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ãndices para rendimiento
+CREATE INDEX IF NOT EXISTS idx_messages_lead_id ON public.messages(lead_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON public.messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_is_read ON public.messages(is_read) WHERE is_read = FALSE;
+
+-- =============================================
+-- PASO 3: Crear vista conversation_summaries
+-- =============================================
+
+DROP VIEW IF EXISTS public.conversation_summaries;
+
+CREATE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    COALESCE(l.sender_id, (SELECT id FROM auth.users LIMIT 1)) AS sender_id,
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,
+    COALESCE(l.recipient_id, (SELECT id FROM auth.users LIMIT 1)) AS recipient_id,
+    COALESCE(p.full_name, 'Usuario') AS recipient_name,
+    COALESCE(l.lead_type, 'INQUIRY') AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'PENDING') AS status,
+    -- Ãšltimo mensaje
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Fecha del Ãºltimo mensaje
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at,
+        NOW()
+    ) AS last_message_at,
+    -- Mensajes no leÃ­dos
+    (
+        SELECT COUNT(*)::INTEGER
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != COALESCE(l.recipient_id, l.sender_id)
+    ) AS unread_count,
+    -- Total de mensajes
+    (
+        SELECT COUNT(*)::INTEGER
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count,
+    COALESCE(l.created_at, NOW()) AS created_at
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.recipient_id
+WHERE COALESCE(l.status, 'PENDING') != 'REJECTED'
+ORDER BY last_message_at DESC;
+
+-- =============================================
+-- PASO 4: PolÃ­ticas RLS
+-- =============================================
+
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+
+CREATE POLICY "Users can view messages in their conversations"
+ON public.messages FOR SELECT
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.recipient_id, auth.uid()) = auth.uid())
+    )
+);
+
+CREATE POLICY "Users can send messages in their conversations"
+ON public.messages FOR INSERT
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.recipient_id, auth.uid()) = auth.uid())
+    )
+    AND sender_id = auth.uid()
+);
+
+CREATE POLICY "Users can update messages in their conversations"
+ON public.messages FOR UPDATE
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.recipient_id, auth.uid()) = auth.uid())
+    )
+);
+
+-- =============================================
+-- PASO 5: Trigger para updated_at
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_messages_updated_at ON public.messages;
+CREATE TRIGGER update_messages_updated_at
+    BEFORE UPDATE ON public.messages
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+
+-- =============================================
+-- PASO 6: Realtime
+-- =============================================
+
+DO $$
+BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+    RAISE NOTICE 'âœ“ Realtime habilitado para messages';
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'âœ“ Realtime ya estaba habilitado';
+END $$;
+
+-- =============================================
+-- PASO 7: FunciÃ³n auxiliar
+-- =============================================
+
+CREATE OR REPLACE FUNCTION public.mark_messages_as_read(p_lead_id UUID)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE public.messages
+    SET is_read = TRUE, read_at = NOW()
+    WHERE lead_id = p_lead_id
+    AND sender_id != auth.uid()
+    AND is_read = FALSE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================
+-- VERIFICACIÃ“N FINAL
+-- =============================================
+
+DO $$
+DECLARE
+    msgs_table BOOLEAN;
+    conv_view BOOLEAN;
+    lead_cols TEXT;
+BEGIN
+    -- Verificar tabla messages
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'messages'
+    ) INTO msgs_table;
+
+    -- Verificar vista
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.views
+        WHERE table_schema = 'public' AND table_name = 'conversation_summaries'
+    ) INTO conv_view;
+
+    -- Listar columnas de leads
+    SELECT string_agg(column_name, ', ' ORDER BY ordinal_position)
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'leads'
+    INTO lead_cols;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         VERIFICACIÃ“N COMPLETADA                   ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+
+    IF msgs_table AND conv_view THEN
+        RAISE NOTICE 'âœ… TODO INSTALADO CORRECTAMENTE';
+        RAISE NOTICE '';
+        RAISE NOTICE 'âœ“ Tabla messages: OK';
+        RAISE NOTICE 'âœ“ Vista conversation_summaries: OK';
+        RAISE NOTICE 'âœ“ PolÃ­ticas RLS: OK';
+        RAISE NOTICE 'âœ“ Realtime: OK';
+        RAISE NOTICE '';
+        RAISE NOTICE 'ðŸ“‹ Columnas en tabla leads:';
+        RAISE NOTICE '   %', lead_cols;
+        RAISE NOTICE '';
+        RAISE NOTICE 'ðŸŽ‰ Â¡Sistema de mensajerÃ­a listo para usar!';
+    ELSE
+        IF NOT msgs_table THEN
+            RAISE WARNING 'âŒ Tabla messages NO fue creada';
+        END IF;
+        IF NOT conv_view THEN
+            RAISE WARNING 'âŒ Vista conversation_summaries NO fue creada';
+        END IF;
+    END IF;
+
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+END $$;
+
+``r
+---
+## [004_rename_recipient_to_profile.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- YourCVPassport - Renombrar recipient_id a profile_id
+-- =============================================
+-- Este script corrige el nombre de la columna para que sea consistente
+-- con el resto del cÃ³digo que usa 'profile_id'
+
+-- =============================================
+-- PASO 1: Renombrar recipient_id a profile_id si existe
+-- =============================================
+
+DO $$
+BEGIN
+    -- Si existe recipient_id, renombrarlo a profile_id
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'recipient_id'
+    ) THEN
+        -- Verificar que profile_id no exista ya
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'leads'
+            AND column_name = 'profile_id'
+        ) THEN
+            ALTER TABLE public.leads RENAME COLUMN recipient_id TO profile_id;
+            RAISE NOTICE 'âœ“ Columna recipient_id renombrada a profile_id';
+        ELSE
+            RAISE NOTICE 'âš  Columna profile_id ya existe, no se puede renombrar';
+        END IF;
+    ELSE
+        -- Si no existe recipient_id, verificar que profile_id exista
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'leads'
+            AND column_name = 'profile_id'
+        ) THEN
+            -- Si tampoco existe profile_id, crearla
+            ALTER TABLE public.leads ADD COLUMN profile_id UUID REFERENCES auth.users(id);
+            RAISE NOTICE 'âœ“ Columna profile_id creada';
+        ELSE
+            RAISE NOTICE 'âœ“ Columna profile_id ya existe';
+        END IF;
+    END IF;
+END $$;
+
+-- =============================================
+-- PASO 2: Actualizar la vista conversation_summaries
+-- =============================================
+
+DROP VIEW IF EXISTS public.conversation_summaries;
+
+CREATE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    COALESCE(l.sender_id, (SELECT id FROM auth.users LIMIT 1)) AS sender_id,
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,
+    COALESCE(l.profile_id, (SELECT id FROM auth.users LIMIT 1)) AS recipient_id,
+    COALESCE(p.full_name, 'Usuario') AS recipient_name,
+    COALESCE(l.lead_type, 'INQUIRY') AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'PENDING') AS status,
+    -- Ãšltimo mensaje
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Fecha del Ãºltimo mensaje
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at,
+        NOW()
+    ) AS last_message_at,
+    -- Mensajes no leÃ­dos
+    (
+        SELECT COUNT(*)::INTEGER
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != COALESCE(l.profile_id, l.sender_id)
+    ) AS unread_count,
+    -- Total de mensajes
+    (
+        SELECT COUNT(*)::INTEGER
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count,
+    COALESCE(l.created_at, NOW()) AS created_at
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.profile_id
+WHERE COALESCE(l.status, 'PENDING') != 'REJECTED'
+ORDER BY last_message_at DESC;
+
+-- =============================================
+-- PASO 3: Actualizar polÃ­ticas RLS para messages
+-- =============================================
+
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+
+CREATE POLICY "Users can view messages in their conversations"
+ON public.messages FOR SELECT
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.profile_id, auth.uid()) = auth.uid())
+    )
+);
+
+CREATE POLICY "Users can send messages in their conversations"
+ON public.messages FOR INSERT
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.profile_id, auth.uid()) = auth.uid())
+    )
+    AND sender_id = auth.uid()
+);
+
+CREATE POLICY "Users can update messages in their conversations"
+ON public.messages FOR UPDATE
+USING (
+    EXISTS (
+        SELECT 1 FROM public.leads l
+        WHERE l.id = messages.lead_id
+        AND (COALESCE(l.sender_id, auth.uid()) = auth.uid()
+             OR COALESCE(l.profile_id, auth.uid()) = auth.uid())
+    )
+);
+
+-- =============================================
+-- VERIFICACIÃ“N FINAL
+-- =============================================
+
+DO $$
+DECLARE
+    profile_id_exists BOOLEAN;
+    lead_cols TEXT;
+BEGIN
+    -- Verificar columna profile_id
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'profile_id'
+    ) INTO profile_id_exists;
+
+    -- Listar columnas de leads
+    SELECT string_agg(column_name, ', ' ORDER BY ordinal_position)
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'leads'
+    INTO lead_cols;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         VERIFICACIÃ“N COMPLETADA                   ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+
+    IF profile_id_exists THEN
+        RAISE NOTICE 'âœ… Columna profile_id configurada correctamente';
+        RAISE NOTICE '';
+        RAISE NOTICE 'ðŸ“‹ Columnas en tabla leads:';
+        RAISE NOTICE '   %', lead_cols;
+        RAISE NOTICE '';
+        RAISE NOTICE 'ðŸŽ‰ Â¡MigraciÃ³n completada exitosamente!';
+    ELSE
+        RAISE WARNING 'âŒ Columna profile_id NO existe en la tabla leads';
+    END IF;
+
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+END $$;
+
+``r
+---
+## [005_fix_leads_rls_policies.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- YourCVPassport - Configurar polÃ­ticas RLS para leads
+-- =============================================
+-- Este script configura las polÃ­ticas de seguridad para permitir
+-- que usuarios anÃ³nimos puedan enviar leads (formulario de contacto pÃºblico)
+
+-- =============================================
+-- PASO 1: Habilitar RLS en la tabla leads
+-- =============================================
+
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- PASO 2: Eliminar polÃ­ticas existentes
+-- =============================================
+
+DROP POLICY IF EXISTS "Users can view their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can insert leads to any profile" ON public.leads;
+DROP POLICY IF EXISTS "Users can update their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can delete their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Anyone can insert leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can delete their leads" ON public.leads;
+
+-- =============================================
+-- PASO 3: Crear polÃ­ticas RLS para leads
+-- =============================================
+
+-- PolÃ­tica 1: Cualquiera puede insertar leads (usuarios anÃ³nimos pueden enviar mensajes)
+-- Esto es necesario para el formulario de contacto pÃºblico
+CREATE POLICY "Anyone can insert leads"
+ON public.leads
+FOR INSERT
+WITH CHECK (true);
+
+-- PolÃ­tica 2: Los dueÃ±os de perfiles pueden ver los leads que les enviaron
+CREATE POLICY "Profile owners can view their leads"
+ON public.leads
+FOR SELECT
+USING (
+    auth.uid() = profile_id
+);
+
+-- PolÃ­tica 3: Los dueÃ±os de perfiles pueden actualizar sus leads
+-- (por ejemplo, marcar como leÃ­do, responder, archivar)
+CREATE POLICY "Profile owners can update their leads"
+ON public.leads
+FOR UPDATE
+USING (
+    auth.uid() = profile_id
+)
+WITH CHECK (
+    auth.uid() = profile_id
+);
+
+-- PolÃ­tica 4: Los dueÃ±os de perfiles pueden eliminar sus leads
+CREATE POLICY "Profile owners can delete their leads"
+ON public.leads
+FOR DELETE
+USING (
+    auth.uid() = profile_id
+);
+
+-- =============================================
+-- VERIFICACIÃ“N FINAL
+-- =============================================
+
+DO $$
+DECLARE
+    rls_enabled BOOLEAN;
+    policy_count INTEGER;
+    policy_names TEXT;
+BEGIN
+    -- Verificar que RLS estÃ¡ habilitado
+    SELECT relrowsecurity
+    FROM pg_class
+    WHERE relname = 'leads' AND relnamespace = 'public'::regnamespace
+    INTO rls_enabled;
+
+    -- Contar polÃ­ticas
+    SELECT COUNT(*)
+    FROM pg_policies
+    WHERE tablename = 'leads' AND schemaname = 'public'
+    INTO policy_count;
+
+    -- Listar nombres de polÃ­ticas
+    SELECT string_agg(policyname, ', ' ORDER BY policyname)
+    FROM pg_policies
+    WHERE tablename = 'leads' AND schemaname = 'public'
+    INTO policy_names;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         VERIFICACIÃ“N DE POLÃTICAS RLS              ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+
+    IF rls_enabled THEN
+        RAISE NOTICE 'âœ… RLS estÃ¡ habilitado en la tabla leads';
+    ELSE
+        RAISE WARNING 'âŒ RLS NO estÃ¡ habilitado en la tabla leads';
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸ“Š Total de polÃ­ticas: %', policy_count;
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸ“‹ PolÃ­ticas configuradas:';
+    RAISE NOTICE '   %', policy_names;
+    RAISE NOTICE '';
+
+    IF policy_count >= 4 THEN
+        RAISE NOTICE 'ðŸŽ‰ Â¡PolÃ­ticas RLS configuradas correctamente!';
+        RAISE NOTICE '';
+        RAISE NOTICE 'âœ“ Usuarios anÃ³nimos pueden insertar leads';
+        RAISE NOTICE 'âœ“ DueÃ±os de perfiles pueden ver sus leads';
+        RAISE NOTICE 'âœ“ DueÃ±os de perfiles pueden actualizar sus leads';
+        RAISE NOTICE 'âœ“ DueÃ±os de perfiles pueden eliminar sus leads';
+    ELSE
+        RAISE WARNING 'âš  Se esperaban al menos 4 polÃ­ticas, pero solo hay %', policy_count;
+    END IF;
+
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+END $$;
+
+``r
+---
+## [006_diagnose_leads_table.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- DiagnÃ³stico de la tabla leads
+-- =============================================
+-- Este script verifica el estado actual de la tabla leads
+
+DO $$
+DECLARE
+    table_exists BOOLEAN;
+    profile_id_exists BOOLEAN;
+    rls_enabled BOOLEAN;
+    policy_count INTEGER;
+    column_info TEXT;
+    policy_info TEXT;
+BEGIN
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         DIAGNÃ“STICO DE LA TABLA LEADS             ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+
+    -- 1. Verificar si la tabla existe
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'leads'
+    ) INTO table_exists;
+
+    IF table_exists THEN
+        RAISE NOTICE 'âœ“ Tabla "leads" existe';
+    ELSE
+        RAISE WARNING 'âœ— Tabla "leads" NO existe';
+        RETURN;
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE '--- COLUMNAS DE LA TABLA ---';
+
+    -- 2. Listar todas las columnas
+    FOR column_info IN
+        SELECT
+            column_name || ' (' || data_type ||
+            CASE
+                WHEN is_nullable = 'NO' THEN ', NOT NULL'
+                ELSE ''
+            END || ')'
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads'
+        ORDER BY ordinal_position
+    LOOP
+        RAISE NOTICE '  %', column_info;
+    END LOOP;
+
+    -- 3. Verificar columna profile_id especÃ­ficamente
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'profile_id'
+    ) INTO profile_id_exists;
+
+    RAISE NOTICE '';
+    IF profile_id_exists THEN
+        RAISE NOTICE 'âœ“ Columna "profile_id" existe';
+    ELSE
+        RAISE WARNING 'âœ— Columna "profile_id" NO existe';
+    END IF;
+
+    -- 4. Verificar RLS
+    SELECT relrowsecurity
+    FROM pg_class
+    WHERE relname = 'leads' AND relnamespace = 'public'::regnamespace
+    INTO rls_enabled;
+
+    RAISE NOTICE '';
+    IF rls_enabled THEN
+        RAISE NOTICE 'âœ“ RLS estÃ¡ HABILITADO';
+    ELSE
+        RAISE NOTICE 'âœ— RLS estÃ¡ DESHABILITADO';
+    END IF;
+
+    -- 5. Listar polÃ­ticas
+    SELECT COUNT(*)
+    FROM pg_policies
+    WHERE tablename = 'leads' AND schemaname = 'public'
+    INTO policy_count;
+
+    RAISE NOTICE '';
+    RAISE NOTICE '--- POLÃTICAS RLS (Total: %) ---', policy_count;
+
+    IF policy_count > 0 THEN
+        FOR policy_info IN
+            SELECT
+                '  â€¢ ' || policyname || ' (' || cmd || ')'
+            FROM pg_policies
+            WHERE tablename = 'leads' AND schemaname = 'public'
+            ORDER BY policyname
+        LOOP
+            RAISE NOTICE '%', policy_info;
+        END LOOP;
+    ELSE
+        RAISE NOTICE '  (sin polÃ­ticas)';
+    END IF;
+
+    -- 6. Verificar foreign keys
+    RAISE NOTICE '';
+    RAISE NOTICE '--- FOREIGN KEYS ---';
+
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.constraint_column_usage ccu
+            ON tc.constraint_name = ccu.constraint_name
+        WHERE tc.table_schema = 'public'
+        AND tc.table_name = 'leads'
+        AND tc.constraint_type = 'FOREIGN KEY'
+        AND ccu.column_name = 'profile_id'
+    ) THEN
+        RAISE NOTICE '  âœ“ Foreign key en profile_id configurado';
+    ELSE
+        RAISE NOTICE '  âœ— NO hay foreign key en profile_id';
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         FIN DEL DIAGNÃ“STICO                       ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+
+END $$;
+
+``r
+---
+## [007_disable_rls_on_leads.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- YourCVPassport - Deshabilitar RLS en leads
+-- =============================================
+-- Este script deshabilita RLS en la tabla leads para permitir
+-- que cualquiera pueda insertar leads (formulario de contacto pÃºblico)
+-- y que los usuarios autenticados puedan ver solo sus propios leads
+-- mediante filtros en el cÃ³digo de la aplicaciÃ³n
+
+-- =============================================
+-- PASO 1: Eliminar todas las polÃ­ticas existentes
+-- =============================================
+
+DROP POLICY IF EXISTS "Users can view their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can insert leads to any profile" ON public.leads;
+DROP POLICY IF EXISTS "Users can update their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can delete their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Anyone can insert leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can delete their leads" ON public.leads;
+
+-- =============================================
+-- PASO 2: Deshabilitar RLS en la tabla leads
+-- =============================================
+
+ALTER TABLE public.leads DISABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- VERIFICACIÃ“N FINAL
+-- =============================================
+
+DO $$
+DECLARE
+    rls_enabled BOOLEAN;
+    policy_count INTEGER;
+BEGIN
+    -- Verificar que RLS estÃ¡ deshabilitado
+    SELECT relrowsecurity
+    FROM pg_class
+    WHERE relname = 'leads' AND relnamespace = 'public'::regnamespace
+    INTO rls_enabled;
+
+    -- Contar polÃ­ticas restantes
+    SELECT COUNT(*)
+    FROM pg_policies
+    WHERE tablename = 'leads' AND schemaname = 'public'
+    INTO policy_count;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '    CONFIGURACIÃ“N RLS PARA TABLA LEADS             ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+
+    IF NOT rls_enabled THEN
+        RAISE NOTICE 'âœ… RLS estÃ¡ DESHABILITADO (correcto para formulario pÃºblico)';
+    ELSE
+        RAISE WARNING 'âš  RLS todavÃ­a estÃ¡ habilitado';
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸ“Š PolÃ­ticas restantes: %', policy_count;
+
+    IF policy_count = 0 THEN
+        RAISE NOTICE 'âœ… Todas las polÃ­ticas fueron eliminadas';
+    ELSE
+        RAISE WARNING 'âš  TodavÃ­a hay % polÃ­ticas activas', policy_count;
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸŽ‰ ConfiguraciÃ³n completada!';
+    RAISE NOTICE '';
+    RAISE NOTICE 'NOTA: Con RLS deshabilitado, la tabla "leads" acepta';
+    RAISE NOTICE 'inserciones de usuarios anÃ³nimos (formulario pÃºblico).';
+    RAISE NOTICE 'El acceso de lectura debe ser controlado por la aplicaciÃ³n';
+    RAISE NOTICE 'usando filtros en las consultas (profile_id = auth.uid()).';
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+
+END $$;
+
+``r
+---
+## [008_check_recent_leads.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar leads recientes
+-- =============================================
+-- Este script muestra los Ãºltimos leads insertados
+
+SELECT
+    id,
+    profile_id,
+    sender_name,
+    sender_email,
+    subject,
+    LEFT(message, 50) || '...' as message_preview,
+    status,
+    created_at
+FROM public.leads
+ORDER BY created_at DESC
+LIMIT 10;
+
+``r
+---
+## [009_check_profile_owner.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar a quiÃ©n pertenece el profile_id del lead
+-- =============================================
+
+-- Mostrar informaciÃ³n del perfil que recibiÃ³ el lead
+SELECT
+    p.id as profile_id,
+    p.full_name,
+    p.email,
+    p.role,
+    u.email as auth_email
+FROM public.profiles p
+LEFT JOIN auth.users u ON u.id = p.id
+WHERE p.id = '93856aad-e6cb-49c8-b912-123389d3e2ad';
+
+-- Mostrar todos los perfiles para comparar
+SELECT
+    p.id as profile_id,
+    p.full_name,
+    p.email,
+    p.role
+FROM public.profiles p
+ORDER BY p.created_at DESC
+LIMIT 10;
+
+``r
+---
+## [010_debug_leads_query.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Debug: Simular la consulta que hace LeadsPage.tsx
+-- =============================================
+
+-- Mostrar el ID del usuario Administrator
+SELECT
+    'Usuario Administrator:' as info,
+    id,
+    full_name,
+    email
+FROM public.profiles
+WHERE email = 'admin@yourcvpassport.com';
+
+-- Simular la consulta exacta que hace el cÃ³digo en LeadsPage.tsx lÃ­nea 50-55
+-- SELECT * FROM leads WHERE profile_id = <admin_id> AND status != 'deleted'
+SELECT
+    'Leads para Administrator:' as info,
+    l.id,
+    l.profile_id,
+    l.sender_name,
+    l.sender_email,
+    l.subject,
+    l.status,
+    l.created_at
+FROM public.leads l
+WHERE l.profile_id = '93856aad-e6cb-49c8-b912-123389d3e2ad'
+AND l.status != 'deleted'
+ORDER BY l.created_at DESC;
+
+-- Ver TODOS los leads sin filtro para comparar
+SELECT
+    'TODOS los leads (sin filtro):' as info,
+    id,
+    profile_id,
+    sender_name,
+    sender_email,
+    status,
+    created_at
+FROM public.leads
+ORDER BY created_at DESC
+LIMIT 5;
+
+``r
+---
+## [011_check_messages_rls.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar tabla messages y sus polÃ­ticas
+-- =============================================
+
+-- Verificar si la tabla messages existe
+SELECT
+    'Tabla messages existe:' as info,
+    EXISTS (
+        SELECT 1 FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_name = 'messages'
+    ) as exists;
+
+-- Verificar RLS en messages
+SELECT
+    'RLS habilitado en messages:' as info,
+    relrowsecurity as rls_enabled
+FROM pg_class
+WHERE relname = 'messages' AND relnamespace = 'public'::regnamespace;
+
+-- Listar polÃ­ticas de messages
+SELECT
+    'PolÃ­ticas en messages:' as info,
+    policyname,
+    cmd as command
+FROM pg_policies
+WHERE tablename = 'messages' AND schemaname = 'public'
+ORDER BY policyname;
+
+-- Verificar columnas de messages
+SELECT
+    'Columnas de messages:' as info,
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'messages'
+ORDER BY ordinal_position;
+
+``r
+---
+## [012_disable_messages_rls.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Deshabilitar RLS en la tabla messages
+-- =============================================
+-- Esto permite que los usuarios anÃ³nimos puedan crear mensajes
+-- cuando envÃ­an un lead desde el formulario de contacto
+
+-- Eliminar todas las polÃ­ticas de messages
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+
+-- Deshabilitar RLS
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+
+-- VerificaciÃ³n
+DO $$
+DECLARE
+    rls_enabled BOOLEAN;
+    policy_count INTEGER;
+BEGIN
+    SELECT relrowsecurity
+    FROM pg_class
+    WHERE relname = 'messages' AND relnamespace = 'public'::regnamespace
+    INTO rls_enabled;
+
+    SELECT COUNT(*)
+    FROM pg_policies
+    WHERE tablename = 'messages' AND schemaname = 'public'
+    INTO policy_count;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '    CONFIGURACIÃ“N RLS PARA TABLA MESSAGES          ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+
+    IF NOT rls_enabled THEN
+        RAISE NOTICE 'âœ… RLS estÃ¡ DESHABILITADO en messages';
+    ELSE
+        RAISE WARNING 'âš  RLS todavÃ­a estÃ¡ habilitado en messages';
+    END IF;
+
+    RAISE NOTICE 'ðŸ“Š PolÃ­ticas restantes: %', policy_count;
+
+    IF policy_count = 0 THEN
+        RAISE NOTICE 'âœ… Todas las polÃ­ticas fueron eliminadas';
+    END IF;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'ðŸŽ‰ ConfiguraciÃ³n completada!';
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+END $$;
+
+``r
+---
+## [013_complete_fix.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- FIX COMPLETO: Sistema de Leads y Mensajes
+-- =============================================
+
+-- PASO 1: Deshabilitar RLS en ambas tablas
+ALTER TABLE public.leads DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+
+-- PASO 2: Eliminar TODAS las polÃ­ticas
+DROP POLICY IF EXISTS "Users can view their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can insert leads to any profile" ON public.leads;
+DROP POLICY IF EXISTS "Users can update their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Users can delete their own leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update leads sent to them" ON public.leads;
+DROP POLICY IF EXISTS "Anyone can insert leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can view their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can update their leads" ON public.leads;
+DROP POLICY IF EXISTS "Profile owners can delete their leads" ON public.leads;
+
+DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+
+-- PASO 3: Verificar estructura de leads
+DO $$
+BEGIN
+    -- Asegurar que profile_id existe
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'profile_id'
+    ) THEN
+        -- Si existe recipient_id, renombrarlo
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'recipient_id'
+        ) THEN
+            ALTER TABLE public.leads RENAME COLUMN recipient_id TO profile_id;
+            RAISE NOTICE 'âœ“ Renombrado recipient_id a profile_id';
+        ELSE
+            ALTER TABLE public.leads ADD COLUMN profile_id UUID REFERENCES auth.users(id);
+            RAISE NOTICE 'âœ“ Creada columna profile_id';
+        END IF;
+    END IF;
+END $$;
+
+-- PASO 4: Crear mensajes iniciales para todos los leads sin mensajes
+DO $$
+DECLARE
+    lead_record RECORD;
+    messages_created INTEGER := 0;
+BEGIN
+    -- Para cada lead que NO tenga mensajes, crear uno
+    FOR lead_record IN
+        SELECT l.id, l.profile_id, l.sender_name, l.message
+        FROM public.leads l
+        WHERE NOT EXISTS (
+            SELECT 1 FROM public.messages m WHERE m.lead_id = l.id
+        )
+        ORDER BY l.created_at DESC
+    LOOP
+        INSERT INTO public.messages (lead_id, sender_id, sender_name, content, is_read, created_at)
+        VALUES (
+            lead_record.id,
+            lead_record.profile_id,
+            lead_record.sender_name,
+            lead_record.message,
+            false,
+            NOW()
+        );
+
+        messages_created := messages_created + 1;
+    END LOOP;
+
+    IF messages_created > 0 THEN
+        RAISE NOTICE 'âœ“ Creados % mensajes iniciales para leads existentes', messages_created;
+    ELSE
+        RAISE NOTICE 'âœ“ Todos los leads ya tienen mensajes';
+    END IF;
+END $$;
+
+-- PASO 5: VerificaciÃ³n final
+DO $$
+DECLARE
+    leads_rls BOOLEAN;
+    messages_rls BOOLEAN;
+    leads_count INTEGER;
+    messages_count INTEGER;
+    profile_id_exists BOOLEAN;
+BEGIN
+    -- Verificar RLS
+    SELECT relrowsecurity FROM pg_class WHERE relname = 'leads' AND relnamespace = 'public'::regnamespace INTO leads_rls;
+    SELECT relrowsecurity FROM pg_class WHERE relname = 'messages' AND relnamespace = 'public'::regnamespace INTO messages_rls;
+
+    -- Contar registros
+    SELECT COUNT(*) FROM public.leads INTO leads_count;
+    SELECT COUNT(*) FROM public.messages INTO messages_count;
+
+    -- Verificar columna
+    SELECT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'profile_id'
+    ) INTO profile_id_exists;
+
+    RAISE NOTICE '';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '         VERIFICACIÃ“N FINAL                        ';
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+    RAISE NOTICE '';
+    RAISE NOTICE 'RLS en leads: % (debe ser FALSE)', COALESCE(leads_rls, false);
+    RAISE NOTICE 'RLS en messages: % (debe ser FALSE)', COALESCE(messages_rls, false);
+    RAISE NOTICE '';
+    RAISE NOTICE 'Columna profile_id existe: %', profile_id_exists;
+    RAISE NOTICE '';
+    RAISE NOTICE 'Total leads: %', leads_count;
+    RAISE NOTICE 'Total messages: %', messages_count;
+    RAISE NOTICE '';
+
+    IF NOT COALESCE(leads_rls, false) AND NOT COALESCE(messages_rls, false) AND profile_id_exists THEN
+        RAISE NOTICE 'âœ… TODO CONFIGURADO CORRECTAMENTE';
+    ELSE
+        RAISE WARNING 'âš  Hay problemas en la configuraciÃ³n';
+    END IF;
+
+    RAISE NOTICE 'â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•';
+END $$;
+
+``r
+---
+## [014_final_simple_fix.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- FIX SIMPLE Y DIRECTO
+-- =============================================
+
+-- PASO 1: Deshabilitar RLS completamente
+ALTER TABLE public.leads DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages DISABLE ROW LEVEL SECURITY;
+
+-- PASO 2: Eliminar TODAS las polÃ­ticas
+DO $$
+BEGIN
+    -- Eliminar polÃ­ticas de leads
+    DROP POLICY IF EXISTS "Users can view their own leads" ON public.leads;
+    DROP POLICY IF EXISTS "Users can insert leads to any profile" ON public.leads;
+    DROP POLICY IF EXISTS "Users can update their own leads" ON public.leads;
+    DROP POLICY IF EXISTS "Users can delete their own leads" ON public.leads;
+    DROP POLICY IF EXISTS "Profile owners can view leads sent to them" ON public.leads;
+    DROP POLICY IF EXISTS "Profile owners can update leads sent to them" ON public.leads;
+    DROP POLICY IF EXISTS "Anyone can insert leads" ON public.leads;
+    DROP POLICY IF EXISTS "Profile owners can view their leads" ON public.leads;
+    DROP POLICY IF EXISTS "Profile owners can update their leads" ON public.leads;
+    DROP POLICY IF EXISTS "Profile owners can delete their leads" ON public.leads;
+
+    -- Eliminar polÃ­ticas de messages
+    DROP POLICY IF EXISTS "Users can view messages in their conversations" ON public.messages;
+    DROP POLICY IF EXISTS "Users can send messages in their conversations" ON public.messages;
+    DROP POLICY IF EXISTS "Users can update messages in their conversations" ON public.messages;
+END $$;
+
+-- PASO 3: Verificar y corregir profile_id
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'recipient_id'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'leads' AND column_name = 'profile_id'
+    ) THEN
+        ALTER TABLE public.leads RENAME COLUMN recipient_id TO profile_id;
+        RAISE NOTICE 'âœ“ Columna renombrada: recipient_id â†’ profile_id';
+    END IF;
+END $$;
+
+-- PASO 4: VerificaciÃ³n simple
+SELECT
+    'âœ… CONFIGURACIÃ“N COMPLETADA' as status,
+    COUNT(*) as total_leads
+FROM public.leads;
+
+SELECT
+    'ðŸ“Š MENSAJES EXISTENTES' as status,
+    COUNT(*) as total_messages
+FROM public.messages;
+
+-- Mostrar leads sin mensajes
+SELECT
+    'âš ï¸ LEADS SIN MENSAJES' as status,
+    l.id,
+    l.sender_name,
+    l.created_at
+FROM public.leads l
+LEFT JOIN public.messages m ON m.lead_id = l.id
+WHERE m.id IS NULL
+ORDER BY l.created_at DESC
+LIMIT 5;
+
+``r
+---
+## [015_insert_missing_messages.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Insertar mensajes para los leads sin mensajes
+-- =============================================
+
+-- Insertar un mensaje para cada lead que no tenga mensajes
+INSERT INTO public.messages (lead_id, sender_id, sender_name, content, is_read, created_at)
+SELECT
+    l.id as lead_id,
+    l.profile_id as sender_id,
+    l.sender_name,
+    l.message as content,
+    false as is_read,
+    l.created_at
+FROM public.leads l
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.messages m WHERE m.lead_id = l.id
+)
+ORDER BY l.created_at DESC;
+
+-- Verificar que se crearon los mensajes
+SELECT
+    'âœ… MENSAJES CREADOS' as status,
+    COUNT(*) as mensajes_insertados
+FROM public.messages
+WHERE created_at >= NOW() - INTERVAL '1 minute';
+
+-- Mostrar el estado final
+SELECT
+    'ðŸ“Š RESUMEN FINAL' as status,
+    (SELECT COUNT(*) FROM public.leads) as total_leads,
+    (SELECT COUNT(*) FROM public.messages) as total_messages,
+    (SELECT COUNT(*) FROM public.leads l WHERE NOT EXISTS (SELECT 1 FROM public.messages m WHERE m.lead_id = l.id)) as leads_sin_mensajes;
+
+``r
+---
+## [016_disable_triggers_and_insert.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Deshabilitar triggers y luego insertar mensajes
+-- =============================================
+
+-- PASO 1: Buscar y eliminar el trigger problemÃ¡tico
+DO $$
+DECLARE
+    trigger_name TEXT;
+BEGIN
+    -- Buscar todos los triggers en la tabla leads
+    FOR trigger_name IN
+        SELECT tgname
+        FROM pg_trigger
+        WHERE tgrelid = 'public.leads'::regclass
+        AND tgname LIKE '%message%'
+    LOOP
+        EXECUTE format('DROP TRIGGER IF EXISTS %I ON public.leads', trigger_name);
+        RAISE NOTICE 'Trigger eliminado: %', trigger_name;
+    END LOOP;
+
+    -- Buscar triggers en messages relacionados con leads
+    FOR trigger_name IN
+        SELECT tgname
+        FROM pg_trigger
+        WHERE tgrelid = 'public.messages'::regclass
+        AND tgname LIKE '%lead%'
+    LOOP
+        EXECUTE format('DROP TRIGGER IF EXISTS %I ON public.messages', trigger_name);
+        RAISE NOTICE 'Trigger eliminado: %', trigger_name;
+    END LOOP;
+END $$;
+
+-- PASO 2: Buscar y eliminar la funciÃ³n del trigger
+DROP FUNCTION IF EXISTS update_lead_last_message() CASCADE;
+DROP FUNCTION IF EXISTS update_lead_last_message_at() CASCADE;
+
+-- PASO 3: Ahora sÃ­ insertar los mensajes
+INSERT INTO public.messages (lead_id, sender_id, sender_name, content, is_read, created_at)
+SELECT
+    l.id as lead_id,
+    l.profile_id as sender_id,
+    l.sender_name,
+    l.message as content,
+    false as is_read,
+    l.created_at
+FROM public.leads l
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.messages m WHERE m.lead_id = l.id
+);
+
+-- PASO 4: VerificaciÃ³n final
+SELECT
+    'âœ… OPERACIÃ“N COMPLETADA' as status,
+    (SELECT COUNT(*) FROM public.leads) as total_leads,
+    (SELECT COUNT(*) FROM public.messages) as total_messages,
+    (SELECT COUNT(*) FROM public.leads l WHERE NOT EXISTS (
+        SELECT 1 FROM public.messages m WHERE m.lead_id = l.id
+    )) as leads_sin_mensajes;
+
+``r
+---
+## [017_fix_foreign_keys.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Arreglar Foreign Keys entre messages y leads
+-- =============================================
+
+-- PASO 1: Eliminar foreign key existente si hay
+DO $$
+DECLARE
+    constraint_name TEXT;
+BEGIN
+    -- Buscar y eliminar constraints de foreign key en messages.lead_id
+    FOR constraint_name IN
+        SELECT tc.constraint_name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.constraint_column_usage ccu
+            ON tc.constraint_name = ccu.constraint_name
+        WHERE tc.table_schema = 'public'
+        AND tc.table_name = 'messages'
+        AND tc.constraint_type = 'FOREIGN KEY'
+        AND ccu.column_name = 'lead_id'
+    LOOP
+        EXECUTE format('ALTER TABLE public.messages DROP CONSTRAINT IF EXISTS %I', constraint_name);
+        RAISE NOTICE 'Constraint eliminado: %', constraint_name;
+    END LOOP;
+END $$;
+
+-- PASO 2: Eliminar mensajes huÃ©rfanos (que no tienen lead correspondiente)
+DELETE FROM public.messages m
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.leads l WHERE l.id = m.lead_id
+);
+
+-- PASO 3: Recrear la foreign key correctamente
+DO $$
+BEGIN
+    -- Solo agregar si no existe
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'messages_lead_id_fkey'
+        AND table_name = 'messages'
+    ) THEN
+        ALTER TABLE public.messages
+        ADD CONSTRAINT messages_lead_id_fkey
+        FOREIGN KEY (lead_id) REFERENCES public.leads(id) ON DELETE CASCADE;
+        RAISE NOTICE 'Foreign key creada';
+    ELSE
+        RAISE NOTICE 'Foreign key ya existe';
+    END IF;
+END $$;
+
+-- PASO 4: Verificar que la relaciÃ³n funciona
+SELECT
+    'âœ… FOREIGN KEY CREADA' as status,
+    COUNT(*) as total_messages_con_lead_valido
+FROM public.messages m
+INNER JOIN public.leads l ON l.id = m.lead_id;
+
+-- PASO 5: Verificar estado final
+SELECT
+    'ðŸ“Š ESTADO FINAL' as status,
+    (SELECT COUNT(*) FROM public.leads) as total_leads,
+    (SELECT COUNT(*) FROM public.messages) as total_messages,
+    (SELECT COUNT(*) FROM public.messages m
+     WHERE EXISTS (SELECT 1 FROM public.leads l WHERE l.id = m.lead_id)) as messages_validos;
+
+``r
+---
+## [018_allow_null_sender.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Permitir sender_id NULL para mensajes externos
+-- =============================================
+
+-- PASO 1: Modificar la columna sender_id para permitir NULL
+ALTER TABLE public.messages
+ALTER COLUMN sender_id DROP NOT NULL;
+
+-- PASO 2: Actualizar mensajes existentes que tienen sender_id incorrecto
+-- Marcar como NULL los mensajes donde el sender_name no coincide con el usuario autenticado
+UPDATE public.messages m
+SET sender_id = NULL
+FROM public.leads l
+WHERE m.lead_id = l.id
+AND m.sender_id IS NOT NULL
+AND NOT EXISTS (
+    SELECT 1 FROM auth.users u
+    WHERE u.id = m.sender_id
+    AND u.email = (SELECT sender_email FROM public.leads WHERE id = m.lead_id)
+);
+
+-- PASO 3: Verificar cambios
+SELECT
+    'ðŸ“Š MENSAJES ACTUALIZADOS' as status,
+    COUNT(*) FILTER (WHERE sender_id IS NULL) as mensajes_externos,
+    COUNT(*) FILTER (WHERE sender_id IS NOT NULL) as mensajes_internos,
+    COUNT(*) as total
+FROM public.messages;
+
+``r
+---
+## [019_verify_and_fix_leads.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar y corregir estructura de tabla leads
+-- =============================================
+
+-- PASO 1: Ver estructura actual de la tabla leads
+SELECT
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'public'
+AND table_name = 'leads'
+ORDER BY ordinal_position;
+
+-- PASO 2: Verificar si existe recipient_id o profile_id
+DO $$
+BEGIN
+    -- Si existe recipient_id pero NO profile_id, renombrar
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'recipient_id'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'profile_id'
+    ) THEN
+        ALTER TABLE public.leads RENAME COLUMN recipient_id TO profile_id;
+        RAISE NOTICE 'âœ“ Columna renombrada: recipient_id â†’ profile_id';
+
+    -- Si NO existe ninguna, agregarla
+    ELSIF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'leads'
+        AND column_name = 'profile_id'
+    ) THEN
+        ALTER TABLE public.leads ADD COLUMN profile_id UUID NOT NULL REFERENCES auth.users(id);
+        RAISE NOTICE 'âœ“ Columna profile_id creada';
+
+    ELSE
+        RAISE NOTICE 'âœ“ Columna profile_id ya existe';
+    END IF;
+END $$;
+
+-- PASO 3: Verificar estado final
+SELECT
+    'ðŸ“Š ESTRUCTURA FINAL' as status,
+    COUNT(*) FILTER (WHERE column_name = 'profile_id') as tiene_profile_id,
+    COUNT(*) FILTER (WHERE column_name = 'recipient_id') as tiene_recipient_id
+FROM information_schema.columns
+WHERE table_schema = 'public'
+AND table_name = 'leads';
+
+``r
+---
+## [020_fix_conversation_summaries.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Actualizar vista conversation_summaries para usar profile_id
+-- =============================================
+
+-- PASO 1: Eliminar vista existente
+DROP VIEW IF EXISTS public.conversation_summaries CASCADE;
+
+-- PASO 2: Recrear vista con profile_id y mostrar leads SIN mensajes
+CREATE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    COALESCE(
+        (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1),
+        (SELECT id FROM auth.users LIMIT 1)
+    ) AS sender_id,
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,
+    l.profile_id AS recipient_id,  -- Usar profile_id en lugar de recipient_id
+    COALESCE(p.full_name, p.email, 'Usuario') AS recipient_name,
+    'INQUIRY' AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'new') AS status,
+    -- Ãšltimo mensaje (puede ser NULL si no hay mensajes)
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Fecha del Ãºltimo mensaje o fecha de creaciÃ³n del lead
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at  -- Si no hay mensajes, usar fecha de creaciÃ³n del lead
+    ) AS last_message_at,
+    -- Contar mensajes no leÃ­dos
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != l.profile_id  -- Mensajes del otro usuario
+    ) AS unread_count,
+    -- Total de mensajes
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.profile_id;
+
+-- PASO 3: Verificar que la vista funciona
+SELECT
+    'âœ… VISTA ACTUALIZADA' as status,
+    COUNT(*) as total_conversaciones
+FROM public.conversation_summaries;
+
+-- PASO 4: Mostrar ejemplo
+SELECT
+    lead_id,
+    sender_name,
+    recipient_name,
+    subject,
+    last_message,
+    message_count,
+    unread_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC
+LIMIT 5;
+
+``r
+---
+## [021_fix_bidirectional_conversations.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Vista bidireccional: mostrar conversaciones enviadas Y recibidas
+-- =============================================
+
+-- PASO 1: Eliminar vista existente
+DROP VIEW IF EXISTS public.conversation_summaries CASCADE;
+
+-- PASO 2: Crear vista que muestra AMBAS perspectivas
+CREATE VIEW public.conversation_summaries AS
+-- Conversaciones donde SOY el RECEPTOR (recibo mensajes)
+SELECT
+    l.id AS lead_id,
+    COALESCE(
+        (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1),
+        (SELECT id FROM auth.users LIMIT 1)
+    ) AS sender_id,
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,
+    l.profile_id AS recipient_id,
+    COALESCE(p.full_name, p.email, 'Usuario') AS recipient_name,
+    'INQUIRY' AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'new') AS status,
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at
+    ) AS last_message_at,
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != l.profile_id
+    ) AS unread_count,
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.profile_id
+
+UNION ALL
+
+-- Conversaciones donde SOY el EMISOR (envÃ­o mensajes)
+SELECT
+    l.id AS lead_id,
+    COALESCE(
+        (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1),
+        (SELECT id FROM auth.users LIMIT 1)
+    ) AS sender_id,  -- YO (el que enviÃ³ el mensaje)
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,  -- Mi nombre
+    l.profile_id AS recipient_id,  -- El receptor (dueÃ±o del perfil)
+    COALESCE(p.full_name, p.email, 'Usuario') AS recipient_name,  -- Nombre del receptor
+    'INQUIRY' AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'new') AS status,
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at
+    ) AS last_message_at,
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != COALESCE(
+            (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1),
+            (SELECT id FROM auth.users LIMIT 1)
+        )
+    ) AS unread_count,
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.profile_id;
+
+-- PASO 3: Verificar que la vista funciona
+SELECT
+    'âœ… VISTA BIDIRECCIONAL CREADA' as status,
+    COUNT(*) as total_conversaciones
+FROM public.conversation_summaries;
+
+-- PASO 4: Mostrar ejemplos agrupados por usuario
+SELECT
+    recipient_id as user_id,
+    recipient_name as user_name,
+    COUNT(*) as conversaciones_totales,
+    SUM(unread_count) as total_no_leidos
+FROM public.conversation_summaries
+GROUP BY recipient_id, recipient_name
+ORDER BY conversaciones_totales DESC
+LIMIT 10;
+
+``r
+---
+## [022_diagnose_conversations.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- DIAGNÃ“STICO: Ver exactamente quÃ© estÃ¡ pasando
+-- =============================================
+
+-- PASO 1: Ver todos los leads
+SELECT
+    'ðŸ“‹ LEADS EN LA BASE DE DATOS' as status,
+    id,
+    profile_id,
+    sender_email,
+    sender_name,
+    subject,
+    created_at
+FROM public.leads
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- PASO 2: Ver todos los mensajes
+SELECT
+    'ðŸ’¬ MENSAJES EN LA BASE DE DATOS' as status,
+    id,
+    lead_id,
+    sender_id,
+    sender_name,
+    content,
+    created_at
+FROM public.messages
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- PASO 3: Ver quÃ© muestra conversation_summaries
+SELECT
+    'ðŸ‘ï¸ CONVERSATION_SUMMARIES (LO QUE VE EL FRONTEND)' as status,
+    lead_id,
+    sender_id,
+    sender_name,
+    recipient_id,
+    recipient_name,
+    subject,
+    last_message,
+    message_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC
+LIMIT 10;
+
+-- PASO 4: Ver usuarios en auth.users
+SELECT
+    'ðŸ‘¤ USUARIOS REGISTRADOS' as status,
+    id,
+    email,
+    created_at
+FROM auth.users
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- PASO 5: Verificar si el WHERE EXISTS funciona
+SELECT
+    'ðŸ” LEADS CON SENDER_EMAIL QUE EXISTE EN AUTH.USERS' as status,
+    l.id,
+    l.sender_email,
+    l.sender_name,
+    l.subject,
+    (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1) as user_id_found
+FROM public.leads l
+WHERE EXISTS (
+    SELECT 1 FROM auth.users u WHERE u.email = l.sender_email
+)
+ORDER BY l.created_at DESC;
+
+``r
+---
+## [023_debug_complete.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- DIAGNÃ“STICO COMPLETO DEL PROBLEMA
+-- =============================================
+
+-- PASO 1: Ver TODOS los leads
+SELECT '========== LEADS ==========' as section;
+SELECT
+    id,
+    profile_id,
+    sender_email,
+    sender_name,
+    subject,
+    created_at
+FROM public.leads
+ORDER BY created_at DESC;
+
+-- PASO 2: Ver TODOS los usuarios
+SELECT '========== USUARIOS ==========' as section;
+SELECT
+    id,
+    email,
+    created_at
+FROM auth.users
+ORDER BY created_at DESC;
+
+-- PASO 3: Ver TODAS las conversaciones de la vista (SIN FILTRO)
+SELECT '========== CONVERSATION_SUMMARIES (TODAS) ==========' as section;
+SELECT
+    lead_id,
+    sender_id,
+    sender_name,
+    recipient_id,
+    recipient_name,
+    subject,
+    last_message,
+    message_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC;
+
+-- PASO 4: Ver los profiles
+SELECT '========== PROFILES ==========' as section;
+SELECT
+    id,
+    full_name,
+    email
+FROM public.profiles
+ORDER BY created_at DESC;
+
+-- PASO 5: SimulaciÃ³n para usuario tester@dev.com
+DO $$
+DECLARE
+    tester_id UUID;
+    admin_id UUID;
+BEGIN
+    -- Obtener IDs
+    SELECT id INTO tester_id FROM auth.users WHERE email = 'tester@dev.com';
+    SELECT id INTO admin_id FROM auth.users WHERE email = 'admin@example.com' LIMIT 1;
+
+    IF tester_id IS NULL THEN
+        SELECT id INTO tester_id FROM auth.users WHERE email LIKE '%test%' LIMIT 1;
+    END IF;
+
+    IF admin_id IS NULL THEN
+        SELECT id INTO admin_id FROM auth.users WHERE email != COALESCE((SELECT email FROM auth.users WHERE id = tester_id), '') LIMIT 1;
+    END IF;
+
+    RAISE NOTICE '========== IDS ==========';
+    RAISE NOTICE 'TESTER ID: %', tester_id;
+    RAISE NOTICE 'ADMIN ID: %', admin_id;
+
+    RAISE NOTICE '========== CONVERSACIONES PARA TESTER (por sender_id) ==========';
+    FOR rec IN (
+        SELECT lead_id, sender_id, sender_name, recipient_id, recipient_name, subject
+        FROM public.conversation_summaries
+        WHERE sender_id = tester_id
+    ) LOOP
+        RAISE NOTICE 'Lead: % | De: % (%) | Para: % (%)',
+            rec.lead_id, rec.sender_name, rec.sender_id, rec.recipient_name, rec.recipient_id;
+    END LOOP;
+
+    RAISE NOTICE '========== CONVERSACIONES PARA TESTER (por recipient_id) ==========';
+    FOR rec IN (
+        SELECT lead_id, sender_id, sender_name, recipient_id, recipient_name, subject
+        FROM public.conversation_summaries
+        WHERE recipient_id = tester_id
+    ) LOOP
+        RAISE NOTICE 'Lead: % | De: % (%) | Para: % (%)',
+            rec.lead_id, rec.sender_name, rec.sender_id, rec.recipient_name, rec.recipient_id;
+    END LOOP;
+
+    RAISE NOTICE '========== CONVERSACIONES PARA TESTER (sender_id OR recipient_id) ==========';
+    FOR rec IN (
+        SELECT lead_id, sender_id, sender_name, recipient_id, recipient_name, subject
+        FROM public.conversation_summaries
+        WHERE sender_id = tester_id OR recipient_id = tester_id
+    ) LOOP
+        RAISE NOTICE 'Lead: % | De: % (%) | Para: % (%)',
+            rec.lead_id, rec.sender_name, rec.sender_id, rec.recipient_name, rec.recipient_id;
+    END LOOP;
+END $$;
+
+``r
+---
+## [024_simple_debug.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- DIAGNÃ“STICO SIMPLE Y EFECTIVO
+-- =============================================
+
+-- Ver todos los leads
+SELECT
+    'ðŸ“‹ LEADS' as info,
+    id,
+    profile_id,
+    sender_email,
+    sender_name,
+    subject
+FROM public.leads
+ORDER BY created_at DESC;
+
+-- Ver todos los usuarios
+SELECT
+    'ðŸ‘¤ USUARIOS' as info,
+    id,
+    email
+FROM auth.users
+ORDER BY created_at DESC;
+
+-- Ver quÃ© devuelve conversation_summaries
+SELECT
+    'ðŸ’¬ CONVERSATION_SUMMARIES' as info,
+    lead_id,
+    sender_id,
+    sender_name,
+    recipient_id,
+    recipient_name,
+    subject,
+    message_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC;
+
+-- Ver profiles
+SELECT
+    'ðŸ‘¥ PROFILES' as info,
+    id,
+    full_name,
+    email
+FROM public.profiles
+ORDER BY created_at DESC;
+
+``r
+---
+## [025_verify_profile_user_match.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar que profiles.id = auth.users.id
+-- =============================================
+
+-- Ver relaciÃ³n entre usuarios y profiles
+SELECT
+    'ðŸ” VERIFICACIÃ“N USER <-> PROFILE' as info,
+    u.id as user_id,
+    u.email as user_email,
+    p.id as profile_id,
+    p.email as profile_email,
+    p.full_name,
+    CASE
+        WHEN u.id = p.id THEN 'âœ… COINCIDEN'
+        ELSE 'âŒ NO COINCIDEN'
+    END as match_status
+FROM auth.users u
+FULL OUTER JOIN public.profiles p ON u.id = p.id
+ORDER BY u.created_at DESC NULLS LAST;
+
+-- Ver quÃ© ID estÃ¡ usando MessagingView para filtrar
+-- Para el usuario tester@dev.com
+SELECT
+    'ðŸ“Š CONVERSACIONES PARA TESTER (usando profile.id)' as info,
+    cs.*
+FROM public.conversation_summaries cs
+WHERE
+    cs.sender_id = (SELECT id FROM public.profiles WHERE email = 'tester@dev.com')
+    OR
+    cs.recipient_id = (SELECT id FROM public.profiles WHERE email = 'tester@dev.com');
+
+-- Ver conversaciones usando auth.users.id
+SELECT
+    'ðŸ“Š CONVERSACIONES PARA TESTER (usando user.id)' as info,
+    cs.*
+FROM public.conversation_summaries cs
+WHERE
+    cs.sender_id = (SELECT id FROM auth.users WHERE email = 'tester@dev.com')
+    OR
+    cs.recipient_id = (SELECT id FROM auth.users WHERE email = 'tester@dev.com');
+
+``r
+---
+## [026_fix_conversation_view_final.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- SOLUCIÃ“N FINAL: Vista que no duplica lead_id
+-- =============================================
+
+-- Eliminar vista existente
+DROP VIEW IF EXISTS public.conversation_summaries CASCADE;
+
+-- Crear vista SIMPLE sin UNION
+-- Cada lead aparece UNA VEZ, y los filtros se hacen en el frontend
+CREATE VIEW public.conversation_summaries AS
+SELECT
+    l.id AS lead_id,
+    -- El sender es quien enviÃ³ el lead (su email estÃ¡ en sender_email)
+    COALESCE(
+        (SELECT u.id FROM auth.users u WHERE u.email = l.sender_email LIMIT 1),
+        (SELECT id FROM auth.users LIMIT 1)
+    ) AS sender_id,
+    COALESCE(l.sender_name, 'Usuario') AS sender_name,
+    -- El recipient es el dueÃ±o del perfil
+    l.profile_id AS recipient_id,
+    COALESCE(p.full_name, p.email, 'Usuario') AS recipient_name,
+    'INQUIRY' AS lead_type,
+    COALESCE(l.subject, 'Sin asunto') AS subject,
+    COALESCE(l.status, 'new') AS status,
+    -- Ãšltimo mensaje
+    (
+        SELECT m.content
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    ) AS last_message,
+    -- Fecha del Ãºltimo mensaje o creaciÃ³n del lead
+    COALESCE(
+        (
+            SELECT m.created_at
+            FROM public.messages m
+            WHERE m.lead_id = l.id
+            ORDER BY m.created_at DESC
+            LIMIT 1
+        ),
+        l.created_at
+    ) AS last_message_at,
+    -- Mensajes no leÃ­dos para el recipient
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+        AND m.is_read = FALSE
+        AND m.sender_id != l.profile_id
+    ) AS unread_count,
+    -- Total de mensajes
+    (
+        SELECT COUNT(*)
+        FROM public.messages m
+        WHERE m.lead_id = l.id
+    ) AS message_count
+FROM public.leads l
+LEFT JOIN public.profiles p ON p.id = l.profile_id;
+
+-- Verificar
+SELECT
+    'âœ… VISTA RECREADA SIN DUPLICADOS' as status,
+    COUNT(*) as total_conversaciones
+FROM public.conversation_summaries;
+
+-- Mostrar algunas conversaciones
+SELECT
+    lead_id,
+    sender_id,
+    sender_name,
+    recipient_id,
+    recipient_name,
+    subject,
+    message_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC
+LIMIT 10;
+
+``r
+---
+## [027_verify_tester_conversations.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar conversaciones especÃ­ficas para Tster
+-- =============================================
+
+-- Ver el ID del usuario Tster
+SELECT
+    'ðŸ‘¤ ID DE TSTER' as info,
+    id as user_id,
+    email
+FROM auth.users
+WHERE email = 'tester@dev.com';
+
+-- Ver TODAS las conversaciones de la vista
+SELECT
+    'ðŸ“‹ TODAS LAS CONVERSACIONES' as info,
+    lead_id,
+    sender_id,
+    sender_name,
+    recipient_id,
+    recipient_name,
+    subject,
+    message_count
+FROM public.conversation_summaries
+ORDER BY last_message_at DESC;
+
+-- Simular el filtro exacto que usa el frontend para Tster
+SELECT
+    'ðŸ” FILTRO FRONTEND PARA TSTER' as info,
+    *
+FROM public.conversation_summaries
+WHERE
+    sender_id = (SELECT id FROM auth.users WHERE email = 'tester@dev.com')
+    OR
+    recipient_id = (SELECT id FROM auth.users WHERE email = 'tester@dev.com')
+ORDER BY last_message_at DESC;
+
+-- Ver si hay algÃºn problema con el profile
+SELECT
+    'ðŸ‘¥ PROFILE DE TSTER' as info,
+    p.id as profile_id,
+    p.email as profile_email,
+    u.id as user_id,
+    u.email as user_email,
+    CASE WHEN p.id = u.id THEN 'âœ… COINCIDEN' ELSE 'âŒ NO COINCIDEN' END as match_status
+FROM public.profiles p
+JOIN auth.users u ON u.email = 'tester@dev.com'
+WHERE p.email = 'tester@dev.com' OR p.id = u.id;
+
+``r
+---
+## [028_check_rls_conversation_summaries.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- Verificar y deshabilitar RLS en conversation_summaries
+-- =============================================
+
+-- Ver si la vista tiene RLS activado (las vistas no deberÃ­an tener RLS, pero verificamos)
+SELECT
+    schemaname,
+    tablename,
+    rowsecurity
+FROM pg_tables
+WHERE tablename = 'conversation_summaries';
+
+-- Verificar polÃ­ticas RLS en las tablas base
+SELECT
+    'ðŸ”’ POLÃTICAS RLS EN LEADS' as info,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual
+FROM pg_policies
+WHERE tablename = 'leads';
+
+SELECT
+    'ðŸ”’ POLÃTICAS RLS EN MESSAGES' as info,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual
+FROM pg_policies
+WHERE tablename = 'messages';
+
+-- Verificar si RLS estÃ¡ activado en las tablas
+SELECT
+    'ðŸ“Š ESTADO RLS' as info,
+    tablename,
+    rowsecurity as rls_enabled
+FROM pg_tables
+WHERE schemaname = 'public'
+AND tablename IN ('leads', 'messages', 'profiles');
+
+-- Desactivar RLS si estÃ¡ activado
+ALTER TABLE IF EXISTS public.leads DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+
+SELECT 'âœ… RLS DESACTIVADO EN TODAS LAS TABLAS' as status;
+
+``r
+---
+## [029_create_cv_versions_table.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- TABLA CV_VERSIONS - Sistema de Versiones de CV
+-- =============================================
+
+-- Eliminar constraint existente si existe (para permitir todos los templates)
+ALTER TABLE IF EXISTS public.cv_versions DROP CONSTRAINT IF EXISTS cv_versions_template_check;
+
+-- Crear la tabla cv_versions si no existe
+CREATE TABLE IF NOT EXISTS public.cv_versions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    version_name TEXT NOT NULL,
+    country TEXT,
+    role TEXT,
+    sections JSONB NOT NULL DEFAULT '[]'::jsonb,
+    template TEXT NOT NULL DEFAULT 'modern',
+    template_color TEXT,
+    snapshot_data JSONB,
+    export_options JSONB DEFAULT jsonb_build_object(
+        'includePhoto', true,
+        'includeStamps', true,
+        'includeSummary', true,
+        'includeSkills', true,
+        'includeLanguages', true,
+        'includeCertifications', true,
+        'includePortfolio', true
+    ),
+    notes TEXT,
+    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ãndices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS idx_cv_versions_profile_id ON public.cv_versions(profile_id);
+CREATE INDEX IF NOT EXISTS idx_cv_versions_country ON public.cv_versions(country);
+CREATE INDEX IF NOT EXISTS idx_cv_versions_template ON public.cv_versions(template);
+CREATE INDEX IF NOT EXISTS idx_cv_versions_created_at ON public.cv_versions(created_at DESC);
+
+-- FunciÃ³n para actualizar updated_at automÃ¡ticamente
+CREATE OR REPLACE FUNCTION update_cv_versions_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para actualizar updated_at
+DROP TRIGGER IF EXISTS trigger_update_cv_versions_updated_at ON public.cv_versions;
+CREATE TRIGGER trigger_update_cv_versions_updated_at
+    BEFORE UPDATE ON public.cv_versions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_cv_versions_updated_at();
+
+-- PolÃ­ticas RLS (Row Level Security)
+ALTER TABLE public.cv_versions ENABLE ROW LEVEL SECURITY;
+
+-- PolÃ­tica: Los usuarios pueden ver sus propias versiones
+DROP POLICY IF EXISTS "Users can view their own CV versions" ON public.cv_versions;
+CREATE POLICY "Users can view their own CV versions"
+    ON public.cv_versions
+    FOR SELECT
+    USING (profile_id = auth.uid());
+
+-- PolÃ­tica: Los usuarios pueden crear sus propias versiones
+DROP POLICY IF EXISTS "Users can create their own CV versions" ON public.cv_versions;
+CREATE POLICY "Users can create their own CV versions"
+    ON public.cv_versions
+    FOR INSERT
+    WITH CHECK (profile_id = auth.uid());
+
+-- PolÃ­tica: Los usuarios pueden actualizar sus propias versiones
+DROP POLICY IF EXISTS "Users can update their own CV versions" ON public.cv_versions;
+CREATE POLICY "Users can update their own CV versions"
+    ON public.cv_versions
+    FOR UPDATE
+    USING (profile_id = auth.uid());
+
+-- PolÃ­tica: Los usuarios pueden eliminar sus propias versiones
+DROP POLICY IF EXISTS "Users can delete their own CV versions" ON public.cv_versions;
+CREATE POLICY "Users can delete their own CV versions"
+    ON public.cv_versions
+    FOR DELETE
+    USING (profile_id = auth.uid());
+
+-- FunciÃ³n para obtener estadÃ­sticas de versiones
+DROP FUNCTION IF EXISTS get_cv_version_stats(UUID);
+CREATE OR REPLACE FUNCTION get_cv_version_stats(p_profile_id UUID)
+RETURNS TABLE (
+    total_versions BIGINT,
+    versions_by_country JSONB,
+    versions_by_template JSONB,
+    most_recent_version JSONB
+) AS $$
+DECLARE
+    v_total BIGINT;
+    v_by_country JSONB;
+    v_by_template JSONB;
+    v_recent JSONB;
+BEGIN
+    -- Contar total
+    SELECT COUNT(*) INTO v_total
+    FROM public.cv_versions
+    WHERE profile_id = p_profile_id;
+
+    -- Agrupar por paÃ­s
+    SELECT jsonb_object_agg(
+        COALESCE(country, 'Sin paÃ­s'),
+        cnt
+    ) INTO v_by_country
+    FROM (
+        SELECT country, COUNT(*)::INT as cnt
+        FROM public.cv_versions
+        WHERE profile_id = p_profile_id
+        GROUP BY country
+    ) t;
+
+    -- Agrupar por template
+    SELECT jsonb_object_agg(template, cnt) INTO v_by_template
+    FROM (
+        SELECT template, COUNT(*)::INT as cnt
+        FROM public.cv_versions
+        WHERE profile_id = p_profile_id
+        GROUP BY template
+    ) t;
+
+    -- Obtener la mÃ¡s reciente
+    SELECT jsonb_build_object(
+        'id', id,
+        'version_name', version_name,
+        'created_at', created_at
+    ) INTO v_recent
+    FROM public.cv_versions
+    WHERE profile_id = p_profile_id
+    ORDER BY created_at DESC
+    LIMIT 1;
+
+    RETURN QUERY SELECT v_total, v_by_country, v_by_template, v_recent;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- FunciÃ³n para duplicar una versiÃ³n
+-- Eliminar todas las versiones existentes de esta funciÃ³n
+DROP FUNCTION IF EXISTS duplicate_cv_version(UUID, TEXT);
+DROP FUNCTION IF EXISTS duplicate_cv_version;
+
+CREATE FUNCTION duplicate_cv_version(
+    p_version_id UUID,
+    p_new_name TEXT
+)
+RETURNS UUID AS $$
+DECLARE
+    v_new_id UUID;
+    v_original record;
+BEGIN
+    -- Obtener la versiÃ³n original
+    SELECT * INTO v_original
+    FROM public.cv_versions
+    WHERE id = p_version_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Version not found: %', p_version_id;
+    END IF;
+
+    -- Crear la nueva versiÃ³n (sin created_by para evitar problemas con auth.uid())
+    INSERT INTO public.cv_versions (
+        profile_id,
+        version_name,
+        country,
+        role,
+        sections,
+        template,
+        template_color,
+        snapshot_data,
+        export_options,
+        notes
+    ) VALUES (
+        v_original.profile_id,
+        p_new_name,
+        v_original.country,
+        v_original.role,
+        v_original.sections,
+        v_original.template,
+        v_original.template_color,
+        v_original.snapshot_data,
+        v_original.export_options,
+        'Duplicado de: ' || v_original.version_name
+    )
+    RETURNING id INTO v_new_id;
+
+    RETURN v_new_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Comentarios para documentaciÃ³n
+COMMENT ON TABLE public.cv_versions IS 'Almacena diferentes versiones de CV personalizadas por paÃ­s/rol';
+COMMENT ON COLUMN public.cv_versions.snapshot_data IS 'Snapshot completo del perfil en el momento de creaciÃ³n';
+COMMENT ON COLUMN public.cv_versions.sections IS 'Array de secciones incluidas en esta versiÃ³n (profile, experience, education, etc.)';
+COMMENT ON COLUMN public.cv_versions.export_options IS 'Opciones de exportaciÃ³n (incluir foto, stamps, etc.)';
+COMMENT ON FUNCTION get_cv_version_stats IS 'Obtiene estadÃ­sticas agregadas de versiones para un perfil';
+COMMENT ON FUNCTION duplicate_cv_version IS 'Duplica una versiÃ³n existente con un nuevo nombre';
+
+``r
+---
+## [030_check_and_clean_cv_versions.sql]
+Fecha de consolidación: 2025-11-24 18:58:16
+
+`sql
+-- =============================================
+-- CHECK AND CLEAN CV VERSIONS
+-- =============================================
+-- Este script te ayuda a verificar y limpiar versiones de CV con datos incorrectos
+
+-- 1. VER TODAS LAS VERSIONES EXISTENTES
+-- Ejecuta esto primero para ver quÃ© hay en la tabla:
+/*
+SELECT
+    id,
+    profile_id,
+    version_name,
+    country,
+    template,
+    created_at,
+    (snapshot_data->'profile'->>'full_name') as nombre_en_snapshot
+FROM public.cv_versions
+ORDER BY created_at DESC;
+*/
+
+-- 2. SI VES VERSIONES CON DATOS INCORRECTOS (ADMINISTRATOR u otros nombres), ELIMÃNALAS:
+-- OPCIÃ“N A: Eliminar TODAS las versiones (si todas tienen datos incorrectos)
+/*
+DELETE FROM public.cv_versions;
+*/
+
+-- OPCIÃ“N B: Eliminar solo versiones especÃ­ficas por ID
+-- Reemplaza 'ID_AQUI' con el ID de la versiÃ³n incorrecta
+/*
+DELETE FROM public.cv_versions WHERE id = 'ID_AQUI';
+*/
+
+-- 3. VERIFICAR QUE TU PROFILE_ID ES CORRECTO
+-- Esto te muestra tu profile_id actual (el que deberÃ­as usar)
+/*
+SELECT id, full_name, email
+FROM public.profiles
+WHERE id = auth.uid();
+*/
+
+-- =============================================
+-- INSTRUCCIONES DE USO:
+-- =============================================
+-- 1. Ve al SQL Editor de Supabase
+-- 2. Ejecuta la query del paso 1 (descomenta removiendo /* */)
+-- 3. Si ves versiones con "ADMINISTRATOR" u otros datos incorrectos, elimÃ­nalas con paso 2
+-- 4. Verifica tu profile_id correcto con paso 3
+-- 5. Luego en la aplicaciÃ³n, crea una NUEVA versiÃ³n de CV
+-- 6. La nueva versiÃ³n tendrÃ¡ tus datos correctos actuales
+
+
+``r
+---

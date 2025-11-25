@@ -501,14 +501,15 @@ function generateHTMLFromSnapshot(data: any, versionName: string, template: stri
 }
 
 export function CVVersionsSection() {
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
   const {
     versions,
     stats,
     isLoading,
     error,
     deleteVersion,
-    duplicateVersion
+    duplicateVersion,
+    fetchCurrentProfileData
   } = useCVVersions();
 
   const { exportAndDownload, isExporting: isExportingFile } = useATSExport({ preferServerSide: true });
@@ -517,6 +518,9 @@ export function CVVersionsSection() {
   const [selectedVersion, setSelectedVersion] = useState<CVVersion | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exportingId, setExportingId] = useState<string | null>(null);
+
+  // Check if user is admin (only admin email can access)
+  const isAdmin = profile?.email === 'admin@yourcvpassport.com';
 
   // Check if error is due to missing table
   const isTableMissing = error && (
@@ -562,18 +566,19 @@ export function CVVersionsSection() {
     setExportingId(version.id);
 
     try {
-      // Use snapshot_data from the version for export
-      const snapshotData = version.snapshot_data;
+      // ALWAYS use CURRENT profile data, not old snapshot
+      // This ensures the CV always shows your latest information
+      const currentProfileData = await fetchCurrentProfileData();
 
-      if (!snapshotData) {
-        throw new Error('No hay datos disponibles para exportar en esta versión');
+      if (!currentProfileData) {
+        throw new Error('No se pudo cargar tu perfil actual. Por favor, intenta nuevamente.');
       }
 
       // Extract template from version or use default
       const template = version.template || 'modern';
 
-      // Generate HTML content from snapshot_data
-      const htmlContent = generateHTMLFromSnapshot(snapshotData, version.version_name, template);
+      // Generate HTML content from CURRENT profile data
+      const htmlContent = generateHTMLFromSnapshot(currentProfileData, version.version_name, template);
 
       // Create a temporary window with the CV data
       const printWindow = window.open('', '_blank');
@@ -602,6 +607,50 @@ export function CVVersionsSection() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Block access for non-admin users
+  if (!isAdmin) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 border-2 border-gray-300 dark:border-gray-700 rounded-2xl p-10 text-center shadow-lg">
+          {/* Lock Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-5">
+              <svg className="w-16 h-16 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Title */}
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+            Función en Desarrollo
+          </h2>
+
+          {/* Description */}
+          <p className="text-gray-700 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+            La sección "Versiones de CV" está temporalmente deshabilitada mientras trabajamos en mejorarla.
+          </p>
+
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 rounded-full">
+            <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-yellow-800 dark:text-yellow-300 font-semibold">
+              Disponible próximamente
+            </span>
+          </div>
+
+          {/* Additional Info */}
+          <div className="mt-8 text-sm text-gray-600 dark:text-gray-400">
+            <p>Estamos trabajando en optimizar esta función para ofrecerte la mejor experiencia.</p>
+            <p className="mt-2">Por ahora, puedes seguir usando todas las demás funciones del dashboard.</p>
+          </div>
+        </div>
       </div>
     );
   }

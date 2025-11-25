@@ -408,7 +408,7 @@ export function CreateVersionModal({
                       key={section.id}
                       type="button"
                       onClick={() => toggleSection(section.id)}
-                      className={`p-2.5 border-2 rounded-lg text-left transition-all ${
+                      className={`p-2 border-2 rounded-md text-left transition-all ${
                         isSelected
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
                           : 'border-gray-200 dark:border-dark-border hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -416,12 +416,12 @@ export function CreateVersionModal({
                     >
                       <div className="flex items-center gap-2">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                          <div className="font-medium text-xs text-gray-900 dark:text-white truncate">
                             {section.label}
                           </div>
                         </div>
                         {isSelected && (
-                          <FiCheck className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                          <FiCheck className="w-3.5 h-3.5 text-green-600 dark:text-green-400 flex-shrink-0" />
                         )}
                       </div>
                     </button>
@@ -429,12 +429,12 @@ export function CreateVersionModal({
                 })}
               </div>
 
-              {/* Section Reordering - Compact */}
+              {/* Section Reordering - Ultra Compact */}
               {selectedSections.length > 0 && (
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FiMove className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 rounded-lg p-2.5 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <FiMove className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                    <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">
                       Orden
                     </span>
                     <span className="ml-auto text-[10px] text-gray-500 dark:text-gray-400 italic">
@@ -469,10 +469,10 @@ export function CreateVersionModal({
               )}
             </div>
 
-            {/* Notes - Compact */}
-            <div className="bg-white dark:bg-gray-800/30 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Notes - Ultra Compact */}
+            <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/30 dark:to-gray-800/10 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+              <label className="block text-xs font-medium text-gray-900 dark:text-white mb-1.5 flex items-center gap-1">
+                <svg className="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
                 Notas (opcional)
@@ -480,46 +480,46 @@ export function CreateVersionModal({
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Añade notas (ej: 'Versión sin foto para EE.UU.')..."
+                placeholder="Añade notas internas (ej: 'Sin foto para EE.UU.')..."
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
 
-            {/* Actions - Fixed at bottom */}
-            <div className="flex justify-end gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-dark-bg-secondary -mx-5 -mb-5 px-5 pb-5">
+            {/* Actions - Fixed at bottom with shadow */}
+            <div className="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-dark-bg-secondary -mx-4 -mb-4 px-4 pb-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium transition-all text-sm"
+                className="px-4 py-1.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium transition-all text-sm"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isCreating}
-                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {isCreating ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="flex items-center gap-1.5">
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     {editingVersion ? 'Actualizando...' : 'Creando...'}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5">
                     {editingVersion ? (
                       <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Actualizar Versión
+                        Actualizar
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Crear Versión
+                        Crear
                       </>
                     )}
                   </span>
@@ -560,15 +560,15 @@ function SortableSectionItem({ id, index, label }: SortableSectionItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg cursor-move hover:border-blue-400 dark:hover:border-blue-600 transition-all"
+      className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md cursor-move hover:border-blue-400 dark:hover:border-blue-600 transition-all"
       {...attributes}
       {...listeners}
     >
-      <FiMove className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-      <div className="flex items-center justify-center w-5 h-5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[10px] font-bold flex-shrink-0">
+      <FiMove className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+      <div className="flex items-center justify-center w-4 h-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[9px] font-bold flex-shrink-0">
         {index + 1}
       </div>
-      <span className="text-sm text-gray-900 dark:text-white font-medium truncate">{label}</span>
+      <span className="text-xs text-gray-900 dark:text-white font-medium truncate">{label}</span>
     </div>
   );
 }

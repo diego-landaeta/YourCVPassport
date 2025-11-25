@@ -44,7 +44,7 @@ async function checkTableExists(): Promise<boolean> {
 async function runMigration(): Promise<void> {
   console.log('📦 Leyendo archivo de migración...');
 
-  const migrationPath = join(process.cwd(), 'supabase', 'migrations', '20250120_cv_versions.sql');
+  const migrationPath = join(process.cwd(), 'supabase', 'migrations', '029_create_cv_versions_table.sql');
   const migrationSQL = readFileSync(migrationPath, 'utf-8');
 
   console.log('🚀 Ejecutando migración...');
@@ -99,7 +99,7 @@ async function main() {
     console.log('1. Ve a: https://supabase.com/dashboard/project/djehzlzombqrzzuchcef/sql');
     console.log('2. Abre el SQL Editor');
     console.log('3. Copia y pega el contenido de:');
-    console.log('   supabase/migrations/20250120_cv_versions.sql');
+    console.log('   supabase/migrations/029_create_cv_versions_table.sql');
     console.log('4. Haz click en "Run" o presiona Ctrl+Enter\n');
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
