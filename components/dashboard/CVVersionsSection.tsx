@@ -9,6 +9,7 @@ import { useATSExport } from '../../hooks/useATSExport';
 import { useAuth } from '../../contexts/AuthContext';
 import { CVVersion } from '../../types';
 import { CreateVersionModal } from './CreateVersionModal';
+import { useToastContext } from '../../context/ToastContext';
 
 // SVG Icons
 const PlusIcon = () => (
@@ -502,6 +503,7 @@ function generateHTMLFromSnapshot(data: any, versionName: string, template: stri
 
 export function CVVersionsSection() {
   const { session, profile } = useAuth();
+  const toast = useToastContext();
   const {
     versions,
     stats,
@@ -539,7 +541,7 @@ export function CVVersionsSection() {
     setDeletingId(null);
 
     if (!success) {
-      alert('Error al eliminar la versión');
+      toast.error('Error al eliminar la versión');
     }
   };
 
@@ -553,13 +555,15 @@ export function CVVersionsSection() {
 
     const newId = await duplicateVersion(version.id, newName);
     if (!newId) {
-      alert('Error al duplicar la versión');
+      toast.error('Error al duplicar la versión');
+    } else {
+      toast.success('Versión duplicada exitosamente');
     }
   };
 
   const handleExport = async (version: CVVersion) => {
     if (!session?.user?.id) {
-      alert('Debes iniciar sesión para exportar');
+      toast.warning('Debes iniciar sesión para exportar');
       return;
     }
 
@@ -595,9 +599,8 @@ export function CVVersionsSection() {
       }, 500);
 
     } catch (error) {
-      console.error('Error exporting version:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Error al exportar la versión: ${errorMessage}\n\nPor favor, intenta nuevamente.`);
+      toast.error(`Error al exportar la versión: ${errorMessage}. Por favor, intenta nuevamente.`, 8000);
     } finally {
       setExportingId(null);
     }

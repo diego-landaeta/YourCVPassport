@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 
 interface PasswordRecoveryFormProps {
   mode?: 'request' | 'reset';
@@ -14,6 +15,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
   const t = translations.dashboard.auth.recovery;
   const errors = translations.dashboard.auth.errors;
   const success = translations.dashboard.auth.success;
+  const toast = useToastContext();
 
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -51,11 +53,12 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
       const { error: authError } = await resetPassword(email);
 
       if (authError) {
-        console.error('Password reset request error:', authError);
         if (authError.message?.includes('rate limit')) {
-          setError(errors.tooManyAttempts);
+          setError(errors.tooManyRequests);
+          toast.error(errors.tooManyRequests, 5000);
         } else {
           setError(errors.serverError);
+          toast.error(errors.serverError, 5000);
         }
         setIsLoading(false);
         return;
@@ -65,8 +68,8 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
       setEmailSent(true);
       setIsLoading(false);
     } catch (err) {
-      console.error('Password reset request error:', err);
       setError(errors.serverError);
+      toast.error(errors.serverError, 5000);
       setIsLoading(false);
     }
   };
@@ -99,14 +102,15 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
       const { error: authError } = await updatePassword(newPassword);
 
       if (authError) {
-        console.error('Password update error:', authError);
         setError(errors.serverError);
+        toast.error(errors.serverError, 5000);
         setIsLoading(false);
         return;
       }
 
       // Success
       setPasswordReset(true);
+      toast.success(success.passwordUpdated, 5000);
       setIsLoading(false);
 
       // Redirect to dashboard after 2 seconds
@@ -114,8 +118,8 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
         navigate('/dashboard');
       }, 2000);
     } catch (err) {
-      console.error('Password update error:', err);
       setError(errors.serverError);
+      toast.error(errors.serverError, 5000);
       setIsLoading(false);
     }
   };
@@ -146,7 +150,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
             {t.checkEmail}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            {t.emailSentMessage} <span className="font-medium text-gray-900 dark:text-white">{email}</span>
+            {t.checkEmailDesc} <span className="font-medium text-gray-900 dark:text-white">{email}</span>
           </p>
 
           <Link
@@ -186,7 +190,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
             {success.passwordUpdated}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            {t.successMessage}
+            {success.passwordUpdated}
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -283,7 +287,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {t.resetPassword}
+            {t.newPasswordTitle}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Enter your new password

@@ -11,6 +11,7 @@ import { routeConfig } from './routeConfig';
 import LoadingSpinner from './components/LoadingSpinner';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './context/ToastContext';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./components/HomePage'));
@@ -42,10 +43,6 @@ const AppContent: React.FC = () => {
       { path: route.path_es, component: route.component, props: route.props },
     ]);
     const uniqueRoutes = Array.from(new Map(allRoutes.map(item => [item.path, item])).values());
-
-    // Debug: Log current pathname
-    const location = window.location;
-    console.log('[AppContent] Current URL:', location.pathname);
 
     return (
       <Suspense fallback={<LoadingSpinner />}>
@@ -120,17 +117,19 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <QueryProvider>
         <HelmetProvider>
-          <AuthProvider>
-            <Router>
-              <LanguageProvider>
-                <MainLayout>
-                  <ErrorBoundary>
-                    <AppContent />
-                  </ErrorBoundary>
-                </MainLayout>
-              </LanguageProvider>
-            </Router>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <Router>
+                <LanguageProvider>
+                  <MainLayout>
+                    <ErrorBoundary>
+                      <AppContent />
+                    </ErrorBoundary>
+                  </MainLayout>
+                </LanguageProvider>
+              </Router>
+            </AuthProvider>
+          </ToastProvider>
         </HelmetProvider>
       </QueryProvider>
     </ErrorBoundary>

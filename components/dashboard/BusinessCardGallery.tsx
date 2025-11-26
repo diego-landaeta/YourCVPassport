@@ -5,6 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { businessCardStyles, BusinessCardStyle } from './businessCardStyles';
 import { templates } from '../templates/templateData';
 import { supabase } from '../../supabase/client';
+import { useToastContext } from '../../context/ToastContext';
 
 interface BusinessCardGalleryProps {
   profile: Profile | null;
@@ -250,6 +251,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
 
 const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shareUrl, userEmail }) => {
   const { lang } = useLanguage();
+  const toast = useToastContext();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'free' | 'pro'>('all');
   const [selectedCard, setSelectedCard] = useState<string>(profile?.business_card_template || profile?.template || 'classic');
@@ -277,7 +279,7 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
         });
         setQrCodeUrl(url);
       } catch (err) {
-        console.error('Error generating QR code:', err);
+        toast.error('Error al generar código QR');
       }
     };
 
@@ -311,12 +313,12 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
         .eq('id', profile.id);
 
       if (error) {
-        console.error('Error saving business card selection:', error);
+        toast.error('Error al guardar selección de tarjeta');
         // Revert selection on error
         setSelectedCard(profile?.business_card_template || profile?.template || 'classic');
       }
     } catch (error) {
-      console.error('Error:', error);
+      toast.error('Error al guardar tarjeta de presentación');
       setSelectedCard(profile?.business_card_template || profile?.template || 'classic');
     } finally {
       setIsSaving(false);

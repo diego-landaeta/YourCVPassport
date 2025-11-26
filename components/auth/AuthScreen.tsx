@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 import OAuthButtons from './OAuthButtons';
 
 const AuthScreen: React.FC = () => {
@@ -10,6 +11,7 @@ const AuthScreen: React.FC = () => {
   const { signInWithEmail, signUpWithEmail, user } = useAuth();
   const translations = useTranslations();
   const t = translations.dashboard.auth;
+  const toast = useToastContext();
 
   // Detect if we're on /login or /signup and set initial view accordingly
   const [isLoginView, setIsLoginView] = useState(location.pathname === '/login');
@@ -79,7 +81,7 @@ const AuthScreen: React.FC = () => {
         }
         navigate('/dashboard');
       } catch (err) {
-        console.error('Login error:', err);
+        toast.error(t.errors.serverError);
         setError(t.errors.serverError);
         setIsLoading(false);
       }
@@ -126,15 +128,14 @@ const AuthScreen: React.FC = () => {
         }
 
         setSuccessMessage(t.success.signUpSuccess);
-        // Show popup as requested by user
-        window.alert(`${t.signup.checkEmail}\n${t.signup.checkEmailAction}`);
-        
+        toast.success(`${t.signup.checkEmail} ${t.signup.checkEmailAction}`, 8000);
+
         setIsLoading(false);
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } catch (err) {
-        console.error('Signup error:', err);
+        toast.error(t.errors.serverError);
         setError(t.errors.serverError);
         setIsLoading(false);
       }

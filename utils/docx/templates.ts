@@ -153,9 +153,8 @@ function generateModernDOCX(
       }
 
       // Achievements
-      if (exp.achievements) {
-        const achievements = exp.achievements.split('\n').filter((a: string) => a.trim());
-        achievements.forEach((achievement: string) => {
+      if (exp.achievements && Array.isArray(exp.achievements)) {
+        exp.achievements.forEach((achievement: string) => {
           sections.push(
             new Paragraph({
               text: `• ${achievement.trim()}`,
@@ -179,7 +178,7 @@ function generateModernDOCX(
         new Paragraph({
           children: [
             new TextRun({
-              text: `${edu.degree} - ${edu.institution}`,
+              text: `${edu.degree} - ${edu.institution_name}`,
               bold: true,
               size: 24,
             }),
@@ -261,10 +260,10 @@ function generateModernDOCX(
   }
 
   // Portfolio
-  if (profile.portfolio && profile.portfolio.length > 0) {
+  if (profile.portfolioItems && profile.portfolioItems.length > 0) {
     sections.push(createSectionHeader(translations.portfolio, true));
 
-    profile.portfolio.slice(0, 5).forEach((item: any) => {
+    profile.portfolioItems.slice(0, 5).forEach((item: any) => {
       sections.push(
         new Paragraph({
           children: [
@@ -300,7 +299,7 @@ function generateModernDOCX(
     stamps.forEach((stamp: Stamp) => {
       sections.push(
         new Paragraph({
-          text: `✓ ${formatStampType(stamp.stamp_type, language)}`,
+          text: `✓ ${formatStampType(stamp.type, language)}`,
           spacing: { after: 100 },
         })
       );
@@ -384,14 +383,6 @@ function generateModernDOCX(
               before: 240,
               after: 120,
             },
-            border: {
-              bottom: {
-                color: '2563eb',
-                space: 1,
-                style: BorderStyle.SINGLE,
-                size: 6,
-              },
-            },
           },
         },
         {
@@ -456,6 +447,14 @@ function createSectionHeader(text: string, withBorder: boolean = true): Paragrap
     text: text.toUpperCase(),
     heading: HeadingLevel.HEADING_2,
     style: 'heading2',
+    border: withBorder ? {
+      bottom: {
+        color: '2563eb',
+        space: 1,
+        style: BorderStyle.SINGLE,
+        size: 6,
+      },
+    } : undefined,
   });
 }
 

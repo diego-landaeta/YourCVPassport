@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToastContext } from '../../context/ToastContext';
 import { Visa } from '../../types';
 import { 
   ArrowLeftIcon,
@@ -16,6 +17,7 @@ const VisaForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const toast = useToastContext();
   const isEditing = !!id;
 
   const [loading, setLoading] = useState(isEditing);
@@ -61,7 +63,7 @@ const VisaForm: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading visa:', error);
-      alert('Error al cargar la Visa');
+      toast.error('Error al cargar la Visa');
       navigate('/dashboard/visas');
     } finally {
       setLoading(false);
@@ -145,7 +147,7 @@ const VisaForm: React.FC = () => {
 
   const generateWithAI = async (field: 'context' | 'action' | 'results') => {
     if (!formData.title) {
-      alert('Por favor ingresa un título primero');
+      toast.warning('Por favor ingresa un título primero');
       return;
     }
 
@@ -168,7 +170,7 @@ const VisaForm: React.FC = () => {
       }));
     } catch (error) {
       console.error('Error generating with AI:', error);
-      alert('Error al generar contenido con IA');
+      toast.error('Error al generar contenido con IA');
     } finally {
       setAiGenerating(null);
     }
@@ -223,7 +225,7 @@ const VisaForm: React.FC = () => {
       if (error.message?.includes('visas_slug_unique')) {
         setErrors({ slug: 'Este slug ya existe. Por favor usa otro.' });
       } else {
-        alert('Error al guardar la Visa');
+        toast.error('Error al guardar la Visa');
       }
     } finally {
       setSaving(false);

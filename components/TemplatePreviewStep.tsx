@@ -43,7 +43,7 @@ const transformCvDataToProfileData = (cvData: CVData): FullProfileData => {
         },
         experiences: cvData.experience.map(exp => ({
             profile_id: '',
-            title: exp.title,
+            position: exp.title,
             company_name: exp.company,
             start_date: '2023-01-01', // Placeholder date
             end_date: null,
@@ -60,6 +60,8 @@ const transformCvDataToProfileData = (cvData: CVData): FullProfileData => {
         })),
         // FIX: The map function was incorrect. cvData.skills is already Skill[].
         skills: cvData.skills,
+        certifications: [],
+        languages: [],
         services: [],
         stats: [],
         portfolioItems: []

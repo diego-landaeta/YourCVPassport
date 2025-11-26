@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 import {
   PaperAirplaneIcon,
   ArrowLeftIcon,
@@ -40,6 +41,7 @@ interface MessagingViewProps {
 const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, onBack }) => {
   const { user, profile } = useAuth();
   const t = useTranslations();
+  const toast = useToastContext();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(initialLeadId || null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -162,8 +164,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
       console.log('✅ Messages loaded:', data?.length || 0);
       setMessages(data || []);
     } catch (err: any) {
-      console.error('❌ Failed to load messages:', err);
-      alert('Error al cargar mensajes: ' + (err.message || 'Error desconocido'));
+      toast.error('Error al cargar mensajes: ' + (err.message || 'Error desconocido'));
     }
   };
 
@@ -272,8 +273,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
       // Remove temp message on error
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent); // Restore message
-      
-      alert('Error al enviar el mensaje: ' + (err.message || 'Error desconocido'));
+
+      toast.error('Error al enviar el mensaje: ' + (err.message || 'Error desconocido'));
     } finally {
       setSending(false);
     }

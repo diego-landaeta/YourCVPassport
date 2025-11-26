@@ -1122,6 +1122,11 @@ export const translations = {
                 signUpLink: "Regístrate",
                 divider: "O continuar con",
                 loggingIn: "Iniciando sesión...",
+                emailPlaceholder: "tu.email@ejemplo.com",
+                passwordPlaceholder: "Ingresa tu contraseña",
+                submit: "Iniciar Sesión",
+                signUp: "Regístrate gratis",
+                orContinue: "O continuar con",
             },
             signup: {
                 title: "Crea tu Cuenta",
@@ -1140,6 +1145,15 @@ export const translations = {
                 loginLink: "Inicia sesión",
                 divider: "O regístrate con",
                 passwordRequirements: "Mínimo 8 caracteres, debe incluir mayúsculas, minúsculas y números",
+                fullNamePlaceholder: "Juan Pérez",
+                emailPlaceholder: "tu.email@ejemplo.com",
+                passwordPlaceholder: "Mínimo 8 caracteres",
+                confirmPasswordPlaceholder: "Repite tu contraseña",
+                orContinue: "O continuar con",
+                checkEmail: "¡Revisa tu correo!",
+                checkEmailDesc: "Te hemos enviado un enlace de confirmación a",
+                checkEmailAction: "Haz clic en el enlace del correo para iniciar sesión al instante.",
+                sending: "Enviando...",
             },
             oauth: {
                 google: "Continuar con Google",
@@ -1155,6 +1169,8 @@ export const translations = {
                 emailSentMessage: "Te hemos enviado un enlace mágico a",
                 clickLink: "Haz clic en el enlace para iniciar sesión de forma segura.",
                 backToLogin: "Volver a Iniciar Sesión",
+                emailPlaceholder: "tu.email@ejemplo.com",
+                submit: "Enviar Enlace Mágico",
             },
             recovery: {
                 title: "Recuperar Contraseña",
@@ -1172,6 +1188,16 @@ export const translations = {
                 resetting: "Restableciendo...",
                 successMessage: "Tu contraseña ha sido restablecida exitosamente",
                 loginNow: "Iniciar sesión ahora",
+                emailPlaceholder: "tu.email@ejemplo.com",
+                submit: "Enviar Enlace",
+                newPasswordTitle: "Establecer Nueva Contraseña",
+                newPasswordSubtitle: "Ingresa tu nueva contraseña abajo",
+                newPasswordPlaceholder: "Mínimo 8 caracteres",
+                confirmPasswordPlaceholder: "Repite tu nueva contraseña",
+                submitNewPassword: "Actualizar Contraseña",
+                successTitle: "¡Contraseña Actualizada!",
+                successDesc: "Tu contraseña ha sido actualizada exitosamente.",
+                successAction: "Volver a iniciar sesión",
             },
             errors: {
                 invalidEmail: "Por favor ingresa un correo electrónico válido",
@@ -1277,6 +1303,7 @@ export const translations = {
         trafficSources: {
             title: "Fuentes de Tráfico",
         },
+
         recentLeads: {
             title: "Leads Recientes",
             viewDetails: "Ver detalles",

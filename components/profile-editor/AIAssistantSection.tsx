@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
+import { useConfirmDialog } from '../ConfirmDialog';
 import {
   SparklesIcon,
   CheckCircleIcon,
@@ -11,6 +13,7 @@ import {
   BriefcaseIcon,
   AcademicCapIcon,
   ChatBubbleLeftRightIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid';
 
 interface AIAssistantSectionProps {
@@ -25,16 +28,20 @@ interface SuggestionItem {
   applied: boolean;
   itemId?: string;
   field?: string;
+  title?: string; // Para mostrar el título en el modal
 }
 
 const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusChange }) => {
   const { profile, session } = useAuth();
   const t = useTranslations();
   const aiT = t.aiAssistantSection;
+  const toast = useToastContext();
+  const confirm = useConfirmDialog();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [selectedTab, setSelectedTab] = useState<'summary' | 'experience' | 'education'>('summary');
   const [isApplying, setIsApplying] = useState<string | null>(null);
+  const [confirmationModal, setConfirmationModal] = useState<SuggestionItem | null>(null);
 
   // @ts-ignore
   const apiKey = import.meta.env?.VITE_GOOGLE_AI_API_KEY || '';
@@ -51,7 +58,7 @@ const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusCha
 
     setIsAnalyzing(true);
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const prompt = `Actúa como un experto en recursos humanos y redacción de CVs profesionales.
 
@@ -115,7 +122,7 @@ INSTRUCCIONES:
         return;
       }
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const newSuggestions: SuggestionItem[] = [];
 
       // Analizar cada experiencia
@@ -150,6 +157,7 @@ INSTRUCCIONES:
           applied: false,
           itemId: exp.id,
           field: 'description',
+          title: `${exp.title} - ${exp.company_name}`,
         });
       }
 
@@ -188,7 +196,7 @@ INSTRUCCIONES:
         return;
       }
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       const newSuggestions: SuggestionItem[] = [];
 
       // Analizar cada educación que tenga descripción
@@ -222,6 +230,7 @@ INSTRUCCIONES:
           applied: false,
           itemId: edu.id,
           field: 'description',
+          title: `${edu.degree} - ${edu.institution_name}`,
         });
       }
 
@@ -239,10 +248,16 @@ INSTRUCCIONES:
     }
   };
 
-  const applySuggestion = async (suggestion: SuggestionItem) => {
-    if (!session?.user.id) return;
+  const handleApplySuggestionClick = (suggestion: SuggestionItem) => {
+    setConfirmationModal(suggestion);
+  };
 
-    setIsApplying(suggestion.id);
+  const applySuggestion = async () => {
+    if (!session?.user.id || !confirmationModal) return;
+
+    setIsApplying(confirmationModal.id);
+    const suggestion = confirmationModal;
+
     try {
       if (suggestion.type === 'summary') {
         // Aplicar mejora al resumen profesional
@@ -275,16 +290,18 @@ INSTRUCCIONES:
         prev.map(s => (s.id === suggestion.id ? { ...s, applied: true } : s))
       );
 
+      // Cerrar modal
+      setConfirmationModal(null);
+
+      // ✅ Mostrar toast de éxito sin recargar la página
+      toast.success(aiT.success.applied || 'Cambios aplicados correctamente');
+
       if (onSaveStatusChange) {
         onSaveStatusChange(aiT.success.applied, new Date().toISOString());
       }
-
-      // Recargar la página después de 1 segundo para ver los cambios
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     } catch (error) {
       console.error('Error applying suggestion:', error);
+      toast.error(aiT.errors.applyingSuggestion || 'Error al aplicar la sugerencia');
       if (onSaveStatusChange) {
         onSaveStatusChange(aiT.errors.applyingSuggestion);
       }
@@ -483,7 +500,7 @@ INSTRUCCIONES:
                   </div>
                 ) : (
                   <button
-                    onClick={() => applySuggestion(suggestion)}
+                    onClick={() => handleApplySuggestionClick(suggestion)}
                     disabled={isApplying === suggestion.id}
                     className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-xl"
                   >
@@ -518,6 +535,113 @@ INSTRUCCIONES:
           <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto text-lg">
             {aiT.emptyState.description[selectedTab]}
           </p>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-slideUp">
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-cv-blue to-purple-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SparklesIcon className="w-7 h-7" />
+                <div>
+                  <h3 className="text-xl font-bold">Confirmar Aplicación de Cambios</h3>
+                  {confirmationModal.title && (
+                    <p className="text-sm text-white/80 mt-1">{confirmationModal.title}</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmationModal(null)}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Original Text */}
+              <div>
+                <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
+                  Texto Original
+                </h4>
+                <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {confirmationModal.originalText}
+                  </p>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="flex justify-center">
+                <div className="bg-gradient-to-r from-cv-blue to-purple-600 rounded-full p-3">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Improved Text */}
+              <div>
+                <h4 className="text-sm font-bold text-green-600 dark:text-green-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <SparklesIcon className="w-4 h-4" />
+                  Texto Mejorado por IA
+                </h4>
+                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-800/50 rounded-lg">
+                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
+                    {confirmationModal.improvedText}
+                  </p>
+                </div>
+              </div>
+
+              {/* Warning */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      <strong>Nota:</strong> Esta acción reemplazará el texto actual con la versión mejorada por IA. Los cambios se aplicarán inmediatamente en tu perfil.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-gray-50 dark:bg-dark-bg-tertiary p-6 rounded-b-2xl flex items-center justify-end gap-4 border-t border-gray-200 dark:border-dark-border">
+              <button
+                onClick={() => setConfirmationModal(null)}
+                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={applySuggestion}
+                disabled={isApplying === confirmationModal.id}
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-xl"
+              >
+                {isApplying === confirmationModal.id ? (
+                  <>
+                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                    Aplicando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="w-5 h-5" />
+                    Aplicar Cambios
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

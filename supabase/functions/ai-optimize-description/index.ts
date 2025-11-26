@@ -1,4 +1,4 @@
-<import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4';
 import { Redis } from 'https://esm.sh/@upstash/redis@1.34.3';
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@2.0.3';
@@ -97,8 +97,8 @@ Suggested skills (comma-separated):`,
   };
 
   // TODO: Replace with actual AI API call
-  // Example for Gemini:
-  // const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+  // Example for Gemini (2025 - using gemini-2.5-flash):
+  // const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
   //   method: 'POST',
   //   headers: { 'Content-Type': 'application/json' },
   //   body: JSON.stringify({
@@ -110,7 +110,7 @@ Suggested skills (comma-separated):`,
   return `[AI Optimized] ${payload.text}`;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -199,10 +199,10 @@ serve(async (req) => {
         },
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in ai-optimize-description function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', message: error.message }),
+      JSON.stringify({ error: 'Internal server error', message: error.message || 'Unknown error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

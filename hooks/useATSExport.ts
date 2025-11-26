@@ -59,7 +59,7 @@ export function useATSExport(options: UseATSExportOptions = {}) {
 
     // Call Edge Function
     const response = await fetch(
-      `${supabase.supabaseUrl}/functions/v1/${endpoint}`,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${endpoint}`,
       {
         method: 'POST',
         headers: {

@@ -3,6 +3,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { Visa } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 import {
   PlusIcon,
   PencilIcon,
@@ -180,6 +181,7 @@ const VisasSection: React.FC = () => {
   const { session } = useAuth();
   const translations = useTranslations();
   const t = translations.dashboard.visas;
+  const toast = useToastContext();
 
   const [visas, setVisas] = useState<Visa[]>([]);
   const [loading, setLoading] = useState(true);
@@ -257,7 +259,7 @@ const VisasSection: React.FC = () => {
     try {
       // Validate user permission
       if (!session?.user.id || visaData.profile_id !== session.user.id) {
-        alert('No tienes permisos para realizar esta acción');
+        toast.error('No tienes permisos para realizar esta acción');
         return;
       }
 
@@ -286,7 +288,7 @@ const VisasSection: React.FC = () => {
       setEditingVisa(undefined);
     } catch (error) {
       console.error('Error saving visa:', error);
-      alert('Error al guardar la visa');
+      toast.error('Error al guardar la visa');
     }
   };
 
@@ -312,7 +314,7 @@ const VisasSection: React.FC = () => {
     try {
       // Validate user permission
       if (!session?.user.id) {
-        alert('No tienes permisos para realizar esta acción');
+        toast.error('No tienes permisos para realizar esta acción');
         return;
       }
 
@@ -328,7 +330,7 @@ const VisasSection: React.FC = () => {
       // toast.success('Visa eliminada exitosamente');
     } catch (error) {
       console.error('Error deleting visa:', error);
-      alert(t.deleteError);
+      toast.error(t.deleteError);
     } finally {
       setDeleting(null);
       setDeleteConfirm({ isOpen: false, visaId: null });

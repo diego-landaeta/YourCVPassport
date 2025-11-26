@@ -5,7 +5,7 @@
  * usando inteligencia artificial (Gemini)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import { suggestSkills } from '../../lib/ai';
@@ -34,6 +34,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
   const [addedSkills, setAddedSkills] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [isAddingSkill, setIsAddingSkill] = useState<string | null>(null);
+  const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
 
   const analyzeSuggestSkills = async () => {
     if (!session?.user.id || experiences.length === 0) {
@@ -61,6 +62,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
       }
 
       setSuggestedSkills(response.data);
+      setHasAutoAnalyzed(true);
     } catch (err) {
       console.error('Error suggesting skills:', err);
       setError('Error al generar sugerencias de habilidades');
@@ -69,6 +71,13 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
     }
   };
 
+  // ✅ Auto-analizar al montar el componente si hay experiencias
+  useEffect(() => {
+    if (!hasAutoAnalyzed && experiences.length > 0 && session?.user.id) {
+      analyzeSuggestSkills();
+    }
+  }, [experiences.length, session?.user.id]);
+
   const addSkill = async (skillName: string) => {
     if (!session?.user.id) return;
 
@@ -76,8 +85,9 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
     try {
       const { error } = await supabase.from('skills').insert({
         profile_id: session.user.id,
-        skill_name: skillName,
-        proficiency_level: 'intermediate', // Default level
+        name: skillName,
+        level: 'INTERMEDIATE', // Default level
+        percentage: 50, // Default percentage
       });
 
       if (error) throw error;
@@ -85,7 +95,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
       // Mark as added
       setAddedSkills(prev => new Set(prev).add(skillName));
 
-      // Callback
+      // Callback para notificar al componente padre
       onSkillAdded?.();
     } catch (error) {
       console.error('Error adding skill:', error);
@@ -139,6 +149,11 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
               Analizando...
+            </>
+          ) : hasAutoAnalyzed ? (
+            <>
+              <ArrowPathIcon className="w-5 h-5" />
+              Regenerar Sugerencias
             </>
           ) : (
             <>
@@ -218,15 +233,34 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
         </div>
       )}
 
-      {/* Empty State */}
-      {!isAnalyzing && suggestedSkills.length === 0 && !error && (
+      {/* Empty State - Loading */}
+      {isAnalyzing && suggestedSkills.length === 0 && (
+        <div className="text-center py-12 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-700">
+          <div className="relative inline-block mb-4">
+            <SparklesIcon className="w-16 h-16 text-purple-600 dark:text-purple-400 animate-pulse" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ArrowPathIcon className="w-8 h-8 text-purple-800 dark:text-purple-300 animate-spin" />
+            </div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Analizando tus experiencias...
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            La IA está identificando habilidades relevantes basadas en tu trayectoria profesional
+          </p>
+        </div>
+      )}
+
+      {/* Empty State - No Suggestions Yet */}
+      {!isAnalyzing && suggestedSkills.length === 0 && !error && hasAutoAnalyzed && (
         <div className="text-center py-12 bg-gray-50 dark:bg-dark-bg-secondary rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           <LightBulbIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No hay sugerencias aún
+            No se encontraron habilidades nuevas
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Haz clic en "Generar Sugerencias" para obtener habilidades relevantes
+            La IA no detectó habilidades adicionales basándose en tus experiencias actuales.
+            Puedes volver a analizar más tarde después de agregar más experiencias.
           </p>
         </div>
       )}

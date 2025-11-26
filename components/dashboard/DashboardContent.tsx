@@ -4,6 +4,7 @@ import { supabase } from '../../supabase/client';
 import { getAnalyticsStats } from '../../hooks/useAnalytics';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useToastContext } from '../../context/ToastContext';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 import ModernDashboardView from './ModernDashboardView';
@@ -77,6 +78,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const { profile, session, refetchProfile } = useAuth();
   const translations = useTranslations();
   const { lang } = useLanguage();
+  const toast = useToastContext();
   const t = translations.dashboard;
   const [stats, setStats] = useState<DashboardStats>({
     visits: 0,
@@ -89,6 +91,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Cargando dashboard');
   const dashboardDataLoadedRef = useRef(false);
+  const skillsSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
+  const experienceSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
+  const educationSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
   const [showCardGallery, setShowCardGallery] = useState(false);
   const [showATSExportModal, setShowATSExportModal] = useState(false);
   const [showPDFExportModal, setShowPDFExportModal] = useState(false);
@@ -207,8 +212,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                                    profile.slug.startsWith('user-'); // Is generic user-id format
 
       if (shouldRegenerateSlug && profile.full_name && profile.headline) {
-        console.log('Regenerating slug...');
-
         // Generate slug from full_name and headline
         const namePart = profile.full_name
           .toLowerCase()
@@ -267,17 +270,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .eq('id', session.user.id);
 
         if (error) {
-          console.error('Error updating slug:', error);
+          toast.error('Error al actualizar el slug del perfil');
           slugCheckedRef.current = false; // ✅ Permitir reintentar si falla
         } else {
-          console.log('Slug updated successfully:', generatedSlug);
           // NO recargar la página, ya marcado como completado
         }
       } else {
         console.log('Slug does not need regeneration or missing data');
       }
     } catch (error) {
-      console.error('Error checking/updating slug:', error);
+      // Silent fail - will retry on next load
       slugCheckedRef.current = false; // ✅ Permitir reintentar si falla
     }
   };
@@ -332,7 +334,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setVisas(visasData || []);
       setCertifications(certificationsData || []);
     } catch (error) {
-      console.error('❌ Error loading profile editor data:', error);
+      toast.error('Error al cargar datos del perfil');
     }
   };
 
@@ -489,7 +491,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLoading(false); // ✅ Dashboard visible con TODO cargado
 
     } catch (error) {
-      console.error('❌ Error loading dashboard data:', error);
+      toast.error('Error al cargar datos del dashboard');
       dashboardDataLoadedRef.current = false; // ✅ Permitir reintentar si falla
       setLoading(false); // ✅ Mostrar error pero no bloquear UI
     }
@@ -612,7 +614,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Identity saved successfully!');
     } catch (error) {
-      console.error('Error saving identity:', error);
+      toast.error('Error al guardar identidad');
       showSaveMessage('Failed to save identity', true);
     } finally {
       setIsSaving(false);
@@ -620,24 +622,43 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   };
 
   const handleExperienceSave = async (data: ExperienceFormData[]) => {
+    console.log('handleExperienceSave called with:', data);
     setIsSaving(true);
+
+    // Detect if this is a deletion (array got smaller)
+    const isDeleting = data.length < experiences.length;
+
     try {
       await supabase.from('experiences').delete().eq('profile_id', session?.user.id);
 
       if (data.length > 0) {
-        const experiencesToInsert = data.map((exp, index) => ({
-          profile_id: session?.user.id,
-          position: exp.position,
-          company_name: exp.company_name,
-          start_date: exp.start_date ? `${exp.start_date}-01` : null,
-          end_date: exp.end_date ? `${exp.end_date}-01` : null,
-          description: exp.description || '',
-          achievements: exp.achievements || null,
-          is_current: exp.is_current || false,
-          location: exp.location || null,
-          employment_type: exp.employment_type || null,
-          sort_order: index,
-        }));
+        const experiencesToInsert = data.map((exp, index) => {
+          // Format dates properly - only add -01 if date is in YYYY-MM format
+          const formatDate = (dateStr: string | null | undefined) => {
+            if (!dateStr) return null;
+            // If already in YYYY-MM-DD format, return as is
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+            // If in YYYY-MM format, add -01
+            if (dateStr.match(/^\d{4}-\d{2}$/)) return `${dateStr}-01`;
+            // Invalid format, return null
+            return null;
+          };
+
+          return {
+            profile_id: session?.user.id,
+            position: exp.position,
+            company_name: exp.company_name,
+            start_date: formatDate(exp.start_date),
+            end_date: formatDate(exp.end_date),
+            description: exp.description || '',
+            achievements: exp.achievements || null,
+            is_current: exp.is_current || false,
+            location: exp.location || null,
+            employment_type: exp.employment_type || null,
+            verified: exp.verified || false,
+            sort_order: index,
+          };
+        });
 
         const { error } = await supabase.from('experiences').insert(experiencesToInsert);
         if (error) throw error;
@@ -646,9 +667,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setExperiences(data);
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
-      showSaveMessage('Experience saved successfully!');
-    } catch (error) {
-      console.error('Error saving experience:', error);
+
+      // Show appropriate message based on action
+      if (isDeleting) {
+        showSaveMessage('Experience deleted successfully!');
+        toast.success('Experiencia eliminada exitosamente');
+      } else {
+        showSaveMessage('Experience saved successfully!');
+        toast.success('Experiencia guardada exitosamente');
+      }
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.error_description || 'Error desconocido';
+      const errorDetails = error?.details || '';
+      const fullError = errorDetails ? `${errorMessage} - ${errorDetails}` : errorMessage;
+      toast.error(`Error al guardar: ${fullError}`, 10000);
       showSaveMessage('Failed to save experience', true);
     } finally {
       setIsSaving(false);
@@ -661,16 +693,29 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await supabase.from('education').delete().eq('profile_id', session?.user.id);
 
       if (data.length > 0) {
-        const educationToInsert = data.map((edu, index) => ({
-          profile_id: session?.user.id,
-          institution_name: edu.institution_name,
-          degree: edu.degree,
-          field_of_study: edu.field_of_study,
-          start_date: edu.start_date ? `${edu.start_date}-01` : null,
-          end_date: edu.end_date ? `${edu.end_date}-01` : null,
-          description: edu.description || '',
-          sort_order: index,
-        }));
+        const educationToInsert = data.map((edu, index) => {
+          // Format dates properly - only add -01 if date is in YYYY-MM format
+          const formatDate = (dateStr: string | null | undefined) => {
+            if (!dateStr) return null;
+            // If already in YYYY-MM-DD format, return as is
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+            // If in YYYY-MM format, add -01
+            if (dateStr.match(/^\d{4}-\d{2}$/)) return `${dateStr}-01`;
+            // Invalid format, return null
+            return null;
+          };
+
+          return {
+            profile_id: session?.user.id,
+            institution_name: edu.institution_name,
+            degree: edu.degree,
+            field_of_study: edu.field_of_study,
+            start_date: formatDate(edu.start_date),
+            end_date: formatDate(edu.end_date),
+            description: edu.description || '',
+            sort_order: index,
+          };
+        });
 
         const { error } = await supabase.from('education').insert(educationToInsert);
         if (error) throw error;
@@ -681,7 +726,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Education saved successfully!');
     } catch (error) {
-      console.error('Error saving education:', error);
+      toast.error('Error al guardar educación');
       showSaveMessage('Failed to save education', true);
     } finally {
       setIsSaving(false);
@@ -712,7 +757,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Skills saved successfully!');
     } catch (error) {
-      console.error('Error saving skills:', error);
+      toast.error('Error al guardar habilidades');
       showSaveMessage('Failed to save skills', true);
     } finally {
       setIsSaving(false);
@@ -741,7 +786,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Languages saved successfully!');
     } catch (error) {
-      console.error('Error saving languages:', error);
+      toast.error('Error al guardar idiomas');
       showSaveMessage('Failed to save languages', true);
     } finally {
       setIsSaving(false);
@@ -757,27 +802,30 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         const items = data.map((item, index) => ({
           profile_id: session?.user.id,
           title: item.title,
-          type: item.type || null,
-          url: item.url || null,
+          category: item.category || null,
+          link: item.link || null,
           description: item.description || null,
-          thumbnail_url: item.thumbnail_url || null,
+          image_url: item.image_url || null,
           file_url: item.file_url || null,
-          tags: item.tags || null,
-          featured: item.featured || false,
           sort_order: index,
         }));
 
+        console.log('Saving portfolio items:', items);
         const { error } = await supabase.from('portfolio_items').insert(items);
-        if (error) throw error;
+        if (error) {
+          console.error('Portfolio save error:', error);
+          throw error;
+        }
       }
 
       setPortfolio(data);
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
-      showSaveMessage('Portfolio saved successfully!');
+      showSaveMessage('Portfolio guardado correctamente');
     } catch (error) {
       console.error('Error saving portfolio:', error);
-      showSaveMessage('Failed to save portfolio', true);
+      toast.error('Error al guardar portfolio');
+      showSaveMessage('Error al guardar portfolio', true);
     } finally {
       setIsSaving(false);
     }
@@ -807,7 +855,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Preferences saved successfully!');
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      toast.error('Error al guardar preferencias');
       showSaveMessage('Failed to save preferences', true);
     } finally {
       setIsSaving(false);
@@ -861,7 +909,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       showSaveMessage('Profile created successfully with AI assistance!');
       setProfileSection('identity');
     } catch (error) {
-      console.error('Error saving AI quiz data:', error);
+      toast.error('Error al guardar cuestionario de IA');
       showSaveMessage('Failed to save profile data', true);
     } finally {
       setIsSaving(false);
@@ -1277,6 +1325,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
             {profileSection === 'experience' && (
               <ExperienceSection
+                ref={experienceSectionRef}
                 initialData={experiences}
                 onSave={handleExperienceSave}
                 onNavigateToVerifications={() => onSectionChange('stamps')}
@@ -1285,6 +1334,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
             {profileSection === 'education' && (
               <EducationSection
+                ref={educationSectionRef}
                 initialData={education}
                 onSave={handleEducationSave}
                 onNavigateToVerifications={() => onSectionChange('stamps')}
@@ -1293,6 +1343,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
             {profileSection === 'skills' && (
               <SkillsSection
+                ref={skillsSectionRef}
                 initialData={skills}
                 onSave={handleSkillsSave}
               />
@@ -1342,7 +1393,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                     if (error) throw error;
                     showSaveMessage(t.templateSection.templateUpdated);
                   } catch (error) {
-                    console.error('Error updating template:', error);
+                    toast.error('Error al actualizar plantilla');
                     showSaveMessage(t.templateSection.templateUpdateError, true);
                   }
                 }}
@@ -1361,15 +1412,45 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         </div>
 
         {/* Floating AI Assistant Button */}
-        {subsection !== 'ai-assistant' && (
+        {subsection !== 'ai-assistant' && (subsection === 'skills' || subsection === 'experience' || subsection === 'education' || subsection === 'identity') && (
           <button
-            onClick={() => onSectionChange('mi-perfil:ai-assistant')}
+            onClick={() => {
+              // If in skills section, toggle AI suggestions panel inline
+              if (subsection === 'skills' && skillsSectionRef.current) {
+                skillsSectionRef.current.toggleAISuggestions();
+              }
+              // If in experience section, toggle AI suggestions panel inline
+              else if (subsection === 'experience' && experienceSectionRef.current) {
+                experienceSectionRef.current.toggleAISuggestions();
+              }
+              // If in education section, toggle AI suggestions panel inline
+              else if (subsection === 'education' && educationSectionRef.current) {
+                educationSectionRef.current.toggleAISuggestions();
+              }
+              // If in identity section, trigger AI summary generation
+              else if (subsection === 'identity') {
+                const event = new CustomEvent('generateAISummary');
+                window.dispatchEvent(event);
+              }
+            }}
             className={`fixed bottom-6 right-6 z-50 group ${
               isAIAvailable
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
                 : 'bg-gray-400 dark:bg-gray-600 opacity-60 cursor-not-allowed'
             } text-white rounded-full p-4 transition-all duration-300 transform hover:scale-110`}
-            title={isAIAvailable ? 'Mejorar con IA' : 'Asistente de IA no disponible'}
+            title={
+              isAIAvailable
+                ? subsection === 'skills'
+                  ? 'Sugerencias IA para Habilidades'
+                  : subsection === 'experience'
+                  ? 'Sugerencias IA para Experiencias'
+                  : subsection === 'education'
+                  ? 'Optimizar Educación con IA'
+                  : subsection === 'identity'
+                  ? 'Generar Resumen Profesional con IA'
+                  : 'Mejorar con IA'
+                : 'Asistente de IA no disponible'
+            }
           >
             {/* Icon */}
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1723,13 +1804,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                           onError: (error) => {
                             setIsGeneratingPDF(false);
                             setPdfProgress(0);
-                            alert(error.message || t.export.popupBlocked);
+                            toast.error(error.message || t.export.popupBlocked, 8000);
                           }
                         });
                       } catch (error) {
                         setIsGeneratingPDF(false);
                         setPdfProgress(0);
-                        alert(t.export.popupBlocked);
+                        toast.error(t.export.popupBlocked, 8000);
                       }
                     }}
                     className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
@@ -2303,7 +2384,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                 onSaveStatusChange(t.templateSection.templateUpdated, new Date().toISOString());
               }
             } catch (error) {
-              console.error('Error updating template:', error);
+              toast.error('Error al actualizar plantilla');
               if (onSaveStatusChange) {
                 onSaveStatusChange(t.templateSection.templateUpdateError, new Date().toISOString());
               }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 
 const MagicLinkForm: React.FC = () => {
   const { sendMagicLink } = useAuth();
@@ -9,6 +10,7 @@ const MagicLinkForm: React.FC = () => {
   const t = translations.dashboard.auth.magicLink;
   const errors = translations.dashboard.auth.errors;
   const success = translations.dashboard.auth.success;
+  const toast = useToastContext();
 
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,11 +37,12 @@ const MagicLinkForm: React.FC = () => {
       const { error: authError } = await sendMagicLink(email);
 
       if (authError) {
-        console.error('Magic link error:', authError);
         if (authError.message?.includes('rate limit')) {
-          setError(errors.tooManyAttempts);
+          setError(errors.tooManyRequests);
+          toast.warning(errors.tooManyRequests);
         } else {
           setError(errors.serverError);
+          toast.error(errors.serverError);
         }
         setIsLoading(false);
         return;
@@ -47,10 +50,11 @@ const MagicLinkForm: React.FC = () => {
 
       // Success
       setEmailSent(true);
+      toast.success(t.checkEmail);
       setIsLoading(false);
     } catch (err) {
-      console.error('Magic link error:', err);
       setError(errors.serverError);
+      toast.error(errors.serverError);
       setIsLoading(false);
     }
   };
@@ -81,10 +85,10 @@ const MagicLinkForm: React.FC = () => {
             {t.checkEmail}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-2">
-            {t.emailSentMessage} <span className="font-medium text-gray-900 dark:text-white">{email}</span>
+            {t.checkEmailDesc} <span className="font-medium text-gray-900 dark:text-white">{email}</span>
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
-            {t.clickLink}
+            {t.checkEmailAction}
           </p>
 
           {/* Back to Login */}
@@ -158,7 +162,7 @@ const MagicLinkForm: React.FC = () => {
             disabled={isLoading}
             className="w-full bg-cv-blue hover:bg-cv-blue-dark text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? t.sending : t.sendButton}
+            {isLoading ? t.sending : t.submit}
           </button>
         </form>
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { FullProfileData, Profile, Experience, Education, Skill, Service, Stat, PortfolioItem } from '../types';
-import { generateAllSchemas } from '../utils/seoSchemas';
 import { useAnalytics } from '../hooks/useAnalytics';
 import ClassicTemplate from './templates/ClassicTemplate';
 import YellowMinimalistTemplate from './templates/YellowMinimalistTemplate';
@@ -20,7 +19,7 @@ import ModernMinimalistTemplate from './templates/ModernMinimalistTemplate';
 import CreativeBoldTemplate from './templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from './templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from './templates/HealthcareProfessionalTemplate';
-import PageSEO from './PageSEO';
+import SEOHead from './SEOHead';
 import { useLanguage } from '../contexts/LanguageContext';
 import ContactLeadFormModal from './ContactLeadFormModal';
 
@@ -109,60 +108,10 @@ const ProfileSearchPage: React.FC = () => {
         fetchProfile();
     }, [slug]);
 
-    // Update document title and meta tags when profile data is loaded
-    useEffect(() => {
-        if (!profileData) return;
-
-        // Generate SEO metadata
-        const baseUrl = 'https://yourcvpassport.com';
-        const title = profileData.profile.meta_title ||
-            `${profileData.profile.full_name} - ${profileData.profile.headline} | YourCVPassport`;
-        const description = profileData.profile.meta_description ||
-            profileData.profile.summary?.substring(0, 160) ||
-            `Professional profile of ${profileData.profile.full_name}. ${profileData.profile.headline}`;
-
-        // Generate all Schema.org structured data
-        const schemas = generateAllSchemas(
-            profileData.profile,
-            profileData.experiences,
-            profileData.education,
-            profileData.skills,
-            [], // certifications - add when available
-            baseUrl
-        );
-
-        // Set title
-        document.title = title;
-
-        // Set description
-        let metaDesc = document.querySelector('meta[name="description"]');
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.setAttribute('name', 'description');
-            document.head.appendChild(metaDesc);
-        }
-        metaDesc.setAttribute('content', description);
-
-        // Add Schema.org JSON-LD
-        const existingScript = document.querySelector('script[data-schema="profile"]');
-        if (existingScript) {
-            existingScript.remove();
-        }
-
-        const script = document.createElement('script');
-        script.setAttribute('type', 'application/ld+json');
-        script.setAttribute('data-schema', 'profile');
-        script.textContent = JSON.stringify(schemas, null, 2);
-        document.head.appendChild(script);
-
-        // Cleanup
-        return () => {
-            const scriptToRemove = document.querySelector('script[data-schema="profile"]');
-            if (scriptToRemove) {
-                scriptToRemove.remove();
-            }
-        };
-    }, [profileData]);
+    // Generate canonical URL - Always use slug if available, fallback to id
+    const canonicalUrl = profileData
+        ? `https://yourcvpassport.com/cv/${profileData.profile.slug || profileData.profile.id}`
+        : undefined;
 
     const renderTemplate = () => {
         if (!profileData) return null;
@@ -190,7 +139,14 @@ const ProfileSearchPage: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center text-lg font-semibold dark:bg-dark-bg-primary dark:text-dark-text-secondary">Loading Profile...</div>;
+        return (
+            <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-dark-bg-primary">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cv-blue mx-auto"></div>
+                    <p className="mt-4 text-lg text-gray-700 dark:text-dark-text-primary">Loading profile...</p>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
@@ -233,24 +189,26 @@ const ProfileSearchPage: React.FC = () => {
     }
 
     if (!profileData) {
-        return null;
+        return (
+            <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-dark-bg-primary">
+                <div className="text-center p-6 bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary mb-4">Profile Not Found</h2>
+                    <p className="text-gray-700 dark:text-dark-text-primary mb-6">The profile you are looking for does not exist or is incomplete.</p>
+                    <Link to="/" className="text-cv-blue hover:underline">Go to Homepage</Link>
+                </div>
+            </div>
+        );
     }
-
-    const seoTitle = lang === 'es'
-        ? 'Perfil Público Profesional'
-        : 'Professional Public Profile';
-
-    const seoDescription = lang === 'es'
-        ? 'Visualiza perfiles profesionales verificados con credenciales blockchain. CV optimizado para compartir con reclutadores y empleadores en formato web profesional.'
-        : 'View verified professional profiles with blockchain credentials. CV optimized for sharing with recruiters and employers in professional web format.';
 
     return (
         <>
-            <PageSEO
-                title={seoTitle}
-                description={seoDescription}
-                lang={lang}
-            />
+            {profileData && (
+                <SEOHead
+                    profile={profileData.profile}
+                    currentLang={lang}
+                    canonicalUrl={canonicalUrl}
+                />
+            )}
             <div className="dark:bg-dark-bg-primary">
                 {/* Floating Contact Button */}
                 <button

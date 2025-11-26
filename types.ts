@@ -164,6 +164,10 @@ export interface Profile {
   slug?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
+  business_card_template?: string | null;
+  is_pro?: boolean;
+  photo_url?: string | null;
+  email_verified?: boolean;
 
   // Contact & Social
   country_code?: string | null;
@@ -207,7 +211,9 @@ export interface Experience {
   id?: string;
   profile_id: string;
   company_name: string;
+  company?: string; // Alias for compatibility
   position: string;
+  title?: string; // Alias for compatibility
   start_date: string;
   end_date: string | null;
   description?: string | null;
@@ -342,7 +348,7 @@ export interface Visa {
   action?: string | null; // STAR: Action
   result?: string | null; // STAR: Result
   context?: string | null; // Additional context
-  metrics?: Record<string, string> | null; // JSON: {revenue: "+30%", users: "1M+"}
+  metrics?: Record<string, string> | { key: string; value: string }[] | null; // JSON: {revenue: "+30%", users: "1M+"} or array format
   images?: string[] | null; // Array of image URLs
   video_urls?: string[] | null; // Array of video URLs
   tags?: string[] | null; // Searchable tags
@@ -490,6 +496,7 @@ export type StampEvidence =
 export interface Stamp {
     id: string;
     profile_id: string;
+    profiles?: Profile; // Relation
     type: StampType;
     status: StampStatus;
     evidence: StampEvidence;
@@ -557,7 +564,7 @@ export interface CVVersion {
   sections: CVSectionType[];
 
   // Template and styling
-  template?: 'classic' | 'modern' | 'minimal';
+  template?: TemplateType;
   template_color?: string | null;
 
   // Complete profile snapshot

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { experienceSchema, ExperienceFormData } from '../../schemas/profileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useConfirmDialog } from '../ConfirmDialog';
+import { useToastContext } from '../../context/ToastContext';
+import { validateDateRange } from '../../utils/dateValidation';
 import {
   DndContext,
   closestCenter,
@@ -20,11 +23,19 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useAuth } from '../../contexts/AuthContext';
+
+// Lazy load AI optimizer
+const AITextOptimizer = lazy(() => import('./AITextOptimizer'));
 
 interface ExperienceSectionProps {
   initialData?: ExperienceFormData[];
   onSave: (data: ExperienceFormData[]) => Promise<void>;
   onNavigateToVerifications?: () => void;
+}
+
+export interface ExperienceSectionHandle {
+  toggleAISuggestions: () => void;
 }
 
 interface SortableExperienceItemProps {
@@ -50,7 +61,10 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
 
   const formatDate = (date: string | null) => {
     if (!date) return 'Presente';
-    const d = new Date(date);
+    // Parse date manually to avoid timezone issues
+    const [year, month] = date.split('-').map(Number);
+    // Create date using local time constructor (year, monthIndex)
+    const d = new Date(year, month - 1);
     return d.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
   };
 
@@ -75,7 +89,17 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{experience.position}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{experience.position}</h4>
+            {experience.verified && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Verificado
+              </span>
+            )}
+          </div>
           <p className="text-gray-700 dark:text-gray-300">{experience.company_name}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {formatDate(experience.start_date)} - {formatDate(experience.end_date)}
@@ -124,13 +148,28 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   );
 };
 
-const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
+const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
+  const { session } = useAuth(); // Fix ReferenceError
+  console.log('ExperienceSection rendered', { session });
+
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
+  const { confirm, Dialog } = useConfirmDialog();
+  const toast = useToastContext();
   const [experiences, setExperiences] = useState<ExperienceFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [achievements, setAchievements] = useState<string[]>(['']);
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const hasCheckedDraft = React.useRef(false);
+  const shouldSaveDraft = React.useRef(true);
+
+  // Expose toggleAISuggestions method to parent component
+  useImperativeHandle(ref, () => ({
+    toggleAISuggestions: () => {
+      setShowAISuggestions(prev => !prev);
+    },
+  }));
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -148,14 +187,20 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
     setValue,
   } = useForm<ExperienceFormData>({
     resolver: zodResolver(experienceSchema),
+    defaultValues: {
+      is_current: false,
+    },
   });
 
   const isCurrent = watch('is_current');
 
   // Auto-save form data to localStorage
   React.useEffect(() => {
-    if (isFormOpen) {
+    if (isFormOpen && shouldSaveDraft.current) {
       const subscription = watch((formData) => {
+        // Only save if auto-save is still enabled (double-check)
+        if (!shouldSaveDraft.current) return;
+
         try {
           localStorage.setItem('experience_draft', JSON.stringify({
             formData,
@@ -164,37 +209,67 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
             timestamp: Date.now()
           }));
         } catch (e) {
-          console.error('Error saving draft:', e);
+          toast.error('Error al guardar borrador');
         }
       });
       return () => subscription.unsubscribe();
     }
   }, [watch, isFormOpen, achievements, editingIndex]);
 
-  // Restore draft on mount
+  // Restore draft on mount (only once per session)
   React.useEffect(() => {
-    try {
-      const draft = localStorage.getItem('experience_draft');
-      if (draft) {
-        const parsed = JSON.parse(draft);
-        // Only restore if less than 24 hours old
-        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-          const shouldRestore = confirm(modals.restoreDraft || '¿Restaurar borrador guardado?');
-          if (shouldRestore && parsed.formData) {
-            reset(parsed.formData);
-            if (parsed.achievements) setAchievements(parsed.achievements);
-            if (parsed.editingIndex !== null) setEditingIndex(parsed.editingIndex);
-            setIsFormOpen(true);
+    if (hasCheckedDraft.current) return;
+    hasCheckedDraft.current = true;
+
+    const checkDraft = async () => {
+      try {
+        const draft = localStorage.getItem('experience_draft');
+        const lastPromptTime = localStorage.getItem('experience_draft_last_prompt');
+
+        if (draft) {
+          const parsed = JSON.parse(draft);
+
+          // Only restore if less than 24 hours old
+          if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+            // Check if we've already asked about this draft in the last 5 minutes
+            if (lastPromptTime && Date.now() - parseInt(lastPromptTime) < 5 * 60 * 1000) {
+              return; // Don't ask again
+            }
+
+            // Update the last prompt time
+            localStorage.setItem('experience_draft_last_prompt', Date.now().toString());
+
+            const shouldRestore = await confirm({
+              title: 'Restaurar Borrador',
+              message: modals.restoreDraft || '¿Restaurar borrador guardado?',
+              confirmText: 'Restaurar',
+              cancelText: 'Descartar',
+              type: 'info'
+            });
+            if (shouldRestore && parsed.formData) {
+              reset(parsed.formData);
+              if (parsed.achievements) setAchievements(parsed.achievements);
+              if (parsed.editingIndex !== null) setEditingIndex(parsed.editingIndex);
+              setIsFormOpen(true);
+              shouldSaveDraft.current = true; // Reactivar guardado de borrador
+            } else {
+              // Usuario descartó el borrador - deshabilitar guardado automático
+              shouldSaveDraft.current = false;
+              localStorage.removeItem('experience_draft');
+              localStorage.removeItem('experience_draft_last_prompt');
+            }
           } else {
             localStorage.removeItem('experience_draft');
+            localStorage.removeItem('experience_draft_last_prompt');
           }
-        } else {
-          localStorage.removeItem('experience_draft');
         }
+      } catch (e) {
+        toast.error('Error al restaurar borrador');
+        localStorage.removeItem('experience_draft');
+        localStorage.removeItem('experience_draft_last_prompt');
       }
-    } catch (e) {
-      console.error('Error restoring draft:', e);
-    }
+    };
+    checkDraft();
   }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -222,6 +297,21 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
     }
   };
 
+  const handleCancel = () => {
+    // CRITICAL: Disable auto-save FIRST, then clear draft immediately
+    shouldSaveDraft.current = false;
+
+    // Use setTimeout to ensure this runs after any pending watch() callbacks
+    setTimeout(() => {
+      localStorage.removeItem('experience_draft');
+      localStorage.removeItem('experience_draft_last_prompt');
+    }, 0);
+
+    setIsFormOpen(false);
+    reset();
+    setAchievements(['']);
+  };
+
   const handleAdd = () => {
     setEditingIndex(null);
     setAchievements(['']);
@@ -233,29 +323,84 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
       description: '',
       is_current: false,
     });
+    shouldSaveDraft.current = true; // Reactivar guardado de borrador para nueva entrada
     setIsFormOpen(true);
   };
 
   const handleEdit = (index: number) => {
     const exp = experiences[index];
     setEditingIndex(index);
-    setAchievements(exp.achievements || ['']);
-    reset(exp);
+
+    // Clean markdown from achievements before editing
+    const cleanedAchievements = (exp.achievements || ['']).map(a => cleanMarkdown(a));
+    setAchievements(cleanedAchievements);
+
+    // Clean markdown from description before loading into form
+    const cleanedExp = {
+      ...exp,
+      description: cleanMarkdown(exp.description),
+      achievements: cleanedAchievements,
+      is_current: exp.is_current || false, // Ensure boolean value
+    };
+
+    reset(cleanedExp);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (index: number) => {
-    if (confirm(modals.deleteConfirm)) {
+  const handleDelete = async (index: number) => {
+    const shouldDelete = await confirm({
+      title: 'Eliminar Experiencia',
+      message: modals.deleteConfirm,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    });
+    if (shouldDelete) {
       const updated = experiences.filter((_, i) => i !== index);
       setExperiences(updated);
       onSave(updated);
     }
   };
 
+  /**
+   * Remove markdown formatting (** for bold) from text
+   */
+  const cleanMarkdown = (text: string | null | undefined): string => {
+    if (!text) return '';
+    // Remove ** bold markers
+    return text.replace(/\*\*/g, '');
+  };
+
   const onSubmit = async (data: ExperienceFormData) => {
+    // Debug: verificar el valor de is_current
+    console.log('📝 Form data on submit:', {
+      is_current: data.is_current,
+      end_date: data.end_date,
+      start_date: data.start_date
+    });
+
+    // Validar fechas antes de guardar
+    const dateValidation = validateDateRange(
+      data.start_date,
+      data.end_date,
+      data.is_current || false
+    );
+
+    if (!dateValidation.isValid) {
+      console.error('❌ Validation failed:', dateValidation.error);
+      toast.error(dateValidation.error || 'Las fechas no son válidas');
+      return;
+    }
+
+    console.log('✅ Validation passed, saving...');
+
+    // Clean markdown from description and achievements before saving
     const formData = {
       ...data,
-      achievements: achievements.filter((a) => a.trim() !== ''),
+      description: cleanMarkdown(data.description),
+      achievements: achievements
+        .filter((a) => a.trim() !== '')
+        .map((a) => cleanMarkdown(a)),
       id: editingIndex !== null ? experiences[editingIndex].id : undefined,
     };
 
@@ -267,13 +412,29 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
     }
 
     setExperiences(updated);
-    await onSave(updated);
-    
-    // Clear draft on successful save
-    localStorage.removeItem('experience_draft');
-    setIsFormOpen(false);
-    reset();
-    setAchievements(['']);
+
+    // CRITICAL: Disable auto-save IMMEDIATELY to prevent any more draft saves
+    shouldSaveDraft.current = false;
+
+    // Clear draft immediately and synchronously
+    setTimeout(() => {
+      localStorage.removeItem('experience_draft');
+      localStorage.removeItem('experience_draft_last_prompt');
+    }, 0);
+
+    try {
+      await onSave(updated);
+    } catch (error) {
+      // Even if refetch fails, draft is already cleaned since DB save succeeded
+      // The error toast will be shown from DashboardContent
+    } finally {
+      // Double-check cleanup and close form
+      localStorage.removeItem('experience_draft');
+      localStorage.removeItem('experience_draft_last_prompt');
+      setIsFormOpen(false);
+      reset();
+      setAchievements(['']);
+    }
   };
 
   const addAchievement = () => {
@@ -290,8 +451,45 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
     setAchievements(updated);
   };
 
+  const handleApplyAISuggestion = async (
+    itemId: string,
+    optimizedText: string,
+    optimizedAchievements?: string[]
+  ) => {
+    try {
+      // Clean markdown before saving
+      const cleanDescription = cleanMarkdown(optimizedText);
+      const cleanAchievements = optimizedAchievements?.map(a => cleanMarkdown(a)) || [];
+
+      // Update local state with cleaned text
+      const updated = experiences.map(exp =>
+        exp.id === itemId
+          ? {
+              ...exp,
+              description: cleanDescription,
+              achievements: cleanAchievements.length > 0 ? cleanAchievements : exp.achievements,
+            }
+          : exp
+      );
+
+      // Update state
+      setExperiences(updated);
+
+      // Save to database through parent component
+      await onSave(updated);
+
+      toast.success('Sugerencias de IA aplicadas correctamente');
+    } catch (error) {
+      console.error('Error applying AI suggestion:', error);
+      toast.error('Error al aplicar la sugerencia');
+      throw error;
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+    <>
+      <Dialog />
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addExperience.replace('Añadir ', '').replace('Add ', '')}</h2>
         <button
@@ -334,6 +532,26 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* AI Suggestions Panel */}
+      {showAISuggestions && (
+        <div className="mb-6">
+          <Suspense fallback={
+            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-6 bg-purple-200 dark:bg-purple-700 rounded w-1/3"></div>
+                <div className="h-20 bg-purple-200 dark:bg-purple-700 rounded"></div>
+              </div>
+            </div>
+          }>
+            <AITextOptimizer
+              type="experience"
+              items={experiences}
+              onApplySuggestion={handleApplyAISuggestion}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -416,23 +634,26 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Actual)</span>}
                 </label>
                 <input
                   {...register('end_date')}
                   type="month"
                   disabled={isCurrent}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                  placeholder={isCurrent ? "Presente" : ""}
                 />
                 <label className="flex items-center mt-2">
                   <input
-                    {...register('is_current')}
                     type="checkbox"
-                    className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setValue('end_date', null);
+                    {...register('is_current', {
+                      onChange: (e) => {
+                        if (e.target.checked) {
+                          setValue('end_date', null, { shouldValidate: true });
+                        }
                       }
-                    }}
+                    })}
+                    className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
                   />
                   <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">{modals.currentJob}</span>
                 </label>
@@ -493,7 +714,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
-                onClick={() => setIsFormOpen(false)}
+                onClick={handleCancel}
                 className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
               >
                 {modals.cancel}
@@ -509,7 +730,10 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ initialData = [],
         </div>
       )}
     </div>
+    </>
   );
-};
+});
+
+ExperienceSection.displayName = 'ExperienceSection';
 
 export default ExperienceSection;

@@ -119,7 +119,7 @@ export async function getAnalyticsStats(profileId: string) {
       .from('analytics_leads')
       .select('*')
       .eq('profile_id', profileId)
-      .order('created_at', { descending: true })
+      .order('created_at', { ascending: false })
       .limit(10);
 
     // Fuentes de tráfico (referrers)

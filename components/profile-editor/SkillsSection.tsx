@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { skillSchema, SkillFormData } from '../../schemas/profileSchemas';
@@ -29,6 +29,10 @@ const AISkillsSuggestion = lazy(() => import('./AISkillsSuggestion'));
 interface SkillsSectionProps {
   initialData?: SkillFormData[];
   onSave: (data: SkillFormData[]) => Promise<void>;
+}
+
+export interface SkillsSectionHandle {
+  toggleAISuggestions: () => void;
 }
 
 // Common skills for autocomplete
@@ -126,7 +130,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
   );
 };
 
-const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave }) => {
+const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ initialData = [], onSave }, ref) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { session } = useAuth();
@@ -138,19 +142,55 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
   const [experiences, setExperiences] = useState<any[]>([]);
   const [showAISuggestions, setShowAISuggestions] = useState(false);
 
+  // Expose toggleAISuggestions method to parent component
+  useImperativeHandle(ref, () => ({
+    toggleAISuggestions: () => {
+      setShowAISuggestions(prev => !prev);
+    },
+  }));
+
+  // Load skills from database
+  const loadSkills = React.useCallback(async () => {
+    if (!session?.user.id) return;
+
+    console.log('🔄 Recargando habilidades desde la base de datos...');
+    const { data, error } = await supabase
+      .from('skills')
+      .select('*')
+      .eq('profile_id', session.user.id)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('❌ Error loading skills:', error);
+    } else {
+      console.log('✅ Skills reloaded:', data);
+      setSkills(data || []);
+    }
+  }, [session?.user.id]);
+
   // Load experiences for AI suggestions
   React.useEffect(() => {
     const loadExperiences = async () => {
       if (!session?.user.id) return;
 
+      console.log('🔍 Loading experiences for AI suggestions...');
       const { data, error } = await supabase
         .from('experiences')
-        .select('title, company_name, description')
+        .select('position, company_name, description')
         .eq('profile_id', session.user.id)
         .order('start_date', { ascending: false });
 
-      if (!error && data) {
-        setExperiences(data);
+      if (error) {
+        console.error('❌ Error loading experiences:', error);
+      } else {
+        console.log('✅ Experiences loaded:', data);
+        // Map position to title for compatibility with AISkillsSuggestion
+        const mappedData = data.map(exp => ({
+          title: exp.position,
+          company_name: exp.company_name,
+          description: exp.description || ''
+        }));
+        setExperiences(mappedData);
       }
     };
 
@@ -167,7 +207,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
     setValue,
     watch,
@@ -177,50 +217,15 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
 
   const watchedLevel = watch('level');
 
-  // Auto-save form data to localStorage
+  // Log de errores de validación
   React.useEffect(() => {
-    if (isFormOpen) {
-      const subscription = watch((formData) => {
-        try {
-          localStorage.setItem('skill_draft', JSON.stringify({
-            formData,
-            searchTerm,
-            editingIndex,
-            timestamp: Date.now()
-          }));
-        } catch (e) {
-          console.error('Error saving draft:', e);
-        }
-      });
-      return () => subscription.unsubscribe();
+    if (Object.keys(errors).length > 0) {
+      console.error('❌ ERRORES DE VALIDACIÓN:', errors);
     }
-  }, [watch, isFormOpen, searchTerm, editingIndex]);
+  }, [errors]);
 
-  // Restore draft on mount
-  React.useEffect(() => {
-    try {
-      const draft = localStorage.getItem('skill_draft');
-      if (draft) {
-        const parsed = JSON.parse(draft);
-        // Only restore if less than 24 hours old
-        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-          const shouldRestore = confirm(modals.restoreDraft || '¿Restaurar borrador guardado?');
-          if (shouldRestore && parsed.formData) {
-            reset(parsed.formData);
-            if (parsed.searchTerm) setSearchTerm(parsed.searchTerm);
-            if (parsed.editingIndex !== null) setEditingIndex(parsed.editingIndex);
-            setIsFormOpen(true);
-          } else {
-            localStorage.removeItem('skill_draft');
-          }
-        } else {
-          localStorage.removeItem('skill_draft');
-        }
-      }
-    } catch (e) {
-      console.error('Error restoring draft:', e);
-    }
-  }, []);
+  // DISABLED: Auto-save draft functionality was causing issues with form editing
+  // The draft was interfering with normal editing operations and showing unwanted dialogs
 
   const filteredSuggestions = COMMON_SKILLS.filter((skill) =>
     skill.toLowerCase().includes(searchTerm.toLowerCase())
@@ -246,6 +251,9 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
   };
 
   const handleEdit = (index: number) => {
+    // Limpiar cualquier borrador previo antes de editar
+    localStorage.removeItem('skill_draft');
+
     const skill = skills[index];
     setEditingIndex(index);
     setSearchTerm(skill.name);
@@ -275,21 +283,43 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
   };
 
   const onSubmit = async (data: SkillFormData) => {
-    let updated: SkillFormData[];
-    if (editingIndex !== null) {
-      updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
-    } else {
-      updated = [...skills, data];
-    }
+    console.log('📝 Submitting skill form:', { data, editingIndex });
+    console.log('📋 Form data details:', {
+      name: data.name,
+      level: data.level,
+      years_of_experience: data.years_of_experience,
+      percentage: data.percentage,
+      typeOfLevel: typeof data.level,
+      typeOfYears: typeof data.years_of_experience,
+      typeOfPercentage: typeof data.percentage,
+    });
 
-    setSkills(updated);
-    await onSave(updated);
-    
-    // Clear draft on successful save
-    localStorage.removeItem('skill_draft');
-    setIsFormOpen(false);
-    reset();
-    setSearchTerm('');
+    try {
+      let updated: SkillFormData[];
+      if (editingIndex !== null) {
+        console.log('✏️ Updating existing skill at index:', editingIndex);
+        updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
+      } else {
+        console.log('➕ Adding new skill');
+        updated = [...skills, data];
+      }
+
+      console.log('💾 Saving skills...', updated);
+      setSkills(updated);
+      await onSave(updated);
+
+      console.log('✅ Skills saved successfully!');
+
+      // Clear draft on successful save
+      localStorage.removeItem('skill_draft');
+      setIsFormOpen(false);
+      reset();
+      setSearchTerm('');
+      setEditingIndex(null);
+    } catch (error) {
+      console.error('❌ ERROR AL GUARDAR HABILIDAD:', error);
+      alert('Error al guardar la habilidad: ' + (error as Error).message);
+    }
   };
 
   return (
@@ -332,12 +362,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
             <AISkillsSuggestion
               experiences={experiences}
               currentSkills={skills.map(s => s.name)}
-              onSkillAdded={() => {
-                // Reload skills
-                if (initialData.length > 0) {
-                  window.location.reload();
-                }
-              }}
+              onSkillAdded={loadSkills}
             />
           </Suspense>
         </div>
@@ -406,6 +431,19 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             {editingIndex !== null ? modals.editSkill : modals.addSkill}
           </h3>
+
+          {/* DEBUG: Mostrar errores de validación */}
+          {Object.keys(errors).length > 0 && (
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg p-4 mb-4">
+              <h4 className="font-bold text-red-800 dark:text-red-300 mb-2">⚠️ Errores de validación:</h4>
+              <ul className="list-disc list-inside text-red-700 dark:text-red-400">
+                {Object.entries(errors).map(([key, error]) => (
+                  <li key={key}>{key}: {error?.message || 'Error desconocido'}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -446,13 +484,15 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {modals.skillLevel}
+                  {modals.skillLevel} (Opcional)
                 </label>
                 <select
-                  {...register('level')}
+                  {...register('level', {
+                    setValueAs: (v) => v === '' ? undefined : v,
+                  })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                 >
-                  <option value="">{modals.skillLevel}</option>
+                  <option value="">Sin especificar</option>
                   <option value="BEGINNER">{modals.beginner}</option>
                   <option value="INTERMEDIATE">{modals.intermediate}</option>
                   <option value="ADVANCED">{modals.advanced}</option>
@@ -465,7 +505,10 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
                   {modals.yearsOfExperience}
                 </label>
                 <input
-                  {...register('years_of_experience', { valueAsNumber: true })}
+                  {...register('years_of_experience', {
+                    valueAsNumber: true,
+                    setValueAs: (v) => isNaN(v) || v === '' ? null : Number(v),
+                  })}
                   type="number"
                   min="0"
                   max="50"
@@ -480,7 +523,10 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
                 {modals.skillPercentage}
               </label>
               <input
-                {...register('percentage', { valueAsNumber: true })}
+                {...register('percentage', {
+                  valueAsNumber: true,
+                  setValueAs: (v) => isNaN(v) || v === '' ? null : Number(v),
+                })}
                 type="range"
                 min="0"
                 max="100"
@@ -497,8 +543,12 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
               <button
                 type="button"
                 onClick={() => {
+                  localStorage.removeItem('skill_draft');
                   setIsFormOpen(false);
                   setShowSuggestions(false);
+                  reset();
+                  setSearchTerm('');
+                  setEditingIndex(null);
                 }}
                 className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
               >
@@ -506,9 +556,15 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
+                onClick={() => {
+                  console.log('🔘 Botón clickeado');
+                  console.log('📋 Errores actuales:', errors);
+                  console.log('⏳ isSubmitting:', isSubmitting);
+                }}
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {editingIndex !== null ? modals.update : modals.add} {modals.addSkill.replace('Añadir ', '').replace('Add ', '')}
+                {isSubmitting ? 'Guardando...' : editingIndex !== null ? modals.update : modals.add} {modals.addSkill.replace('Añadir ', '').replace('Add ', '')}
               </button>
             </div>
           </form>
@@ -516,6 +572,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ initialData = [], onSave 
       )}
     </div>
   );
-};
+});
+
+SkillsSection.displayName = 'SkillsSection';
 
 export default SkillsSection;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useToastContext } from '../context/ToastContext';
 import { XMarkIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 interface ContactLeadFormModalProps {
@@ -27,6 +28,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
   profileName,
 }) => {
   const { user, profile } = useAuth();
+  const toast = useToastContext();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -164,7 +166,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
       setShowSubjectSelect(false);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
-      alert('Error al iniciar la conversación');
+      toast.error('Error al iniciar la conversación');
     } finally {
       setLoading(false);
     }
@@ -217,7 +219,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
       // Remove temp message on error
       setMessages((prev) => prev.filter((m) => m.id !== tempMessage.id));
       setNewMessage(messageContent);
-      alert('Error al enviar el mensaje');
+      toast.error('Error al enviar el mensaje');
     } finally {
       setSending(false);
     }

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { educationSchema, EducationFormData } from '../../schemas/profileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useConfirmDialog } from '../ConfirmDialog';
+import { useToastContext } from '../../context/ToastContext';
+import { validateDateRange } from '../../utils/dateValidation';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   DndContext,
   closestCenter,
@@ -21,10 +25,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+// Lazy load AI optimizer
+const AITextOptimizer = lazy(() => import('./AITextOptimizer'));
+
 interface EducationSectionProps {
   initialData?: EducationFormData[];
   onSave: (data: EducationFormData[]) => Promise<void>;
   onNavigateToVerifications?: () => void;
+}
+
+export interface EducationSectionHandle {
+  toggleAISuggestions: () => void;
 }
 
 interface SortableEducationItemProps {
@@ -52,7 +63,10 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
 
   const formatDate = (date: string | null) => {
     if (!date) return 'Present';
-    const d = new Date(date);
+    // Parse date manually to avoid timezone issues
+    const [year, month] = date.split('-').map(Number);
+    // Create date using local time constructor (year, monthIndex)
+    const d = new Date(year, month - 1);
     return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
@@ -140,12 +154,82 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   );
 };
 
-const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
+/**
+ * Normalize and expand common abbreviations in education fields
+ */
+const normalizeEducationText = (text: string): string => {
+  if (!text) return '';
+  
+  let normalized = text.trim();
+  
+  // Expand common abbreviations
+  const abbreviations: { [key: string]: string } = {
+    'Ing\\.': 'Ingeniería de',
+    'Lic\\.': 'Licenciatura en',
+    'Dr\\.': 'Doctorado en',
+    'Msc\\.': 'Maestría en',
+    'MBA': 'Master en Administración de Empresas',
+    'BSc': 'Licenciatura en Ciencias',
+  };
+  
+  for (const [abbr, full] of Object.entries(abbreviations)) {
+    const regex = new RegExp(abbr, 'gi');
+    normalized = normalized.replace(regex, full);
+  }
+  
+  // Fix common patterns like "Ingeniería de sistemas" -> "Ingeniería de Sistemas"
+  // Capitalize first letter of each word after "de", "en", "y"
+  normalized = normalized.replace(/\b(de|en|y)\s+([a-z])/g, (match, prep, letter) => {
+    return `${prep} ${letter.toUpperCase()}`;
+  });
+  
+  // Capitalize first letter
+  normalized = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  
+  return normalized;
+};
+
+/**
+ * Extract degree type from field of study
+ * Returns a simplified degree name
+ */
+const extractDegreeType = (fieldOfStudy: string): string => {
+  if (!fieldOfStudy) return '';
+  
+  // If it already contains degree type, extract it
+  if (fieldOfStudy.toLowerCase().includes('ingeniería')) {
+    return 'Ingeniería';
+  } else if (fieldOfStudy.toLowerCase().includes('licenciatura')) {
+    return 'Licenciatura';
+  } else if (fieldOfStudy.toLowerCase().includes('maestría') || fieldOfStudy.toLowerCase().includes('master')) {
+    return 'Maestría';
+  } else if (fieldOfStudy.toLowerCase().includes('doctorado')) {
+    return 'Doctorado';
+  }
+  
+  // Default: assume it's a bachelor's degree
+  return 'Licenciatura';
+};
+
+const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
+  const { session } = useAuth();
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
+  const { confirm, Dialog } = useConfirmDialog();
+  const toast = useToastContext();
   const [education, setEducation] = useState<EducationFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const hasCheckedDraft = React.useRef(false);
+  const shouldSaveDraft = React.useRef(true);
+
+  // Expose toggleAISuggestions method to parent component
+  useImperativeHandle(ref, () => ({
+    toggleAISuggestions: () => {
+      setShowAISuggestions(prev => !prev);
+    },
+  }));
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -160,14 +244,30 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<EducationFormData>({
     resolver: zodResolver(educationSchema),
   });
 
+  const isCurrent = watch('is_current');
+
+  // Clear end_date when marking as current
+  React.useEffect(() => {
+    if (isCurrent) {
+      reset((formValues) => ({
+        ...formValues,
+        end_date: null,
+      }));
+    }
+  }, [isCurrent, reset]);
+
   // Auto-save form data to localStorage
   React.useEffect(() => {
-    if (isFormOpen) {
+    if (isFormOpen && shouldSaveDraft.current) {
       const subscription = watch((formData) => {
+        // Only save if auto-save is still enabled (double-check)
+        if (!shouldSaveDraft.current) return;
+
         try {
           localStorage.setItem('education_draft', JSON.stringify({
             formData,
@@ -175,36 +275,63 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
             timestamp: Date.now()
           }));
         } catch (e) {
-          console.error('Error saving draft:', e);
+          toast.error('Error al guardar borrador');
         }
       });
       return () => subscription.unsubscribe();
     }
   }, [watch, isFormOpen, editingIndex]);
 
-  // Restore draft on mount
+  // Restore draft on mount (only once per session)
   React.useEffect(() => {
-    try {
-      const draft = localStorage.getItem('education_draft');
-      if (draft) {
-        const parsed = JSON.parse(draft);
-        // Only restore if less than 24 hours old
-        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-          const shouldRestore = confirm(modals.restoreDraft || '¿Restaurar borrador guardado?');
-          if (shouldRestore && parsed.formData) {
-            reset(parsed.formData);
-            if (parsed.editingIndex !== null) setEditingIndex(parsed.editingIndex);
-            setIsFormOpen(true);
+    if (hasCheckedDraft.current) return;
+    hasCheckedDraft.current = true;
+
+    const checkDraft = async () => {
+      try {
+        const draft = localStorage.getItem('education_draft');
+        const lastPromptTime = localStorage.getItem('education_draft_last_prompt');
+
+        if (draft) {
+          const parsed = JSON.parse(draft);
+
+          // Only restore if less than 24 hours old
+          if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+            // Check if we've already asked about this draft in the last 5 minutes
+            if (lastPromptTime && Date.now() - parseInt(lastPromptTime) < 5 * 60 * 1000) {
+              return; // Don't ask again
+            }
+
+            // Update the last prompt time
+            localStorage.setItem('education_draft_last_prompt', Date.now().toString());
+
+            const shouldRestore = await confirm({
+              title: 'Restaurar Borrador',
+              message: modals.restoreDraft || '¿Restaurar borrador guardado?',
+              confirmText: 'Restaurar',
+              cancelText: 'Descartar',
+              type: 'info'
+            });
+            if (shouldRestore && parsed.formData) {
+              reset(parsed.formData);
+              if (parsed.editingIndex !== null) setEditingIndex(parsed.editingIndex);
+              setIsFormOpen(true);
+            } else {
+              localStorage.removeItem('education_draft');
+              localStorage.removeItem('education_draft_last_prompt');
+            }
           } else {
             localStorage.removeItem('education_draft');
+            localStorage.removeItem('education_draft_last_prompt');
           }
-        } else {
-          localStorage.removeItem('education_draft');
         }
+      } catch (e) {
+        toast.error('Error al restaurar borrador');
+        localStorage.removeItem('education_draft');
+        localStorage.removeItem('education_draft_last_prompt');
       }
-    } catch (e) {
-      console.error('Error restoring draft:', e);
-    }
+    };
+    checkDraft();
   }, []);
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -229,23 +356,215 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
       end_date: null,
       description: '',
       grade: '',
-      verified: false,
+      is_current: false,
     });
+    shouldSaveDraft.current = true; // Reactivar guardado de borrador para nueva entrada
     setIsFormOpen(true);
+  };
+
+  const handleCancel = () => {
+    // CRITICAL: Disable auto-save FIRST, then clear draft immediately
+    shouldSaveDraft.current = false;
+
+    // Use setTimeout to ensure this runs after any pending watch() callbacks
+    setTimeout(() => {
+      localStorage.removeItem('education_draft');
+      localStorage.removeItem('education_draft_last_prompt');
+    }, 0);
+
+    setIsFormOpen(false);
+    reset();
+  };
+
+  /**
+   * Remove markdown formatting (** for bold) from text
+   */
+  const cleanMarkdown = (text: string | null | undefined): string => {
+    if (!text) return '';
+    // Remove ** bold markers
+    return text.replace(/\*\*/g, '');
   };
 
   const handleEdit = (index: number) => {
     const edu = education[index];
     setEditingIndex(index);
-    reset(edu);
+
+    // Clean markdown from description
+    const cleanedDescription = cleanMarkdown(edu.description);
+    
+    // Try to extract structured information from description if fields are empty
+    let institutionName = edu.institution_name || '';
+    let degree = edu.degree || '';
+    let fieldOfStudy = edu.field_of_study || '';
+    let grade = edu.grade || '';
+    let description = cleanedDescription;
+
+    // If description contains structured data and other fields are empty, try to parse it
+    if (cleanedDescription && (!edu.degree || !edu.field_of_study || !edu.institution_name)) {
+      const lines = cleanedDescription.split('\n').map(l => l.trim()).filter(l => l);
+      
+      // Look for title line (format: "Field of Study - Institution")
+      // Example: "Ingeniería de Sistemas - PSM"
+      let titleLine = null;
+      for (const line of lines) {
+        if (line.includes(' - ') && !line.startsWith('*') && !line.startsWith('•') && !line.startsWith('-')) {
+          titleLine = line;
+          break;
+        }
+      }
+      
+      if (titleLine) {
+        const parts = titleLine.split(' - ');
+        if (parts.length >= 2) {
+          if (!edu.field_of_study) {
+            // Normalize and expand the field of study
+            fieldOfStudy = normalizeEducationText(parts[0].trim());
+          }
+          if (!edu.institution_name) {
+            // Normalize institution name (capitalize properly)
+            institutionName = parts[1].trim().toUpperCase();
+          }
+          // Extract degree type from field of study
+          if (!edu.degree) {
+            degree = extractDegreeType(fieldOfStudy);
+          }
+        }
+      }
+
+      // Look for GPA/Grade info in any line
+      const gradePattern = /(?:GPA|Promedio)[:\s]*([0-9.]+\/[0-9.]+|[0-9.]+)/i;
+      for (const line of lines) {
+        const gradeMatch = line.match(gradePattern);
+        if (gradeMatch && !edu.grade) {
+          grade = gradeMatch[1];
+          break;
+        }
+      }
+
+      // Extract only bullet points as description, excluding the title line
+      const bulletPoints = lines.filter(l => {
+        const isBullet = l.startsWith('*') || l.startsWith('•') || l.startsWith('-');
+        const isNotTitle = l !== titleLine;
+        return isBullet && isNotTitle;
+      });
+      
+      // Clean bullet points (remove the bullet character)
+      const cleanedBullets = bulletPoints.map(bp => {
+        if (bp.startsWith('* ')) return bp.substring(2);
+        if (bp.startsWith('• ')) return bp.substring(2);
+        if (bp.startsWith('- ')) return bp.substring(2);
+        return bp;
+      });
+      
+      description = cleanedBullets.join('\n');
+    } else {
+      // Even if fields exist, normalize them
+      if (edu.degree) {
+        degree = normalizeEducationText(edu.degree);
+      }
+      if (edu.field_of_study) {
+        fieldOfStudy = normalizeEducationText(edu.field_of_study);
+      }
+      if (edu.institution_name) {
+        institutionName = edu.institution_name.toUpperCase();
+      }
+    }
+
+    const cleanedEdu = {
+      ...edu,
+      institution_name: institutionName,
+      degree: degree,
+      field_of_study: fieldOfStudy,
+      grade: grade,
+      description: description,
+    };
+
+    reset(cleanedEdu);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (index: number) => {
-    if (confirm(modals.deleteEducationConfirm)) {
+  const handleDelete = async (index: number) => {
+    const shouldDelete = await confirm({
+      title: 'Eliminar Educación',
+      message: modals.deleteEducationConfirm,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    });
+    if (shouldDelete) {
       const updated = education.filter((_, i) => i !== index);
       setEducation(updated);
       onSave(updated);
+    }
+  };
+
+  const handleApplyAISuggestion = async (
+    itemId: string,
+    optimizedText: string,
+    optimizedAchievements?: string[]
+  ) => {
+    try {
+      // Clean markdown before saving
+      const cleanDescription = cleanMarkdown(optimizedText);
+
+      // Parse the optimized text to extract structured information
+      const lines = cleanDescription.split('\n').map(l => l.trim()).filter(l => l);
+      
+      let institutionName = '';
+      let degree = '';
+      let fieldOfStudy = '';
+      let description = cleanDescription;
+
+      // Look for title line (format: "Field of Study | Institution")
+      const titleLine = lines.find(l => l.includes(' | ') && !l.startsWith('*'));
+      if (titleLine) {
+        const parts = titleLine.split(' | ');
+        if (parts.length >= 2) {
+          fieldOfStudy = normalizeEducationText(parts[0].trim());
+          institutionName = parts[1].trim().toUpperCase();
+          degree = extractDegreeType(fieldOfStudy);
+        }
+
+        // Remove title line from description
+        const bulletPoints = lines.filter(l => 
+          (l.startsWith('*') || l.startsWith('•') || l.startsWith('-')) &&
+          l !== titleLine
+        );
+        
+        const cleanedBullets = bulletPoints.map(bp => {
+          if (bp.startsWith('* ')) return bp.substring(2);
+          if (bp.startsWith('• ')) return bp.substring(2);
+          if (bp.startsWith('- ')) return bp.substring(2);
+          return bp;
+        });
+        
+        description = cleanedBullets.join('\n');
+      }
+
+      // Update local state with all normalized fields
+      const updated = education.map(edu =>
+        edu.id === itemId
+          ? {
+              ...edu,
+              institution_name: institutionName || edu.institution_name,
+              degree: degree || edu.degree,
+              field_of_study: fieldOfStudy || edu.field_of_study,
+              description: description,
+            }
+          : edu
+      );
+
+      // Update state
+      setEducation(updated);
+
+      // Save to database through parent component
+      await onSave(updated);
+
+      toast.success('Sugerencias de IA aplicadas correctamente');
+    } catch (error) {
+      console.error('Error applying AI suggestion:', error);
+      toast.error('Error al aplicar la sugerencia');
+      throw error;
     }
   };
 
@@ -258,24 +577,69 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
   };
 
   const onSubmit = async (data: EducationFormData) => {
+    // Validar fechas antes de guardar
+    const dateValidation = validateDateRange(
+      data.start_date,
+      data.end_date,
+      data.is_current || false
+    );
+
+    if (!dateValidation.isValid) {
+      toast.error(dateValidation.error || 'Las fechas no son válidas');
+      return;
+    }
+
+    // Normalize and clean all fields before saving
+    const formData = {
+      ...data,
+      // Normalize institution name (uppercase)
+      institution_name: data.institution_name ? data.institution_name.toUpperCase() : '',
+      // Normalize degree (expand abbreviations and capitalize)
+      degree: data.degree ? normalizeEducationText(data.degree) : '',
+      // Normalize field of study (expand abbreviations and capitalize)
+      field_of_study: data.field_of_study ? normalizeEducationText(data.field_of_study) : '',
+      // Clean markdown from description
+      description: cleanMarkdown(data.description),
+      // Keep the ID if editing
+      id: editingIndex !== null ? education[editingIndex].id : undefined,
+    };
+
     let updated: EducationFormData[];
     if (editingIndex !== null) {
-      updated = education.map((edu, idx) => (idx === editingIndex ? data : edu));
+      updated = education.map((edu, idx) => (idx === editingIndex ? formData : edu));
     } else {
-      updated = [...education, data];
+      updated = [...education, formData];
     }
 
     setEducation(updated);
-    await onSave(updated);
-    
-    // Clear draft on successful save
-    localStorage.removeItem('education_draft');
-    setIsFormOpen(false);
-    reset();
+
+    // CRITICAL: Disable auto-save IMMEDIATELY to prevent any more draft saves
+    shouldSaveDraft.current = false;
+
+    // Clear draft immediately and synchronously
+    setTimeout(() => {
+      localStorage.removeItem('education_draft');
+      localStorage.removeItem('education_draft_last_prompt');
+    }, 0);
+
+    try {
+      await onSave(updated);
+    } catch (error) {
+      // Even if refetch fails, draft is already cleaned since DB save succeeded
+      // The error toast will be shown from DashboardContent
+    } finally {
+      // Double-check cleanup and close form
+      localStorage.removeItem('education_draft');
+      localStorage.removeItem('education_draft_last_prompt');
+      setIsFormOpen(false);
+      reset();
+    }
   };
 
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+    <>
+      <Dialog />
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addEducation.replace('Añadir ', '').replace('Add ', '')}</h2>
         <button
@@ -318,6 +682,26 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* AI Suggestions Panel */}
+      {showAISuggestions && (
+        <div className="mb-6">
+          <Suspense fallback={
+            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-6 bg-purple-200 dark:bg-purple-700 rounded w-1/3"></div>
+                <div className="h-20 bg-purple-200 dark:bg-purple-700 rounded"></div>
+              </div>
+            </div>
+          }>
+            <AITextOptimizer
+              type="education"
+              items={education}
+              onApplySuggestion={handleApplyAISuggestion}
+            />
+          </Suspense>
         </div>
       )}
 
@@ -411,23 +795,36 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Actual)</span>}
                 </label>
                 <input
                   {...register('end_date')}
                   type="month"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                  disabled={isCurrent}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                  placeholder={isCurrent ? "Presente" : ""}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   GPA
+                  <span title="Grade Point Average - Promedio de calificaciones (ej: 3.8/4.0 o 85/100)" className="cursor-help">
+                    <svg
+                      className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
                 </label>
                 <input
                   {...register('grade')}
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                  placeholder="3.8/4.0"
+                  placeholder="3.8/4.0 o 85/100"
                 />
               </div>
             </div>
@@ -447,9 +844,9 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
             <div>
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
-                  {...register('verified')}
+                  {...register('is_current')}
                   type="checkbox"
-                  className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {modals.currentStudy}
@@ -460,7 +857,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
-                onClick={() => setIsFormOpen(false)}
+                onClick={handleCancel}
                 className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
               >
                 {modals.cancel}
@@ -476,7 +873,10 @@ const EducationSection: React.FC<EducationSectionProps> = ({ initialData = [], o
         </div>
       )}
     </div>
+    </>
   );
-};
+});
+
+EducationSection.displayName = 'EducationSection';
 
 export default EducationSection;

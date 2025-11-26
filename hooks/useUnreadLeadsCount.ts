@@ -47,7 +47,8 @@ export const useUnreadLeadsCount = () => {
       if (error) throw error;
       setUnreadCount(count || 0);
     } catch (err) {
-      console.error('Error loading unread count:', err);
+      // Silently fail - leads feature may not be enabled for this user
+      // Don't show error toast as it's not critical functionality
       setUnreadCount(0);
     } finally {
       setLoading(false);

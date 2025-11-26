@@ -5,6 +5,8 @@ import { portfolioItemSchema, PortfolioItemFormData } from '../../schemas/profil
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
+import { useConfirmDialog } from '../ConfirmDialog';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -36,14 +38,23 @@ const SortablePortfolioItem: React.FC<SortablePortfolioItemProps> = ({ item, onE
       </button>
 
       {item.image_url ? (
-        <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
-      ) : (
-        <div className="w-full h-48 bg-gray-200 dark:bg-dark-bg-primary flex items-center justify-center">
-          <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
-      )}
+        <img
+          src={item.image_url}
+          alt={item.title}
+          className="w-full h-48 object-cover"
+          onError={(e) => {
+            console.error('Failed to load portfolio image:', item.image_url, item);
+            e.currentTarget.style.display = 'none';
+            const placeholder = e.currentTarget.nextElementSibling;
+            if (placeholder) placeholder.classList.remove('hidden');
+          }}
+        />
+      ) : null}
+      <div className={`w-full h-48 bg-gray-200 dark:bg-dark-bg-primary flex items-center justify-center ${item.image_url ? 'hidden' : ''}`}>
+        <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
 
       <div className="p-4">
         <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
@@ -75,12 +86,27 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { profile } = useAuth();
+  const toast = useToastContext();
+  const { confirm, Dialog } = useConfirmDialog();
   const [portfolio, setPortfolio] = useState<PortfolioItemFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | undefined>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Debug: Log portfolio items when component mounts or data changes
+  React.useEffect(() => {
+    console.log('Portfolio data loaded:', portfolio);
+    portfolio.forEach((item, index) => {
+      console.log(`Portfolio item ${index}:`, {
+        id: item.id,
+        title: item.title,
+        image_url: item.image_url,
+        has_image: !!item.image_url
+      });
+    });
+  }, [portfolio]);
 
   const sensors = useSensors(useSensor(PointerSensor));
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<PortfolioItemFormData>({
@@ -108,15 +134,23 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
       const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
       const filePath = `portfolio/${fileName}`;
 
+      console.log('Uploading file:', { fileName, filePath, fileType: file.type });
+
       const { error: uploadError } = await supabase.storage.from('profile-assets').upload(filePath, file);
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage.from('profile-assets').getPublicUrl(filePath);
+      console.log('Generated public URL:', publicUrl);
+
       setImagePreview(publicUrl);
       setValue('image_url', publicUrl);
+      toast.success('Imagen subida correctamente');
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Failed to upload file.');
+      toast.error('Error al subir la imagen. Por favor, intenta de nuevo.');
     } finally {
       setIsUploading(false);
     }
@@ -137,8 +171,16 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
     setIsFormOpen(true);
   };
 
-  const handleDelete = (index: number) => {
-    if (confirm(modals.deletePortfolioConfirm)) {
+  const handleDelete = async (index: number) => {
+    const shouldDelete = await confirm({
+      title: 'Eliminar Proyecto',
+      message: modals.deletePortfolioConfirm,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    });
+
+    if (shouldDelete) {
       const updated = portfolio.filter((_, i) => i !== index);
       setPortfolio(updated);
       onSave(updated);
@@ -158,7 +200,9 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
   };
 
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+    <>
+      <Dialog />
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addPortfolioItem.replace('Añadir ', '').replace('Add ', '')}</h2>
         <button onClick={handleAdd} className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2">
@@ -231,6 +275,7 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
         </div>
       )}
     </div>
+    </>
   );
 };
 

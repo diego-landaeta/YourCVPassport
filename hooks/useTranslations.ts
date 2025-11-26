@@ -5,7 +5,7 @@ import type { TranslationsType } from '../types/translations';
 
 const translations: Record<'en' | 'es', TranslationsType> = {
     en: enTranslations,
-    es: esTranslations as TranslationsType, // Cast to ensure Spanish translations match English structure
+    es: esTranslations as unknown as TranslationsType, // Cast to ensure Spanish translations match English structure
 };
 
 /**

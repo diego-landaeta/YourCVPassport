@@ -1167,6 +1167,7 @@ export const translations = {
                 checkEmail: "Check your email!",
                 checkEmailDesc: "We've sent a magic link to",
                 checkEmailAction: "Click the link in the email to sign in instantly.",
+                sending: "Sending...",
             },
             recovery: {
                 title: "Reset Password",
@@ -1297,6 +1298,7 @@ export const translations = {
         trafficSources: {
             title: "Traffic Sources",
         },
+
         recentLeads: {
             title: "Recent Leads",
             viewDetails: "View details",

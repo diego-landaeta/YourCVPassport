@@ -28,6 +28,7 @@ const HomePage: React.FC = () => {
         title={seoTitle}
         description={seoDescription}
         lang={lang}
+        canonical="https://yourcvpassport.com/"
       />
       <Hero />
       <Companies />

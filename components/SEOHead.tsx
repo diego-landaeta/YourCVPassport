@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Profile } from '../types';
+import { normalizeUrl } from '../utils/canonicalUrl';
 
 interface SEOHeadProps {
   title?: string;
@@ -8,27 +9,34 @@ interface SEOHeadProps {
   profile?: Profile;
   currentLang?: 'en' | 'es';
   canonicalUrl?: string;
+  keywords?: string;
 }
 
-const SEOHead: React.FC<SEOHeadProps> = ({ 
-  title: propTitle, 
-  description: propDescription, 
-  profile, 
-  currentLang = 'en', 
-  canonicalUrl 
+const SEOHead: React.FC<SEOHeadProps> = ({
+  title: propTitle,
+  description: propDescription,
+  profile,
+  currentLang = 'en',
+  canonicalUrl,
+  keywords
 }) => {
   const baseUrl = 'https://yourcvpassport.com';
-  
+
   // Determine URL and Image
   let profileUrl = canonicalUrl;
   let imageUrl = `${baseUrl}/default-avatar.png`;
-  
+
   if (profile) {
-    profileUrl = canonicalUrl || `${baseUrl}/cv/${profile.slug}`;
+    // Always prefer slug over id for canonical URL
+    const profilePath = profile.slug || profile.id;
+    profileUrl = canonicalUrl || `${baseUrl}/cv/${profilePath}`;
     imageUrl = profile.avatar_url || `${baseUrl}/default-avatar.png`;
   } else {
     profileUrl = canonicalUrl || baseUrl;
   }
+
+  // Normalize the canonical URL (remove query strings, trailing slashes, etc.)
+  profileUrl = normalizeUrl(profileUrl);
   
   // Generate title and description
   let title = propTitle || "YourCVPassport - Professional CV Verification";
@@ -78,6 +86,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       {/* Basic Meta Tags */}
       <title>{title}</title>
       <meta name="description" content={description} />
+      {/* @ts-ignore */}
+      {keywords && <meta name="keywords" content={keywords} />}
       {profileUrl && <link rel="canonical" href={profileUrl} />}
       
       {/* Language Alternates */}

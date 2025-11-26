@@ -69,6 +69,7 @@ const ProductOverviewPage: React.FC = () => {
             description={seoDescription}
             lang={lang}
             keywords={seoKeywords}
+            canonical="https://yourcvpassport.com/product/overview"
         />
         <div className="bg-white dark:bg-dark-bg-primary">
       {/* Hero Section */}

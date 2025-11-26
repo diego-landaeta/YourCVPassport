@@ -18,7 +18,7 @@ interface MagicLinkRequest {
   redirectTo?: string
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -40,7 +40,7 @@ serve(async (req) => {
     
     if (userError) throw userError
 
-    const user = users.users.find(u => u.email === email)
+    const user = users.users.find((u: any) => u.email === email)
 
     // Generate magic link using Supabase Auth Admin API
     const { data: magicLinkData, error: magicLinkError } = await supabase.auth.admin.generateLink({
@@ -122,9 +122,9 @@ serve(async (req) => {
                   </p>
                 </div>
 
-                <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
+                <div style="font-size: 14px; color: #6b7280; margin-top: 30px;">
                   Si no solicitaste este enlace, puedes ignorar este email de forma segura. Nadie podrá acceder a tu cuenta sin este enlace.
-                </p>
+                </div>
 
                 <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
 
@@ -169,7 +169,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error)
     return new Response(
       JSON.stringify({

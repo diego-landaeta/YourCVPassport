@@ -5,6 +5,8 @@ import { identitySchema, IdentityFormData } from '../../schemas/profileSchemas';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
+import { generateSummary } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
 
 interface IdentitySectionProps {
@@ -15,10 +17,14 @@ interface IdentitySectionProps {
 const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }) => {
   const translations = useTranslations();
   const t = translations.dashboard.identity;
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
+  const toast = useToastContext();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(initialData?.avatar_url);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiSummaryVariants, setAiSummaryVariants] = useState<string[]>([]);
+  const [showAIModal, setShowAIModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -118,7 +124,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
 
     setIsUploading(true);
     setUploadError(null);
-    
+
     try {
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
@@ -149,7 +155,8 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
       console.log('URL pública generada:', publicUrl);
 
       setAvatarPreview(publicUrl);
-      setValue('avatar_url', publicUrl, { shouldDirty: true });
+      // ✅ NO marcar como dirty ya que se guarda automáticamente
+      setValue('avatar_url', publicUrl, { shouldDirty: false });
       setUploadError(null);
 
       // Guardar automáticamente en la base de datos
@@ -164,6 +171,8 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
         setUploadError('Error al guardar la foto en tu perfil');
       } else {
         console.log('✅ Avatar guardado exitosamente en la base de datos');
+        // ✅ Mostrar feedback al usuario
+        toast.success(t.photoUploadSuccess || 'Foto de perfil actualizada');
       }
     } catch (error: any) {
       console.error('Error completo al subir avatar:', error);
@@ -174,11 +183,90 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
     }
   };
 
+  const handleGenerateSummary = React.useCallback(async () => {
+    if (!session?.user?.id) {
+      toast.error('Debes estar autenticado para usar esta función');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      // Fetch user's experiences and skills from database
+      const [{ data: experiencesData }, { data: skillsData }] = await Promise.all([
+        supabase
+          .from('experiences')
+          .select('position, company_name, description')
+          .eq('profile_id', session.user.id)
+          .limit(3),
+        supabase
+          .from('skills')
+          .select('name')
+          .eq('profile_id', session.user.id)
+          .limit(10),
+      ]);
+
+      const experiences = experiencesData?.map(exp => `${exp.position} en ${exp.company_name}`) || [];
+      const skills = skillsData?.map(skill => skill.name) || [];
+
+      if (experiences.length === 0 && skills.length === 0) {
+        toast.error('Agrega primero experiencias y habilidades para generar un resumen profesional');
+        return;
+      }
+
+      // Get current headline as objective
+      const currentValues = getValues();
+      const objective = currentValues.headline || undefined;
+
+      const response = await generateSummary(
+        experiences,
+        skills,
+        objective,
+        'formal',
+        3,
+        session.user.id
+      );
+
+      if (response.success && response.data) {
+        setAiSummaryVariants(response.data);
+        setShowAIModal(true);
+      } else {
+        toast.error(response.error || 'Error al generar el resumen');
+      }
+    } catch (error) {
+      console.error('Error generating summary:', error);
+      toast.error('Error al generar el resumen con IA');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  }, [session, toast, getValues]);
+
+  const handleSelectSummaryVariant = (variant: string) => {
+    setValue('summary', variant, { shouldDirty: true });
+    setShowAIModal(false);
+    setAiSummaryVariants([]);
+    toast.success('Resumen aplicado. No olvides guardar los cambios.');
+  };
+
   const onSubmit = async (data: IdentityFormData) => {
     await onSave(data);
     // Clear draft on successful save
     localStorage.removeItem('identity_draft');
+    // Reset form to mark as clean (no unsaved changes)
+    reset(data);
   };
+
+  // Listen for AI summary generation trigger from floating button
+  React.useEffect(() => {
+    const handleGenerateAISummaryEvent = () => {
+      handleGenerateSummary();
+    };
+
+    window.addEventListener('generateAISummary', handleGenerateAISummaryEvent);
+
+    return () => {
+      window.removeEventListener('generateAISummary', handleGenerateAISummaryEvent);
+    };
+  }, [handleGenerateSummary]);
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-6">
@@ -340,7 +428,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
               onBlur={(e) => {
                 const value = e.target.value;
                 if (value && !/^(https?:\/\/)?(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(value)) {
-                  alert(t.invalidLinkedin);
+                  toast.warning(t.invalidLinkedin);
                   setValue('linkedin_url', '');
                 }
               }}
@@ -362,7 +450,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
               onBlur={(e) => {
                 const value = e.target.value;
                 if (value && !/^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_-]+\/?$/.test(value)) {
-                  alert(t.invalidGithub);
+                  toast.warning(t.invalidGithub);
                   setValue('github_url', '');
                 }
               }}
@@ -392,23 +480,10 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
 
         {/* About / Summary */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t.aboutMe}
             </label>
-            <button
-              type="button"
-              onClick={() => {
-                // TODO: Implement AI generation
-                alert('AI generation feature coming soon!');
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-cv-blue hover:text-cv-blue-dark bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Generate with AI
-            </button>
           </div>
           <textarea
             {...register('summary')}
@@ -446,6 +521,88 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
           </button>
         </div>
       </form>
+
+      {/* Loading Modal */}
+      {isGeneratingAI && !showAIModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-xl p-8 flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cv-blue"></div>
+            <p className="text-lg font-medium text-gray-900 dark:text-white">
+              Cargando las opciones...
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center max-w-md">
+              La IA está generando tu resumen profesional basado en tu experiencia y habilidades
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* AI Summary Variants Modal */}
+      {showAIModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-dark-border">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Selecciona un resumen profesional
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAIModal(false);
+                    setAiSummaryVariants([]);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                La IA ha generado {aiSummaryVariants.length} versiones de resumen profesional basadas en tu experiencia y habilidades.
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {aiSummaryVariants.map((variant, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 dark:border-dark-border rounded-lg p-4 hover:border-cv-blue dark:hover:border-cv-blue transition-colors cursor-pointer"
+                  onClick={() => handleSelectSummaryVariant(variant)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-xs font-semibold text-cv-blue">Opción {index + 1}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectSummaryVariant(variant);
+                      }}
+                      className="px-3 py-1 text-xs font-medium text-white bg-cv-blue hover:bg-cv-blue-dark rounded transition-colors"
+                    >
+                      Seleccionar
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    {variant}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary">
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setAiSummaryVariants([]);
+                }}
+                className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -13,7 +13,18 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // @ts-ignore
 const API_KEY = import.meta.env?.VITE_GOOGLE_AI_API_KEY || '';
-const DEFAULT_MODEL = 'gemini-pro';
+
+// Models to try in order of preference (2025 - Updated based on available models)
+// Note: Gemini 1.0 and 1.5 have been RETIRED as of 2025
+const MODELS_TO_TRY = [
+  'gemini-2.5-flash',          // Latest stable fast model (2025)
+  'gemini-2.5-pro',            // Latest stable advanced model (2025)
+  'gemini-2.0-flash',          // Stable fast model
+  'gemini-2.0-flash-exp',      // Experimental model
+  'gemini-exp-1206',           // Experimental variant
+];
+
+const DEFAULT_MODEL = MODELS_TO_TRY[0];
 
 // Rate limiting configuration (requests per minute per user)
 const RATE_LIMIT_RPM = 10;
@@ -119,12 +130,41 @@ export function getModel(modelName: string = DEFAULT_MODEL) {
   return ai.getGenerativeModel({ model: modelName });
 }
 
+/**
+ * List available models (for debugging)
+ */
+export async function listAvailableModels(): Promise<string[]> {
+  try {
+    const ai = initializeAI();
+    if (!ai) {
+      throw new Error('AI client not initialized');
+    }
+
+    // This endpoint might help identify which models are actually available
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to list models: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const modelNames = data.models?.map((m: any) => m.name) || [];
+    console.log('Available models:', modelNames);
+    return modelNames;
+  } catch (error) {
+    console.error('Error listing models:', error);
+    return [];
+  }
+}
+
 // ==================================================
 // CORE AI FUNCTIONS
 // ==================================================
 
 /**
- * Generate text with Gemini
+ * Generate text with Gemini - tries multiple models with fallback
  */
 export async function generateText(
   prompt: string,
@@ -140,27 +180,62 @@ export async function generateText(
       };
     }
 
-    // Get model
-    const model = getModel();
+    let lastError: Error | null = null;
 
-    // Generate content
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
+    // Try each model in sequence until one works
+    for (const modelName of MODELS_TO_TRY) {
+      try {
+        console.log(`Trying model: ${modelName}`);
+        const model = getModel(modelName);
 
-    // Record request
-    if (userId) {
-      recordRequest(userId);
+        // Generate content
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().trim();
+
+        // Record request
+        if (userId) {
+          recordRequest(userId);
+        }
+
+        console.log(`✅ Successfully used model: ${modelName}`);
+        return {
+          success: true,
+          data: text,
+        };
+      } catch (error) {
+        console.warn(`❌ Model ${modelName} failed:`, error);
+        lastError = error instanceof Error ? error : new Error(String(error));
+        // Continue to next model
+        continue;
+      }
+    }
+
+    // All models failed
+    throw lastError || new Error('All models failed');
+  } catch (error) {
+    console.error('Error generating text:', error);
+
+    let errorMessage = 'Unknown error occurred';
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // Provide helpful hints for common errors
+      if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+        errorMessage = `No se pudo encontrar un modelo de IA disponible.\n\n` +
+          `Posibles soluciones:\n` +
+          `1. Verifica tu API key en Google AI Studio: https://aistudio.google.com/apikey\n` +
+          `2. Asegúrate de que la API key tenga acceso a los modelos Gemini\n` +
+          `3. Verifica que VITE_GOOGLE_AI_API_KEY esté en tu archivo .env.local\n` +
+          `4. La API key podría tener restricciones geográficas o de cuota`;
+      } else if (errorMessage.includes('API key')) {
+        errorMessage += '\n\nVerifica que VITE_GOOGLE_AI_API_KEY esté configurado correctamente en tu archivo .env.local';
+      }
     }
 
     return {
-      success: true,
-      data: text,
-    };
-  } catch (error) {
-    console.error('Error generating text:', error);
-    return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: errorMessage,
     };
   }
 }
@@ -170,14 +245,19 @@ export async function generateText(
 // ==================================================
 
 /**
- * Optimize experience description
+ * Optimize experience description and achievements separately
  */
 export async function optimizeExperience(
   title: string,
   company: string,
   description: string,
-  userId?: string
-): Promise<AIResponse<string>> {
+  userId?: string,
+  achievements?: string[]
+): Promise<AIResponse<{description: string; achievements: string[]}>> {
+  const achievementsText = achievements && achievements.length > 0
+    ? `\n\nLOGROS ACTUALES:\n${achievements.map((a, i) => `${i + 1}. ${a}`).join('\n')}`
+    : '';
+
   const prompt = `Actúa como un experto en recursos humanos y redacción de CVs profesionales.
 
 Mejora la siguiente descripción de experiencia laboral:
@@ -185,17 +265,62 @@ Mejora la siguiente descripción de experiencia laboral:
 PUESTO: ${title}
 EMPRESA: ${company}
 DESCRIPCIÓN ORIGINAL:
-${description}
+${description}${achievementsText}
 
 INSTRUCCIONES:
-- Mejora la redacción para destacar logros y responsabilidades
+- Mejora la redacción para destacar responsabilidades clave
 - Usa verbos de acción al inicio de cada punto
-- Cuantifica logros cuando sea posible (%, números, resultados)
-- Mantén un formato claro con bullets points si corresponde
+- Mantén un formato claro con bullets points (usando * para cada punto)
+- Usa **texto** para resaltar palabras clave importantes
 - Optimiza para sistemas ATS
-- Devuelve SOLO el texto mejorado, sin explicaciones adicionales`;
+- Devuelve el resultado en el siguiente formato EXACTO (respeta las etiquetas):
 
-  return generateText(prompt, userId);
+DESCRIPCIÓN:
+[Descripción mejorada aquí con bullets usando *]
+
+LOGROS:
+* Logro 1 mejorado y cuantificado
+* Logro 2 mejorado y cuantificado
+* Logro 3 mejorado y cuantificado
+
+IMPORTANTE:
+- Si no hay logros actuales, sugiere al menos 3 logros basados en las responsabilidades
+- Cuantifica los logros con números, porcentajes o métricas cuando sea posible
+- NO incluyas explicaciones adicionales, solo el formato solicitado`;
+
+  const response = await generateText(prompt, userId);
+
+  if (!response.success || !response.data) {
+    return {
+      success: false,
+      error: response.error,
+    };
+  }
+
+  // Parse the response to separate description and achievements
+  const text = response.data;
+  const descriptionMatch = text.match(/DESCRIPCIÓN:\s*([\s\S]*?)(?=LOGROS:|$)/i);
+  const achievementsMatch = text.match(/LOGROS:\s*([\s\S]*?)$/i);
+
+  const optimizedDescription = descriptionMatch
+    ? descriptionMatch[1].trim()
+    : text;
+
+  const optimizedAchievements = achievementsMatch
+    ? achievementsMatch[1]
+        .trim()
+        .split('\n')
+        .filter(line => line.trim().startsWith('*'))
+        .map(line => line.trim().substring(1).trim())
+    : [];
+
+  return {
+    success: true,
+    data: {
+      description: optimizedDescription,
+      achievements: optimizedAchievements,
+    },
+  };
 }
 
 /**
@@ -242,7 +367,10 @@ Resumen 3`;
   const response = await generateText(prompt, userId);
 
   if (!response.success || !response.data) {
-    return response as AIResponse<string[]>;
+    return {
+      success: false,
+      error: response.error || 'Failed to generate summary variants',
+    };
   }
 
   // Split variants
@@ -291,7 +419,10 @@ Formato: Habilidad1, Habilidad2, Habilidad3`;
   const response = await generateText(prompt, userId);
 
   if (!response.success || !response.data) {
-    return response as AIResponse<string[]>;
+    return {
+      success: false,
+      error: response.error || 'Failed to generate skills suggestions',
+    };
   }
 
   // Split skills
@@ -508,6 +639,7 @@ export default {
   initializeAI,
   getModel,
   generateText,
+  listAvailableModels,
 
   // CV optimization
   optimizeExperience,

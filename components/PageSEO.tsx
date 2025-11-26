@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
+import { getPageCanonicalUrl, normalizeUrl, getCanonicalPath, getHreflangUrls } from '../utils/canonicalUrl';
 
 interface PageSEOProps {
   title: string;
@@ -21,8 +22,18 @@ const PageSEO: React.FC<PageSEOProps> = ({
 }) => {
   const location = useLocation();
   const baseUrl = 'https://yourcvpassport.com';
-  const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href : baseUrl);
+
+  // Use provided canonical, or auto-generate from current page (maps ES to EN)
+  const canonicalUrl = canonical
+    ? normalizeUrl(canonical)
+    : getPageCanonicalUrl();
   const fullTitle = `${title} - YourCVPassport`;
+
+  // Get hreflang URLs for alternate language versions
+  const canonicalPath = typeof window !== 'undefined'
+    ? getCanonicalPath(window.location.pathname)
+    : '/';
+  const hreflangUrls = getHreflangUrls(canonicalPath);
 
   // Ensure description is max 160 characters
   const metaDescription = description.length > 160
@@ -49,6 +60,11 @@ const PageSEO: React.FC<PageSEOProps> = ({
       <meta name="description" content={metaDescription} />
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={canonicalUrl} />
+
+      {/* Hreflang Tags for Multilingual SEO */}
+      <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
+      <link rel="alternate" hrefLang="es" href={hreflangUrls.es} />
+      <link rel="alternate" hrefLang="x-default" href={hreflangUrls.xDefault} />
 
       {/* Open Graph Tags */}
       <meta property="og:type" content="website" />

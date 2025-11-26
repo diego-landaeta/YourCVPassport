@@ -4,6 +4,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useToastContext } from '../../context/ToastContext';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate';
@@ -34,6 +35,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
   const { session, profile } = useAuth();
   const translations = useTranslations();
   const { lang } = useLanguage();
+  const toast = useToastContext();
   const t = translations.dashboard.cards.templateSelector;
   const [selectedTemplate, setSelectedTemplate] = useState(currentTemplate || 'classic');
   const [isSaving, setIsSaving] = useState(false);
@@ -105,7 +107,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
       onTemplateChange(templateId);
     } catch (error) {
       console.error('Error updating template:', error);
-      alert('Failed to update template');
+      toast.error('Failed to update template');
     } finally {
       setIsSaving(false);
     }

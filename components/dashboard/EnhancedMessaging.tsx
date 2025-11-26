@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 import {
   PaperAirplaneIcon,
   CheckCircleIcon,
@@ -50,6 +51,7 @@ interface Lead {
 const EnhancedMessaging: React.FC = () => {
   const { user, profile } = useAuth();
   const t = useTranslations();
+  const toast = useToastContext();
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -233,7 +235,7 @@ const EnhancedMessaging: React.FC = () => {
       console.error('Error sending message:', err);
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent);
-      alert('Error al enviar el mensaje');
+      toast.error('Error al enviar el mensaje');
     } finally {
       setSending(false);
     }
