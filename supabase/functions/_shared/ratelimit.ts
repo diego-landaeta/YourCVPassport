@@ -153,7 +153,7 @@ export async function withRateLimit(
 
     return result;
   } catch (error) {
-    console.error('Rate limit check failed:', error);
+    
     // Allow the request to proceed if rate limiting fails (fail open)
     return {
       success: true,
@@ -178,7 +178,7 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
     const value = await redis.get(key);
     return value as T | null;
   } catch (error) {
-    console.error('Cache get failed:', error);
+    
     return null;
   }
 }
@@ -192,7 +192,7 @@ export async function cacheSet<T>(
     const redis = getRedisClient();
     await redis.set(key, value, { ex: options.ttl });
   } catch (error) {
-    console.error('Cache set failed:', error);
+    
   }
 }
 
@@ -201,7 +201,7 @@ export async function cacheDel(key: string): Promise<void> {
     const redis = getRedisClient();
     await redis.del(key);
   } catch (error) {
-    console.error('Cache delete failed:', error);
+    
   }
 }
 
@@ -216,7 +216,7 @@ export async function invalidatePattern(pattern: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.error('Cache invalidation failed:', error);
+    
   }
 }
 

@@ -216,9 +216,7 @@ const VisasSection: React.FC = () => {
 
       if (error) throw error;
       setVisas(data || []);
-    } catch (error) {
-      console.error('Error loading visas:', error);
-      // toast.error('Error al cargar las visas');
+    } catch (error) {// toast.error('Error al cargar las visas');
     } finally {
       setLoading(false);
     }
@@ -247,9 +245,7 @@ const VisasSection: React.FC = () => {
       // Execute all updates in parallel
       await Promise.all(updates);
       // toast.success('Orden actualizado');
-    } catch (error) {
-      console.error('Error updating sort order:', error);
-      // toast.error('Error al actualizar el orden');
+    } catch (error) {// toast.error('Error al actualizar el orden');
       // Revert on error
       loadVisas();
     }
@@ -286,9 +282,7 @@ const VisasSection: React.FC = () => {
       loadVisas();
       setIsFormOpen(false);
       setEditingVisa(undefined);
-    } catch (error) {
-      console.error('Error saving visa:', error);
-      toast.error('Error al guardar la visa');
+    } catch (error) {toast.error('Error al guardar la visa');
     }
   };
 
@@ -328,9 +322,7 @@ const VisasSection: React.FC = () => {
 
       setVisas(visas.filter(v => v.id !== visaId));
       // toast.success('Visa eliminada exitosamente');
-    } catch (error) {
-      console.error('Error deleting visa:', error);
-      toast.error(t.deleteError);
+    } catch (error) {toast.error(t.deleteError);
     } finally {
       setDeleting(null);
       setDeleteConfirm({ isOpen: false, visaId: null });
@@ -443,3 +435,4 @@ const VisasSection: React.FC = () => {
 };
 
 export default VisasSection;
+

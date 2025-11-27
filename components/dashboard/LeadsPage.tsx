@@ -56,9 +56,7 @@ const LeadsPage: React.FC = () => {
 
       if (error) throw error;
       setLeads(data || []);
-    } catch (error) {
-      console.error('Error loading leads:', error);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   };
@@ -117,9 +115,7 @@ const LeadsPage: React.FC = () => {
 
       if (error) throw error;
       setNotes(data || []);
-    } catch (error) {
-      console.error('Error loading notes:', error);
-    }
+    } catch (error) {}
   };
 
   const updateLeadStatus = async (leadId: string, status: LeadStatus) => {
@@ -153,9 +149,7 @@ const LeadsPage: React.FC = () => {
       if (selectedLead?.id === leadId) {
         setSelectedLead({ ...selectedLead, ...updates });
       }
-    } catch (error) {
-      console.error('Error updating lead status:', error);
-    }
+    } catch (error) {}
   };
 
   const handleArchive = async (leadId: string) => {
@@ -177,9 +171,7 @@ const LeadsPage: React.FC = () => {
       if (selectedLead?.id === leadId) {
         setSelectedLead(null);
       }
-    } catch (error) {
-      console.error('Error deleting lead:', error);
-    }
+    } catch (error) {}
   };
 
   const handleAddNote = async () => {
@@ -201,9 +193,7 @@ const LeadsPage: React.FC = () => {
 
       setNotes([data, ...notes]);
       setNoteText('');
-    } catch (error) {
-      console.error('Error adding note:', error);
-    } finally {
+    } catch (error) {} finally {
       setAddingNote(false);
     }
   };
@@ -524,3 +514,4 @@ const LeadsPage: React.FC = () => {
 };
 
 export default LeadsPage;
+

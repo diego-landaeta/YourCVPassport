@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { languageSchema, LanguageFormData } from '../../schemas/profileSchemas';
+import { z } from 'zod';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+// Extended language schema with percentage
+const extendedLanguageSchema = z.object({
+  name: z.string().min(1, 'El nombre del idioma es requerido'),
+  level: z.string().min(1, 'El nivel es requerido'),
+  percentage: z.number().min(0).max(100).optional().nullable(),
+});
+
+type LanguageFormData = z.infer<typeof extendedLanguageSchema> & { id?: string };
 
 interface LanguagesSectionProps {
   initialData?: LanguageFormData[];
@@ -19,18 +29,19 @@ const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native'] as const;
 
 const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], onSave, onNavigateToVerifications }) => {
   const translations = useTranslations();
+  const { lang } = useLanguage();
   const modals = translations.dashboard.modals;
   const [languages, setLanguages] = useState<LanguageFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<LanguageFormData>({
-    resolver: zodResolver(languageSchema),
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<LanguageFormData>({
+    resolver: zodResolver(extendedLanguageSchema),
   });
 
   const handleAdd = () => {
     setEditingIndex(null);
-    reset({ name: '', level: 'B2' });
+    reset({ name: '', level: 'B2', percentage: null });
     setIsFormOpen(true);
   };
 
@@ -97,10 +108,10 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {translations.lang === 'en' ? 'Do you have a language certificate?' : '¿Cuentas con algún certificado de idioma?'}
+                {lang === 'en' ? 'Do you have a language certificate?' : '¿Cuentas con algún certificado de idioma?'}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {translations.lang === 'en'
+                {lang === 'en'
                   ? 'Verify your language proficiency with official certificates (TOEFL, IELTS, DELE, DELF, etc.). Go to Verifications to upload your language certificates.'
                   : 'Verifica tu nivel de idioma con certificados oficiales (TOEFL, IELTS, DELE, DELF, etc.). Ve a Verificaciones para subir tus certificados de idioma.'}
               </p>
@@ -108,7 +119,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
               >
-                {translations.lang === 'en' ? 'Upload Language Certificate' : 'Subir Certificado de Idioma'}
+                {lang === 'en' ? 'Upload Language Certificate' : 'Subir Certificado de Idioma'}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -121,8 +132,8 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {languages.map((lang, index) => (
           <div key={index} className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4 border border-gray-200 dark:border-dark-border">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
                 <h4 className="font-semibold text-gray-900 dark:text-white">{lang.name}</h4>
                 <span className={`inline-block mt-1 px-2 py-1 rounded text-xs ${getLevelColor(lang.level)}`}>
                   {lang.level}
@@ -141,6 +152,20 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 </button>
               </div>
             </div>
+            {lang.percentage !== undefined && lang.percentage !== null && (
+              <div className="mt-2">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  <span>Nivel de dominio</span>
+                  <span>{lang.percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-cv-blue h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${lang.percentage}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -183,6 +208,60 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
               </select>
               {errors.level && <p className="text-red-500 text-sm mt-1">{errors.level.message}</p>}
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {modals.skillPercentage || 'Nivel de dominio (%)'}
+              </label>
+              <input
+                {...register('percentage', {
+                  valueAsNumber: true,
+                  setValueAs: (v) => isNaN(v) || v === '' ? null : Number(v),
+                })}
+                type="range"
+                min="0"
+                max="100"
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <span>0%</span>
+                <span>{watch('percentage') || 0}%</span>
+                <span>100%</span>
+              </div>
+            </div>
+
+            {/* Preview Section */}
+            {watch('name') && watch('level') && (
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  {lang === 'en' ? 'Preview' : 'Vista previa'}
+                </h4>
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-3 border border-gray-200 dark:border-dark-border">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{watch('name')}</h4>
+                      <span className={`inline-block mt-1 px-2 py-1 rounded text-xs ${getLevelColor(watch('level'))}`}>
+                        {watch('level')}
+                      </span>
+                    </div>
+                  </div>
+                  {watch('percentage') !== null && watch('percentage') !== undefined && watch('percentage') > 0 && (
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <span>Nivel de dominio</span>
+                        <span>{watch('percentage')}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-cv-blue h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${watch('percentage')}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 justify-end">
               <button

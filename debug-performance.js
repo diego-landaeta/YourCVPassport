@@ -14,9 +14,9 @@
  */
 
 (function() {
-  console.clear();
-  console.log('%c🔍 INICIANDO DIAGNÓSTICO DE PERFORMANCE', 'background: #4CAF50; color: white; padding: 10px; font-size: 16px; font-weight: bold;');
-  console.log('━'.repeat(60));
+  
+  
+  
 
   // ============================================
   // 1. MONITOR DE NETWORK REQUESTS
@@ -35,7 +35,7 @@
     const requestId = ++requestCounter;
     const url = args[0];
 
-    console.log(`🌐 [${requestId}] Fetch iniciado: ${url}`);
+    
 
     return originalFetch.apply(this, args).then(response => {
       const endTime = performance.now();
@@ -53,14 +53,14 @@
 
       requests.push(requestInfo);
 
-      console.log(`✅ [${requestId}] Fetch completado: ${duration}ms - ${url}`);
+      
 
       return response;
     }).catch(error => {
       const endTime = performance.now();
       const duration = (endTime - startTime).toFixed(2);
 
-      console.error(`❌ [${requestId}] Fetch error: ${duration}ms - ${url}`, error);
+      
 
       requests.push({
         id: requestId,
@@ -88,7 +88,7 @@
     const checkSupabase = setInterval(() => {
       if (window.supabase || window._supabaseClient) {
         clearInterval(checkSupabase);
-        console.log('✅ Cliente de Supabase detectado');
+        
 
         // Interceptar .from()
         const originalFrom = (window.supabase || window._supabaseClient).from;
@@ -97,7 +97,7 @@
             const queryId = ++supabaseQueryCounter;
             const startTime = performance.now();
 
-            console.log(`🗄️  [Q${queryId}] Supabase query iniciado: ${table}`);
+            
 
             const builder = originalFrom.call(this, table);
 
@@ -122,7 +122,7 @@
                     timestamp: new Date().toISOString()
                   });
 
-                  console.log(`✅ [Q${queryId}] Supabase query completado: ${duration}ms - ${table} (${data?.data?.length || 0} rows)`);
+                  
 
                   return onFulfilled ? onFulfilled(data) : data;
                 }, onRejected);
@@ -151,7 +151,7 @@
 
   const monitorReactRenders = () => {
     if (window.React) {
-      console.log('⚛️  React detectado, monitoreando re-renders...');
+      
 
       // Hook en React.createElement
       const originalCreateElement = React.createElement;
@@ -166,7 +166,7 @@
 
           // Solo log para componentes importantes
           if (componentName.includes('Dashboard') || componentName.includes('Content')) {
-            console.log(`⚛️  Re-render: ${componentName}`);
+            
           }
         }
 
@@ -230,38 +230,33 @@
   // ============================================
 
   window.generatePerformanceReport = function() {
-    console.clear();
-    console.log('%c📊 REPORTE DE PERFORMANCE', 'background: #2196F3; color: white; padding: 10px; font-size: 18px; font-weight: bold;');
-    console.log('━'.repeat(60));
+    
+    
+    
 
     // Network Requests
-    console.log('\n%c🌐 NETWORK REQUESTS', 'color: #FF9800; font-size: 14px; font-weight: bold;');
-    console.log(`Total de requests: ${requests.length}`);
+    
+    
 
     if (requests.length > 0) {
       const totalDuration = requests.reduce((sum, req) => sum + parseFloat(req.duration), 0);
-      console.log(`Tiempo total: ${totalDuration.toFixed(2)}ms`);
-      console.log(`Promedio por request: ${(totalDuration / requests.length).toFixed(2)}ms`);
+      
+      
 
       // Requests más lentos
       const slowest = [...requests].sort((a, b) => parseFloat(b.duration) - parseFloat(a.duration)).slice(0, 5);
-      console.log('\n🐌 Top 5 requests más lentos:');
-      console.table(slowest.map(r => ({
-        ID: r.id,
-        URL: r.url.substring(0, 50) + '...',
-        Duración: r.duration + 'ms',
-        Status: r.status || r.error
-      })));
+      
+      
     }
 
     // Supabase Queries
-    console.log('\n%c🗄️  SUPABASE QUERIES', 'color: #4CAF50; font-size: 14px; font-weight: bold;');
-    console.log(`Total de queries: ${supabaseQueries.length}`);
+    
+    
 
     if (supabaseQueries.length > 0) {
       const totalDuration = supabaseQueries.reduce((sum, q) => sum + parseFloat(q.duration), 0);
-      console.log(`Tiempo total: ${totalDuration.toFixed(2)}ms`);
-      console.log(`Promedio por query: ${(totalDuration / supabaseQueries.length).toFixed(2)}ms`);
+      
+      
 
       // Queries por tabla
       const byTable = {};
@@ -270,27 +265,21 @@
         byTable[q.table].push(q);
       });
 
-      console.log('\n📊 Queries por tabla:');
+      
       Object.keys(byTable).forEach(table => {
         const queries = byTable[table];
         const totalTime = queries.reduce((sum, q) => sum + parseFloat(q.duration), 0);
-        console.log(`  ${table}: ${queries.length} queries (${totalTime.toFixed(2)}ms total)`);
+        
       });
 
       // Queries más lentas
       const slowest = [...supabaseQueries].sort((a, b) => parseFloat(b.duration) - parseFloat(a.duration)).slice(0, 5);
-      console.log('\n🐌 Top 5 queries más lentas:');
-      console.table(slowest.map(q => ({
-        ID: q.id,
-        Tabla: q.table,
-        Query: q.query,
-        Duración: q.duration + 'ms',
-        Filas: q.rowCount
-      })));
+      
+      
     }
 
     // React Re-renders
-    console.log('\n%c⚛️  REACT RE-RENDERS', 'color: #61DAFB; font-size: 14px; font-weight: bold;');
+    
 
     const renderCounts = {};
     componentRenders.forEach(r => {
@@ -302,23 +291,20 @@
       .slice(0, 10);
 
     if (topRenders.length > 0) {
-      console.log('🔄 Top 10 componentes con más re-renders:');
-      console.table(topRenders.map(([name, count]) => ({
-        Componente: name,
-        'Re-renders': count
-      })));
+      
+      
     } else {
-      console.log('No se detectaron re-renders (React puede estar en producción)');
+      
     }
 
     // Performance Metrics
-    console.log('\n%c⏱️  PERFORMANCE METRICS', 'color: #9C27B0; font-size: 14px; font-weight: bold;');
+    
     if (performanceMetrics.measurements.length > 0) {
-      console.table(performanceMetrics.measurements);
+      
     }
 
     // Recomendaciones
-    console.log('\n%c💡 RECOMENDACIONES', 'color: #FFC107; font-size: 14px; font-weight: bold;');
+    
 
     const recommendations = [];
 
@@ -347,13 +333,13 @@
     }
 
     if (recommendations.length === 0) {
-      console.log('✅ No se detectaron problemas obvios de performance.');
+      
     } else {
-      recommendations.forEach(rec => console.log(rec));
+      recommendations.forEach(rec => );
     }
 
-    console.log('\n' + '━'.repeat(60));
-    console.log('%c✅ REPORTE COMPLETADO', 'background: #4CAF50; color: white; padding: 10px; font-size: 14px; font-weight: bold;');
+    
+    
   };
 
   // ============================================
@@ -366,7 +352,7 @@
     const url = window.location.href;
     if (url.includes('/dashboard') && !dashboardLoaded) {
       dashboardLoaded = true;
-      console.log('📍 Dashboard detectado, generando reporte en 3 segundos...');
+      
 
       setTimeout(() => {
         window.generatePerformanceReport();
@@ -380,13 +366,13 @@
   // 7. COMANDOS DISPONIBLES
   // ============================================
 
-  console.log('\n%c📝 COMANDOS DISPONIBLES', 'color: #00BCD4; font-size: 14px; font-weight: bold;');
-  console.log('Ejecuta estos comandos en cualquier momento:');
-  console.log('  generatePerformanceReport() - Generar reporte completo');
-  console.log('  console.table(requests) - Ver todas las requests HTTP');
-  console.log('  console.table(supabaseQueries) - Ver todas las queries Supabase');
-  console.log('\n' + '━'.repeat(60));
+  
+  
+  
+  
+  
+  
 
 })();
 
-console.log('✅ Diagnóstico iniciado. Navega al Dashboard para ver resultados.');
+

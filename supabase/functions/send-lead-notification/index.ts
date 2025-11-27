@@ -48,7 +48,7 @@ serve(async (req: Request) => {
       .single();
 
     if (profileError || !profile) {
-      console.error('Error fetching profile:', profileError);
+      
       return new Response(
         JSON.stringify({ error: 'Profile not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -56,7 +56,7 @@ serve(async (req: Request) => {
     }
 
     if (!profile.email) {
-      console.error('Profile has no email address');
+      
       return new Response(
         JSON.stringify({ error: 'Profile has no email address' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -205,12 +205,12 @@ ${message}
 
     if (!resendResponse.ok) {
       const error = await resendResponse.text();
-      console.error('Resend API error:', error);
+      
       throw new Error(`Failed to send email: ${error}`);
     }
 
     const resendData = await resendResponse.json();
-    console.log('Email sent successfully:', resendData);
+    
 
     return new Response(
       JSON.stringify({
@@ -225,7 +225,7 @@ ${message}
     );
 
   } catch (error: any) {
-    console.error('Error in send-lead-notification function:', error);
+    
     return new Response(
       JSON.stringify({
         error: error.message || 'Internal server error',

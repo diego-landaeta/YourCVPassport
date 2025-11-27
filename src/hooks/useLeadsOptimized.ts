@@ -161,9 +161,7 @@ export function useMarkLeadAsRead() {
     onError: (err, { userId }, context) => {
       if (context?.previousLeads) {
         queryClient.setQueryData(queryKeys.leads(userId), context.previousLeads);
-      }
-      console.error('Error marking lead as read:', err);
-    },
+      }},
 
     // Refetch después de éxito
     onSettled: (data, error, { userId }) => {
@@ -239,9 +237,7 @@ export function useSendMessage() {
     onError: (err, { leadId }, context) => {
       if (context?.previousMessages) {
         queryClient.setQueryData(queryKeys.leadMessages(leadId), context.previousMessages);
-      }
-      console.error('Error sending message:', err);
-    },
+      }},
 
     onSettled: (data, error, { leadId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.leadMessages(leadId) });

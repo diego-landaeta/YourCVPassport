@@ -76,7 +76,7 @@ async function checkRateLimit(req: Request): Promise<{ success: boolean; headers
       reset: result.reset,
     };
   } catch (error) {
-    console.error('Rate limit check failed:', error);
+    
     // Fail open - allow request if rate limiting fails
     return {
       success: true,
@@ -201,7 +201,7 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      console.error('Error inserting analytics event:', error);
+      
       return new Response(
         JSON.stringify({ error: 'Failed to track event', details: error.message }),
         {
@@ -223,7 +223,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in track-analytics function:', error);
+    
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: error.message }),
       {

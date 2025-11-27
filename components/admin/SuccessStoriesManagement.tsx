@@ -53,9 +53,7 @@ const SuccessStoriesManagement: React.FC = () => {
 
       if (error) throw error;
       setStories(data || []);
-    } catch (err: any) {
-      console.error('Error loading stories:', err);
-      showAlert({
+    } catch (err: any) {showAlert({
         title: 'Error',
         message: 'Error al cargar historias: ' + err.message,
         type: 'error'
@@ -111,9 +109,7 @@ const SuccessStoriesManagement: React.FC = () => {
 
       resetForm();
       loadStories();
-    } catch (err: any) {
-      console.error('Error saving story:', err);
-      showAlert({
+    } catch (err: any) {showAlert({
         title: 'Error',
         message: 'Error al guardar: ' + err.message,
         type: 'error'
@@ -513,3 +509,4 @@ const SuccessStoriesManagement: React.FC = () => {
 };
 
 export default SuccessStoriesManagement;
+

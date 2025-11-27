@@ -104,11 +104,7 @@ const BlogPage: React.FC = () => {
             .select('*')
             .order('published_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching posts:', error);
-        } else {
-            console.log('Posts cargados:', data?.length, data);
-            setPosts(data as BlogPost[]);
+        if (error) {} else {setPosts(data as BlogPost[]);
         }
         setLoading(false);
     };
@@ -325,3 +321,4 @@ const BlogPage: React.FC = () => {
 };
 
 export default BlogPage;
+

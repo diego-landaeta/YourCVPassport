@@ -108,7 +108,7 @@ let genAI: GoogleGenerativeAI | null = null;
  */
 export function initializeAI(): GoogleGenerativeAI | null {
   if (!API_KEY) {
-    console.warn('⚠️ VITE_GOOGLE_AI_API_KEY not configured');
+    
     return null;
   }
 
@@ -151,10 +151,10 @@ export async function listAvailableModels(): Promise<string[]> {
 
     const data = await response.json();
     const modelNames = data.models?.map((m: any) => m.name) || [];
-    console.log('Available models:', modelNames);
+    
     return modelNames;
   } catch (error) {
-    console.error('Error listing models:', error);
+    
     return [];
   }
 }
@@ -185,7 +185,7 @@ export async function generateText(
     // Try each model in sequence until one works
     for (const modelName of MODELS_TO_TRY) {
       try {
-        console.log(`Trying model: ${modelName}`);
+        
         const model = getModel(modelName);
 
         // Generate content
@@ -197,13 +197,13 @@ export async function generateText(
           recordRequest(userId);
         }
 
-        console.log(`✅ Successfully used model: ${modelName}`);
+        
         return {
           success: true,
           data: text,
         };
       } catch (error) {
-        console.warn(`❌ Model ${modelName} failed:`, error);
+        
         lastError = error instanceof Error ? error : new Error(String(error));
         // Continue to next model
         continue;
@@ -213,7 +213,7 @@ export async function generateText(
     // All models failed
     throw lastError || new Error('All models failed');
   } catch (error) {
-    console.error('Error generating text:', error);
+    
 
     let errorMessage = 'Unknown error occurred';
 

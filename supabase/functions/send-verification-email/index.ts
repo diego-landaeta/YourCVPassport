@@ -60,10 +60,10 @@ serve(async (req) => {
     }
 
     // Check for required environment variables
-    console.log('Available Env Vars:', JSON.stringify(Object.keys(Deno.env.toObject())))
+    
     
     if (!RESEND_API_KEY) {
-      console.error('Missing RESEND_API_KEY')
+      
       throw new Error('Server configuration error: Missing email provider key')
     }
 
@@ -153,7 +153,7 @@ serve(async (req) => {
 
     const userName = profile?.full_name || 'Usuario'
 
-    console.log(`Sending email to ${email} from ${SENDER_EMAIL}`)
+    
 
     // Send email via Resend
     const resendResponse = await fetch('https://api.resend.com/emails', {
@@ -220,7 +220,7 @@ serve(async (req) => {
 
     if (!resendResponse.ok) {
       const error = await resendResponse.json()
-      console.error('Resend API Error:', error)
+      
       throw new Error(`Resend error: ${JSON.stringify(error)}`)
     }
 
@@ -239,7 +239,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in send-verification-email:', error)
+    
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred',

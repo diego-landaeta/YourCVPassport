@@ -216,7 +216,7 @@ export async function checkHandleAvailability(
 
     return { available: true };
   } catch (error: any) {
-    console.error('Error checking handle availability:', error);
+    
     return { available: false, error: 'Error checking handle availability' };
   }
 }

@@ -77,7 +77,7 @@ serve(async (req) => {
 
     // Check for required environment variables
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
-      console.error('Missing Twilio configuration')
+      
       throw new Error('Server configuration error: Missing SMS provider keys')
     }
 
@@ -153,7 +153,7 @@ serve(async (req) => {
         metadata: { phone }
       })
 
-    console.log(`Sending SMS to ${phone}`)
+    
 
     // Send SMS via Twilio
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`
@@ -174,7 +174,7 @@ serve(async (req) => {
 
     if (!twilioResponse.ok) {
       const error = await twilioResponse.json()
-      console.error('Twilio API Error:', error)
+      
       throw new Error(`Twilio error: ${JSON.stringify(error)}`)
     }
 
@@ -193,7 +193,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in send-verification-sms:', error)
+    
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred',

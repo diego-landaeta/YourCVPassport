@@ -60,17 +60,13 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
             const { data: newToken, error: createError } = await supabase
                 .rpc('get_or_create_verification_token', { p_stamp_id: stampId });
 
-            if (createError) {
-                console.error('Error creating token:', createError);
-                return;
+            if (createError) {return;
             }
 
             if (newToken) {
                 setToken(newToken);
             }
-        } catch (err) {
-            console.error('Error with verification token:', err);
-        }
+        } catch (err) {}
     };
 
     const generateQRCode = async (tokenString: string) => {
@@ -85,9 +81,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
                 }
             });
             setQrCodeUrl(qrDataUrl);
-        } catch (err) {
-            console.error('Error generating QR code:', err);
-        }
+        } catch (err) {}
     };
 
     const handleShowQR = async () => {
@@ -263,3 +257,4 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
 };
 
 export default VerificationBadge;
+

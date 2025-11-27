@@ -163,7 +163,7 @@ export function useATSExport(options: UseATSExportOptions = {}) {
           // Try server-side first
           blob = await exportServerSide(profileId, exportOptions);
         } catch (serverError) {
-          console.warn('Server-side export failed, falling back to client-side:', serverError);
+          
 
           // Fallback to client-side if server fails
           if (format === 'pdf') {

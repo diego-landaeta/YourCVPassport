@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabase/client';
 import { Stamp, StampType, StampStatus } from '../../types';
 import {
@@ -15,7 +15,9 @@ import {
   EyeIcon,
   CheckCircleIcon,
   XMarkIcon,
-  FunnelIcon
+  FunnelIcon,
+  MagnifyingGlassPlusIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { useToast } from '../../hooks/useToast';
 import Toast from '../common/Toast';
@@ -30,7 +32,37 @@ const StampsManagement: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
+  
+  // Magnifier state
+  const [showMagnifier, setShowMagnifier] = useState(false);
+  const [isZoomEnabled, setIsZoomEnabled] = useState(false);
+  const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
+  const imgRef = useRef<HTMLImageElement>(null);
+
   const { toasts, removeToast, success, error } = useToast();
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (!isZoomEnabled) return;
+    const elem = e.currentTarget;
+    const { width, height } = elem.getBoundingClientRect();
+    setImgSize({ width, height });
+    setShowMagnifier(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isZoomEnabled) return;
+    const elem = e.currentTarget;
+    const { top, left } = elem.getBoundingClientRect();
+    const x = e.clientX - left;
+    const y = e.clientY - top;
+    setMagnifierPosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setShowMagnifier(false);
+  };
 
   // Statistics
   const [stats, setStats] = useState({
@@ -65,7 +97,15 @@ const StampsManagement: React.FC = () => {
 
       if (error) throw error;
 
-      setStamps(data || []);
+      // Filter out PENDING EMAIL and PHONE stamps (they should only show when VERIFIED)
+      const filteredData = (data || []).filter(stamp => {
+        if ((stamp.type === 'EMAIL' || stamp.type === 'PHONE') && stamp.status === 'PENDING') {
+          return false;
+        }
+        return true;
+      });
+
+      setStamps(filteredData);
 
       // Calculate stats
       const { data: allStamps } = await supabase
@@ -82,9 +122,7 @@ const StampsManagement: React.FC = () => {
         });
       }
 
-    } catch (error) {
-      console.error('Error loading stamps:', error);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   };
@@ -156,22 +194,15 @@ const StampsManagement: React.FC = () => {
 
     // Si es una ruta de Supabase Storage, obtener URL firmada
     try {
-      console.log('Getting signed URL for path:', documentPath);
-
       const { data, error } = await supabase.storage
         .from('documents')
         .createSignedUrl(documentPath, 3600); // URL válida por 1 hora
 
       if (error) {
-        console.error('Error getting signed URL:', error);
-        console.error('Error details:', JSON.stringify(error));
         return ''; // Return empty string to show error state
       }
-
-      console.log('Signed URL generated successfully:', data.signedUrl);
       return data.signedUrl;
     } catch (error) {
-      console.error('Error processing document URL:', error);
       return '';
     }
   };
@@ -208,8 +239,6 @@ const StampsManagement: React.FC = () => {
         throw new Error('No se pudo obtener el usuario actual');
       }
 
-      console.log('Approving stamp:', stampId, 'by admin:', user.id);
-
       const { data, error: rpcError } = await supabase.rpc('verify_stamp', {
         stamp_id: stampId,
         admin_id: user.id,
@@ -217,11 +246,9 @@ const StampsManagement: React.FC = () => {
       });
 
       if (rpcError) {
-        console.error('RPC Error details:', rpcError);
         throw rpcError;
       }
 
-      console.log('Stamp approved successfully:', data);
       success('Stamp verificado exitosamente');
       setShowDocumentModal(false);
       setSelectedStamp(null);
@@ -230,16 +257,16 @@ const StampsManagement: React.FC = () => {
       loadStamps();
 
     } catch (err: any) {
-      console.error('Error approving stamp:', err);
-      console.error('Error stack:', err.stack);
       error('Error al aprobar: ' + (err.message || 'Error desconocido'));
     } finally {
       setProcessing(false);
     }
   };
 
-  const rejectStamp = async (stampId: string) => {
-    if (!actionNotes) {
+  const rejectStamp = async (stampId: string, reason?: string) => {
+    const rejectionReason = reason || actionNotes;
+
+    if (!rejectionReason) {
       error('Por favor añade un motivo de rechazo');
       return;
     }
@@ -253,20 +280,16 @@ const StampsManagement: React.FC = () => {
         throw new Error('No se pudo obtener el usuario actual');
       }
 
-      console.log('Rejecting stamp:', stampId, 'by admin:', user.id);
-
       const { data, error: rpcError } = await supabase.rpc('reject_stamp', {
         stamp_id: stampId,
         admin_id: user.id,
-        reason: actionNotes
+        reason: rejectionReason
       });
 
       if (rpcError) {
-        console.error('RPC Error details:', rpcError);
         throw rpcError;
       }
 
-      console.log('Stamp rejected successfully:', data);
       success('Stamp rechazado exitosamente');
       setShowDocumentModal(false);
       setSelectedStamp(null);
@@ -275,12 +298,25 @@ const StampsManagement: React.FC = () => {
       loadStamps();
 
     } catch (err: any) {
-      console.error('Error rejecting stamp:', err);
-      console.error('Error stack:', err.stack);
       error('Error al rechazar: ' + (err.message || 'Error desconocido'));
     } finally {
       setProcessing(false);
     }
+  };
+
+  const handleQuickReject = async (stamp: Stamp) => {
+    const reason = prompt('Por favor, ingresa el motivo del rechazo:');
+
+    if (reason === null) {
+      return; // User cancelled
+    }
+
+    if (!reason.trim()) {
+      error('Debes proporcionar un motivo para rechazar');
+      return;
+    }
+
+    await rejectStamp(stamp.id, reason);
   };
 
   const formatDate = (dateString: string) => {
@@ -422,13 +458,26 @@ const StampsManagement: React.FC = () => {
                       {stamp.provider || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => viewDocument(stamp)}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1"
-                      >
-                        <EyeIcon className="w-4 h-4" />
-                        Ver Detalles
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        {stamp.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleQuickReject(stamp)}
+                            disabled={processing}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center gap-1 disabled:opacity-50"
+                            title="Rechazar rápidamente"
+                          >
+                            <XCircleIcon className="w-4 h-4" />
+                            Rechazar
+                          </button>
+                        )}
+                        <button
+                          onClick={() => viewDocument(stamp)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1"
+                        >
+                          <EyeIcon className="w-4 h-4" />
+                          Ver Detalles
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -441,16 +490,17 @@ const StampsManagement: React.FC = () => {
       {/* Document Modal */}
       {showDocumentModal && selectedStamp && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
-              <div className="flex items-start justify-between">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-6xl w-full h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+            {/* Header - Compact */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex-shrink-0">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <ShieldCheckIcon className="w-6 h-6 text-blue-200" />
                     Verificación de {getStampTypeName(selectedStamp.type)}
                   </h2>
-                  <p className="text-blue-100">
-                    Solicitado por: {(selectedStamp.profiles as any)?.full_name}
+                  <p className="text-blue-100 text-sm mt-1">
+                    Solicitado por: <span className="font-semibold text-white">{(selectedStamp.profiles as any)?.full_name}</span>
                   </p>
                 </div>
                 <button
@@ -460,159 +510,263 @@ const StampsManagement: React.FC = () => {
                     setActionNotes('');
                     setDocumentUrl(null);
                   }}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2"
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* Stamp Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</label>
-                  <div className="mt-1">{getStatusBadge(selectedStamp.status)}</div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Solicitud</label>
-                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{formatDate(selectedStamp.created_at)}</p>
-                </div>
-              </div>
-
-              {/* Evidence Details */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información Proporcionada</h3>
-                <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4 space-y-3">
-                  {Object.entries(selectedStamp.evidence as any).map(([key, value]) => {
-                    if (key === 'document_url' || key === 'verification_code' || key === 'expires_at' || key === 'attempts') return null;
-                    return (
-                      <div key={key} className="flex justify-between">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
-                          {key.replace(/_/g, ' ')}:
-                        </span>
-                        <span className="text-sm text-gray-900 dark:text-white">
-                          {typeof value === 'string' ? value : JSON.stringify(value)}
-                        </span>
+            {/* Content - Fixed Height with Internal Scroll */}
+            <div className="flex-1 overflow-hidden p-6 bg-gray-50 dark:bg-dark-bg-primary">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                {/* Left Column: Info & Actions */}
+                <div className="flex flex-col gap-6 h-full">
+                  {/* Stamp Info Card */}
+                  <div className="bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 block">Estado Actual</label>
+                        <div>{getStatusBadge(selectedStamp.status)}</div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 block">Fecha Solicitud</label>
+                        <p className="text-sm text-gray-900 dark:text-white font-medium flex items-center gap-1.5">
+                          <ClockIcon className="w-4 h-4 text-gray-400" />
+                          {formatDate(selectedStamp.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Document Preview */}
-              {(selectedStamp.evidence as any).document_url && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Documento Adjunto</h3>
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                  {/* Evidence Details Card - Scrollable */}
+                  <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex-1 flex flex-col min-h-0 overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <DocumentTextIcon className="w-4 h-4 text-blue-500" />
+                        Información Proporcionada
+                      </h3>
+                    </div>
+                    <div className="p-4 overflow-y-auto custom-scrollbar">
+                      <div className="space-y-0 text-sm">
+                        {Object.entries(selectedStamp.evidence as any).map(([key, value]) => {
+                          if (key === 'document_url' || key === 'verification_code' || key === 'expires_at' || key === 'attempts' || key === 'file_type' || key === 'file_name') return null;
+                          return (
+                            <div key={key} className="grid grid-cols-3 gap-4 py-3 border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary px-2 -mx-2 rounded-lg transition-colors">
+                              <span className="font-medium text-gray-500 dark:text-gray-400 capitalize col-span-1 flex items-center">
+                                {key.replace(/_/g, ' ')}
+                              </span>
+                              <span className="text-gray-900 dark:text-white col-span-2 break-words font-medium">
+                                {typeof value === 'string' ? value : JSON.stringify(value)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Admin Actions Card */}
+                  <div className="bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    {selectedStamp.status === 'PENDING' ? (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Notas de Revisión
+                          </label>
+                          <textarea
+                            value={actionNotes}
+                            onChange={(e) => setActionNotes(e.target.value)}
+                            rows={3}
+                            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm resize-none"
+                            placeholder="Escribe aquí las observaciones para el usuario..."
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => rejectStamp(selectedStamp.id)}
+                            disabled={processing}
+                            className="flex-1 px-4 py-2.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-sm"
+                          >
+                            {processing ? (
+                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <>
+                                <XCircleIcon className="w-5 h-5" />
+                                Rechazar
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => approveStamp(selectedStamp.id)}
+                            disabled={processing}
+                            className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                          >
+                            {processing ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <>
+                                <CheckCircleIcon className="w-5 h-5" />
+                                Aprobar Verificación
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4 text-center">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          Esta solicitud ya ha sido procesada.
+                        </p>
+                        {selectedStamp.admin_notes && (
+                          <div className="mt-3 text-left bg-white dark:bg-dark-bg-primary p-3 rounded border border-gray-200 dark:border-gray-700">
+                            <span className="text-xs font-bold text-gray-400 uppercase block mb-1">Nota del Admin</span>
+                            <p className="text-sm text-gray-800 dark:text-gray-200">{selectedStamp.admin_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column: Document Preview */}
+                <div className="flex flex-col h-full bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <EyeIcon className="w-4 h-4 text-blue-500" />
+                      Documento Adjunto
+                    </h3>
+                    {(selectedStamp.evidence as any).file_type?.startsWith('image/') && (
+                      <button
+                        onClick={() => {
+                          setIsZoomEnabled(!isZoomEnabled);
+                          setShowMagnifier(false);
+                        }}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          isZoomEnabled 
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
+                        }`}
+                        title={isZoomEnabled ? "Desactivar Lupa" : "Activar Lupa"}
+                      >
+                        <MagnifyingGlassPlusIcon className="w-4 h-4" />
+                        {isZoomEnabled ? 'Lupa Activa' : 'Activar Lupa'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex-1 bg-gray-100 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 overflow-hidden relative group flex items-center justify-center">
                     {loadingDocument ? (
-                      <div className="p-8 text-center">
-                        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Cargando documento...</p>
+                      <div className="text-center">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                        <p className="text-sm text-gray-500 font-medium">Cargando documento...</p>
                       </div>
                     ) : documentUrl ? (
                       (selectedStamp.evidence as any).file_type?.startsWith('image/') ? (
-                        <img
-                          src={documentUrl}
-                          alt="Document"
-                          className="w-full"
-                          onError={(e) => {
-                            console.error('Error loading image from URL:', documentUrl);
-                          }}
-                        />
+                        <div 
+                          className={`relative w-full h-full flex items-center justify-center group ${isZoomEnabled ? 'cursor-none' : 'cursor-zoom-in'}`}
+                          onClick={() => !isZoomEnabled && setShowLightbox(true)}
+                          onMouseEnter={handleMouseEnter}
+                          onMouseMove={handleMouseMove}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <img
+                            ref={imgRef}
+                            src={documentUrl}
+                            alt="Document"
+                            className="max-w-full max-h-full object-contain"
+                            onError={(e) => {}}
+                          />
+                          
+                          {showMagnifier && (
+                            <div 
+                              style={{
+                                position: 'absolute',
+                                pointerEvents: 'none',
+                                height: '200px',
+                                width: '200px',
+                                top: `${magnifierPosition.y - 100}px`,
+                                left: `${magnifierPosition.x - 100}px`,
+                                border: '4px solid white',
+                                borderRadius: '50%',
+                                backgroundColor: 'white',
+                                backgroundImage: `url('${documentUrl}')`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundSize: `${imgSize.width * 2}px ${imgSize.height * 2}px`,
+                                backgroundPosition: `${-magnifierPosition.x * 2 + 100}px ${-magnifierPosition.y * 2 + 100}px`,
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                                zIndex: 50
+                              }}
+                            />
+                          )}
+                          
+                          {!showMagnifier && (
+                            <div className="absolute bottom-4 right-4 flex gap-2 pointer-events-none">
+                              <div className="bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                                {isZoomEnabled ? 'Modo Lupa Activo' : 'Clic para pantalla completa'}
+                              </div>
+                            </div>
+                          )}
+
+
+                        </div>
                       ) : (
-                        <div className="p-8 text-center">
-                          <DocumentTextIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        <div className="text-center p-8">
+                          <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <DocumentTextIcon className="w-10 h-10 text-blue-500" />
+                          </div>
+                          <p className="text-base font-medium text-gray-900 dark:text-white mb-1">
                             {(selectedStamp.evidence as any).file_name || 'Documento PDF'}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            Este documento no se puede previsualizar
                           </p>
                           <a
                             href={documentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                           >
                             <EyeIcon className="w-5 h-5" />
-                            Abrir Documento
+                            Abrir en nueva pestaña
                           </a>
                         </div>
                       )
                     ) : (
-                      <div className="p-8 text-center">
-                        <XCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                        <p className="text-sm text-red-600 dark:text-red-400">
-                          Error al cargar el documento. Revisa la consola para más detalles.
-                        </p>
+                      <div className="text-center p-8">
+                        <XCircleIcon className="w-16 h-16 text-red-300 mx-auto mb-3" />
+                        <p className="text-gray-500 font-medium">No se pudo cargar el documento</p>
                       </div>
                     )}
                   </div>
                 </div>
-              )}
-
-              {/* Admin Notes */}
-              {selectedStamp.status === 'PENDING' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Notas del Administrador
-                  </label>
-                  <textarea
-                    value={actionNotes}
-                    onChange={(e) => setActionNotes(e.target.value)}
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    placeholder="Añade notas sobre la verificación..."
-                  />
-                </div>
-              )}
-
-              {selectedStamp.admin_notes && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Notas Previas</h4>
-                  <p className="text-sm text-blue-800 dark:text-blue-400">{selectedStamp.admin_notes}</p>
-                </div>
-              )}
-
-              {/* Actions */}
-              {selectedStamp.status === 'PENDING' && (
-                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => rejectStamp(selectedStamp.id)}
-                    disabled={processing}
-                    className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {processing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <XCircleIcon className="w-5 h-5" />
-                        Rechazar
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => approveStamp(selectedStamp.id)}
-                    disabled={processing}
-                    className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {processing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircleIcon className="w-5 h-5" />
-                        Aprobar
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Overlay */}
+      {showLightbox && documentUrl && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setShowLightbox(false)}
+        >
+          <div className="relative max-w-[95vw] max-h-[95vh]">
+            <img 
+              src={documentUrl} 
+              alt="Full size document" 
+              className="max-w-full max-h-[95vh] object-contain rounded-lg shadow-2xl"
+            />
+            <button 
+              className="absolute -top-12 right-0 text-white/80 hover:text-white p-2 transition-colors flex items-center gap-2 bg-white/10 rounded-full px-4 hover:bg-white/20"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLightbox(false);
+              }}
+            >
+              <span className="text-sm font-medium">Cerrar</span>
+              <XMarkIcon className="w-6 h-6" />
+            </button>
           </div>
         </div>
       )}
@@ -631,3 +785,4 @@ const StampsManagement: React.FC = () => {
 };
 
 export default StampsManagement;
+

@@ -84,9 +84,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
         setSubject(existingLead.subject || '');
         setShowSubjectSelect(false);
       }
-    } catch (error) {
-      console.error('Error checking existing conversation:', error);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   };
@@ -100,9 +98,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
       .eq('lead_id', leadId)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Error loading messages:', error);
-      return;
+    if (error) {return;
     }
 
     setMessages(data || []);
@@ -164,9 +160,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
 
       setLeadId(newLead.id);
       setShowSubjectSelect(false);
-    } catch (error: any) {
-      console.error('Error creating conversation:', error);
-      toast.error('Error al iniciar la conversación');
+    } catch (error: any) {toast.error('Error al iniciar la conversación');
     } finally {
       setLoading(false);
     }
@@ -214,9 +208,7 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
       setMessages((prev) =>
         prev.map((m) => (m.id === tempMessage.id ? data : m))
       );
-    } catch (error: any) {
-      console.error('Error sending message:', error);
-      // Remove temp message on error
+    } catch (error: any) {// Remove temp message on error
       setMessages((prev) => prev.filter((m) => m.id !== tempMessage.id));
       setNewMessage(messageContent);
       toast.error('Error al enviar el mensaje');
@@ -444,3 +436,4 @@ const ContactLeadFormModal: React.FC<ContactLeadFormModalProps> = ({
 };
 
 export default ContactLeadFormModal;
+

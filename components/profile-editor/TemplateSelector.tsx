@@ -73,9 +73,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
           stats: [],
           portfolioItems: portfolioData || [],
         });
-      } catch (error) {
-        console.error('Error loading profile data:', error);
-        setProfileData({
+      } catch (error) {setProfileData({
           profile: profile,
           experiences: [],
           education: [],
@@ -105,9 +103,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
       if (error) throw error;
 
       onTemplateChange(templateId);
-    } catch (error) {
-      console.error('Error updating template:', error);
-      toast.error('Failed to update template');
+    } catch (error) {toast.error('Failed to update template');
     } finally {
       setIsSaving(false);
     }
@@ -366,3 +362,4 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
 };
 
 export default TemplateSelector;
+

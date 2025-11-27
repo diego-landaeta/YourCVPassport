@@ -43,7 +43,7 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
           icon: IdentificationIcon,
           fields: [
             { key: 'document_type', label: 'Tipo de Documento', type: 'select', options: ['DNI', 'Pasaporte', 'NIE', 'Licencia de Conducir'], required: true },
-            { key: 'document_number', label: 'Número de Documento', type: 'text', required: true }
+            { key: 'document_number', label: 'Número de Documento', type: 'text', required: true, placeholder: 'Ej: 12345678Z' }
           ]
         };
       case 'EDUCATION':
@@ -52,9 +52,9 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
           description: 'Sube tu título académico, diploma o certificado de estudios',
           icon: AcademicCapIcon,
           fields: [
-            { key: 'institution', label: 'Institución', type: 'text', required: true },
-            { key: 'degree', label: 'Título/Grado', type: 'text', required: true },
-            { key: 'graduation_year', label: 'Año de Graduación', type: 'number', required: false }
+            { key: 'institution', label: 'Institución', type: 'text', required: true, placeholder: 'Ej: Universidad de Madrid' },
+            { key: 'degree', label: 'Título/Grado', type: 'text', required: true, placeholder: 'Ej: Licenciatura en Ingeniería Informática' },
+            { key: 'graduation_year', label: 'Año de Graduación', type: 'number', required: false, placeholder: 'Ej: 2020' }
           ]
         };
       case 'CERTIFICATION':
@@ -63,10 +63,10 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
           description: 'Sube tu certificado profesional o acreditación',
           icon: DocumentTextIcon,
           fields: [
-            { key: 'name', label: 'Nombre de la Certificación', type: 'text', required: true },
-            { key: 'issuer', label: 'Emisor', type: 'text', required: true },
+            { key: 'name', label: 'Nombre de la Certificación', type: 'text', required: true, placeholder: 'Ej: TOEFL iBT, IELTS Academic, DELE C1' },
+            { key: 'issuer', label: 'Emisor', type: 'text', required: true, placeholder: 'Ej: ETS, British Council, Instituto Cervantes' },
             { key: 'issue_date', label: 'Fecha de Emisión', type: 'date', required: false },
-            { key: 'credential_id', label: 'ID de Credencial', type: 'text', required: false }
+            { key: 'credential_id', label: 'ID de Credencial', type: 'text', required: false, placeholder: 'Ej: ABC123456789' }
           ]
         };
       case 'EMPLOYMENT':
@@ -75,9 +75,9 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
           description: 'Sube carta de recomendación o certificado de empleo',
           icon: BriefcaseIcon,
           fields: [
-            { key: 'company', label: 'Empresa', type: 'text', required: true },
-            { key: 'position', label: 'Cargo', type: 'text', required: true },
-            { key: 'reference_contact', label: 'Contacto de Referencia', type: 'email', required: false }
+            { key: 'company', label: 'Empresa', type: 'text', required: true, placeholder: 'Ej: Google Spain, Telefónica, Banco Santander' },
+            { key: 'position', label: 'Cargo', type: 'text', required: true, placeholder: 'Ej: Desarrollador Senior, Gerente de Proyectos' },
+            { key: 'reference_contact', label: 'Contacto de Referencia', type: 'email', required: false, placeholder: 'Ej: jefe@empresa.com' }
           ]
         };
       default:
@@ -206,9 +206,7 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
       onClose();
       resetForm();
 
-    } catch (err: any) {
-      console.error('Upload error:', err);
-      setError(err.message || 'Error al subir el documento. Intenta nuevamente.');
+    } catch (err: any) {setError(err.message || 'Error al subir el documento. Intenta nuevamente.');
     } finally {
       setUploading(false);
     }
@@ -230,203 +228,247 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 p-6 rounded-t-2xl">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white dark:bg-dark-bg-tertiary rounded-lg flex items-center justify-center">
-                <Icon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        {/* Header - Compact & Modern */}
+        <div className="bg-white dark:bg-dark-bg-secondary border-b border-gray-100 dark:border-gray-700 p-6 flex-shrink-0 z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <Icon className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{stampInfo.title}</h2>
-                <p className="text-blue-100 dark:text-blue-200 text-sm mt-1">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{stampInfo.title}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {stampInfo.description}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors p-1"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Form Fields */}
-          {stampInfo.fields.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Información del Documento</h3>
-              {stampInfo.fields.map((field) => (
-                <div key={field.key}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
-                  {field.type === 'select' ? (
-                    <select
-                      value={formData[field.key] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                      required={field.required}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Selecciona una opción</option>
-                      {field.options?.map((option) => (
-                        <option key={option} value={option}>{option}</option>
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <form id="upload-form" onSubmit={handleSubmit} className="h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+              {/* Left Column: Form Fields */}
+              <div className="flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
+                {stampInfo.fields.length > 0 && (
+                  <div className="space-y-5">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 pb-2">
+                      Información del Documento
+                    </h3>
+                    <div className="grid grid-cols-1 gap-5">
+                      {stampInfo.fields.map((field) => (
+                        <div key={field.key}>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            {field.label}
+                            {field.required && <span className="text-red-500 ml-1">*</span>}
+                          </label>
+                          {field.type === 'select' ? (
+                            <div className="relative">
+                              <select
+                                value={formData[field.key] || ''}
+                                onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                                required={field.required}
+                                className="w-full pl-4 pr-10 py-3 bg-white dark:bg-dark-bg-tertiary border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                              >
+                                <option value="">Selecciona una opción</option>
+                                {field.options?.map((option) => (
+                                  <option key={option} value={option}>{option}</option>
+                                ))}
+                              </select>
+                              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                              </div>
+                            </div>
+                          ) : (
+                            <input
+                              type={field.type}
+                              value={formData[field.key] || ''}
+                              onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                              required={field.required}
+                              placeholder={(field as any).placeholder || ''}
+                              className="w-full px-4 py-3 bg-white dark:bg-dark-bg-tertiary border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            />
+                          )}
+                        </div>
                       ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={field.type}
-                      value={formData[field.key] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                      required={field.required}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Documento <span className="text-red-500">*</span>
-            </label>
-
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              className={`relative border-2 border-dashed rounded-xl p-8 transition-all ${
-                dragActive
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-300 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary'
-              }`}
-            >
-              {!file ? (
-                <div className="text-center">
-                  <CloudArrowUpIcon className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400 mb-2">
-                    Arrastra tu documento aquí o
-                  </p>
-                  <label className="inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium cursor-pointer transition-colors">
-                    Selecciona un archivo
-                    <input
-                      type="file"
-                      onChange={(e) => e.target.files?.[0] && handleFileChange(e.target.files[0])}
-                      accept="image/jpeg,image/png,image/jpg,application/pdf,image/webp"
-                      className="hidden"
-                    />
-                  </label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                    JPG, PNG, PDF o WEBP (máx. 10MB)
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* File Preview */}
-                  {preview ? (
-                    <div className="flex justify-center">
-                      <img
-                        src={preview}
-                        alt="Preview"
-                        className="max-h-64 rounded-lg border border-gray-200 dark:border-dark-border"
-                      />
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-3 p-4 bg-white dark:bg-dark-bg-secondary rounded-lg">
-                      <DocumentTextIcon className="w-12 h-12 text-red-500" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{file.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          PDF • {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* File Info & Remove */}
-                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                      <CheckCircleIcon className="w-5 h-5" />
-                      <span className="text-sm font-medium">Archivo seleccionado</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFile(null);
-                        setPreview(null);
-                      }}
-                      className="text-sm text-red-600 dark:text-red-400 hover:underline"
-                    >
-                      Eliminar
-                    </button>
+                  </div>
+                )}
+                
+                {/* Info Message - Moved to left column bottom */}
+                <div className="mt-auto bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-4 flex gap-4">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400">
+                    <ExclamationTriangleIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-1">Proceso de Verificación</h4>
+                    <ul className="space-y-1">
+                      <li className="text-xs text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                        <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Revisión manual por nuestro equipo
+                      </li>
+                      <li className="text-xs text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+                        <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
+                        Tiempo estimado: 1 a 3 días hábiles
+                      </li>
+                    </ul>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
-            </div>
-          )}
+              {/* Right Column: Upload Zone */}
+              <div className="flex flex-col h-full">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 pb-2 mb-5">
+                  Documento Probatorio <span className="text-red-500">*</span>
+                </h3>
 
-          {/* Info Message */}
-          <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <ExclamationTriangleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-700 dark:text-blue-400">
-              <p className="font-medium mb-1">Proceso de Verificación</p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
-                <li>Tu documento será revisado por nuestro equipo</li>
-                <li>El proceso puede tomar de 1-3 días hábiles</li>
-                <li>Recibirás una notificación con el resultado</li>
-                <li>Asegúrate de que el documento sea legible y válido</li>
-              </ul>
-            </div>
-          </div>
+                <div className="flex-1 flex flex-col">
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    className={`flex-1 relative border-2 border-dashed rounded-xl p-8 transition-all duration-200 group flex flex-col items-center justify-center ${
+                      dragActive
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-[1.01]'
+                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-dark-bg-tertiary hover:border-blue-400 dark:hover:border-blue-500'
+                    }`}
+                  >
+                    {!file ? (
+                      <div className="text-center">
+                        <div className="w-20 h-20 bg-white dark:bg-dark-bg-secondary rounded-full shadow-sm flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                          <CloudArrowUpIcon className="w-10 h-10 text-blue-500" />
+                        </div>
+                        <h4 className="text-lg text-gray-900 dark:text-white font-medium mb-2">
+                          Arrastra tu documento aquí
+                        </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                          o haz clic para seleccionar
+                        </p>
+                        <label className="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark-bg-primary cursor-pointer transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5">
+                          Seleccionar Archivo
+                          <input
+                            type="file"
+                            onChange={(e) => e.target.files?.[0] && handleFileChange(e.target.files[0])}
+                            accept="image/jpeg,image/png,image/jpg,application/pdf,image/webp"
+                            className="hidden"
+                          />
+                        </label>
+                        <p className="text-xs text-gray-400 mt-6 max-w-xs mx-auto">
+                          Formatos soportados: JPG, PNG, PDF, WEBP (Máx. 10MB)
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center">
+                        <div className="relative w-full max-w-sm bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg overflow-hidden group-hover:shadow-xl transition-shadow">
+                          {/* Preview Image/Icon */}
+                          <div className="aspect-video bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-b border-gray-100 dark:border-gray-700">
+                            {preview ? (
+                              <img src={preview} alt="Preview" className="w-full h-full object-contain" />
+                            ) : (
+                              <DocumentTextIcon className="w-16 h-16 text-gray-400" />
+                            )}
+                          </div>
+                          
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="min-w-0">
+                                <p className="font-bold text-gray-900 dark:text-white truncate text-sm">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type.split('/')[1].toUpperCase()}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFile(null);
+                                  setPreview(null);
+                                }}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                title="Eliminar archivo"
+                              >
+                                <XMarkIcon className="w-5 h-5" />
+                              </button>
+                            </div>
+                            <div className="mt-3 flex items-center gap-2 text-green-600 dark:text-green-400 text-xs font-bold bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full w-fit">
+                              <CheckCircleIcon className="w-4 h-4" />
+                              Listo para subir
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFile(null);
+                            setPreview(null);
+                          }}
+                          className="mt-6 text-sm text-gray-500 hover:text-red-500 underline decoration-dotted underline-offset-4 transition-colors"
+                        >
+                          Cambiar archivo
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-dark-border">
+                  {/* Error Message */}
+                  {error && (
+                    <div className="mt-4 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-shake">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* Footer Actions - Fixed */}
+        <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-dark-bg-secondary flex-shrink-0">
+          <div className="flex gap-4">
             <button
               type="button"
               onClick={handleClose}
               disabled={uploading}
-              className="flex-1 px-6 py-3 bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3.5 bg-white dark:bg-dark-bg-tertiary border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
+              form="upload-form"
               disabled={!file || uploading}
-              className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-[2] px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 disabled:shadow-none transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Subiendo...
+                  Subiendo Documento...
                 </>
               ) : (
                 <>
                   <CloudArrowUpIcon className="w-5 h-5" />
-                  Enviar para Verificación
+                  Enviar Solicitud
                 </>
               )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
 export default StampsUploadModal;
+

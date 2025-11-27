@@ -29,7 +29,7 @@ export async function trackView(profileId: string) {
       referrer: referrer,
     });
   } catch (error) {
-    console.error('Error tracking view:', error);
+    
   }
 }
 
@@ -47,7 +47,7 @@ export async function trackClick(profileId: string, ctaType: string, ctaLabel?: 
       cta_label: ctaLabel,
     });
   } catch (error) {
-    console.error('Error tracking click:', error);
+    
   }
 }
 
@@ -71,7 +71,7 @@ export async function trackLead(
       status: 'new',
     });
   } catch (error) {
-    console.error('Error tracking lead:', error);
+    
   }
 }
 
@@ -157,7 +157,7 @@ export async function getAnalyticsStats(profileId: string) {
       topCountries,
     };
   } catch (error) {
-    console.error('Error getting analytics stats:', error);
+    
     return null;
   }
 }

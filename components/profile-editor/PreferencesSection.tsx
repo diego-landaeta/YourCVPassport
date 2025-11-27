@@ -155,8 +155,6 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                   <input
                     {...register('salary_min', { valueAsNumber: true })}
                     type="number"
-                    min="0"
-                    step="1000"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                     placeholder={t.jobPreferences.minSalary}
                   />
@@ -165,8 +163,6 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                   <input
                     {...register('salary_max', { valueAsNumber: true })}
                     type="number"
-                    min="0"
-                    step="1000"
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                     placeholder={t.jobPreferences.maxSalary}
                   />

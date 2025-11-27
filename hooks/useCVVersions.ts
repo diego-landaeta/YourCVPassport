@@ -53,7 +53,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
       if (supabaseError) {
         // Store error message for display but DON'T throw
         setError(supabaseError.message || 'Error fetching CV versions');
-        console.error('CV Versions error:', supabaseError);
+        
         return [];
       }
 
@@ -75,7 +75,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
         .rpc('get_cv_version_stats', { p_profile_id: profile.id });
 
       if (error) {
-        console.error('Error fetching version stats:', error);
+        
         return null;
       }
 
@@ -134,7 +134,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
 
       return fullProfileData;
     } catch (err) {
-      console.error('Error fetching profile data:', err);
+      
       setError('Failed to fetch profile data');
       return null;
     }
@@ -193,7 +193,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
 
         return data;
       } catch (err) {
-        console.error('Error creating version:', err);
+        
         setError(err instanceof Error ? err.message : 'Failed to create version');
         return null;
       } finally {
@@ -229,7 +229,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
 
         return data;
       } catch (err) {
-        console.error('Error updating version:', err);
+        
         setError(err instanceof Error ? err.message : 'Failed to update version');
         return null;
       }
@@ -262,7 +262,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
 
         return true;
       } catch (err) {
-        console.error('Error deleting version:', err);
+        
         setError(err instanceof Error ? err.message : 'Failed to delete version');
         return false;
       }
@@ -295,7 +295,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
 
         return data;
       } catch (err) {
-        console.error('Error duplicating version:', err);
+        
         setError(err instanceof Error ? err.message : 'Failed to duplicate version');
         return null;
       }
@@ -322,7 +322,7 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
         if (error) throw error;
         return data;
       } catch (err) {
-        console.error('Error fetching version:', err);
+        
         setError(err instanceof Error ? err.message : 'Failed to fetch version');
         return null;
       }

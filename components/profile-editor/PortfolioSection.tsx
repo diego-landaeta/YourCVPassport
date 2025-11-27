@@ -42,9 +42,7 @@ const SortablePortfolioItem: React.FC<SortablePortfolioItemProps> = ({ item, onE
           src={item.image_url}
           alt={item.title}
           className="w-full h-48 object-cover"
-          onError={(e) => {
-            console.error('Failed to load portfolio image:', item.image_url, item);
-            e.currentTarget.style.display = 'none';
+          onError={(e) => {e.currentTarget.style.display = 'none';
             const placeholder = e.currentTarget.nextElementSibling;
             if (placeholder) placeholder.classList.remove('hidden');
           }}
@@ -96,16 +94,7 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Debug: Log portfolio items when component mounts or data changes
-  React.useEffect(() => {
-    console.log('Portfolio data loaded:', portfolio);
-    portfolio.forEach((item, index) => {
-      console.log(`Portfolio item ${index}:`, {
-        id: item.id,
-        title: item.title,
-        image_url: item.image_url,
-        has_image: !!item.image_url
-      });
-    });
+  React.useEffect(() => {portfolio.forEach((item, index) => {});
   }, [portfolio]);
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -132,25 +121,14 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
-      const filePath = `portfolio/${fileName}`;
-
-      console.log('Uploading file:', { fileName, filePath, fileType: file.type });
-
-      const { error: uploadError } = await supabase.storage.from('profile-assets').upload(filePath, file);
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+      const filePath = `portfolio/${fileName}`;const { error: uploadError } = await supabase.storage.from('profile-assets').upload(filePath, file);
+      if (uploadError) {throw uploadError;
       }
 
-      const { data: { publicUrl } } = supabase.storage.from('profile-assets').getPublicUrl(filePath);
-      console.log('Generated public URL:', publicUrl);
-
-      setImagePreview(publicUrl);
+      const { data: { publicUrl } } = supabase.storage.from('profile-assets').getPublicUrl(filePath);setImagePreview(publicUrl);
       setValue('image_url', publicUrl);
       toast.success('Imagen subida correctamente');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error('Error al subir la imagen. Por favor, intenta de nuevo.');
+    } catch (error) {toast.error('Error al subir la imagen. Por favor, intenta de nuevo.');
     } finally {
       setIsUploading(false);
     }
@@ -280,3 +258,4 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
 };
 
 export default PortfolioSection;
+

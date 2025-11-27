@@ -60,6 +60,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     headline: '',
     email: '',
     phone: '',
+    country_code: '',
     location: '',
     linkedin_url: '',
     github_url: '',
@@ -71,8 +72,8 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     education: [
       { institution_name: '', degree: '', field_of_study: '', start_date: '', end_date: '', description: '' }
     ],
-    skills: [{ name: '', level: '', years_of_experience: 0 }],
-    languages: [{ language: '', proficiency: '' }],
+    skills: [{ name: '', level: '', years_of_experience: 0, percentage: null }],
+    languages: [{ name: '', level: '', percentage: null }],
     availability: '',
     work_mode: '',
     expected_salary: '',
@@ -104,6 +105,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
           headline: profileRes.data.headline || '',
           email: profileRes.data.email || '',
           phone: profileRes.data.phone || '',
+          country_code: profileRes.data.country_code || '',
           location: profileRes.data.location || '',
           linkedin_url: profileRes.data.linkedin_url || '',
           github_url: profileRes.data.github_url || '',
@@ -152,6 +154,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             name: skill.name || '',
             level: skill.level || '',
             years_of_experience: skill.years_of_experience || 0,
+            percentage: skill.percentage || null,
           }))
         }));
       }
@@ -160,14 +163,13 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
         setFormData(prev => ({
           ...prev,
           languages: langsRes.data.map(lang => ({
-            language: lang.language || '',
-            proficiency: lang.proficiency || '',
+            name: lang.name || '',
+            level: lang.level || '',
+            percentage: lang.percentage || null,
           }))
         }));
       }
-    } catch (error: any) {
-      console.error('Error loading profile:', error);
-      setError(q.messages.loadingError);
+    } catch (error: any) {setError(q.messages.loadingError);
     } finally {
       setIsLoadingProfile(false);
     }
@@ -214,7 +216,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
       case 'skills':
         return formData.skills.some(skill => skill.name);
       case 'languages':
-        return formData.languages.some(lang => lang.language);
+        return formData.languages.some(lang => lang.name);
       case 'preferences':
         return true;
       case 'template':
@@ -244,55 +246,93 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     try {
       setIsProcessing(true);
 
-      // Actualizar perfil
-      await supabase.from('profiles').update({
+      // Actualizar perfil - solo campos que existen en types.ts Profile interface
+      const { error: profileError } = await supabase.from('profiles').update({
         full_name: formData.full_name,
         headline: formData.headline,
         email: formData.email,
         phone: formData.phone,
+        country_code: formData.country_code,
         location: formData.location,
         linkedin_url: formData.linkedin_url,
         github_url: formData.github_url,
         portfolio_url: formData.portfolio_url,
         summary: formData.summary,
         availability: formData.availability,
-        work_mode: formData.work_mode,
-        expected_salary: formData.expected_salary,
-        relocation_willing: formData.relocation_willing,
-        template_id: formData.template_id,
+        // work_mode: formData.work_mode, // Descomentar después de ejecutar add-missing-profile-columns.sql
         updated_at: new Date().toISOString(),
       }).eq('id', user.id);
 
+      if (profileError) throw profileError;
+
       // Guardar experiencias
       await supabase.from('experiences').delete().eq('profile_id', user.id);
-      if (formData.experiences.length > 0) {
-        await supabase.from('experiences').insert(
-          formData.experiences.map(exp => ({ ...exp, profile_id: user.id }))
-        );
+      if (formData.experiences.length > 0 && formData.experiences.some(exp => exp.position && exp.company_name)) {
+        const experiencesToSave = formData.experiences
+          .filter(exp => exp.position && exp.company_name && exp.start_date)
+          .map(exp => ({
+            ...exp,
+            profile_id: user.id,
+            start_date: normalizeDateForDB(exp.start_date),
+            end_date: exp.is_current ? null : normalizeDateForDB(exp.end_date),
+          }));
+        if (experiencesToSave.length > 0) {
+          const { error: insertExpError } = await supabase.from('experiences').insert(experiencesToSave);
+          if (insertExpError) throw insertExpError;
+        }
       }
 
       // Guardar educación
       await supabase.from('education').delete().eq('profile_id', user.id);
-      if (formData.education.length > 0) {
-        await supabase.from('education').insert(
-          formData.education.map(edu => ({ ...edu, profile_id: user.id }))
-        );
+      if (formData.education.length > 0 && formData.education.some(edu => edu.institution_name && edu.degree)) {
+        const educationToSave = formData.education
+          .filter(edu => edu.institution_name && edu.degree && edu.start_date)
+          .map(edu => ({
+            ...edu,
+            profile_id: user.id,
+            start_date: normalizeDateForDB(edu.start_date),
+            end_date: edu.is_current ? null : normalizeDateForDB(edu.end_date),
+          }));
+        if (educationToSave.length > 0) {
+          const { error: insertEduError } = await supabase.from('education').insert(educationToSave);
+          if (insertEduError) throw insertEduError;
+        }
       }
 
       // Guardar habilidades
       await supabase.from('skills').delete().eq('profile_id', user.id);
-      if (formData.skills.length > 0) {
-        await supabase.from('skills').insert(
-          formData.skills.map(skill => ({ ...skill, profile_id: user.id }))
-        );
+      if (formData.skills.length > 0 && formData.skills.some(s => s.name)) {
+        const skillsToSave = formData.skills
+          .filter(skill => skill.name)
+          .map(skill => ({
+            name: skill.name,
+            profile_id: user.id,
+            level: normalizeSkillLevel(skill.level),
+            years_of_experience: skill.years_of_experience || null,
+            percentage: skill.percentage !== null && skill.percentage !== undefined ? skill.percentage : null
+          }));
+        if (skillsToSave.length > 0) {
+          const { error: insertSkillsError } = await supabase.from('skills').insert(skillsToSave);
+          if (insertSkillsError) throw insertSkillsError;
+        }
       }
 
       // Guardar idiomas
       await supabase.from('languages').delete().eq('profile_id', user.id);
-      if (formData.languages.length > 0) {
-        await supabase.from('languages').insert(
-          formData.languages.map(lang => ({ ...lang, profile_id: user.id }))
-        );
+      if (formData.languages.length > 0 && formData.languages.some(l => l.name && l.level)) {
+        const langsToSave = formData.languages
+          .filter(lang => lang.name && lang.level)
+          .map(lang => ({
+            name: lang.name,
+            profile_id: user.id,
+            level: normalizeLanguageLevel(lang.level),
+            percentage: lang.percentage !== null && lang.percentage !== undefined ? lang.percentage : null
+          }))
+          .filter(lang => lang.level !== null);
+        if (langsToSave.length > 0) {
+          const { error: insertLangsError } = await supabase.from('languages').insert(langsToSave);
+          if (insertLangsError) throw insertLangsError;
+        }
       }
 
       setIsCompleted(true);
@@ -304,8 +344,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
       if (onComplete) onComplete();
     } catch (error: any) {
-      console.error('Error saving profile:', error);
-      setError(q.messages.savingError);
+      setError(q.messages.savingError + ': ' + (error?.message || 'Unknown error'));
     } finally {
       setIsProcessing(false);
     }
@@ -313,6 +352,35 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
   const validateLinkedInUrl = (url: string) => {
     return /linkedin\.com\/in\//i.test(url);
+  };
+
+  // Función para normalizar fechas de formato YYYY-MM a YYYY-MM-01
+  const normalizeDateForDB = (date: string | null): string | null => {
+    if (!date) return null;
+    // Si ya está en formato completo YYYY-MM-DD, retornar tal cual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+    // Si está en formato YYYY-MM, agregar -01
+    if (/^\d{4}-\d{2}$/.test(date)) return `${date}-01`;
+    // Si no es un formato válido, retornar null
+    return null;
+  };
+
+  // Función para normalizar skill level a valores válidos de la BD
+  const normalizeSkillLevel = (level: string | null | undefined): 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT' | null => {
+    if (!level) return null;
+    const validLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
+    const upperLevel = level.toUpperCase();
+    return validLevels.includes(upperLevel) ? upperLevel as any : null;
+  };
+
+  // Función para normalizar language level a valores válidos de la BD
+  const normalizeLanguageLevel = (level: string | null | undefined): 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'NATIVE' | null => {
+    if (!level) return null;
+    const validLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'NATIVE'];
+    const upperLevel = level.toUpperCase();
+    // Convertir "Native" a "NATIVE"
+    if (upperLevel === 'NATIVE') return 'NATIVE';
+    return validLevels.includes(upperLevel) ? upperLevel as any : null;
   };
 
   const validateGitHubUrl = (url: string) => {
@@ -386,14 +454,202 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {lang === 'es' ? 'País' : 'Country'}
+                </label>
+                <select
+                  value={formData.country_code}
+                  onChange={(e) => updateFormData('country_code', e.target.value)}
+                  className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  <option value="">{lang === 'es' ? 'Selecciona tu país' : 'Select your country'}</option>
+                  <option value="ES">🇪🇸 España</option>
+                  <option value="AR">🇦🇷 Argentina</option>
+                  <option value="MX">🇲🇽 México</option>
+                  <option value="CO">🇨🇴 Colombia</option>
+                  <option value="PE">🇵🇪 Perú</option>
+                  <option value="CL">🇨🇱 Chile</option>
+                  <option value="UY">🇺🇾 Uruguay</option>
+                  <option value="VE">🇻🇪 Venezuela</option>
+                  <option value="CR">🇨🇷 Costa Rica</option>
+                  <option value="PA">🇵🇦 Panamá</option>
+                  <option value="EC">🇪🇨 Ecuador</option>
+                  <option value="BO">🇧🇴 Bolivia</option>
+                  <option value="PY">🇵🇾 Paraguay</option>
+                  <option value="SV">🇸🇻 El Salvador</option>
+                  <option value="HN">🇭🇳 Honduras</option>
+                  <option value="NI">🇳🇮 Nicaragua</option>
+                  <option value="GT">🇬🇹 Guatemala</option>
+                  <option value="CU">🇨🇺 Cuba</option>
+                  <option value="DO">🇩🇴 República Dominicana</option>
+                  <option value="PR">🇵🇷 Puerto Rico</option>
+                  <option value="US">🇺🇸 United States</option>
+                  <option value="GB">🇬🇧 United Kingdom</option>
+                  <option value="FR">🇫🇷 France</option>
+                  <option value="DE">🇩🇪 Germany</option>
+                  <option value="IT">🇮🇹 Italy</option>
+                  <option value="PT">🇵🇹 Portugal</option>
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.location}</label>
-                <input
-                  type="text"
+                <select
                   value={formData.location}
                   onChange={(e) => updateFormData('location', e.target.value)}
                   className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                  placeholder={q.identity.locationPlaceholder}
-                />
+                  disabled={!formData.country_code}
+                >
+                  <option value="">{formData.country_code ? (lang === 'es' ? 'Selecciona tu ciudad' : 'Select your city') : (lang === 'es' ? 'Primero selecciona un país' : 'First select a country')}</option>
+                  {formData.country_code === 'ES' && (
+                    <>
+                      <option value="Madrid, España">Madrid</option>
+                      <option value="Barcelona, España">Barcelona</option>
+                      <option value="Valencia, España">Valencia</option>
+                      <option value="Sevilla, España">Sevilla</option>
+                      <option value="Bilbao, España">Bilbao</option>
+                      <option value="Málaga, España">Málaga</option>
+                    </>
+                  )}
+                  {formData.country_code === 'AR' && (
+                    <>
+                      <option value="Buenos Aires, Argentina">Buenos Aires</option>
+                      <option value="Córdoba, Argentina">Córdoba</option>
+                      <option value="Rosario, Argentina">Rosario</option>
+                      <option value="Mendoza, Argentina">Mendoza</option>
+                    </>
+                  )}
+                  {formData.country_code === 'MX' && (
+                    <>
+                      <option value="Ciudad de México, México">Ciudad de México</option>
+                      <option value="Guadalajara, México">Guadalajara</option>
+                      <option value="Monterrey, México">Monterrey</option>
+                      <option value="Puebla, México">Puebla</option>
+                    </>
+                  )}
+                  {formData.country_code === 'CO' && (
+                    <>
+                      <option value="Bogotá, Colombia">Bogotá</option>
+                      <option value="Medellín, Colombia">Medellín</option>
+                      <option value="Cali, Colombia">Cali</option>
+                      <option value="Barranquilla, Colombia">Barranquilla</option>
+                    </>
+                  )}
+                  {formData.country_code === 'PE' && (
+                    <>
+                      <option value="Lima, Perú">Lima</option>
+                      <option value="Arequipa, Perú">Arequipa</option>
+                      <option value="Cusco, Perú">Cusco</option>
+                    </>
+                  )}
+                  {formData.country_code === 'CL' && (
+                    <>
+                      <option value="Santiago, Chile">Santiago</option>
+                      <option value="Valparaíso, Chile">Valparaíso</option>
+                      <option value="Concepción, Chile">Concepción</option>
+                    </>
+                  )}
+                  {formData.country_code === 'UY' && (
+                    <>
+                      <option value="Montevideo, Uruguay">Montevideo</option>
+                      <option value="Salto, Uruguay">Salto</option>
+                    </>
+                  )}
+                  {formData.country_code === 'VE' && (
+                    <>
+                      <option value="Caracas, Venezuela">Caracas</option>
+                      <option value="Maracaibo, Venezuela">Maracaibo</option>
+                      <option value="Valencia, Venezuela">Valencia</option>
+                      <option value="Barquisimeto, Venezuela">Barquisimeto</option>
+                    </>
+                  )}
+                  {formData.country_code === 'CR' && (
+                    <>
+                      <option value="San José, Costa Rica">San José</option>
+                      <option value="Alajuela, Costa Rica">Alajuela</option>
+                    </>
+                  )}
+                  {formData.country_code === 'PA' && (
+                    <>
+                      <option value="Panamá, Panamá">Panamá</option>
+                      <option value="Colón, Panamá">Colón</option>
+                    </>
+                  )}
+                  {formData.country_code === 'EC' && (
+                    <>
+                      <option value="Quito, Ecuador">Quito</option>
+                      <option value="Guayaquil, Ecuador">Guayaquil</option>
+                    </>
+                  )}
+                  {formData.country_code === 'BO' && (
+                    <>
+                      <option value="La Paz, Bolivia">La Paz</option>
+                      <option value="Santa Cruz, Bolivia">Santa Cruz</option>
+                    </>
+                  )}
+                  {formData.country_code === 'PY' && (
+                    <option value="Asunción, Paraguay">Asunción</option>
+                  )}
+                  {formData.country_code === 'SV' && (
+                    <option value="San Salvador, El Salvador">San Salvador</option>
+                  )}
+                  {formData.country_code === 'HN' && (
+                    <option value="Tegucigalpa, Honduras">Tegucigalpa</option>
+                  )}
+                  {formData.country_code === 'NI' && (
+                    <option value="Managua, Nicaragua">Managua</option>
+                  )}
+                  {formData.country_code === 'GT' && (
+                    <option value="Guatemala, Guatemala">Guatemala</option>
+                  )}
+                  {formData.country_code === 'CU' && (
+                    <option value="La Habana, Cuba">La Habana</option>
+                  )}
+                  {formData.country_code === 'DO' && (
+                    <option value="Santo Domingo, República Dominicana">Santo Domingo</option>
+                  )}
+                  {formData.country_code === 'PR' && (
+                    <option value="San Juan, Puerto Rico">San Juan</option>
+                  )}
+                  {formData.country_code === 'US' && (
+                    <>
+                      <option value="Miami, USA">Miami</option>
+                      <option value="New York, USA">New York</option>
+                      <option value="Los Angeles, USA">Los Angeles</option>
+                      <option value="Houston, USA">Houston</option>
+                      <option value="Chicago, USA">Chicago</option>
+                    </>
+                  )}
+                  {formData.country_code === 'GB' && (
+                    <>
+                      <option value="London, UK">London</option>
+                      <option value="Manchester, UK">Manchester</option>
+                    </>
+                  )}
+                  {formData.country_code === 'FR' && (
+                    <>
+                      <option value="Paris, France">Paris</option>
+                      <option value="Lyon, France">Lyon</option>
+                    </>
+                  )}
+                  {formData.country_code === 'DE' && (
+                    <>
+                      <option value="Berlin, Germany">Berlin</option>
+                      <option value="Munich, Germany">Munich</option>
+                    </>
+                  )}
+                  {formData.country_code === 'IT' && (
+                    <>
+                      <option value="Rome, Italy">Rome</option>
+                      <option value="Milan, Italy">Milan</option>
+                    </>
+                  )}
+                  {formData.country_code === 'PT' && (
+                    <>
+                      <option value="Lisbon, Portugal">Lisbon</option>
+                      <option value="Porto, Portugal">Porto</option>
+                    </>
+                  )}
+                </select>
               </div>
             </div>
 
@@ -717,7 +973,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 </select>
                 <button
                   onClick={() => {
-                    addArrayItem('skills', { name: '', level: '', years_of_experience: 0 });
+                    addArrayItem('skills', { name: '', level: '', years_of_experience: 0, percentage: null });
                     setSelectedSkillIndex(formData.skills.length);
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
@@ -780,11 +1036,44 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {lang === 'es' ? 'Nivel de dominio (%)' : 'Proficiency Level (%)'}
+                </label>
+                <input
+                  type="range"
+                  value={skill.percentage || 0}
+                  onChange={(e) => updateArrayItem('skills', selectedSkillIndex, 'percentage', Number(e.target.value))}
+                  min="0"
+                  max="100"
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <span>0%</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{skill.percentage || 0}%</span>
+                  <span>100%</span>
+                </div>
+                {skill.percentage !== null && skill.percentage !== undefined && skill.percentage > 0 && (
+                  <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${skill.percentage}%` }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
 
       case 'languages':
+        const COMMON_LANGUAGES = [
+          'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Chinese', 'Japanese',
+          'Korean', 'Arabic', 'Russian', 'Hindi', 'Dutch', 'Swedish', 'Norwegian', 'Danish', 'Finnish',
+        ];
+        const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native'] as const;
+
         return (
           <div className="space-y-8">
             {/* Header with Controls */}
@@ -804,12 +1093,12 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="px-4 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 >
                   {formData.languages.map((l, idx) => (
-                    <option key={idx} value={idx}>{l.language || `${q.languages.label} ${idx + 1}`}</option>
+                    <option key={idx} value={idx}>{l.name || `${q.languages.label} ${idx + 1}`}</option>
                   ))}
                 </select>
                 <button
                   onClick={() => {
-                    addArrayItem('languages', { language: '', proficiency: '' });
+                    addArrayItem('languages', { name: '', level: 'B2', percentage: null });
                     setSelectedLangIndex(formData.languages.length);
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
@@ -838,32 +1127,100 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     {q.languages.language} <span className="text-red-500">{q.required}</span>
                   </label>
-                  <input
-                    type="text"
-                    value={language.language}
-                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'language', e.target.value)}
-                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    placeholder={q.languages.languagePlaceholder}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.languages.level}</label>
                   <select
-                    value={language.proficiency}
-                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'proficiency', e.target.value)}
+                    value={language.name}
+                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'name', e.target.value)}
                     className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   >
-                    <option value="">{q.languages.levelSelect}</option>
-                    <option value="A1">{q.languages.levelA1}</option>
-                    <option value="A2">{q.languages.levelA2}</option>
-                    <option value="B1">{q.languages.levelB1}</option>
-                    <option value="B2">{q.languages.levelB2}</option>
-                    <option value="C1">{q.languages.levelC1}</option>
-                    <option value="C2">{q.languages.levelC2}</option>
-                    <option value={q.languages.levelNative}>{q.languages.levelNative}</option>
+                    <option value="">{q.languages.languagePlaceholder}</option>
+                    {COMMON_LANGUAGES.map((langName) => (
+                      <option key={langName} value={langName}>{langName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {q.languages.level} <span className="text-red-500">{q.required}</span>
+                  </label>
+                  <select
+                    value={language.level}
+                    onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'level', e.target.value)}
+                    className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  >
+                    {CEFR_LEVELS.map((level) => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
                   </select>
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {lang === 'es' ? 'Nivel de dominio (%)' : 'Proficiency Level (%)'}
+                </label>
+                <input
+                  type="range"
+                  value={language.percentage || 0}
+                  onChange={(e) => updateArrayItem('languages', selectedLangIndex, 'percentage', Number(e.target.value))}
+                  min="0"
+                  max="100"
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <span>0%</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{language.percentage || 0}%</span>
+                  <span>100%</span>
+                </div>
+                {language.percentage !== null && language.percentage !== undefined && language.percentage > 0 && (
+                  <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${language.percentage}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Preview Section */}
+              {language.name && language.level && (
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    {lang === 'es' ? 'Vista previa' : 'Preview'}
+                  </h4>
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-base">{language.name}</h4>
+                        <span className={`inline-block mt-1 px-2 py-1 rounded text-xs ${
+                          language.level === 'Native' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                          language.level === 'C2' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                          language.level === 'C1' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                          language.level === 'B2' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                          language.level === 'B1' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                          language.level === 'A2' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                          'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                        }`}>
+                          {language.level}
+                        </span>
+                      </div>
+                    </div>
+                    {language.percentage !== null && language.percentage !== undefined && language.percentage > 0 && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          <span>{lang === 'es' ? 'Nivel de dominio' : 'Proficiency level'}</span>
+                          <span>{language.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${language.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -961,38 +1318,52 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                 <div
                   key={template.id}
                   onClick={() => updateFormData('template_id', template.id)}
-                  className={`cursor-pointer border-3 rounded-2xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
+                  className={`cursor-pointer border-3 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
                     formData.template_id === template.id
                       ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 shadow-2xl ring-4 ring-blue-200 dark:ring-blue-800'
                       : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 shadow-lg bg-white dark:bg-gray-800'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-base font-bold text-gray-900 dark:text-white">
-                      {lang === 'es' ? template.name.es : template.name.en}
-                    </div>
+                  {/* Preview Image */}
+                  <div className="relative w-full aspect-[3/4] bg-gray-100 dark:bg-gray-700">
+                    <img
+                      src={template.previewImg}
+                      alt={lang === 'es' ? template.name.es : template.name.en}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback si la imagen no carga
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
                     {formData.template_id === template.id && (
-                      <CheckCircleIcon className="h-6 w-6 text-blue-600" />
+                      <div className="absolute top-2 right-2">
+                        <CheckCircleIcon className="h-8 w-8 text-blue-600 bg-white rounded-full" />
+                      </div>
+                    )}
+                    {template.isPro && (
+                      <div className="absolute top-2 left-2">
+                        <span className="inline-block text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full font-bold shadow-md">
+                          ✨ PRO
+                        </span>
+                      </div>
                     )}
                   </div>
 
-                  {template.isPro && (
-                    <div className="mb-3">
-                      <span className="inline-block text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full font-bold shadow-md">
-                        ✨ PRO
-                      </span>
+                  {/* Template Info */}
+                  <div className="p-4">
+                    <div className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                      {lang === 'es' ? template.name.es : template.name.en}
                     </div>
-                  )}
-
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    {lang === 'es'
-                      ? template.isPro
-                        ? 'Diseño premium con características avanzadas'
-                        : 'Diseño profesional y elegante'
-                      : template.isPro
-                        ? 'Premium design with advanced features'
-                        : 'Professional and elegant design'
-                    }
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {lang === 'es'
+                        ? template.isPro
+                          ? 'Diseño premium con características avanzadas'
+                          : 'Diseño profesional y elegante'
+                        : template.isPro
+                          ? 'Premium design with advanced features'
+                          : 'Professional and elegant design'
+                      }
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1183,3 +1554,4 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     </div>
   );
 }
+

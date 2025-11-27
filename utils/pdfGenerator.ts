@@ -253,7 +253,7 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     }
 
   } catch (error) {
-    console.error('Error generating PDF:', error);
+    
     if (onError) {
       onError(error instanceof Error ? error : new Error('Unknown error'));
     }

@@ -123,9 +123,7 @@ const VisaFormModal: React.FC<VisaFormModalProps> = ({
 
       await onSave(visaData);
       onClose();
-    } catch (error) {
-      console.error('Error saving visa:', error);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   };
@@ -420,3 +418,4 @@ const VisaFormModal: React.FC<VisaFormModalProps> = ({
 };
 
 export default VisaFormModal;
+

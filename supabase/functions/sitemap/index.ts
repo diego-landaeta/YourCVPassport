@@ -115,7 +115,7 @@ async function generateSitemap() {
   </url>`).join('');
     }
   } catch (err) {
-    console.error('Error fetching profiles for sitemap:', err);
+    
     // Continue without profile URLs if the database call fails
   }
 
@@ -217,7 +217,7 @@ serve(async (_req) => {
       headers: { 'Content-Type': 'application/xml' },
     });
   } catch (err) {
-    console.error(err);
+    
     return new Response('Error generating sitemap', { status: 500 });
   }
 });

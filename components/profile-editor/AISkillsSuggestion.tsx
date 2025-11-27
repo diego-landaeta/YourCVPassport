@@ -63,9 +63,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 
       setSuggestedSkills(response.data);
       setHasAutoAnalyzed(true);
-    } catch (err) {
-      console.error('Error suggesting skills:', err);
-      setError('Error al generar sugerencias de habilidades');
+    } catch (err) {setError('Error al generar sugerencias de habilidades');
     } finally {
       setIsAnalyzing(false);
     }
@@ -97,9 +95,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 
       // Callback para notificar al componente padre
       onSkillAdded?.();
-    } catch (error) {
-      console.error('Error adding skill:', error);
-      setError(`Error al agregar habilidad: ${skillName}`);
+    } catch (error) {setError(`Error al agregar habilidad: ${skillName}`);
     } finally {
       setIsAddingSkill(null);
     }
@@ -269,3 +265,4 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 };
 
 export default AISkillsSuggestion;
+

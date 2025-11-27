@@ -172,9 +172,7 @@ const ContactLeadModal: React.FC<ContactLeadModalProps> = ({
         resetForm();
       }, 2000);
 
-    } catch (err: any) {
-      console.error('Error sending lead:', err);
-      setError(err.message || 'Error al enviar el mensaje');
+    } catch (err: any) {setError(err.message || 'Error al enviar el mensaje');
     } finally {
       setLoading(false);
     }
@@ -480,3 +478,4 @@ const ContactLeadModal: React.FC<ContactLeadModalProps> = ({
 };
 
 export default ContactLeadModal;
+

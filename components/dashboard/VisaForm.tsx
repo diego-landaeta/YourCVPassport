@@ -61,9 +61,7 @@ const VisaForm: React.FC = () => {
       if (data) {
         setFormData(data);
       }
-    } catch (error) {
-      console.error('Error loading visa:', error);
-      toast.error('Error al cargar la Visa');
+    } catch (error) {toast.error('Error al cargar la Visa');
       navigate('/dashboard/visas');
     } finally {
       setLoading(false);
@@ -168,9 +166,7 @@ const VisaForm: React.FC = () => {
         ...prev,
         [field]: placeholder
       }));
-    } catch (error) {
-      console.error('Error generating with AI:', error);
-      toast.error('Error al generar contenido con IA');
+    } catch (error) {toast.error('Error al generar contenido con IA');
     } finally {
       setAiGenerating(null);
     }
@@ -220,9 +216,7 @@ const VisaForm: React.FC = () => {
       }
 
       navigate('/dashboard/visas');
-    } catch (error: any) {
-      console.error('Error saving visa:', error);
-      if (error.message?.includes('visas_slug_unique')) {
+    } catch (error: any) {if (error.message?.includes('visas_slug_unique')) {
         setErrors({ slug: 'Este slug ya existe. Por favor usa otro.' });
       } else {
         toast.error('Error al guardar la Visa');
@@ -561,3 +555,4 @@ const VisaForm: React.FC = () => {
 };
 
 export default VisaForm;
+

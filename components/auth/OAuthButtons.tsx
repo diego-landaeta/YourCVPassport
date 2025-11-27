@@ -17,15 +17,11 @@ const OAuthButtons: React.FC = () => {
     setIsGoogleLoading(true);
     try {
       const { error: authError } = await signInWithGoogle();
-      if (authError) {
-        console.error('Google sign-in error:', authError);
-        setError(errors.serverError);
+      if (authError) {setError(errors.serverError);
         setIsGoogleLoading(false);
       }
       // If successful, the user will be redirected, so no need to reset loading state
-    } catch (err) {
-      console.error('Google sign-in error:', err);
-      setError(errors.networkError);
+    } catch (err) {setError(errors.networkError);
       setIsGoogleLoading(false);
     }
   };
@@ -35,15 +31,11 @@ const OAuthButtons: React.FC = () => {
     setIsLinkedInLoading(true);
     try {
       const { error: authError } = await signInWithLinkedIn();
-      if (authError) {
-        console.error('LinkedIn sign-in error:', authError);
-        setError(errors.serverError);
+      if (authError) {setError(errors.serverError);
         setIsLinkedInLoading(false);
       }
       // If successful, the user will be redirected, so no need to reset loading state
-    } catch (err) {
-      console.error('LinkedIn sign-in error:', err);
-      setError(errors.networkError);
+    } catch (err) {setError(errors.networkError);
       setIsLinkedInLoading(false);
     }
   };
@@ -116,3 +108,4 @@ const OAuthButtons: React.FC = () => {
 };
 
 export default OAuthButtons;
+

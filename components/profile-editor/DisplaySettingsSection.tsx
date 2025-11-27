@@ -48,9 +48,7 @@ const DisplaySettingsSection: React.FC = () => {
       setMessage({ type: 'success', text: t.displaySettings.messages.success });
       
       setTimeout(() => setMessage(null), 3000);
-    } catch (err: any) {
-      console.error('Error saving display settings:', err);
-      setMessage({ type: 'error', text: t.displaySettings.messages.error });
+    } catch (err: any) {setMessage({ type: 'error', text: t.displaySettings.messages.error });
     } finally {
       setSaving(false);
     }
@@ -202,3 +200,4 @@ const DisplaySettingsSection: React.FC = () => {
 };
 
 export default DisplaySettingsSection;
+

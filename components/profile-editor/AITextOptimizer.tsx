@@ -169,9 +169,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       } else {
         setSuggestions(newSuggestions);
       }
-    } catch (err) {
-      console.error('Error generating suggestions:', err);
-      setError('Error al generar sugerencias. Por favor, intenta de nuevo.');
+    } catch (err) {setError('Error al generar sugerencias. Por favor, intenta de nuevo.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -188,9 +186,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       setSuggestions(prev =>
         prev.map(s => (s.id === suggestion.id ? { ...s, status: 'accepted' as const } : s))
       );
-    } catch (error) {
-      console.error('Error applying suggestion:', error);
-      setError('Error al aplicar la sugerencia');
+    } catch (error) {setError('Error al aplicar la sugerencia');
     } finally {
       setApplyingId(null);
     }
@@ -447,3 +443,4 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 };
 
 export default AITextOptimizer;
+

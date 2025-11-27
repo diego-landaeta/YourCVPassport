@@ -44,9 +44,7 @@ const BlogPostPage: React.FC = () => {
             .eq('slug', slug)
             .single();
 
-        if (error) {
-            console.error('Error fetching post:', error);
-            navigate('/blog');
+        if (error) {navigate('/blog');
         } else {
             setPost(data as BlogPost);
             fetchRelatedPosts(data.category, data.id);
@@ -210,3 +208,4 @@ const BlogPostPage: React.FC = () => {
 };
 
 export default BlogPostPage;
+

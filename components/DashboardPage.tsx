@@ -73,9 +73,7 @@ const DashboardPage: React.FC = () => {
         setSkillsCount(skillCount || 0);
         setLanguagesCount(langCount || 0);
         setPortfolioCount(portCount || 0);
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
+      } catch (error) {}
     };
 
     loadData();
@@ -103,22 +101,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Profile Editor Secondary Sidebar - only show when in Mi Perfil */}
-      {isInMiPerfil && (
-        <div className="hidden lg:block">
-          <ProfileEditorSidebar
-            activeSubsection={subsection}
-            onSubsectionChange={(newSubsection) => setActiveSection(`mi-perfil:${newSubsection}`)}
-            profile={profile}
-            lastSaved={lastSaved ? new Date(lastSaved).toLocaleTimeString() : undefined}
-            saveMessage={saveMessage}
-            experiencesCount={experiencesCount}
-            educationCount={educationCount}
-            skillsCount={skillsCount}
-            languagesCount={languagesCount}
-            portfolioCount={portfolioCount}
-          />
-        </div>
-      )}
+
 
       {/* Mobile Navigation */}
       <div className="lg:hidden">
@@ -132,8 +115,8 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className={`lg:ml-64 min-h-screen ${isInMiPerfil ? 'lg:ml-[calc(16rem+18rem)]' : ''}`}>
-        <div className="p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8">
+      <div className={`min-h-screen transition-all duration-300 lg:ml-64`}>
+        <div className="pt-20 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-8">
           <DashboardContent
             activeSection={activeSection}
             onSectionChange={setActiveSection}
@@ -150,3 +133,4 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
+

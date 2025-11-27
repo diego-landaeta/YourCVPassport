@@ -14,17 +14,12 @@ import Modal from '../ui/Modal';
 import { generateCVPDF } from '../../utils/pdfGenerator';
 
 // Lazy load heavy components for better performance
-const IdentitySection = lazy(() => import('../profile-editor/IdentitySection'));
-const ExperienceSection = lazy(() => import('../profile-editor/ExperienceSection'));
-const EducationSection = lazy(() => import('../profile-editor/EducationSection'));
-const SkillsSection = lazy(() => import('../profile-editor/SkillsSection'));
-const LanguagesSection = lazy(() => import('../profile-editor/LanguagesSection'));
-const PortfolioSection = lazy(() => import('../profile-editor/PortfolioSection'));
-const PreferencesSection = lazy(() => import('../profile-editor/PreferencesSection'));
+
 const TemplateSelector = lazy(() => import('../profile-editor/TemplateSelector'));
 const OnboardingWizard = lazy(() => import('../OnboardingWizard'));
 const AIQuestionnaireAssistant = lazy(() => import('../AIQuestionnaireAssistant'));
-const AIAssistantSection = lazy(() => import('../profile-editor/AIAssistantSection'));
+
+const ProfileWizard = lazy(() => import('../profile-editor/ProfileWizard')); // New Wizard Component
 const VisasSection = lazy(() => import('./VisasSection'));
 const BlogManagementSection = lazy(() => import('../BlogManagementSection'));
 const InteractiveAnalyticsPanel = lazy(() => import('./InteractiveAnalyticsPanel'));
@@ -32,6 +27,7 @@ const BusinessCardPreview = lazy(() => import('./BusinessCardPreview'));
 const BusinessCardGallery = lazy(() => import('./BusinessCardGallery'));
 const LeadsInbox = lazy(() => import('./LeadsInboxModern'));
 const DisplaySettingsSection = lazy(() => import('../profile-editor/DisplaySettingsSection'));
+
 const MessagingView = lazy(() => import('./MessagingView'));
 const EnhancedMessaging = lazy(() => import('./EnhancedMessaging'));
 const StampsSection = lazy(() => import('./StampsSection'));
@@ -91,9 +87,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Cargando dashboard');
   const dashboardDataLoadedRef = useRef(false);
-  const skillsSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
-  const experienceSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
-  const educationSectionRef = useRef<{ toggleAISuggestions: () => void }>(null);
+
   const [showCardGallery, setShowCardGallery] = useState(false);
   const [showATSExportModal, setShowATSExportModal] = useState(false);
   const [showPDFExportModal, setShowPDFExportModal] = useState(false);
@@ -105,8 +99,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   // @ts-ignore
   const isAIAvailable = Boolean(import.meta.env?.VITE_GOOGLE_AI_API_KEY);
 
+  // Check if AI is available
+
+
   // Profile editor states
-  const [profileSection, setProfileSection] = useState<ProfileSectionKey>('identity');
+
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [saveMessage, setSaveMessage] = useState<string>('');
@@ -154,15 +151,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     const userId = session?.user.id || null;
 
     // Solo ejecutar si el user.id es diferente al anterior
-    if (userId && userId !== currentUserIdRef.current) {
-      console.log('[Dashboard] User ID changed, loading data:', userId);
-      currentUserIdRef.current = userId;
+    if (userId && userId !== currentUserIdRef.current) {currentUserIdRef.current = userId;
       loadDashboardData();
       checkAndUpdateSlug();
     } else if (!userId && currentUserIdRef.current) {
-      // Usuario se deslogueó
-      console.log('[Dashboard] User logged out, resetting');
-      currentUserIdRef.current = null;
+      // Usuario se deslogueócurrentUserIdRef.current = null;
       dashboardDataLoadedRef.current = false;
     }
   }, [session?.user.id]); // Dependencia necesaria para detectar cambios
@@ -191,21 +184,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     if (!session?.user.id || !profile) return;
 
     // ✅ PREVENIR ejecuciones múltiples
-    if (slugCheckedRef.current) {
-      console.log('Slug ya verificado, saltando...');
-      return;
+    if (slugCheckedRef.current) {return;
     }
 
     slugCheckedRef.current = true; // ✅ Marcar INMEDIATAMENTE antes de hacer queries
 
-    try {
-      console.log('Checking slug for profile:', {
-        slug: profile.slug,
-        full_name: profile.full_name,
-        headline: profile.headline
-      });
-
-      // Check if slug needs to be updated
+    try {// Check if slug needs to be updated
       const shouldRegenerateSlug = !profile.slug ||
                                    profile.slug.match(/-\d{6}$/) || // Has timestamp suffix
                                    profile.slug === profile.id || // Is UUID
@@ -232,10 +216,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .substring(0, 30)
           .trim();
 
-        let generatedSlug = headlinePart ? `${namePart}-${headlinePart}` : namePart;
-        console.log('Generated slug:', generatedSlug);
-
-        // Check if slug already exists
+        let generatedSlug = headlinePart ? `${namePart}-${headlinePart}` : namePart;// Check if slug already exists
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('id')
@@ -275,24 +256,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         } else {
           // NO recargar la página, ya marcado como completado
         }
-      } else {
-        console.log('Slug does not need regeneration or missing data');
-      }
+      } else {}
     } catch (error) {
       // Silent fail - will retry on next load
       slugCheckedRef.current = false; // ✅ Permitir reintentar si falla
     }
   };
 
-  // Update profile section when activeSection changes (for mi-perfil subsections)
-  useEffect(() => {
-    if (activeSection.includes(':')) {
-      const [section, subsection] = activeSection.split(':');
-      if (section === 'mi-perfil' && subsection) {
-        setProfileSection(subsection as ProfileSectionKey);
-      }
-    }
-  }, [activeSection]);
+
 
   const loadProfileEditorData = async () => {
     if (!session?.user.id) return;
@@ -314,19 +285,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         supabase.from('languages').select('*').eq('profile_id', session.user.id).order('created_at', { ascending: false }),
         supabase.from('visas').select('*').eq('profile_id', session.user.id).order('created_at', { ascending: false }),
         supabase.from('certifications').select('*').eq('profile_id', session.user.id).order('created_at', { ascending: false }),
-      ]);
-
-      console.log('📊 Datos cargados del perfil:', {
-        experiences: expData?.length || 0,
-        education: eduData?.length || 0,
-        skills: skillsData?.length || 0,
-        portfolio: portfolioData?.length || 0,
-        languages: languagesData?.length || 0,
-        visas: visasData?.length || 0,
-        certifications: certificationsData?.length || 0,
-      });
-
-      setExperiences(expData || []);
+      ]);setExperiences(expData || []);
       setEducation(eduData || []);
       setSkills(skillsData || []);
       setPortfolio(portfolioData || []);
@@ -342,15 +301,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     if (!session?.user.id) return;
 
     // ✅ PREVENIR múltiples ejecuciones
-    if (dashboardDataLoadedRef.current) {
-      console.log('Datos ya cargados, saltando...');
-      return;
+    if (dashboardDataLoadedRef.current) {return;
     }
 
     dashboardDataLoadedRef.current = true; // Marcar como cargado INMEDIATAMENTE
 
     try {
-      console.time('⏱️ loadDashboardData');
+      
 
       // 🚀 OPTIMIZACIÓN: Cargar TODO de una vez con Promise.allSettled
       const results = await Promise.allSettled([
@@ -408,9 +365,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       const leadsData = results[5].status === 'fulfilled' ? results[5].value.data : [];
       const analytics = results[6].status === 'fulfilled' ? results[6].value : null;
 
-      if (results[6].status === 'rejected') {
-        console.warn('⚠️ Analytics falló, continuando:', results[6].reason);
-      }
+      if (results[6].status === 'rejected') {}
 
       // Calcular completeness con datos REALES
       const profileCompleteness = Math.round(
@@ -487,7 +442,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         skillsCount: skillsCount || 0,
       });
 
-      console.timeEnd('⏱️ loadDashboardData');
+      
       setLoading(false); // ✅ Dashboard visible con TODO cargado
 
     } catch (error) {
@@ -621,9 +576,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     }
   };
 
-  const handleExperienceSave = async (data: ExperienceFormData[]) => {
-    console.log('handleExperienceSave called with:', data);
-    setIsSaving(true);
+  const handleExperienceSave = async (data: ExperienceFormData[]) => {setIsSaving(true);
 
     // Detect if this is a deletion (array got smaller)
     const isDeleting = data.length < experiences.length;
@@ -774,6 +727,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           profile_id: session?.user.id,
           name: lang.name,
           level: lang.level,
+
           sort_order: index,
         }));
 
@@ -808,13 +762,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           image_url: item.image_url || null,
           file_url: item.file_url || null,
           sort_order: index,
-        }));
-
-        console.log('Saving portfolio items:', items);
-        const { error } = await supabase.from('portfolio_items').insert(items);
-        if (error) {
-          console.error('Portfolio save error:', error);
-          throw error;
+        }));const { error } = await supabase.from('portfolio_items').insert(items);
+        if (error) {throw error;
         }
       }
 
@@ -822,9 +771,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Portfolio guardado correctamente');
-    } catch (error) {
-      console.error('Error saving portfolio:', error);
-      toast.error('Error al guardar portfolio');
+    } catch (error) {toast.error('Error al guardar portfolio');
       showSaveMessage('Error al guardar portfolio', true);
     } finally {
       setIsSaving(false);
@@ -834,28 +781,37 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const handlePreferencesSave = async (data: PreferencesFormData) => {
     setIsSaving(true);
     try {
+      // Ensure numeric values are valid or null
+      const salary_min = data.salary_min && !isNaN(data.salary_min) ? data.salary_min : null;
+      const salary_max = data.salary_max && !isNaN(data.salary_max) ? data.salary_max : null;
+      
+      const updateData = {
+        job_type: data.job_type && data.job_type.length > 0 ? data.job_type : null,
+        availability: data.availability || null,
+        salary_min,
+        salary_max,
+        salary_currency: data.salary_currency || null,
+        remote_preference: data.remote_preference || null,
+        willing_to_relocate: data.willing_to_relocate || false,
+        preferred_locations: data.preferred_locations && data.preferred_locations.length > 0 ? data.preferred_locations : null,
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          job_type: data.job_type || null,
-          availability: data.availability || null,
-          salary_min: data.salary_min || null,
-          salary_max: data.salary_max || null,
-          salary_currency: data.salary_currency || null,
-          remote_preference: data.remote_preference || null,
-          willing_to_relocate: data.willing_to_relocate || false,
-          preferred_locations: data.preferred_locations || null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', session?.user.id);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Preferences saved successfully!');
-    } catch (error) {
-      toast.error('Error al guardar preferencias');
+      toast.success('Preferencias guardadas correctamente');
+    } catch (error: any) {
+      toast.error(`Error al guardar preferencias: ${error?.message || 'Error desconocido'}`);
       showSaveMessage('Failed to save preferences', true);
     } finally {
       setIsSaving(false);
@@ -907,7 +863,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       }
 
       showSaveMessage('Profile created successfully with AI assistance!');
-      setProfileSection('identity');
+
     } catch (error) {
       toast.error('Error al guardar cuestionario de IA');
       showSaveMessage('Failed to save profile data', true);
@@ -1287,191 +1243,33 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   }
 
   // Mi Perfil Section (Profile Editor)
-  // Parse section and subsection from activeSection (format: "mi-perfil:identity")
-  const [section, subsection] = activeSection.includes(':') ? activeSection.split(':') : [activeSection, null];
-
-  if (section === 'mi-perfil' && subsection) {
-    // AI Assistant tiene su propio diseño de pantalla completa
-    if (profileSection === 'ai-assistant') {
-      return (
-        <Suspense fallback={<SectionLoader />}>
-          <AIQuestionnaireAssistant onComplete={() => onSectionChange('ver-cv')} />
-        </Suspense>
-      );
-    }
-
+  if (activeSection.startsWith('mi-perfil')) {
     return (
-      <div className="space-y-6">
-        {/* Section Content */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm p-6 border border-gray-100 dark:border-dark-border">
-          <Suspense fallback={<SectionLoader />}>
-            {profileSection === 'identity' && (
-              <IdentitySection
-                initialData={{
-                  full_name: profile?.full_name || '',
-                  headline: profile?.headline || '',
-                  summary: profile?.summary || '',
-                  country_code: profile?.country_code || '',
-                  location: profile?.location || '',
-                  phone: profile?.phone || '',
-                  linkedin_url: profile?.linkedin_url || '',
-                  github_url: profile?.github_url || '',
-                  portfolio_url: profile?.portfolio_url || '',
-                  avatar_url: profile?.avatar_url || '',
-                }}
-                onSave={handleIdentitySave}
-              />
-            )}
+      <div className="animate-fade-in">
+        <Suspense fallback={<SectionLoader />}>
+          <ProfileWizard
+            profile={profile}
+            experiences={experiences}
+            education={education}
+            skills={skills}
+            languages={languages}
+            portfolio={portfolio}
+            visas={visas}
+            certifications={certifications}
+            onSaveIdentity={handleIdentitySave}
+            onSaveExperience={handleExperienceSave}
+            onSaveEducation={handleEducationSave}
+            onSaveSkills={handleSkillsSave}
+            onSaveLanguages={handleLanguagesSave}
+            onSavePortfolio={handlePortfolioSave}
+            onSavePreferences={handlePreferencesSave}
 
-            {profileSection === 'experience' && (
-              <ExperienceSection
-                ref={experienceSectionRef}
-                initialData={experiences}
-                onSave={handleExperienceSave}
-                onNavigateToVerifications={() => onSectionChange('stamps')}
-              />
-            )}
-
-            {profileSection === 'education' && (
-              <EducationSection
-                ref={educationSectionRef}
-                initialData={education}
-                onSave={handleEducationSave}
-                onNavigateToVerifications={() => onSectionChange('stamps')}
-              />
-            )}
-
-            {profileSection === 'skills' && (
-              <SkillsSection
-                ref={skillsSectionRef}
-                initialData={skills}
-                onSave={handleSkillsSave}
-              />
-            )}
-
-            {profileSection === 'languages' && (
-              <LanguagesSection
-                initialData={languages}
-                onSave={handleLanguagesSave}
-                onNavigateToVerifications={() => onSectionChange('stamps')}
-              />
-            )}
-
-            {profileSection === 'portfolio' && (
-              <PortfolioSection
-                initialData={portfolio}
-                onSave={handlePortfolioSave}
-              />
-            )}
-
-            {profileSection === 'preferences' && (
-              <PreferencesSection
-                initialData={{
-                  job_type: (profile?.job_type as ('full-time' | 'part-time' | 'contract' | 'freelance' | 'internship')[]) || [],
-                  availability: (profile?.availability as 'immediate' | '2-weeks' | '1-month' | '2-months' | 'not-looking') || undefined,
-                  salary_min: profile?.salary_min || undefined,
-                  salary_max: profile?.salary_max || undefined,
-                  salary_currency: profile?.salary_currency || 'USD',
-                  remote_preference: (profile?.remote_preference as 'remote' | 'hybrid' | 'on-site' | 'flexible') || undefined,
-                  willing_to_relocate: profile?.willing_to_relocate || false,
-                  preferred_locations: profile?.preferred_locations || [],
-                }}
-                onSave={handlePreferencesSave}
-              />
-            )}
-
-            {profileSection === 'template' && (
-              <TemplateSelector
-                currentTemplate={profile?.template || 'minimal'}
-                onTemplateChange={async (template) => {
-                  try {
-                    const { error } = await supabase
-                      .from('profiles')
-                      .update({ template: template })
-                      .eq('id', session?.user.id);
-
-                    if (error) throw error;
-                    showSaveMessage(t.templateSection.templateUpdated);
-                  } catch (error) {
-                    toast.error('Error al actualizar plantilla');
-                    showSaveMessage(t.templateSection.templateUpdateError, true);
-                  }
-                }}
-              />
-            )}
-
-            {profileSection === 'stamps' && (
-              <StampsSection
-                onStampsUpdate={() => {
-                  // Refresh profile data if needed
-                  refetchProfile();
-                }}
-              />
-            )}
-          </Suspense>
-        </div>
-
-        {/* Floating AI Assistant Button */}
-        {subsection !== 'ai-assistant' && (subsection === 'skills' || subsection === 'experience' || subsection === 'education' || subsection === 'identity') && (
-          <button
-            onClick={() => {
-              // If in skills section, toggle AI suggestions panel inline
-              if (subsection === 'skills' && skillsSectionRef.current) {
-                skillsSectionRef.current.toggleAISuggestions();
-              }
-              // If in experience section, toggle AI suggestions panel inline
-              else if (subsection === 'experience' && experienceSectionRef.current) {
-                experienceSectionRef.current.toggleAISuggestions();
-              }
-              // If in education section, toggle AI suggestions panel inline
-              else if (subsection === 'education' && educationSectionRef.current) {
-                educationSectionRef.current.toggleAISuggestions();
-              }
-              // If in identity section, trigger AI summary generation
-              else if (subsection === 'identity') {
-                const event = new CustomEvent('generateAISummary');
-                window.dispatchEvent(event);
-              }
+            onComplete={() => {
+              toast.success('¡Perfil completado y optimizado con éxito!');
+              onSectionChange('dashboard');
             }}
-            className={`fixed bottom-6 right-6 z-50 group ${
-              isAIAvailable
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl'
-                : 'bg-gray-400 dark:bg-gray-600 opacity-60 cursor-not-allowed'
-            } text-white rounded-full p-4 transition-all duration-300 transform hover:scale-110`}
-            title={
-              isAIAvailable
-                ? subsection === 'skills'
-                  ? 'Sugerencias IA para Habilidades'
-                  : subsection === 'experience'
-                  ? 'Sugerencias IA para Experiencias'
-                  : subsection === 'education'
-                  ? 'Optimizar Educación con IA'
-                  : subsection === 'identity'
-                  ? 'Generar Resumen Profesional con IA'
-                  : 'Mejorar con IA'
-                : 'Asistente de IA no disponible'
-            }
-          >
-            {/* Icon */}
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            
-            {/* Tooltip */}
-            <span className={`absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none ${
-              isAIAvailable
-                ? 'bg-gray-900 dark:bg-gray-700 text-white'
-                : 'bg-gray-600 text-gray-200'
-            }`}>
-              {isAIAvailable ? '✨ Mejorar con IA' : '⚠️ IA no disponible'}
-            </span>
-
-            {/* Pulse animation when available */}
-            {isAIAvailable && (
-              <span className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-75"></span>
-            )}
-          </button>
-        )}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -2664,3 +2462,4 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 };
 
 export default DashboardContent;
+

@@ -24,6 +24,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // Lazy load AI optimizer
 const AITextOptimizer = lazy(() => import('./AITextOptimizer'));
@@ -149,9 +150,8 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
 };
 
 const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
-  const { session } = useAuth(); // Fix ReferenceError
-  console.log('ExperienceSection rendered', { session });
-
+  const { session } = useAuth();
+  const { lang } = useLanguage();
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { confirm, Dialog } = useConfirmDialog();
@@ -372,29 +372,16 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   };
 
   const onSubmit = async (data: ExperienceFormData) => {
-    // Debug: verificar el valor de is_current
-    console.log('📝 Form data on submit:', {
-      is_current: data.is_current,
-      end_date: data.end_date,
-      start_date: data.start_date
-    });
-
-    // Validar fechas antes de guardar
+    // Debug: verificar el valor de is_current// Validar fechas antes de guardar
     const dateValidation = validateDateRange(
       data.start_date,
       data.end_date,
       data.is_current || false
     );
 
-    if (!dateValidation.isValid) {
-      console.error('❌ Validation failed:', dateValidation.error);
-      toast.error(dateValidation.error || 'Las fechas no son válidas');
+    if (!dateValidation.isValid) {toast.error(dateValidation.error || 'Las fechas no son válidas');
       return;
-    }
-
-    console.log('✅ Validation passed, saving...');
-
-    // Clean markdown from description and achievements before saving
+    }// Clean markdown from description and achievements before saving
     const formData = {
       ...data,
       description: cleanMarkdown(data.description),
@@ -479,9 +466,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
       await onSave(updated);
 
       toast.success('Sugerencias de IA aplicadas correctamente');
-    } catch (error) {
-      console.error('Error applying AI suggestion:', error);
-      toast.error('Error al aplicar la sugerencia');
+    } catch (error) {toast.error('Error al aplicar la sugerencia');
       throw error;
     }
   };
@@ -514,10 +499,10 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {translations.lang === 'en' ? 'Verify your work experience' : 'Verifica tu experiencia laboral'}
+                {lang === 'en' ? 'Verify your work experience' : 'Verifica tu experiencia laboral'}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {translations.lang === 'en'
+                {lang === 'en'
                   ? 'Add credibility to your profile by verifying your work experience. Go to the Verifications section to submit documentation.'
                   : 'Añade credibilidad a tu perfil verificando tu experiencia laboral. Ve a la sección de Verificaciones para enviar la documentación.'}
               </p>
@@ -525,7 +510,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
-                {translations.lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
+                {lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -737,3 +722,4 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
 ExperienceSection.displayName = 'ExperienceSection';
 
 export default ExperienceSection;
+

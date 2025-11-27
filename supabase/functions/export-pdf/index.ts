@@ -121,7 +121,7 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error('Error in export-pdf function:', error);
+    
 
     return new Response(
       JSON.stringify({
@@ -485,7 +485,7 @@ async function logExportEvent(
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error logging export event:', error);
+    
     // Don't throw - logging shouldn't break the export
   }
 }

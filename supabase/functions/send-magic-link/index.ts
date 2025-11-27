@@ -152,7 +152,7 @@ serve(async (req: Request) => {
 
     if (!resendResponse.ok) {
       const error = await resendResponse.json()
-      console.error('Resend error:', error)
+      
       throw new Error(`Resend error: ${JSON.stringify(error)}`)
     }
 
@@ -170,7 +170,7 @@ serve(async (req: Request) => {
     )
 
   } catch (error: any) {
-    console.error('Error:', error)
+    
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred',

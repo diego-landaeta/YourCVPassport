@@ -77,9 +77,7 @@ const SuccessStoriesPage: React.FC = () => {
 
             if (error) throw error;
             setDbStories(data || []);
-        } catch (err) {
-            console.error('Error loading stories:', err);
-            // Si hay error, usar historias estáticas como fallback
+        } catch (err) {// Si hay error, usar historias estáticas como fallback
         } finally {
             setLoadingStories(false);
         }
@@ -91,9 +89,7 @@ const SuccessStoriesPage: React.FC = () => {
     };
 
     const handleStorySubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Story submitted:', storyForm);
-        alert(pageData.form.alert);
+        e.preventDefault();alert(pageData.form.alert);
         setStoryForm({ name: '', email: '', message: '' });
     };
 
@@ -275,4 +271,5 @@ const SuccessStoriesPage: React.FC = () => {
 };
 
 export default SuccessStoriesPage;
+
 

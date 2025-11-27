@@ -46,9 +46,7 @@ const VerifiedStampsBadge: React.FC<VerifiedStampsBadgeProps> = ({
 
             if (error) throw error;
             setVerifiedStamps(data || []);
-        } catch (error) {
-            console.error('Error fetching verified stamps:', error);
-        } finally {
+        } catch (error) {} finally {
             setLoading(false);
         }
     };
@@ -160,3 +158,4 @@ const VerifiedStampsBadge: React.FC<VerifiedStampsBadgeProps> = ({
 };
 
 export default VerifiedStampsBadge;
+

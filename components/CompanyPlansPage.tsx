@@ -66,9 +66,7 @@ const CompanyPlansPage: React.FC = () => {
     };
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Demo request:', formState);
-        alert(pageData.form.alert);
+        e.preventDefault();alert(pageData.form.alert);
         setFormState({ name: '', company: '', email: '', message: '' });
     };
 
@@ -203,3 +201,4 @@ const CompanyPlansPage: React.FC = () => {
 };
 
 export default CompanyPlansPage;
+

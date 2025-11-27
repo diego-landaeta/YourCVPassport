@@ -137,7 +137,7 @@ Return ONLY the JSON object, no additional text.
     
     return parsedData;
   } catch (error) {
-    console.error('Error parsing CV with AI:', error);
+    
     throw new Error('Failed to parse CV. Please try again or enter your information manually.');
   }
 }
@@ -189,7 +189,7 @@ export async function parseCV(file: File): Promise<ParsedCVData> {
       ]
     };
   } catch (error) {
-    console.error('Error parsing CV:', error);
+    
     throw error;
   }
 }

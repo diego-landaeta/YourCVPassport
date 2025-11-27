@@ -10,11 +10,11 @@ export const getSupabaseConfig = () => {
   const key = process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    console.warn('⚠️  VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set in environment');
-    console.warn('   Tests may fail. Please set these environment variables.');
-    console.warn('   Example:');
-    console.warn('   $env:VITE_SUPABASE_URL="https://your-project.supabase.co"');
-    console.warn('   $env:VITE_SUPABASE_ANON_KEY="your-anon-key"');
+    
+    
+    
+    
+    
   }
 
   return {

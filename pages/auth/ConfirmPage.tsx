@@ -16,7 +16,7 @@ const ConfirmPage: React.FC = () => {
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Email confirmation error:', error);
+          
           setStatus('error');
           setMessage('Email confirmation failed. The link may have expired.');
           return;
@@ -37,7 +37,7 @@ const ConfirmPage: React.FC = () => {
           setMessage('Your email has been confirmed! You can now log in.');
         }
       } catch (err) {
-        console.error('Confirmation handling error:', err);
+        
         setStatus('error');
         setMessage('Something went wrong during confirmation.');
       }

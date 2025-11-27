@@ -60,11 +60,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   useEffect(() => {
     if (selectedLeadId) {
       loadMessages(selectedLeadId);
-      markMessagesAsRead(selectedLeadId);
-      
-      console.log('🔔 Setting up realtime subscription for lead:', selectedLeadId);
-      
-      // Subscribe to new messages
+      markMessagesAsRead(selectedLeadId);// Subscribe to new messages
       const subscription = supabase
         .channel(`messages:${selectedLeadId}`)
         .on('postgres_changes', {
@@ -72,9 +68,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
           schema: 'public',
           table: 'messages',
           filter: `lead_id=eq.${selectedLeadId}`
-        }, (payload) => {
-          console.log('🔔 New message received via realtime:', payload.new);
-          const newMsg = payload.new as Message;
+        }, (payload) => {const newMsg = payload.new as Message;
           
           // Only add if it's not from us (to avoid duplicates from optimistic update)
           if (newMsg.sender_id !== user?.id) {
@@ -83,14 +77,10 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
             // Don't reload conversations here to avoid infinite loop
           }
         })
-        .subscribe((status) => {
-          console.log('🔔 Realtime subscription status:', status);
-          setIsRealtimeConnected(status === 'SUBSCRIBED');
+        .subscribe((status) => {setIsRealtimeConnected(status === 'SUBSCRIBED');
         });
 
-      return () => {
-        console.log('🔕 Unsubscribing from realtime for lead:', selectedLeadId);
-        subscription.unsubscribe();
+      return () => {subscription.unsubscribe();
         setIsRealtimeConnected(false);
       };
     }
@@ -106,11 +96,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
 
   const loadConversations = async () => {
     if (!user) {
-      console.warn('⚠️ Cannot load conversations: no user');
       return;
     }
-
-    console.log('📥 Loading conversations for user:', user.id);
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -120,12 +107,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
         .order('last_message_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error loading conversations:', error);
         throw error;
       }
-
-      console.log('✅ Conversations loaded:', data?.length || 0);
-
       // Recalculate unread_count for each conversation from the user's perspective
       const conversationsWithCorrectUnread = await Promise.all((data || []).map(async (conv) => {
         const { count } = await supabase
@@ -140,7 +123,6 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
 
       setConversations(conversationsWithCorrectUnread);
     } catch (err: any) {
-      console.error('❌ Failed to load conversations:', err);
       // Don't show alert here as it's called on mount
     } finally {
       setLoading(false);
@@ -148,7 +130,6 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   };
 
   const loadMessages = async (leadId: string) => {
-    console.log('📥 Loading messages for lead:', leadId);
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -157,11 +138,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('❌ Error loading messages:', error);
         throw error;
       }
-
-      console.log('✅ Messages loaded:', data?.length || 0);
       setMessages(data || []);
     } catch (err: any) {
       toast.error('Error al cargar mensajes: ' + (err.message || 'Error desconocido'));
@@ -196,33 +174,18 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
         .in('id', messagesToMark.map(m => m.id));
 
       if (error) {
-        console.error('Error updating messages:', error);
         return;
       }
 
       // Reload conversations to update unread count
       loadConversations();
-    } catch (err) {
-      console.error('Error marking messages as read:', err);
-    }
+    } catch (err) {}
   };
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedLeadId || !user || !profile) {
-      console.warn('⚠️ Cannot send message: missing required data', {
-        hasMessage: !!newMessage.trim(),
-        hasLeadId: !!selectedLeadId,
-        hasUser: !!user,
-        hasProfile: !!profile
-      });
       return;
     }
-
-    console.log('📤 Sending message:', {
-      lead_id: selectedLeadId,
-      sender_id: user.id,
-      content_length: newMessage.trim().length
-    });
 
     setSending(true);
     
@@ -255,22 +218,15 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
         .single();
 
       if (error) {
-        console.error('❌ Supabase error:', error);
         throw error;
       }
-
-      console.log('✅ Message sent successfully:', data);
-      
       // Replace temp message with real one
       setMessages(prev => prev.map(m => 
         m.id === tempMessage.id ? data : m
       ));
       
       loadConversations(); // Refresh to update last message
-    } catch (err: any) {
-      console.error('❌ Failed to send message:', err);
-      
-      // Remove temp message on error
+    } catch (err: any) {// Remove temp message on error
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent); // Restore message
 
@@ -536,3 +492,4 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
 };
 
 export default MessagingView;
+

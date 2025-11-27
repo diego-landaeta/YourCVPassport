@@ -42,16 +42,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Effect for handling session state
   useEffect(() => {
     const getSessionData = async () => {
-      console.log('[AuthContext] Fetching initial session...');
+      
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('[AuthContext] Initial session:', session ? 'exists' : 'null');
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false); // Session loading is complete
 
       // If no session, no need to wait for profile
       if (!session) {
-        console.log('[AuthContext] No session, setting profileLoading to false');
+        
         setProfileLoading(false);
       }
     };
@@ -67,11 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Log other important events
-      console.log('[AuthContext] Auth state change:', event, session ? 'with session' : 'no session');
+      
 
       // Handle signed out state
       if (event === 'SIGNED_OUT') {
-        console.log('[AuthContext] User signed out, clearing session');
+        
         setSession(null);
         setUser(null);
         setProfile(null);
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Handle signed in and initial session
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        console.log('[AuthContext] Setting session:', session ? 'valid session' : 'no session');
+        
         setSession(session);
         setUser(session?.user ?? null);
         if (session) {
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Fallback: ensure loading is always set to false for any unhandled events
-      console.log('[AuthContext] Unhandled auth event, setting loading to false');
+      
       setLoading(false);
     });
 
@@ -104,11 +104,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Effect for fetching profile data when user changes
   const fetchProfile = useCallback(async () => {
     if (user) {
-      console.log('[AuthContext] 🔍 Fetching profile for user:', user.id);
+      
       setProfileLoading(true);
       try {
         // Primero intentar obtener el perfil
-        console.log('[AuthContext] 📡 Querying profiles table...');
+        
         let { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -116,15 +116,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .limit(1)
           .single();
 
-        console.log('[AuthContext] 📊 Query result:', { 
-          hasData: !!data, 
-          errorCode: error?.code, 
-          errorMessage: error?.message 
-        });
+        
 
         // If profile doesn't exist (e.g., user signed up before trigger was in place), create one.
         if (error && error.code === 'PGRST116') {
-          console.warn('[AuthContext] ⚠️ Profile not found for user, creating a new one.');
+          
           const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
             .insert({
@@ -136,34 +132,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
 
           if (insertError) {
-            console.error('[AuthContext] ❌ Error creating profile:', insertError);
+            
             throw insertError;
           }
-          console.log('[AuthContext] ✅ Profile created successfully');
+          
           data = newProfile;
         } else if (error) {
           // For any other errors, re-throw to be caught by the catch block
-          console.error('[AuthContext] ❌ Error fetching profile:', error);
+          
           throw error;
         }
 
-        console.log('[AuthContext] ✅ Profile loaded:', data ? `id=${data.id}, name=${data.full_name}, role=${data.role}` : 'null');
+        
         setProfile(data as Profile | null);
       } catch (error: any) {
-        console.error("[AuthContext] ❌ Error fetching or creating profile:", {
-          message: error?.message,
-          code: error?.code,
-          details: error?.details,
-          hint: error?.hint
-        });
+        
         setProfile(null); // Set profile to null if any error occurs
       } finally {
-        console.log('[AuthContext] ✅ Profile loading complete');
+        
         setProfileLoading(false);
       }
     } else {
       // If there is no user, there is no profile.
-      console.log('[AuthContext] ℹ️ No user, clearing profile');
+      
       setProfile(null);
       setProfileLoading(false);
     }
@@ -175,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const currentUserId = user?.id || null;
-    console.log('[AuthContext] User ID effect triggered, current:', currentUserId, 'previous:', userIdRef.current, 'hasFetched:', hasFetchedProfile.current);
+    
 
     // Fetch profile if:
     // 1. User ID changed, OR
@@ -183,7 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const shouldFetch = currentUserId !== userIdRef.current || (currentUserId && !hasFetchedProfile.current);
 
     if (shouldFetch && currentUserId) {
-      console.log('[AuthContext] User ID changed or first fetch, fetching profile...');
+      
       userIdRef.current = currentUserId;
       hasFetchedProfile.current = true;
       fetchProfile();
@@ -227,7 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (funcError) {
-        console.error('Edge Function error:', funcError);
+        
         let errorMessage = funcError.message;
         
         // Try to parse the response body if available
@@ -241,7 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            console.error('Error parsing Edge Function response:', e);
+            
           }
         }
         
@@ -249,7 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (funcData?.error) {
-        console.error('Edge Function returned error:', funcData.error);
+        
         return { data: { user: null, session: null }, error: new Error(funcData.error) };
       }
 
@@ -262,7 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error: null 
       };
     } catch (error) {
-      console.error('Sign up error:', error);
+      
       return { data: { user: null, session: null }, error };
     }
   };
@@ -306,7 +297,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('Edge Function error:', error);
+        
         let errorMessage = error.message;
         
         // Try to parse the response body if available
@@ -320,20 +311,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            console.error('Error parsing Edge Function response:', e);
+            
           }
         }
         return { error: new Error(errorMessage) };
       }
 
       if (data?.error) {
-        console.error('Edge Function returned error:', data.error);
+        
         return { error: new Error(data.error) };
       }
 
       return { error: null };
     } catch (error) {
-      console.error('Magic link error:', error);
+      
       return { error };
     }
   };
@@ -349,7 +340,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('Edge Function error:', error);
+        
         let errorMessage = error.message;
         
         // Try to parse the response body if available
@@ -363,20 +354,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            console.error('Error parsing Edge Function response:', e);
+            
           }
         }
         return { error: new Error(errorMessage) };
       }
 
       if (data?.error) {
-        console.error('Edge Function returned error:', data.error);
+        
         return { error: new Error(data.error) };
       }
 
       return { error: null };
     } catch (error) {
-      console.error('Reset password error:', error);
+      
       return { error };
     }
   };

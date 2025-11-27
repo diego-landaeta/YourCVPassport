@@ -151,40 +151,26 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
 
   // Load skills from database
   const loadSkills = React.useCallback(async () => {
-    if (!session?.user.id) return;
-
-    console.log('🔄 Recargando habilidades desde la base de datos...');
-    const { data, error } = await supabase
+    if (!session?.user.id) return;const { data, error } = await supabase
       .from('skills')
       .select('*')
       .eq('profile_id', session.user.id)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('❌ Error loading skills:', error);
-    } else {
-      console.log('✅ Skills reloaded:', data);
-      setSkills(data || []);
+    if (error) {} else {setSkills(data || []);
     }
   }, [session?.user.id]);
 
   // Load experiences for AI suggestions
   React.useEffect(() => {
     const loadExperiences = async () => {
-      if (!session?.user.id) return;
-
-      console.log('🔍 Loading experiences for AI suggestions...');
-      const { data, error } = await supabase
+      if (!session?.user.id) return;const { data, error } = await supabase
         .from('experiences')
         .select('position, company_name, description')
         .eq('profile_id', session.user.id)
         .order('start_date', { ascending: false });
 
-      if (error) {
-        console.error('❌ Error loading experiences:', error);
-      } else {
-        console.log('✅ Experiences loaded:', data);
-        // Map position to title for compatibility with AISkillsSuggestion
+      if (error) {} else {// Map position to title for compatibility with AISkillsSuggestion
         const mappedData = data.map(exp => ({
           title: exp.position,
           company_name: exp.company_name,
@@ -219,9 +205,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
 
   // Log de errores de validación
   React.useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.error('❌ ERRORES DE VALIDACIÓN:', errors);
-    }
+    if (Object.keys(errors).length > 0) {}
   }, [errors]);
 
   // DISABLED: Auto-save draft functionality was causing issues with form editing
@@ -282,43 +266,18 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
     setShowSuggestions(false);
   };
 
-  const onSubmit = async (data: SkillFormData) => {
-    console.log('📝 Submitting skill form:', { data, editingIndex });
-    console.log('📋 Form data details:', {
-      name: data.name,
-      level: data.level,
-      years_of_experience: data.years_of_experience,
-      percentage: data.percentage,
-      typeOfLevel: typeof data.level,
-      typeOfYears: typeof data.years_of_experience,
-      typeOfPercentage: typeof data.percentage,
-    });
-
-    try {
+  const onSubmit = async (data: SkillFormData) => {try {
       let updated: SkillFormData[];
-      if (editingIndex !== null) {
-        console.log('✏️ Updating existing skill at index:', editingIndex);
-        updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
-      } else {
-        console.log('➕ Adding new skill');
-        updated = [...skills, data];
-      }
-
-      console.log('💾 Saving skills...', updated);
-      setSkills(updated);
-      await onSave(updated);
-
-      console.log('✅ Skills saved successfully!');
-
-      // Clear draft on successful save
+      if (editingIndex !== null) {updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
+      } else {updated = [...skills, data];
+      }setSkills(updated);
+      await onSave(updated);// Clear draft on successful save
       localStorage.removeItem('skill_draft');
       setIsFormOpen(false);
       reset();
       setSearchTerm('');
       setEditingIndex(null);
-    } catch (error) {
-      console.error('❌ ERROR AL GUARDAR HABILIDAD:', error);
-      alert('Error al guardar la habilidad: ' + (error as Error).message);
+    } catch (error) {alert('Error al guardar la habilidad: ' + (error as Error).message);
     }
   };
 
@@ -556,11 +515,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
               </button>
               <button
                 type="submit"
-                onClick={() => {
-                  console.log('🔘 Botón clickeado');
-                  console.log('📋 Errores actuales:', errors);
-                  console.log('⏳ isSubmitting:', isSubmitting);
-                }}
+                onClick={() => {}}
                 disabled={isSubmitting}
                 className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -577,3 +532,4 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
 SkillsSection.displayName = 'SkillsSection';
 
 export default SkillsSection;
+

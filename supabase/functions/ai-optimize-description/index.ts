@@ -51,7 +51,7 @@ async function checkRateLimit(req: Request, userId?: string): Promise<{ success:
       reset: result.reset,
     };
   } catch (error) {
-    console.error('Rate limit check failed:', error);
+    
     // Fail open - allow request if rate limiting fails
     return {
       success: true,
@@ -200,7 +200,7 @@ serve(async (req: Request) => {
       }
     );
   } catch (error: any) {
-    console.error('Error in ai-optimize-description function:', error);
+    
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: error.message || 'Unknown error' }),
       {

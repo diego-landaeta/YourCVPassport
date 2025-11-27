@@ -190,9 +190,7 @@ const ProfileCategoryPage: React.FC = () => {
                 setProfileSkills(skillsMap);
                 setTotalProfiles(count || filteredProfiles.length);
             }
-        } catch (err) {
-            console.error('Error loading profiles:', err);
-        } finally {
+        } catch (err) {} finally {
             setLoading(false);
         }
     };
@@ -437,3 +435,4 @@ const ProfileCategoryPage: React.FC = () => {
 };
 
 export default ProfileCategoryPage;
+

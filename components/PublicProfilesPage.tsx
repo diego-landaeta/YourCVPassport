@@ -26,26 +26,26 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, skills }) => {
     const avatarUrl = profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
 
     return (
-        <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-700 hover:border-cv-blue dark:hover:border-cv-blue overflow-hidden">
+        <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-cv-blue dark:hover:border-cv-blue overflow-hidden">
             {/* Gradient Background Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
 
             {/* Content */}
-            <div className="relative p-6 flex flex-col h-full">
+            <div className="relative p-4 flex flex-col h-full">
                 {/* Header with Avatar and Verified Badge */}
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-3 mb-3">
                     <div className="relative flex-shrink-0">
                         <img
                             src={avatarUrl}
                             alt={profile.full_name}
-                            className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white dark:ring-gray-800 shadow-lg group-hover:ring-cv-blue/30 transition-all"
+                            className="w-12 h-12 rounded-lg object-cover ring-2 ring-white dark:ring-gray-800 shadow group-hover:ring-cv-blue/30 transition-all"
                             onError={(e) => {
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
                             }}
                         />
                         {profile.plan !== 'Free' && (
-                            <div className="absolute -top-2 -right-2 bg-cv-green text-white p-1.5 rounded-full shadow-lg" title="Verified Profile">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <div className="absolute -top-1 -right-1 bg-cv-green text-white p-1 rounded-full shadow" title="Verified Profile">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                 </svg>
                             </div>
@@ -53,67 +53,54 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, skills }) => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate group-hover:text-cv-blue transition-colors">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-0.5 truncate group-hover:text-cv-blue transition-colors">
                             {profile.full_name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                             {profile.headline || 'Professional'}
                         </p>
                     </div>
                 </div>
 
                 {/* Location with Country Badge */}
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 dark:border-gray-700">
                     {profile.country_code ? (
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <CountryBadge countryCode={profile.country_code} size="md" showName={false} />
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <CountryBadge countryCode={profile.country_code} size="sm" showName={false} />
                             {profile.location && (
-                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                    <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                                    </svg>
-                                    <span className="font-medium">{profile.location}</span>
-                                </div>
+                                <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{profile.location}</span>
                             )}
                             {profile.remote_preference === 'REMOTE' && (
-                                <span className="inline-flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-md">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
-                                    </svg>
+                                <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded">
                                     Remote
                                 </span>
                             )}
                         </div>
                     ) : profile.location && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                            <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                            </svg>
-                            <span className="font-medium">{profile.location}</span>
-                        </div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{profile.location}</span>
                     )}
                 </div>
 
                 {/* Top 3 Skills */}
-                <div className="flex-grow mb-4">
-                    <div className="flex flex-wrap gap-2">
+                <div className="flex-grow mb-3">
+                    <div className="flex flex-wrap gap-1">
                         {skills.slice(0, 3).map((skill: string, index: number) => (
                             <span
                                 key={index}
-                                className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-cv-blue/10 to-indigo-500/10 dark:from-cv-blue/20 dark:to-indigo-500/20 text-cv-blue dark:text-cv-blue-light text-xs font-semibold rounded-lg border border-cv-blue/20 dark:border-cv-blue/30"
+                                className="inline-flex items-center px-2 py-0.5 bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue dark:text-cv-blue-light text-xs font-medium rounded"
                             >
                                 {skill}
                             </span>
                         ))}
                         {skills.length > 3 && (
-                            <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                +{skills.length - 3} more
+                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded">
+                                +{skills.length - 3}
                             </span>
                         )}
                     </div>
                     {skills.length === 0 && (
-                        <p className="text-sm text-gray-400 dark:text-gray-600 italic">
-                            No skills listed
+                        <p className="text-xs text-gray-400 dark:text-gray-600 italic">
+                            No skills
                         </p>
                     )}
                 </div>
@@ -121,10 +108,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, skills }) => {
                 {/* View Profile CTA */}
                 <Link
                     to={`/cv/${profile.slug || profile.id}`}
-                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl text-center flex items-center justify-center gap-2 group-hover:scale-105"
+                    className="w-full bg-cv-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow text-center flex items-center justify-center gap-1.5"
                 >
                     <span>View Profile</span>
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </Link>
@@ -141,6 +128,9 @@ interface Filters {
     availability: boolean;
     verifiedOnly: boolean;
     remote: boolean;
+    salaryMin: string;
+    salaryMax: string;
+    experienceLevel: string;
 }
 
 type SortOption = 'relevance' | 'recent' | 'verified';
@@ -167,6 +157,9 @@ const PublicProfilesPage: React.FC = () => {
         availability: searchParams.get('availability') === 'true',
         verifiedOnly: searchParams.get('verified') === 'true',
         remote: searchParams.get('remote') === 'true',
+        salaryMin: searchParams.get('salaryMin') || '',
+        salaryMax: searchParams.get('salaryMax') || '',
+        experienceLevel: searchParams.get('experience') || 'Any',
     });
 
     const [sortBy, setSortBy] = useState<SortOption>((searchParams.get('sort') as SortOption) || 'relevance');
@@ -187,9 +180,7 @@ const PublicProfilesPage: React.FC = () => {
                 const uniqueSkills = [...new Set(data.map(s => s.name))].sort();
                 setAvailableSkills(uniqueSkills);
             }
-        } catch (err) {
-            console.error('Error loading skills:', err);
-        }
+        } catch (err) {}
     };
 
     // Load profiles
@@ -300,9 +291,7 @@ const PublicProfilesPage: React.FC = () => {
                 setProfileSkills(skillsMap);
                 setTotalProfiles(count || 0);
             }
-        } catch (err) {
-            console.error('Error loading profiles:', err);
-        } finally {
+        } catch (err) {} finally {
             setLoading(false);
         }
     };
@@ -333,6 +322,9 @@ const PublicProfilesPage: React.FC = () => {
             availability: false,
             verifiedOnly: false,
             remote: false,
+            salaryMin: '',
+            salaryMax: '',
+            experienceLevel: 'Any',
         });
         setCurrentPage(1);
     };
@@ -340,75 +332,82 @@ const PublicProfilesPage: React.FC = () => {
     return (
         <>
             <PageSEO
-                title="Professional Profiles Directory - YourCVPassport"
-                description="Browse verified professional profiles. Filter by role, location, skills, and availability. Connect with top talent worldwide."
+                title="Talent Directory - YourCVPassport"
+                description="Connect with verified professionals worldwide. Advanced filters by role, location, skills, experience, and salary expectations. Find the perfect candidate for your team."
                 lang={lang}
             />
 
             <div className="bg-white dark:bg-dark-bg-primary min-h-screen">
                 {/* Hero Section */}
-                <section className="bg-gradient-to-br from-cv-blue via-indigo-600 to-purple-600 text-white py-16 px-4">
+                <section className="bg-gradient-to-br from-cv-blue via-indigo-600 to-purple-600 text-white py-3 px-4">
                     <AnimatedWrapper>
                         <div className="max-w-7xl mx-auto">
-                            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-                                Professional Profiles Directory
+                            <h1 className="text-xl md:text-2xl font-extrabold mb-1">
+                                Talent Directory
                             </h1>
-                            <p className="text-xl text-blue-100 max-w-3xl">
-                                Discover talented professionals from around the world. Filter by skills, location, and availability.
+                            <p className="text-xs text-blue-100 max-w-3xl">
+                                Connect with verified professionals worldwide
                             </p>
                         </div>
                     </AnimatedWrapper>
                 </section>
 
                 {/* Main Content */}
-                <section className="py-12 px-4 bg-gray-50 dark:bg-dark-bg-primary">
+                <section className="py-3 px-4 bg-gray-50 dark:bg-dark-bg-primary">
                     <div className="max-w-7xl mx-auto">
-                        <div className="grid lg:grid-cols-4 gap-8">
+                        <div className="grid lg:grid-cols-6 gap-4">
                             {/* Filters Sidebar */}
                             <div className="lg:col-span-1">
-                                <div className="sticky top-6 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <div className="sticky top-4 bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                                     {/* Filter Header */}
-                                    <div className="bg-gradient-to-r from-cv-blue to-indigo-600 p-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-white/20 rounded-lg">
-                                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="bg-gradient-to-r from-cv-blue to-indigo-600 p-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="p-0.5 bg-white/20 rounded">
+                                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                                 </svg>
                                             </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-white">Filters</h3>
-                                                <p className="text-sm text-blue-100">Refine your search</p>
-                                            </div>
+                                            <h3 className="text-xs font-bold text-white">Filters</h3>
                                         </div>
                                     </div>
 
                                     {/* Filter Options */}
-                                    <div className="p-6 space-y-6">
+                                    <div className="p-2 space-y-2">
                                         {/* Role/Title Input */}
                                         <div>
-                                            <label htmlFor="role" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                Role / Title
+                                            <label htmlFor="role" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Role
+                                                </div>
                                             </label>
                                             <input
                                                 id="role"
                                                 type="text"
-                                                placeholder="e.g., UI Designer, Developer"
+                                                placeholder="e.g., Developer"
                                                 value={filters.role}
                                                 onChange={(e) => handleFilterChange('role', e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                                                className="w-full px-1.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                                             />
                                         </div>
 
                                         {/* Country Dropdown */}
                                         <div>
-                                            <label htmlFor="country" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                Country
+                                            <label htmlFor="country" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Country
+                                                </div>
                                             </label>
                                             <select
                                                 id="country"
                                                 value={filters.country}
                                                 onChange={(e) => handleFilterChange('country', e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                                                className="w-full px-1.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                                             >
                                                 <option value="">All Countries</option>
                                                 <option value="ES">Spain</option>
@@ -428,142 +427,154 @@ const PublicProfilesPage: React.FC = () => {
 
                                         {/* City Input */}
                                         <div>
-                                            <label htmlFor="city" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                City
+                                            <label htmlFor="city" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    Location
+                                                </div>
                                             </label>
                                             <input
                                                 id="city"
                                                 type="text"
-                                                placeholder="e.g., Valencia, Madrid"
+                                                placeholder="e.g., Madrid"
                                                 value={filters.city}
                                                 onChange={(e) => handleFilterChange('city', e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                                                className="w-full px-1.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                                             />
                                         </div>
 
                                         {/* Skills Multi-Select */}
                                         <div>
-                                            <label htmlFor="skill-input" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                Skills
+                                            <label htmlFor="skill-input" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    Skills
+                                                </div>
                                             </label>
-                                            <div className="space-y-2">
-                                                <input
-                                                    id="skill-input"
-                                                    type="text"
-                                                    placeholder="Type to search skills..."
-                                                    list="skills-datalist"
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            handleSkillAdd(e.currentTarget.value);
-                                                            e.currentTarget.value = '';
-                                                        }
-                                                    }}
-                                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
-                                                />
-                                                <datalist id="skills-datalist">
-                                                    {availableSkills.map(skill => (
-                                                        <option key={skill} value={skill} />
-                                                    ))}
-                                                </datalist>
-                                                {filters.skills.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {filters.skills.map(skill => (
-                                                            <span
-                                                                key={skill}
-                                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-cv-blue text-white text-xs font-semibold rounded-lg"
-                                                            >
-                                                                {skill}
-                                                                <button
-                                                                    onClick={() => handleSkillRemove(skill)}
-                                                                    className="hover:bg-white/20 rounded-full p-0.5"
-                                                                >
-                                                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                    </svg>
-                                                                </button>
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <input
+                                                id="skill-input"
+                                                type="text"
+                                                placeholder="Search skills..."
+                                                list="skills-datalist"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleSkillAdd(e.currentTarget.value);
+                                                        e.currentTarget.value = '';
+                                                    }
+                                                }}
+                                                className="w-full px-1.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                                            />
+                                            <datalist id="skills-datalist">
+                                                {availableSkills.map(skill => (
+                                                    <option key={skill} value={skill} />
+                                                ))}
+                                            </datalist>
                                         </div>
 
-                                        {/* Availability Checkbox */}
-                                        <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl p-4">
-                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                        {/* Checkboxes - Combined */}
+                                        <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded p-1.5 space-y-1">
+                                            <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     checked={filters.availability}
                                                     onChange={(e) => handleFilterChange('availability', e.target.checked)}
-                                                    className="h-5 w-5 text-cv-blue rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-cv-blue transition-all"
+                                                    className="h-3 w-3 text-cv-blue rounded border border-gray-300 focus:ring-1 focus:ring-cv-blue"
                                                 />
-                                                <div className="flex-1">
-                                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-cv-blue transition-colors">
-                                                        Open to opportunities
-                                                    </span>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        Actively looking for jobs
-                                                    </p>
-                                                </div>
+                                                <span className="text-xs font-medium text-gray-900 dark:text-white">Open to work</span>
                                             </label>
-                                        </div>
-
-                                        {/* Verified Only Checkbox */}
-                                        <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl p-4">
-                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                            <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     checked={filters.verifiedOnly}
                                                     onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
-                                                    className="h-5 w-5 text-cv-blue rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-cv-blue transition-all"
+                                                    className="h-3 w-3 text-cv-blue rounded border border-gray-300 focus:ring-1 focus:ring-cv-blue"
                                                 />
-                                                <div className="flex-1">
-                                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-cv-blue transition-colors">
-                                                        Verified profiles only
-                                                    </span>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        Premium members
-                                                    </p>
-                                                </div>
-                                                <svg className="w-5 h-5 text-cv-green" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                                                </svg>
+                                                <span className="text-xs font-medium text-gray-900 dark:text-white">Verified only</span>
                                             </label>
-                                        </div>
-
-                                        {/* Remote Checkbox */}
-                                        <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl p-4">
-                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                            <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     checked={filters.remote}
                                                     onChange={(e) => handleFilterChange('remote', e.target.checked)}
-                                                    className="h-5 w-5 text-cv-blue rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-cv-blue transition-all"
+                                                    className="h-3 w-3 text-cv-blue rounded border border-gray-300 focus:ring-1 focus:ring-cv-blue"
                                                 />
-                                                <div className="flex-1">
-                                                    <span className="font-semibold text-gray-900 dark:text-white group-hover:text-cv-blue transition-colors">
-                                                        Remote only
-                                                    </span>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        Work from anywhere
-                                                    </p>
+                                                <span className="text-xs font-medium text-gray-900 dark:text-white">Remote only</span>
+                                            </label>
+                                        </div>
+
+                                        {/* Salary Expectation (EUR) */}
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Salary
                                                 </div>
                                             </label>
+                                            <div className="grid grid-cols-2 gap-1">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Min"
+                                                    value={filters.salaryMin}
+                                                    onChange={(e) => handleFilterChange('salaryMin', e.target.value)}
+                                                    className="w-full px-1.5 py-0.5 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                                                />
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max"
+                                                    value={filters.salaryMax}
+                                                    onChange={(e) => handleFilterChange('salaryMax', e.target.value)}
+                                                    className="w-full px-1.5 py-0.5 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Years of Experience */}
+                                        <div>
+                                            <label htmlFor="experience" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-2.5 h-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Experience
+                                                </div>
+                                            </label>
+                                            <select
+                                                id="experience"
+                                                value={filters.experienceLevel}
+                                                onChange={(e) => handleFilterChange('experienceLevel', e.target.value)}
+                                                className="w-full px-1.5 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded focus:ring-1 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                                            >
+                                                <option value="Any">Any</option>
+                                                <option value="0-2">0-2 years</option>
+                                                <option value="3-5">3-5 years</option>
+                                                <option value="6-10">6-10 years</option>
+                                                <option value="10+">10+ years</option>
+                                            </select>
                                         </div>
 
                                         {/* Clear Filters Button */}
                                         <button
                                             onClick={clearAllFilters}
-                                            className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                                            className="w-full px-1.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors flex items-center justify-center gap-1"
                                         >
-                                            Clear All Filters
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Clear
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Results Area */}
-                            <div className="lg:col-span-3">
+                            <div className="lg:col-span-5">
                                 {/* Sort and Results Header */}
                                 <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm">
                                     <div className="flex items-center gap-3">
@@ -573,9 +584,9 @@ const PublicProfilesPage: React.FC = () => {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">Results found</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Candidates found</p>
                                             <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                                {totalProfiles} {totalProfiles === 1 ? 'profile' : 'profiles'}
+                                                {totalProfiles} {totalProfiles === 1 ? 'professional' : 'professionals'}
                                             </p>
                                         </div>
                                     </div>
@@ -615,10 +626,10 @@ const PublicProfilesPage: React.FC = () => {
                                             </div>
                                         </div>
                                         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                                            No profiles found
+                                            No matching profiles
                                         </h3>
                                         <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                                            Try adjusting your search filters or broaden your criteria
+                                            Adjust your search criteria to discover more candidates
                                         </p>
                                         <button
                                             onClick={clearAllFilters}
@@ -629,8 +640,8 @@ const PublicProfilesPage: React.FC = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        {/* Profile Cards Grid - Responsive: 3 cols desktop, 2 tablet, 1 mobile */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                        {/* Profile Cards Grid - 4 columns on desktop */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                             {profiles.map(profile => (
                                                 <ProfileCard
                                                     key={profile.id}
@@ -704,3 +715,4 @@ const PublicProfilesPage: React.FC = () => {
 };
 
 export default PublicProfilesPage;
+

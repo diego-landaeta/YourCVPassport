@@ -115,7 +115,7 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error('Error in export-docx function:', error);
+    
 
     return new Response(
       JSON.stringify({
@@ -287,6 +287,6 @@ async function logExportEvent(
       metadata: { format },
     });
   } catch (error) {
-    console.error('Error logging export event:', error);
+    
   }
 }

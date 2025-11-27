@@ -41,9 +41,7 @@ const BlogManagementSection: React.FC = () => {
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching posts:', error);
-        } else {
+        if (error) {} else {
             setPosts(data as BlogPost[]);
         }
         setLoading(false);
@@ -110,9 +108,7 @@ const BlogManagementSection: React.FC = () => {
                 .eq('id', session.user.id)
                 .single();
 
-            if (profileError) {
-                console.error('Error fetching profile:', profileError);
-                const msg = 'Error al obtener datos del perfil: ' + profileError.message;
+            if (profileError) {const msg = 'Error al obtener datos del perfil: ' + profileError.message;
                 setErrorMessage(msg);
                 setTimeout(() => setErrorMessage(null), 5000);
                 return;
@@ -125,20 +121,14 @@ const BlogManagementSection: React.FC = () => {
                 author_name: post.author_name || profileData?.full_name || 'Usuario',
                 author_image_url: post.author_image_url || profileData?.avatar_url || 'https://via.placeholder.com/100',
                 published_at: post.published_at || new Date().toISOString(),
-            };
-
-            console.log('Saving post:', postToSave);
-
-            let response;
+            };let response;
             if (post.id) {
                 response = await supabase.from('blog_posts').update(postToSave).eq('id', post.id);
             } else {
                 response = await supabase.from('blog_posts').insert([postToSave]);
             }
 
-            if (response.error) {
-                console.error('Supabase error:', response.error);
-                let errorMsg = response.error.message;
+            if (response.error) {let errorMsg = response.error.message;
                 if (errorMsg.includes('blog_posts_slug_format')) {
                     errorMsg = 'El slug debe contener solo letras minúsculas, números y guiones. Usa el botón "Auto-generar" para crear un slug válido.';
                 } else if (errorMsg.includes('blog_posts_title_length')) {
@@ -148,16 +138,12 @@ const BlogManagementSection: React.FC = () => {
                 }
                 setErrorMessage(errorMsg);
                 setTimeout(() => setErrorMessage(null), 5000);
-            } else {
-                console.log('Post saved successfully');
-                setSuccessMessage('✅ Artículo guardado exitosamente');
+            } else {setSuccessMessage('✅ Artículo guardado exitosamente');
                 setEditingPost(null);
                 fetchPosts();
                 setTimeout(() => setSuccessMessage(null), 3000);
             }
-        } catch (error: any) {
-            console.error('Unexpected error:', error);
-            const msg = 'Error inesperado: ' + (error.message || 'Por favor, intenta de nuevo');
+        } catch (error: any) {const msg = 'Error inesperado: ' + (error.message || 'Por favor, intenta de nuevo');
             setErrorMessage(msg);
             setTimeout(() => setErrorMessage(null), 5000);
         }

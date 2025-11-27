@@ -62,7 +62,7 @@ const VerifyPage: React.FC = () => {
 
             setVerificationData(data[0]);
         } catch (err: any) {
-            console.error('Error fetching verification data:', err);
+            
             setError(err.message || (lang === 'es'
                 ? 'Error al cargar los datos de verificación'
                 : 'Error loading verification data'));
@@ -84,7 +84,7 @@ const VerifyPage: React.FC = () => {
             });
             setQrCodeUrl(qrDataUrl);
         } catch (err) {
-            console.error('Error generating QR code:', err);
+            
         }
     };
 

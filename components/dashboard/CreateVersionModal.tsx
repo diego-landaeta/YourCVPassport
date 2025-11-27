@@ -214,18 +214,12 @@ export function CreateVersionModal({
     };
 
     try {
-      if (editingVersion) {
-        console.log('Updating version with data:', request);
-        const updated = await updateVersion(editingVersion.id, request);
-        console.log('Update result:', updated);
-        if (updated) {
+      if (editingVersion) {const updated = await updateVersion(editingVersion.id, request);if (updated) {
           onClose();
         } else {
           // Get the error from the hook state
           const errorMsg = hookError || 'Error al actualizar la versión';
-          setError(errorMsg);
-          console.error('Update failed with error:', hookError);
-        }
+          setError(errorMsg);}
       } else {
         const created = await createVersion(request);
         if (created) {
@@ -233,15 +227,11 @@ export function CreateVersionModal({
         } else {
           // Get the error from the hook state
           const errorMsg = hookError || 'Error al crear la versión';
-          setError(errorMsg);
-          console.error('Create failed with error:', hookError);
-        }
+          setError(errorMsg);}
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      setError(errorMessage);
-      console.error('Exception during save:', err);
-    }
+      setError(errorMessage);}
   };
 
   if (!isOpen) return null;
@@ -572,3 +562,4 @@ function SortableSectionItem({ id, index, label }: SortableSectionItemProps) {
     </div>
   );
 }
+

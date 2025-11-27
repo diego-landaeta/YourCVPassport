@@ -104,7 +104,7 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
 
       onDownloadComplete?.();
     } catch (error) {
-      console.error(`Error generating ${exportFormat.toUpperCase()}:`, error);
+      console.error('Error generating ATS PDF:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -444,3 +444,4 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
 };
 
 export default ATSPDFPreview;
+

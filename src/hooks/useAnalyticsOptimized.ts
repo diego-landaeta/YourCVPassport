@@ -42,9 +42,7 @@ export function useAnalyticsSummary(userId: string | undefined, days: number = 3
         days,
       });
 
-      if (error) {
-        console.error('Error fetching analytics summary:', error);
-        throw error;
+      if (error) {throw error;
       }
 
       return data as AnalyticsSummary;
@@ -70,9 +68,7 @@ export function useAnalyticsTimeSeries(userId: string | undefined, days: number 
         days,
       });
 
-      if (error) {
-        console.error('Error fetching analytics timeseries:', error);
-        throw error;
+      if (error) {throw error;
       }
 
       return data as AnalyticsTimeSeriesPoint[];

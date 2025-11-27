@@ -43,9 +43,7 @@ const ProfilesManagement: React.FC = () => {
 
       if (error) throw error;
       setProfiles(data || []);
-    } catch (err) {
-      console.error('Error loading profiles:', err);
-    } finally {
+    } catch (err) {} finally {
       setLoading(false);
     }
   };
@@ -66,9 +64,7 @@ const ProfilesManagement: React.FC = () => {
       });
       loadProfiles();
       setShowEditModal(false);
-    } catch (err: any) {
-      console.error('Error updating profile:', err);
-      showAlert({
+    } catch (err: any) {showAlert({
         title: 'Error',
         message: 'Error al actualizar perfil: ' + err.message,
         type: 'error'
@@ -101,9 +97,7 @@ const ProfilesManagement: React.FC = () => {
         type: 'success'
       });
       loadProfiles();
-    } catch (err: any) {
-      console.error('Error deleting profile:', err);
-      showAlert({
+    } catch (err: any) {showAlert({
         title: 'Error',
         message: 'Error al eliminar perfil: ' + err.message,
         type: 'error'
@@ -418,3 +412,4 @@ const ProfilesManagement: React.FC = () => {
 };
 
 export default ProfilesManagement;
+

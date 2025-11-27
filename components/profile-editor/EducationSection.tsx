@@ -561,9 +561,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       await onSave(updated);
 
       toast.success('Sugerencias de IA aplicadas correctamente');
-    } catch (error) {
-      console.error('Error applying AI suggestion:', error);
-      toast.error('Error al aplicar la sugerencia');
+    } catch (error) {toast.error('Error al aplicar la sugerencia');
       throw error;
     }
   };
@@ -880,3 +878,4 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
 EducationSection.displayName = 'EducationSection';
 
 export default EducationSection;
+

@@ -15,7 +15,7 @@ const CallbackPage: React.FC = () => {
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Auth callback error:', error);
+          
           setError('Authentication failed. Please try again.');
           setTimeout(() => navigate('/login'), 3000);
           return;
@@ -30,7 +30,7 @@ const CallbackPage: React.FC = () => {
           setTimeout(() => navigate('/login'), 2000);
         }
       } catch (err) {
-        console.error('Callback handling error:', err);
+        
         setError('Something went wrong. Redirecting to login...');
         setTimeout(() => navigate('/login'), 3000);
       }

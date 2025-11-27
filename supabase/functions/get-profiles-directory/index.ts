@@ -60,7 +60,7 @@ async function checkRateLimit(req: Request): Promise<{ success: boolean; headers
       reset: result.reset,
     };
   } catch (error) {
-    console.error('Rate limit check failed:', error);
+    
     // Fail open - allow request if rate limiting fails
     return {
       success: true,
@@ -82,7 +82,7 @@ async function cacheGet<T>(key: string): Promise<T | null> {
     const value = await redis.get(key);
     return value as T | null;
   } catch (error) {
-    console.error('Cache get failed:', error);
+    
     return null;
   }
 }
@@ -99,7 +99,7 @@ async function cacheSet<T>(key: string, value: T, ttl: number): Promise<void> {
 
     await redis.set(key, value, { ex: ttl });
   } catch (error) {
-    console.error('Cache set failed:', error);
+    
   }
 }
 
@@ -176,7 +176,7 @@ serve(async (req) => {
     let directoryData = await cacheGet<DirectoryResponse>(cacheKey);
 
     if (directoryData) {
-      console.log(`Cache HIT for directory: page ${page}`);
+      
       return new Response(
         JSON.stringify({
           success: true,
@@ -195,7 +195,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Cache MISS for directory: page ${page}`);
+    
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -243,7 +243,7 @@ serve(async (req) => {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching profiles directory:', error);
+      
       return new Response(
         JSON.stringify({ error: 'Failed to fetch profiles', details: error.message }),
         {
@@ -284,7 +284,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in get-profiles-directory function:', error);
+    
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: error.message }),
       {

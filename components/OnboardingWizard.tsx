@@ -80,9 +80,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile
                         goal: goal,
                         handle: finalHandle
                     });
-                } catch (error) {
-                    console.error('Error saving wizard data:', error);
-                }
+                } catch (error) {}
             }
             reset(); // Reset state on completion
             onComplete();
@@ -113,9 +111,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile
                 setGeneratedSummary(summary);
                 setGeneratedExperience(experienceHighlights);
                 setIsGenerating(false);
-            } catch (error) {
-                console.error('Error parsing CV:', error);
-                setIsGenerating(false);
+            } catch (error) {setIsGenerating(false);
                 // Continue without parsed data - user can fill manually
             }
         }

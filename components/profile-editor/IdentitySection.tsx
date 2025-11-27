@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { identitySchema, IdentityFormData } from '../../schemas/profileSchemas';
@@ -10,15 +10,20 @@ import { generateSummary } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
 
 interface IdentitySectionProps {
-  initialData?: Partial<IdentityFormData>;
+  profile: any;
   onSave: (data: IdentityFormData) => Promise<void>;
 }
 
-const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }) => {
+export interface WizardStepHandle {
+  submit: () => Promise<boolean>;
+}
+
+const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave }, ref) => {
   const translations = useTranslations();
   const t = translations.dashboard.identity;
   const { profile, session } = useAuth();
   const toast = useToastContext();
+  
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(initialData?.avatar_url);
@@ -34,6 +39,8 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
     setValue,
     watch,
     getValues,
+    trigger,
+    reset,
   } = useForm<IdentityFormData>({
     resolver: zodResolver(identitySchema),
     defaultValues: initialData || {},
@@ -41,9 +48,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
 
   const watchedRemote = watch('remote');
 
-  React.useEffect(() => {
-    console.log('👤 IdentitySection mounted, profile:', profile);
-  }, [profile]);
+  React.useEffect(() => {}, [profile]);
 
   // Auto-save form data to localStorage
   React.useEffect(() => {
@@ -53,9 +58,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
           formData,
           timestamp: Date.now()
         }));
-      } catch (e) {
-        console.error('Error saving draft:', e);
-      }
+      } catch (e) {}
     });
     return () => subscription.unsubscribe();
   }, [watch]);
@@ -85,28 +88,15 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
           localStorage.removeItem('identity_draft');
         }
       }
-    } catch (e) {
-      console.error('Error restoring draft:', e);
-    }
+    } catch (e) {}
   }, []);
 
-  const handleAvatarClick = () => {
-    console.log('🖱️ handleAvatarClick called');
-    console.log('📁 fileInputRef.current:', fileInputRef.current);
-    if (fileInputRef.current) {
-      console.log('✅ Triggering file input click');
-      fileInputRef.current.click();
-    } else {
-      console.error('❌ fileInputRef.current is null');
-    }
+  const handleAvatarClick = () => {if (fileInputRef.current) {fileInputRef.current.click();
+    } else {}
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('📂 handleFileChange called', e.target.files);
-    const file = e.target.files?.[0];
-    if (!file || !profile) {
-      console.log('❌ No file selected or no profile:', { file, profile });
-      return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {const file = e.target.files?.[0];
+    if (!file || !profile) {return;
     }
 
     // Validar tamaño del archivo (máximo 5MB)
@@ -130,9 +120,6 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
       const fileExt = file.name.split('.').pop();
       const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
-
-      console.log('Subiendo archivo:', filePath);
-
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('profile-assets')
         .upload(filePath, file, {
@@ -141,18 +128,13 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
         });
 
       if (uploadError) {
-        console.error('Error de Supabase:', uploadError);
         throw new Error(uploadError.message);
       }
-
-      console.log('Archivo subido exitosamente:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('profile-assets')
         .getPublicUrl(filePath);
-
-      console.log('URL pública generada:', publicUrl);
 
       setAvatarPreview(publicUrl);
       // ✅ NO marcar como dirty ya que se guarda automáticamente
@@ -160,22 +142,18 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
       setUploadError(null);
 
       // Guardar automáticamente en la base de datos
-      console.log('💾 Guardando avatar en la base de datos...');
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
         .eq('id', profile.id);
 
       if (updateError) {
-        console.error('❌ Error guardando avatar en BD:', updateError);
         setUploadError('Error al guardar la foto en tu perfil');
       } else {
-        console.log('✅ Avatar guardado exitosamente en la base de datos');
         // ✅ Mostrar feedback al usuario
-        toast.success(t.photoUploadSuccess || 'Foto de perfil actualizada');
+        toast.success('Foto de perfil actualizada');
       }
     } catch (error: any) {
-      console.error('Error completo al subir avatar:', error);
       const errorMessage = error?.message || 'Error desconocido';
       setUploadError(`Error al subir la imagen: ${errorMessage}`);
     } finally {
@@ -232,9 +210,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
       } else {
         toast.error(response.error || 'Error al generar el resumen');
       }
-    } catch (error) {
-      console.error('Error generating summary:', error);
-      toast.error('Error al generar el resumen con IA');
+    } catch (error) {toast.error('Error al generar el resumen con IA');
     } finally {
       setIsGeneratingAI(false);
     }
@@ -248,12 +224,37 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
   };
 
   const onSubmit = async (data: IdentityFormData) => {
-    await onSave(data);
+    // Transform URLs to add https:// if missing
+    const transformedData = {
+      ...data,
+      linkedin_url: data.linkedin_url && data.linkedin_url.length > 0 && !data.linkedin_url.startsWith('http') 
+        ? `https://${data.linkedin_url}` 
+        : data.linkedin_url,
+      github_url: data.github_url && data.github_url.length > 0 && !data.github_url.startsWith('http')
+        ? `https://${data.github_url}`
+        : data.github_url,
+      portfolio_url: data.portfolio_url && data.portfolio_url.length > 0 && !data.portfolio_url.startsWith('http')
+        ? `https://${data.portfolio_url}`
+        : data.portfolio_url,
+    };
+    
+    await onSave(transformedData);
     // Clear draft on successful save
     localStorage.removeItem('identity_draft');
     // Reset form to mark as clean (no unsaved changes)
     reset(data);
   };
+
+  useImperativeHandle(ref, () => ({
+    submit: async () => {
+      const isValid = await trigger();
+      if (isValid) {
+        await handleSubmit(onSubmit as any)();
+        return true;
+      }
+      return false;
+    }
+  }));
 
   // Listen for AI summary generation trigger from floating button
   React.useEffect(() => {
@@ -272,250 +273,265 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
     <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.title}</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* Avatar Upload */}
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <div
-              onClick={handleAvatarClick}
-              className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden hover:opacity-80 transition-opacity border-2 border-gray-200 dark:border-gray-600"
-            >
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <svg className="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              )}
-            </div>
-            {isUploading && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Left Column: Professional Information */}
+          <div className="space-y-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              Información Profesional
+            </h3>
+
+            {/* Avatar + Main Info Group */}
+            <div className="flex gap-5 items-start">
+              {/* Avatar */}
+              <div className="flex flex-col items-center gap-2 pt-1">
+                <div className="relative group">
+                  <div
+                    onClick={handleAvatarClick}
+                    className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-600 shadow-sm group-hover:border-cv-blue transition-colors"
+                  >
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <svg className="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div 
+                    className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={handleAvatarClick}
+                  >
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    </svg>
+                  </div>
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAvatarClick}
+                  disabled={isUploading}
+                  className="text-xs text-cv-blue hover:text-cv-blue-dark font-medium"
+                >
+                  Cambiar
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
               </div>
-            )}
-          </div>
-          <div>
-            <button
-              type="button"
-              onClick={handleAvatarClick}
-              disabled={isUploading}
-              className="px-4 py-2 bg-cv-blue text-white rounded-md hover:bg-cv-blue-dark transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUploading ? t.uploading : t.uploadPhoto}
-            </button>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{t.photoHelper}</p>
-            {uploadError && (
-              <p className="text-xs text-red-500 mt-1">{uploadError}</p>
-            )}
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </div>
 
-        {/* Name & Headline Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.fullNameRequired}
-            </label>
-            <input
-              {...register('full_name')}
-              type="text"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="John Doe"
-            />
-            {errors.full_name && (
-              <p className="text-red-500 text-sm mt-1">{errors.full_name.message}</p>
-            )}
-          </div>
+              {/* Name & Headline Inputs */}
+              <div className="flex-1 space-y-3 min-w-0">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t.fullNameRequired}
+                  </label>
+                  <input
+                    {...register('full_name')}
+                    type="text"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                    placeholder="John Doe"
+                  />
+                  {errors.full_name && (
+                    <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>
+                  )}
+                </div>
 
-          {/* Headline */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.headlineRequired}
-            </label>
-            <input
-              {...register('headline')}
-              type="text"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="Senior Software Engineer"
-            />
-            {errors.headline && (
-              <p className="text-red-500 text-sm mt-1">{errors.headline.message}</p>
-            )}
-          </div>
-        </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t.headlineRequired}
+                  </label>
+                  <input
+                    {...register('headline')}
+                    type="text"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                    placeholder="Senior Software Engineer"
+                  />
+                  {errors.headline && (
+                    <p className="text-red-500 text-xs mt-1">{errors.headline.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
-        {/* Country */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            País
-          </label>
-          <CountrySelector
-            value={watch('country_code')}
-            onChange={(code) => setValue('country_code', code, { shouldDirty: true })}
-            placeholder="Selecciona tu país"
-            lang="es"
-          />
-        </div>
-
-        {/* Location & Remote */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.location}
-            </label>
-            <input
-              {...register('location')}
-              type="text"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="Madrid, Barcelona, Valencia..."
-            />
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Ciudad o región específica
-            </p>
-          </div>
-          <div className="flex items-end">
-            <label className="flex items-center space-x-2 cursor-pointer">
+            {/* Country & Location */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  País
+                </label>
+                <CountrySelector
+                  value={watch('country_code')}
+                  onChange={(code) => setValue('country_code', code, { shouldDirty: true })}
+                  placeholder="País"
+                  lang="es"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t.location}
+                </label>
+                <input
+                  {...register('location')}
+                  type="text"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                  placeholder="Ciudad"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center pt-1">
               <input
                 {...register('remote')}
                 type="checkbox"
+                id="remote-check"
                 className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="remote-check" className="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 {t.remoteWork}
-              </span>
-            </label>
-          </div>
-        </div>
+              </label>
+            </div>
 
-        {/* Phone */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t.phone}
-          </label>
-          <input
-            {...register('phone')}
-            type="tel"
-            onChange={(e) => {
-              // Solo permitir números, espacios, guiones, paréntesis y el símbolo +
-              const value = e.target.value.replace(/[^0-9+\s()-]/g, '');
-              setValue('phone', value);
-            }}
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-            placeholder="+1 (555) 123-4567"
-            maxLength={20}
-          />
-        </div>
-
-        {/* Social Links */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t.socialLinks}</h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.linkedinUrl}
-            </label>
-            <input
-              {...register('linkedin_url')}
-              type="url"
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value && !/^(https?:\/\/)?(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/.test(value)) {
-                  toast.warning(t.invalidLinkedin);
-                  setValue('linkedin_url', '');
-                }
-              }}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="https://linkedin.com/in/username"
-            />
-            {errors.linkedin_url && (
-              <p className="text-red-500 text-sm mt-1">{errors.linkedin_url.message}</p>
-            )}
+            {/* About / Summary */}
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {t.aboutMe}
+                </label>
+                <span className="text-xs text-gray-400">
+                  {watch('summary')?.length || 0}/500
+                </span>
+              </div>
+              <textarea
+                {...register('summary')}
+                rows={4}
+                maxLength={500}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white resize-none text-sm"
+                placeholder={t.aboutMePlaceholder}
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.githubUrl}
-            </label>
-            <input
-              {...register('github_url')}
-              type="url"
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value && !/^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_-]+\/?$/.test(value)) {
-                  toast.warning(t.invalidGithub);
-                  setValue('github_url', '');
-                }
-              }}
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="https://github.com/username"
-            />
-            {errors.github_url && (
-              <p className="text-red-500 text-sm mt-1">{errors.github_url.message}</p>
-            )}
-          </div>
+          {/* Right Column: Contact Information */}
+          <div className="space-y-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
+              Información de Contacto
+            </h3>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.portfolioUrl}
-            </label>
-            <input
-              {...register('portfolio_url')}
-              type="url"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-              placeholder="https://yourportfolio.com"
-            />
-            {errors.portfolio_url && (
-              <p className="text-red-500 text-sm mt-1">{errors.portfolio_url.message}</p>
-            )}
-          </div>
-        </div>
+            <div className="space-y-4">
+              {/* Phone */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t.phone}
+                </label>
+                <input
+                  {...register('phone')}
+                  type="tel"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9+\s()-]/g, '');
+                    setValue('phone', value);
+                  }}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                  placeholder="+1 (555) 123-4567"
+                  maxLength={20}
+                />
+              </div>
 
-        {/* About / Summary */}
-        <div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t.aboutMe}
-            </label>
-          </div>
-          <textarea
-            {...register('summary')}
-            rows={6}
-            maxLength={500}
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none transition-colors"
-            placeholder={t.aboutMePlaceholder}
-          />
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Recommended: 150-300 characters
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {watch('summary')?.length || 0} / 500 characters
-            </p>
+              {/* Social Links Grid */}
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t.linkedinUrl}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                    </div>
+                    <input
+                      {...register('linkedin_url')}
+                      type="url"
+                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      placeholder="linkedin.com/in/user"
+                    />
+                  </div>
+                  {errors.linkedin_url && (
+                    <p className="text-red-500 text-xs mt-1">{errors.linkedin_url.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t.githubUrl}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                    </div>
+                    <input
+                      {...register('github_url')}
+                      type="url"
+                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      placeholder="github.com/user"
+                    />
+                  </div>
+                  {errors.github_url && (
+                    <p className="text-red-500 text-xs mt-1">{errors.github_url.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t.portfolioUrl}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                      </svg>
+                    </div>
+                    <input
+                      {...register('portfolio_url')}
+                      type="url"
+                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      placeholder="yourportfolio.com"
+                    />
+                  </div>
+                  {errors.portfolio_url && (
+                    <p className="text-red-500 text-xs mt-1">{errors.portfolio_url.message}</p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Save Button */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 mt-2">
           {isDirty && (
             <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span className="text-sm font-medium">{t.unsavedChanges}</span>
+              <span className="text-xs font-medium">{t.unsavedChanges}</span>
             </div>
           )}
           <button
             type="submit"
             disabled={!isDirty}
-            className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+            className="px-5 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm ml-auto"
           >
             {isDirty ? t.saveChanges : t.noChanges}
           </button>
@@ -605,6 +621,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({ initialData, onSave }
       )}
     </div>
   );
-};
+});
 
 export default IdentitySection;
+

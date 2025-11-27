@@ -63,7 +63,7 @@ async function checkRateLimit(req: Request): Promise<{ success: boolean; headers
       reset: result.reset,
     };
   } catch (error) {
-    console.error('Rate limit check failed:', error);
+    
     // Fail open - allow request if rate limiting fails
     return {
       success: true,
@@ -85,7 +85,7 @@ async function cacheGet<T>(key: string): Promise<T | null> {
     const value = await redis.get(key);
     return value as T | null;
   } catch (error) {
-    console.error('Cache get failed:', error);
+    
     return null;
   }
 }
@@ -102,7 +102,7 @@ async function cacheSet<T>(key: string, value: T, ttl: number): Promise<void> {
 
     await redis.set(key, value, { ex: ttl });
   } catch (error) {
-    console.error('Cache set failed:', error);
+    
   }
 }
 
@@ -118,7 +118,7 @@ async function cacheDel(key: string): Promise<void> {
 
     await redis.del(key);
   } catch (error) {
-    console.error('Cache delete failed:', error);
+    
   }
 }
 
@@ -171,7 +171,7 @@ serve(async (req) => {
     let profile = await cacheGet<ProfileResponse>(cacheKey);
 
     if (profile) {
-      console.log(`Cache HIT for profile: ${handle}`);
+      
       return new Response(
         JSON.stringify({
           success: true,
@@ -190,7 +190,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Cache MISS for profile: ${handle}`);
+    
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -206,7 +206,7 @@ serve(async (req) => {
       .single();
 
     if (error) {
-      console.error('Error fetching profile:', error);
+      
 
       if (error.code === 'PGRST116') {
         return new Response(
@@ -249,7 +249,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in get-public-profile function:', error);
+    
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: error.message }),
       {

@@ -32,7 +32,7 @@ interface SuggestionItem {
 }
 
 const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusChange }) => {
-  const { profile, session } = useAuth();
+  const { profile, session, refreshProfile } = useAuth();
   const t = useTranslations();
   const aiT = t.aiAssistantSection;
   const toast = useToastContext();
@@ -48,9 +48,7 @@ const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusCha
   const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
   useEffect(() => {
-    if (!apiKey) {
-      console.warn('⚠️ API Key de Google AI NO configurada');
-    }
+    if (!apiKey) {}
   }, [apiKey]);
 
   const analyzeSummary = async () => {
@@ -91,9 +89,7 @@ INSTRUCCIONES:
         const filtered = prev.filter(s => s.id !== 'summary');
         return [...filtered, newSuggestion];
       });
-    } catch (error) {
-      console.error('Error analyzing summary:', error);
-      if (onSaveStatusChange) {
+    } catch (error) {if (onSaveStatusChange) {
         onSaveStatusChange(aiT.errors.analyzingSummary);
       }
     } finally {
@@ -165,9 +161,7 @@ INSTRUCCIONES:
         const filtered = prev.filter(s => s.type !== 'experience');
         return [...filtered, ...newSuggestions];
       });
-    } catch (error) {
-      console.error('Error analyzing experiences:', error);
-      if (onSaveStatusChange) {
+    } catch (error) {if (onSaveStatusChange) {
         onSaveStatusChange(aiT.errors.analyzingExperiences);
       }
     } finally {
@@ -238,9 +232,7 @@ INSTRUCCIONES:
         const filtered = prev.filter(s => s.type !== 'education');
         return [...filtered, ...newSuggestions];
       });
-    } catch (error) {
-      console.error('Error analyzing education:', error);
-      if (onSaveStatusChange) {
+    } catch (error) {if (onSaveStatusChange) {
         onSaveStatusChange(aiT.errors.analyzingEducation);
       }
     } finally {
@@ -290,6 +282,11 @@ INSTRUCCIONES:
         prev.map(s => (s.id === suggestion.id ? { ...s, applied: true } : s))
       );
 
+      // Refresh profile to show updated data
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+
       // Cerrar modal
       setConfirmationModal(null);
 
@@ -299,9 +296,7 @@ INSTRUCCIONES:
       if (onSaveStatusChange) {
         onSaveStatusChange(aiT.success.applied, new Date().toISOString());
       }
-    } catch (error) {
-      console.error('Error applying suggestion:', error);
-      toast.error(aiT.errors.applyingSuggestion || 'Error al aplicar la sugerencia');
+    } catch (error) {toast.error(aiT.errors.applyingSuggestion || 'Error al aplicar la sugerencia');
       if (onSaveStatusChange) {
         onSaveStatusChange(aiT.errors.applyingSuggestion);
       }
@@ -649,3 +644,4 @@ INSTRUCCIONES:
 };
 
 export default AIAssistantSection;
+

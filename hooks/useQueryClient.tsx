@@ -37,7 +37,7 @@ export const queryClient = new QueryClient({
       // Configuración de mutaciones
       retry: 1, // 1 reintento para mutations
       onError: (error) => {
-        console.error('Mutation error:', error);
+        
       },
     },
   },

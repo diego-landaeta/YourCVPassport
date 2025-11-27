@@ -142,16 +142,16 @@ serve(async (req) => {
 
     if (!resendResponse.ok) {
       const error = await resendResponse.json()
-      console.error('Resend error:', error)
+      
       
       // Rollback: Delete the user if email sending fails
       if (user && user.id) {
-        console.error(`Rolling back: Deleting user ${user.id} due to email failure`)
+        
         const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id)
         if (deleteError) {
-          console.error('Failed to delete user during rollback:', deleteError)
+          
         } else {
-          console.error('User deleted successfully (rollback complete)')
+          
         }
       }
 
@@ -173,7 +173,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    
     return new Response(
       JSON.stringify({
         error: error.message || 'An error occurred',

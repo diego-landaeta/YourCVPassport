@@ -93,7 +93,7 @@ const ContactPage: React.FC = () => {
             if (error) {
                 // If table doesn't exist, fall back to console log and show success anyway
                 if (error.message.includes('relation') || error.message.includes('does not exist')) {
-                    console.log('Contact form submitted (table not yet created):', formState);
+                    console.log('Contact form submission:', formState);
                     setSubmitStatus('success');
                     setFormState({ name: '', email: '', inquiry: 'General Question', message: '' });
                 } else {
@@ -103,9 +103,7 @@ const ContactPage: React.FC = () => {
                 setSubmitStatus('success');
                 setFormState({ name: '', email: '', inquiry: 'General Question', message: '' });
             }
-        } catch (error) {
-            console.error('Error submitting contact form:', error);
-            setSubmitStatus('error');
+        } catch (error) {setSubmitStatus('error');
         } finally {
             setIsSubmitting(false);
         }
@@ -266,3 +264,4 @@ const ContactPage: React.FC = () => {
 };
 
 export default ContactPage;
+

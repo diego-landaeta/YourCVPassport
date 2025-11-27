@@ -8,9 +8,9 @@ export const identitySchema = z.object({
   country_code: z.string().optional(),
   location: z.string().optional(),
   phone: z.string().optional(),
-  linkedin_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  github_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-  portfolio_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  linkedin_url: z.string().optional(),
+  github_url: z.string().optional(),
+  portfolio_url: z.string().optional(),
   remote: z.boolean().optional(),
   avatar_url: z.string().optional(),
 });

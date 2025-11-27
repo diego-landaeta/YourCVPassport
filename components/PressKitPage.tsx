@@ -63,9 +63,7 @@ const PressKitPage: React.FC = () => {
     };
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Press inquiry:', formState);
-        alert(pageData.form.alert);
+        e.preventDefault();alert(pageData.form.alert);
         setFormState({ name: '', outlet: '', email: '', message: '' });
     };
 
@@ -200,3 +198,4 @@ const PressKitPage: React.FC = () => {
 };
 
 export default PressKitPage;
+

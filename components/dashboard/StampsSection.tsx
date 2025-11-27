@@ -5,6 +5,8 @@ import { Stamp, StampType, StampStatus, CreateStampRequest, StampsSummary } from
 import StampsUploadModal from './StampsUploadModal';
 import StampsVerificationCodeModal from './StampsVerificationCodeModal';
 import VerificationBadge from '../VerificationBadge';
+import Modal from '../ui/Modal';
+import { useToastContext } from '../../context/ToastContext';
 import {
     CheckBadgeIcon,
     ClockIcon,
@@ -37,6 +39,12 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
     const [selectedStampType, setSelectedStampType] = useState<StampType | null>(null);
+    
+    // Delete modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [stampToDelete, setStampToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const toast = useToastContext();
 
     useEffect(() => {
         if (session?.user.id) {
@@ -56,9 +64,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
 
             if (error) throw error;
             setStamps(data || []);
-        } catch (error) {
-            console.error('Error fetching stamps:', error);
-        } finally {
+        } catch (error) {} finally {
             setLoading(false);
         }
     };
@@ -73,9 +79,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
 
             if (error && error.code !== 'PGRST116') throw error; // Ignore "not found" error
             setSummary(data);
-        } catch (error) {
-            console.error('Error fetching stamps summary:', error);
-        }
+        } catch (error) {}
     };
 
     const getStampIcon = (type: StampType) => {
@@ -163,6 +167,40 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                 return (stamp.evidence as any).skill_name || 'Skill verification';
             default:
                 return 'Verification';
+        }
+    };
+
+
+    const handleDeleteStamp = (stampId: string) => {
+        setStampToDelete(stampId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeleteStamp = async () => {
+        if (!stampToDelete) return;
+        
+        setIsDeleting(true);
+        try {
+            const { error } = await supabase
+                .from('stamps')
+                .delete()
+                .eq('id', stampToDelete)
+                .eq('profile_id', session?.user.id);
+
+            if (error) throw error;
+
+            // Refresh stamps list
+            await fetchStamps();
+            await fetchSummary();
+            onStampsUpdate?.();
+            
+            toast.success('Verificación eliminada exitosamente');
+            setShowDeleteModal(false);
+            setStampToDelete(null);
+        } catch (error: any) {
+            toast.error(`Error al eliminar la verificación: ${error.message || 'Error desconocido'}`);
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -335,6 +373,17 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                         />
                                     </div>
                                 </div>
+                                
+                                {/* Delete button for pending stamps */}
+                                {stamp.status === 'PENDING' && (
+                                    <button
+                                        onClick={() => handleDeleteStamp(stamp.id)}
+                                        className="ml-4 p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        title="Eliminar verificación pendiente"
+                                    >
+                                        <XCircleIcon className="w-6 h-6" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -407,18 +456,17 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         hasStamp={stamps.some(s => s.type === 'EMAIL' && s.status === 'VERIFIED')}
                     />
 
-                    {/* Phone Stamp */}
+                    {/* Phone Stamp - Temporarily Disabled */}
                     <StampCard
                         type="PHONE"
                         icon={PhoneIcon}
-                        title="Teléfono"
-                        description="Verifica tu número de teléfono"
+                        title="Teléfono (Pausado)"
+                        description="Verificación por SMS temporalmente no disponible"
                         requiresDocument={false}
                         onClick={() => {
-                            setSelectedStampType('PHONE');
-                            setShowVerificationModal(true);
+                            // Disabled temporarily
                         }}
-                        hasStamp={stamps.some(s => s.type === 'PHONE' && s.status === 'VERIFIED')}
+                        hasStamp={true}
                     />
 
                     {/* Employment Stamp */}
@@ -470,6 +518,56 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                     }}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    if (!isDeleting) {
+                        setShowDeleteModal(false);
+                        setStampToDelete(null);
+                    }
+                }}
+                title="Eliminar Verificación"
+            >
+                <div className="p-6">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+                        <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-center text-gray-900 dark:text-white mb-2">
+                        ¿Estás seguro?
+                    </h3>
+                    <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
+                        ¿Estás seguro de que deseas eliminar esta verificación pendiente? Esta acción no se puede deshacer.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => {
+                                setShowDeleteModal(false);
+                                setStampToDelete(null);
+                            }}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={confirmDeleteStamp}
+                            disabled={isDeleting}
+                            className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Eliminando...
+                                </>
+                            ) : (
+                                'Eliminar'
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
@@ -553,3 +651,4 @@ const StampCard: React.FC<StampCardProps> = ({
 };
 
 export default StampsSection;
+

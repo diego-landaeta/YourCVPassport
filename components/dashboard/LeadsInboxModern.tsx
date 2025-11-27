@@ -115,9 +115,7 @@ const LeadsInboxModern: React.FC = () => {
   };
 
   const loadLeads = async () => {
-    if (!user) {
-      console.warn('⚠️ Cannot load leads: no user');
-      return;
+    if (!user) {return;
     }
 
     try {
@@ -161,9 +159,7 @@ const LeadsInboxModern: React.FC = () => {
       }));
 
       setLeads(mappedLeads);
-    } catch (error) {
-      console.error('Error loading leads:', error);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   };
@@ -178,9 +174,7 @@ const LeadsInboxModern: React.FC = () => {
 
       if (error) throw error;
       setMessages(data || []);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
+    } catch (error) {}
   };
 
   const markLeadAsRead = async (leadId: string) => {
@@ -199,9 +193,7 @@ const LeadsInboxModern: React.FC = () => {
       setLeads(prev => prev.map(lead =>
         lead.id === leadId ? { ...lead, read_at: new Date().toISOString(), unread_count: 0 } : lead
       ));
-    } catch (error) {
-      console.error('Error marking lead as read:', error);
-    }
+    } catch (error) {}
   };
 
   const sendMessage = async () => {
@@ -226,9 +218,7 @@ const LeadsInboxModern: React.FC = () => {
       setMessages(prev => [...prev, data]);
       setNewMessage('');
       scrollToBottom();
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
+    } catch (error) {} finally {
       setSending(false);
     }
   };
@@ -246,9 +236,7 @@ const LeadsInboxModern: React.FC = () => {
         lead.id === selectedLead.id ? { ...lead, status } : lead
       ));
       setSelectedLead({ ...selectedLead, status });
-    } catch (error) {
-      console.error('Error updating lead status:', error);
-    }
+    } catch (error) {}
   };
 
   const applyFilters = () => {
@@ -751,3 +739,4 @@ const LeadsInboxModern: React.FC = () => {
 };
 
 export default LeadsInboxModern;
+

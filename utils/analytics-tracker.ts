@@ -41,7 +41,7 @@ class AnalyticsTracker {
   public optOut(): void {
     localStorage.setItem('analytics_opt_out', 'true');
     this.optedOut = true;
-    console.log('Analytics tracking disabled');
+    
   }
 
   /**
@@ -50,7 +50,7 @@ class AnalyticsTracker {
   public optIn(): void {
     localStorage.removeItem('analytics_opt_out');
     this.optedOut = false;
-    console.log('Analytics tracking enabled');
+    
   }
 
   /**
@@ -158,13 +158,13 @@ class AnalyticsTracker {
       });
 
       if (!response.ok) {
-        console.error('Analytics tracking failed:', await response.text());
+        
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error tracking analytics:', error);
+      
       return false;
     }
   }

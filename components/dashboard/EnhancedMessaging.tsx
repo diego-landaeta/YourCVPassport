@@ -84,9 +84,7 @@ const EnhancedMessaging: React.FC = () => {
 
       if (error) throw error;
       setLeads(data || []);
-    } catch (err) {
-      console.error('Error loading leads:', err);
-    } finally {
+    } catch (err) {} finally {
       setLoading(false);
       loadingRef.current = false;
     }
@@ -149,9 +147,7 @@ const EnhancedMessaging: React.FC = () => {
 
       if (error) throw error;
       setMessages(data || []);
-    } catch (err) {
-      console.error('Error loading messages:', err);
-    }
+    } catch (err) {}
   };
 
   const markMessagesAsRead = async (leadId: string) => {
@@ -172,9 +168,7 @@ const EnhancedMessaging: React.FC = () => {
         .eq('status', 'NEW');
 
       loadLeads();
-    } catch (err) {
-      console.error('Error marking as read:', err);
-    }
+    } catch (err) {}
   };
 
   const sendMessage = async () => {
@@ -231,9 +225,7 @@ const EnhancedMessaging: React.FC = () => {
           : l
       ));
       setSelectedLead(prev => prev ? { ...prev, status: 'REPLIED' } : null);
-    } catch (err: any) {
-      console.error('Error sending message:', err);
-      setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+    } catch (err: any) {setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent);
       toast.error('Error al enviar el mensaje');
     } finally {
@@ -257,9 +249,7 @@ const EnhancedMessaging: React.FC = () => {
       if (newStatus === 'ARCHIVED') {
         setSelectedLead(null);
       }
-    } catch (err) {
-      console.error('Error updating status:', err);
-    }
+    } catch (err) {}
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -691,3 +681,4 @@ const EnhancedMessaging: React.FC = () => {
 };
 
 export default EnhancedMessaging;
+

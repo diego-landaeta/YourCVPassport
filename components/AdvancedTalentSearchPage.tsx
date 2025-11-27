@@ -178,10 +178,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                         />
                         <div className="flex-1">
                             <span className="font-semibold text-gray-900 dark:text-white group-hover:text-cv-blue transition-colors">
-                                Solo perfiles verificados
+                                Verified profiles only
                             </span>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                Usuarios con plan Pro o Premium
+                                Premium and Pro members
                             </p>
                         </div>
                         <svg className="w-5 h-5 text-cv-green" fill="currentColor" viewBox="0 0 20 20">
@@ -212,34 +212,46 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                 </div>
 
                 <div>
-                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        🌍 País
+                     <label htmlFor="country" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Country
+                        </div>
                      </label>
                      <select
+                        id="country"
                         value={filters.country}
                         onChange={(e) => onFilterChange({ ...filters, country: e.target.value })}
                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                      >
-                        <option value="">🌎 Todos los países</option>
-                        <option value="ES">🇪🇸 España</option>
-                        <option value="MX">🇲🇽 México</option>
-                        <option value="AR">🇦🇷 Argentina</option>
-                        <option value="CO">🇨🇴 Colombia</option>
-                        <option value="CL">🇨🇱 Chile</option>
-                        <option value="PE">🇵🇪 Perú</option>
-                        <option value="US">🇺🇸 Estados Unidos</option>
-                        <option value="GB">🇬🇧 Reino Unido</option>
-                        <option value="FR">🇫🇷 Francia</option>
-                        <option value="DE">🇩🇪 Alemania</option>
-                        <option value="IT">🇮🇹 Italia</option>
-                        <option value="BR">🇧🇷 Brasil</option>
+                        <option value="">All countries</option>
+                        <option value="ES">Spain</option>
+                        <option value="MX">Mexico</option>
+                        <option value="AR">Argentina</option>
+                        <option value="CO">Colombia</option>
+                        <option value="CL">Chile</option>
+                        <option value="PE">Peru</option>
+                        <option value="US">United States</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="FR">France</option>
+                        <option value="DE">Germany</option>
+                        <option value="IT">Italy</option>
+                        <option value="BR">Brazil</option>
                      </select>
                 </div>
 
                 <div>
                      <label htmlFor="location" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        📍 {filterLabels.location.label}
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {filterLabels.location.label}
+                        </div>
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -266,7 +278,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
 
                 <div>
                      <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        💰 {filterLabels.salary.label}
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {filterLabels.salary.label}
+                        </div>
                      </label>
                      <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -294,8 +311,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                 </div>
                 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        ⏱️ {filterLabels.experience.label}
+                    <label htmlFor="experience" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {filterLabels.experience.label}
+                        </div>
                     </label>
                     <select 
                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
@@ -382,9 +404,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
 
             setProfiles(profilesData || []);
             setProfileSkills(skillsMap);
-        } catch (err) {
-            console.error('Error loading profiles:', err);
-        } finally {
+        } catch (err) {} finally {
             setLoading(false);
         }
     };
@@ -702,3 +722,4 @@ const AdvancedTalentSearchPage: React.FC = () => {
 };
 
 export default AdvancedTalentSearchPage;
+
