@@ -912,6 +912,28 @@ import { SEOHead } from './components/PageSEO';
 }
 ```
 
+
+### 8.7 URLs Canónicas y SEO Avanzado
+
+El sistema implementa una estrategia estricta de URLs canónicas para evitar contenido duplicado.
+
+**Principios:**
+- **Idioma Base:** Inglés es la versión canónica.
+- **Normalización:** Se eliminan query strings y trailing slashes.
+- **Mapeo Automático:** Rutas en español (`/precios`) apuntan a su canónica en inglés (`/pricing`).
+
+**Mapeo de Rutas (ES → EN):**
+| Ruta ES | Canonical EN |
+|---------|--------------|
+| `/precios` | `/pricing` |
+| `/producto/resumen` | `/product/overview` |
+| `/empresas/planes` | `/companies/plans` |
+| `/perfiles/*` | `/profiles/*` |
+
+**Utilidades (`utils/canonicalUrl.ts`):**
+- `normalizeUrl()`: Limpieza de URLs.
+- `getCanonicalUrl()`: Generación de canonicals.
+
 ---
 
 ## 9. Seguridad
@@ -1104,6 +1126,41 @@ supabase functions deploy export-pdf
 # Ver logs
 supabase functions logs export-pdf
 ```
+
+---
+
+### 11.6 Configuración de Email (Resend)
+
+Para habilitar el envío de emails (verificación, notificaciones):
+
+1. **Crear Edge Functions en Supabase:**
+   - `send-verification-email`
+   - `verify-email-code`
+   
+2. **Configurar Variable de Entorno:**
+   - Ir a **Project Settings > Edge Functions**.
+   - Añadir `RESEND_API_KEY` (obtener en [Resend.com](https://resend.com)).
+
+3. **Verificación:**
+   - Revisar logs en Dashboard si los emails no llegan.
+   - Verificar límites del plan gratuito de Resend.
+
+---
+
+### 11.7 Referencia de Scripts
+
+El proyecto incluye scripts de utilidad en la carpeta `scripts/`:
+
+**Scripts Activos (Mantenimiento/Build):**
+- `generate-sitemap.mjs`: Genera el sitemap.xml para SEO.
+- `generate-template-previews.mjs`: Genera imágenes de vista previa de las plantillas de CV.
+- `optimize-images.mjs`: Optimiza imágenes estáticas.
+- `check-and-run-cv-versions-migration.ts`: Migración para el sistema de versiones de CV.
+
+**Scripts Históricos (Eliminados/Archivados):**
+- `verify-canonical-utils.mjs`: Tests de URLs canónicas (integrado en tests unitarios).
+- `check-resend-domains.js`: Verificación de dominios de email.
+- `debug-*.js`: Scripts de depuración manual para auth y emails.
 
 ---
 

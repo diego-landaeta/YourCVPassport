@@ -6195,3 +6195,77 @@ WHERE id = auth.uid();
 
 ``r
 ---
+
+-- =====================================================================================
+-- SCRIPT: ADD MISSING PROFILE COLUMNS
+-- Fecha: Reciente (Ad-hoc)
+-- Descripción: Agrega columna 'work_mode' a la tabla profiles.
+-- =====================================================================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'work_mode') THEN
+    ALTER TABLE public.profiles ADD COLUMN work_mode TEXT;
+  END IF;
+END $$;
+
+-- =====================================================================================
+-- SCRIPT: CLEAN MARKDOWN
+-- Fecha: Reciente (Ad-hoc)
+-- Descripción: Limpia asteriscos (**) de descripciones y achievements en experiences.
+-- =====================================================================================
+UPDATE experiences SET description = REPLACE(description, '**', '') WHERE description LIKE '%**%';
+
+-- =====================================================================================
+-- SCRIPT: FIX PROFILES CONSTRAINT
+-- Fecha: Reciente (Ad-hoc)
+-- Descripción: Corrige constraints de 'plan' y 'role' en profiles. Normaliza valores a 'Free' y 'user'.
+-- =====================================================================================
+UPDATE profiles SET role = 'user' WHERE role = 'professional';
+UPDATE profiles SET plan = 'Free' WHERE plan IS NULL OR plan = '';
+ALTER TABLE profiles ADD CONSTRAINT profiles_plan_check CHECK (plan IN ('Free', 'Pro', 'Premium'));
+
+-- =====================================================================================
+-- SCRIPT: FIX STAMPS RLS
+-- Fecha: Reciente (Ad-hoc)
+-- Descripción: Actualiza políticas RLS para permitir a usuarios borrar sus propios stamps pendientes.
+-- =====================================================================================
+CREATE POLICY "Users can delete their own pending stamps" ON stamps FOR DELETE USING (auth.uid() = profile_id AND status = 'PENDING');
+
+-- =====================================================================================
+-- MIGRATION: CREATE LANGUAGES TABLE
+-- Fecha: 2025-01-26
+-- Descripción: Crea tabla languages con soporte para niveles y porcentajes.
+-- =====================================================================================
+CREATE TABLE IF NOT EXISTS public.languages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  profile_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  level TEXT NOT NULL,
+  percentage INTEGER CHECK (percentage >= 0 AND percentage <= 100),
+  sort_order INTEGER DEFAULT 0
+);
+
+-- =====================================================================================
+-- MIGRATION: ADD FLEXIBLE REMOTE PREFERENCE
+-- Fecha: 2025-01-26
+-- Descripción: Actualiza constraint de remote_preference para incluir 'flexible'.
+-- =====================================================================================
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_remote_preference_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_remote_preference_check 
+CHECK (remote_preference IS NULL OR remote_preference IN ('remote', 'hybrid', 'on-site', 'flexible'));
+
+-- =====================================================================================
+-- MIGRATION: CHANGE SALARY TO BIGINT
+-- Fecha: 2025-01-26
+-- Descripción: Cambia columnas de salario a BIGINT para soportar cifras mayores.
+-- =====================================================================================
+ALTER TABLE profiles ALTER COLUMN salary_min TYPE bigint;
+ALTER TABLE profiles ALTER COLUMN salary_max TYPE bigint;
+
+-- =====================================================================================
+-- MIGRATION: FIX PORTFOLIO ITEMS COLUMNS
+-- Fecha: Reciente
+-- Descripción: Asegura existencia de columnas category, link, description, image_url, file_url en portfolio_items.
+-- =====================================================================================
+ALTER TABLE public.portfolio_items ADD COLUMN IF NOT EXISTS category text;
+ALTER TABLE public.portfolio_items ADD COLUMN IF NOT EXISTS link text;
