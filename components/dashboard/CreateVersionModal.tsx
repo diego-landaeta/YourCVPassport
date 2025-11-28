@@ -145,7 +145,7 @@ export function CreateVersionModal({
       setCountry(editingVersion.country || '');
       setRole(editingVersion.role || '');
       setSelectedSections(editingVersion.sections);
-      setTemplate(editingVersion.template || 'modern');
+      setTemplate(editingVersion.template || 'passport');
       setNotes(editingVersion.notes || '');
     } else {
       // Reset form for new version

@@ -7,14 +7,17 @@ import DashboardContent from './dashboard/DashboardContent';
 import ProfileEditorSidebar from './dashboard/ProfileEditorSidebar';
 import PageSEO from './PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useDashboardTour } from '../hooks/useDashboardTour';
 
 const DashboardPage: React.FC = () => {
   const { profile, session } = useAuth();
   const { lang } = useLanguage();
+  const { hasTourBeenCompleted } = useDashboardTour(profile?.id);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('dashboard');
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string>('');
+  const [profileCompleteness, setProfileCompleteness] = useState(0);
 
   const seoTitle = lang === 'es'
     ? 'Panel de Control'
@@ -79,6 +82,31 @@ const DashboardPage: React.FC = () => {
     loadData();
   }, [session, saveMessage, activeSection]); // Reload when save message changes or section changes
 
+  // Calculate profile completeness
+  useEffect(() => {
+    if (!profile) return;
+
+    let completedFields = 0;
+    const totalFields = 10;
+
+    // Basic fields (5 fields)
+    if (profile.full_name) completedFields++;
+    if (profile.email) completedFields++;
+    if (profile.headline) completedFields++;
+    if (profile.summary) completedFields++;
+    if (profile.avatar_url) completedFields++;
+
+    // Additional sections (5 fields)
+    if (experiencesCount > 0) completedFields++;
+    if (educationCount > 0) completedFields++;
+    if (skillsCount >= 3) completedFields++;
+    if (languagesCount > 0) completedFields++;
+    if (portfolioCount > 0) completedFields++;
+
+    const completeness = Math.round((completedFields / totalFields) * 100);
+    setProfileCompleteness(completeness);
+  }, [profile, experiencesCount, educationCount, skillsCount, languagesCount, portfolioCount]);
+
   return (
     <>
       <PageSEO
@@ -97,6 +125,8 @@ const DashboardPage: React.FC = () => {
           education={education}
           skills={skills}
           languages={languages}
+          profileCompleteness={profileCompleteness}
+          tourCompleted={hasTourBeenCompleted}
         />
       </div>
 

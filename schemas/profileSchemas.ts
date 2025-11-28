@@ -2,17 +2,17 @@ import { z } from 'zod';
 
 // Identity Section Schema
 export const identitySchema = z.object({
-  full_name: z.string().min(2, 'Name must be at least 2 characters'),
-  headline: z.string().min(5, 'Headline must be at least 5 characters'),
-  summary: z.string().optional(),
-  country_code: z.string().optional(),
-  location: z.string().optional(),
-  phone: z.string().optional(),
-  linkedin_url: z.string().optional(),
-  github_url: z.string().optional(),
-  portfolio_url: z.string().optional(),
-  remote: z.boolean().optional(),
-  avatar_url: z.string().optional(),
+  full_name: z.string().min(2, 'El nombre completo es obligatorio (mínimo 2 caracteres)'),
+  headline: z.string().min(5, 'El título profesional es obligatorio (mínimo 5 caracteres)'),
+  summary: z.string().min(1, 'El resumen "Acerca de mí" es obligatorio').max(500, 'Máximo 500 caracteres'),
+  country_code: z.string().min(1, 'Debes seleccionar un país'),
+  location: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  linkedin_url: z.string().optional().nullable(),
+  github_url: z.string().optional().nullable(),
+  portfolio_url: z.string().optional().nullable(),
+  remote: z.boolean().optional().nullable(),
+  avatar_url: z.string().optional().nullable(),
 });
 
 // Experience Schema

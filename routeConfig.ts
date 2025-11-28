@@ -26,7 +26,8 @@ const SystemStatusPage = lazy(() => import('./components/SystemStatusPage'));
 const UnderConstructionPage = lazy(() => import('./components/UnderConstructionPage'));
 const TemplatePreviewCapture = lazy(() => import('./components/TemplatePreviewCapture'));
 const AllTemplatesPreview = lazy(() => import('./components/AllTemplatesPreview'));
-const PublicProfilesPage = lazy(() => import('./components/PublicProfilesPage'));
+const TermsPage = lazy(() => import('./components/TermsPage'));
+const PrivacyPage = lazy(() => import('./components/PrivacyPage'));
 
 interface RouteConfig {
   path_en: string;
@@ -61,7 +62,8 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   UnderConstructionPage,
   TemplatePreviewCapture,
   AllTemplatesPreview,
-  PublicProfilesPage,
+  TermsPage,
+  PrivacyPage,
 };
 
 const pathMappings = [
@@ -93,7 +95,9 @@ const pathMappings = [
   { en: 'resources', es: 'recursos', componentName: 'UnderConstructionPage', props: { pageTitle: 'Resources' } },
   { en: 'dev/template-preview', es: 'dev/vista-previa-plantillas', componentName: 'TemplatePreviewCapture' },
   { en: 'dev/all-templates-preview', es: 'dev/todas-plantillas-vista', componentName: 'AllTemplatesPreview' },
-  { en: 'profiles', es: 'perfiles', componentName: 'PublicProfilesPage' },
+  { en: 'profiles', es: 'perfiles', componentName: 'AdvancedTalentSearchPage' },
+  { en: 'terms', es: 'terminos', componentName: 'TermsPage' },
+  { en: 'privacy', es: 'privacidad', componentName: 'PrivacyPage' },
 ];
 
 export const routeConfig: RouteConfig[] = pathMappings.map(route => ({

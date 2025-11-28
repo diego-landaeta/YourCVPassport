@@ -24,19 +24,19 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
     const avatarUrl = profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
     
     return (
-        <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-700 hover:border-cv-blue dark:hover:border-cv-blue overflow-hidden">
+        <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-700 hover:border-cv-blue dark:hover:border-cv-blue overflow-hidden aspect-square flex flex-col">
             {/* Gradient Background Effect */}
             <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+
             {/* Content */}
-            <div className="relative p-6 flex flex-col h-full">
+            <div className="relative p-4 flex flex-col h-full">
                 {/* Header with Avatar and Badge */}
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-3 mb-3">
                     <div className="relative flex-shrink-0">
-                        <img 
-                            src={avatarUrl} 
-                            alt={profile.full_name} 
-                            className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white dark:ring-gray-800 shadow-lg group-hover:ring-cv-blue/30 transition-all" 
+                        <img
+                            src={avatarUrl}
+                            alt={profile.full_name}
+                            className="w-16 h-16 rounded-xl object-cover ring-2 ring-white dark:ring-gray-800 shadow-md group-hover:ring-cv-blue/30 transition-all" 
                             onError={(e) => {
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
                             }}
@@ -51,17 +51,17 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate group-hover:text-cv-blue transition-colors">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-0.5 truncate group-hover:text-cv-blue transition-colors">
                             {profile.full_name}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                             {profile.headline || 'Professional'}
                         </p>
                     </div>
                 </div>
 
                 {/* Location with Country Badge */}
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
                     {profile.country_code ? (
                         <div className="flex items-center gap-2">
                             <CountryBadge countryCode={profile.country_code} size="md" showName={false} />
@@ -92,36 +92,36 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                 </div>
 
                 {/* Skills */}
-                <div className="flex-grow mb-4">
-                    <div className="flex flex-wrap gap-2">
-                        {skills.slice(0, 4).map((skill: string, index: number) => (
-                            <span 
-                                key={index} 
-                                className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-cv-blue/10 to-indigo-500/10 dark:from-cv-blue/20 dark:to-indigo-500/20 text-cv-blue dark:text-cv-blue-light text-xs font-semibold rounded-lg border border-cv-blue/20 dark:border-cv-blue/30"
+                <div className="flex-grow mb-3">
+                    <div className="flex flex-wrap gap-1.5">
+                        {skills.slice(0, 3).map((skill: string, index: number) => (
+                            <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-cv-blue/10 to-indigo-500/10 dark:from-cv-blue/20 dark:to-indigo-500/20 text-cv-blue dark:text-cv-blue-light text-xs font-medium rounded-md border border-cv-blue/20 dark:border-cv-blue/30"
                             >
                                 {skill}
                             </span>
                         ))}
-                        {skills.length > 4 && (
-                            <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                +{skills.length - 4} más
+                        {skills.length > 3 && (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md">
+                                +{skills.length - 3} más
                             </span>
                         )}
                     </div>
                     {skills.length === 0 && (
-                        <p className="text-sm text-gray-400 dark:text-gray-600 italic">
-                            Sin habilidades registradas
+                        <p className="text-xs text-gray-400 dark:text-gray-600 italic">
+                            Sin habilidades
                         </p>
                     )}
                 </div>
 
                 {/* View Profile Button */}
-                <Link 
+                <Link
                     to={`/cv/${profile.slug || profile.id}`}
-                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl text-center flex items-center justify-center gap-2 group-hover:scale-105"
+                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-lg text-center flex items-center justify-center gap-2 text-sm"
                 >
                     <span>Ver Perfil</span>
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </Link>
@@ -149,70 +149,43 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
     const { filters: filterLabels } = t.advancedTalentSearch;
     
     return (
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-cv-blue to-indigo-600 p-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-lg">
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-white">{filterLabels.title}</h3>
-                        <p className="text-sm text-blue-100">Refina tu búsqueda</p>
-                    </div>
+            <div className="bg-gradient-to-r from-cv-blue to-indigo-600 p-4">
+                <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <h3 className="text-lg font-bold text-white">{filterLabels.title}</h3>
                 </div>
             </div>
-            
+
             {/* Filters */}
-            <div className="p-6 space-y-6">
-                <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl p-4">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <input 
-                            type="checkbox" 
-                            className="h-5 w-5 text-cv-blue rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-cv-blue transition-all" 
-                            id="verified-only"
-                            checked={filters.verifiedOnly}
-                            onChange={(e) => onFilterChange({ ...filters, verifiedOnly: e.target.checked })}
-                        />
-                        <div className="flex-1">
-                            <span className="font-semibold text-gray-900 dark:text-white group-hover:text-cv-blue transition-colors">
-                                Verified profiles only
-                            </span>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                Premium and Pro members
-                            </p>
-                        </div>
-                        <svg className="w-5 h-5 text-cv-green" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                        </svg>
-                    </label>
-                </div>
-                
+            <div className="p-4 space-y-3">
+
                 <div>
-                     <label htmlFor="skills" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                     <label htmlFor="skills" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         {filterLabels.skills.label}
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                         </div>
-                        <input 
-                            id="skills" 
-                            type="text" 
+                        <input
+                            id="skills"
+                            type="text"
                             placeholder={filterLabels.skills.placeholder}
                             value={filters.skills}
                             onChange={(e) => onFilterChange({ ...filters, skills: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all" 
+                            className="w-full pl-9 pr-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                         />
                      </div>
                 </div>
 
                 <div>
-                     <label htmlFor="country" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                     <label htmlFor="country" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -224,7 +197,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                         id="country"
                         value={filters.country}
                         onChange={(e) => onFilterChange({ ...filters, country: e.target.value })}
-                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
+                        className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                      >
                         <option value="">All countries</option>
@@ -244,7 +217,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                 </div>
 
                 <div>
-                     <label htmlFor="location" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                     <label htmlFor="location" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -255,20 +228,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
                             </svg>
                         </div>
-                        <input 
-                            id="location" 
-                            type="text" 
+                        <input
+                            id="location"
+                            type="text"
                             placeholder={filterLabels.location.placeholder}
                             value={filters.location}
                             onChange={(e) => onFilterChange({ ...filters, location: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all" 
+                            className="w-full pl-9 pr-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                         />
                      </div>
-                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
                         </svg>
@@ -277,7 +250,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                 </div>
 
                 <div>
-                     <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                     <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -285,33 +258,33 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                             {filterLabels.salary.label}
                         </div>
                      </label>
-                     <div className="grid grid-cols-2 gap-3">
+                     <div className="grid grid-cols-2 gap-2">
                         <div>
-                            <input 
-                                id="salary" 
-                                type="number" 
+                            <input
+                                id="salary"
+                                type="number"
                                 placeholder={filterLabels.salary.min}
                                 value={filters.salaryMin}
                                 onChange={(e) => onFilterChange({ ...filters, salaryMin: e.target.value })}
-                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all" 
+                                className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                             />
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Mínimo</p>
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Mínimo</p>
                         </div>
                         <div>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 placeholder={filterLabels.salary.max}
                                 value={filters.salaryMax}
                                 onChange={(e) => onFilterChange({ ...filters, salaryMax: e.target.value })}
-                                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all" 
+                                className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
                             />
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Máximo</p>
+                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Máximo</p>
                         </div>
                      </div>
                 </div>
-                
+
                 <div>
-                    <label htmlFor="experience" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="experience" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                         <div className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -319,8 +292,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                             {filterLabels.experience.label}
                         </div>
                     </label>
-                    <select 
-                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
+                    <select
+                        className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
                         value={filters.experienceLevel}
                         onChange={(e) => onFilterChange({ ...filters, experienceLevel: e.target.value })}
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
@@ -329,14 +302,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                     </select>
                 </div>
             </div>
-            
+
             {/* Apply Button */}
-            <div className="p-6 pt-0">
-                <button 
+            <div className="p-4 pt-0">
+                <button
                     onClick={onApplyFilters}
-                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
+                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2.5 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
                 >
-                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <span>{filterLabels.applyButton}</span>
@@ -375,14 +348,15 @@ const AdvancedTalentSearchPage: React.FC = () => {
     const loadProfiles = async () => {
         try {
             setLoading(true);
-            
-            // Get profiles with complete information
+
+            // Get profiles with complete information, prioritizing premium users
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
                 .select('*')
                 .not('full_name', 'is', null)
                 .not('headline', 'is', null)
                 .not('summary', 'is', null)
+                .order('plan', { ascending: false, nullsFirst: false })
                 .order('created_at', { ascending: false })
                 .limit(50);
 

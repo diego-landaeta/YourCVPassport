@@ -456,7 +456,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         hasStamp={stamps.some(s => s.type === 'EMAIL' && s.status === 'VERIFIED')}
                     />
 
-                    {/* Phone Stamp - Temporarily Disabled */}
+                    {/* Phone Stamp - Temporarily Disabled
                     <StampCard
                         type="PHONE"
                         icon={PhoneIcon}
@@ -468,6 +468,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         }}
                         hasStamp={true}
                     />
+                    */}
 
                     {/* Employment Stamp */}
                     <StampCard

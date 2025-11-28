@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from '../../hooks/useTranslations';
-import { 
-  UserCircleIcon, 
-  BriefcaseIcon, 
-  AcademicCapIcon, 
-  WrenchScrewdriverIcon, 
-  LanguageIcon, 
-  FolderIcon, 
-  Cog6ToothIcon, 
-  SparklesIcon,
-  CheckCircleIcon,
-  ArrowRightIcon,
-  ArrowLeftIcon
+import {
+  UserCircleIcon,
+  BriefcaseIcon,
+  AcademicCapIcon,
+  WrenchScrewdriverIcon,
+  LanguageIcon,
+  FolderIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 // Import sections
@@ -22,8 +18,6 @@ import SkillsSection from './SkillsSection';
 import LanguagesSection from './LanguagesSection';
 import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
-
-import AIImprovementStep from './AIImprovementStep';
 
 interface ProfileWizardProps {
   profile: any;
@@ -41,7 +35,7 @@ interface ProfileWizardProps {
   onSaveLanguages: (data: any[]) => Promise<void>;
   onSavePortfolio: (data: any[]) => Promise<void>;
   onSavePreferences: (data: any) => Promise<void>;
-
+  initialStep?: string; // Step ID to start with (e.g., 'identity', 'experience')
   onComplete: () => void;
 }
 
@@ -61,113 +55,160 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   onSaveLanguages,
   onSavePortfolio,
   onSavePreferences,
-
+  initialStep,
   onComplete
 }) => {
   const t = useTranslations();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const stepRef = React.useRef<any>(null);
 
-  const steps = [
-    { id: 'identity', title: 'Identidad', icon: UserCircleIcon, component: IdentitySection, props: { profile, onSave: onSaveIdentity } },
-    { id: 'experience', title: 'Experiencia', icon: BriefcaseIcon, component: ExperienceSection, props: { experiences, onSave: onSaveExperience } },
-    { id: 'education', title: 'Educación', icon: AcademicCapIcon, component: EducationSection, props: { education, onSave: onSaveEducation } },
-    { id: 'skills', title: 'Habilidades', icon: WrenchScrewdriverIcon, component: SkillsSection, props: { skills, onSave: onSaveSkills } },
-    { id: 'languages', title: 'Idiomas', icon: LanguageIcon, component: LanguagesSection, props: { languages, onSave: onSaveLanguages } },
-    { id: 'portfolio', title: 'Portafolio', icon: FolderIcon, component: PortfolioSection, props: { items: portfolio, onSave: onSavePortfolio } },
-    { id: 'preferences', title: 'Preferencias', icon: Cog6ToothIcon, component: PreferencesSection, props: { preferences: profile, onSave: onSavePreferences } },
-    { id: 'ai-improvement', title: 'Mejora con IA', icon: SparklesIcon, component: AIImprovementStep, props: { 
-        experiences, 
-        education, 
-        onSaveExperience, 
-        onSaveEducation,
-        onComplete 
-      } 
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+      window.scrollTo(0, 0);
+    } else {
+      onComplete();
     }
+  };
+
+  const steps = [
+    { id: 'identity', title: 'Identidad', icon: UserCircleIcon, component: IdentitySection, props: { profile, onSave: onSaveIdentity, onNext: handleNext } },
+    { id: 'experience', title: 'Experiencia', icon: BriefcaseIcon, component: ExperienceSection, props: { initialData: experiences, onSave: onSaveExperience } },
+    { id: 'education', title: 'Educación', icon: AcademicCapIcon, component: EducationSection, props: { initialData: education, onSave: onSaveEducation } },
+    { id: 'skills', title: 'Habilidades', icon: WrenchScrewdriverIcon, component: SkillsSection, props: { initialData: skills, onSave: onSaveSkills, onNext: handleNext } },
+    { id: 'languages', title: 'Idiomas', icon: LanguageIcon, component: LanguagesSection, props: { initialData: languages, onSave: onSaveLanguages, onNext: handleNext } },
+    { id: 'portfolio', title: 'Portafolio', icon: FolderIcon, component: PortfolioSection, props: { items: portfolio, onSave: onSavePortfolio } },
+    { id: 'preferences', title: 'Preferencias', icon: Cog6ToothIcon, component: PreferencesSection, props: { preferences: profile, onSave: onSavePreferences } }
   ];
 
-  const handleNext = async () => {
-    try {
-      // Validate current step if it supports validation
-      if (stepRef.current && stepRef.current.submit) {
-        const isValid = await stepRef.current.submit();
-        if (!isValid) {
-          return;
-        }
-      }
+  // Find initial step index based on initialStep prop
+  const getInitialStepIndex = () => {
+    if (initialStep) {
+      const index = steps.findIndex(step => step.id === initialStep);
+      return index !== -1 ? index : 0;
+    }
+    return 0;
+  };
 
-      if (!completedSteps.includes(currentStep)) {
-        setCompletedSteps([...completedSteps, currentStep]);
-      }
-      if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1);
+  const [currentStep, setCurrentStep] = useState(getInitialStepIndex());
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+
+  // Initialize and update completed steps based on content
+  useEffect(() => {
+    const stepsWithContent: number[] = [];
+
+    // Check each step for content
+    if (profile?.full_name && profile?.email) {
+      stepsWithContent.push(0); // identity
+    }
+    if (experiences && experiences.length > 0) {
+      stepsWithContent.push(1); // experience
+    }
+    if (education && education.length > 0) {
+      stepsWithContent.push(2); // education
+    }
+    if (skills && skills.length > 0) {
+      stepsWithContent.push(3); // skills
+    }
+    if (languages && languages.length > 0) {
+      stepsWithContent.push(4); // languages
+    }
+    if (portfolio && portfolio.length > 0) {
+      stepsWithContent.push(5); // portfolio
+    }
+    if (profile) {
+      stepsWithContent.push(6); // preferences
+    }
+
+    setCompletedSteps(stepsWithContent);
+  }, [profile?.full_name, profile?.email, experiences?.length, education?.length, skills?.length, languages?.length, portfolio?.length]);
+
+  // Update currentStep when initialStep changes
+  useEffect(() => {
+    if (initialStep) {
+      const index = steps.findIndex(step => step.id === initialStep);
+      if (index !== -1 && index !== currentStep) {
+        setCurrentStep(index);
         window.scrollTo(0, 0);
-      } else {
-        onComplete();
       }
-    } catch (error) {
-      // Silent error handling
     }
-  };
+  }, [initialStep]);
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const CurrentComponent = steps[currentStep].component;
+  const CurrentComponent = steps[currentStep].component as any;
 
   return (
     <div className="max-w-5xl mx-auto">
       {/* Stepper Header */}
       <div className="mb-8 overflow-x-auto">
-        <div className="flex items-center min-w-max px-4">
+        <div className="flex items-center justify-center min-w-max px-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
-            const isCompleted = completedSteps.includes(index) || index < currentStep;
+            const isCompleted = completedSteps.includes(index);
 
             return (
               <div key={step.id} className="flex items-center">
-                <div 
-                  className={`flex flex-col items-center cursor-pointer group ${
-                    isActive ? 'text-cv-blue' : isCompleted ? 'text-green-600' : 'text-gray-400'
+                <div
+                  className={`flex flex-col items-center cursor-pointer group transition-all ${
+                    isActive ? 'text-cv-blue' : isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
                   onClick={() => {
-                    // Only allow clicking on completed steps or the current step
-                    if (completedSteps.includes(index) || index <= currentStep) {
-                      setCurrentStep(index);
-                    }
+                    // Allow free navigation to any step
+                    setCurrentStep(index);
+                    window.scrollTo(0, 0);
                   }}
                 >
                   <div className={`
                     w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
-                    ${isActive 
-                      ? 'border-cv-blue bg-blue-50 dark:bg-blue-900/20' 
-                      : isCompleted 
-                        ? 'border-green-600 bg-green-50 dark:bg-green-900/20' 
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary'
+                    group-hover:scale-110 group-hover:shadow-md
+                    ${isActive
+                      ? 'border-cv-blue bg-blue-50 dark:bg-blue-900/20'
+                      : isCompleted
+                        ? 'border-green-600 bg-green-50 dark:bg-green-900/20 group-hover:border-green-700'
+                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
                     }
                   `}>
-                    {isCompleted && !isActive ? (
-                      <CheckCircleIcon className="w-6 h-6" />
-                    ) : (
-                      <Icon className="w-5 h-5" />
-                    )}
+                    <Icon className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-medium mt-2">{step.title}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`h-0.5 w-10 mx-2 ${index < currentStep ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`} />
+                  <div className={`h-0.5 w-10 mx-2 ${completedSteps.includes(index) ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`} />
                 )}
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* AI Optimization Floating Button - Fixed bottom right */}
+      {/* Show button based on current section's AI support */}
+      {((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
+        (currentStep === 1 && experiences.length > 0) || // Experience has AI
+        (currentStep === 2 && education.length > 0) || // Education has AI
+        (currentStep === 3 && skills.length > 0)) && ( // Skills has AI
+        <button
+          onClick={() => {
+            // Trigger AI for current section only
+            if (currentStep === 0) {
+              // Identity section - trigger AI summary generation
+              window.dispatchEvent(new Event('generateAISummary'));
+            } else if (currentStep === 1 || currentStep === 2 || currentStep === 3) {
+              // Experience, Education, or Skills - toggle AI suggestions
+              stepRef.current?.toggleAISuggestions?.();
+            }
+          }}
+          className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group"
+          title="Mejorar con IA"
+        >
+          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {/* Tooltip */}
+          <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Mejorar con IA
+          </span>
+        </button>
+      )}
 
       {/* Content */}
       <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 min-h-[500px]">
@@ -186,38 +227,6 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
         )}
       </div>
 
-      {/* Navigation Footer */}
-      <div className="mt-6 bg-white dark:bg-dark-bg-secondary border-t border-gray-200 dark:border-gray-700 p-4 rounded-xl shadow-sm">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className={`
-              flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold transition-all
-              ${currentStep === 0 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'
-              }
-            `}
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Anterior
-          </button>
-
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">
-              Paso {currentStep + 1} de {steps.length}
-            </span>
-            <button
-              onClick={handleNext}
-              className="flex items-center gap-2 px-8 py-2.5 bg-cv-blue text-white rounded-lg font-bold shadow-lg hover:bg-opacity-90 transition-all transform hover:scale-105"
-            >
-              {currentStep === steps.length - 1 ? 'Finalizar' : 'Siguiente'}
-              {currentStep < steps.length - 1 && <ArrowRightIcon className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

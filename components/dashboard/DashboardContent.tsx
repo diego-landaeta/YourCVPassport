@@ -289,7 +289,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setEducation(eduData || []);
       setSkills(skillsData || []);
       setPortfolio(portfolioData || []);
-      setLanguages(languagesData || []);
+      // Map is_native to isNative for languages
+      setLanguages((languagesData || []).map((lang: any) => ({
+        ...lang,
+        isNative: lang.is_native || false,
+      })));
       setVisas(visasData || []);
       setCertifications(certificationsData || []);
     } catch (error) {
@@ -617,7 +621,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         if (error) throw error;
       }
 
-      setExperiences(data);
+      // Refetch experiences from database to ensure UI is synced
+      const { data: freshExperiences } = await supabase
+        .from('experiences')
+        .select('*')
+        .eq('profile_id', session?.user.id)
+        .order('sort_order', { ascending: true });
+
+      setExperiences(freshExperiences || []);
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
 
@@ -727,7 +738,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           profile_id: session?.user.id,
           name: lang.name,
           level: lang.level,
-
+          is_native: lang.is_native || false,
           sort_order: index,
         }));
 
@@ -739,7 +750,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Languages saved successfully!');
+      toast.success('Idiomas guardados correctamente');
     } catch (error) {
+      console.error('Error saving languages:', error);
       toast.error('Error al guardar idiomas');
       showSaveMessage('Failed to save languages', true);
     } finally {
@@ -1244,6 +1257,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
   // Mi Perfil Section (Profile Editor)
   if (activeSection.startsWith('mi-perfil')) {
+    // Extract step from activeSection (e.g., 'mi-perfil:identity' -> 'identity')
+    const stepMatch = activeSection.match(/^mi-perfil:(.+)$/);
+    const initialStep = stepMatch ? stepMatch[1] : undefined;
+
     return (
       <div className="animate-fade-in">
         <Suspense fallback={<SectionLoader />}>
@@ -1256,6 +1273,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             portfolio={portfolio}
             visas={visas}
             certifications={certifications}
+            initialStep={initialStep}
             onSaveIdentity={handleIdentitySave}
             onSaveExperience={handleExperienceSave}
             onSaveEducation={handleEducationSave}

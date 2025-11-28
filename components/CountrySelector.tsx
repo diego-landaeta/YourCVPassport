@@ -126,7 +126,14 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
       >
         {selectedCountry ? (
           <>
-            <span className="text-3xl">{selectedCountry.flag}</span>
+            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-gray-200 dark:border-gray-600 bg-white">
+              <img
+                src={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`}
+                srcSet={`https://flagcdn.com/w80/${selectedCountry.code.toLowerCase()}.png 2x`}
+                alt={`${selectedCountry.nameEs}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
             <span className="flex-1 text-left text-gray-900 dark:text-white font-medium">
               {lang === 'es' ? selectedCountry.nameEs : selectedCountry.name}
             </span>
@@ -136,10 +143,10 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
             {placeholder}
           </span>
         )}
-        <svg 
-          className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          viewBox="0 0 24 24" 
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -176,12 +183,19 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                     value === country.code ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                   }`}
                 >
-                  <span className="text-2xl">{country.flag}</span>
-                  <span className="flex-1 text-left text-gray-900 dark:text-white">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm border-2 border-gray-200 dark:border-gray-600 bg-white">
+                    <img
+                      src={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png`}
+                      srcSet={`https://flagcdn.com/w80/${country.code.toLowerCase()}.png 2x`}
+                      alt={`${country.nameEs}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="flex-1 text-left text-gray-900 dark:text-white font-medium">
                     {lang === 'es' ? country.nameEs : country.name}
                   </span>
                   {value === country.code && (
-                    <svg className="w-5 h-5 text-cv-blue" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-cv-blue flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}

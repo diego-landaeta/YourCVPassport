@@ -1,6 +1,6 @@
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -34,6 +34,9 @@ const ConfirmPage = lazy(() => import('./pages/auth/ConfirmPage'));
 
 // Public verification page
 const VerifyPage = lazy(() => import('./pages/VerifyPage'));
+
+// 404 Not Found page
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
@@ -106,6 +109,10 @@ const AppContent: React.FC = () => {
           <Route path="/perfiles/:country/:city" element={<ProfileCategoryPage />} />
           <Route path="/perfiles/:country" element={<ProfileCategoryPage />} />
           <Route path="/perfiles/:role" element={<ProfileCategoryPage />} />
+
+          {/* 404 Not Found Routes */}
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Suspense>
     );
@@ -118,8 +125,8 @@ const App: React.FC = () => {
       <QueryProvider>
         <HelmetProvider>
           <ToastProvider>
-            <AuthProvider>
-              <Router>
+            <Router>
+              <AuthProvider>
                 <LanguageProvider>
                   <MainLayout>
                     <ErrorBoundary>
@@ -127,8 +134,8 @@ const App: React.FC = () => {
                     </ErrorBoundary>
                   </MainLayout>
                 </LanguageProvider>
-              </Router>
-            </AuthProvider>
+              </AuthProvider>
+            </Router>
           </ToastProvider>
         </HelmetProvider>
       </QueryProvider>

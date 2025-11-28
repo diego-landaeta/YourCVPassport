@@ -1,6 +1,8 @@
 import React, { memo, lazy, Suspense } from 'react';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useDashboardTour } from '../../hooks/useDashboardTour';
+import DashboardTour from './DashboardTour';
 
 // Lazy load ProfileQualityScore
 const ProfileQualityScore = lazy(() => import('../profile-editor/ProfileQualityScore'));
@@ -65,7 +67,19 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
   const [chartType, setChartType] = React.useState<'bar' | 'pie'>('bar');
   const [notification, setNotification] = React.useState<CompletionNotification>({ show: false, message: '' });
   const [previousStats, setPreviousStats] = React.useState(stats);
-  
+
+  // Dashboard Tour
+  const { showTour, completeTour, skipTour, hasTourBeenCompleted } = useDashboardTour(profile?.id);
+
+  // Check if sections should be blocked
+  const shouldBlockSections = hasTourBeenCompleted && stats.profileCompleteness < 100;
+  const [showBlockAlert, setShowBlockAlert] = React.useState(false);
+
+  const handleBlockedAction = () => {
+    setShowBlockAlert(true);
+    setTimeout(() => setShowBlockAlert(false), 4000);
+  };
+
   const weeklyData = generateWeeklyData(stats.visits);
 
   // Check for completed tasks
@@ -100,7 +114,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
   return (
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
+        {/* Dashboard Tour */}
+        {showTour && <DashboardTour onComplete={completeTour} onSkip={skipTour} />}
+
         {/* Success Notification */}
         {notification.show && (
           <div className="fixed top-4 right-4 z-50 animate-slideInRight">
@@ -117,9 +134,25 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
             </div>
           </div>
         )}
-        
+
+        {/* Profile Block Alert */}
+        {showBlockAlert && (
+          <div className="fixed top-4 right-4 z-50 animate-slideInRight">
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-4 rounded-xl shadow-2xl min-w-[320px] border border-orange-400">
+              <p className="font-bold text-sm mb-1">
+                {lang === 'es' ? '¡Completa tu perfil primero!' : 'Complete your profile first!'}
+              </p>
+              <p className="text-xs text-orange-100">
+                {lang === 'es'
+                  ? 'Debes completar tu perfil al 100% para acceder a todas las funciones.'
+                  : 'You must complete your profile to 100% to access all features.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header with gradient accent */}
-        <div className="mb-8">
+        <div className="mb-8" data-tour="welcome">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -132,7 +165,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
         </div>
 
         {/* Quick Actions Widget */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 shadow-lg border border-gray-200 dark:border-dark-border mb-8">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 shadow-lg border border-gray-200 dark:border-dark-border mb-8" data-tour="quick-actions">
           <div className="flex items-center gap-2 mb-5">
             <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -155,48 +188,93 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
 
             {/* Export CV */}
             <button
-              onClick={() => onSectionChange('exportar')}
-              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 dark:hover:from-green-900/30 rounded-xl border border-green-200 dark:border-green-800 transition-all hover:shadow-md group"
+              onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('exportar')}
+              className={`flex flex-col items-center gap-3 p-4 bg-gradient-to-br rounded-xl border transition-all group relative ${
+                shouldBlockSections
+                  ? 'from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700 opacity-50'
+                  : 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 dark:hover:from-green-900/30 border-green-200 dark:border-green-800 hover:shadow-md'
+              }`}
             >
-              <div className="w-12 h-12 bg-green-600 dark:bg-green-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-transform ${
+                shouldBlockSections
+                  ? 'bg-gray-400 dark:bg-gray-600'
+                  : 'bg-green-600 dark:bg-green-500 group-hover:scale-110'
+              }`}>
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">{t.quickActions.exportCV}</span>
+              <span className={`text-sm font-semibold text-center ${
+                shouldBlockSections ? 'text-gray-500 dark:text-gray-600' : 'text-gray-900 dark:text-white'
+              }`}>{t.quickActions.exportCV}</span>
+              {shouldBlockSections && (
+                <svg className="w-4 h-4 absolute top-2 right-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              )}
             </button>
 
             {/* Share CV */}
             <button
-              onClick={() => onSectionChange('compartir')}
-              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 dark:hover:from-purple-900/30 rounded-xl border border-purple-200 dark:border-purple-800 transition-all hover:shadow-md group"
+              onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('compartir')}
+              className={`flex flex-col items-center gap-3 p-4 bg-gradient-to-br rounded-xl border transition-all group relative ${
+                shouldBlockSections
+                  ? 'from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700 opacity-50'
+                  : 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 dark:hover:from-purple-900/30 border-purple-200 dark:border-purple-800 hover:shadow-md'
+              }`}
             >
-              <div className="w-12 h-12 bg-purple-600 dark:bg-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-transform ${
+                shouldBlockSections
+                  ? 'bg-gray-400 dark:bg-gray-600'
+                  : 'bg-purple-600 dark:bg-purple-500 group-hover:scale-110'
+              }`}>
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">{t.quickActions.shareCV}</span>
+              <span className={`text-sm font-semibold text-center ${
+                shouldBlockSections ? 'text-gray-500 dark:text-gray-600' : 'text-gray-900 dark:text-white'
+              }`}>{t.quickActions.shareCV}</span>
+              {shouldBlockSections && (
+                <svg className="w-4 h-4 absolute top-2 right-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              )}
             </button>
 
             {/* View Analytics */}
             <button
-              onClick={() => onSectionChange('analitica')}
-              className="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 hover:from-orange-100 dark:hover:from-orange-900/30 rounded-xl border border-orange-200 dark:border-orange-800 transition-all hover:shadow-md group"
+              onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('analitica')}
+              className={`flex flex-col items-center gap-3 p-4 bg-gradient-to-br rounded-xl border transition-all group relative ${
+                shouldBlockSections
+                  ? 'from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700 opacity-50'
+                  : 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 hover:from-orange-100 dark:hover:from-orange-900/30 border-orange-200 dark:border-orange-800 hover:shadow-md'
+              }`}
             >
-              <div className="w-12 h-12 bg-orange-600 dark:bg-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-transform ${
+                shouldBlockSections
+                  ? 'bg-gray-400 dark:bg-gray-600'
+                  : 'bg-orange-600 dark:bg-orange-500 group-hover:scale-110'
+              }`}>
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold text-gray-900 dark:text-white text-center">{t.quickActions.analytics}</span>
+              <span className={`text-sm font-semibold text-center ${
+                shouldBlockSections ? 'text-gray-500 dark:text-gray-600' : 'text-gray-900 dark:text-white'
+              }`}>{t.quickActions.analytics}</span>
+              {shouldBlockSections && (
+                <svg className="w-4 h-4 absolute top-2 right-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
 
         {/* Profile Status Alert - Always visible */}
         {stats.profileCompleteness < 100 ? (
-          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300" data-tour="profile-completion">
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
@@ -288,14 +366,22 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={() => window.open(`/cv/${profile?.slug}`, '_blank')}
-                    className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+                    onClick={() => shouldBlockSections ? handleBlockedAction() : window.open(`/cv/${profile?.slug}`, '_blank')}
+                    className={`px-5 py-2.5 text-sm font-semibold rounded-lg transition-all shadow-md ${
+                      shouldBlockSections
+                        ? 'bg-gray-400 dark:bg-gray-700 text-gray-200 dark:text-gray-600 opacity-50'
+                        : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white hover:shadow-lg'
+                    }`}
                   >
                     {t.profileCompletion.viewProfile}
                   </button>
                   <button
-                    onClick={() => onSectionChange('exportar')}
-                    className="px-5 py-2.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg border-2 border-gray-300 dark:border-gray-600 transition-all shadow-sm hover:shadow-md"
+                    onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('exportar')}
+                    className={`px-5 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all shadow-sm ${
+                      shouldBlockSections
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600 border-gray-300 dark:border-gray-600 opacity-50'
+                        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:shadow-md'
+                    }`}
                   >
                     {t.profileCompletion.downloadPDF}
                   </button>
@@ -341,7 +427,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-tour="stats">
           <StatCard
             title={t.stats.profileVisits}
             value={stats.visits}
@@ -398,7 +484,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             }
-            onClick={() => window.open(`/cv/${profile?.slug}`, '_blank')}
+            onClick={() => shouldBlockSections ? handleBlockedAction() : window.open(`/cv/${profile?.slug}`, '_blank')}
+            isBlocked={shouldBlockSections}
           />
 
           <QuickActionCard
@@ -409,7 +496,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             }
-            onClick={() => onSectionChange('exportar')}
+            onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('exportar')}
+            isBlocked={shouldBlockSections}
           />
 
           <QuickActionCard
@@ -420,7 +508,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             }
-            onClick={() => onSectionChange('analitica')}
+            onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('analitica')}
+            isBlocked={shouldBlockSections}
           />
         </div>
 
@@ -429,7 +518,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
           {/* Left Column */}
           <div className="space-y-6">
             {/* Analytics Chart */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border-2 border-gray-300 dark:border-gray-600 shadow-lg">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border-2 border-gray-300 dark:border-gray-600 shadow-lg" data-tour="chart">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.weeklyVisits.title}</h3>
@@ -600,61 +689,152 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
               </div>
             </div>
 
-            {/* Próximos Pasos */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.nextSteps.title}</h3>
-              <div className="space-y-3">
-                <NextStepItem
-                  text={t.nextSteps.add3Experiences}
-                  completed={stats.experienceCount >= 3}
-                  onClick={() => onSectionChange('mi-perfil:experience')}
-                />
-                <NextStepItem
-                  text={t.nextSteps.completeSummary}
-                  completed={!!profile?.summary && profile.summary.length > 50}
-                  onClick={() => onSectionChange('mi-perfil:identity')}
-                />
-                <NextStepItem
-                  text={t.nextSteps.addSkills}
-                  completed={stats.skillsCount >= 5}
-                  onClick={() => onSectionChange('mi-perfil:skills')}
-                />
-              </div>
-            </div>
+            {/* Próximos Pasos - Solo cuando el perfil está completo */}
+            {stats.profileCompleteness === 100 ? (
+              <>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800" data-tour="next-steps">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.nextSteps.title}</h3>
+                  <div className="space-y-3">
+                    <NextStepItem
+                      text={t.nextSteps.add3Experiences}
+                      completed={stats.experienceCount >= 3}
+                      onClick={() => onSectionChange('mi-perfil:experience')}
+                    />
+                    <NextStepItem
+                      text={t.nextSteps.completeSummary}
+                      completed={!!profile?.summary && profile.summary.length > 50}
+                      onClick={() => onSectionChange('mi-perfil:identity')}
+                    />
+                    <NextStepItem
+                      text={t.nextSteps.addSkills}
+                      completed={stats.skillsCount >= 5}
+                      onClick={() => onSectionChange('mi-perfil:skills')}
+                    />
+                  </div>
+                </div>
 
-            {/* Quick Stats */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.quickSummary.title}</h3>
-              <div className="space-y-3">
-                <QuickStatRow label={t.quickSummary.profileCreated} value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : 'N/A'} />
-                <QuickStatRow label={t.quickSummary.lastUpdate} value={t.quickSummary.today} />
-                <QuickStatRow label={t.quickSummary.activeTemplate} value={profile?.template || 'Minimal'} />
-                <QuickStatRow label={t.quickSummary.visibility} value={t.quickSummary.public} />
+                {/* Quick Stats */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.quickSummary.title}</h3>
+                  <div className="space-y-3">
+                    <QuickStatRow label={t.quickSummary.profileCreated} value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : 'N/A'} />
+                    <QuickStatRow label={t.quickSummary.lastUpdate} value={t.quickSummary.today} />
+                    <QuickStatRow label={t.quickSummary.activeTemplate} value={profile?.template || 'Minimal'} />
+                    <QuickStatRow label={t.quickSummary.visibility} value={t.quickSummary.public} />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                      {lang === 'es' ? '¡Estás casi listo!' : 'You\'re almost ready!'}
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 leading-relaxed">
+                      {lang === 'es'
+                        ? 'Completa tu perfil al 100% para desbloquear tareas personalizadas, resumen rápido de tu información y recomendaciones de nuestra IA para mejorar tu CV.'
+                        : 'Complete your profile to 100% to unlock personalized tasks, quick summary of your information and recommendations from our AI to improve your CV.'}
+                    </p>
+                    <button
+                      onClick={() => onSectionChange('mi-perfil:identity')}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      {lang === 'es' ? 'Completar Ahora' : 'Complete Now'}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Profile Quality Score - AI Powered */}
-            <Suspense fallback={
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            {/* Profile Quality Score - AI Powered - Solo se muestra cuando el tour ha sido completado Y el perfil está al 100% */}
+            {hasTourBeenCompleted && stats.profileCompleteness === 100 && (
+              <Suspense fallback={
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              }>
+                <div data-tour="quality-score">
+                  <ProfileQualityScore
+                    experiences={experiences}
+                    education={education}
+                    skills={skills}
+                    visas={visas}
+                    languages={languages}
+                    certifications={certifications}
+                    onNavigateToSection={(sectionId) => {
+                      // Special sections that don't need 'mi-perfil:' prefix
+                      const directSections = ['visas', 'stamps', 'analitica'];
+                      if (directSections.includes(sectionId)) {
+                        onSectionChange(sectionId);
+                      } else {
+                        onSectionChange(`mi-perfil:${sectionId}`);
+                      }
+                    }}
+                  />
+                </div>
+              </Suspense>
+            )}
+
+            {/* Mensaje cuando el tour está completado pero el perfil está incompleto */}
+            {hasTourBeenCompleted && stats.profileCompleteness < 100 && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                      {lang === 'es' ? 'Recomendaciones IA' : 'AI Recommendations'}
+                      <span className="px-2 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full">
+                        {lang === 'es' ? 'COMPLETA TU PERFIL' : 'COMPLETE YOUR PROFILE'}
+                      </span>
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
+                      {lang === 'es'
+                        ? 'Completa tu perfil al 100% para desbloquear sugerencias personalizadas de nuestra IA. Recibirás recomendaciones sobre cómo mejorar tu CV, optimizar tu perfil y aumentar tus oportunidades laborales.'
+                        : 'Complete your profile to 100% to unlock personalized suggestions from our AI. You will receive recommendations on how to improve your CV, optimize your profile and increase your job opportunities.'}
+                    </p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${stats.profileCompleteness}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400 min-w-[48px] text-right">
+                        {stats.profileCompleteness}%
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => onSectionChange('mi-perfil:identity')}
+                      className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      {lang === 'es' ? 'Completar Perfil' : 'Complete Profile'}
+                    </button>
+                  </div>
                 </div>
               </div>
-            }>
-              <ProfileQualityScore
-                experiences={experiences}
-                education={education}
-                skills={skills}
-                visas={visas}
-                languages={languages}
-                certifications={certifications}
-                onNavigateToSection={(sectionId) => onSectionChange(`mi-perfil:${sectionId}`)}
-              />
-            </Suspense>
+            )}
           </div>
         </div>
       </div>
@@ -764,23 +944,46 @@ const QuickActionCard: React.FC<{
   description: string;
   icon: React.ReactNode;
   onClick: () => void;
-}> = memo(({ title, description, icon, onClick }) => (
+  isBlocked?: boolean;
+}> = memo(({ title, description, icon, onClick, isBlocked = false }) => (
   <button
     onClick={onClick}
-    className="bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10 rounded-xl p-5 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl transition-all duration-300 text-left group relative overflow-hidden"
+    className={`rounded-xl p-5 border-2 transition-all duration-300 text-left group relative overflow-hidden ${
+      isBlocked
+        ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700 opacity-50'
+        : 'bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl'
+    }`}
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-300"></div>
+    <div className={`absolute inset-0 bg-gradient-to-br transition-all duration-300 ${
+      isBlocked ? 'from-gray-500/0 to-gray-500/0' : 'from-blue-500/0 to-indigo-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5'
+    }`}></div>
     <div className="relative flex items-start gap-3.5">
-      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 flex items-center justify-center text-white group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 flex-shrink-0 shadow-md">
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white transition-all duration-300 flex-shrink-0 shadow-md ${
+        isBlocked
+          ? 'bg-gray-400 dark:bg-gray-600'
+          : 'bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 group-hover:scale-110 group-hover:rotate-6'
+      }`}>
         {icon}
       </div>
       <div className="flex-1 min-w-0 pt-0.5">
-        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+        <h3 className={`text-base font-bold mb-1 transition-colors ${
+          isBlocked
+            ? 'text-gray-500 dark:text-gray-600'
+            : 'text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+        }`}>{title}</h3>
+        <p className={`text-sm ${
+          isBlocked ? 'text-gray-400 dark:text-gray-600' : 'text-gray-600 dark:text-gray-400'
+        }`}>{description}</p>
       </div>
-      <svg className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-      </svg>
+      {isBlocked ? (
+        <svg className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ) : (
+        <svg className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all duration-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        </svg>
+      )}
     </div>
   </button>
 ));

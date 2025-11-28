@@ -122,10 +122,10 @@ const SortableVisaCard: React.FC<SortableVisaCardProps> = ({ visa, onEdit, onDel
           )}
 
           {/* Metrics */}
-          {visa.metrics && visa.metrics.length > 0 && (
+          {Array.isArray(visa.metrics) && visa.metrics.length > 0 && (
             <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 mb-4">
               <ChartBarIcon className="w-4 h-4" aria-hidden="true" />
-              <span>{visa.metrics.length} {t.metrics}</span>
+              <span>{(Array.isArray(visa.metrics) ? visa.metrics : []).length} {t.metrics}</span>
             </div>
           )}
 

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
 import { Profile } from '../types';
@@ -31,6 +32,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -42,16 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Effect for handling session state
   useEffect(() => {
     const getSessionData = async () => {
-      
       const { data: { session } } = await supabase.auth.getSession();
-      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false); // Session loading is complete
 
       // If no session, no need to wait for profile
       if (!session) {
-        
         setProfileLoading(false);
       }
     };
@@ -61,17 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Completely ignore token refresh events - don't even log them
       if (event === 'TOKEN_REFRESHED') {
-        // Do absolutely nothing - no state updates, no logging
-        // This prevents page refreshes when switching tabs
         return;
       }
 
-      // Log other important events
-      
-
       // Handle signed out state
       if (event === 'SIGNED_OUT') {
-        
         setSession(null);
         setUser(null);
         setProfile(null);
@@ -81,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Handle signed in and initial session
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        
         setSession(session);
         setUser(session?.user ?? null);
         if (session) {
@@ -91,8 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Fallback: ensure loading is always set to false for any unhandled events
-      
       setLoading(false);
     });
 
@@ -104,11 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Effect for fetching profile data when user changes
   const fetchProfile = useCallback(async () => {
     if (user) {
-      
       setProfileLoading(true);
       try {
-        // Primero intentar obtener el perfil
-        
         let { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -116,11 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .limit(1)
           .single();
 
-        
-
         // If profile doesn't exist (e.g., user signed up before trigger was in place), create one.
         if (error && error.code === 'PGRST116') {
-          
           const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
             .insert({
@@ -132,29 +116,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
 
           if (insertError) {
-            
             throw insertError;
           }
-          
           data = newProfile;
         } else if (error) {
-          // For any other errors, re-throw to be caught by the catch block
-          
           throw error;
         }
 
-        
         setProfile(data as Profile | null);
       } catch (error: any) {
-        
         setProfile(null); // Set profile to null if any error occurs
       } finally {
-        
         setProfileLoading(false);
       }
     } else {
-      // If there is no user, there is no profile.
-      
       setProfile(null);
       setProfileLoading(false);
     }
@@ -166,7 +141,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const currentUserId = user?.id || null;
-    
 
     // Fetch profile if:
     // 1. User ID changed, OR
@@ -174,7 +148,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const shouldFetch = currentUserId !== userIdRef.current || (currentUserId && !hasFetchedProfile.current);
 
     if (shouldFetch && currentUserId) {
-      
       userIdRef.current = currentUserId;
       hasFetchedProfile.current = true;
       fetchProfile();
@@ -188,7 +161,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const openModal = (mode: AuthMode) => {
     setAuthMode(mode);
-    setIsAuthModalOpen(true);
+    // Redirect instead of opening modal
+    if (mode === 'signup') {
+      navigate('/signup');
+    } else {
+      navigate('/login');
+    }
+    // setIsAuthModalOpen(true); // Modal is removed
   };
 
   const closeModal = () => {
@@ -218,9 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (funcError) {
-        
         let errorMessage = funcError.message;
-        
         // Try to parse the response body if available
         if (funcError instanceof Error && 'context' in funcError) {
           try {
@@ -232,15 +209,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            
+            // ignore
           }
         }
-        
         return { data: { user: null, session: null }, error: new Error(errorMessage) };
       }
 
       if (funcData?.error) {
-        
         return { data: { user: null, session: null }, error: new Error(funcData.error) };
       }
 
@@ -253,7 +228,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error: null 
       };
     } catch (error) {
-      
       return { data: { user: null, session: null }, error };
     }
   };
@@ -297,10 +271,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        
         let errorMessage = error.message;
-        
-        // Try to parse the response body if available
         if (error instanceof Error && 'context' in error) {
           try {
             const response = (error as any).context as Response;
@@ -311,20 +282,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            
+            // ignore
           }
         }
         return { error: new Error(errorMessage) };
       }
 
       if (data?.error) {
-        
         return { error: new Error(data.error) };
       }
 
       return { error: null };
     } catch (error) {
-      
       return { error };
     }
   };
@@ -340,10 +309,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        
         let errorMessage = error.message;
-        
-        // Try to parse the response body if available
         if (error instanceof Error && 'context' in error) {
           try {
             const response = (error as any).context as Response;
@@ -354,20 +320,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
           } catch (e) {
-            
+            // ignore
           }
         }
         return { error: new Error(errorMessage) };
       }
 
       if (data?.error) {
-        
         return { error: new Error(data.error) };
       }
 
       return { error: null };
     } catch (error) {
-      
       return { error };
     }
   };

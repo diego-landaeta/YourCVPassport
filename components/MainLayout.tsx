@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
 import Header from './Header';
 import Footer from './Footer';
-import AuthModal from './AuthModal';
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { pathname } = useLocation();
@@ -28,7 +26,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {children}
             </main>
             {!hideHeaderFooter && <Footer />}
-            <AuthModal />
         </>
     );
 };

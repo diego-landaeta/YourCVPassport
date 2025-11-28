@@ -18,7 +18,7 @@ interface VerificationRequest {
   userId: string
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -242,9 +242,9 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({
-        error: error.message || 'An error occurred',
+        error: (error as any).message || 'An error occurred',
         code: 'INTERNAL_ERROR',
-        details: error.toString()
+        details: (error as any).toString()
       }),
       {
         status: 500,

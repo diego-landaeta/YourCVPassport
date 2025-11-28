@@ -120,6 +120,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
       services: [],
       stats: [],
       portfolioItems: profileData.portfolio || [],
+      certifications: [],
+      languages: [],
     };
 
     switch (templateId) {
@@ -321,7 +323,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
             <div className="sticky top-0 bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between z-10">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {t.previewModalTitle(templates.find(t => t.id === previewTemplate)?.name || '')}
+                  {t.previewModalTitle(templates.find(t => t.id === previewTemplate)?.name[lang] || '')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {t.previewModalSubtitle}

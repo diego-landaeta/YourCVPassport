@@ -6,19 +6,20 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../context/ToastContext';
-import { generateSummary } from '../../lib/ai';
+import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
 
 interface IdentitySectionProps {
   profile: any;
   onSave: (data: IdentityFormData) => Promise<void>;
+  onNext?: () => void;
 }
 
 export interface WizardStepHandle {
   submit: () => Promise<boolean>;
 }
 
-const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave }, ref) => {
+const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave, onNext }, ref) => {
   const translations = useTranslations();
   const t = translations.dashboard.identity;
   const { profile, session } = useAuth();
@@ -30,6 +31,10 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiSummaryVariants, setAiSummaryVariants] = useState<string[]>([]);
   const [showAIModal, setShowAIModal] = useState(false);
+  const [aiHeadlineVariants, setAiHeadlineVariants] = useState<string[]>([]);
+  const [showHeadlineModal, setShowHeadlineModal] = useState(false);
+  const [showRestoreDraftModal, setShowRestoreDraftModal] = useState(false);
+  const [draftToRestore, setDraftToRestore] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -50,9 +55,12 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
   React.useEffect(() => {}, [profile]);
 
-  // Auto-save form data to localStorage
+  // Auto-save form data to localStorage ONLY if there are unsaved changes
   React.useEffect(() => {
     const subscription = watch((formData) => {
+      // Solo guardar draft si hay cambios sin guardar (isDirty)
+      if (!isDirty) return;
+
       try {
         localStorage.setItem('identity_draft', JSON.stringify({
           formData,
@@ -61,7 +69,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       } catch (e) {}
     });
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, isDirty]);
 
   // Restore draft on mount
   React.useEffect(() => {
@@ -69,20 +77,35 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       const draft = localStorage.getItem('identity_draft');
       if (draft) {
         const parsed = JSON.parse(draft);
-        // Only restore if less than 24 hours old and different from initial data
+        // Only restore if less than 24 hours old
         if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-          const hasChanges = JSON.stringify(parsed.formData) !== JSON.stringify(initialData);
-          if (hasChanges) {
-            const shouldRestore = confirm(t.restoreDraft || '¿Restaurar borrador guardado?');
-            if (shouldRestore && parsed.formData) {
-              Object.keys(parsed.formData).forEach((key) => {
-                if (parsed.formData[key] !== undefined) {
-                  setValue(key as keyof IdentityFormData, parsed.formData[key], { shouldDirty: true });
-                }
-              });
-            } else {
-              localStorage.removeItem('identity_draft');
-            }
+          // Comparar solo los campos relevantes (ignorar campos que pueden ser null vs undefined)
+          const draftData = parsed.formData;
+          const currentData = initialData;
+
+          // Función para normalizar valores (null, undefined, '' -> null)
+          const normalize = (val: any) => {
+            if (val === undefined || val === '' || val === null) return null;
+            return val;
+          };
+
+          // Comparar campos importantes
+          const hasRealChanges =
+            normalize(draftData.full_name) !== normalize(currentData?.full_name) ||
+            normalize(draftData.headline) !== normalize(currentData?.headline) ||
+            normalize(draftData.summary) !== normalize(currentData?.summary) ||
+            normalize(draftData.country_code) !== normalize(currentData?.country_code) ||
+            normalize(draftData.linkedin_url) !== normalize(currentData?.linkedin_url) ||
+            normalize(draftData.github_url) !== normalize(currentData?.github_url) ||
+            normalize(draftData.portfolio_url) !== normalize(currentData?.portfolio_url) ||
+            normalize(draftData.remote) !== normalize(currentData?.remote);
+
+          if (hasRealChanges) {
+            setDraftToRestore(parsed.formData);
+            setShowRestoreDraftModal(true);
+          } else {
+            // Si no hay cambios reales, eliminar el draft
+            localStorage.removeItem('identity_draft');
           }
         } else {
           localStorage.removeItem('identity_draft');
@@ -216,33 +239,108 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
     }
   }, [session, toast, getValues]);
 
-  const handleSelectSummaryVariant = (variant: string) => {
+  const handleOptimizeHeadline = React.useCallback(async () => {
+    if (!session?.user?.id) {
+      toast.error('Debes estar autenticado para usar esta función');
+      return;
+    }
+
+    const currentValues = getValues();
+    const currentHeadline = currentValues.headline;
+
+    if (!currentHeadline || currentHeadline.trim() === '') {
+      toast.error('Primero escribe un headline profesional para optimizarlo');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      const response = await optimizeHeadline(currentHeadline, session.user.id);
+
+      if (response.success && response.data) {
+        setValue('headline', response.data, { shouldDirty: true });
+        toast.success('Headline optimizado con IA');
+      } else {
+        toast.error(response.error || 'Error al optimizar el headline');
+      }
+    } catch (error) {
+      toast.error('Error al optimizar el headline con IA');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  }, [session, toast, getValues, setValue]);
+
+  const handleSelectSummaryVariant = async (variant: string) => {
     setValue('summary', variant, { shouldDirty: true });
     setShowAIModal(false);
     setAiSummaryVariants([]);
-    toast.success('Resumen aplicado. No olvides guardar los cambios.');
+    toast.success('Resumen aplicado.');
+
+    // After selecting summary, automatically optimize headline
+    const currentHeadline = getValues('headline');
+    if (currentHeadline && currentHeadline.trim() !== '') {
+      setIsGeneratingAI(true);
+      try {
+        const response = await optimizeHeadline(currentHeadline, session?.user?.id);
+
+        if (response.success && response.data) {
+          setAiHeadlineVariants(response.data);
+          setShowHeadlineModal(true);
+          setIsGeneratingAI(false);
+        } else {
+          toast.error(response.error || 'Error al optimizar el headline');
+          setIsGeneratingAI(false);
+        }
+      } catch (error) {
+        toast.error('Error al optimizar el headline con IA');
+        setIsGeneratingAI(false);
+      }
+    }
   };
 
+  const handleSelectHeadlineVariant = (variant: string) => {
+    setValue('headline', variant, { shouldDirty: true });
+    setShowHeadlineModal(false);
+    setAiHeadlineVariants([]);
+    toast.success('Headline optimizado. No olvides guardar los cambios.');
+  };
+
+  const handleRejectHeadline = () => {
+    setShowHeadlineModal(false);
+    setAiHeadlineVariants([]);
+    toast.info('Headline original mantenido.');
+  };
+
+  // Combined AI optimization - only generates summary (NOT headline)
+  // Headline optimization must be explicitly requested by user
+  const handleOptimizeWithAI = React.useCallback(async () => {
+    // Only generate summary, do NOT touch headline
+    await handleGenerateSummary();
+  }, [handleGenerateSummary]);
+
   const onSubmit = async (data: IdentityFormData) => {
-    // Transform URLs to add https:// if missing
+    // Transform URLs to add https:// if missing, handle null/undefined values
+    const transformUrl = (url: string | null | undefined) => {
+      if (!url || url.trim() === '') return null;
+      return url.startsWith('http') ? url : `https://${url}`;
+    };
+
     const transformedData = {
       ...data,
-      linkedin_url: data.linkedin_url && data.linkedin_url.length > 0 && !data.linkedin_url.startsWith('http') 
-        ? `https://${data.linkedin_url}` 
-        : data.linkedin_url,
-      github_url: data.github_url && data.github_url.length > 0 && !data.github_url.startsWith('http')
-        ? `https://${data.github_url}`
-        : data.github_url,
-      portfolio_url: data.portfolio_url && data.portfolio_url.length > 0 && !data.portfolio_url.startsWith('http')
-        ? `https://${data.portfolio_url}`
-        : data.portfolio_url,
+      linkedin_url: transformUrl(data.linkedin_url),
+      github_url: transformUrl(data.github_url),
+      portfolio_url: transformUrl(data.portfolio_url),
     };
-    
+
     await onSave(transformedData);
     // Clear draft on successful save
     localStorage.removeItem('identity_draft');
     // Reset form to mark as clean (no unsaved changes)
-    reset(data);
+    reset(transformedData);
+    // Auto-advance to next section
+    if (onNext) {
+      onNext();
+    }
   };
 
   useImperativeHandle(ref, () => ({
@@ -256,10 +354,10 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
     }
   }));
 
-  // Listen for AI summary generation trigger from floating button
+  // Listen for AI optimization trigger from floating button
   React.useEffect(() => {
     const handleGenerateAISummaryEvent = () => {
-      handleGenerateSummary();
+      handleOptimizeWithAI();
     };
 
     window.addEventListener('generateAISummary', handleGenerateAISummaryEvent);
@@ -267,13 +365,13 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
     return () => {
       window.removeEventListener('generateAISummary', handleGenerateAISummaryEvent);
     };
-  }, [handleGenerateSummary]);
+  }, [handleOptimizeWithAI]);
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.title}</h2>
 
-      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit as any)} noValidate className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {/* Left Column: Professional Information */}
           <div className="space-y-5">
@@ -333,12 +431,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <div className="flex-1 space-y-3 min-w-0">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t.fullNameRequired}
+                    {t.fullNameRequired} <span className="text-red-500">*</span>
                   </label>
                   <input
                     {...register('full_name')}
                     type="text"
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                    className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
+                      errors.full_name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
                     placeholder="John Doe"
                   />
                   {errors.full_name && (
@@ -348,12 +448,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t.headlineRequired}
+                    {t.headlineRequired} <span className="text-red-500">*</span>
                   </label>
                   <input
                     {...register('headline')}
                     type="text"
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                    className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
+                      errors.headline ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    }`}
                     placeholder="Senior Software Engineer"
                   />
                   {errors.headline && (
@@ -363,30 +465,20 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               </div>
             </div>
 
-            {/* Country & Location */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  País
-                </label>
-                <CountrySelector
-                  value={watch('country_code')}
-                  onChange={(code) => setValue('country_code', code, { shouldDirty: true })}
-                  placeholder="País"
-                  lang="es"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t.location}
-                </label>
-                <input
-                  {...register('location')}
-                  type="text"
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                  placeholder="Ciudad"
-                />
-              </div>
+            {/* Country */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                País <span className="text-red-500">*</span>
+              </label>
+              <CountrySelector
+                value={watch('country_code')}
+                onChange={(code) => setValue('country_code', code, { shouldDirty: true })}
+                placeholder="Selecciona tu país"
+                lang="es"
+              />
+              {errors.country_code && (
+                <p className="text-red-500 text-xs mt-1">{errors.country_code.message}</p>
+              )}
             </div>
             
             <div className="flex items-center pt-1">
@@ -405,7 +497,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {t.aboutMe}
+                  {t.aboutMe} <span className="text-red-500">*</span>
                 </label>
                 <span className="text-xs text-gray-400">
                   {watch('summary')?.length || 0}/500
@@ -415,9 +507,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 {...register('summary')}
                 rows={4}
                 maxLength={500}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white resize-none text-sm"
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white resize-none text-sm ${
+                  errors.summary ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
                 placeholder={t.aboutMePlaceholder}
               />
+              {errors.summary && (
+                <p className="text-red-500 text-xs mt-1">{errors.summary.message}</p>
+              )}
             </div>
           </div>
 
@@ -428,24 +525,6 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             </h3>
 
             <div className="space-y-4">
-              {/* Phone */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t.phone}
-                </label>
-                <input
-                  {...register('phone')}
-                  type="tel"
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9+\s()-]/g, '');
-                    setValue('phone', value);
-                  }}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                  placeholder="+1 (555) 123-4567"
-                  maxLength={20}
-                />
-              </div>
-
               {/* Social Links Grid */}
               <div className="grid grid-cols-1 gap-4">
                 <div>
@@ -530,10 +609,9 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
           )}
           <button
             type="submit"
-            disabled={!isDirty}
-            className="px-5 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm ml-auto"
+            className="px-5 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium shadow-sm ml-auto"
           >
-            {isDirty ? t.saveChanges : t.noChanges}
+            {t.saveChanges}
           </button>
         </div>
       </form>
@@ -549,6 +627,60 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             <p className="text-sm text-gray-600 dark:text-gray-400 text-center max-w-md">
               La IA está generando tu resumen profesional basado en tu experiencia y habilidades
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Restore Draft Modal */}
+      {showRestoreDraftModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Borrador guardado
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Tienes cambios sin guardar de una sesión anterior. ¿Deseas restaurarlos?
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('identity_draft');
+                    setShowRestoreDraftModal(false);
+                    setDraftToRestore(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
+                >
+                  Descartar
+                </button>
+                <button
+                  onClick={() => {
+                    if (draftToRestore) {
+                      Object.keys(draftToRestore).forEach((key) => {
+                        if (draftToRestore[key] !== undefined) {
+                          setValue(key as keyof IdentityFormData, draftToRestore[key], { shouldDirty: true });
+                        }
+                      });
+                    }
+                    setShowRestoreDraftModal(false);
+                    setDraftToRestore(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-cv-blue hover:bg-cv-blue-dark text-white rounded-lg font-medium transition-colors"
+                >
+                  Restaurar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -614,6 +746,76 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Headline Optimization Modal */}
+      {showHeadlineModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-xl max-w-2xl w-full">
+            <div className="p-6 border-b border-gray-200 dark:border-dark-border">
+              <div className="flex items-center gap-3 mb-4">
+                <svg className="w-8 h-8 text-cv-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Headline Optimizado
+                </h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                La IA ha optimizado tu headline profesional corrigiendo errores y mejorando su impacto.
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Original Headline */}
+              <div className="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-gray-50 dark:bg-dark-bg-tertiary">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Original</span>
+                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                  {getValues('headline')}
+                </p>
+              </div>
+
+              {/* Optimized Headline Variants */}
+              {aiHeadlineVariants.map((variant, index) => (
+                <div
+                  key={index}
+                  className="border-2 border-cv-blue rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10 hover:border-purple-600 transition-colors cursor-pointer group"
+                  onClick={() => handleSelectHeadlineVariant(variant)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-cv-blue uppercase">
+                      Opción {index + 1} - Optimizado con IA
+                    </span>
+                    <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-gray-900 dark:text-white font-medium mb-3">
+                    {variant}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectHeadlineVariant(variant);
+                    }}
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-cv-blue group-hover:bg-purple-600 rounded-lg transition-colors"
+                  >
+                    Seleccionar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary">
+              <button
+                onClick={handleRejectHeadline}
+                className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
+              >
+                Mantener Original
               </button>
             </div>
           </div>

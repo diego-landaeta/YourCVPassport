@@ -582,7 +582,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label={(entry) => `${entry.source_type}: ${entry.percentage}%`}
+                label={(entry: any) => `${entry.source_type}: ${entry.percentage}%`}
               >
                 {analyticsData.trafficSources.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -607,7 +607,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                label={(entry) => `${entry.device_type}: ${entry.percentage}%`}
+                label={(entry: any) => `${entry.device_type}: ${entry.percentage}%`}
               >
                 {analyticsData.devices.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />

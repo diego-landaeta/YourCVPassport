@@ -115,9 +115,10 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
       'Experiencia laboral': 'experience',
       'Habilidades': 'skills',
       'Educación': 'education',
-      'Proyectos (Visas)': 'portfolio',
+      'Proyectos (Visas)': 'visas',
       'Idiomas': 'languages',
       'Certificaciones': 'portfolio',
+      'Verificaciones': 'stamps',
     };
     return categoryMap[category] || null;
   };

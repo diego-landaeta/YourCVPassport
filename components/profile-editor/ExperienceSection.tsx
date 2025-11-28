@@ -163,6 +163,18 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   const [showAISuggestions, setShowAISuggestions] = useState(false);
   const hasCheckedDraft = React.useRef(false);
   const shouldSaveDraft = React.useRef(true);
+  const prevInitialDataRef = React.useRef<string>('');
+
+  // Sync local state with initialData when it actually changes (after save)
+  // Use JSON comparison with ref to prevent infinite loops
+  React.useEffect(() => {
+    const newDataStr = JSON.stringify(initialData);
+
+    if (prevInitialDataRef.current !== newDataStr) {
+      prevInitialDataRef.current = newDataStr;
+      setExperiences(initialData);
+    }
+  }, [initialData]);
 
   // Expose toggleAISuggestions method to parent component
   useImperativeHandle(ref, () => ({
@@ -372,16 +384,41 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   };
 
   const onSubmit = async (data: ExperienceFormData) => {
-    // Debug: verificar el valor de is_current// Validar fechas antes de guardar
+    // Validar campos requeridos
+    if (!data.position || data.position.trim() === '') {
+      toast.error('El cargo es obligatorio');
+      return;
+    }
+
+    if (!data.company_name || data.company_name.trim() === '') {
+      toast.error('El nombre de la empresa es obligatorio');
+      return;
+    }
+
+    if (!data.start_date || data.start_date.trim() === '') {
+      toast.error('La fecha de inicio es obligatoria');
+      return;
+    }
+
+    // Validar que si NO está marcado como actual, debe tener fecha de fin
+    if (!data.is_current && (!data.end_date || data.end_date.trim() === '')) {
+      toast.error('La fecha de fin es obligatoria. Si aún trabajas aquí, marca "Actualmente trabajo aquí"');
+      return;
+    }
+
+    // Validar fechas antes de guardar
     const dateValidation = validateDateRange(
       data.start_date,
       data.end_date,
       data.is_current || false
     );
 
-    if (!dateValidation.isValid) {toast.error(dateValidation.error || 'Las fechas no son válidas');
+    if (!dateValidation.isValid) {
+      toast.error(dateValidation.error || 'Las fechas no son válidas');
       return;
-    }// Clean markdown from description and achievements before saving
+    }
+
+    // Clean markdown from description and achievements before saving
     const formData = {
       ...data,
       description: cleanMarkdown(data.description),
@@ -477,15 +514,34 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addExperience.replace('Añadir ', '').replace('Add ', '')}</h2>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          {modals.addExperience}
-        </button>
+        <div className="flex items-center gap-3">
+          {/* AI Toggle Button */}
+          {experiences.length > 0 && (
+            <button
+              onClick={() => setShowAISuggestions(!showAISuggestions)}
+              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
+                showAISuggestions
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
+                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
+              }`}
+              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
+            </button>
+          )}
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {modals.addExperience}
+          </button>
+        </div>
       </div>
 
       {/* Verification Info Banner */}
@@ -574,7 +630,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             {editingIndex !== null ? modals.editExperience : modals.addNewExperience}
           </h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

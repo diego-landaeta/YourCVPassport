@@ -32,7 +32,7 @@ interface SuggestionItem {
 }
 
 const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusChange }) => {
-  const { profile, session, refreshProfile } = useAuth();
+  const { profile, session, refetchProfile } = useAuth();
   const t = useTranslations();
   const aiT = t.aiAssistantSection;
   const toast = useToastContext();
@@ -283,8 +283,8 @@ INSTRUCCIONES:
       );
 
       // Refresh profile to show updated data
-      if (refreshProfile) {
-        await refreshProfile();
+      if (refetchProfile) {
+        await refetchProfile();
       }
 
       // Cerrar modal

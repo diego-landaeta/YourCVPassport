@@ -1,13 +1,13 @@
 import React from 'react';
-import { Toast } from '../hooks/useToast';
+import { ToastMessage } from '../hooks/useToast';
 
 interface ToastContainerProps {
-  toasts: Toast[];
+  toasts: ToastMessage[];
   onRemove: (id: string) => void;
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
-  const getToastStyles = (type: Toast['type']) => {
+  const getToastStyles = (type: ToastMessage['type']) => {
     const baseStyles = 'px-6 py-4 rounded-lg shadow-lg flex items-start gap-3 min-w-[320px] max-w-md animate-slide-in';
 
     switch (type) {
@@ -23,7 +23,7 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => 
     }
   };
 
-  const getIcon = (type: Toast['type']) => {
+  const getIcon = (type: ToastMessage['type']) => {
     switch (type) {
       case 'success':
         return (

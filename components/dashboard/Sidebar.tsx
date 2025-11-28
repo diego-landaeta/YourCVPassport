@@ -13,12 +13,16 @@ interface SidebarProps {
   education?: any[];
   skills?: any[];
   languages?: any[];
+  profileCompleteness?: number;
+  tourCompleted?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   profile,
   activeSection,
-  onSectionChange
+  onSectionChange,
+  profileCompleteness = 100,
+  tourCompleted = false
 }) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -163,19 +167,65 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
   ].filter(item => item && item.id); // Filter out commented/undefined items
 
+  // Determinar si las secciones deben estar bloqueadas
+  const shouldBlockSections = tourCompleted && profileCompleteness < 100;
+  const [showProfileAlert, setShowProfileAlert] = React.useState(false);
+
   const handleMenuClick = (item: any) => {
+    // Permitir siempre Dashboard y Mi Perfil
+    if (item.id === 'dashboard' || item.id === 'mi-perfil') {
+      if (item.link) {
+        navigate(item.link);
+      } else if (item.id === 'mi-perfil') {
+        onSectionChange('mi-perfil:identity');
+      } else {
+        onSectionChange(item.id);
+      }
+      return;
+    }
+
+    // Bloquear otras secciones (incluyendo ver-cv) si el perfil no está completo después del tour
+    if (shouldBlockSections) {
+      setShowProfileAlert(true);
+      setTimeout(() => setShowProfileAlert(false), 4000);
+      return;
+    }
+
+    // Permitir navegación normal
     if (item.link) {
       navigate(item.link);
-    } else if (item.id === 'mi-perfil') {
-      // Navigate to first subsection (identity)
-      onSectionChange('mi-perfil:identity');
     } else {
       onSectionChange(item.id);
     }
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col">
+    <div className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col" data-tour="sidebar">
+      {/* Profile Completion Alert */}
+      {showProfileAlert && (
+        <div className="fixed top-20 left-72 z-50 animate-slideInRight">
+          <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-4 rounded-xl shadow-2xl min-w-[320px] border border-orange-400">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm mb-1">
+                  {lang === 'es' ? '¡Completa tu perfil primero!' : 'Complete your profile first!'}
+                </p>
+                <p className="text-xs text-orange-100">
+                  {lang === 'es'
+                    ? 'Debes completar tu perfil al 100% para acceder a todas las funciones.'
+                    : 'You must complete your profile to 100% to access all features.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
         {/* User Profile Section */}
       <div className="p-6 border-b border-gray-200 dark:border-dark-border">
         <div className="flex items-center gap-3">
@@ -201,13 +251,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <ul className="space-y-1">
           {menuItems.map((item) => {
+            const isBlocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
             return (
-              <li key={item.id}>
+              <li key={item.id} className="relative">
                 <button
                   onClick={() => handleMenuClick(item)}
                   data-section-btn={item.id}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    activeSection === item.id || (item.id === 'mi-perfil' && activeSection.startsWith('mi-perfil:'))
+                  data-tour={`sidebar-${item.id}`}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                    isBlocked
+                      ? 'opacity-50 text-gray-400 dark:text-gray-600'
+                      : activeSection === item.id || (item.id === 'mi-perfil' && activeSection.startsWith('mi-perfil:'))
                       ? 'bg-cv-blue text-white'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'
                   }`}
@@ -224,7 +278,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                     )}
                   </div>
                   <span className="font-medium">{item.label}</span>
-                  {item.id === 'leads' && unreadCount > 0 && (
+                  {isBlocked && (
+                    <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  )}
+                  {!isBlocked && item.id === 'leads' && unreadCount > 0 && (
                     <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
                       {unreadCount}
                     </span>

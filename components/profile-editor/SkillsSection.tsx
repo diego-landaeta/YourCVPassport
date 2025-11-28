@@ -29,6 +29,7 @@ const AISkillsSuggestion = lazy(() => import('./AISkillsSuggestion'));
 interface SkillsSectionProps {
   initialData?: SkillFormData[];
   onSave: (data: SkillFormData[]) => Promise<void>;
+  onNext?: () => void;
 }
 
 export interface SkillsSectionHandle {
@@ -130,7 +131,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
   );
 };
 
-const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ initialData = [], onSave }, ref) => {
+const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ initialData = [], onSave, onNext }, ref) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { session } = useAuth();
@@ -286,15 +287,23 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addSkill.replace('Añadir ', '').replace('Add ', '')}</h2>
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowAISuggestions(!showAISuggestions)}
-            className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors text-sm font-medium flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-            {showAISuggestions ? 'Ocultar Sugerencias IA' : 'Sugerencias IA'}
-          </button>
+          {/* AI Toggle Button */}
+          {skills.length > 0 && (
+            <button
+              onClick={() => setShowAISuggestions(!showAISuggestions)}
+              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
+                showAISuggestions
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
+                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
+              }`}
+              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
+            </button>
+          )}
           <button
             onClick={handleAdd}
             className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
@@ -356,6 +365,21 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </div>
       )}
 
+      {/* Botón Continuar - Solo cuando hay habilidades y no está abierto el formulario */}
+      {skills.length > 0 && !isFormOpen && onNext && (
+        <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
+          <button
+            onClick={onNext}
+            className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium flex items-center gap-2 shadow-sm"
+          >
+            Continuar
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteIndex !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -403,7 +427,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {modals.skillName} *

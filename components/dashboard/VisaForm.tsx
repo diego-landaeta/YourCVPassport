@@ -89,23 +89,23 @@ const VisaForm: React.FC = () => {
   const addMetric = () => {
     setFormData(prev => ({
       ...prev,
-      metrics: [...(prev.metrics || []), { key: '', value: '' }]
+      metrics: [...(Array.isArray(prev.metrics) ? prev.metrics : []), { key: '', value: '' }]
     }));
   };
 
   const updateMetric = (index: number, field: 'key' | 'value', value: string) => {
     setFormData(prev => ({
       ...prev,
-      metrics: prev.metrics?.map((m, i) => 
+      metrics: (Array.isArray(prev.metrics) ? prev.metrics : []).map((m, i) => 
         i === index ? { ...m, [field]: value } : m
-      ) || []
+      )
     }));
   };
 
   const removeMetric = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      metrics: prev.metrics?.filter((_, i) => i !== index) || []
+      metrics: (Array.isArray(prev.metrics) ? prev.metrics : []).filter((_, i) => i !== index)
     }));
   };
 
@@ -426,7 +426,7 @@ const VisaForm: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {formData.metrics?.map((metric, index) => (
+            {(Array.isArray(formData.metrics) ? formData.metrics : []).map((metric, index) => (
               <div key={index} className="flex items-center gap-3">
                 <input
                   type="text"

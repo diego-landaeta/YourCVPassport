@@ -386,6 +386,73 @@ Resumen 3`;
 }
 
 /**
+ * Optimize professional headline - generates 3 variants
+ * Corrects grammar, spelling, and improves professionalism
+ */
+export async function optimizeHeadline(
+  headline: string,
+  userId?: string
+): Promise<AIResponse<string[]>> {
+  const prompt = `Actúa como un experto en recursos humanos y redacción profesional.
+
+Optimiza el siguiente headline profesional, generando 3 versiones diferentes:
+
+HEADLINE ORIGINAL:
+${headline}
+
+INSTRUCCIONES:
+- Genera EXACTAMENTE 3 versiones diferentes del headline
+- Corrige cualquier error ortográfico o gramatical
+- Mejora la redacción para que sea más profesional e impactante
+- Mantén el mensaje y la esencia original
+- Usa verbos de acción y términos profesionales
+- Mantén cada headline conciso (máximo 10-12 palabras)
+- Optimiza para sistemas ATS
+- NO uses frases como "con experiencia en" o "especializado en", ve directo al punto
+- Separa cada variante con "---" (tres guiones)
+- NO incluyas números de versión ni títulos, solo el texto
+
+Ejemplo:
+Input: "desarollador full stack con años de esperiencia"
+Output:
+Full Stack Developer | React, Node.js & Cloud Solutions
+---
+Full Stack Engineer | Frontend & Backend Specialist
+---
+Software Developer | JavaScript, APIs & Modern Frameworks
+
+Devuelve las 3 variantes separadas por ---:`;
+
+  const response = await generateText(prompt, userId);
+
+  if (!response.success || !response.data) {
+    return {
+      success: false,
+      error: response.error || 'Failed to optimize headline',
+    };
+  }
+
+  // Split variants by ---
+  const variants = response.data
+    .split('---')
+    .map(v => v.trim())
+    .filter(v => v.length > 0);
+
+  // Ensure we have at least 3 variants
+  if (variants.length < 3) {
+    return {
+      success: false,
+      error: 'No se pudieron generar suficientes variantes',
+    };
+  }
+
+  return {
+    success: true,
+    data: variants.slice(0, 3), // Return only first 3 variants
+  };
+}
+
+/**
  * Suggest missing skills based on experience
  */
 export async function suggestSkills(
@@ -610,6 +677,16 @@ export function generateProfileSuggestions(
       message: 'Agrega los idiomas que dominas',
       actionable: true,
       priority: 'low',
+    });
+  }
+
+  // Sugerencia para subir certificados de idiomas si tiene idiomas agregados
+  if (check.languagesCount > 0) {
+    suggestions.push({
+      category: 'Verificaciones',
+      message: 'Sube certificados de idiomas (TOEFL, IELTS, DELE, etc.) para verificar tu nivel y aumentar tu credibilidad',
+      actionable: true,
+      priority: 'medium',
     });
   }
 

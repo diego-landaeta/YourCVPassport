@@ -1,14 +1,23 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslations } from '../hooks/useTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Hero: React.FC = () => {
-  const { openModal } = useAuth();
+  const { openModal, user } = useAuth();
   const t = useTranslations();
   const { lang } = useLanguage();
+  const navigate = useNavigate();
   const langPrefix = lang === 'es' ? '/es' : '';
+
+  const handleAuthRedirect = (defaultAction?: () => void) => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/signup');
+    }
+  };
 
   return (
     <section className="bg-cv-light-gray dark:bg-dark-bg-primary">
@@ -21,15 +30,15 @@ const Hero: React.FC = () => {
         </p>
         <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <button
-            onClick={() => openModal('signup')}
+            onClick={() => handleAuthRedirect()}
             className="w-full sm:w-auto bg-cv-blue dark:bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light transition-all duration-300 transform hover:scale-105 shadow-lg">
             {t.hero.ctaCreate}
           </button>
-          <Link
-            to={`${langPrefix}/companies/search`}
+          <button
+            onClick={() => handleAuthRedirect()}
             className="w-full sm:w-auto bg-white dark:bg-dark-bg-secondary text-cv-blue dark:text-cv-blue-light px-8 py-3 rounded-lg text-lg font-semibold border-2 border-cv-blue dark:border-cv-blue-light hover:bg-cv-blue hover:text-white dark:hover:bg-cv-blue-light dark:hover:text-white transition-all duration-300 transform hover:scale-105 shadow-lg">
             {t.hero.ctaSearch}
-          </Link>
+          </button>
         </div>
       </div>
     </section>

@@ -70,7 +70,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
       { position: '', company_name: '', start_date: '', end_date: '', description: '', is_current: false }
     ],
     education: [
-      { institution_name: '', degree: '', field_of_study: '', start_date: '', end_date: '', description: '' }
+      { institution_name: '', degree: '', field_of_study: '', start_date: '', end_date: '', description: '', is_current: false }
     ],
     skills: [{ name: '', level: '', years_of_experience: 0, percentage: null }],
     languages: [{ name: '', level: '', percentage: null }],
@@ -143,6 +143,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             start_date: edu.start_date || '',
             end_date: edu.end_date || '',
             description: edu.description || '',
+            is_current: edu.is_current || false,
           }))
         }));
       }

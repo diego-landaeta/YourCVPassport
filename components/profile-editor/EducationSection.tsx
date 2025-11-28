@@ -24,6 +24,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // Lazy load AI optimizer
 const AITextOptimizer = lazy(() => import('./AITextOptimizer'));
@@ -211,9 +212,11 @@ const extractDegreeType = (fieldOfStudy: string): string => {
   return 'Licenciatura';
 };
 
+
 const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
   const { session } = useAuth();
   const translations = useTranslations();
+  const { lang } = useLanguage();
   const modals = translations.dashboard.modals;
   const { confirm, Dialog } = useConfirmDialog();
   const toast = useToastContext();
@@ -223,6 +226,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
   const [showAISuggestions, setShowAISuggestions] = useState(false);
   const hasCheckedDraft = React.useRef(false);
   const shouldSaveDraft = React.useRef(true);
+  const [gradeScale, setGradeScale] = useState<string>('4.0'); // Estado para la escala del GPA
 
   // Expose toggleAISuggestions method to parent component
   useImperativeHandle(ref, () => ({
@@ -348,6 +352,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
 
   const handleAdd = () => {
     setEditingIndex(null);
+    setGradeScale('4.0'); // Resetear a la escala por defecto
     reset({
       institution_name: '',
       degree: '',
@@ -372,6 +377,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       localStorage.removeItem('education_draft_last_prompt');
     }, 0);
 
+    setGradeScale('4.0'); // Resetear a la escala por defecto
     setIsFormOpen(false);
     reset();
   };
@@ -479,6 +485,14 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       description: description,
     };
 
+    // Extraer y establecer la escala del GPA si existe
+    if (grade && grade.includes('/')) {
+      const scale = grade.split('/')[1];
+      setGradeScale(scale || '4.0');
+    } else {
+      setGradeScale('4.0');
+    }
+
     reset(cleanedEdu);
     setIsFormOpen(true);
   };
@@ -575,6 +589,33 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
   };
 
   const onSubmit = async (data: EducationFormData) => {
+    // Validar campos requeridos
+    if (!data.institution_name || data.institution_name.trim() === '') {
+      toast.error('El nombre de la institución es obligatorio');
+      return;
+    }
+
+    if (!data.degree || data.degree.trim() === '') {
+      toast.error('El título es obligatorio');
+      return;
+    }
+
+    if (!data.field_of_study || data.field_of_study.trim() === '') {
+      toast.error('El campo de estudio es obligatorio');
+      return;
+    }
+
+    if (!data.start_date || data.start_date.trim() === '') {
+      toast.error('La fecha de inicio es obligatoria');
+      return;
+    }
+
+    // Validar que si NO está marcado como actual, debe tener fecha de fin
+    if (!data.is_current && (!data.end_date || data.end_date.trim() === '')) {
+      toast.error('La fecha de fin es obligatoria. Si aún estudias aquí, marca "Actualmente estudio aquí"');
+      return;
+    }
+
     // Validar fechas antes de guardar
     const dateValidation = validateDateRange(
       data.start_date,
@@ -640,15 +681,34 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addEducation.replace('Añadir ', '').replace('Add ', '')}</h2>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          {modals.addEducation}
-        </button>
+        <div className="flex items-center gap-3">
+          {/* AI Toggle Button */}
+          {education.length > 0 && (
+            <button
+              onClick={() => setShowAISuggestions(!showAISuggestions)}
+              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
+                showAISuggestions
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
+                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
+              }`}
+              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
+            </button>
+          )}
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            {modals.addEducation}
+          </button>
+        </div>
       </div>
 
       {/* Verification Info Banner */}
@@ -662,10 +722,10 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {translations.lang === 'en' ? 'Verify your education' : 'Verifica tu educación'}
+                {lang === 'en' ? 'Verify your education' : 'Verifica tu educación'}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {translations.lang === 'en'
+                {lang === 'en'
                   ? 'Boost your credibility by verifying your educational background. Go to the Verifications section to submit your certificates or diplomas.'
                   : 'Aumenta tu credibilidad verificando tu formación académica. Ve a la sección de Verificaciones para enviar tus certificados o diplomas.'}
               </p>
@@ -673,7 +733,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
               >
-                {translations.lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
+                {lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -735,7 +795,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             {editingIndex !== null ? modals.editEducation : modals.addNewEducation}
           </h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -805,25 +865,74 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
               </div>
 
               <div>
-                <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  GPA
-                  <span title="Grade Point Average - Promedio de calificaciones (ej: 3.8/4.0 o 85/100)" className="cursor-help">
-                    <svg
-                      className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  GPA / Nota Media (Opcional)
                 </label>
-                <input
-                  {...register('grade')}
-                  type="text"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                  placeholder="3.8/4.0 o 85/100"
-                />
+                <div className="flex gap-2">
+                  {/* Selector de formato */}
+                  <select
+                    className="w-40 px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                    value={gradeScale}
+                    onChange={(e) => {
+                      const newScale = e.target.value;
+                      setGradeScale(newScale);
+
+                      const currentValue = watch('grade');
+                      const numericValue = currentValue?.match(/[\d.]+/)?.[0] || '';
+
+                      // Actualizar el campo solo si hay un valor numérico
+                      if (numericValue) {
+                        setValue('grade', `${numericValue}/${newScale}`, { shouldDirty: true });
+                      }
+                    }}
+                  >
+                    <option value="4.0">Escala 4.0</option>
+                    <option value="5.0">Escala 5.0</option>
+                    <option value="10">Escala 10</option>
+                    <option value="100">Porcentaje 100</option>
+                  </select>
+
+                  {/* Input numérico */}
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max={parseFloat(gradeScale)}
+                    placeholder={
+                      gradeScale === '4.0' ? '0.0 - 4.0' :
+                      gradeScale === '5.0' ? '0.0 - 5.0' :
+                      gradeScale === '10' ? '0 - 10' :
+                      '0 - 100'
+                    }
+                    value={watch('grade')?.match(/[\d.]+/)?.[0] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (value === '') {
+                        setValue('grade', '', { shouldDirty: true });
+                        return;
+                      }
+
+                      // Validar límites según la escala
+                      const maxValue = parseFloat(gradeScale);
+                      const numValue = parseFloat(value);
+
+                      if (numValue > maxValue) {
+                        toast.error(`El valor máximo para esta escala es ${maxValue}`);
+                        return;
+                      }
+
+                      setValue('grade', `${value}/${gradeScale}`, { shouldDirty: true });
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                  {gradeScale === '4.0' && 'GPA en escala de 0.0 a 4.0 (ej: 3.85)'}
+                  {gradeScale === '5.0' && 'Nota en escala de 0.0 a 5.0 (ej: 4.2)'}
+                  {gradeScale === '10' && 'Nota en escala de 0 a 10 (ej: 8.5)'}
+                  {gradeScale === '100' && 'Porcentaje de 0 a 100 (ej: 85)'}
+                </p>
               </div>
             </div>
 

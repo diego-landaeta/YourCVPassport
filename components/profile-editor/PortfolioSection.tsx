@@ -210,7 +210,7 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
       {isFormOpen && (
         <div className="border-t dark:border-dark-border pt-6 mt-6">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{editingIndex !== null ? modals.editPortfolioItem : modals.addPortfolioItem}</h3>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{modals.uploadImage}</label>
               <div className="flex items-center gap-4">

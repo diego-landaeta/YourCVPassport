@@ -44,7 +44,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
     <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.title}</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
         {/* Language Settings Section */}
         <div className="pb-6 border-b border-gray-200 dark:border-dark-border">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.language.title}</h3>
