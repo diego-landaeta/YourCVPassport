@@ -69,10 +69,12 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
   const [previousStats, setPreviousStats] = React.useState(stats);
 
   // Dashboard Tour
-  const { showTour, completeTour, skipTour, hasTourBeenCompleted } = useDashboardTour(profile?.id);
+  const { showTour, completeTour, skipTour, hasTourBeenCompleted } = useDashboardTour(profile?.id, stats.profileCompleteness);
 
   // Check if sections should be blocked
-  const shouldBlockSections = hasTourBeenCompleted && stats.profileCompleteness < 100;
+  // ⚠️ IMPORTANTE: Bloquear funcionalidades HASTA que el perfil esté completo (100%)
+  // No depende del estado del tour - el perfil debe estar completo para acceder a las funcionalidades
+  const shouldBlockSections = stats.profileCompleteness < 100;
   const [showBlockAlert, setShowBlockAlert] = React.useState(false);
 
   const handleBlockedAction = () => {

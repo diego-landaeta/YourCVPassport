@@ -18,6 +18,8 @@ const HomePage = lazy(() => import('./components/HomePage'));
 const DashboardPage = lazy(() => import('./components/DashboardPage'));
 const ProfileSearchPage = lazy(() => import('./components/ProfileSearchPage'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const TalentCategoriesIndex = lazy(() => import('./components/admin/TalentCategoriesIndex'));
+const TalentCategoryPage = lazy(() => import('./components/admin/TalentCategoryPage'));
 const VisasPage = lazy(() => import('./components/dashboard/VisasPage'));
 const VisaFormPage = lazy(() => import('./components/dashboard/VisaFormPage'));
 const LeadsPage = lazy(() => import('./components/dashboard/LeadsPage'));
@@ -73,6 +75,8 @@ const AppContent: React.FC = () => {
 
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/talentos" element={<TalentCategoriesIndex />} />
+            <Route path="/admin/talentos/:category" element={<TalentCategoryPage />} />
           </Route>
 
           {/* Dynamically generated routes from routeConfig */}

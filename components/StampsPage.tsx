@@ -7,6 +7,7 @@ import Faq from './Faq';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -64,20 +65,33 @@ const StampsPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {t.stampsPage.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {t.stampsPage.subtitle}
-                    </p>
-                    <button 
-                        onClick={() => openModal('signup')}
-                        className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                        {t.stampsPage.cta.start}
-                    </button>
-                </AnimatedWrapper>
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {t.stampsPage.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {t.stampsPage.subtitle}
+                                </p>
+                                <button
+                                    onClick={() => openModal('signup')}
+                                    className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    {t.stampsPage.cta.start}
+                                </button>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1639322537228-f710d846310a?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Verificación de Credenciales Blockchain' : 'Blockchain Credential Verification'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
+                    </div>
+                </div>
             </section>
 
             {/* Why it matters */}
@@ -127,15 +141,93 @@ const StampsPage: React.FC = () => {
                             </p>
                         </div>
                         <div className="mt-16 grid md:grid-cols-3 gap-12 md:gap-8 items-start relative">
-                            {/* Dotted line connector for desktop */}
-                            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 mt-[-1rem]">
-                                <svg width="100%" height="2">
-                                <line x1="0" y1="1" x2="100%" y2="1" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="8 8"/>
+                            {/* Dotted line connectors - two segments that don't overlap circles */}
+                            {/* Line from circle 1 to circle 2 */}
+                            <div className="hidden md:block absolute top-12 left-[calc(16.67%+3rem)] w-[calc(33.33%-6rem)] h-0.5 z-0">
+                                <svg width="100%" height="2" className="overflow-visible">
+                                    <line x1="0" y1="1" x2="100%" y2="1" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="8 8"/>
                                 </svg>
                             </div>
+                            {/* Line from circle 2 to circle 3 */}
+                            <div className="hidden md:block absolute top-12 left-[calc(50%+3rem)] w-[calc(33.33%-6rem)] h-0.5 z-0">
+                                <svg width="100%" height="2" className="overflow-visible">
+                                    <line x1="0" y1="1" x2="100%" y2="1" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="8 8"/>
+                                </svg>
+                            </div>
+
+                            {/* Global animation styles - 9 seconds total */}
+                            <style>{`
+                                /* Step visibility animations - when one is active, others fade */
+                                @keyframes stepVisible1 {
+                                    0%, 28% { opacity: 1; }
+                                    35%, 100% { opacity: 0.3; }
+                                }
+                                @keyframes stepVisible2 {
+                                    0%, 28% { opacity: 0.3; }
+                                    35%, 61% { opacity: 1; }
+                                    68%, 100% { opacity: 0.3; }
+                                }
+                                @keyframes stepVisible3 {
+                                    0%, 61% { opacity: 0.3; }
+                                    68%, 93% { opacity: 1; }
+                                    100% { opacity: 0.3; }
+                                }
+
+                                /* Circle glow animations */
+                                @keyframes glowCircle1 {
+                                    0%, 28% {
+                                        transform: scale(1.1);
+                                        box-shadow: 0 0 40px rgba(59, 130, 246, 0.7);
+                                    }
+                                    35%, 100% {
+                                        transform: scale(1);
+                                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                    }
+                                }
+                                @keyframes glowCircle2 {
+                                    0%, 28% {
+                                        transform: scale(1);
+                                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                    }
+                                    35%, 61% {
+                                        transform: scale(1.1);
+                                        box-shadow: 0 0 40px rgba(59, 130, 246, 0.7);
+                                    }
+                                    68%, 100% {
+                                        transform: scale(1);
+                                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                    }
+                                }
+                                @keyframes glowCircle3 {
+                                    0%, 61% {
+                                        transform: scale(1);
+                                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                    }
+                                    68%, 93% {
+                                        transform: scale(1.1);
+                                        box-shadow: 0 0 40px rgba(34, 197, 94, 0.7);
+                                    }
+                                    100% {
+                                        transform: scale(1);
+                                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                    }
+                                }
+                            `}</style>
+
                             {t.stampsPage.how.steps.map((step: any, index: number) => (
-                                <div key={step.title} className="relative text-center">
-                                    <div className={`flex items-center justify-center w-24 h-24 mx-auto mb-6 bg-white dark:bg-dark-bg-secondary border-4 rounded-full text-4xl font-bold shadow-lg z-10 relative ${index === 2 ? 'border-cv-green text-cv-green' : 'border-cv-blue text-cv-blue'}`}>
+                                <div
+                                    key={step.title}
+                                    className="relative text-center"
+                                    style={{
+                                        animation: `stepVisible${index + 1} 9s ease-in-out infinite`,
+                                    }}
+                                >
+                                    <div
+                                        className={`flex items-center justify-center w-24 h-24 mx-auto mb-6 border-4 rounded-full text-4xl font-bold z-20 relative bg-white dark:bg-dark-bg-primary ${index === 2 ? 'border-cv-green text-cv-green' : 'border-cv-blue text-cv-blue'}`}
+                                        style={{
+                                            animation: `glowCircle${index + 1} 9s ease-in-out infinite`,
+                                        }}
+                                    >
                                     {index + 1}
                                     </div>
                                     <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{step.title}</h3>

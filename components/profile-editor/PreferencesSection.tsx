@@ -8,14 +8,152 @@ import { useLanguage } from '../../contexts/LanguageContext';
 interface PreferencesSectionProps {
   initialData?: Partial<PreferencesFormData>;
   onSave: (data: PreferencesFormData) => Promise<void>;
+  onNext?: () => void;
 }
 
+const JOB_SEEKING_STATUS_OPTIONS = ['OPEN', 'PASSIVE', 'NOT_LOOKING'] as const;
 const JOB_TYPES = ['full-time', 'part-time', 'contract', 'freelance', 'internship'] as const;
 const AVAILABILITY_OPTIONS = ['immediate', '2-weeks', '1-month', '2-months', 'not-looking'] as const;
 const REMOTE_PREFERENCES = ['remote', 'hybrid', 'on-site', 'flexible'] as const;
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR'];
 
-const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, onSave }) => {
+// Lista de ciudades populares organizadas por región
+const POPULAR_CITIES = [
+  // América Latina
+  'Buenos Aires, Argentina',
+  'Córdoba, Argentina',
+  'Rosario, Argentina',
+  'Mendoza, Argentina',
+  'São Paulo, Brasil',
+  'Río de Janeiro, Brasil',
+  'Brasilia, Brasil',
+  'Belo Horizonte, Brasil',
+  'Santiago, Chile',
+  'Valparaíso, Chile',
+  'Bogotá, Colombia',
+  'Medellín, Colombia',
+  'Cali, Colombia',
+  'Cartagena, Colombia',
+  'Ciudad de México, México',
+  'Guadalajara, México',
+  'Monterrey, México',
+  'Cancún, México',
+  'Lima, Perú',
+  'Cusco, Perú',
+  'Arequipa, Perú',
+  'Caracas, Venezuela',
+  'Quito, Ecuador',
+  'Guayaquil, Ecuador',
+  'Montevideo, Uruguay',
+  'Asunción, Paraguay',
+  'La Paz, Bolivia',
+  'San José, Costa Rica',
+  'Panamá, Panamá',
+  'San Salvador, El Salvador',
+  'Managua, Nicaragua',
+  'Tegucigalpa, Honduras',
+  'Guatemala, Guatemala',
+  'Santo Domingo, República Dominicana',
+  'La Habana, Cuba',
+
+  // América del Norte
+  'Nueva York, Estados Unidos',
+  'Los Ángeles, Estados Unidos',
+  'Chicago, Estados Unidos',
+  'Houston, Estados Unidos',
+  'Miami, Estados Unidos',
+  'San Francisco, Estados Unidos',
+  'Seattle, Estados Unidos',
+  'Boston, Estados Unidos',
+  'Austin, Estados Unidos',
+  'Denver, Estados Unidos',
+  'Atlanta, Estados Unidos',
+  'Las Vegas, Estados Unidos',
+  'Toronto, Canadá',
+  'Vancouver, Canadá',
+  'Montreal, Canadá',
+  'Calgary, Canadá',
+  'Ottawa, Canadá',
+
+  // Europa
+  'Madrid, España',
+  'Barcelona, España',
+  'Valencia, España',
+  'Sevilla, España',
+  'Bilbao, España',
+  'Málaga, España',
+  'Londres, Reino Unido',
+  'Manchester, Reino Unido',
+  'Edimburgo, Reino Unido',
+  'París, Francia',
+  'Lyon, Francia',
+  'Marsella, Francia',
+  'Berlín, Alemania',
+  'Múnich, Alemania',
+  'Frankfurt, Alemania',
+  'Hamburgo, Alemania',
+  'Roma, Italia',
+  'Milán, Italia',
+  'Florencia, Italia',
+  'Venecia, Italia',
+  'Ámsterdam, Países Bajos',
+  'Rotterdam, Países Bajos',
+  'Bruselas, Bélgica',
+  'Zúrich, Suiza',
+  'Ginebra, Suiza',
+  'Viena, Austria',
+  'Praga, República Checa',
+  'Varsovia, Polonia',
+  'Budapest, Hungría',
+  'Lisboa, Portugal',
+  'Oporto, Portugal',
+  'Dublín, Irlanda',
+  'Estocolmo, Suecia',
+  'Copenhague, Dinamarca',
+  'Oslo, Noruega',
+  'Helsinki, Finlandia',
+  'Atenas, Grecia',
+
+  // Asia
+  'Tokio, Japón',
+  'Osaka, Japón',
+  'Kioto, Japón',
+  'Seúl, Corea del Sur',
+  'Shanghái, China',
+  'Pekín, China',
+  'Hong Kong, China',
+  'Shenzhen, China',
+  'Singapur, Singapur',
+  'Bangkok, Tailandia',
+  'Manila, Filipinas',
+  'Jakarta, Indonesia',
+  'Ho Chi Minh, Vietnam',
+  'Hanói, Vietnam',
+  'Bombay, India',
+  'Nueva Delhi, India',
+  'Bangalore, India',
+  'Dubái, Emiratos Árabes Unidos',
+  'Abu Dabi, Emiratos Árabes Unidos',
+  'Tel Aviv, Israel',
+
+  // Oceanía
+  'Sídney, Australia',
+  'Melbourne, Australia',
+  'Brisbane, Australia',
+  'Perth, Australia',
+  'Auckland, Nueva Zelanda',
+  'Wellington, Nueva Zelanda',
+
+  // África
+  'Ciudad del Cabo, Sudáfrica',
+  'Johannesburgo, Sudáfrica',
+  'El Cairo, Egipto',
+  'Nairobi, Kenia',
+  'Lagos, Nigeria',
+  'Casablanca, Marruecos',
+];
+
+const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, onSave, onNext }) => {
   const translations = useTranslations();
   const { lang, setLang } = useLanguage();
   const t = translations.dashboard.preferences;
@@ -26,13 +164,24 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
     control,
     formState: { errors, isDirty },
     watch,
+    reset,
   } = useForm<PreferencesFormData>({
     resolver: zodResolver(preferencesSchema),
     defaultValues: initialData || {},
   });
 
+  // Update form when initialData changes
+  React.useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
   const onSubmit = async (data: PreferencesFormData) => {
     await onSave(data);
+    if (onNext) {
+      onNext();
+    }
   };
 
   const handleLanguageChange = (newLang: 'en' | 'es') => {
@@ -45,47 +194,37 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.title}</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
-        {/* Language Settings Section */}
-        <div className="pb-6 border-b border-gray-200 dark:border-dark-border">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.language.title}</h3>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t.language.label}
-            </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              {t.language.description}
-            </p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => handleLanguageChange('en')}
-                className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                  lang === 'en'
-                    ? 'bg-cv-blue text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                {t.language.english}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLanguageChange('es')}
-                className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                  lang === 'es'
-                    ? 'bg-cv-blue text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                {t.language.spanish}
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Job Preferences Section */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t.jobPreferences.title}</h3>
           <div className="space-y-6">
+            {/* Job Seeking Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t.jobPreferences.seekingStatus || 'Estado de Búsqueda'}
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                {t.jobPreferences.seekingStatusDescription || 'Indica si estás buscando activamente oportunidades laborales'}
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {JOB_SEEKING_STATUS_OPTIONS.map((status) => (
+                  <label key={status} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      {...register('job_seeking_status')}
+                      type="radio"
+                      value={status}
+                      className="w-4 h-4 text-cv-blue border-gray-300 focus:ring-cv-blue"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {status === 'OPEN' && (t.jobPreferences.seekingOpen || 'Busco Activamente')}
+                      {status === 'PASSIVE' && (t.jobPreferences.seekingPassive || 'Abierto a Ofertas')}
+                      {status === 'NOT_LOOKING' && (t.jobPreferences.seekingNotLooking || 'No Busco Actualmente')}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Job Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -230,42 +369,77 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
               <Controller
                 name="preferred_locations"
                 control={control}
-                render={({ field }) => (
-                  <input
-                    type="text"
-                    value={field.value?.join(', ') || ''}
-                    onChange={(e) => {
-                      const locations = e.target.value
-                        .split(',')
-                        .map((loc) => loc.trim())
-                        .filter((loc) => loc !== '');
-                      field.onChange(locations);
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                    placeholder={t.jobPreferences.locationPlaceholder}
-                  />
-                )}
+                render={({ field }) => {
+                  const selectedLocations = field.value || [];
+                  const availableCities = POPULAR_CITIES.filter(city => !selectedLocations.includes(city));
+
+                  return (
+                    <div className="space-y-3">
+                      {/* Selected Cities */}
+                      {selectedLocations.length > 0 && (
+                        <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
+                          {selectedLocations.map((location, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-cv-blue text-white rounded-full text-sm"
+                            >
+                              {location}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = selectedLocations.filter((_, i) => i !== index);
+                                  field.onChange(updated);
+                                }}
+                                className="ml-1 hover:bg-cv-blue-dark rounded-full p-0.5"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* City Selector */}
+                      <select
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            field.onChange([...selectedLocations, e.target.value]);
+                            e.target.value = '';
+                          }
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                      >
+                        <option value="">Selecciona una ciudad...</option>
+                        {availableCities.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Selecciona las ciudades donde estarías dispuesto a trabajar
+                      </p>
+                    </div>
+                  );
+                }}
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {t.jobPreferences.locationHelper}
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end items-center gap-3">
-          {isDirty && (
-            <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-              {t.unsavedChanges}
-            </span>
-          )}
+        {/* Next Button */}
+        <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             type="submit"
-            disabled={!isDirty}
-            className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            {t.saveButton}
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </form>

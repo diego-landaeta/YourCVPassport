@@ -4,6 +4,7 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import Testimonials from './Testimonials';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
@@ -111,7 +112,21 @@ const HowItWorksProfessionalsPage: React.FC = () => {
                     ))}
                 </div>
             </section>
-            
+
+            {/* Mid-page CTA */}
+            <div className="px-4">
+                <div className="max-w-5xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? '¿Listo para crear tu perfil?' : 'Ready to create your profile?'}
+                        description={lang === 'es'
+                            ? 'Sigue estos pasos y tendrás tu perfil profesional verificado en menos de 10 minutos.'
+                            : 'Follow these steps and you will have your verified professional profile in less than 10 minutes.'}
+                        buttonText={lang === 'es' ? 'Comenzar ahora' : 'Start now'}
+                        variant="gradient"
+                    />
+                </div>
+            </div>
+
             {/* Video Tutorial */}
             <section className="py-20 px-4 bg-cv-light-gray dark:bg-dark-bg-secondary">
                 <AnimatedWrapper>
@@ -123,9 +138,11 @@ const HowItWorksProfessionalsPage: React.FC = () => {
                         <div className="relative text-center text-white">
                              <h2 className="text-3xl md:text-4xl font-bold">{pageData.video.title}</h2>
                              <p className="mt-2">{pageData.video.subtitle}</p>
-                             <button aria-label="Play Video" className="mt-4 bg-white dark:bg-dark-bg-primary/80 backdrop-blur-sm p-4 rounded-full shadow-lg transform hover:scale-110 transition-transform duration-300">
-                                <svg className="w-10 h-10 text-cv-blue" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd"></path></svg>
-                            </button>
+                             <div className="mt-6 bg-white/90 dark:bg-dark-bg-primary/90 backdrop-blur-sm px-6 py-3 rounded-lg">
+                                <p className="text-cv-blue dark:text-cv-blue-light font-semibold text-lg">
+                                    {lang === 'es' ? 'Video próximamente' : 'Video coming soon'}
+                                </p>
+                             </div>
                         </div>
                     </div>
                 </AnimatedWrapper>

@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../supabase/client';
 import { Link } from 'react-router-dom';
 import { CountryBadge } from './CountrySelector';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -459,30 +460,43 @@ const AdvancedTalentSearchPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {pageData.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {pageData.subtitle}
-                    </p>
-                    <div className="mt-8 max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 bg-white dark:bg-dark-bg-primary p-4 rounded-lg shadow-lg">
-                        <input 
-                            type="text" 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="ej: Senior Python Developer, React, Designer..."
-                            className="flex-grow p-3 border border-gray-300 dark:border-dark-border-light rounded-md focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-secondary dark:text-white" 
-                        />
-                        <button 
-                            onClick={() => applyFilters()}
-                            className="bg-cv-blue text-white px-8 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors"
-                        >
-                            {pageData.searchButton}
-                        </button>
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {pageData.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {pageData.subtitle}
+                                </p>
+                                <div className="mt-8 flex flex-col sm:flex-row gap-4 bg-white dark:bg-dark-bg-primary p-4 rounded-lg shadow-lg">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="ej: Senior Python Developer, React, Designer..."
+                                        className="flex-grow p-3 border border-gray-300 dark:border-dark-border-light rounded-md focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-secondary dark:text-white"
+                                    />
+                                    <button
+                                        onClick={() => applyFilters()}
+                                        className="bg-cv-blue text-white px-8 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors"
+                                    >
+                                        {pageData.searchButton}
+                                    </button>
+                                </div>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Búsqueda Avanzada de Talento' : 'Advanced Talent Search'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Main Search Interface */}
@@ -502,10 +516,17 @@ const AdvancedTalentSearchPage: React.FC = () => {
                             {/* Filters Sidebar */}
                             <div className="lg:col-span-3">
                                 <div className="sticky top-6">
-                                    <FilterSection 
+                                    <FilterSection
                                         filters={filters}
                                         onFilterChange={setFilters}
-                                        onApplyFilters={() => {}}
+                                        onApplyFilters={() => {
+                                            // Filters are applied reactively, but this provides visual feedback
+                                            // and can trigger a scroll to results
+                                            const resultsSection = document.querySelector('.lg\\:col-span-9');
+                                            if (resultsSection) {
+                                                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }
+                                        }}
                                     />
                                 </div>
                             </div>

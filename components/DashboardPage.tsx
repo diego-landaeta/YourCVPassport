@@ -43,40 +43,45 @@ const DashboardPage: React.FC = () => {
   const isInMiPerfil = activeSection.startsWith('mi-perfil:');
   const subsection = isInMiPerfil ? activeSection.split(':')[1] : null;
 
-  // Load counts and data for profile sections - optimized to only load when in Mi Perfil section
+  // Load counts and data for profile sections
   useEffect(() => {
     const loadData = async () => {
       if (!session?.user.id) return;
 
-      // Only load data if we're in the Mi Perfil section to reduce initial load time
-      if (!activeSection.startsWith('mi-perfil')) return;
+      // REMOVED: Conditional check that prevented data loading on dashboard
+      // We need this data ALWAYS to calculate profile completeness for the Sidebar
 
       try {
-        const [
-          { data: expData, count: expCount },
-          { data: eduData, count: eduCount },
-          { data: skillData, count: skillCount },
-          { data: langData, count: langCount },
-          { count: portCount }
-        ] = await Promise.all([
-          supabase.from('experiences').select('*', { count: 'exact' }).eq('profile_id', session.user.id),
-          supabase.from('education').select('*', { count: 'exact' }).eq('profile_id', session.user.id),
-          supabase.from('skills').select('*', { count: 'exact' }).eq('profile_id', session.user.id),
-          supabase.from('languages').select('*', { count: 'exact' }).eq('profile_id', session.user.id),
+        // Use Promise.allSettled to prevent one failure from blocking everything
+        const results = await Promise.allSettled([
+          supabase.from('experiences').select('*', { count: 'exact', head: true }).eq('profile_id', session.user.id),
+          supabase.from('education').select('*', { count: 'exact', head: true }).eq('profile_id', session.user.id),
+          supabase.from('skills').select('*', { count: 'exact', head: true }).eq('profile_id', session.user.id),
+          supabase.from('languages').select('*', { count: 'exact', head: true }).eq('profile_id', session.user.id),
+          // Optimized portfolio query
           supabase.from('portfolio_items').select('*', { count: 'exact', head: true }).eq('profile_id', session.user.id)
         ]);
 
-        setExperiences(expData || []);
-        setEducation(eduData || []);
-        setSkills(skillData || []);
-        setLanguages(langData || []);
+        // Process results safely
+        const expResult = results[0].status === 'fulfilled' ? results[0].value : { data: [], count: 0 };
+        const eduResult = results[1].status === 'fulfilled' ? results[1].value : { data: [], count: 0 };
+        const skillResult = results[2].status === 'fulfilled' ? results[2].value : { data: [], count: 0 };
+        const langResult = results[3].status === 'fulfilled' ? results[3].value : { data: [], count: 0 };
+        const portResult = results[4].status === 'fulfilled' ? results[4].value : { data: [], count: 0 };
 
-        setExperiencesCount(expCount || 0);
-        setEducationCount(eduCount || 0);
-        setSkillsCount(skillCount || 0);
-        setLanguagesCount(langCount || 0);
-        setPortfolioCount(portCount || 0);
-      } catch (error) {}
+        setExperiences(expResult.data || []);
+        setEducation(eduResult.data || []);
+        setSkills(skillResult.data || []);
+        setLanguages(langResult.data || []);
+
+        setExperiencesCount(expResult.count || 0);
+        setEducationCount(eduResult.count || 0);
+        setSkillsCount(skillResult.count || 0);
+        setLanguagesCount(langResult.count || 0);
+        setPortfolioCount(portResult.count || 0);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
     };
 
     loadData();
@@ -86,26 +91,34 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     if (!profile) return;
 
-    let completedFields = 0;
-    const totalFields = 10;
-
-    // Basic fields (5 fields)
-    if (profile.full_name) completedFields++;
-    if (profile.email) completedFields++;
-    if (profile.headline) completedFields++;
-    if (profile.summary) completedFields++;
-    if (profile.avatar_url) completedFields++;
-
-    // Additional sections (5 fields)
-    if (experiencesCount > 0) completedFields++;
-    if (educationCount > 0) completedFields++;
-    if (skillsCount >= 3) completedFields++;
-    if (languagesCount > 0) completedFields++;
-    if (portfolioCount > 0) completedFields++;
-
-    const completeness = Math.round((completedFields / totalFields) * 100);
-    setProfileCompleteness(completeness);
+    // Importar la función centralizada para calcular completeness
+    import('../utils/profileValidation').then(({ calculateProfileCompleteness }) => {
+      const completeness = calculateProfileCompleteness(profile, {
+        experiences: experiencesCount,
+        education: educationCount,
+        skills: skillsCount,
+        languages: languagesCount,
+        portfolio: portfolioCount,
+      });
+      setProfileCompleteness(completeness);
+    });
   }, [profile, experiencesCount, educationCount, skillsCount, languagesCount, portfolioCount]);
+
+  // Listen for custom events to change dashboard section
+  useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      const { section } = event.detail;
+      if (section) {
+        setActiveSection(section);
+      }
+    };
+
+    window.addEventListener('change-dashboard-section' as any, handleSectionChange);
+
+    return () => {
+      window.removeEventListener('change-dashboard-section' as any, handleSectionChange);
+    };
+  }, []);
 
   return (
     <>

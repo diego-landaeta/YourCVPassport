@@ -22,7 +22,7 @@ const StoryCard: React.FC<{ story: SuccessStory; onReadMore: () => void }> = ({ 
     const t = useTranslations();
     return (
         <div className="bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
-            <img src={story.imageUrl} alt={story.name} className="w-full h-56 object-cover" />
+            <img src={story.imageUrl} alt={story.name} className="w-full h-56 object-cover" style={{ objectPosition: '50% 30%' }} />
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{story.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-dark-text-tertiary">{story.role}</p>
@@ -147,7 +147,7 @@ const SuccessStoriesPage: React.FC = () => {
              {isModalOpen && selectedStory && (
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                     <div className="p-8 bg-white dark:bg-dark-bg-primary max-h-[90vh] overflow-y-auto">
-                        <img src={selectedStory.imageUrl} alt={selectedStory.name} className="w-32 h-32 rounded-full mx-auto object-cover mb-4 ring-4 ring-cv-blue/20" />
+                        <img src={selectedStory.imageUrl} alt={selectedStory.name} className="w-32 h-32 rounded-full mx-auto object-cover object-center mb-4 ring-4 ring-cv-blue/20" />
                         <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center">{selectedStory.name}</h2>
                         <p className="text-center text-gray-500 dark:text-dark-text-tertiary mt-1">{selectedStory.role}</p>
                         <blockquote className="mt-6 text-center text-xl italic text-cv-dark-gray dark:text-dark-text-primary before:content-['\201C'] after:content-['\201D']">

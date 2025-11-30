@@ -9,6 +9,7 @@ import Security from './Security';
 import Faq from './Faq';
 import CallToAction from './CallToAction';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const HomePage: React.FC = () => {
@@ -31,10 +32,25 @@ const HomePage: React.FC = () => {
         canonical="https://yourcvpassport.com/"
       />
       <Hero />
-      <Companies />
       <Features />
+      <InlineCTA
+        title={lang === 'es' ? '¿Listo para destacar?' : 'Ready to stand out?'}
+        description={lang === 'es'
+          ? 'Únete a miles de profesionales que ya crearon su perfil verificado y reciben oportunidades laborales cada semana.'
+          : 'Join thousands of professionals who have already created their verified profile and receive job opportunities every week.'}
+        buttonText={lang === 'es' ? 'Crear mi perfil gratis' : 'Create my free profile'}
+        variant="gradient"
+      />
       <HowItWorks />
       <Testimonials />
+      <InlineCTA
+        title={lang === 'es' ? 'Empieza hoy, gratis' : 'Start today, free'}
+        description={lang === 'es'
+          ? 'Crea tu perfil profesional en minutos. Sin tarjeta de crédito requerida.'
+          : 'Create your professional profile in minutes. No credit card required.'}
+        buttonText={lang === 'es' ? 'Registrarse ahora' : 'Sign up now'}
+        variant="light"
+      />
       <Pricing />
       <Security />
       <Faq />

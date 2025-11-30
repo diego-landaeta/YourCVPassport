@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, threshold?: number, delay?: string}> = ({ children, threshold = 0.1, delay = 'duration-700' }) => {
@@ -272,37 +273,20 @@ const AIProductPage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Demo Video Section (Optional) */}
-                <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary">
-                    <div className="max-w-5xl mx-auto">
-                        <AnimatedWrapper>
-                            <div className="text-center mb-12">
-                                <h2 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary">
-                                    {lang === 'es' ? 'Ve la IA en acción' : 'See AI in action'}
-                                </h2>
-                                <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">
-                                    {lang === 'es'
-                                        ? 'Descubre cómo transformar tu CV en minutos'
-                                        : 'Discover how to transform your CV in minutes'}
-                                </p>
-                            </div>
-                            <div className="relative bg-gradient-to-br from-cv-blue/10 to-purple-600/10 rounded-lg overflow-hidden shadow-2xl" style={{ paddingBottom: '56.25%' }}>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <div className="w-20 h-20 bg-cv-blue rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"></path>
-                                            </svg>
-                                        </div>
-                                        <p className="text-gray-600 dark:text-dark-text-secondary">
-                                            {lang === 'es' ? 'Video demo próximamente' : 'Demo video coming soon'}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </AnimatedWrapper>
+                {/* Mid-page CTA */}
+                <div className="px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <InlineCTA
+                            title={lang === 'es' ? 'Prueba la IA gratis' : 'Try AI for free'}
+                            description={lang === 'es'
+                                ? 'Descubre cómo la inteligencia artificial puede transformar tu CV en minutos. Sin tarjeta de crédito.'
+                                : 'Discover how artificial intelligence can transform your CV in minutes. No credit card required.'}
+                            buttonText={lang === 'es' ? 'Empezar ahora gratis' : 'Start now for free'}
+                            variant="gradient"
+                        />
                     </div>
-                </section>
+                </div>
+
 
                 {/* Testimonials */}
                 <section className="py-20 px-4 bg-cv-light-gray dark:bg-dark-bg-secondary">

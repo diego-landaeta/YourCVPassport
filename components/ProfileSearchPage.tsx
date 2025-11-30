@@ -210,6 +210,18 @@ const ProfileSearchPage: React.FC = () => {
                 />
             )}
             <div className="dark:bg-dark-bg-primary">
+                {/* Back Button */}
+                <Link
+                    to="/"
+                    className="no-print fixed top-8 left-8 z-50 bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-primary px-4 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group border border-gray-200 dark:border-dark-border"
+                    aria-label="Regresar"
+                >
+                    <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span className="hidden sm:inline">Regresar</span>
+                </Link>
+
                 {/* Floating Contact Button */}
                 <button
                     onClick={() => setShowContactModal(true)}

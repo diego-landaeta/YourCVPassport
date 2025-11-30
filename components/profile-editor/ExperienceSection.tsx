@@ -33,6 +33,7 @@ interface ExperienceSectionProps {
   initialData?: ExperienceFormData[];
   onSave: (data: ExperienceFormData[]) => Promise<void>;
   onNavigateToVerifications?: () => void;
+  onNext?: () => void;
 }
 
 export interface ExperienceSectionHandle {
@@ -149,7 +150,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   );
 };
 
-const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
+const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionProps>(({ initialData = [], onSave, onNavigateToVerifications, onNext }, ref) => {
   const { session } = useAuth();
   const { lang } = useLanguage();
   const translations = useTranslations();
@@ -515,23 +516,6 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addExperience.replace('Añadir ', '').replace('Add ', '')}</h2>
         <div className="flex items-center gap-3">
-          {/* AI Toggle Button */}
-          {experiences.length > 0 && (
-            <button
-              onClick={() => setShowAISuggestions(!showAISuggestions)}
-              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
-                showAISuggestions
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
-              }`}
-              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
-            </button>
-          )}
           <button
             onClick={handleAdd}
             className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
@@ -576,25 +560,6 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
         </div>
       )}
 
-      {/* AI Suggestions Panel */}
-      {showAISuggestions && (
-        <div className="mb-6">
-          <Suspense fallback={
-            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-6 bg-purple-200 dark:bg-purple-700 rounded w-1/3"></div>
-                <div className="h-20 bg-purple-200 dark:bg-purple-700 rounded"></div>
-              </div>
-            </div>
-          }>
-            <AITextOptimizer
-              type="experience"
-              items={experiences}
-              onApplySuggestion={handleApplyAISuggestion}
-            />
-          </Suspense>
-        </div>
-      )}
 
       {/* Experience List with Drag & Drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -621,6 +586,21 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           <p>{modals.noExperienceYet}</p>
+        </div>
+      )}
+
+      {/* Botón Continuar - Solo cuando hay experiencias y no está abierto el formulario */}
+      {experiences.length > 0 && !isFormOpen && onNext && (
+        <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
+          <button
+            onClick={onNext}
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
+          >
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
 

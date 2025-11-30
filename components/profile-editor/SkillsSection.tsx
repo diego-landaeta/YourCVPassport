@@ -287,23 +287,6 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addSkill.replace('Añadir ', '').replace('Add ', '')}</h2>
         <div className="flex gap-2">
-          {/* AI Toggle Button */}
-          {skills.length > 0 && (
-            <button
-              onClick={() => setShowAISuggestions(!showAISuggestions)}
-              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
-                showAISuggestions
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
-              }`}
-              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
-            </button>
-          )}
           <button
             onClick={handleAdd}
             className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
@@ -315,26 +298,6 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
           </button>
         </div>
       </div>
-
-      {/* AI Skills Suggestions */}
-      {showAISuggestions && (
-        <div className="mb-6">
-          <Suspense fallback={
-            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-6 bg-purple-200 dark:bg-purple-700 rounded w-1/3"></div>
-                <div className="h-20 bg-purple-200 dark:bg-purple-700 rounded"></div>
-              </div>
-            </div>
-          }>
-            <AISkillsSuggestion
-              experiences={experiences}
-              currentSkills={skills.map(s => s.name)}
-              onSkillAdded={loadSkills}
-            />
-          </Suspense>
-        </div>
-      )}
 
       {/* Skills Grid with Drag & Drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -370,11 +333,11 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium flex items-center gap-2 shadow-sm"
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            Continuar
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>

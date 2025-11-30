@@ -2,7 +2,9 @@ import React from 'react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -53,18 +55,31 @@ const SecurityCompliancePage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {pageData.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {pageData.subtitle}
-                    </p>
-                    <div className="mt-10 flex justify-center flex-wrap gap-4">
-                        {pageData.heroBadges.map((badge: string) => <SecurityBadge key={badge} text={badge} />)}
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {pageData.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {pageData.subtitle}
+                                </p>
+                                <div className="mt-10 flex justify-center md:justify-start flex-wrap gap-4">
+                                    {pageData.heroBadges.map((badge: string) => <SecurityBadge key={badge} text={badge} />)}
+                                </div>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Seguridad y Cumplimiento' : 'Security and Compliance'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Our Commitment Section */}
@@ -137,7 +152,21 @@ const SecurityCompliancePage: React.FC = () => {
                     </AnimatedWrapper>
                 </div>
             </section>
-            
+
+            {/* Mid-page CTA */}
+            <div className="px-4">
+                <div className="max-w-5xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Protege tu información profesional' : 'Protect your professional information'}
+                        description={lang === 'es'
+                            ? 'Únete a miles de profesionales que confían en nuestra plataforma certificada para gestionar su información de manera segura.'
+                            : 'Join thousands of professionals who trust our certified platform to manage their information securely.'}
+                        buttonText={lang === 'es' ? 'Crear perfil seguro' : 'Create secure profile'}
+                        variant="blue"
+                    />
+                </div>
+            </div>
+
             {/* Security Features Cards */}
             <section className="py-20 px-4 bg-cv-light-gray dark:bg-dark-bg-secondary">
                 <div className="max-w-7xl mx-auto">

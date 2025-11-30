@@ -22,18 +22,39 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnual }) => {
     const { openModal } = useAuth();
     const t = useTranslations();
+    const { lang } = useLanguage();
 
-    const price = isAnnual && plan.price !== t.pricingPage.freePrice && plan.price !== t.pricingPage.customPrice
-        ? `€${(parseInt(plan.price.replace('€', '')) * 0.8).toFixed(0)}` 
+    const monthlyPrice = plan.price !== t.pricingPage.freePrice && plan.price !== t.pricingPage.customPrice
+        ? parseInt(plan.price.replace('€', ''))
+        : null;
+
+    const annualPrice = monthlyPrice ? Math.round(monthlyPrice * 12 * 0.8) : null;
+    const monthlyFromAnnual = annualPrice ? Math.round(annualPrice / 12) : null;
+
+    const displayPrice = isAnnual && annualPrice
+        ? `€${annualPrice}`
         : plan.price;
+
+    const displayPeriod = isAnnual && annualPrice
+        ? (lang === 'es' ? '/ año' : '/ year')
+        : plan.period;
 
     return (
         <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col relative overflow-hidden ${plan.highlight ? 'border-cv-blue scale-105 bg-white dark:bg-dark-bg-secondary' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg`}>
             {plan.highlight && <div className="absolute top-0 -right-12 transform rotate-45 bg-cv-green text-white text-center font-semibold py-1 w-40">{t.pricingPage.trialLabel}</div>}
             <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{plan.title}</h3>
-            <div className="mt-4 flex items-baseline">
-                <span className="text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{price}</span>
-                <span className="ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary">{plan.period}</span>
+            <div className="mt-4">
+                <div className="flex items-baseline">
+                    <span className="text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{displayPrice}</span>
+                    <span className="ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary">{displayPeriod}</span>
+                </div>
+                {isAnnual && monthlyFromAnnual && (
+                    <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
+                        {lang === 'es'
+                            ? `€${monthlyFromAnnual} por mes`
+                            : `€${monthlyFromAnnual} per month`}
+                    </p>
+                )}
             </div>
             <p className="mt-5 text-gray-600 dark:text-dark-text-secondary h-12">{plan.description}</p>
             <ul className="mt-8 space-y-4 flex-grow">

@@ -15,6 +15,9 @@ interface SuccessStory {
   industry: string;
   goal: string;
   featured: boolean;
+  approved: boolean;
+  user_id?: string;
+  submitted_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -34,7 +37,8 @@ const SuccessStoriesManagement: React.FC = () => {
     after_image_url: '',
     industry: 'Technology',
     goal: 'Career Change',
-    featured: false
+    featured: false,
+    approved: true
   });
 
   const { dialogState, showAlert, showConfirm, closeDialog, handleConfirm, handleCancel } = useCustomDialog();
@@ -123,6 +127,40 @@ const SuccessStoriesManagement: React.FC = () => {
     setIsCreating(true);
   };
 
+  const handleApprove = async (id: string, currentApprovalStatus: boolean) => {
+    const action = currentApprovalStatus ? 'rechazar' : 'aprobar';
+    const confirmed = await showConfirm({
+      title: `Confirmar ${action}`,
+      message: `¿Deseas ${action} esta historia?`,
+      type: 'info',
+      confirmText: action === 'aprobar' ? 'Aprobar' : 'Rechazar',
+      cancelText: 'Cancelar'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase
+        .from('success_stories')
+        .update({ approved: !currentApprovalStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+      showAlert({
+        title: 'Éxito',
+        message: `Historia ${action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente`,
+        type: 'success'
+      });
+      loadStories();
+    } catch (err: any) {
+      showAlert({
+        title: 'Error',
+        message: 'Error al actualizar: ' + err.message,
+        type: 'error'
+      });
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     const confirmed = await showConfirm({
       title: 'Confirmar eliminación',
@@ -169,7 +207,8 @@ const SuccessStoriesManagement: React.FC = () => {
       after_image_url: '',
       industry: 'Technology',
       goal: 'Career Change',
-      featured: false
+      featured: false,
+      approved: true
     });
     setEditingStory(null);
     setIsCreating(false);
@@ -462,28 +501,54 @@ const SuccessStoriesManagement: React.FC = () => {
                       <div className="text-sm text-gray-500 dark:text-gray-400">{story.goal}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {story.featured && (
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                          Destacada
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          story.approved
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                        }`}>
+                          {story.approved ? '✓ Aprobada' : '⏳ Pendiente'}
                         </span>
-                      )}
+                        {story.featured && (
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                            ⭐ Destacada
+                          </span>
+                        )}
+                        {story.user_id && (
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            👤 Usuario
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(story.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(story)}
-                        className="text-cv-blue hover:text-blue-700 mr-4"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(story.id, story.name)}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        Eliminar
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleApprove(story.id, story.approved)}
+                          className={`px-3 py-1 rounded ${
+                            story.approved
+                              ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400'
+                          }`}
+                        >
+                          {story.approved ? 'Rechazar' : 'Aprobar'}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(story)}
+                          className="text-cv-blue hover:text-blue-700 px-3 py-1"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(story.id, story.name)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 px-3 py-1"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

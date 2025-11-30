@@ -8,6 +8,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../context/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
+import PhotoPreviewModal, { CropData } from '../PhotoPreviewModal';
 
 interface IdentitySectionProps {
   profile: any;
@@ -36,6 +37,9 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   const [showRestoreDraftModal, setShowRestoreDraftModal] = useState(false);
   const [draftToRestore, setDraftToRestore] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showPhotoPreview, setShowPhotoPreview] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const {
     register,
@@ -118,8 +122,10 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
     } else {}
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {const file = e.target.files?.[0];
-    if (!file || !profile) {return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) {
+      return;
     }
 
     // Validar tamaño del archivo (máximo 5MB)
@@ -135,8 +141,23 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       return;
     }
 
-    setIsUploading(true);
     setUploadError(null);
+
+    // Crear URL temporal para previsualización
+    const tempUrl = URL.createObjectURL(file);
+    setPreviewImageUrl(tempUrl);
+    setSelectedFile(file);
+    setShowPhotoPreview(true);
+
+    // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
+    e.target.value = '';
+  };
+
+  const handlePhotoConfirm = async (file: File, cropData: CropData) => {
+    if (!profile) return;
+
+    setIsUploading(true);
+    setShowPhotoPreview(false);
 
     try {
       // Upload to Supabase Storage
@@ -181,12 +202,37 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       setUploadError(`Error al subir la imagen: ${errorMessage}`);
     } finally {
       setIsUploading(false);
+      // Limpiar URL temporal
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+        setPreviewImageUrl(null);
+      }
+      setSelectedFile(null);
     }
+  };
+
+  const handlePhotoCancel = () => {
+    setShowPhotoPreview(false);
+    // Limpiar URL temporal
+    if (previewImageUrl) {
+      URL.revokeObjectURL(previewImageUrl);
+      setPreviewImageUrl(null);
+    }
+    setSelectedFile(null);
   };
 
   const handleGenerateSummary = React.useCallback(async () => {
     if (!session?.user?.id) {
       toast.error('Debes estar autenticado para usar esta función');
+      return;
+    }
+
+    // Check if user has AI access
+    const { checkAIAccess } = await import('../../lib/ai');
+    const { hasAccess, plan } = await checkAIAccess(session.user.id);
+
+    if (!hasAccess) {
+      toast.error(`Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`);
       return;
     }
 
@@ -242,6 +288,15 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   const handleOptimizeHeadline = React.useCallback(async () => {
     if (!session?.user?.id) {
       toast.error('Debes estar autenticado para usar esta función');
+      return;
+    }
+
+    // Check if user has AI access
+    const { checkAIAccess } = await import('../../lib/ai');
+    const { hasAccess, plan } = await checkAIAccess(session.user.id);
+
+    if (!hasAccess) {
+      toast.error(`Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`);
       return;
     }
 
@@ -597,21 +652,16 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 mt-2">
-          {isDirty && (
-            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span className="text-xs font-medium">{t.unsavedChanges}</span>
-            </div>
-          )}
+        {/* Next Button */}
+        <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700 mt-2">
           <button
             type="submit"
-            className="px-5 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium shadow-sm ml-auto"
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            {t.saveChanges}
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </form>
@@ -820,6 +870,16 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             </div>
           </div>
         </div>
+      )}
+
+      {/* Photo Preview Modal */}
+      {showPhotoPreview && previewImageUrl && selectedFile && (
+        <PhotoPreviewModal
+          imageUrl={previewImageUrl}
+          originalFile={selectedFile}
+          onConfirm={handlePhotoConfirm}
+          onCancel={handlePhotoCancel}
+        />
       )}
     </div>
   );

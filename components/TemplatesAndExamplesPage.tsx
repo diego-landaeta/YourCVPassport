@@ -5,7 +5,9 @@ import TemplateGallery from './TemplateGallery';
 import ImageComparisonSlider from './ImageComparisonSlider';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -43,22 +45,35 @@ const TemplatesAndExamplesPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {pageData.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {pageData.subtitle}
-                    </p>
-                    <p className="mt-4 max-w-2xl mx-auto text-base text-gray-600 dark:text-dark-text-secondary">
-                        Plantillas diseñadas por expertos en recursos humanos, optimizadas para sistemas ATS como Greenhouse, Lever y Workday.
-                        Personalizables en tiempo real y exportables a PDF de alta calidad.
-                    </p>
-                    <div className="mt-8">
-                        <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{pageData.templatesIncluded}</h3>
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {pageData.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {pageData.subtitle}
+                                </p>
+                                <p className="mt-4 text-base text-gray-600 dark:text-dark-text-secondary">
+                                    Plantillas diseñadas por expertos en recursos humanos, optimizadas para sistemas ATS como Greenhouse, Lever y Workday.
+                                    Personalizables en tiempo real y exportables a PDF de alta calidad.
+                                </p>
+                                <div className="mt-8">
+                                    <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{pageData.templatesIncluded}</h3>
+                                </div>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Plantillas de CV Profesionales' : 'Professional CV Templates'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Template Gallery */}
@@ -84,7 +99,21 @@ const TemplatesAndExamplesPage: React.FC = () => {
                     </AnimatedWrapper>
                 </div>
             </section>
-            
+
+            {/* Mid-page CTA */}
+            <div className="px-4 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Elige tu plantilla perfecta' : 'Choose your perfect template'}
+                        description={lang === 'es'
+                            ? 'Accede a todas nuestras plantillas profesionales optimizadas para ATS y empieza a destacar hoy.'
+                            : 'Access all our professional ATS-optimized templates and start standing out today.'}
+                        buttonText={lang === 'es' ? 'Explorar plantillas' : 'Explore templates'}
+                        variant="gradient"
+                    />
+                </div>
+            </div>
+
             {/* Real Success Stories: Before/After */}
             <section className="py-16 px-4 bg-cv-light-gray dark:bg-dark-bg-secondary">
                  <div className="max-w-4xl mx-auto">

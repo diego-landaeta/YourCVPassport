@@ -1,17 +1,46 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from '../hooks/useTranslations';
 
-const CompanyLogo: React.FC<{ name: string; url: string }> = ({ name, url }) => (
+const CompanyLogo: React.FC<{ name: string; url: string; logoUrl: string; logoUrlLight?: string }> = ({ name, url, logoUrl, logoUrlLight }) => {
+  const [isDark, setIsDark] = useState(() => {
+    return document.documentElement.classList.contains('dark');
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const currentLogoUrl = (!isDark && logoUrlLight) ? logoUrlLight : logoUrl;
+
+  return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center h-12 text-gray-500 dark:text-dark-text-tertiary text-2xl font-semibold grayscale opacity-70 hover:grayscale-0 hover:opacity-100 hover:text-cv-blue dark:hover:text-cv-blue-light transition-all duration-300 cursor-pointer"
+      className="flex items-center justify-center p-4 transition-all duration-300 cursor-pointer"
+      aria-label={name}
     >
-      {name}
+      <img
+        src={currentLogoUrl}
+        alt={name}
+        className="h-20 w-auto object-contain opacity-60 hover:opacity-100 hover:scale-105 transition-all duration-300"
+        style={{ filter: 'grayscale(100%) brightness(0.5) contrast(1.2)' }}
+        onMouseEnter={(e) => e.currentTarget.style.filter = 'grayscale(0%) brightness(1) contrast(1)'}
+        onMouseLeave={(e) => e.currentTarget.style.filter = 'grayscale(100%) brightness(0.5) contrast(1.2)'}
+      />
     </a>
-);
+  );
+};
 
 const Companies: React.FC<{title?: string}> = ({title}) => {
   const t = useTranslations();
@@ -23,8 +52,8 @@ const Companies: React.FC<{title?: string}> = ({title}) => {
           {title || defaultTitle}
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
-          {t.companies.logos.map((company: { name: string; url: string }) => (
-            <CompanyLogo key={company.name} name={company.name} url={company.url} />
+          {t.companies.logos.map((company: { name: string; url: string; logoUrl: string; logoUrlLight?: string }) => (
+            <CompanyLogo key={company.name} name={company.name} url={company.url} logoUrl={company.logoUrl} logoUrlLight={company.logoUrlLight} />
           ))}
         </div>
       </div>

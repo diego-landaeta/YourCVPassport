@@ -267,8 +267,8 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
 
           {/* Sidebar with Premium Cards */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Availability Card - Optional */}
-            {(profile.show_availability_badge !== false) && (
+            {/* Availability Card - Only shown when actively looking for work */}
+            {profile.job_seeking_status === 'OPEN' && (
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 shadow-lg border-2 border-green-200 dark:border-green-800">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   Availability
@@ -285,30 +285,8 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
               </div>
             )}
 
-            {/* Verified Stamps - Optional */}
-            {profile.show_verified_credentials && (
-              <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-xl">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5">
-                  Verified Credentials
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                    <CheckBadgeIcon className="w-6 h-6 text-green-500" />
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">Email Verified</span>
-                  </div>
-                  {profile.linkedin_url && (
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                      <CheckBadgeIcon className="w-6 h-6 text-blue-500" />
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">LinkedIn Connected</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-                    <CheckBadgeIcon className="w-6 h-6 text-purple-500" />
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">Identity Verified</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Note: Verified credentials are now shown using stamps system only (see main content area)
+                 Admins verify users through the stamps system, not user-controlled settings */}
 
             {/* Professional Links - Optional */}
             {profile.show_connect_links && (profile.linkedin_url || profile.portfolio_url || profile.github_url) && (

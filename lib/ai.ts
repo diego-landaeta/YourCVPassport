@@ -164,6 +164,30 @@ export async function listAvailableModels(): Promise<string[]> {
 // ==================================================
 
 /**
+ * Check if user has access to AI features based on plan
+ */
+export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolean; plan: string | null }> {
+  try {
+    const { supabase } = await import('../supabase/client');
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', userId)
+      .single();
+
+    if (error || !profile) {
+      return { hasAccess: false, plan: null };
+    }
+
+    // Only Pro and Enterprise users have access to AI features
+    const hasAccess = profile.plan === 'pro' || profile.plan === 'enterprise';
+    return { hasAccess, plan: profile.plan || null };
+  } catch (error) {
+    return { hasAccess: false, plan: null };
+  }
+}
+
+/**
  * Generate text with Gemini - tries multiple models with fallback
  */
 export async function generateText(
@@ -172,6 +196,17 @@ export async function generateText(
   options?: AIGenerationOptions
 ): Promise<AIResponse<string>> {
   try {
+    // Check AI access for premium users only
+    if (userId) {
+      const { hasAccess, plan } = await checkAIAccess(userId);
+      if (!hasAccess) {
+        return {
+          success: false,
+          error: `Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`,
+        };
+      }
+    }
+
     // Rate limiting
     if (userId && !checkRateLimit(userId)) {
       return {
@@ -717,12 +752,14 @@ export default {
   getModel,
   generateText,
   listAvailableModels,
+  checkAIAccess,
 
   // CV optimization
   optimizeExperience,
   generateSummary,
   suggestSkills,
   optimizeEducation,
+  optimizeHeadline,
 
   // Profile analysis
   calculateProfileScore,

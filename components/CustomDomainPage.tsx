@@ -5,7 +5,9 @@ import URLSimulator from './URLSimulator';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -42,19 +44,32 @@ const CustomDomainPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4 overflow-hidden">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {t.customDomain.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {t.customDomain.subtitle}
-                    </p>
-                    <div className="mt-10 max-w-2xl mx-auto bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg p-2 flex items-center">
-                        <span className="text-gray-400 dark:text-dark-text-tertiary ml-4">https://</span>
-                        <span className="text-cv-dark-gray dark:text-dark-text-primary font-semibold">yourcvpassport.com/cv/janedoe</span>
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4 overflow-hidden">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {t.customDomain.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {t.customDomain.subtitle}
+                                </p>
+                                <div className="mt-10 bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg p-2 flex items-center">
+                                    <span className="text-gray-400 dark:text-dark-text-tertiary ml-4">https://</span>
+                                    <span className="text-cv-dark-gray dark:text-dark-text-primary font-semibold">yourcvpassport.com/cv/janedoe</span>
+                                </div>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Dominio Personalizado para tu CV' : 'Custom Domain for Your CV'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Why it matters */}
@@ -100,7 +115,21 @@ const CustomDomainPage: React.FC = () => {
                     </AnimatedWrapper>
                  </div>
             </section>
-            
+
+            {/* Mid-page CTA */}
+            <div className="px-4 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Reserva tu URL personalizada' : 'Reserve your custom URL'}
+                        description={lang === 'es'
+                            ? 'Crea tu marca personal profesional con una URL memorable que destaque ante reclutadores.'
+                            : 'Create your professional personal brand with a memorable URL that stands out to recruiters.'}
+                        buttonText={lang === 'es' ? 'Configurar mi URL ahora' : 'Set up my URL now'}
+                        variant="blue"
+                    />
+                </div>
+            </div>
+
             {/* QR Code & Business Card */}
             <section className="py-20 px-4">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">

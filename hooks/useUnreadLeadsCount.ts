@@ -6,11 +6,22 @@ export const useUnreadLeadsCount = () => {
   const { profile } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [leadsTableExists, setLeadsTableExists] = useState<boolean | null>(null);
+
+  // Check if leads table exists on first load
+  useEffect(() => {
+    checkLeadsTableExists();
+  }, []);
 
   useEffect(() => {
-    if (!profile) {
+    if (!profile || leadsTableExists === false) {
       setUnreadCount(0);
       setLoading(false);
+      return;
+    }
+
+    if (leadsTableExists === null) {
+      // Still checking if table exists
       return;
     }
 
@@ -32,10 +43,36 @@ export const useUnreadLeadsCount = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [profile]);
+  }, [profile, leadsTableExists]);
+
+  const checkLeadsTableExists = async () => {
+    try {
+      // Try a simple query to check if table exists
+      const { error } = await supabase
+        .from('leads')
+        .select('id', { count: 'exact', head: true })
+        .limit(0);
+
+      if (error) {
+        // Check if error is about missing table
+        if (error.code === '42P01' || error.message.includes('does not exist') || error.message.includes('relation')) {
+          console.warn('Leads table does not exist yet. Leads feature will be disabled.');
+          setLeadsTableExists(false);
+        } else {
+          // Other errors (like RLS) mean table exists
+          setLeadsTableExists(true);
+        }
+      } else {
+        setLeadsTableExists(true);
+      }
+    } catch (err) {
+      console.warn('Could not check leads table existence:', err);
+      setLeadsTableExists(false);
+    }
+  };
 
   const loadUnreadCount = async () => {
-    if (!profile) return;
+    if (!profile || leadsTableExists === false) return;
 
     try {
       const { count, error } = await supabase
@@ -49,6 +86,7 @@ export const useUnreadLeadsCount = () => {
     } catch (err) {
       // Silently fail - leads feature may not be enabled for this user
       // Don't show error toast as it's not critical functionality
+      console.warn('Could not load unread leads count:', err);
       setUnreadCount(0);
     } finally {
       setLoading(false);

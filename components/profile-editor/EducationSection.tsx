@@ -33,6 +33,7 @@ interface EducationSectionProps {
   initialData?: EducationFormData[];
   onSave: (data: EducationFormData[]) => Promise<void>;
   onNavigateToVerifications?: () => void;
+  onNext?: () => void;
 }
 
 export interface EducationSectionHandle {
@@ -213,7 +214,7 @@ const extractDegreeType = (fieldOfStudy: string): string => {
 };
 
 
-const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProps>(({ initialData = [], onSave, onNavigateToVerifications }, ref) => {
+const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProps>(({ initialData = [], onSave, onNavigateToVerifications, onNext }, ref) => {
   const { session } = useAuth();
   const translations = useTranslations();
   const { lang } = useLanguage();
@@ -682,23 +683,6 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addEducation.replace('Añadir ', '').replace('Add ', '')}</h2>
         <div className="flex items-center gap-3">
-          {/* AI Toggle Button */}
-          {education.length > 0 && (
-            <button
-              onClick={() => setShowAISuggestions(!showAISuggestions)}
-              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
-                showAISuggestions
-                  ? 'bg-purple-600 text-white hover:bg-purple-700'
-                  : 'bg-cv-blue text-white hover:bg-cv-blue-dark'
-              }`}
-              title={showAISuggestions ? 'Ocultar sugerencias de IA' : 'Optimizar con IA'}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              {showAISuggestions ? 'Ocultar IA' : 'Optimizar con IA'}
-            </button>
-          )}
           <button
             onClick={handleAdd}
             className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2"
@@ -743,25 +727,6 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
         </div>
       )}
 
-      {/* AI Suggestions Panel */}
-      {showAISuggestions && (
-        <div className="mb-6">
-          <Suspense fallback={
-            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-6 bg-purple-200 dark:bg-purple-700 rounded w-1/3"></div>
-                <div className="h-20 bg-purple-200 dark:bg-purple-700 rounded"></div>
-              </div>
-            </div>
-          }>
-            <AITextOptimizer
-              type="education"
-              items={education}
-              onApplySuggestion={handleApplyAISuggestion}
-            />
-          </Suspense>
-        </div>
-      )}
 
       {/* Education List with Drag & Drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -786,6 +751,21 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
           <p>{modals.noEducationYet}</p>
+        </div>
+      )}
+
+      {/* Botón Continuar - Solo cuando hay educación y no está abierto el formulario */}
+      {education.length > 0 && !isFormOpen && onNext && (
+        <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
+          <button
+            onClick={onNext}
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
+          >
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
 

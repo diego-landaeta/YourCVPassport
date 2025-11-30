@@ -15,15 +15,41 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
     );
 };
 
-const CompanyPlanCard: React.FC<{ plan: any }> = ({ plan }) => {
+const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isAnnual }) => {
     const { openModal } = useAuth();
+    const { lang } = useLanguage();
+
+    const monthlyPrice = plan.price && plan.price.startsWith('€')
+        ? parseInt(plan.price.replace('€', ''))
+        : null;
+
+    const annualPrice = monthlyPrice ? Math.round(monthlyPrice * 12 * 0.8) : null;
+    const monthlyFromAnnual = annualPrice ? Math.round(annualPrice / 12) : null;
+
+    const displayPrice = isAnnual && annualPrice
+        ? `€${annualPrice}`
+        : plan.price;
+
+    const displayPeriod = isAnnual && annualPrice
+        ? (lang === 'es' ? '/ año' : '/ year')
+        : (lang === 'es' ? '/ mes' : '/ month');
+
     return (
         <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col ${plan.highlight ? 'border-cv-blue dark:border-cv-blue-light scale-105 bg-white dark:bg-dark-bg-secondary ring-2 ring-cv-blue/20 dark:ring-cv-blue-light/30' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg dark:shadow-2xl`}>
             <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{plan.title}</h3>
             <p className="mt-2 text-gray-500 dark:text-dark-text-tertiary">{plan.description}</p>
-            <div className="mt-4 flex items-baseline">
-                <span className="text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{plan.price}</span>
-                <span className="ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary">/ month</span>
+            <div className="mt-4">
+                <div className="flex items-baseline">
+                    <span className="text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{displayPrice}</span>
+                    <span className="ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary">{displayPeriod}</span>
+                </div>
+                {isAnnual && monthlyFromAnnual && (
+                    <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
+                        {lang === 'es'
+                            ? `€${monthlyFromAnnual} por mes`
+                            : `€${monthlyFromAnnual} per month`}
+                    </p>
+                )}
             </div>
              <p className="mt-2 font-semibold text-cv-blue dark:text-cv-blue-light">{plan.credits}</p>
             <ul className="mt-8 space-y-4 flex-grow">
@@ -45,7 +71,7 @@ const CompanyPlansPage: React.FC = () => {
     const t = useTranslations();
     // FIX: Correctly reference the translation object for this page. The error was caused by this object missing from the Spanish translation file.
     const pageData = t.companyPlansPage;
-    const [formState, setFormState] = useState({ name: '', company: '', email: '', message: '' });
+    const [isAnnual, setIsAnnual] = useState(false);
     const { lang } = useLanguage();
 
     const seoTitle = lang === 'es'
@@ -59,16 +85,6 @@ const CompanyPlansPage: React.FC = () => {
     const seoKeywords = lang === 'es'
         ? 'planes empresas, reclutamiento, talento, ATS, integración, créditos, búsqueda talento, verificación, YourCVPassport, empresa, soluciones HR'
         : 'company plans, recruitment, talent, ATS, integration, credits, talent search, verification, YourCVPassport, enterprise, HR solutions';
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
-        setFormState(prevState => ({ ...prevState, [id]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();alert(pageData.form.alert);
-        setFormState({ name: '', company: '', email: '', message: '' });
-    };
 
     return (
         <>
@@ -88,8 +104,17 @@ const CompanyPlansPage: React.FC = () => {
                     <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
                         {pageData.subtitle}
                     </p>
-                    <div className="mt-8 flex justify-center gap-4">
-                        <button className="bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">{pageData.cta.requestDemo}</button>
+                    <div className="mt-10 flex justify-center items-center space-x-4">
+                        <span className={`font-semibold ${!isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
+                            {lang === 'es' ? 'Mensual' : 'Monthly'}
+                        </span>
+                        <label htmlFor="billing-toggle-company" className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="billing-toggle-company" className="sr-only peer" checked={isAnnual} onChange={() => setIsAnnual(!isAnnual)} />
+                            <div className="w-14 h-8 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-[4px] after:bg-white dark:after:bg-dark-text-primary after:border-gray-300 dark:border-dark-border-light after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cv-blue"></div>
+                        </label>
+                        <span className={`font-semibold ${isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
+                            {lang === 'es' ? 'Anual' : 'Annual'} <span className="text-cv-green">({lang === 'es' ? 'Ahorra 20%' : 'Save 20%'})</span>
+                        </span>
                     </div>
                 </AnimatedWrapper>
             </section>
@@ -103,7 +128,7 @@ const CompanyPlansPage: React.FC = () => {
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                             {pageData.tiers.plans.map((plan: any) => (
-                                <CompanyPlanCard key={plan.title} plan={plan} />
+                                <CompanyPlanCard key={plan.title} plan={plan} isAnnual={isAnnual} />
                             ))}
                         </div>
                     </AnimatedWrapper>
@@ -177,24 +202,6 @@ const CompanyPlansPage: React.FC = () => {
                 </AnimatedWrapper>
             </section>
 
-            {/* Demo Request Form */}
-            <section className="py-20 px-4">
-                <div className="max-w-4xl mx-auto bg-white dark:bg-dark-bg-primary p-8 rounded-lg shadow-2xl border">
-                    <AnimatedWrapper>
-                        <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-2">{pageData.form.title}</h2>
-                        <p className="text-center text-gray-600 dark:text-dark-text-secondary mb-8">{pageData.form.subtitle}</p>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                             <div className="grid md:grid-cols-2 gap-6">
-                                <div><label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{pageData.form.name}</label><input type="text" id="name" value={formState.name} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-dark-border-light rounded-md shadow-sm" /></div>
-                                <div><label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{pageData.form.company}</label><input type="text" id="company" value={formState.company} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-dark-border-light rounded-md shadow-sm" /></div>
-                             </div>
-                            <div><label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{pageData.form.email}</label><input type="email" id="email" value={formState.email} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-dark-border-light rounded-md shadow-sm" /></div>
-                            <div><label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary">{pageData.form.message}</label><textarea id="message" rows={4} value={formState.message} onChange={handleInputChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-dark-border-light rounded-md shadow-sm"></textarea></div>
-                            <div className="text-center"><button type="submit" className="bg-cv-blue text-white px-10 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all shadow-lg">{pageData.form.submit}</button></div>
-                        </form>
-                    </AnimatedWrapper>
-                </div>
-            </section>
         </div>
         </>
     );

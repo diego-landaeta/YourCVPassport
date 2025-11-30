@@ -6,7 +6,9 @@ import BadCVExample from './BadCVExample';
 import GoodCVExample from './GoodCVExample';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -55,27 +57,38 @@ const ATSExportPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary relative overflow-hidden">
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary relative overflow-hidden py-20 px-4">
                  <div className="absolute top-0 left-0 -translate-x-1/3 -translate-y-1/3">
                     <div className="w-96 h-96 bg-cv-blue/10 rounded-full filter blur-3xl"></div>
                 </div>
                 <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3">
                     <div className="w-96 h-96 bg-cv-green/10 rounded-full filter blur-3xl"></div>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 text-center z-10 relative">
-                    <AnimatedWrapper>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary leading-tight">
-                            {t.atsPage.title}
-                        </h1>
-                        <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600 dark:text-dark-text-secondary">
-                            {t.atsPage.subtitle}
-                        </p>
-                        <button 
-                            onClick={() => openModal('signup')}
-                            className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            {t.atsPage.cta.export}
-                        </button>
-                    </AnimatedWrapper>
+                <div className="max-w-7xl mx-auto z-10 relative">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary leading-tight">
+                                    {t.atsPage.title}
+                                </h1>
+                                <p className="mt-6 text-lg md:text-xl text-gray-600 dark:text-dark-text-secondary">
+                                    {t.atsPage.subtitle}
+                                </p>
+                                <button
+                                    onClick={() => openModal('signup')}
+                                    className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    {t.atsPage.cta.export}
+                                </button>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Plantillas Optimizadas para ATS' : 'ATS-Optimized Templates'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
+                    </div>
                 </div>
             </section>
             
@@ -171,6 +184,20 @@ const ATSExportPage: React.FC = () => {
                     </AnimatedWrapper>
                 </div>
             </section>
+
+            {/* Mid-page CTA */}
+            <div className="px-4 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Optimiza tu CV para ATS ahora' : 'Optimize your CV for ATS now'}
+                        description={lang === 'es'
+                            ? 'Accede a plantillas profesionales optimizadas para sistemas ATS y aumenta tus posibilidades de ser contactado.'
+                            : 'Access professional templates optimized for ATS systems and increase your chances of being contacted.'}
+                        buttonText={lang === 'es' ? 'Probar plantillas ATS gratis' : 'Try ATS templates free'}
+                        variant="gradient"
+                    />
+                </div>
+            </div>
 
              {/* Before/After */}
             <section className="py-20 px-4 bg-cv-light-gray dark:bg-dark-bg-secondary">

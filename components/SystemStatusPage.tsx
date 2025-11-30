@@ -5,6 +5,7 @@ import { ChangelogChangeType } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import Modal from './ui/Modal';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -28,6 +29,7 @@ const SystemStatusPage: React.FC = () => {
     const { openModal } = useAuth();
     const { lang } = useLanguage();
     const [email, setEmail] = useState('');
+    const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
     const t = useTranslations();
     const pageData = t.statusPage;
 
@@ -71,6 +73,29 @@ const SystemStatusPage: React.FC = () => {
                         {pageData.operational}
                     </div>
                 </AnimatedWrapper>
+            </section>
+
+            {/* No Incidents Banner - Highlighted Section */}
+            <section className="py-12 px-4">
+                <div className="max-w-4xl mx-auto">
+                    <AnimatedWrapper>
+                        <div className="relative overflow-hidden bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border-2 border-green-200 dark:border-green-800 p-10">
+                            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-green-200 dark:bg-green-800 rounded-full opacity-20"></div>
+                            <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-emerald-200 dark:bg-emerald-800 rounded-full opacity-20"></div>
+                            <div className="relative flex items-center justify-center gap-6">
+                                <div className="flex-shrink-0 w-20 h-20 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center shadow-lg">
+                                    <svg className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-3xl font-extrabold text-green-800 dark:text-green-400">{pageData.incidents.noIncidents}</p>
+                                    <p className="text-lg text-green-700 dark:text-green-500 mt-2 font-medium">Sistema operando con normalidad</p>
+                                </div>
+                            </div>
+                        </div>
+                    </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Current Status Grid */}
@@ -132,34 +157,32 @@ const SystemStatusPage: React.FC = () => {
                     <main className="lg:col-span-8">
                         <AnimatedWrapper delay="duration-900">
                             <h2 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary mb-16">{pageData.changelogTitle}</h2>
-                            <div className="space-y-12">
+                            <div className="space-y-6">
                                 {t.CHANGELOG_ENTRIES.map((entry, index) => (
-                                    <div key={entry.version} className="bg-white dark:bg-dark-bg-primary rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
-                                        {/* Header Section */}
-                                        <div className="bg-gradient-to-r from-cv-blue/5 to-purple-500/5 dark:from-cv-blue/10 dark:to-purple-500/10 px-10 py-8 border-b border-gray-200 dark:border-gray-700">
-                                            <div className="flex items-center gap-4 mb-3">
-                                                <div className="w-4 h-4 bg-cv-blue rounded-full shadow-lg"></div>
-                                                <p className="text-sm font-bold text-gray-500 dark:text-dark-text-tertiary uppercase tracking-widest">{entry.date}</p>
-                                            </div>
-                                            <h3 className="text-4xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                                                {pageData.version} {entry.version}
-                                            </h3>
-                                        </div>
-
-                                        {/* Changes Section */}
-                                        <div className="px-10 py-8 space-y-4">
-                                            {entry.changes.map((change, changeIndex) => (
-                                                <div key={changeIndex} className="group hover:bg-gray-50 dark:hover:bg-dark-bg-secondary rounded-xl px-6 py-4 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
-                                                    <div className="flex items-center gap-4">
-                                                        <span className={`flex-shrink-0 text-xs font-bold px-4 py-1.5 rounded-full ${getChangeTypeColor(change.type)} shadow-sm whitespace-nowrap`}>
-                                                            {t.changelogTypes[change.type]}
-                                                        </span>
-                                                        <p className="text-base text-gray-700 dark:text-dark-text-secondary flex-1">
-                                                            {change.description}
-                                                        </p>
-                                                    </div>
+                                    <div
+                                        key={entry.version}
+                                        className="bg-white dark:bg-dark-bg-primary rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                                        onClick={() => setSelectedVersion(index)}
+                                    >
+                                        <div className="bg-gradient-to-r from-cv-blue/5 to-purple-500/5 dark:from-cv-blue/10 dark:to-purple-500/10 px-8 py-6 flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="w-3 h-3 bg-cv-blue rounded-full shadow-md"></div>
+                                                    <p className="text-xs font-bold text-gray-500 dark:text-dark-text-tertiary uppercase tracking-widest">{entry.date}</p>
                                                 </div>
-                                            ))}
+                                                <h3 className="text-2xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                                    {pageData.version} {entry.version}
+                                                </h3>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                                    {entry.changes.length} {entry.changes.length === 1 ? 'cambio' : 'cambios'}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-cv-blue group-hover:translate-x-1 transition-transform">
+                                                <span className="font-semibold text-sm">{lang === 'es' ? 'Ver detalles' : 'View details'}</span>
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -379,28 +402,50 @@ const SystemStatusPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* No Incidents Banner */}
-                            <div className="relative overflow-hidden bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border-2 border-green-200 dark:border-green-800 p-8">
-                                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-green-200 dark:bg-green-800 rounded-full opacity-20"></div>
-                                <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-emerald-200 dark:bg-emerald-800 rounded-full opacity-20"></div>
-                                <div className="relative flex items-center justify-center gap-4">
-                                    <div className="flex-shrink-0 w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                                        <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                        </svg>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-2xl font-bold text-green-800 dark:text-green-400">{pageData.incidents.noIncidents}</p>
-                                        <p className="text-green-700 dark:text-green-500 mt-1">Sistema operando con normalidad</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </AnimatedWrapper>
                 </div>
             </section>
             </div>
+
+            {/* Changelog Detail Modal */}
+            {selectedVersion !== null && (
+                <Modal
+                    isOpen={selectedVersion !== null}
+                    onClose={() => setSelectedVersion(null)}
+                    title={`${pageData.version} ${t.CHANGELOG_ENTRIES[selectedVersion].version}`}
+                    maxWidth="4xl"
+                >
+                    <div className="p-8">
+                        {/* Date Badge */}
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-3 h-3 bg-cv-blue rounded-full shadow-md"></div>
+                            <p className="text-sm font-bold text-gray-500 dark:text-dark-text-tertiary uppercase tracking-widest">
+                                {t.CHANGELOG_ENTRIES[selectedVersion].date}
+                            </p>
+                        </div>
+
+                        {/* Changes List */}
+                        <div className="space-y-4">
+                            {t.CHANGELOG_ENTRIES[selectedVersion].changes.map((change, changeIndex) => (
+                                <div
+                                    key={changeIndex}
+                                    className="group hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary rounded-xl px-6 py-5 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <span className={`flex-shrink-0 text-xs font-bold px-4 py-1.5 rounded-full ${getChangeTypeColor(change.type)} shadow-sm whitespace-nowrap`}>
+                                            {t.changelogTypes[change.type]}
+                                        </span>
+                                        <p className="text-base text-gray-700 dark:text-dark-text-secondary flex-1 leading-relaxed">
+                                            {change.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </>
     );
 };

@@ -3,7 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -58,18 +60,31 @@ const ATSIntegrationsPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {pageData.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {pageData.subtitle}
-                    </p>
-                    <div className="mt-10 flex justify-center flex-wrap gap-6">
-                        {pageData.logos.map((logo: string) => <ATSLogo key={logo} name={logo} />)}
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {pageData.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {pageData.subtitle}
+                                </p>
+                                <div className="mt-10 flex justify-center md:justify-start flex-wrap gap-6">
+                                    {pageData.logos.map((logo: string) => <ATSLogo key={logo} name={logo} />)}
+                                </div>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Integraciones ATS' : 'ATS Integrations'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Integration Showcase */}
@@ -107,7 +122,21 @@ const ATSIntegrationsPage: React.FC = () => {
                     </AnimatedWrapper>
                 </div>
             </section>
-            
+
+            {/* Mid-page CTA */}
+            <div className="px-4 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Conecta con cualquier ATS' : 'Connect with any ATS'}
+                        description={lang === 'es'
+                            ? 'Exporta tu CV optimizado directamente a los sistemas ATS más populares sin perder formato ni información.'
+                            : 'Export your optimized CV directly to the most popular ATS systems without losing format or information.'}
+                        buttonText={lang === 'es' ? 'Ver integraciones disponibles' : 'See available integrations'}
+                        variant="blue"
+                    />
+                </div>
+            </div>
+
             {/* API Documentation Preview */}
             <section className="py-20 px-4">
                 <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
@@ -122,9 +151,14 @@ const ATSIntegrationsPage: React.FC = () => {
                                     </li>
                                 ))}
                             </ul>
-                            <button className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+                            <a
+                                href="https://github.com/yourusername/yourcvpassport/blob/main/API_DOCUMENTATION.md"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors"
+                            >
                                 {pageData.api.cta}
-                            </button>
+                            </a>
                         </div>
                     </AnimatedWrapper>
                     <AnimatedWrapper delay="duration-1000">

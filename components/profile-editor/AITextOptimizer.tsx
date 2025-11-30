@@ -107,6 +107,15 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       return;
     }
 
+    // Check if user has AI access
+    const { checkAIAccess } = await import('../../lib/ai');
+    const { hasAccess, plan } = await checkAIAccess(session.user.id);
+
+    if (!hasAccess) {
+      setError(`Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`);
+      return;
+    }
+
     setIsAnalyzing(true);
     setError(null);
     setSuggestions([]);
@@ -223,9 +232,14 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
         <div className="flex items-center gap-3">
           <SparklesIcon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
           <div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              Optimización con IA
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Optimización con IA
+              </h3>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                IA
+              </span>
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {items.length} {type === 'experience' ? 'experiencia(s)' : 'educación(es)'} para analizar
             </p>
@@ -240,17 +254,17 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           {isAnalyzing ? (
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
-              Analizando...
+              Analizando con IA...
             </>
           ) : suggestions.length > 0 ? (
             <>
               <ArrowPathIcon className="w-5 h-5" />
-              Regenerar Sugerencias
+              Regenerar Sugerencias IA
             </>
           ) : (
             <>
               <SparklesIcon className="w-5 h-5" />
-              Generar Sugerencias
+              Generar Sugerencias IA
             </>
           )}
         </button>

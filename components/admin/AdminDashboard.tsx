@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import BlogManagementSection from '../BlogManagementSection';
 import SuccessStoriesManagement from './SuccessStoriesManagement';
 import ProfilesManagement from './ProfilesManagement';
@@ -15,6 +15,11 @@ const AdminDashboard: React.FC = () => {
     const savedTab = sessionStorage.getItem('adminDashboardTab');
     return (savedTab === 'blog' || savedTab === 'stories' || savedTab === 'profiles' || savedTab === 'stamps' ? savedTab : 'profiles') as 'profiles' | 'blog' | 'stories' | 'stamps';
   });
+
+  // Save active tab to sessionStorage when it changes
+  useEffect(() => {
+    sessionStorage.setItem('adminDashboardTab', activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     if (!profile || profile.role !== 'admin') {
@@ -110,6 +115,41 @@ const AdminDashboard: React.FC = () => {
             </nav>
           </div>
         </div>
+
+        {/* Talent Search Link Card */}
+        <Link
+          to="/admin/talentos"
+          className="mb-8 block bg-gradient-to-r from-purple-500 to-indigo-600 dark:from-purple-700 dark:to-indigo-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm">
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                  🎯 Búsqueda de Talentos por Categorías
+                  <span className="px-2 py-1 bg-yellow-400/30 border border-yellow-300/50 rounded text-xs font-medium text-yellow-100">
+                    EN DESARROLLO
+                  </span>
+                </h3>
+                <p className="text-purple-100">
+                  Explora profesionales organizados por nicho, profesión y especialización
+                </p>
+              </div>
+            </div>
+            <svg
+              className="w-8 h-8 text-white transform group-hover:translate-x-2 transition-transform"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+        </Link>
 
         {activeTab === 'profiles' && (
           <ProfilesManagement />

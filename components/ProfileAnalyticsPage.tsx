@@ -5,7 +5,9 @@ import Testimonials from './Testimonials';
 import { useTranslations } from '../hooks/useTranslations';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -87,18 +89,28 @@ const ProfileAnalyticsPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {pageData.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                        {pageData.subtitle}
-                    </p>
-                    <div className="mt-10 max-w-4xl mx-auto bg-white dark:bg-dark-bg-primary p-4 rounded-lg shadow-xl border">
-                        <img src={pageData.dashboardImageUrl} alt={pageData.dashboardImageAlt} className="rounded-md" />
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {pageData.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                    {pageData.subtitle}
+                                </p>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Analítica de Perfil Profesional' : 'Professional Profile Analytics'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
                     </div>
-                </AnimatedWrapper>
+                </div>
             </section>
 
             {/* Why it matters */}
@@ -185,6 +197,20 @@ const ProfileAnalyticsPage: React.FC = () => {
                     </AnimatedWrapper>
                  </div>
             </section>
+
+            {/* Mid-page CTA */}
+            <div className="px-4 py-12">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Comienza a rastrear tus métricas hoy' : 'Start tracking your metrics today'}
+                        description={lang === 'es'
+                            ? 'Obtén insights detallados sobre quién visita tu perfil y optimiza tu estrategia de búsqueda de empleo.'
+                            : 'Get detailed insights into who visits your profile and optimize your job search strategy.'}
+                        buttonText={lang === 'es' ? 'Activar analíticas gratis' : 'Activate free analytics'}
+                        variant="blue"
+                    />
+                </div>
+            </div>
 
             <Testimonials 
                 title={pageData.testimonialsTitle}

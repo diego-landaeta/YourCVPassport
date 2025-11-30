@@ -4,7 +4,9 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import CoverLetterGenerator from './CoverLetterGenerator';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
+import InlineCTA from './InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroImage from './HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -36,20 +38,33 @@ const AIAssistantPage: React.FC = () => {
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero Section */}
-            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary text-center py-20 px-4">
-                <AnimatedWrapper>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
-                        {t.aiPage.title}
-                    </h1>
-                    <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 dark:text-dark-text-secondary">
-                       {t.aiPage.subtitle}
-                    </p>
-                    <button 
-                        onClick={() => openModal('signup')}
-                        className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                        {t.aiPage.cta.try}
-                    </button>
-                </AnimatedWrapper>
+            <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <AnimatedWrapper>
+                            <div className="text-center md:text-left">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
+                                    {t.aiPage.title}
+                                </h1>
+                                <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
+                                   {t.aiPage.subtitle}
+                                </p>
+                                <button
+                                    onClick={() => openModal('signup')}
+                                    className="mt-8 bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    {t.aiPage.cta.try}
+                                </button>
+                            </div>
+                        </AnimatedWrapper>
+                        <AnimatedWrapper delay="duration-1000">
+                            <HeroImage
+                                src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop"
+                                alt={lang === 'es' ? 'Asistente de IA para CV' : 'AI Assistant for CV'}
+                                position="center"
+                            />
+                        </AnimatedWrapper>
+                    </div>
+                </div>
             </section>
 
             {/* Features section */}
@@ -87,6 +102,20 @@ const AIAssistantPage: React.FC = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Mid-page CTA */}
+            <div className="px-4">
+                <div className="max-w-7xl mx-auto">
+                    <InlineCTA
+                        title={lang === 'es' ? 'Deja que la IA trabaje por ti' : 'Let AI work for you'}
+                        description={lang === 'es'
+                            ? 'Optimiza tu CV automáticamente y genera cartas de presentación personalizadas en segundos.'
+                            : 'Optimize your CV automatically and generate personalized cover letters in seconds.'}
+                        buttonText={lang === 'es' ? 'Probar IA gratis' : 'Try AI for free'}
+                        variant="gradient"
+                    />
+                </div>
+            </div>
 
             <CoverLetterGenerator />
             

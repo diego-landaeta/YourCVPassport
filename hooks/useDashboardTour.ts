@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const TOUR_COMPLETED_KEY = 'dashboardTourCompleted';
 
-export const useDashboardTour = (userId?: string) => {
+export const useDashboardTour = (userId?: string, profileCompleteness?: number) => {
   const [showTour, setShowTour] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [tourJustCompleted, setTourJustCompleted] = useState(false);
@@ -16,6 +16,15 @@ export const useDashboardTour = (userId?: string) => {
     // Check if user has completed the tour
     const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${userId}`);
 
+    // ✅ AUTO-COMPLETE: If user has profile progress (>0%), mark tour as completed automatically
+    // This prevents existing users from seeing the tour again
+    if (profileCompleteness && profileCompleteness > 0 && !tourCompleted) {
+      localStorage.setItem(`${TOUR_COMPLETED_KEY}_${userId}`, 'true');
+      setShowTour(false); // Ensure it's hidden if it was somehow set to true
+      setIsLoading(false);
+      return;
+    }
+
     // Show tour only if not completed
     if (!tourCompleted) {
       // Small delay to ensure dashboard is fully rendered
@@ -26,7 +35,7 @@ export const useDashboardTour = (userId?: string) => {
     } else {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, profileCompleteness]);
 
   const completeTour = () => {
     if (userId) {

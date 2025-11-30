@@ -58,11 +58,11 @@ export const translations = {
     companies: {
         title: 'Empresas que Confían en la Verificación de YourCVPassport',
         logos: [
-            { name: "Innovate Inc.", url: "https://www.innovateteam.com/" },
-            { name: "QuantumLeap", url: "http://quleap.com/" },
-            { name: "Apex Solutions", url: "https://www.apexsystems.com/" },
-            { name: "Stellar Corp.", url: "https://www.stlr.net/" },
-            { name: "NextGen", url: "https://nextgen.group/" }
+            { name: "ISEIE", url: "https://iseie.com/", logoUrl: "https://iseie.com/wp-content/uploads/2024/11/LOGO-PAIS-BANDERA-ESPANA-0-00-00-00-e1738499416780.png" },
+            { name: "Psiko Aprende", url: "https://psikoaprende.com/", logoUrl: "https://psikoaprende.com/wp-content/uploads/2024/11/LOGO-PSIKO-APRENDE-PNG-1-e1730841803106.png", logoUrlLight: "https://psikoaprende.com/wp-content/uploads/2024/03/LOGO-PSIKO-APRENDE-PNG-2-e1730843042102.png" },
+            { name: "Navalis University", url: "https://navalis.university/", logoUrl: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-logo-scaled.png", logoUrlLight: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-Logo-Negro-1024x1024.png" },
+            { name: "ISEIH", url: "https://iseih.com/", logoUrl: "https://iseih.com/wp-content/uploads/2025/08/ISEIH-LOGOTIPO-3.png" },
+            { name: "CETLAT", url: "https://cetlat.org/", logoUrl: "https://cetlat.org/wp-content/uploads/2025/05/cetlat-horizontal-nuevo-logo.webp" }
         ],
     },
     features: {
@@ -288,8 +288,8 @@ export const translations = {
         }
     },
     stampsPage: {
-        title: 'Sellos Verificados: El Nuevo Estándar de Confianza Profesional',
-        subtitle: 'Construye credibilidad y destaca de la competencia con credenciales verificadas. Nuestros sellos prueban tus cualificaciones, para que tú no tengas que hacerlo.',
+        title: 'Verifica Tus Credenciales para Posicionarte en YourCVPassport',
+        subtitle: 'Destaca de la competencia con credenciales verificadas que validan tu trayectoria profesional. Construye confianza y acelera tu contratación.',
         cta: {
             start: 'Inicia Tu Verificación'
         },
@@ -383,10 +383,26 @@ export const translations = {
             title: 'Elige de una Biblioteca de Plantillas Optimizadas para ATS',
             subtitle: 'Belleza e inteligencia. Nuestras plantillas están diseñadas para ser visualmente atractivas para los humanos y perfectamente legibles para las máquinas.',
             items: [
+                { title: 'Pasaporte (Nuevo)', imageUrl: '/images/templates/passport.png' },
+                { title: 'Clásico', imageUrl: '/images/templates/classic.png' },
                 { title: 'Profesional Moderno', imageUrl: '/images/templates/modern-professional.png' },
                 { title: 'Corporativo Clásico', imageUrl: '/images/templates/classic-corporate.png' },
                 { title: 'Creativo Minimalista', imageUrl: '/images/templates/creative-minimalist.png' },
-                { title: 'Estándar Académico', imageUrl: '/images/templates/academic-standard.png' }
+                { title: 'Estándar Académico', imageUrl: '/images/templates/academic-standard.png' },
+                { title: 'Moderno Minimalista', imageUrl: '/images/templates/modern-minimalist.png' },
+                { title: 'Creativo Audaz', imageUrl: '/images/templates/creative-bold.png' },
+                { title: 'Profesional Clásico', imageUrl: '/images/templates/professional-classic.png' },
+                { title: 'Profesional de la Salud', imageUrl: '/images/templates/healthcare-professional.png' },
+                { title: 'Minimalista Amarillo', imageUrl: '/images/templates/minimalist-yellow.png' },
+                { title: 'Gradiente Azul', imageUrl: '/images/templates/gradient-blue.png' },
+                { title: 'Rosa Coral', imageUrl: '/images/templates/coral-pink.png' },
+                { title: 'Verde Minimalista', imageUrl: '/images/templates/green-minimal.png' },
+                { title: 'Naranja Creativo', imageUrl: '/images/templates/creative-orange.png' },
+                { title: 'Barra Lateral Oscura', imageUrl: '/images/templates/classic-sidebar.png' },
+                { title: 'Encabezado Gradiente', imageUrl: '/images/templates/modern-clean.png' },
+                { title: 'Línea de Tiempo Elegante', imageUrl: '/images/templates/elegant-minimal.png' },
+                { title: 'Azul Profesional', imageUrl: '/images/templates/professional-blue.png' },
+                { title: 'Banner Creativo', imageUrl: '/images/templates/creative-modern.png' }
             ]
         },
         optimization: {
@@ -544,7 +560,7 @@ export const translations = {
             subtitle: "Intenta ajustar tus filtros para encontrar la plantilla perfecta."
         },
         cta: {
-            title: "Desbloquea el Acceso Ilimitado a Todas las Plantillas",
+            title: "Vista Previa de Todas las Plantillas",
             subtitle: "Actualiza a nuestro Plan Profesional para descargas ilimitadas, personalización avanzada y herramientas con IA.",
             button: "Actualizar a Pro"
         }
@@ -1048,14 +1064,19 @@ export const translations = {
             },
             jobPreferences: {
                 title: "Preferencias Laborales",
+                seekingStatus: "Estado de Búsqueda",
+                seekingStatusDescription: "Indica si estás buscando activamente oportunidades laborales. Solo los que buscan activamente mostrarán el badge de 'Open to opportunities' en su CV público.",
+                seekingOpen: "Busco Activamente",
+                seekingPassive: "Abierto a Ofertas",
+                seekingNotLooking: "No Busco Actualmente",
                 jobType: "Tipo de Trabajo (selecciona todos los que apliquen)",
-                availability: "Disponibilidad",
+                availability: "Disponibilidad para Empezar",
                 selectAvailability: "Selecciona disponibilidad",
                 immediate: "Inmediato",
                 twoWeeks: "Aviso de 2 Semanas",
                 oneMonth: "Aviso de 1 Mes",
                 twoMonths: "2+ Meses",
-                notLooking: "No Busco Actualmente",
+                notLooking: "No Disponible",
                 salary: "Expectativas Salariales",
                 minSalary: "Salario mínimo",
                 maxSalary: "Salario máximo",
@@ -1237,6 +1258,7 @@ export const translations = {
             analytics: "Analítica",
             leads: "Leads",
             stamps: "Verificaciones",
+            successStories: "Casos de Éxito",
             settings: "Ajustes",
             help: "Ayuda",
             backToHome: "Volver al Inicio",
@@ -1247,6 +1269,49 @@ export const translations = {
             completeProfileFirst: "Completa tu perfil primero",
             editProfile: "Editar Perfil",
             viewPublicProfile: "Ver Perfil Público",
+        },
+        successStories: {
+            title: "¡Comparte Tu Caso de Éxito!",
+            subtitle: "¿Conseguiste un nuevo trabajo, un ascenso o un gran proyecto usando YourCVPassport? ¡Nos encantaría escucharlo!",
+            newStory: "Compartir Mi Historia",
+            shareStory: "Compartir Mi Historia",
+            editStory: "Editar Mi Historia",
+            myStories: "Mis Historias",
+            noStories: "Aún no has compartido ninguna historia",
+            noStoriesHelp: "Haz clic en el botón de arriba para compartir tu primera historia de éxito",
+            approved: "✓ Aprobada",
+            pending: "⏳ Pendiente de aprobación",
+            submitted: "Enviada",
+            error: "Error",
+            success: "Éxito",
+            loadError: "Error al cargar tus historias",
+            cannotEditApproved: "No puedes editar una historia que ya ha sido aprobada.",
+            updateSuccess: "Historia actualizada correctamente. Está pendiente de aprobación.",
+            submitSuccess: "¡Historia enviada correctamente! Será revisada por nuestro equipo antes de ser publicada.",
+            saveError: "Error al guardar",
+            confirmDelete: "Confirmar eliminación",
+            deleteMessage: "¿Eliminar tu historia \"{headline}\"? Esta acción no se puede deshacer.",
+            delete: "Eliminar",
+            cancel: "Cancelar",
+            deleteSuccess: "Historia eliminada correctamente",
+            deleteError: "Error al eliminar",
+            edit: "Editar",
+            update: "Actualizar",
+            submit: "Enviar Historia",
+            form: {
+                name: "Tu Nombre",
+                role: "Tu Rol/Posición",
+                headline: "Titular de Tu Historia",
+                headlinePlaceholder: "Ej: Conseguí mi trabajo soñado en solo 2 semanas",
+                fullStory: "Tu Historia Completa",
+                storyPlaceholder: "Cuéntanos cómo YourCVPassport te ayudó a alcanzar tu objetivo profesional...",
+                industry: "Industria",
+                goal: "Objetivo Alcanzado",
+                imageUrl: "URL de Tu Foto",
+                imageHelp: "Sugerencia: Puedes usar la URL de tu foto de perfil de YourCVPassport",
+                beforeImage: "URL Imagen \"Antes\" (opcional)",
+                afterImage: "URL Imagen \"Después\" (opcional)",
+            }
         },
         editor: {
             title: "Editar Perfil",
@@ -1647,6 +1712,11 @@ export const translations = {
         { question: '¿Cómo funciona el proceso de verificación?', answer: 'Envías tus documentos e información a través de nuestra plataforma segura. Nuestro sistema, combinado con servicios de verificación de terceros, confirma la autenticidad de tus credenciales. Una vez verificado, se añade un "sello" a tu perfil.' },
         { question: '¿Están seguros mis datos?', answer: 'Absolutamente. Cumplimos totalmente con el RGPD y utilizamos encriptación de última generación para proteger tus datos. Tienes control total sobre quién ve tu perfil e información.' },
         { question: '¿Puedo exportar mi CV para solicitudes de empleo?', answer: '¡Sí! Puedes exportar tu CV verificado en varios formatos compatibles con ATS como PDF y DOCX, asegurando que pase a través de los sistemas de seguimiento de candidatos utilizados por la mayoría de las empresas.' },
+        { question: '¿Cuánto cuesta crear un perfil en YourCVPassport?', answer: 'Crear tu perfil básico es completamente gratis. Ofrecemos un plan gratuito que incluye plantillas esenciales y funciones básicas. Para acceso a plantillas premium, herramientas de IA, dominio personalizado y análisis avanzado, puedes actualizar a uno de nuestros planes de pago.' },
+        { question: '¿Puedo actualizar mi CV después de haberlo creado?', answer: 'Por supuesto. Puedes editar y actualizar tu CV en cualquier momento desde tu panel de control. Todas las actualizaciones se guardan automáticamente y se reflejan en tiempo real en tu perfil público si está activado.' },
+        { question: '¿Qué es un perfil público y cómo funciona?', answer: 'Un perfil público es una versión de tu CV que puedes compartir con reclutadores mediante un enlace único. Puedes activarlo o desactivarlo cuando quieras y controlar exactamente qué información es visible. Es ideal para búsqueda pasiva de empleo.' },
+        { question: '¿Los reclutadores pueden encontrarme en YourCVPassport?', answer: 'Sí, si activas tu perfil público, los reclutadores pueden encontrarte mediante nuestra función de búsqueda avanzada. Pueden filtrar por habilidades, ubicación, industria y más. Tú mantienes el control sobre tu visibilidad y puedes desactivar tu perfil en cualquier momento.' },
+        { question: '¿Qué ventajas ofrece YourCVPassport frente a otros creadores de CV?', answer: 'YourCVPassport se diferencia por combinar creación de CV profesional con verificación de credenciales mediante tecnología blockchain, optimización con IA, plantillas compatibles con ATS, perfil público con URL personalizada, y herramientas de análisis para rastrear el rendimiento de tu CV.' },
     ],
     TESTIMONIALS: [
         { quote: "El sello de verificación marcó una gran diferencia. Recibí más llamadas de empresas de primer nivel que nunca. Es un antes y un después.", name: 'Anna Kowalsky', role: 'Ingeniera de Software Senior', imageUrl: 'https://picsum.photos/id/1027/100/100' },
@@ -1656,6 +1726,11 @@ export const translations = {
     STAMPS_FAQ_ITEMS: [
         { question: '¿Cuánto tarda la verificación?', answer: 'La verificación de identidad suele ser instantánea. La de educación y experiencia laboral puede tardar de 2 a 5 días hábiles dependiendo de la institución.' },
         { question: '¿Qué documentos necesito?', answer: 'Varía según el sello. Para la identidad, se requiere un documento de identidad emitido por el gobierno. Para la educación, es posible que necesites un diploma o expediente académico.' },
+        { question: '¿Qué es la tecnología blockchain y cómo protege mis credenciales?', answer: 'Blockchain es una tecnología de registro distribuido que crea un registro inmutable y transparente de tus credenciales verificadas. Una vez que tu información es verificada y registrada en la blockchain, no puede ser alterada ni falsificada, garantizando la máxima autenticidad.' },
+        { question: '¿Puedo verificar certificaciones profesionales además de títulos académicos?', answer: 'Sí, puedes verificar múltiples tipos de credenciales incluyendo certificaciones profesionales (PMP, AWS, Google, etc.), títulos académicos, cursos especializados, licencias profesionales y experiencia laboral. Cada tipo de credencial recibe su propio sello de verificación.' },
+        { question: '¿Qué sucede si mi empleador anterior ya no existe o no responde?', answer: 'Entendemos que algunas empresas pueden haber cerrado o ser difíciles de contactar. En estos casos, aceptamos documentos alternativos como cartas de referencia, recibos de nómina, contratos laborales o declaraciones de impuestos que demuestren tu empleo.' },
+        { question: '¿Los reclutadores pueden ver mis documentos originales?', answer: 'No. Los reclutadores solo ven el sello de verificación en tu perfil que confirma que tus credenciales han sido verificadas. Tus documentos originales permanecen privados y seguros en nuestro sistema encriptado. Solo nuestro equipo de verificación autorizado tiene acceso temporal para el proceso de validación.' },
+        { question: '¿Cuánto cuestan las verificaciones de credenciales?', answer: 'La verificación básica de identidad está incluida en todos los planes. Las verificaciones de educación y experiencia laboral están incluidas en los planes Profesional y Corporativo. Para usuarios del plan gratuito, ofrecemos verificaciones individuales a partir de €9.99 por credencial.' },
     ],
     PRICING_PAGE_TESTIMONIALS: [
         { quote: "El Plan Profesional vale cada céntimo. El dominio personalizado y las analíticas avanzadas me dieron la ventaja que necesitaba.", name: 'Juan Pérez', role: 'Director de Marketing', imageUrl: 'https://picsum.photos/id/1012/100/100', plan: 'Profesional' },
@@ -1670,10 +1745,20 @@ export const translations = {
         { question: '¿Hay una prueba gratuita para el Plan Profesional?', answer: 'Sí, todos nuestros planes de pago vienen con una prueba gratuita de 14 días. Puedes explorar todas las funciones antes de comprometerte.' },
         { question: '¿Puedo cambiar mi plan más adelante?', answer: 'Por supuesto. Puedes ampliar, reducir o cancelar tu plan en cualquier momento desde tu panel de cuenta.' },
         { question: '¿Qué son los créditos de contacto para los planes Corporativos?', answer: 'Los créditos de contacto se utilizan para ver perfiles completos y contactar a los candidatos. Este sistema flexible te permite pagar por lo que usas.' },
+        { question: '¿Qué métodos de pago aceptan?', answer: 'Aceptamos todas las tarjetas de crédito y débito principales (Visa, MasterCard, American Express), PayPal y transferencias bancarias para planes Corporativos. Todos los pagos se procesan de forma segura a través de pasarelas de pago certificadas PCI-DSS.' },
+        { question: '¿Qué sucede si cancelo mi suscripción?', answer: 'Puedes cancelar en cualquier momento sin penalización. Mantendrás acceso a las funciones premium hasta el final de tu período de facturación actual. Después, tu cuenta volverá automáticamente al plan gratuito y tu perfil permanecerá activo con las funciones básicas.' },
+        { question: '¿Hay descuentos para estudiantes o organizaciones sin fines de lucro?', answer: 'Sí, ofrecemos un 30% de descuento para estudiantes con identificación válida y un 25% de descuento para organizaciones sin fines de lucro verificadas. Contacta a nuestro equipo de ventas en support@yourcvpassport.com para aplicar estos descuentos.' },
+        { question: '¿Puedo pagar anualmente para ahorrar dinero?', answer: 'Absolutamente. Al elegir facturación anual, ahorras un 20% comparado con los pagos mensuales. Por ejemplo, el Plan Profesional cuesta €29/mes (€348/año) mensualmente, pero solo €23.20/mes (€278.40/año) con facturación anual.' },
+        { question: '¿El plan Corporativo incluye soporte dedicado?', answer: 'Sí, todos los clientes del plan Corporativo reciben un gestor de cuenta dedicado, soporte prioritario con tiempo de respuesta garantizado de menos de 2 horas, integración personalizada con tus sistemas ATS existentes, y sesiones de capacitación para tu equipo de reclutamiento.' },
     ],
     HELP_CENTER_FAQ_ITEMS: [
         { question: '¿Cómo restablezco mi contraseña?', answer: 'Puedes restablecer tu contraseña haciendo clic en el enlace "¿Olvidaste tu contraseña?" en la página de inicio de sesión. Se te enviará un correo electrónico con instrucciones.'},
-        { question: '¿Cómo actualizo la información de mi perfil?', answer: 'Puedes editar todas las secciones de tu perfil directamente desde tu panel de control después de iniciar sesión.'}
+        { question: '¿Cómo actualizo la información de mi perfil?', answer: 'Puedes editar todas las secciones de tu perfil directamente desde tu panel de control después de iniciar sesión.'},
+        { question: '¿Cómo cambio mi plantilla de CV después de haberla seleccionado?', answer: 'Dirígete a tu panel de control, haz clic en "Configuración de Plantilla" o "Cambiar Plantilla", y selecciona una nueva plantilla de nuestra galería. Todo tu contenido se transferirá automáticamente al nuevo diseño sin perder ninguna información.'},
+        { question: '¿Puedo descargar mi CV en diferentes idiomas?', answer: 'Sí, YourCVPassport soporta creación de CV multilingüe. Puedes crear versiones de tu CV en español e inglés, y exportar cada versión por separado. Esto es especialmente útil para aplicar a empleos internacionales.'},
+        { question: '¿Cómo activo o desactivo mi perfil público?', answer: 'En tu panel de control, ve a "Configuración de Privacidad" y utiliza el interruptor "Perfil Público" para activarlo o desactivarlo. Cuando está activado, los reclutadores pueden encontrarte; cuando está desactivado, solo tú puedes acceder a tu perfil.'},
+        { question: '¿Qué hago si no recibo el correo de verificación?', answer: 'Primero, revisa tu carpeta de spam o correo no deseado. Si aún no lo encuentras, ve a la configuración de tu cuenta y haz clic en "Reenviar correo de verificación". Si el problema persiste, contacta a nuestro equipo de soporte en support@yourcvpassport.com.'},
+        { question: '¿Cómo puedo ver las estadísticas de mi CV (vistas, descargas)?', answer: 'Las analíticas están disponibles en los planes Profesional y Corporativo. En tu panel de control, haz clic en "Analíticas" para ver métricas detalladas incluyendo vistas de perfil, descargas de CV, búsquedas por palabra clave que llevaron a tu perfil, y tendencias a lo largo del tiempo.'},
     ],
     SEARCH_PROFILE_EXAMPLES: [
         { name: 'Dr. Evelyn Reed', role: 'Científica de Datos', location: 'Berlín, Alemania', skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL', 'Big Data'], verified: true, imageUrl: 'https://picsum.photos/id/1027/100/100' },
@@ -1706,10 +1791,71 @@ export const translations = {
     TEMPLATE_INDUSTRIES: ['Todo', 'Tecnología', 'Creativo', 'Corporativo', 'Salud'],
     TEMPLATE_LEVELS: ['Todo', 'Nivel Inicial', 'Carrera Media', 'Senior', 'Ejecutivo'],
     TEMPLATES: [
+        // CVs - Tecnología
         { id: 1, title: 'Diseño Moderno Minimalista', category: 'CV', imageUrl: '/images/templates/modern-minimalist.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1250, rating: 4.8 },
-        { id: 2, title: 'Formato Creativo Audaz', category: 'CV', imageUrl: '/images/templates/creative-bold.png', industry: 'Creativo', level: 'Senior', downloads: 980, rating: 4.9 },
-        { id: 3, title: 'Diseño Profesional Clásico', category: 'CV', imageUrl: '/images/templates/professional-classic.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 2100, rating: 4.7 },
-        { id: 4, title: 'Profesional de la Salud', category: 'CV', imageUrl: '/images/templates/healthcare-professional.png', industry: 'Salud', level: 'Carrera Media', downloads: 850, rating: 4.6 },
+        { id: 2, title: 'CV Tech Stack Completo', category: 'CV', imageUrl: '/images/templates/gradient-blue.png', industry: 'Tecnología', level: 'Senior', downloads: 1890, rating: 4.9 },
+        { id: 3, title: 'Desarrollador Frontend', category: 'CV', imageUrl: '/images/templates/professional-blue.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1567, rating: 4.7 },
+        { id: 4, title: 'Ingeniero Full Stack', category: 'CV', imageUrl: '/images/templates/modern-clean.png', industry: 'Tecnología', level: 'Senior', downloads: 2234, rating: 4.9 },
+        { id: 5, title: 'DevOps Profesional', category: 'CV', imageUrl: '/images/templates/classic.png', industry: 'Tecnología', level: 'Senior', downloads: 1456, rating: 4.8 },
+        { id: 6, title: 'Data Scientist', category: 'CV', imageUrl: '/images/templates/elegant-minimal.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1678, rating: 4.7 },
+        { id: 7, title: 'Programador Junior', category: 'CV', imageUrl: '/images/templates/green-minimal.png', industry: 'Tecnología', level: 'Nivel Inicial', downloads: 2134, rating: 4.6 },
+        { id: 8, title: 'Arquitecto de Software', category: 'CV', imageUrl: '/images/templates/modern-professional.png', industry: 'Tecnología', level: 'Ejecutivo', downloads: 1234, rating: 4.9 },
+
+        // CVs - Creativo
+        { id: 9, title: 'Formato Creativo Audaz', category: 'CV', imageUrl: '/images/templates/creative-bold.png', industry: 'Creativo', level: 'Senior', downloads: 980, rating: 4.9 },
+        { id: 10, title: 'Portfolio Diseñador Gráfico', category: 'CV', imageUrl: '/images/templates/creative-modern.png', industry: 'Creativo', level: 'Carrera Media', downloads: 1345, rating: 4.8 },
+        { id: 11, title: 'UX/UI Designer', category: 'CV', imageUrl: '/images/templates/creative-orange.png', industry: 'Creativo', level: 'Senior', downloads: 1789, rating: 4.9 },
+        { id: 12, title: 'Diseñador Web', category: 'CV', imageUrl: '/images/templates/coral-pink.png', industry: 'Creativo', level: 'Carrera Media', downloads: 1456, rating: 4.7 },
+        { id: 13, title: 'Director de Arte', category: 'CV', imageUrl: '/images/templates/creative-minimalist.png', industry: 'Creativo', level: 'Ejecutivo', downloads: 890, rating: 4.8 },
+        { id: 14, title: 'Fotógrafo Profesional', category: 'CV', imageUrl: '/images/templates/minimalist-yellow.png', industry: 'Creativo', level: 'Senior', downloads: 756, rating: 4.6 },
+        { id: 15, title: 'Ilustrador Digital', category: 'CV', imageUrl: '/images/templates/passport.png', industry: 'Creativo', level: 'Carrera Media', downloads: 923, rating: 4.7 },
+        { id: 16, title: 'Diseñador Multimedia', category: 'CV', imageUrl: '/images/templates/template-16.png', industry: 'Creativo', level: 'Nivel Inicial', downloads: 1123, rating: 4.5 },
+
+        // CVs - Corporativo
+        { id: 17, title: 'Diseño Profesional Clásico', category: 'CV', imageUrl: '/images/templates/professional-classic.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 2100, rating: 4.7 },
+        { id: 18, title: 'Gerente de Proyectos', category: 'CV', imageUrl: '/images/templates/classic-corporate.png', industry: 'Corporativo', level: 'Senior', downloads: 1890, rating: 4.8 },
+        { id: 19, title: 'Analista Financiero', category: 'CV', imageUrl: '/images/templates/classic-sidebar.png', industry: 'Corporativo', level: 'Carrera Media', downloads: 1567, rating: 4.6 },
+        { id: 20, title: 'Contador Profesional', category: 'CV', imageUrl: '/images/templates/academic-standard.png', industry: 'Corporativo', level: 'Senior', downloads: 1234, rating: 4.7 },
+        { id: 21, title: 'Consultor de Negocios', category: 'CV', imageUrl: '/images/templates/template-21.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 1456, rating: 4.9 },
+        { id: 22, title: 'Recursos Humanos', category: 'CV', imageUrl: '/images/templates/template-22.png', industry: 'Corporativo', level: 'Carrera Media', downloads: 1678, rating: 4.5 },
+        { id: 23, title: 'Asistente Ejecutivo', category: 'CV', imageUrl: '/images/templates/template-23.png', industry: 'Corporativo', level: 'Carrera Media', downloads: 1345, rating: 4.6 },
+        { id: 24, title: 'Director de Operaciones', category: 'CV', imageUrl: '/images/templates/template-24.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 987, rating: 4.8 },
+
+        // CVs - Salud
+        { id: 25, title: 'Profesional de la Salud', category: 'CV', imageUrl: '/images/templates/healthcare-professional.png', industry: 'Salud', level: 'Carrera Media', downloads: 850, rating: 4.6 },
+        { id: 26, title: 'Enfermero Registrado', category: 'CV', imageUrl: '/images/templates/template-26.png', industry: 'Salud', level: 'Carrera Media', downloads: 1456, rating: 4.7 },
+        { id: 27, title: 'Médico Especialista', category: 'CV', imageUrl: '/images/templates/template-27.png', industry: 'Salud', level: 'Ejecutivo', downloads: 1123, rating: 4.9 },
+        { id: 28, title: 'Farmacéutico', category: 'CV', imageUrl: '/images/templates/template-28.png', industry: 'Salud', level: 'Senior', downloads: 890, rating: 4.6 },
+        { id: 29, title: 'Fisioterapeuta', category: 'CV', imageUrl: '/images/templates/template-29.png', industry: 'Salud', level: 'Carrera Media', downloads: 756, rating: 4.5 },
+        { id: 30, title: 'Técnico de Laboratorio', category: 'CV', imageUrl: '/images/templates/template-30.png', industry: 'Salud', level: 'Nivel Inicial', downloads: 923, rating: 4.4 },
+
+        // Cartas de Presentación
+        { id: 31, title: 'Carta Moderna Tech', category: 'Cover Letter', imageUrl: '/images/templates/template-31.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1567, rating: 4.8 },
+        { id: 32, title: 'Carta Profesional Corporativa', category: 'Cover Letter', imageUrl: '/images/templates/template-32.png', industry: 'Corporativo', level: 'Senior', downloads: 1890, rating: 4.7 },
+        { id: 33, title: 'Carta Creativa Diseño', category: 'Cover Letter', imageUrl: '/images/templates/template-33.png', industry: 'Creativo', level: 'Carrera Media', downloads: 1234, rating: 4.9 },
+        { id: 34, title: 'Carta Salud Profesional', category: 'Cover Letter', imageUrl: '/images/templates/template-34.png', industry: 'Salud', level: 'Senior', downloads: 890, rating: 4.6 },
+        { id: 35, title: 'Carta Nivel Inicial', category: 'Cover Letter', imageUrl: '/images/templates/template-35.png', industry: 'Tecnología', level: 'Nivel Inicial', downloads: 2134, rating: 4.5 },
+        { id: 36, title: 'Carta Ejecutiva', category: 'Cover Letter', imageUrl: '/images/templates/template-36.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 1456, rating: 4.9 },
+        { id: 37, title: 'Carta Cambio de Carrera', category: 'Cover Letter', imageUrl: '/images/templates/template-37.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1678, rating: 4.7 },
+        { id: 38, title: 'Carta Freelance', category: 'Cover Letter', imageUrl: '/images/templates/template-38.png', industry: 'Creativo', level: 'Senior', downloads: 1123, rating: 4.8 },
+
+        // Correos
+        { id: 39, title: 'Email Seguimiento Post-Entrevista', category: 'Email', imageUrl: '/images/templates/template-39.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 2345, rating: 4.8 },
+        { id: 40, title: 'Email Networking Profesional', category: 'Email', imageUrl: '/images/templates/template-40.png', industry: 'Corporativo', level: 'Senior', downloads: 1890, rating: 4.7 },
+        { id: 41, title: 'Email Solicitud de Referencia', category: 'Email', imageUrl: '/images/templates/template-41.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 1567, rating: 4.6 },
+        { id: 42, title: 'Email Agradecimiento', category: 'Email', imageUrl: '/images/templates/template-42.png', industry: 'Corporativo', level: 'Nivel Inicial', downloads: 2456, rating: 4.5 },
+        { id: 43, title: 'Email Propuesta Freelance', category: 'Email', imageUrl: '/images/templates/template-43.png', industry: 'Creativo', level: 'Senior', downloads: 1234, rating: 4.9 },
+        { id: 44, title: 'Email Renegociación Salarial', category: 'Email', imageUrl: '/images/templates/template-44.png', industry: 'Corporativo', level: 'Senior', downloads: 1678, rating: 4.8 },
+        { id: 45, title: 'Email Primera Conexión', category: 'Email', imageUrl: '/images/templates/template-45.png', industry: 'Tecnología', level: 'Nivel Inicial', downloads: 2134, rating: 4.6 },
+
+        // LinkedIn
+        { id: 46, title: 'Resumen LinkedIn Tech Professional', category: 'LinkedIn', imageUrl: '/images/templates/template-46.png', industry: 'Tecnología', level: 'Senior', downloads: 2567, rating: 4.9 },
+        { id: 47, title: 'Resumen LinkedIn Creativo', category: 'LinkedIn', imageUrl: '/images/templates/template-47.png', industry: 'Creativo', level: 'Carrera Media', downloads: 1890, rating: 4.8 },
+        { id: 48, title: 'Resumen LinkedIn Ejecutivo', category: 'LinkedIn', imageUrl: '/images/templates/template-48.png', industry: 'Corporativo', level: 'Ejecutivo', downloads: 1456, rating: 4.9 },
+        { id: 49, title: 'Resumen LinkedIn Salud', category: 'LinkedIn', imageUrl: '/images/templates/template-49.png', industry: 'Salud', level: 'Senior', downloads: 1123, rating: 4.7 },
+        { id: 50, title: 'Mensaje LinkedIn Networking', category: 'LinkedIn', imageUrl: '/images/templates/template-50.png', industry: 'Tecnología', level: 'Carrera Media', downloads: 2234, rating: 4.8 },
+        { id: 51, title: 'Perfil LinkedIn Junior', category: 'LinkedIn', imageUrl: '/images/templates/template-51.png', industry: 'Tecnología', level: 'Nivel Inicial', downloads: 2456, rating: 4.6 },
+        { id: 52, title: 'Recomendación LinkedIn', category: 'LinkedIn', imageUrl: '/images/templates/template-52.png', industry: 'Corporativo', level: 'Senior', downloads: 1678, rating: 4.7 },
     ] as Template[],
     STORY_INDUSTRIES: ['Todo', 'Tecnología', 'Marketing', 'Salud', 'Finanzas'],
     STORY_GOALS: ['Todo', 'Cambio de Carrera', 'Primer Empleo', 'Ascenso', 'Freelance'],
@@ -1798,7 +1944,11 @@ export const translations = {
         { question: '¿Dónde está la sede de YourCVPassport?', answer: 'Nuestra sede se encuentra en Valencia, España, cerca del Ayuntamiento de Valencia en el centro histórico de la ciudad. Operamos con un equipo totalmente remoto en todo el mundo.'},
         { question: '¿Cómo puedo verificar mis credenciales en la plataforma?', answer: 'Puedes verificar tus credenciales educativas y profesionales a través de nuestro sistema blockchain. Simplemente sube los documentos necesarios en la sección de verificación de tu perfil, y nuestro equipo procesará la verificación en 24-48 horas laborables.' },
         { question: '¿Ofrecen soporte en español?', answer: 'Sí, ofrecemos soporte completo en español e inglés. Nuestro equipo está disponible para ayudarte en tu idioma preferido a través de correo electrónico, chat en vivo y nuestro centro de ayuda multilingüe.' },
-        { question: '¿Puedo solicitar una demostración personalizada de la plataforma?', answer: 'Por supuesto. Para empresas y reclutadores interesados en nuestras soluciones corporativas, ofrecemos demostraciones personalizadas. Contacta a nuestro equipo a través del formulario de contacto o directamente en support@yourcvpassport.com para agendar una sesión.' },
+        { question: '¿Cuál es el tiempo de respuesta promedio del equipo de soporte?', answer: 'Para consultas generales por correo electrónico, nuestro tiempo de respuesta es de 4-6 horas durante días laborables. Los clientes del plan Profesional reciben respuesta en menos de 2 horas, y los clientes Corporativos tienen soporte prioritario con respuesta garantizada en menos de 1 hora.' },
+        { question: '¿Tienen oficinas físicas donde pueda visitarlos?', answer: 'Nuestra sede principal está en Valencia, España, pero operamos principalmente de forma remota para servir mejor a nuestra comunidad global. Para reuniones presenciales o visitas a la oficina, por favor coordina previamente con nuestro equipo a través de support@yourcvpassport.com.' },
+        { question: '¿Cómo puedo reportar un problema técnico o bug en la plataforma?', answer: 'Si encuentras un problema técnico, por favor repórtalo inmediatamente enviando un correo a support@yourcvpassport.com con capturas de pantalla, descripción del problema y los pasos para reproducirlo. Nuestro equipo técnico lo investigará y te mantendrá informado del progreso.' },
+        { question: '¿Ofrecen capacitación o webinars para nuevos usuarios?', answer: 'Sí, organizamos webinars gratuitos mensuales para nuevos usuarios donde mostramos las mejores prácticas de la plataforma, cómo optimizar tu perfil, y responder preguntas en vivo. También ofrecemos sesiones de capacitación personalizadas para equipos corporativos.' },
+        { question: '¿Cómo puedo dar feedback o sugerir nuevas funcionalidades?', answer: 'Valoramos mucho tus comentarios. Puedes enviar sugerencias, ideas de funcionalidades o feedback general a través del formulario de contacto, por correo a support@yourcvpassport.com, o participando en nuestra comunidad de usuarios. Revisamos todas las sugerencias mensualmente para nuestra hoja de ruta de producto.' },
     ],
     CORE_VALUES: [
         { icon: transparencyIcon, title: 'Transparencia', description: 'Creemos en la comunicación abierta. Nuestros precios son públicos, nuestro roadmap es compartido y construimos abiertamente con nuestra comunidad.' },
@@ -1826,8 +1976,8 @@ export const translations = {
             { title: "Comparte y Triunfa", description: "Haz que te vean los reclutadores." }
         ],
         gettingStarted: {
-            title: "Primeros Pasos",
-            subtitle: "Tu camino hacia un perfil verificado es simple."
+            title: "Primeros Pasos para Conseguir Trabajo como Profesional",
+            subtitle: "Tu camino hacia oportunidades laborales profesionales comienza aquí."
         },
         mainSteps: [
             {
@@ -2062,7 +2212,6 @@ export const translations = {
     companyPlansPage: {
         title: "Planes para Empresas",
         subtitle: "Accede a un grupo de talento verificado y agiliza tu proceso de contratación.",
-        cta: { requestDemo: "Ver Planes" },
         tiers: {
             title: "Nuestros Niveles",
             plans: [
@@ -2095,16 +2244,6 @@ export const translations = {
             timeToHire: { title: "Tiempo para Contratar", value: "-40%" },
             costPerHire: { title: "Costo por Contratación", value: "-25%" }
         },
-        form: {
-            title: "Solicita una Demo",
-            subtitle: "Déjanos mostrarte cómo podemos ayudarte.",
-            name: "Nombre",
-            company: "Empresa",
-            email: "Correo Electrónico",
-            message: "Mensaje",
-            submit: "Enviar Solicitud",
-            alert: "¡Solicitud de demo enviada!"
-        }
     },
     atsIntegrationsPage: {
         title: "Integraciones ATS",

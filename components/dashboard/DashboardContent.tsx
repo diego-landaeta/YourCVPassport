@@ -33,6 +33,7 @@ const EnhancedMessaging = lazy(() => import('./EnhancedMessaging'));
 const StampsSection = lazy(() => import('./StampsSection'));
 const ATSExportModal = lazy(() => import('../ats-export/ATSExportModal'));
 const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
+const SuccessStorySubmission = lazy(() => import('./SuccessStorySubmission'));
 import {
   IdentityFormData,
   ExperienceFormData,
@@ -56,6 +57,9 @@ interface DashboardStats {
   verifiedStamps: number;
   experienceCount: number;
   skillsCount: number;
+  educationCount: number;
+  languagesCount: number;
+  portfolioCount: number;
 }
 
 type ProfileSectionKey = 'identity' | 'experience' | 'education' | 'skills' | 'languages' | 'portfolio' | 'preferences' | 'template' | 'stamps' | 'ai-assistant';
@@ -83,6 +87,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     verifiedStamps: 0,
     experienceCount: 0,
     skillsCount: 0,
+    educationCount: 0,
+    languagesCount: 0,
+    portfolioCount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Cargando dashboard');
@@ -166,6 +173,36 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       loadProfileEditorData();
     }
   }, [activeSection, session?.user.id]); // Separar en dos useEffect
+
+  // ✅ CRITICAL FIX: Recalculate completeness when profile loads
+  // This fixes the race condition where stats are loaded before profile
+  useEffect(() => {
+    if (!profile) return;
+
+    import('../../utils/profileValidation').then(({ calculateProfileCompleteness }) => {
+      const completeness = calculateProfileCompleteness(profile, {
+        experiences: stats.experienceCount,
+        education: stats.educationCount,
+        skills: stats.skillsCount,
+        languages: stats.languagesCount,
+        portfolio: stats.portfolioCount,
+      });
+
+      setStats(prev => {
+        if (prev.profileCompleteness === completeness) return prev;
+        return { ...prev, profileCompleteness: completeness };
+      });
+    });
+  }, [
+    profile,
+    profile?.template, // ✅ Detectar cambios en template
+    profile?.slug, // ✅ Detectar cambios en slug
+    stats.experienceCount,
+    stats.educationCount,
+    stats.skillsCount,
+    stats.languagesCount,
+    stats.portfolioCount
+  ]);
 
   // Listen for URL changes (for messaging navigation)
   useEffect(() => {
@@ -305,14 +342,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     if (!session?.user.id) return;
 
     // ✅ PREVENIR múltiples ejecuciones
-    if (dashboardDataLoadedRef.current) {return;
+    if (dashboardDataLoadedRef.current) {
+      return;
     }
 
     dashboardDataLoadedRef.current = true; // Marcar como cargado INMEDIATAMENTE
 
     try {
       
-
       // 🚀 OPTIMIZACIÓN: Cargar TODO de una vez con Promise.allSettled
       const results = await Promise.allSettled([
         // Counts con limit(1) - MUY rápido
@@ -357,7 +394,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .limit(2),
 
         // Analytics (puede fallar sin bloqueartodo)
-        getAnalyticsStats(session.user.id)
+        getAnalyticsStats(session.user.id),
+
+        // Additional counts needed for completeness
+        supabase
+          .from('languages')
+          .select('id', { count: 'exact' })
+          .eq('profile_id', session.user.id)
+          .limit(1),
+
+        supabase
+          .from('portfolio_items')
+          .select('id', { count: 'exact' })
+          .eq('profile_id', session.user.id)
+          .limit(1),
       ]);
 
       // Extraer resultados con fallbacks
@@ -368,22 +418,30 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       const stampsData = results[4].status === 'fulfilled' ? results[4].value.data : [];
       const leadsData = results[5].status === 'fulfilled' ? results[5].value.data : [];
       const analytics = results[6].status === 'fulfilled' ? results[6].value : null;
+      const langCount = results[7].status === 'fulfilled' ? results[7].value.count : 0;
+      const portCount = results[8].status === 'fulfilled' ? results[8].value.count : 0;
 
-      if (results[6].status === 'rejected') {}
+      console.log('📊 CONTEOS DASHBOARD:', {
+        experiences: expCount,
+        skills: skillsCount,
+        education: eduCount,
+        languages: langCount,
+        portfolio: portCount,
+      });
 
-      // Calcular completeness con datos REALES
-      const profileCompleteness = Math.round(
-        ((profile?.full_name ? 15 : 0) +
-         (profile?.headline ? 15 : 0) +
-         (profile?.summary ? 10 : 0) +
-         (profile?.avatar_url ? 10 : 0) +
-         (profile?.location ? 5 : 0) +
-         (profile?.phone ? 5 : 0) +
-         (expCount && expCount > 0 ? 15 : 0) +
-         (eduCount && eduCount > 0 ? 10 : 0) +
-         (skillsCount && skillsCount > 0 ? 5 : 0) +
-         10) // Base
-      );
+      if (results[6].status === 'rejected') {
+        
+      }
+
+      // Calcular completeness usando la función centralizada
+      const { calculateProfileCompleteness } = await import('../../utils/profileValidation');
+      const profileCompleteness = calculateProfileCompleteness(profile, {
+        experiences: expCount || 0,
+        education: eduCount || 0,
+        skills: skillsCount || 0,
+        languages: langCount || 0,
+        portfolio: portCount || 0,
+      });
 
       // ✅ Configurar stamps y leads
       setStamps(stampsData || []);
@@ -444,6 +502,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         verifiedStamps: stampsCount || 0,
         experienceCount: expCount || 0,
         skillsCount: skillsCount || 0,
+        educationCount: eduCount || 0,
+        languagesCount: langCount || 0,
+        portfolioCount: portCount || 0,
       });
 
       
@@ -799,6 +860,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       const salary_max = data.salary_max && !isNaN(data.salary_max) ? data.salary_max : null;
       
       const updateData = {
+        job_seeking_status: data.job_seeking_status || null,
         job_type: data.job_type && data.job_type.length > 0 ? data.job_type : null,
         availability: data.availability || null,
         salary_min,
@@ -2052,6 +2114,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     return (
       <Suspense fallback={<SectionLoader />}>
         <MessagingView leadId={leadId} onBack={() => onSectionChange('leads')} />
+      </Suspense>
+    );
+  }
+
+  // Success Stories Section
+  if (activeSection === 'casos-exito') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <SuccessStorySubmission />
       </Suspense>
     );
   }

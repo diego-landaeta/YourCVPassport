@@ -484,22 +484,16 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
         </div>
       )}
 
-      {/* Save and Continue Button */}
+      {/* Next Button */}
       {nativeLanguage && !isFormOpen && (
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {lang === 'en'
-              ? `${languages.length} ${languages.length === 1 ? 'language' : 'languages'} added`
-              : `${languages.length} ${languages.length === 1 ? 'idioma agregado' : 'idiomas agregados'}`
-            }
-          </p>
+        <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={handleSaveAndContinue}
-            className="px-6 py-2.5 bg-cv-blue hover:bg-cv-blue-dark text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            {lang === 'en' ? 'Save and Continue' : 'Guardar y Continuar'}
+            Siguiente
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>

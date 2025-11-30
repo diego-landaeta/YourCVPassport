@@ -7,7 +7,8 @@ import {
   WrenchScrewdriverIcon,
   LanguageIcon,
   FolderIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  CheckBadgeIcon
 } from '@heroicons/react/24/outline';
 
 // Import sections
@@ -18,6 +19,7 @@ import SkillsSection from './SkillsSection';
 import LanguagesSection from './LanguagesSection';
 import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
+import FinalizationStep from './FinalizationStep';
 
 interface ProfileWizardProps {
   profile: any;
@@ -72,12 +74,13 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
   const steps = [
     { id: 'identity', title: 'Identidad', icon: UserCircleIcon, component: IdentitySection, props: { profile, onSave: onSaveIdentity, onNext: handleNext } },
-    { id: 'experience', title: 'Experiencia', icon: BriefcaseIcon, component: ExperienceSection, props: { initialData: experiences, onSave: onSaveExperience } },
-    { id: 'education', title: 'Educación', icon: AcademicCapIcon, component: EducationSection, props: { initialData: education, onSave: onSaveEducation } },
+    { id: 'experience', title: 'Experiencia', icon: BriefcaseIcon, component: ExperienceSection, props: { initialData: experiences, onSave: onSaveExperience, onNext: handleNext } },
+    { id: 'education', title: 'Educación', icon: AcademicCapIcon, component: EducationSection, props: { initialData: education, onSave: onSaveEducation, onNext: handleNext } },
     { id: 'skills', title: 'Habilidades', icon: WrenchScrewdriverIcon, component: SkillsSection, props: { initialData: skills, onSave: onSaveSkills, onNext: handleNext } },
     { id: 'languages', title: 'Idiomas', icon: LanguageIcon, component: LanguagesSection, props: { initialData: languages, onSave: onSaveLanguages, onNext: handleNext } },
-    { id: 'portfolio', title: 'Portafolio', icon: FolderIcon, component: PortfolioSection, props: { items: portfolio, onSave: onSavePortfolio } },
-    { id: 'preferences', title: 'Preferencias', icon: Cog6ToothIcon, component: PreferencesSection, props: { preferences: profile, onSave: onSavePreferences } }
+    { id: 'portfolio', title: 'Portafolio', icon: FolderIcon, component: PortfolioSection, props: { initialData: portfolio, onSave: onSavePortfolio, onNext: handleNext } },
+    { id: 'preferences', title: 'Preferencias', icon: Cog6ToothIcon, component: PreferencesSection, props: { initialData: profile, onSave: onSavePreferences, onNext: handleNext } },
+    { id: 'finalization', title: 'Finalizar', icon: CheckBadgeIcon, component: FinalizationStep, props: { currentTemplate: profile?.template, currentSlug: profile?.slug, onComplete } }
   ];
 
   // Find initial step index based on initialStep prop
@@ -118,9 +121,13 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     if (profile) {
       stepsWithContent.push(6); // preferences
     }
+    // Finalization step is only completed when template and slug are set
+    if (profile?.template && profile?.slug) {
+      stepsWithContent.push(7); // finalization
+    }
 
     setCompletedSteps(stepsWithContent);
-  }, [profile?.full_name, profile?.email, experiences?.length, education?.length, skills?.length, languages?.length, portfolio?.length]);
+  }, [profile?.full_name, profile?.email, profile?.template, profile?.slug, experiences?.length, education?.length, skills?.length, languages?.length, portfolio?.length]);
 
   // Update currentStep when initialStep changes
   useEffect(() => {
@@ -200,6 +207,13 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
           className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group"
           title="Mejorar con IA"
         >
+          {/* Premium Badge */}
+          <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold rounded-full shadow-lg flex items-center gap-1 animate-pulse z-10">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            PREMIUM
+          </span>
           <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>

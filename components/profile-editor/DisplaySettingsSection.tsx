@@ -7,10 +7,8 @@ const DisplaySettingsSection: React.FC = () => {
   const { profile, refetchProfile } = useAuth();
   const t = useTranslations();
   const [settings, setSettings] = useState({
-    show_verified_credentials: profile?.show_verified_credentials ?? false,
     show_connect_links: profile?.show_connect_links ?? false,
     show_qr_code: profile?.show_qr_code ?? true,
-    show_availability_badge: profile?.show_availability_badge ?? true,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -18,10 +16,8 @@ const DisplaySettingsSection: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setSettings({
-        show_verified_credentials: profile.show_verified_credentials ?? false,
         show_connect_links: profile.show_connect_links ?? false,
         show_qr_code: profile.show_qr_code ?? true,
-        show_availability_badge: profile.show_availability_badge ?? true,
       });
     }
   }, [profile]);
@@ -56,25 +52,11 @@ const DisplaySettingsSection: React.FC = () => {
 
   const settingsOptions = [
     {
-      key: 'show_availability_badge' as const,
-      title: t.displaySettings.options.availability.title,
-      description: t.displaySettings.options.availability.description,
-      icon: '🟢',
-      recommended: true,
-    },
-    {
       key: 'show_qr_code' as const,
       title: t.displaySettings.options.qrCode.title,
       description: t.displaySettings.options.qrCode.description,
       icon: '📱',
       recommended: true,
-    },
-    {
-      key: 'show_verified_credentials' as const,
-      title: t.displaySettings.options.credentials.title,
-      description: t.displaySettings.options.credentials.description,
-      icon: '✅',
-      recommended: false,
     },
     {
       key: 'show_connect_links' as const,

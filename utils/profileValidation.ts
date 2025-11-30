@@ -15,6 +15,110 @@ export interface MissingFieldInfo {
 }
 
 /**
+ * FUNCIÓN ÚNICA Y CENTRALIZADA para calcular el completeness del perfil
+ *
+ * ⚠️ IMPORTANTE: Esta es la ÚNICA fuente de verdad para el cálculo del completeness
+ * No usar cálculos ad-hoc en otros archivos - siempre usar esta función
+ *
+ * Distribución de puntos (total 100%):
+ *
+ * CAMPOS CRÍTICOS (60%):
+ * - Nombre completo: 15% (CRÍTICO)
+ * - Título profesional: 15% (CRÍTICO)
+ * - Resumen/About me: 10%
+ * - Foto de perfil: 10%
+ * - Al menos 1 experiencia: 10% (CRÍTICO)
+ *
+ * CAMPOS IMPORTANTES (40%):
+ * - Al menos 1 educación: 15%
+ * - Al menos 1 skill: 20%
+ * - Al menos 1 idioma: 5%
+ *
+ * NOTA: Ubicación, teléfono, portfolio, template y slug NO suman (son opcionales)
+ */
+export const calculateProfileCompleteness = (
+  profile: any | null,
+  counts: {
+    experiences?: number;
+    education?: number;
+    skills?: number;
+    languages?: number;
+    portfolio?: number;
+  } = {}
+): number => {
+  if (!profile) return 0;
+
+  let completeness = 0;
+  const debug: string[] = [];
+
+  // Campos críticos del perfil (60%)
+  if (profile.full_name?.trim()) {
+    completeness += 15;
+    debug.push('✅ Nombre: +15%');
+  } else {
+    debug.push('❌ Nombre: 0%');
+  }
+
+  if (profile.headline?.trim()) {
+    completeness += 15;
+    debug.push('✅ Título: +15%');
+  } else {
+    debug.push('❌ Título: 0%');
+  }
+
+  if (profile.summary?.trim()) {
+    completeness += 10;
+    debug.push('✅ Summary: +10%');
+  } else {
+    debug.push('❌ Summary: 0%');
+  }
+
+  if (profile.avatar_url) {
+    completeness += 10;
+    debug.push('✅ Avatar: +10%');
+  } else {
+    debug.push('❌ Avatar: 0%');
+  }
+
+  if (counts.experiences && counts.experiences > 0) {
+    completeness += 10;
+    debug.push(`✅ Experiencias (${counts.experiences}): +10%`);
+  } else {
+    debug.push('❌ Experiencias: 0%');
+  }
+
+  // Campos importantes (40%)
+  if (counts.education && counts.education > 0) {
+    completeness += 15;
+    debug.push(`✅ Educación (${counts.education}): +15%`);
+  } else {
+    debug.push('❌ Educación: 0%');
+  }
+
+  if (counts.skills && counts.skills >= 1) {
+    completeness += 20;
+    debug.push(`✅ Skills (${counts.skills}): +20%`);
+  } else {
+    debug.push(`❌ Skills (${counts.skills || 0}): 0%`);
+  }
+
+  if (counts.languages && counts.languages > 0) {
+    completeness += 5;
+    debug.push(`✅ Idiomas (${counts.languages}): +5%`);
+  } else {
+    debug.push('❌ Idiomas: 0%');
+  }
+
+  // NOTA: Ubicación, teléfono, portfolio, template y slug NO suman (son opcionales)
+
+  console.log('📊 CÁLCULO DE COMPLETENESS:');
+  debug.forEach(line => console.log(line));
+  console.log(`🎯 TOTAL: ${completeness}%`);
+
+  return Math.min(completeness, 100);
+};
+
+/**
  * Valida si el perfil tiene todos los datos necesarios para mostrar un CV
  */
 export const validateProfileForCV = (
@@ -26,7 +130,6 @@ export const validateProfileForCV = (
 ): ValidationResult => {
   const missingFields: string[] = [];
   const warnings: string[] = [];
-  let completeness = 0;
 
   if (!profile) {
     return {
@@ -40,84 +143,69 @@ export const validateProfileForCV = (
   // Campos críticos (necesarios para mostrar el CV)
   if (!profile.full_name || profile.full_name.trim() === '') {
     missingFields.push('Nombre completo');
-  } else {
-    completeness += 20;
   }
 
   if (!profile.headline || profile.headline.trim() === '') {
     missingFields.push('Título profesional');
-  } else {
-    completeness += 15;
   }
 
   // Campos importantes
   if (!profile.summary || profile.summary.trim() === '') {
     warnings.push('Resumen profesional');
-    completeness += 5; // Dar algo de crédito aunque esté vacío
-  } else {
-    completeness += 15;
   }
 
   if (!profile.location || profile.location.trim() === '') {
     warnings.push('Ubicación');
-  } else {
-    completeness += 5;
   }
 
   if (!profile.phone || profile.phone.trim() === '') {
     warnings.push('Teléfono');
-  } else {
-    completeness += 5;
   }
 
   if (!profile.avatar_url) {
     warnings.push('Foto de perfil');
-  } else {
-    completeness += 10;
   }
 
   // Redes sociales (al menos una)
   if (!profile.linkedin_url && !profile.github_url && !profile.portfolio_url) {
     warnings.push('Al menos una red social (LinkedIn, GitHub o Portfolio)');
-  } else {
-    completeness += 5;
   }
 
   // Experiencia laboral
   if (!experiences || experiences.length === 0) {
     missingFields.push('Experiencia laboral (al menos una)');
-  } else {
-    completeness += 15;
   }
 
   // Educación
   if (!education || education.length === 0) {
     warnings.push('Educación');
-  } else {
-    completeness += 5;
   }
 
   // Habilidades
   if (!skills || skills.length === 0) {
     warnings.push('Habilidades');
-  } else {
-    completeness += 5;
   }
 
   // Idiomas
   if (!languages || languages.length === 0) {
     warnings.push('Idiomas');
-  } else {
-    completeness += 5;
   }
 
   const isValid = missingFields.length === 0;
+
+  // Usar la función centralizada para calcular completeness
+  const completeness = calculateProfileCompleteness(profile, {
+    experiences: experiences?.length || 0,
+    education: education?.length || 0,
+    skills: skills?.length || 0,
+    languages: languages?.length || 0,
+  });
 
   return {
     isValid,
     missingFields,
     warnings,
-    completeness: Math.min(completeness, 100),
+    completeness,
   };
 };
 

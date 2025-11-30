@@ -14,6 +14,7 @@ import { CSS } from '@dnd-kit/utilities';
 interface PortfolioSectionProps {
   initialData?: PortfolioItemFormData[];
   onSave: (data: PortfolioItemFormData[]) => Promise<void>;
+  onNext?: () => void;
 }
 
 interface SortablePortfolioItemProps {
@@ -80,7 +81,7 @@ const SortablePortfolioItem: React.FC<SortablePortfolioItemProps> = ({ item, onE
   );
 };
 
-const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], onSave }) => {
+const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], onSave, onNext }) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { profile } = useAuth();
@@ -250,6 +251,25 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
               <button type="submit" className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium">{editingIndex !== null ? modals.update : modals.add} {modals.addPortfolioItem.replace('Añadir ', '').replace('Add ', '')}</button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Next Button */}
+      {onNext && !isFormOpen && (
+        <div className="flex justify-end pt-6 mt-6 border-t border-gray-200 dark:border-dark-border">
+          <button
+            type="button"
+            onClick={async () => {
+              await onSave(portfolio);
+              onNext();
+            }}
+            className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
+          >
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
     </div>

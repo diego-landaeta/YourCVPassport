@@ -87,6 +87,7 @@ export const portfolioItemSchema = z.object({
 
 // Preferences Schema
 export const preferencesSchema = z.object({
+  job_seeking_status: z.enum(['OPEN', 'PASSIVE', 'NOT_LOOKING']).optional(),
   job_type: z.array(z.enum(['full-time', 'part-time', 'contract', 'freelance', 'internship'])).optional(),
   availability: z.enum(['immediate', '2-weeks', '1-month', '2-months', 'not-looking']).optional(),
   salary_min: z.number().min(0).optional(),

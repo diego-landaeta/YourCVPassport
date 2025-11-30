@@ -21,8 +21,8 @@ const ATSIntegrationsPage = lazy(() => import('./components/ATSIntegrationsPage'
 const SecurityCompliancePage = lazy(() => import('./components/SecurityCompliancePage'));
 const BlogPage = lazy(() => import('./components/BlogPage'));
 const TemplateLibraryPage = lazy(() => import('./components/TemplateLibraryPage'));
-const SuccessStoriesPage = lazy(() => import('./components/SuccessStoriesPage'));
 const SystemStatusPage = lazy(() => import('./components/SystemStatusPage'));
+const SuccessStoriesPage = lazy(() => import('./components/SuccessStoriesPage'));
 const UnderConstructionPage = lazy(() => import('./components/UnderConstructionPage'));
 const TemplatePreviewCapture = lazy(() => import('./components/TemplatePreviewCapture'));
 const AllTemplatesPreview = lazy(() => import('./components/AllTemplatesPreview'));
@@ -57,8 +57,8 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   SecurityCompliancePage,
   BlogPage,
   TemplateLibraryPage,
-  SuccessStoriesPage,
   SystemStatusPage,
+  SuccessStoriesPage,
   UnderConstructionPage,
   TemplatePreviewCapture,
   AllTemplatesPreview,
@@ -87,7 +87,7 @@ const pathMappings = [
   { en: 'companies/security', es: 'empresas/seguridad', componentName: 'SecurityCompliancePage' },
   { en: 'resources/blog', es: 'recursos/blog', componentName: 'BlogPage' },
   { en: 'resources/library', es: 'recursos/biblioteca', componentName: 'TemplateLibraryPage' },
-  { en: 'resources/success', es: 'recursos/exito', componentName: 'SuccessStoriesPage' },
+  { en: 'resources/success-stories', es: 'recursos/exito', componentName: 'SuccessStoriesPage' },
   { en: 'resources/status', es: 'recursos/estado', componentName: 'SystemStatusPage' },
   { en: 'product', es: 'producto', componentName: 'ProductOverviewPage' },
   { en: 'professionals', es: 'profesionales', componentName: 'HowItWorksProfessionalsPage' },
