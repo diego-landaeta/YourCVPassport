@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../supabase/client';
+import { useAuth } from '../contexts/AuthContext';
 
-const TOUR_COMPLETED_KEY = 'dashboardTourCompleted';
-
-export const useDashboardTour = (userId?: string, profileCompleteness?: number) => {
+export const useDashboardTour = (userId?: string, profileCompleteness?: number, dashboardTourCompleted?: boolean | null, wizardCompleted?: boolean) => {
+  const { refetchProfile } = useAuth();
   const [showTour, setShowTour] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [tourJustCompleted, setTourJustCompleted] = useState(false);
@@ -13,57 +14,65 @@ export const useDashboardTour = (userId?: string, profileCompleteness?: number) 
       return;
     }
 
-    // Check if user has completed the tour
-    const tourCompleted = localStorage.getItem(`${TOUR_COMPLETED_KEY}_${userId}`);
-
-    // ✅ AUTO-COMPLETE: If user has profile progress (>0%), mark tour as completed automatically
-    // This prevents existing users from seeing the tour again
-    if (profileCompleteness && profileCompleteness > 0 && !tourCompleted) {
-      localStorage.setItem(`${TOUR_COMPLETED_KEY}_${userId}`, 'true');
-      setShowTour(false); // Ensure it's hidden if it was somehow set to true
-      setIsLoading(false);
-      return;
-    }
-
-    // Show tour only if not completed
-    if (!tourCompleted) {
+    // Show tour ONLY if:
+    // 1. User hasn't completed/skipped tour before (checked from database)
+    // 2. User has completed the profile wizard (wizard_completed = true)
+    // The tour shows users how to use the dashboard features after completing their profile setup
+    if (!dashboardTourCompleted && wizardCompleted) {
       // Small delay to ensure dashboard is fully rendered
       setTimeout(() => {
         setShowTour(true);
         setIsLoading(false);
-      }, 1000);
+      }, 800);
     } else {
       setIsLoading(false);
     }
-  }, [userId, profileCompleteness]);
+  }, [userId, wizardCompleted, dashboardTourCompleted]);
 
-  const completeTour = () => {
+  const completeTour = async () => {
     if (userId) {
-      localStorage.setItem(`${TOUR_COMPLETED_KEY}_${userId}`, 'true');
+      // Guardar en base de datos
+      await supabase
+        .from('profiles')
+        .update({ dashboard_tour_completed: true })
+        .eq('id', userId);
+
+      // ✅ Refetch profile to update dashboard_tour_completed status in context
+      await refetchProfile();
     }
     setShowTour(false);
     setTourJustCompleted(true);
   };
 
-  const skipTour = () => {
+  const skipTour = async () => {
     if (userId) {
-      localStorage.setItem(`${TOUR_COMPLETED_KEY}_${userId}`, 'true');
+      // Guardar en base de datos
+      await supabase
+        .from('profiles')
+        .update({ dashboard_tour_completed: true })
+        .eq('id', userId);
+
+      // ✅ Refetch profile to update dashboard_tour_completed status in context
+      await refetchProfile();
     }
     setShowTour(false);
     setTourJustCompleted(true);
   };
 
-  const resetTour = () => {
+  const resetTour = async () => {
     if (userId) {
-      localStorage.removeItem(`${TOUR_COMPLETED_KEY}_${userId}`);
+      // Resetear en base de datos
+      await supabase
+        .from('profiles')
+        .update({ dashboard_tour_completed: false })
+        .eq('id', userId);
     }
     setShowTour(true);
     setTourJustCompleted(false);
   };
 
-  const hasTourBeenCompleted = (userId?: string) => {
-    if (!userId) return false;
-    return localStorage.getItem(`${TOUR_COMPLETED_KEY}_${userId}`) === 'true';
+  const hasTourBeenCompleted = (tourCompleted?: boolean | null) => {
+    return tourCompleted === true;
   };
 
   return {
@@ -73,6 +82,6 @@ export const useDashboardTour = (userId?: string, profileCompleteness?: number) 
     completeTour,
     skipTour,
     resetTour,
-    hasTourBeenCompleted: hasTourBeenCompleted(userId),
+    hasTourBeenCompleted: hasTourBeenCompleted(dashboardTourCompleted),
   };
 };

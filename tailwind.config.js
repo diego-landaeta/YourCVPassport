@@ -40,6 +40,8 @@ export default {
         'blob': 'blob 7s infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'shake': 'shake 0.5s ease-in-out',
+        'fadeIn': 'fadeIn 0.2s ease-out',
+        'slideUp': 'slideUp 0.3s ease-out',
       },
       keyframes: {
         'spin-reverse': {
@@ -68,6 +70,14 @@ export default {
           '0%, 100%': { transform: 'translateX(0)' },
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
+        },
+        'fadeIn': {
+          '0%': { opacity: '0', transform: 'translateY(-4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slideUp': {
+          '0%': { opacity: '0', transform: 'translate(-50%, -45%)' },
+          '100%': { opacity: '1', transform: 'translate(-50%, -50%)' },
         }
       },
       animationDelay: {
@@ -76,5 +86,19 @@ export default {
       }
     }
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          /* Hide scrollbar for Chrome, Safari and Opera */
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          /* Hide scrollbar for IE, Edge and Firefox */
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+        }
+      })
+    }
+  ],
 }

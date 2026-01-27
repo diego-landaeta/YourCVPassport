@@ -199,9 +199,19 @@ export interface Profile {
   show_qr_code?: boolean | null;
   show_availability_badge?: boolean | null;
 
+  // Dashboard Tour
+  dashboard_tour_completed?: boolean | null;
+
+  // First Login
+  first_login_completed?: boolean | null;
+
+  // Wizard Completion
+  wizard_completed?: boolean | null;
+
   // Timestamps
   created_at?: string;
   updated_at?: string;
+  last_slug_changed_at?: string | null;
 }
 
 // Type definitions for experiences
@@ -313,7 +323,7 @@ export interface Stat {
 }
 
 // Updated: Portfolio Item with type field
-export type PortfolioItemType = 'PROJECT' | 'DESIGN' | 'WRITING' | 'VIDEO' | 'CODE' | 'OTHER';
+export type PortfolioItemType = 'PROJECT' | 'DESIGN' | 'WRITING' | 'VIDEO' | 'CODE' | 'OTHER' | 'CERTIFICATION' | 'COLLABORATION';
 
 export interface PortfolioItem {
   id?: string;
@@ -329,6 +339,14 @@ export interface PortfolioItem {
   sort_order?: number;
   created_at?: string;
   updated_at?: string;
+
+  // Certification-specific fields (when type = 'CERTIFICATION')
+  issuer?: string | null;
+  issue_date?: string | null;
+  expiry_date?: string | null;
+  credential_id?: string | null;
+  credential_url?: string | null;
+  verified?: boolean | null;
 
   // Legacy fields (for backward compatibility)
   category?: string;
@@ -374,16 +392,37 @@ export interface AdminUserView {
   updated_at: string;
 }
 
+// Recommendation/Testimonial interface
+export interface Recommendation {
+  id?: string;
+  profile_id: string; // The profile receiving the recommendation
+  recommender_name: string;
+  recommender_title: string;
+  recommender_company?: string | null;
+  recommender_avatar_url?: string | null;
+  recommender_linkedin_url?: string | null;
+  relationship: string; // e.g., "Manager", "Colleague", "Client", "Professor"
+  recommendation_text: string;
+  date?: string | null;
+  featured?: boolean;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface FullProfileData {
     profile: Profile;
     experiences: Experience[];
     education: Education[];
-    certifications: Certification[];
+    certifications: Certification[] | PortfolioItem[]; // Can be either Certification[] or filtered PortfolioItem[]
+    collaborations?: PortfolioItem[]; // Collaboration type portfolio items
     skills: Skill[];
     languages: Language[];
     services: Service[];
     stats: Stat[];
-    portfolioItems: PortfolioItem[];
+    portfolio?: PortfolioItem[]; // Templates expect 'portfolio' (projects only)
+    portfolioItems?: PortfolioItem[]; // Legacy support
+    recommendations?: Recommendation[];
     visas?: Visa[];
     stamps?: Stamp[];
 }
@@ -413,12 +452,12 @@ export interface CVData {
 
 export type StampType =
     | 'EMAIL'
-    | 'PHONE'
     | 'IDENTITY'
     | 'EDUCATION'
     | 'CERTIFICATION'
     | 'EMPLOYMENT'
-    | 'SKILL';
+    | 'SKILL'
+    | 'LANGUAGE';
 
 export type StampStatus =
     | 'PENDING'
@@ -677,4 +716,117 @@ export interface LeadFilters {
 
 export interface LeadWithNotes extends Lead {
   notes?: LeadNote[];
+}
+
+// ============================================================================
+// COMPANY PANEL TYPES
+// ============================================================================
+
+export type CompanyStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+export type CompanyUserRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
+export type CompanySize = '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+';
+export type CreditTransactionType =
+  | 'PURCHASE'
+  | 'ADMIN_ADJUSTMENT'
+  | 'REFUND'
+  | 'PROFILE_VIEW'
+  | 'PROFILE_CONTACT'
+  | 'SEARCH_EXPORT'
+  | 'PROFILE_UNLOCK';
+
+export interface Company {
+  id: string;
+  created_at: string;
+  updated_at: string;
+
+  // Basic Information
+  company_name: string;
+  legal_name: string;
+  tax_id: string; // CIF/NIF
+  company_email: string;
+  company_phone?: string | null;
+  website_url?: string | null;
+
+  // Address
+  address_street?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_country?: string | null; // ISO country code
+  address_postal?: string | null;
+
+  // Company Details
+  industry?: string | null;
+  company_size?: CompanySize | null;
+  description?: string | null;
+  logo_url?: string | null;
+
+  // Verification Documents
+  tax_document_url?: string | null;
+  verification_document_url?: string | null;
+
+  // Admin Verification
+  status: CompanyStatus;
+  verified_at?: string | null;
+  verified_by?: string | null;
+  rejection_reason?: string | null;
+  admin_notes?: string | null;
+
+  // Credits
+  credit_balance: number;
+  total_credits_purchased: number;
+  total_credits_used: number;
+
+  // Metadata
+  signup_ip?: string | null;
+  last_login_at?: string | null;
+  metadata?: Record<string, any>;
+}
+
+export interface CompanyUser {
+  id: string;
+  company_id: string;
+  user_id: string;
+  role: CompanyUserRole;
+  invited_by?: string | null;
+  invited_at: string;
+  accepted_at?: string | null;
+  created_at: string;
+}
+
+export interface CompanyCreditHistory {
+  id: string;
+  company_id: string;
+  amount: number;
+  balance_after: number;
+  transaction_type: CreditTransactionType;
+  reference_id?: string | null;
+  description?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  metadata?: Record<string, any>;
+}
+
+export interface CompanyWithUsers extends Company {
+  company_users?: CompanyUser[];
+}
+
+export interface CreateCompanyInput {
+  company_name: string;
+  legal_name: string;
+  tax_id: string;
+  company_email: string;
+  company_phone?: string;
+  website_url?: string;
+  address_street?: string;
+  address_city?: string;
+  address_state?: string;
+  address_country?: string;
+  address_postal?: string;
+  industry?: string;
+  company_size?: CompanySize;
+  description?: string;
+  logo_url?: string;
+  tax_document_url?: string;
+  verification_document_url?: string;
+  signup_ip?: string;
 }

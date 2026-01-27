@@ -2,6 +2,7 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { BriefcaseIcon, AcademicCapIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CreativeModernTemplateProps {
     data: FullProfileData;
@@ -50,6 +51,15 @@ const CreativeModernTemplate: React.FC<CreativeModernTemplateProps> = ({ data, c
                                 <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
                             </div>
                         )}
+                        {/* Contact Buttons */}
+                        <div className="mt-6 flex justify-center md:justify-start">
+                            <ProfileContactButtons
+                                profileId={profile.id}
+                                profileEmail={profile.email}
+                                variant="minimal"
+                                accentColor={accentColor}
+                            />
+                        </div>
                     </div>
                 </div>
             </header>

@@ -20,8 +20,14 @@ export const useToast = () => {
   }, []);
 
   const showToast = useCallback((message: string, type: ToastType = 'info', duration: number = 5000) => {
+    // Clear all existing timeouts
+    timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    timeoutsRef.current.clear();
+
     const id = Math.random().toString(36).substring(7);
-    setToasts(prev => [...prev, { id, message, type }]);
+
+    // Replace all toasts with just this one (max 1 toast at a time)
+    setToasts([{ id, message, type }]);
 
     // Auto-dismiss after duration
     const timeout = setTimeout(() => {

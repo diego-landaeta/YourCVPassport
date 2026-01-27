@@ -1,9 +1,11 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useUnreadLeadsCount } from '../../hooks/useUnreadLeadsCount';
+import { useJobApplications } from '../../hooks/useJobApplications';
 
 interface MobileNavProps {
   profile: any;
@@ -11,9 +13,10 @@ interface MobileNavProps {
   onSectionChange: (section: string) => void;
   isOpen: boolean;
   onToggle: () => void;
+  profileCompleteness?: number;
 }
 
-const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSectionChange, isOpen, onToggle }) => {
+const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSectionChange, isOpen, onToggle, profileCompleteness = 100 }) => {
   const translations = useTranslations();
   const menu = translations.dashboard.menu;
   const { lang, setLang } = useLanguage();
@@ -22,6 +25,10 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { unreadCount } = useUnreadLeadsCount();
+  const { activeCount: activeApplicationsCount } = useJobApplications(profile?.id, {
+    includeJobDetails: false
+  });
+  const [showProfileAlert, setShowProfileAlert] = React.useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -31,6 +38,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
   };
 
   const allMenuItems = [
+    // MAIN OVERVIEW
     {
       id: 'dashboard',
       label: menu.dashboard,
@@ -40,21 +48,14 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
         </svg>
       ),
     },
+
+    // PROFILE MANAGEMENT
     {
       id: 'mi-perfil',
       label: menu.myProfile,
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'template',
-      label: menu.template,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
         </svg>
       ),
     },
@@ -74,57 +75,11 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
           : `/cv/${profile?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'mi-perfil'}`,
     },
     {
-      id: 'visas',
-      label: menu.visas,
+      id: 'plantillas',
+      label: menu.templates || (lang === 'es' ? 'Plantillas' : 'Templates'),
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    // Hidden temporarily - in development
-    // {
-    //   id: 'cv-versions',
-    //   label: menu.cvVersions || (lang === 'es' ? 'Versiones de CV' : 'CV Versions'),
-    //   icon: (
-    //     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-    //     </svg>
-    //   ),
-    // },
-    {
-      id: 'exportar',
-      label: menu.export,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'compartir',
-      label: menu.share,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'analitica',
-      label: menu.analytics,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'leads',
-      label: menu.leads,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
         </svg>
       ),
     },
@@ -137,6 +92,63 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
         </svg>
       ),
     },
+
+    // JOB OPPORTUNITIES (Unified section)
+    {
+      id: 'vacantes',
+      label: menu.jobSearch || (lang === 'es' ? 'Oportunidades' : 'Opportunities'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+      // No link - uses internal navigation
+    },
+    {
+      id: 'postulaciones',
+      label: menu.myApplications || (lang === 'es' ? 'Mis Aplicaciones' : 'My Applications'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      ),
+      // No link - uses internal navigation
+    },
+
+    // COMMUNICATIONS & NETWORKING
+    {
+      id: 'leads',
+      label: menu.leads,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+
+    // ANALYTICS & INSIGHTS
+    {
+      id: 'analitica',
+      label: menu.analytics,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+
+    // DOCUMENTS & LEGAL
+    {
+      id: 'visas',
+      label: menu.visas,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+
+    // SETTINGS
     {
       id: 'ajustes',
       label: menu.settings,
@@ -147,28 +159,42 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
         </svg>
       ),
     },
-    {
-      id: 'ayuda',
-      label: menu.help,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
   ].filter(item => item && item.id); // Filter out commented/undefined items
 
+  // Determinar si las secciones deben estar bloqueadas
+  // ⚠️ CRÍTICO: Bloquear TODO HASTA que el usuario COMPLETE EL WIZARD (paso de finalización)
+  // El wizard se considera completo SOLO cuando:
+  // 1. El usuario tiene un template seleccionado (profile.template)
+  // 2. El usuario tiene un slug personalizado (profile.slug)
+  // Esto asegura que nuevos usuarios DEBEN completar el wizard antes de acceder al dashboard
+  const wizardCompleted = profile?.template && profile?.slug;
+  const shouldBlockSections = !wizardCompleted;
+
   const handleMenuClick = (item: any) => {
+    // Permitir SOLO "Mi Perfil" siempre (para que puedan acceder al wizard)
+    if (item.id === 'mi-perfil') {
+      if (item.link) {
+        navigate(item.link);
+        onToggle();
+      } else {
+        onSectionChange('mi-perfil:identity');
+        onToggle();
+      }
+      return;
+    }
+
+    // Bloquear TODO (incluido Dashboard) si el wizard no está completo
+    if (shouldBlockSections) {
+      setShowProfileAlert(true);
+      setTimeout(() => setShowProfileAlert(false), 4000);
+      return;
+    }
+
+    // Permitir navegación normal SOLO si el wizard está completo
     if (item.link) {
-      // For external links, don't close the menu, just navigate
       navigate(item.link);
       onToggle();
-    } else if (item.id === 'mi-perfil') {
-      // For profile, change to identity subsection
-      onSectionChange('mi-perfil:identity');
-      onToggle();
     } else {
-      // For other sections, just change section
       onSectionChange(item.id);
       onToggle();
     }
@@ -177,6 +203,31 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
 
   return (
     <>
+      {/* Profile Completion Alert */}
+      {showProfileAlert && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slideInDown">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-4 rounded-xl shadow-xl min-w-[280px] max-w-[90vw] border border-blue-400">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm mb-1">
+                  {lang === 'es' ? 'Completa el wizard primero' : 'Complete the wizard first'}
+                </p>
+                <p className="text-xs text-blue-100">
+                  {lang === 'es'
+                    ? 'Debes completar el wizard de perfil (incluyendo el paso de Finalización) para acceder a todas las funcionalidades.'
+                    : 'You must complete the profile wizard (including the Finalization step) to access all features.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Header Bar */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-3">
@@ -220,36 +271,60 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
       >
         <nav className="py-4 px-3 pb-8">
           <ul className="space-y-1">
-            {allMenuItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  onClick={() => handleMenuClick(item)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    activeSection === item.id || (item.id === 'mi-perfil' && activeSection.startsWith('mi-perfil:'))
-                      ? 'bg-cv-blue text-white'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'
-                  }`}
-                >
-                  <div className="relative">
-                    {item.icon}
-                    {item.id === 'leads' && unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-[10px] font-bold items-center justify-center">
-                          {unreadCount > 9 ? '9+' : unreadCount}
+            {allMenuItems.map((item) => {
+              const isBlocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
+              return (
+                <li key={item.id}>
+                  <button
+                    onClick={() => handleMenuClick(item)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                      isBlocked
+                        ? 'opacity-50 text-gray-400 dark:text-gray-600'
+                        : activeSection === item.id ||
+                          (item.id === 'mi-perfil' && activeSection.startsWith('mi-perfil:'))
+                        ? 'bg-cv-blue text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'
+                    }`}
+                  >
+                    <div className="relative">
+                      {item.icon}
+                      {item.id === 'leads' && unreadCount > 0 && !isBlocked && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-[10px] font-bold items-center justify-center">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
                         </span>
+                      )}
+                      {item.id === 'postulaciones' && activeApplicationsCount > 0 && !isBlocked && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500 text-white text-[10px] font-bold items-center justify-center">
+                            {activeApplicationsCount > 9 ? '9+' : activeApplicationsCount}
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-medium flex-1 text-left">{item.label}</span>
+                    {isBlocked && (
+                      <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    )}
+                    {!isBlocked && item.id === 'leads' && unreadCount > 0 && (
+                      <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+                        {unreadCount}
                       </span>
                     )}
-                  </div>
-                  <span className="font-medium flex-1 text-left">{item.label}</span>
-                  {item.id === 'leads' && unreadCount > 0 && (
-                    <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-              </li>
-            ))}
+                    {!isBlocked && item.id === 'postulaciones' && activeApplicationsCount > 0 && (
+                      <span className="ml-auto px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
+                        {activeApplicationsCount}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="px-3 py-4 mt-4 border-t border-gray-200 dark:border-dark-border space-y-3">

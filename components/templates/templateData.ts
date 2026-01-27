@@ -5,8 +5,7 @@ export interface TemplateData {
         en: string;
     };
     previewImg: string;
-    isPro: boolean;
-    category: 'CV' | 'Cover Letter' | 'Email';
+    isPro: boolean;category: 'CV' | 'Cover Letter' | 'Email';
 }
 
 export const templates: TemplateData[] = [
@@ -35,49 +34,49 @@ export const templates: TemplateData[] = [
         id: 'corporate-classic',
         name: { es: 'Corporativo Clásico', en: 'Corporate Classic' },
         previewImg: '/images/templates/classic-corporate.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'creative-minimalist',
         name: { es: 'Creativo Minimalista', en: 'Creative Minimalist' },
         previewImg: '/images/templates/creative-minimalist.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'academic-standard',
         name: { es: 'Estándar Académico', en: 'Academic Standard' },
         previewImg: '/images/templates/academic-standard.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'modern-minimalist',
         name: { es: 'Moderno Minimalista', en: 'Modern Minimalist' },
         previewImg: '/images/templates/modern-minimalist.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'creative-bold',
         name: { es: 'Creativo Audaz', en: 'Creative Bold' },
         previewImg: '/images/templates/creative-bold.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'professional-classic',
         name: { es: 'Profesional Clásico', en: 'Professional Classic' },
         previewImg: '/images/templates/professional-classic.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
         id: 'healthcare-professional',
         name: { es: 'Profesional de la Salud', en: 'Healthcare Professional' },
         previewImg: '/images/templates/healthcare-professional.png',
-        isPro: false,
+        isPro: true,
         category: 'CV',
     },
     {
@@ -149,5 +148,12 @@ export const templates: TemplateData[] = [
         previewImg: '/images/templates/creative-modern.png',
         isPro: true,
         category: 'CV',
-    }
+    },
+    {
+        id: 'urban',
+        name: { es: 'Urbano', en: 'Urban' },
+        previewImg: '/images/templates/urban.png',
+        isPro: true,
+        category: 'CV',
+    },
 ];

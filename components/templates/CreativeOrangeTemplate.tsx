@@ -2,6 +2,7 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { SparklesIcon, FolderIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CreativeOrangeTemplateProps {
     data: FullProfileData;
@@ -34,10 +35,16 @@ const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, c
                         <p className="text-2xl leading-relaxed text-gray-700 dark:text-gray-300 font-light">
                             {profile.summary}
                         </p>
-                        <button className="inline-flex items-center gap-3 px-12 py-5 rounded-2xl font-bold text-lg text-white shadow-2xl hover:shadow-xl hover:-translate-y-1 transition-all group" style={{ background: `linear-gradient(135deg, ${accentColor}, #FBBF24)` }}>
-                            <SparklesIcon className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                            View My Work
-                        </button>
+                        {/* Contact Buttons */}
+                        <div className="mt-4">
+                            <ProfileContactButtons
+                                profileId={profile.id}
+                                profileEmail={profile.email}
+                                variant="compact"
+                                accentColor={accentColor}
+                                showDownload={false}
+                            />
+                        </div>
                     </div>
 
                     <div className="relative">

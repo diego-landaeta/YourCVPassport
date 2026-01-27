@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import {
   calculateProfileScore,
   generateProfileSuggestions,
@@ -21,12 +22,18 @@ import {
 } from '@heroicons/react/24/solid';
 
 interface ProfileQualityScoreProps {
+  // Soporta tanto arrays como conteos directos
   experiences?: any[];
   education?: any[];
   skills?: any[];
   visas?: any[];
   languages?: any[];
   certifications?: any[];
+  // Conteos directos (preferidos - se cargan al inicio del dashboard)
+  experienceCount?: number;
+  educationCount?: number;
+  skillsCount?: number;
+  certificationsCount?: number;
   onNavigateToSection?: (sectionId: string) => void;
 }
 
@@ -37,25 +44,33 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
   visas = [],
   languages = [],
   certifications = [],
+  experienceCount,
+  educationCount,
+  skillsCount,
+  certificationsCount,
   onNavigateToSection,
 }) => {
   const { profile } = useAuth();
+  const t = useTranslations();
 
-  // Calculate quality check
+  // Calculate quality check - usa conteos directos si están disponibles, sino usa arrays
   const qualityCheck: ProfileQualityCheck = useMemo(() => {
+    // Verificar foto: puede estar en avatar_url o photo_url
+    const hasPhoto = !!(profile?.avatar_url || profile?.photo_url);
+
     return {
-      hasPhoto: !!profile?.photo_url,
+      hasPhoto,
       hasEmail: !!profile?.email,
       emailVerified: !!profile?.email_verified,
       hasSummary: !!profile?.summary && profile.summary.trim().length > 20,
-      experienceCount: experiences.length,
-      educationCount: education.length,
-      skillsCount: skills.length,
+      experienceCount: experienceCount ?? experiences.length,
+      educationCount: educationCount ?? education.length,
+      skillsCount: skillsCount ?? skills.length,
       visasCount: visas.length,
       languagesCount: languages.length,
-      certificationsCount: certifications.length,
+      certificationsCount: certificationsCount ?? certifications.length,
     };
-  }, [profile, experiences, education, skills, visas, languages, certifications]);
+  }, [profile, experiences, education, skills, visas, languages, certifications, experienceCount, educationCount, skillsCount, certificationsCount]);
 
   // Calculate score
   const score = useMemo(() => calculateProfileScore(qualityCheck), [qualityCheck]);
@@ -73,7 +88,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         color: 'text-green-600 dark:text-green-400',
         bgColor: 'bg-green-100 dark:bg-green-900/30',
         borderColor: 'border-green-500 dark:border-green-400',
-        label: 'Excelente',
+        label: t.profileEditor.qualityScore.labels.excellent,
         icon: CheckCircleIcon,
       };
     } else if (score >= 70) {
@@ -81,7 +96,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         color: 'text-blue-600 dark:text-blue-400',
         bgColor: 'bg-blue-100 dark:bg-blue-900/30',
         borderColor: 'border-blue-500 dark:border-blue-400',
-        label: 'Bueno',
+        label: t.profileEditor.qualityScore.labels.good,
         icon: ChartBarIcon,
       };
     } else if (score >= 50) {
@@ -89,7 +104,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         color: 'text-yellow-600 dark:text-yellow-400',
         bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
         borderColor: 'border-yellow-500 dark:border-yellow-400',
-        label: 'Regular',
+        label: t.profileEditor.qualityScore.labels.regular,
         icon: ExclamationTriangleIcon,
       };
     } else {
@@ -97,7 +112,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         color: 'text-red-600 dark:text-red-400',
         bgColor: 'bg-red-100 dark:bg-red-900/30',
         borderColor: 'border-red-500 dark:border-red-400',
-        label: 'Necesita mejoras',
+        label: t.profileEditor.qualityScore.labels.needsImprovements,
         icon: XCircleIcon,
       };
     }
@@ -112,12 +127,14 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
       'Foto de perfil': 'identity',
       'Email': 'identity',
       'Resumen profesional': 'identity',
+      [t.profileEditor.qualityScore.workExperience]: 'experience',
       'Experiencia laboral': 'experience',
       'Habilidades': 'skills',
+      [t.profileEditor.qualityScore.education]: 'education',
       'Educación': 'education',
       'Proyectos (Visas)': 'visas',
-      'Idiomas': 'languages',
-      'Certificaciones': 'portfolio',
+      [t.profileEditor.qualityScore.languages]: 'languages',
+      'Certificaciones': 'stamps',
       'Verificaciones': 'stamps',
     };
     return categoryMap[category] || null;
@@ -130,19 +147,19 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         bg: 'bg-red-100 dark:bg-red-900/30',
         text: 'text-red-700 dark:text-red-400',
         border: 'border-red-300 dark:border-red-700',
-        label: 'Alta',
+        label: t.profileEditor.qualityScore.priority.high,
       },
       medium: {
         bg: 'bg-amber-100 dark:bg-amber-900/30',
         text: 'text-amber-700 dark:text-amber-400',
         border: 'border-amber-300 dark:border-amber-700',
-        label: 'Media',
+        label: t.profileEditor.qualityScore.priority.medium,
       },
       low: {
         bg: 'bg-emerald-100 dark:bg-emerald-900/30',
         text: 'text-emerald-700 dark:text-emerald-400',
         border: 'border-emerald-300 dark:border-emerald-700',
-        label: 'Baja',
+        label: t.profileEditor.qualityScore.priority.low,
       },
     };
     return styles[priority];
@@ -162,7 +179,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
                 {score}%
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Calidad del Perfil
+                {t.profileEditor.qualityScore.title}
               </p>
             </div>
           </div>
@@ -192,26 +209,70 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-          {score >= 90
-            ? '¡Perfil casi perfecto! Solo pequeños detalles para alcanzar el 100%'
+          {score === 100
+            ? t.profileEditor.qualityScore.perfect
+            : score >= 90
+            ? t.profileEditor.qualityScore.almostPerfect
             : score >= 70
-            ? 'Buen perfil, pero aún puedes mejorarlo siguiendo las sugerencias'
+            ? t.profileEditor.qualityScore.good
             : score >= 50
-            ? 'Tu perfil necesita atención en varias áreas importantes'
-            : 'Tu perfil necesita mejoras significativas para destacar'}
+            ? t.profileEditor.qualityScore.needsAttention
+            : t.profileEditor.qualityScore.needsImprovement}
         </p>
       </div>
 
-      {/* Suggestions */}
-      {suggestions.length > 0 ? (
+      {/* Success message - Solo mostrar cuando score === 100 */}
+      {score === 100 ? (
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+              <CheckCircleIcon className="w-7 h-7 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5">
+                {t.profileEditor.qualityScore.completed100}
+              </h4>
+              <p className="text-sm text-green-700 dark:text-green-400">
+                {t.profileEditor.qualityScore.readyToShine}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              {t.profileEditor.qualityScore.excellentWork}
+            </p>
+
+            <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 border border-green-200 dark:border-green-800">
+              <p className="text-xs font-semibold text-gray-900 dark:text-white mb-2">
+                {t.profileEditor.qualityScore.nextSteps}
+              </p>
+              <ul className="space-y-1.5">
+                <li className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <span className="text-green-600 dark:text-green-400 font-bold">→</span>
+                  <span>{t.profileEditor.qualityScore.exportShare}</span>
+                </li>
+                <li className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <span className="text-green-600 dark:text-green-400 font-bold">→</span>
+                  <span>{t.profileEditor.qualityScore.reviewAnalytics}</span>
+                </li>
+                <li className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
+                  <span className="text-green-600 dark:text-green-400 font-bold">→</span>
+                  <span>{t.profileEditor.qualityScore.keepUpdated}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      ) : suggestions.length > 0 ? (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
             <h4 className="text-lg font-bold text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
               <SparklesIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              Recomendaciones IA
+              {t.profileEditor.qualityScore.aiRecommendations}
             </h4>
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-3 py-1 rounded-full">
-              {suggestions.length} {suggestions.length === 1 ? 'sugerencia' : 'sugerencias'}
+              {suggestions.length} {suggestions.length === 1 ? t.profileEditor.qualityScore.suggestion : t.profileEditor.qualityScore.suggestions}
             </span>
           </div>
 
@@ -274,21 +335,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
             </p>
           </div>
         </div>
-      ) : (
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-              <CheckCircleIcon className="w-6 h-6 text-white" />
-            </div>
-            <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-              ¡Perfil optimizado!
-            </h4>
-          </div>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Tu perfil cumple con todos los requisitos de calidad. Continúa manteniéndolo actualizado para maximizar tu visibilidad.
-          </p>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };

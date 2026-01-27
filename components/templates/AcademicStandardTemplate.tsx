@@ -1,6 +1,7 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface AcademicStandardTemplateProps {
     data: FullProfileData;
@@ -42,6 +43,15 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                         <span>{profile.meta_description || 'N/A'}</span>
                         <span className="mx-2">|</span>
                         <span>Location</span>
+                    </div>
+                    {/* Contact Buttons */}
+                    <div className="mt-4 flex justify-center">
+                        <ProfileContactButtons
+                            profileId={profile.id}
+                            profileEmail={profile.email}
+                            variant="minimal"
+                            accentColor={accentColor}
+                        />
                     </div>
                 </header>
 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 interface BlogPost {
     id?: number;
@@ -22,6 +24,7 @@ interface BlogPost {
 
 const BlogManagementSection: React.FC = () => {
     const { session } = useAuth();
+    const { lang } = useLanguage();
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
@@ -254,26 +257,39 @@ const BlogManagementSection: React.FC = () => {
                         Crea y administra los artículos de tu blog. Total: {posts.length} artículo{posts.length !== 1 ? 's' : ''}
                     </p>
                 </div>
-                <button
-                    onClick={() => setEditingPost({ 
-                        title: '', 
-                        slug: '', 
-                        summary: '', 
-                        content: '', 
-                        image_url: '', 
-                        author_name: '', 
-                        author_image_url: '', 
-                        category: '', 
-                        is_featured: false, 
-                        published_at: new Date().toISOString().split('T')[0], 
-                        meta_title: '', 
-                        meta_description: '' 
-                    })}
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-cv-blue hover:bg-opacity-90 text-white rounded-lg font-semibold transition-colors shadow-md"
-                >
-                    <PlusIcon className="w-5 h-5" />
-                    Nuevo Artículo
-                </button>
+                <div className="flex gap-3">
+                    <Link
+                        to={lang === 'es' ? '/recursos/blog' : '/resources/blog'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-lg font-semibold transition-all shadow-md"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Ver Blog Público
+                    </Link>
+                    <button
+                        onClick={() => setEditingPost({
+                            title: '',
+                            slug: '',
+                            summary: '',
+                            content: '',
+                            image_url: '',
+                            author_name: '',
+                            author_image_url: '',
+                            category: '',
+                            is_featured: false,
+                            published_at: new Date().toISOString().split('T')[0],
+                            meta_title: '',
+                            meta_description: ''
+                        })}
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-cv-blue hover:bg-opacity-90 text-white rounded-lg font-semibold transition-colors shadow-md"
+                    >
+                        <PlusIcon className="w-5 h-5" />
+                        Nuevo Artículo
+                    </button>
+                </div>
             </div>
 
             {posts.length === 0 ? (
@@ -804,7 +820,7 @@ const PostForm: React.FC<{ post: Partial<BlogPost>, onSave: (post: Partial<BlogP
                                 <div className="p-6 bg-white dark:bg-dark-bg-primary">
                                     <div className="max-w-2xl">
                                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                            yourcvpassport.com › blog › {formData.slug || 'slug-del-articulo'}
+                                            yourcvpassport.com › recursos › blog › {formData.slug || 'slug-del-articulo'}
                                         </div>
                                         <div className="text-xl text-blue-600 dark:text-blue-400 font-medium mb-2 hover:underline cursor-pointer">
                                             {formData.meta_title || formData.title || 'Título del artículo'}

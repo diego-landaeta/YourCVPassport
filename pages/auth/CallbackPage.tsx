@@ -23,7 +23,7 @@ const CallbackPage: React.FC = () => {
 
         if (data.session) {
           // Successfully authenticated, redirect to dashboard
-          navigate('/dashboard', { replace: true });
+          navigate('/dashboard');
         } else {
           // No session found
           setError('No session found. Redirecting to login...');

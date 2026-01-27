@@ -1,10 +1,14 @@
-import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { skillSchema, SkillFormData } from '../../schemas/profileSchemas';
+import { SkillFormData } from '../../schemas/profileSchemas';
+import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
+import { useToastContext } from '../../context/ToastContext';
+import { useTranslatedSkills } from '../../hooks/useTranslatedSkills';
 import {
   DndContext,
   closestCenter,
@@ -36,13 +40,368 @@ export interface SkillsSectionHandle {
   toggleAISuggestions: () => void;
 }
 
-// Common skills for autocomplete
+// Common skills for autocomplete - Extended with diverse categories (English + Spanish)
 const COMMON_SKILLS = [
+  // Programming Languages (EN + ES)
   'JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'Java', 'C++', 'C#',
-  'Ruby', 'PHP', 'Swift', 'Kotlin', 'Go', 'Rust', 'SQL', 'MongoDB', 'PostgreSQL',
-  'GraphQL', 'REST API', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP',
-  'Git', 'Agile', 'Scrum', 'CI/CD', 'TDD', 'UI/UX Design', 'Figma', 'Photoshop',
-  'Machine Learning', 'Data Analysis', 'Leadership', 'Communication', 'Project Management',
+  'Ruby', 'PHP', 'Swift', 'Kotlin', 'Go', 'Rust', 'Dart', 'R', 'MATLAB', 'Scala',
+  'Perl', 'Elixir', 'Haskell', 'Lua', 'Julia',
+
+  // Web & Mobile Development
+  'HTML5', 'CSS3', 'SASS', 'LESS', 'Tailwind CSS', 'Bootstrap', 'Material UI',
+  'Vue.js', 'Angular', 'Next.js', 'Gatsby', 'Nuxt.js', 'Svelte', 'jQuery',
+  'React Native', 'Flutter', 'Ionic', 'Xamarin', 'SwiftUI',
+  'Desarrollo Web', 'Desarrollo Móvil', 'Diseño Responsive', 'Progressive Web Apps',
+
+  // Backend & Databases
+  'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Cassandra', 'DynamoDB',
+  'Firebase', 'Oracle', 'MariaDB', 'SQLite', 'Elasticsearch', 'Neo4j',
+  'GraphQL', 'REST API', 'SOAP', 'gRPC', 'WebSockets',
+  'Bases de Datos', 'Modelado de Datos', 'APIs', 'Backend Development',
+
+  // DevOps & Cloud
+  'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Heroku', 'DigitalOcean',
+  'Jenkins', 'GitLab CI', 'GitHub Actions', 'CircleCI', 'Travis CI',
+  'Terraform', 'Ansible', 'Chef', 'Puppet', 'Vagrant', 'Nginx', 'Apache',
+  'CI/CD', 'Microservices', 'Serverless', 'Computación en la Nube',
+
+  // Tools & Version Control
+  'Git', 'GitHub', 'GitLab', 'Bitbucket', 'SVN', 'Mercurial',
+  'VS Code', 'IntelliJ IDEA', 'Eclipse', 'Vim', 'Emacs',
+  'Jira', 'Confluence', 'Trello', 'Asana', 'Monday.com', 'Notion',
+  'Control de Versiones', 'Gestión de Proyectos',
+
+  // Design & Creative
+  'UI/UX Design', 'Figma', 'Adobe XD', 'Sketch', 'InVision', 'Zeplin',
+  'Photoshop', 'Illustrator', 'InDesign', 'After Effects', 'Premiere Pro',
+  'Lightroom', 'CorelDRAW', 'Canva', 'Blender', '3D Modeling', 'AutoCAD',
+  'SketchUp', 'Prototyping', 'Wireframing', 'User Research', 'Design Thinking',
+  'Color Theory', 'Typography', 'Brand Identity', 'Motion Graphics',
+  'Diseño UI/UX', 'Diseño Gráfico', 'Diseño Web', 'Prototipado', 'Identidad de Marca',
+
+  // Data & Analytics
+  'Data Analysis', 'Data Visualization', 'Business Intelligence', 'ETL',
+  'Tableau', 'Power BI', 'Looker', 'Google Analytics', 'Mixpanel',
+  'Machine Learning', 'Deep Learning', 'Natural Language Processing',
+  'Computer Vision', 'TensorFlow', 'PyTorch', 'Keras', 'Scikit-learn',
+  'Pandas', 'NumPy', 'Jupyter', 'Apache Spark', 'Hadoop', 'Airflow',
+  'Data Mining', 'Statistical Analysis', 'A/B Testing', 'Predictive Modeling',
+  'Análisis de Datos', 'Visualización de Datos', 'Inteligencia Artificial',
+  'Aprendizaje Automático', 'Ciencia de Datos', 'Big Data',
+
+  // Business & Management
+  'Project Management', 'Product Management', 'Agile', 'Scrum', 'Kanban',
+  'Lean', 'Six Sigma', 'Strategic Planning', 'Business Development',
+  'Market Research', 'Competitive Analysis', 'Financial Planning', 'Budgeting',
+  'Risk Management', 'Change Management', 'Stakeholder Management',
+  'Resource Planning', 'Process Improvement', 'KPI Tracking', 'OKRs',
+  'Gestión de Proyectos', 'Gestión de Productos', 'Planificación Estratégica',
+  'Desarrollo de Negocios', 'Investigación de Mercado', 'Análisis Competitivo',
+
+  // Soft Skills (EN + ES)
+  'Leadership', 'Team Management', 'Communication', 'Public Speaking',
+  'Presentation Skills', 'Negotiation', 'Conflict Resolution', 'Critical Thinking',
+  'Problem Solving', 'Decision Making', 'Time Management', 'Adaptability',
+  'Creativity', 'Emotional Intelligence', 'Mentoring', 'Coaching',
+  'Active Listening', 'Collaboration', 'Customer Service', 'Networking',
+  'Liderazgo', 'Gestión de Equipos', 'Comunicación', 'Oratoria',
+  'Habilidades de Presentación', 'Negociación', 'Resolución de Conflictos',
+  'Pensamiento Crítico', 'Resolución de Problemas', 'Toma de Decisiones',
+  'Gestión del Tiempo', 'Adaptabilidad', 'Creatividad', 'Inteligencia Emocional',
+  'Mentoría', 'Coaching', 'Escucha Activa', 'Colaboración', 'Servicio al Cliente',
+  'Trabajo en Equipo', 'Empatía', 'Motivación', 'Delegación', 'Organización',
+
+  // Marketing & Sales (EN + ES)
+  'Digital Marketing', 'SEO', 'SEM', 'Content Marketing', 'Email Marketing',
+  'Social Media Marketing', 'Facebook Ads', 'Google Ads', 'LinkedIn Marketing',
+  'Influencer Marketing', 'Affiliate Marketing', 'Growth Hacking',
+  'Marketing Automation', 'CRM', 'Salesforce', 'HubSpot', 'Mailchimp',
+  'Copywriting', 'Content Strategy', 'Brand Management', 'Product Marketing',
+  'Sales Strategy', 'B2B Sales', 'B2C Sales', 'Account Management',
+  'Marketing Digital', 'Estrategia de Contenido', 'Gestión de Marca', 'Ventas',
+  'Publicidad Digital', 'Redes Sociales', 'Growth Hacking', 'Analítica Web',
+
+  // Finance & Accounting (EN + ES)
+  'Financial Analysis', 'Accounting', 'Bookkeeping', 'Tax Preparation',
+  'Auditing', 'QuickBooks', 'SAP', 'Excel', 'Financial Modeling',
+  'Investment Analysis', 'Corporate Finance', 'Cost Accounting',
+  'GAAP', 'IFRS', 'Payroll', 'Forecasting', 'Variance Analysis',
+  'Análisis Financiero', 'Contabilidad', 'Finanzas', 'Auditoría', 'Presupuestos',
+
+  // Human Resources (EN + ES)
+  'Recruitment', 'Talent Acquisition', 'Onboarding', 'Performance Management',
+  'Employee Relations', 'Compensation & Benefits', 'Training & Development',
+  'HR Analytics', 'Workforce Planning', 'Diversity & Inclusion',
+  'Labor Law', 'Organizational Development', 'HRIS', 'Workday', 'BambooHR',
+  'Recursos Humanos', 'Reclutamiento', 'Gestión del Talento', 'Capacitación',
+  'Nómina', 'Desarrollo Organizacional', 'Selección de Personal',
+
+  // Healthcare & Medical (EN + ES)
+  'Patient Care', 'Medical Diagnosis', 'Treatment Planning', 'EMR/EHR',
+  'HIPAA Compliance', 'Clinical Research', 'Pharmacology', 'Nursing',
+  'Physical Therapy', 'Occupational Therapy', 'Medical Coding', 'CPT/ICD',
+  'Healthcare Administration', 'Medical Writing', 'Telemedicine',
+  'Atención al Paciente', 'Diagnóstico Médico', 'Investigación Clínica',
+  'Enfermería', 'Farmacología', 'Telemedicina', 'Salud',
+
+  // Education & Training (EN + ES)
+  'Curriculum Development', 'Instructional Design', 'E-Learning', 'LMS',
+  'Classroom Management', 'Student Assessment', 'Educational Technology',
+  'Tutoring', 'Workshop Facilitation', 'Corporate Training', 'Moodle',
+  'Canvas', 'Blackboard', 'Educational Psychology', 'Lesson Planning',
+  'Educación', 'Diseño Instruccional', 'Formación', 'Capacitación',
+  'Docencia', 'Pedagogía', 'E-Learning', 'Tutoría',
+
+  // Legal (EN + ES)
+  'Legal Research', 'Contract Drafting', 'Contract Negotiation', 'Litigation',
+  'Compliance', 'Corporate Law', 'Intellectual Property', 'Patent Law',
+  'Employment Law', 'Real Estate Law', 'Legal Writing', 'Case Management',
+  'Derecho', 'Asesoría Legal', 'Redacción de Contratos', 'Litigio',
+  'Derecho Corporativo', 'Propiedad Intelectual', 'Cumplimiento Legal',
+
+  // Engineering & Manufacturing (EN + ES)
+  'Mechanical Engineering', 'Electrical Engineering', 'Civil Engineering',
+  'Chemical Engineering', 'Industrial Engineering', 'CAD', 'CAM', 'SolidWorks',
+  'MATLAB', 'Simulation', 'Quality Control', 'Lean Manufacturing',
+  'Supply Chain', 'Logistics', 'Inventory Management', 'Production Planning',
+  'ISO Standards', 'GMP', 'Process Engineering', 'Root Cause Analysis',
+  'Ingeniería', 'Ingeniería Mecánica', 'Ingeniería Civil', 'Control de Calidad',
+  'Manufactura', 'Cadena de Suministro', 'Logística', 'Producción',
+
+  // Testing & Quality Assurance (EN + ES)
+  'TDD', 'BDD', 'Unit Testing', 'Integration Testing', 'E2E Testing',
+  'Manual Testing', 'Automated Testing', 'Performance Testing', 'Security Testing',
+  'Jest', 'Mocha', 'Chai', 'Selenium', 'Cypress', 'Playwright', 'TestNG',
+  'Quality Assurance', 'Test Planning', 'Bug Tracking', 'Load Testing',
+  'Regression Testing', 'UAT', 'Test Automation', 'Appium',
+  'Pruebas de Software', 'QA', 'Testing', 'Automatización de Pruebas',
+
+  // Cybersecurity & Information Security (EN + ES)
+  'Cybersecurity', 'Penetration Testing', 'Ethical Hacking', 'Network Security',
+  'Security Auditing', 'Vulnerability Assessment', 'Incident Response',
+  'SIEM', 'Firewall Management', 'IDS/IPS', 'Cryptography', 'SSL/TLS',
+  'Security Compliance', 'ISO 27001', 'SOC 2', 'GDPR', 'PCI DSS',
+  'Threat Intelligence', 'Malware Analysis', 'Security Architecture',
+  'Identity Management', 'Access Control', 'Risk Assessment', 'Forensics',
+  'Ciberseguridad', 'Seguridad Informática', 'Hacking Ético', 'Auditoría de Seguridad',
+
+  // Architecture & Infrastructure (EN + ES)
+  'Solution Architecture', 'Enterprise Architecture', 'System Design',
+  'Cloud Architecture', 'Network Architecture', 'Microservices Architecture',
+  'API Design', 'Scalability', 'High Availability', 'Disaster Recovery',
+  'Infrastructure as Code', 'Monitoring', 'Observability', 'Prometheus',
+  'Grafana', 'ELK Stack', 'Splunk', 'New Relic', 'Datadog',
+  'Arquitectura de Software', 'Diseño de Sistemas', 'Infraestructura',
+
+  // Blockchain & Web3 (EN + ES)
+  'Blockchain', 'Smart Contracts', 'Solidity', 'Ethereum', 'Web3',
+  'Cryptocurrency', 'DeFi', 'NFT', 'Hyperledger', 'Truffle',
+  'MetaMask', 'Decentralized Applications', 'Consensus Algorithms',
+  'Criptomonedas', 'Contratos Inteligentes',
+
+  // Gaming & Game Development (EN + ES)
+  'Unity', 'Unreal Engine', 'Game Design', 'Game Development', 'C# for Games',
+  '3D Animation', 'Level Design', 'Game Physics', 'Shader Programming',
+  'Godot', 'GameMaker', 'Pixel Art', 'Character Design', 'VR Development',
+  'AR Development', 'Mobile Gaming', 'Multiplayer Networking',
+  'Desarrollo de Videojuegos', 'Diseño de Juegos', 'Animación 3D',
+
+  // Video & Audio Production (EN + ES)
+  'Video Editing', 'Audio Engineering', 'Sound Design', 'Music Production',
+  'Final Cut Pro', 'DaVinci Resolve', 'Avid Media Composer', 'Pro Tools',
+  'Logic Pro', 'Ableton Live', 'FL Studio', 'Voice Over', 'Podcasting',
+  'Live Streaming', 'OBS Studio', 'Camera Operation', 'Lighting',
+  'Color Grading', 'Audio Mixing', 'Mastering', 'Foley',
+  'Edición de Video', 'Producción de Audio', 'Producción Musical', 'Locución',
+
+  // E-commerce & Retail (EN + ES)
+  'E-commerce Management', 'Shopify', 'WooCommerce', 'Magento', 'BigCommerce',
+  'Amazon FBA', 'Dropshipping', 'Inventory Management', 'Order Fulfillment',
+  'Payment Gateways', 'Conversion Optimization', 'Product Photography',
+  'Merchandising', 'Retail Management', 'POS Systems', 'Category Management',
+  'Comercio Electrónico', 'Gestión de Inventario', 'Ventas Online',
+
+  // Writing & Content Creation (EN + ES)
+  'Creative Writing', 'Copywriting', 'Technical Writing', 'Content Creation',
+  'Blog Writing', 'SEO Writing', 'Journalism', 'Editing', 'Proofreading',
+  'Scriptwriting', 'Grant Writing', 'Proposal Writing', 'Press Releases',
+  'Social Media Content', 'Newsletter Writing', 'UX Writing', 'Storytelling',
+  'Redacción', 'Escritura Creativa', 'Redacción Técnica', 'Periodismo',
+  'Corrección de Estilo', 'Creación de Contenido',
+
+  // Translation & Localization (EN + ES)
+  'Translation', 'Localization', 'Subtitling', 'Transcription', 'Interpretation',
+  'CAT Tools', 'SDL Trados', 'MemoQ', 'Cultural Adaptation', 'Multilingual SEO',
+  'Traducción', 'Localización', 'Interpretación', 'Subtitulado', 'Transcripción',
+
+  // Real Estate & Property Management (EN + ES)
+  'Real Estate', 'Property Management', 'Leasing', 'Real Estate Marketing',
+  'Property Valuation', 'Tenant Relations', 'Contract Management',
+  'Real Estate Law', 'MLS', 'Real Estate CRM', 'Building Maintenance',
+  'Bienes Raíces', 'Gestión Inmobiliaria', 'Valuación de Propiedades',
+
+  // Hospitality & Tourism
+  'Hospitality Management', 'Hotel Management', 'Front Desk Operations',
+  'Guest Services', 'Restaurant Management', 'Food & Beverage',
+  'Event Management', 'Catering', 'Tourism Management', 'Travel Planning',
+  'Reservation Systems', 'PMS Software', 'Concierge Services',
+
+  // Agriculture & Environmental
+  'Agriculture', 'Sustainable Farming', 'Crop Management', 'Soil Science',
+  'Environmental Science', 'Environmental Compliance', 'Sustainability',
+  'Climate Change', 'Renewable Energy', 'Solar Energy', 'Wind Energy',
+  'Carbon Footprint Analysis', 'Environmental Impact Assessment', 'GIS',
+
+  // Construction & Architecture
+  'Construction Management', 'Project Estimation', 'Building Codes',
+  'Architecture', 'Architectural Design', 'BIM', 'Revit', 'ArchiCAD',
+  'Site Supervision', 'Quantity Surveying', 'Construction Safety',
+  'LEED Certification', 'Structural Engineering', 'MEP Design',
+
+  // Telecommunications
+  'Telecommunications', 'Network Engineering', 'VoIP', 'Wireless Networks',
+  '5G Technology', 'Fiber Optics', 'Routing & Switching', 'Cisco',
+  'Network Protocols', 'LAN/WAN', 'VPN', 'BGP', 'OSPF', 'MPLS',
+
+  // Automotive & Transportation
+  'Automotive Engineering', 'Vehicle Diagnostics', 'Auto Mechanics',
+  'Electric Vehicles', 'Autonomous Vehicles', 'Transportation Planning',
+  'Fleet Management', 'Logistics Optimization', 'Route Planning',
+
+  // Scientific Research
+  'Research Methodology', 'Laboratory Techniques', 'Data Collection',
+  'Statistical Software', 'SPSS', 'SAS', 'Scientific Writing',
+  'Peer Review', 'Grant Application', 'Experiment Design', 'Literature Review',
+  'Bioinformatics', 'Genomics', 'Proteomics', 'Chemistry', 'Physics',
+  'Biology', 'Microbiology', 'Molecular Biology', 'Cell Culture',
+
+  // Customer Success & Support
+  'Customer Support', 'Customer Success', 'Technical Support', 'Help Desk',
+  'Zendesk', 'Freshdesk', 'Intercom', 'Customer Retention',
+  'Onboarding', 'Client Relations', 'Account Management', 'Ticketing Systems',
+  'Live Chat Support', 'Phone Support', 'Email Support', 'SLA Management',
+
+  // Sports & Fitness (Professional)
+  'Personal Training', 'Fitness Coaching', 'Nutrition Planning', 'Sports Coaching',
+  'Athletic Training', 'Physical Conditioning', 'Injury Prevention', 'Rehabilitation',
+  'Sports Psychology', 'Exercise Physiology', 'Wellness Coaching', 'Kinesiology',
+  'Sports Medicine', 'Athletic Performance', 'Biomechanics',
+
+  // Arts & Creative Professions
+  'Fine Art', 'Digital Art', 'Illustration', 'Graphic Design', 'Portrait Art',
+  'Commercial Art', 'Art Direction', 'Visual Arts', 'Concept Art',
+  'Music Composition', 'Music Theory', 'Music Production', 'Sound Engineering',
+  'Music Education', 'Audio Production', 'Musical Direction',
+
+  // Fashion Industry
+  'Fashion Design', 'Pattern Making', 'Garment Construction', 'Textile Design',
+  'Fashion Merchandising', 'Fashion Buying', 'Trend Forecasting', 'Fashion Marketing',
+  'Apparel Production', 'Quality Control Fashion', 'Fashion Illustration',
+
+  // Culinary & Food Service (Professional)
+  'Culinary Arts', 'Pastry Arts', 'Menu Planning', 'Recipe Development',
+  'Food Cost Control', 'Kitchen Management', 'Restaurant Management',
+  'Food Safety', 'HACCP', 'ServSafe', 'Dietary Planning', 'Nutrition Science',
+  'Catering Management', 'Food Service Operations', 'Beverage Management',
+  'Wine Knowledge', 'Food & Beverage Cost Analysis',
+
+  // Social Services & Nonprofit
+  'Social Work', 'Case Management', 'Crisis Intervention', 'Counseling',
+  'Community Outreach', 'Nonprofit Management', 'Fundraising', 'Grant Writing',
+  'Volunteer Coordination', 'Program Development', 'Advocacy', 'Child Welfare',
+  'Elder Care', 'Mental Health Support', 'Substance Abuse Counseling',
+  'Family Therapy', 'Group Facilitation', 'Conflict Mediation',
+  'Disaster Relief', 'Humanitarian Aid', 'Community Development',
+
+  // Psychology & Counseling
+  'Clinical Psychology', 'Psychological Assessment', 'Cognitive Behavioral Therapy',
+  'Psychotherapy', 'Marriage Counseling', 'Career Counseling', 'Life Coaching',
+  'Mindfulness', 'Meditation', 'Stress Management', 'Grief Counseling',
+  'Trauma Therapy', 'Child Psychology', 'Adolescent Counseling',
+  'Behavioral Analysis', 'Psychological Testing', 'Therapeutic Techniques',
+
+  // Library & Information Science
+  'Library Management', 'Cataloging', 'Reference Services', 'Archives Management',
+  'Information Retrieval', 'Digital Libraries', 'Library Systems', 'Research Assistance',
+  'Collection Development', 'Metadata', 'Information Literacy', 'Dewey Decimal',
+  'Library of Congress Classification', 'Database Searching', 'Interlibrary Loan',
+
+  // Veterinary & Animal Care
+  'Veterinary Medicine', 'Animal Care', 'Pet Grooming', 'Animal Training',
+  'Dog Training', 'Veterinary Nursing', 'Animal Behavior', 'Wildlife Care',
+  'Equine Care', 'Animal Nutrition', 'Pet Sitting', 'Kennel Management',
+  'Animal Rescue', 'Zoo Keeping', 'Aquarium Management', 'Pet First Aid',
+
+  // Emergency Services & Safety
+  'Emergency Medical Services', 'Paramedic', 'EMT', 'First Aid', 'CPR',
+  'Firefighting', 'Fire Safety', 'Emergency Response', 'Disaster Management',
+  'Search and Rescue', 'Crisis Management', 'Emergency Planning',
+  'Occupational Safety', 'OSHA Compliance', 'Safety Training', 'Risk Assessment',
+  'Safety Inspections', 'Hazmat', 'Industrial Safety', 'Construction Safety',
+
+  // Aviation & Maritime
+  'Pilot License', 'Aviation', 'Flight Operations', 'Air Traffic Control',
+  'Aircraft Maintenance', 'Aviation Safety', 'Navigation', 'Flight Planning',
+  'Maritime Operations', 'Ship Navigation', 'Marine Engineering', 'Sailing',
+  'Boating', 'Maritime Law', 'Cargo Operations', 'Port Management',
+
+  // Photography & Videography (Extended)
+  'Portrait Photography', 'Wedding Photography', 'Event Photography',
+  'Commercial Photography', 'Fashion Photography', 'Product Photography',
+  'Real Estate Photography', 'Food Photography', 'Wildlife Photography',
+  'Sports Photography', 'Photojournalism', 'Studio Photography', 'Lighting Setup',
+  'Photo Retouching', 'Drone Photography', 'Aerial Photography', 'Cinematography',
+  'Video Production', 'Documentary Filmmaking', 'Commercial Videography',
+
+  // Religious & Spiritual Services (Professional)
+  'Ministry', 'Pastoral Care', 'Religious Education', 'Theology', 'Chaplaincy',
+  'Youth Ministry', 'Religious Administration', 'Faith-based Counseling',
+
+  // Skilled Trades & Technical Services
+  'Plumbing', 'Electrical Systems', 'HVAC Systems', 'Carpentry', 'Welding',
+  'Masonry', 'Roofing', 'Construction', 'Flooring Installation', 'Drywall',
+  'Landscape Architecture', 'Horticulture', 'Irrigation Systems',
+  'Locksmith Services', 'Appliance Repair', 'Solar Installation',
+  'Concrete Construction', 'Heavy Equipment Operation', 'Equipment Maintenance',
+
+  // Wellness & Therapeutic Services (Professional)
+  'Massage Therapy', 'Physical Rehabilitation', 'Therapeutic Massage',
+  'Sports Massage', 'Chiropractic Care', 'Acupuncture', 'Physical Therapy',
+  'Occupational Therapy', 'Spa Management', 'Wellness Program Design',
+  'Holistic Health Consulting', 'Health & Wellness Coaching',
+
+  // Public Relations & Communications
+  'Public Relations', 'Media Relations', 'Press Relations', 'Crisis Communication',
+  'Corporate Communications', 'Internal Communications', 'Stakeholder Engagement',
+  'Speech Writing', 'Media Training', 'Brand Communication', 'Reputation Management',
+  'Social Media Management', 'Community Management', 'Influencer Relations',
+
+  // Event Management (Extended)
+  'Wedding Planning', 'Conference Planning', 'Trade Show Management',
+  'Festival Organization', 'Concert Production', 'Corporate Events',
+  'Fundraising Events', 'Virtual Events', 'Event Marketing', 'Event Budgeting',
+  'Event Logistics', 'Venue Selection', 'Catering Coordination', 'Entertainment Booking',
+
+  // Import/Export & International Trade
+  'Import/Export', 'International Trade', 'Customs Compliance', 'Freight Forwarding',
+  'Trade Compliance', 'Tariffs', 'International Logistics', 'Cross-Border Trade',
+  'Trade Documentation', 'Incoterms', 'Export Documentation', 'Customs Brokerage',
+
+  // Insurance
+  'Insurance Underwriting', 'Claims Processing', 'Risk Analysis', 'Policy Administration',
+  'Insurance Sales', 'Life Insurance', 'Health Insurance', 'Property Insurance',
+  'Casualty Insurance', 'Actuarial Science', 'Insurance Law', 'Claims Adjustment',
+
+  // Other Professional Skills
+  'Documentation', 'Research', 'Event Planning', 'Vendor Management',
+  'Contract Management', 'Reporting', 'Data Entry', 'Administrative Support',
+  'Office Management', 'Travel Coordination', 'Calendar Management',
+  'Microsoft Office', 'Google Workspace', 'Slack', 'Zoom', 'Microsoft Teams',
+  'Scheduling', 'Meeting Coordination', 'Minute Taking', 'Filing Systems',
+  'Virtual Assistance', 'Business Writing', 'Spreadsheet Management',
+  'Database Management', 'CRM Management', 'Workflow Optimization',
+  'Typing Speed', 'Data Processing', 'Record Keeping', 'Office Equipment',
+  'Reception', 'Phone Etiquette', 'Multi-tasking', 'Organizational Skills',
 ];
 
 interface SortableSkillItemProps {
@@ -54,6 +413,7 @@ interface SortableSkillItemProps {
 
 const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, onDelete, translations }) => {
   const modals = translations.dashboard.modals;
+  const { lang } = useLanguage();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: skill.id || `temp-${skill.name}`,
   });
@@ -71,6 +431,17 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
       case 'ADVANCED': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'EXPERT': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    }
+  };
+
+  const getLevelTranslation = (level?: string) => {
+    if (!level) return '';
+    switch (level.toUpperCase()) {
+      case 'BEGINNER': return lang === 'es' ? 'Principiante' : 'Beginner';
+      case 'INTERMEDIATE': return lang === 'es' ? 'Intermedio' : 'Intermediate';
+      case 'ADVANCED': return lang === 'es' ? 'Avanzado' : 'Advanced';
+      case 'EXPERT': return lang === 'es' ? 'Experto' : 'Expert';
+      default: return level.toLowerCase();
     }
   };
 
@@ -96,23 +467,10 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
           <span className="font-medium text-gray-900 dark:text-white">{skill.name}</span>
           {skill.level && (
             <span className={`px-2 py-0.5 rounded-full text-xs ${getLevelColor(skill.level)}`}>
-              {skill.level.toLowerCase()}
-            </span>
-          )}
-          {skill.years_of_experience !== undefined && skill.years_of_experience > 0 && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {skill.years_of_experience} {skill.years_of_experience === 1 ? (modals.year || 'año') : (modals.years || 'años')}
+              {getLevelTranslation(skill.level)}
             </span>
           )}
         </div>
-        {skill.percentage !== undefined && (
-          <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div
-              className="bg-cv-blue h-1.5 rounded-full"
-              style={{ width: `${skill.percentage}%` }}
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex gap-1">
@@ -135,6 +493,12 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { session } = useAuth();
+  const { lang } = useLanguage();
+  const toast = useToastContext();
+
+  // Get schemas with translated error messages
+  const { skillSchema } = useMemo(() => getProfileSchemas(translations), [translations]);
+
   const [skills, setSkills] = useState<SkillFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -142,6 +506,17 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [experiences, setExperiences] = useState<any[]>([]);
   const [showAISuggestions, setShowAISuggestions] = useState(false);
+
+  // Detectar si estamos en modo wizard (onNext presente = wizard mode)
+  const isWizardMode = !!onNext;
+
+  // Traducir habilidades automáticamente según el idioma activo
+  const translatedSkills = useTranslatedSkills(skills);
+
+  // Sync local state with initialData when it changes
+  React.useEffect(() => {
+    setSkills(initialData);
+  }, [initialData]);
 
   // Expose toggleAISuggestions method to parent component
   useImperativeHandle(ref, () => ({
@@ -212,9 +587,59 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
   // DISABLED: Auto-save draft functionality was causing issues with form editing
   // The draft was interfering with normal editing operations and showing unwanted dialogs
 
-  const filteredSuggestions = COMMON_SKILLS.filter((skill) =>
-    skill.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 5);
+  // Improved filtering: Show skills based on active language and exclude existing skills
+  const filteredSuggestions = React.useMemo(() => {
+    if (!searchTerm) return [];
+
+    const searchLower = searchTerm.toLowerCase();
+
+    // Get existing skill names (excluding the one being edited)
+    const existingSkillNames = skills
+      .filter((_, idx) => idx !== editingIndex)
+      .map(skill => skill.name.toLowerCase());
+
+    // Language-specific skill keywords to determine if a skill is in Spanish
+    const spanishIndicators = ['ción', 'ía', 'ñ', 'ó', 'á', 'é', 'ú'];
+    const isLikelySpanish = (skill: string) => {
+      const lowerSkill = skill.toLowerCase();
+      return spanishIndicators.some(indicator => lowerSkill.includes(indicator));
+    };
+
+    const matches: string[] = [];
+
+    COMMON_SKILLS.forEach((skill) => {
+      const skillLower = skill.toLowerCase();
+      const skillIsSpanish = isLikelySpanish(skill);
+
+      // Exclude skills that already exist
+      if (existingSkillNames.includes(skillLower)) {
+        return;
+      }
+
+      // Only include skills that match the search AND match the current language
+      if (skillLower.includes(searchLower)) {
+        if (lang === 'es' && skillIsSpanish) {
+          matches.push(skill);
+        } else if (lang === 'en' && !skillIsSpanish) {
+          matches.push(skill);
+        }
+      }
+    });
+
+    // Sort by relevance: 1) starts with, 2) shorter length (more specific)
+    matches.sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      const aStarts = aLower.startsWith(searchLower);
+      const bStarts = bLower.startsWith(searchLower);
+
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.length - b.length;
+    });
+
+    return matches.slice(0, 10);
+  }, [searchTerm, lang, skills, editingIndex]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -267,25 +692,64 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
     setShowSuggestions(false);
   };
 
-  const onSubmit = async (data: SkillFormData) => {try {
+  const onSubmit = async (data: SkillFormData) => {
+    try {
+      // Check for duplicate skill names (case-insensitive)
+      const isDuplicate = skills.some((skill, idx) => {
+        // Skip the skill being edited
+        if (editingIndex !== null && idx === editingIndex) return false;
+        return skill.name.toLowerCase() === data.name.toLowerCase();
+      });
+
+      if (isDuplicate) {
+        toast.error(
+          lang === 'es'
+            ? 'Esta habilidad ya existe en tu perfil'
+            : 'This skill already exists in your profile'
+        );
+        return;
+      }
+
       let updated: SkillFormData[];
-      if (editingIndex !== null) {updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
-      } else {updated = [...skills, data];
-      }setSkills(updated);
-      await onSave(updated);// Clear draft on successful save
+      if (editingIndex !== null) {
+        updated = skills.map((skill, idx) => (idx === editingIndex ? data : skill));
+      } else {
+        updated = [...skills, data];
+      }
+
+      setSkills(updated);
+
+      // ✅ Cerrar formulario INMEDIATAMENTE para mejor UX
       localStorage.removeItem('skill_draft');
       setIsFormOpen(false);
       reset();
       setSearchTerm('');
       setEditingIndex(null);
-    } catch (error) {alert('Error al guardar la habilidad: ' + (error as Error).message);
+
+      // ⚠️ NO mostrar toast en modo wizard para no interrumpir el flujo
+      if (!isWizardMode) {
+        toast.success(
+          lang === 'es'
+            ? 'Habilidad guardada correctamente'
+            : 'Skill saved successfully'
+        );
+      }
+
+      // Guardar en segundo plano
+      await onSave(updated);
+    } catch (error) {
+      // Siempre mostrar errores, incluso en wizard mode
+      toast.error(
+        lang === 'es'
+          ? 'Error al guardar la habilidad: ' + (error as Error).message
+          : 'Error saving skill: ' + (error as Error).message
+      );
     }
   };
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addSkill.replace('Añadir ', '').replace('Add ', '')}</h2>
+      <div className="flex items-center justify-end mb-6">
         <div className="flex gap-2">
           <button
             onClick={handleAdd}
@@ -299,6 +763,41 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </div>
       </div>
 
+      {/* AI Suggestions Panel */}
+      {showAISuggestions && (
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <svg className="w-6 h-6 text-cv-blue" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                {lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+              </h3>
+            </div>
+            <button
+              onClick={() => setShowAISuggestions(false)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cv-blue"></div>
+            </div>
+          }>
+            <AISkillsSuggestion
+              experiences={experiences}
+              currentSkills={skills.map(s => s.name)}
+              onSkillAdded={loadSkills}
+            />
+          </Suspense>
+        </div>
+      )}
+
       {/* Skills Grid with Drag & Drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -306,9 +805,9 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
           strategy={horizontalListSortingStrategy}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-            {skills.map((skill, index) => (
+            {translatedSkills.map((skill, index) => (
               <SortableSkillItem
-                key={skill.id || `${skill.name}-${index}`}
+                key={skills[index]?.id || `${skills[index]?.name}-${index}`}
                 skill={skill}
                 onEdit={() => handleEdit(index)}
                 onDelete={() => handleDelete(index)}
@@ -328,6 +827,31 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </div>
       )}
 
+      {/* Premium AI Suggestions Button - Floating (only when NOT in wizard mode) */}
+      {!isFormOpen && !onNext && (
+        <button
+          onClick={() => setShowAISuggestions(prev => !prev)}
+          className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-40 group"
+          title={lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+        >
+          {/* Premium Badge */}
+          <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold rounded-full shadow-lg flex items-center gap-1 animate-pulse z-10">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            PREMIUM
+          </span>
+          {/* Lightning Icon */}
+          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          {/* Tooltip */}
+          <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+          </span>
+        </button>
+      )}
+
       {/* Botón Continuar - Solo cuando hay habilidades y no está abierto el formulario */}
       {skills.length > 0 && !isFormOpen && onNext && (
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
@@ -335,7 +859,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
             onClick={onNext}
             className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            Siguiente
+            {translations.common?.next || 'Next'}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -381,7 +905,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
           {/* DEBUG: Mostrar errores de validación */}
           {Object.keys(errors).length > 0 && (
             <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-500 rounded-lg p-4 mb-4">
-              <h4 className="font-bold text-red-800 dark:text-red-300 mb-2">⚠️ Errores de validación:</h4>
+              <h4 className="font-bold text-red-800 dark:text-red-300 mb-2">⚠️ {translations.validationErrors.title}:</h4>
               <ul className="list-disc list-inside text-red-700 dark:text-red-400">
                 {Object.entries(errors).map(([key, error]) => (
                   <li key={key}>{key}: {error?.message || 'Error desconocido'}</li>
@@ -405,24 +929,48 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
+                maxLength={50}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                 placeholder={modals.skillNamePlaceholder}
               />
               {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+              {!errors.name && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  💡 {lang === 'es'
+                    ? 'Escribe para ver sugerencias'
+                    : 'Type to see suggestions'}
+                </p>
+              )}
 
-              {/* Autocomplete Suggestions */}
+              {/* Autocomplete Suggestions - Improved */}
               {showSuggestions && searchTerm && filteredSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {filteredSuggestions.map((suggestion) => (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-dark-bg-primary border-b border-gray-200 dark:border-dark-border sticky top-0">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      {lang === 'es' ? 'Sugerencias populares - Haz clic para seleccionar' : 'Popular suggestions - Click to select'}
+                    </p>
+                  </div>
+                  {filteredSuggestions.map((suggestion, idx) => (
                     <button
                       key={suggestion}
                       type="button"
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-bg-primary text-gray-900 dark:text-white"
+                      className="w-full text-left px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-900 dark:text-white transition-colors border-b border-gray-100 dark:border-dark-border last:border-0 flex items-center gap-2 group"
                     >
-                      {suggestion}
+                      <svg className="w-4 h-4 text-gray-400 group-hover:text-cv-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span className="group-hover:text-cv-blue transition-colors font-medium">{suggestion}</span>
                     </button>
                   ))}
+                  <div className="px-3 py-2 bg-gray-50 dark:bg-dark-bg-primary border-t border-gray-200 dark:border-dark-border sticky bottom-0">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      💡 {lang === 'es' ? 'Tip: También puedes escribir habilidades personalizadas' : 'Tip: You can also write custom skills'}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -430,7 +978,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {modals.skillLevel} (Opcional)
+                  {modals.skillLevel}
                 </label>
                 <select
                   {...register('level', {
@@ -438,30 +986,14 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                   })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                 >
-                  <option value="">Sin especificar</option>
-                  <option value="BEGINNER">{modals.beginner}</option>
-                  <option value="INTERMEDIATE">{modals.intermediate}</option>
-                  <option value="ADVANCED">{modals.advanced}</option>
-                  <option value="EXPERT">{modals.expert}</option>
+                  <option value="">{lang === 'es' ? 'Sin especificar' : 'Not specified'}</option>
+                  <option value="BEGINNER">{lang === 'es' ? 'Principiante' : 'Beginner'}</option>
+                  <option value="INTERMEDIATE">{lang === 'es' ? 'Intermedio' : 'Intermediate'}</option>
+                  <option value="ADVANCED">{lang === 'es' ? 'Avanzado' : 'Advanced'}</option>
+                  <option value="EXPERT">{lang === 'es' ? 'Experto' : 'Expert'}</option>
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {modals.yearsOfExperience}
-                </label>
-                <input
-                  {...register('years_of_experience', {
-                    valueAsNumber: true,
-                    setValueAs: (v) => isNaN(v) || v === '' ? null : Number(v),
-                  })}
-                  type="number"
-                  min="0"
-                  max="50"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                  placeholder="0"
-                />
-              </div>
             </div>
 
             <div>
@@ -470,8 +1002,11 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
               </label>
               <input
                 {...register('percentage', {
-                  valueAsNumber: true,
-                  setValueAs: (v) => isNaN(v) || v === '' ? null : Number(v),
+                  setValueAs: (v) => {
+                    if (v === '' || v === null || v === undefined) return null;
+                    const num = Number(v);
+                    return isNaN(num) ? undefined : num;
+                  },
                 })}
                 type="range"
                 min="0"

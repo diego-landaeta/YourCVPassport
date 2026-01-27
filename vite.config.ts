@@ -6,8 +6,9 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
-        port: 3000,
+        port: 5173,
         host: '0.0.0.0',
+        allowedHosts: ['apply-kurt-describes-completely.trycloudflare.com'],
       },
       plugins: [react()],
       define: {
@@ -23,15 +24,6 @@ export default defineConfig(({ mode }) => {
       build: {
         rollupOptions: {
           output: {
-            manualChunks: {
-              'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-              'supabase': ['@supabase/supabase-js'],
-              'ui-vendor': ['@heroicons/react', 'react-hook-form', '@hookform/resolvers'],
-              'pdf-tools': ['jspdf', 'html2canvas', 'qrcode'],
-              'ai-vendor': ['@google/genai', '@google/generative-ai', 'openai'],
-              'charts': ['recharts'],
-              'dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-            },
             assetFileNames: (assetInfo) => {
               const info = assetInfo.name.split('.');
               const ext = info[info.length - 1];
@@ -44,7 +36,7 @@ export default defineConfig(({ mode }) => {
             entryFileNames: 'assets/js/[name]-[hash].js',
           },
         },
-        chunkSizeWarningLimit: 1000,
+        chunkSizeWarningLimit: 5000,
         minify: 'terser',
         terserOptions: {
           compress: {
@@ -65,6 +57,7 @@ export default defineConfig(({ mode }) => {
           '@supabase/supabase-js',
           'react-helmet-async',
           'zustand',
+          'react-hot-toast',
         ],
         exclude: ['@google/generative-ai', 'openai'],
       },

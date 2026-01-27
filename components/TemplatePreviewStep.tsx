@@ -20,6 +20,7 @@ import ModernMinimalistTemplate from './templates/ModernMinimalistTemplate';
 import CreativeBoldTemplate from './templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from './templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from './templates/HealthcareProfessionalTemplate';
+import UrbanTemplate from './templates/UrbanTemplate';
 import { FullProfileData, Skill } from '../types';
 
 interface TemplatePreviewStepProps {
@@ -98,6 +99,7 @@ const TemplatePreviewStep: React.FC<TemplatePreviewStepProps> = ({ cvData, onClo
             case 'creative-bold': return <CreativeBoldTemplate {...props} />;
             case 'professional-classic': return <ProfessionalClassicTemplate {...props} />;
             case 'healthcare-professional': return <HealthcareProfessionalTemplate {...props} />;
+            case 'urban': return <UrbanTemplate {...props} />;
             default: return <ClassicTemplate {...props} />;
         }
     };
@@ -156,8 +158,8 @@ const TemplatePreviewStep: React.FC<TemplatePreviewStepProps> = ({ cvData, onClo
                 </div>
 
                 {/* Main preview area */}
-                <div className="col-span-9 bg-gray-200 dark:bg-dark-bg-primary rounded-lg overflow-y-auto">
-                    <div className="w-full">
+                <div className="col-span-9 bg-gray-200 rounded-lg overflow-y-auto p-4">
+                    <div className="w-full bg-white shadow-lg">
                          {renderTemplatePreview(selectedTemplate)}
                     </div>
                 </div>

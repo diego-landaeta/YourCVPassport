@@ -1,7 +1,8 @@
-import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { experienceSchema, ExperienceFormData } from '../../schemas/profileSchemas';
+import { ExperienceFormData } from '../../schemas/profileSchemas';
+import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useConfirmDialog } from '../ConfirmDialog';
 import { useToastContext } from '../../context/ToastContext';
@@ -44,12 +45,14 @@ interface SortableExperienceItemProps {
   experience: ExperienceFormData;
   onEdit: () => void;
   onDelete: () => void;
+  lang: 'es' | 'en';
 }
 
 const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   experience,
   onEdit,
   onDelete,
+  lang,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: experience.id || 'temp-new',
@@ -62,12 +65,13 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return 'Presente';
+    if (!date) return lang === 'es' ? 'Presente' : 'Present';
     // Parse date manually to avoid timezone issues
     const [year, month] = date.split('-').map(Number);
     // Create date using local time constructor (year, monthIndex)
     const d = new Date(year, month - 1);
-    return d.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+    const locale = lang === 'es' ? 'es-ES' : 'en-US';
+    return d.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
   };
 
   return (
@@ -105,7 +109,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
           <p className="text-gray-700 dark:text-gray-300">{experience.company_name}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {formatDate(experience.start_date)} - {formatDate(experience.end_date)}
-            {experience.is_current && ' (Actual)'}
+            {experience.is_current && (lang === 'es' ? ' (Actual)' : ' (Current)')}
           </p>
           {experience.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
@@ -114,10 +118,10 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
           )}
           {experience.achievements && experience.achievements.length > 0 && (
             <ul className="mt-2 space-y-1">
-              {experience.achievements.slice(0, 2).map((achievement, idx) => (
+              {experience.achievements.map((achievement, idx) => (
                 <li key={idx} className="text-sm text-gray-600 dark:text-gray-400 flex items-start">
                   <span className="mr-2">•</span>
-                  <span className="line-clamp-1">{achievement}</span>
+                  <span>{achievement}</span>
                 </li>
               ))}
             </ul>
@@ -157,6 +161,10 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   const modals = translations.dashboard.modals;
   const { confirm, Dialog } = useConfirmDialog();
   const toast = useToastContext();
+
+  // Get schema with translated error messages
+  const { experienceSchema } = useMemo(() => getProfileSchemas(translations), [translations]);
+
   const [experiences, setExperiences] = useState<ExperienceFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -253,10 +261,10 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
             localStorage.setItem('experience_draft_last_prompt', Date.now().toString());
 
             const shouldRestore = await confirm({
-              title: 'Restaurar Borrador',
-              message: modals.restoreDraft || '¿Restaurar borrador guardado?',
-              confirmText: 'Restaurar',
-              cancelText: 'Descartar',
+              title: modals.restoreDraftTitle,
+              message: modals.restoreDraft,
+              confirmText: modals.restoreButton,
+              cancelText: modals.discardButton,
               type: 'info'
             });
             if (shouldRestore && parsed.formData) {
@@ -344,6 +352,35 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     const exp = experiences[index];
     setEditingIndex(index);
 
+    // Helper function to ensure date is in YYYY-MM format
+    const normalizeDate = (date: string | null | undefined): string => {
+      if (!date) return '';
+
+      // If already in YYYY-MM format, return as is
+      if (/^\d{4}-\d{2}$/.test(date)) {
+        return date;
+      }
+
+      // If in YYYY-MM-DD format, extract YYYY-MM
+      if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
+        return date.substring(0, 7);
+      }
+
+      // Try to parse as date and format to YYYY-MM
+      try {
+        const d = new Date(date);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        }
+      } catch (e) {
+        console.error('Error parsing date:', date, e);
+      }
+
+      return '';
+    };
+
     // Clean markdown from achievements before editing
     const cleanedAchievements = (exp.achievements || ['']).map(a => cleanMarkdown(a));
     setAchievements(cleanedAchievements);
@@ -351,10 +388,16 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     // Clean markdown from description before loading into form
     const cleanedExp = {
       ...exp,
-      description: cleanMarkdown(exp.description),
+      description: cleanMarkdown(exp.description || ''),
       achievements: cleanedAchievements,
-      is_current: exp.is_current || false, // Ensure boolean value
+      is_current: exp.is_current || false,
+      // Normalize dates to YYYY-MM format for month input
+      start_date: normalizeDate(exp.start_date),
+      end_date: exp.is_current ? '' : normalizeDate(exp.end_date),
     };
+
+    // Enable draft saving when editing
+    shouldSaveDraft.current = true;
 
     reset(cleanedExp);
     setIsFormOpen(true);
@@ -362,7 +405,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
 
   const handleDelete = async (index: number) => {
     const shouldDelete = await confirm({
-      title: 'Eliminar Experiencia',
+      title: translations.profileEditor.deleteModal.deleteExperience,
       message: modals.deleteConfirm,
       confirmText: 'Eliminar',
       cancelText: 'Cancelar',
@@ -447,18 +490,20 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
       localStorage.removeItem('experience_draft_last_prompt');
     }, 0);
 
+    // ✅ Cerrar formulario INMEDIATAMENTE para mejor UX
+    setIsFormOpen(false);
+    reset();
+    setAchievements(['']);
+
     try {
       await onSave(updated);
     } catch (error) {
       // Even if refetch fails, draft is already cleaned since DB save succeeded
       // The error toast will be shown from DashboardContent
     } finally {
-      // Double-check cleanup and close form
+      // Double-check cleanup
       localStorage.removeItem('experience_draft');
       localStorage.removeItem('experience_draft_last_prompt');
-      setIsFormOpen(false);
-      reset();
-      setAchievements(['']);
     }
   };
 
@@ -502,8 +547,6 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
 
       // Save to database through parent component
       await onSave(updated);
-
-      toast.success('Sugerencias de IA aplicadas correctamente');
     } catch (error) {toast.error('Error al aplicar la sugerencia');
       throw error;
     }
@@ -513,8 +556,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     <>
       <Dialog />
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addExperience.replace('Añadir ', '').replace('Add ', '')}</h2>
+      <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-3">
           <button
             onClick={handleAdd}
@@ -528,8 +570,8 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
         </div>
       </div>
 
-      {/* Verification Info Banner */}
-      {experiences.length > 0 && (
+      {/* Verification Info Banner - Only show when NOT in wizard mode (onNext is undefined means we're not in wizard) */}
+      {experiences.length > 0 && !onNext && onNavigateToVerifications && (
         <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
@@ -574,6 +616,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 experience={{...exp, id: exp.id || `temp-${index}`}}
                 onEdit={() => handleEdit(index)}
                 onDelete={() => handleDelete(index)}
+                lang={lang}
               />
             ))}
           </div>
@@ -596,7 +639,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
             onClick={onNext}
             className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            Siguiente
+            {translations.common?.next || 'Next'}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -619,10 +662,14 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 <input
                   {...register('position')}
                   type="text"
+                  maxLength={60}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   placeholder={modals.jobTitlePlaceholder}
                 />
                 {errors.position && <p className="text-red-500 text-sm mt-1">{errors.position.message}</p>}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {watch('position')?.length || 0}/60 {translations.common.characters}
+                </p>
               </div>
 
               <div>
@@ -632,10 +679,14 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 <input
                   {...register('company_name')}
                   type="text"
+                  maxLength={80}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   placeholder={modals.companyPlaceholder}
                 />
                 {errors.company_name && <p className="text-red-500 text-sm mt-1">{errors.company_name.message}</p>}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {watch('company_name')?.length || 0}/80 {translations.common.characters}
+                </p>
               </div>
             </div>
 
@@ -644,26 +695,29 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.startDate} *
                 </label>
-                <input
-                  {...register('start_date')}
-                  type="month"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                />
+                <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
+                  <input
+                    {...register('start_date')}
+                    type="month"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                  />
+                </div>
                 {errors.start_date && <p className="text-red-500 text-sm mt-1">{errors.start_date.message}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
-                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Actual)</span>}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({lang === 'es' ? 'Actual' : 'Current'})</span>}
                 </label>
-                <input
-                  {...register('end_date')}
-                  type="month"
-                  disabled={isCurrent}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
-                  placeholder={isCurrent ? "Presente" : ""}
-                />
+                <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
+                  <input
+                    {...register('end_date')}
+                    type="month"
+                    disabled={isCurrent}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
                 <label className="flex items-center mt-2">
                   <input
                     type="checkbox"
@@ -688,9 +742,13 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
               <textarea
                 {...register('description')}
                 rows={4}
+                maxLength={500}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white resize-none"
                 placeholder={modals.descriptionPlaceholder}
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {watch('description')?.length || 0}/500 {translations.common.characters}
+              </p>
             </div>
 
             <div>
@@ -708,25 +766,31 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
               </div>
               <div className="space-y-2">
                 {achievements.map((achievement, index) => (
-                  <div key={index} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={achievement}
-                      onChange={(e) => updateAchievement(index, e.target.value)}
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                      placeholder={modals.achievementPlaceholder}
-                    />
-                    {achievements.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeAchievement(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
+                  <div key={index} className="space-y-1">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={achievement}
+                        onChange={(e) => updateAchievement(index, e.target.value)}
+                        maxLength={100}
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                        placeholder={modals.achievementPlaceholder}
+                      />
+                      {achievements.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeAchievement(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                      {achievement.length}/100 {translations.common.characters}
+                    </p>
                   </div>
                 ))}
               </div>

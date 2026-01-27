@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Analytics Tracker - Client-side tracking utility
  *

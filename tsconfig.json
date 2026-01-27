@@ -26,10 +26,42 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
+  "include": [
+    "*.ts",
+    "*.tsx",
+    "components/**/*.tsx",
+    "components/**/*.ts",
+    "contexts/**/*.tsx",
+    "contexts/**/*.ts",
+    "hooks/**/*.ts",
+    "lib/**/*.ts",
+    "pages/**/*.tsx",
+    "schemas/**/*.ts",
+    "translations/**/*.ts",
+    "types.ts",
+    "utils/**/*.ts",
+    "vite.config.ts",
+    "NUEVOS/**/*.tsx"
+  ],
   "exclude": [
+    "node_modules",
+    "dist",
+    "build",
     "supabase",
     "scripts",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "components/admin/AdminTemplateViewer.tsx",
+    "components/admin/AdminTestingHub.tsx",
+    "components/admin/UserModeration.tsx",
+    "components/admin/JobPostingsManagement.tsx",
+    "components/admin/CompanyManagementSection.tsx",
+    "components/company/CompanySettingsPage_NEW.tsx",
+    "components/company/CompanyMessagesPage.tsx",
+    "components/company/CompanyProfileViewPage.tsx",
+    "components/templates/UrbanTemplate.tsx",
+    "components/ats-export",
+    "**/*.backup*",
+    "**/*_NEW.tsx"
   ]
 }

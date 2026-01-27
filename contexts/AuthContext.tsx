@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
-import { Profile } from '../types';
+import { Profile, Company, CompanyUser } from '../types';
 
 type AuthMode = 'login' | 'signup';
 
@@ -18,6 +18,12 @@ interface AuthContextType {
   closeModal: () => void;
   setAuthMode: (mode: AuthMode) => void;
   refetchProfile: () => Promise<void>;
+  // Company data
+  company: Company | null;
+  companyUser: CompanyUser | null;
+  isCompanyUser: boolean;
+  companyLoading: boolean;
+  refetchCompany: () => Promise<void>;
   // Auth methods
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
   signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ error: any }>;
@@ -40,6 +46,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profileLoading, setProfileLoading] = useState(true); // Start as true, will be set to false once we know if there's a user or not
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('signup');
+
+  // Company state
+  const [company, setCompany] = useState<Company | null>(null);
+  const [companyUser, setCompanyUser] = useState<CompanyUser | null>(null);
+  const [companyLoading, setCompanyLoading] = useState(false);
 
   // Effect for handling session state
   useEffect(() => {
@@ -109,8 +120,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('profiles')
             .insert({
               id: user.id,
-              full_name: user.user_metadata?.full_name || user.email,
-              slug: user.id, // Default slug to user ID to ensure it's unique
+              full_name: user.user_metadata?.full_name || null,
+              email: user.email,
+              // ❌ REMOVED: slug assignment - users must create their URL in Display Settings after completing wizard
+              // Previously: slug: user.id, which auto-assigned a UUID and broke the intended workflow
             })
             .select()
             .single();
@@ -158,6 +171,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user?.id, fetchProfile]);
 
+  // Fetch company data when user changes
+  const fetchCompany = useCallback(async () => {
+    if (!user) {
+      setCompany(null);
+      setCompanyUser(null);
+      setCompanyLoading(false);
+      return;
+    }
+
+    setCompanyLoading(true);
+    try {
+      // Check if user is part of a company
+      const { data: companyUserData, error: companyUserError } = await supabase
+        .from('company_users')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (companyUserError) {
+        console.error('Error fetching company user:', companyUserError);
+        setCompanyUser(null);
+        setCompany(null);
+        setCompanyLoading(false);
+        return;
+      }
+
+      if (!companyUserData) {
+        // User is not part of any company
+        setCompanyUser(null);
+        setCompany(null);
+        setCompanyLoading(false);
+        return;
+      }
+
+      setCompanyUser(companyUserData as CompanyUser);
+
+      // Fetch company details
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', companyUserData.company_id)
+        .single();
+
+      if (companyError) {
+        console.error('Error fetching company:', companyError);
+        setCompany(null);
+        setCompanyLoading(false);
+        return;
+      }
+
+      setCompany(companyData as Company);
+    } catch (error) {
+      console.error('Error in fetchCompany:', error);
+      setCompanyUser(null);
+      setCompany(null);
+    } finally {
+      setCompanyLoading(false);
+    }
+  }, [user]);
+
+  // Fetch company data when user changes
+  useEffect(() => {
+    if (user) {
+      fetchCompany();
+    } else {
+      setCompany(null);
+      setCompanyUser(null);
+      setCompanyLoading(false);
+    }
+  }, [user?.id, fetchCompany]);
 
   const openModal = (mode: AuthMode) => {
     setAuthMode(mode);
@@ -177,7 +260,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Auth methods
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      // Log login activity if successful
+      if (!error && data?.user) {
+        try {
+          await supabase.rpc('log_user_activity', {
+            p_user_id: data.user.id,
+            p_activity_type: 'login',
+            p_metadata: { email }
+          });
+        } catch (logError) {
+          console.error('Error logging activity:', logError);
+          // Don't fail the login if logging fails
+        }
+      }
+
       return { error };
     } catch (error) {
       return { error };
@@ -354,7 +452,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile(null);
   };
 
-  const value = {
+  // ⚡ CRITICAL OPTIMIZATION: Memoize the context value
+  // This prevents ALL child components from re-rendering when unrelated auth state changes
+  // Previously, every token refresh or minor state change caused a full app re-render
+  const value = useMemo(() => ({
     session,
     user,
     profile,
@@ -366,6 +467,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     closeModal,
     setAuthMode,
     refetchProfile: fetchProfile,
+    // Company data
+    company,
+    companyUser,
+    isCompanyUser: !!companyUser,
+    companyLoading,
+    refetchCompany: fetchCompany,
     // Auth methods
     signInWithEmail,
     signUpWithEmail,
@@ -375,7 +482,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     updatePassword,
     signOut,
-  };
+  }), [
+    session,
+    user,
+    profile,
+    loading,
+    profileLoading,
+    isAuthModalOpen,
+    authMode,
+    company,
+    companyUser,
+    companyLoading,
+    // Callbacks are stable from useCallback, safe to include
+    fetchProfile,
+    fetchCompany,
+  ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

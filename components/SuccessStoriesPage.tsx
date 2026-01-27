@@ -22,7 +22,13 @@ const StoryCard: React.FC<{ story: SuccessStory; onReadMore: () => void }> = ({ 
     const t = useTranslations();
     return (
         <div className="bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
-            <img src={story.imageUrl} alt={story.name} className="w-full h-56 object-cover" style={{ objectPosition: '50% 30%' }} />
+            <div className="w-full h-56 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <img
+                    src={story.imageUrl}
+                    alt={story.name}
+                    className="w-full h-full object-cover object-[65%_center]"
+                />
+            </div>
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{story.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-dark-text-tertiary">{story.role}</p>
@@ -67,12 +73,28 @@ const SuccessStoriesPage: React.FC = () => {
         loadStoriesFromDB();
     }, []);
 
+    // Cargar script de Opynio
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://web.opynio.com/widget.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            // Cleanup: remover el script cuando el componente se desmonte
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
+        };
+    }, []);
+
     const loadStoriesFromDB = async () => {
         try {
             setLoadingStories(true);
             const { data, error } = await supabase
                 .from('success_stories')
                 .select('*')
+                .eq('approved', true)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -208,6 +230,19 @@ const SuccessStoriesPage: React.FC = () => {
                 </section>
             )}
 
+            {/* Opynio Reviews Widget */}
+            <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary">
+                <div className="max-w-7xl mx-auto">
+                    <AnimatedWrapper>
+                        <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8">
+                            {lang === 'es' ? 'Lo que dicen nuestros usuarios' : 'What our users say'}
+                        </h2>
+                        {/* Opynio Widget v6.0 - horizontal-carousel */}
+                        <div className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
+                    </AnimatedWrapper>
+                </div>
+            </section>
+
             {/* Main Content: Filters & Grid */}
             <section className="py-20 px-4">
                 <div className="max-w-7xl mx-auto">
@@ -234,7 +269,7 @@ const SuccessStoriesPage: React.FC = () => {
                     </AnimatedWrapper>
                 </div>
             </section>
-            
+
             {/* Share Your Story Form */}
             <section className="py-20 px-4">
                 <div className="max-w-3xl mx-auto bg-white dark:bg-dark-bg-primary p-8 rounded-lg shadow-2xl border">

@@ -7,8 +7,9 @@ const DisplaySettingsSection: React.FC = () => {
   const { profile, refetchProfile } = useAuth();
   const t = useTranslations();
   const [settings, setSettings] = useState({
-    show_connect_links: profile?.show_connect_links ?? false,
-    show_qr_code: profile?.show_qr_code ?? true,
+    show_connect_links: profile?.show_connect_links ?? true,
+    show_verified_credentials: profile?.show_verified_credentials ?? true,
+    show_availability_badge: profile?.show_availability_badge ?? true,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -16,8 +17,9 @@ const DisplaySettingsSection: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setSettings({
-        show_connect_links: profile.show_connect_links ?? false,
-        show_qr_code: profile.show_qr_code ?? true,
+        show_connect_links: profile.show_connect_links ?? true,
+        show_verified_credentials: profile.show_verified_credentials ?? true,
+        show_availability_badge: profile.show_availability_badge ?? true,
       });
     }
   }, [profile]);
@@ -52,17 +54,36 @@ const DisplaySettingsSection: React.FC = () => {
 
   const settingsOptions = [
     {
-      key: 'show_qr_code' as const,
-      title: t.displaySettings.options.qrCode.title,
-      description: t.displaySettings.options.qrCode.description,
-      icon: '📱',
+      key: 'show_verified_credentials' as const,
+      title: t.displaySettings.options.credentials.title,
+      description: t.displaySettings.options.credentials.description,
+      icon: (
+        <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+        </svg>
+      ),
       recommended: true,
     },
     {
       key: 'show_connect_links' as const,
       title: t.displaySettings.options.connectLinks.title,
       description: t.displaySettings.options.connectLinks.description,
-      icon: '🔗',
+      icon: (
+        <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+        </svg>
+      ),
+      recommended: true,
+    },
+    {
+      key: 'show_availability_badge' as const,
+      title: t.displaySettings.options.availability.title,
+      description: t.displaySettings.options.availability.description,
+      icon: (
+        <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+      ),
       recommended: false,
     },
   ];
@@ -87,7 +108,15 @@ const DisplaySettingsSection: React.FC = () => {
             : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
         }`}>
           <div className="flex items-center gap-2">
-            <span className="text-xl">{message.type === 'success' ? '✅' : '❌'}</span>
+            {message.type === 'success' ? (
+              <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+              </svg>
+            )}
             <span className="font-medium">{message.text}</span>
           </div>
         </div>
@@ -102,7 +131,7 @@ const DisplaySettingsSection: React.FC = () => {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4 flex-1">
-                <div className="text-3xl">{option.icon}</div>
+                <div className="flex-shrink-0">{option.icon}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white">

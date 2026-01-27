@@ -2,6 +2,7 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, PhoneIcon, AcademicCapIcon, BriefcaseIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface HealthcareProfessionalTemplateProps {
     data: FullProfileData;
@@ -55,6 +56,16 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                                     <span className="font-medium">LinkedIn</span>
                                 </div>
                             )}
+                        </div>
+                        {/* Contact Buttons */}
+                        <div className="mt-4">
+                            <ProfileContactButtons
+                                profileId={profile.id}
+                                profileEmail={profile.email}
+                                variant="compact"
+                                accentColor={accentColor}
+                                showDownload={false}
+                            />
                         </div>
                     </div>
                 </div>

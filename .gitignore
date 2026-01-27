@@ -109,3 +109,13 @@ dist
 supabase/.temp/
 supabase/.branches/
 supabase/functions/*/deno.lock
+
+# Temporary debug files
+debug-*.html
+*-debug.html
+
+# SQL scripts in root (use scripts/sql/ instead)
+/*.sql
+
+# Keep important files
+!README.md

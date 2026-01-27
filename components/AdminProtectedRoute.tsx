@@ -2,12 +2,14 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import { useLanguage } from '../contexts/LanguageContext';
 
 const AdminProtectedRoute: React.FC = () => {
   const { session, loading, profile, profileLoading } = useAuth();
   const location = useLocation();
-  const { lang } = useLanguage();
+
+  // Get saved language from localStorage for loading message
+  const lang = (localStorage.getItem('language') === 'es') ? 'es' : 'en';
+
   // Wait for BOTH session and profile to finish loading
   if (loading || profileLoading) {
     const message = lang === 'es' ? 'Verificando permisos de administrador...' : 'Verifying admin permissions...';

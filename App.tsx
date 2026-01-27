@@ -1,30 +1,31 @@
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
 import { routeConfig } from './routeConfig';
 import LoadingSpinner from './components/LoadingSpinner';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './context/ToastContext';
+import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./components/HomePage'));
 const DashboardPage = lazy(() => import('./components/DashboardPage'));
-const ProfileSearchPage = lazy(() => import('./components/ProfileSearchPage'));
+const ProfileViewPage = lazy(() => import('./components/ProfileViewPage'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
-const TalentCategoriesIndex = lazy(() => import('./components/admin/TalentCategoriesIndex'));
-const TalentCategoryPage = lazy(() => import('./components/admin/TalentCategoryPage'));
+const AdminTalentSearchPage = lazy(() => import('./components/admin/AdminTalentSearchPage'));
 const VisasPage = lazy(() => import('./components/dashboard/VisasPage'));
 const VisaFormPage = lazy(() => import('./components/dashboard/VisaFormPage'));
 const LeadsPage = lazy(() => import('./components/dashboard/LeadsPage'));
+const BlogPage = lazy(() => import('./components/BlogPage'));
 const BlogPostPage = lazy(() => import('./components/BlogPostPage'));
-const ProfileCategoryPage = lazy(() => import('./components/ProfileCategoryPage'));
 const AIProductPage = lazy(() => import('./components/AIProductPage'));
 
 // Authentication pages
@@ -34,11 +35,32 @@ const RecoveryPage = lazy(() => import('./pages/auth/RecoveryPage'));
 const CallbackPage = lazy(() => import('./pages/auth/CallbackPage'));
 const ConfirmPage = lazy(() => import('./pages/auth/ConfirmPage'));
 
-// Public verification page
-const VerifyPage = lazy(() => import('./pages/VerifyPage'));
+
+// Company pages
+const CompanyRegistrationPage = lazy(() => import('./components/company/CompanyRegistrationPage'));
+const CompanyDashboardPage = lazy(() => import('./components/company/CompanyDashboardPage'));
+const CompanyTalentSearchPage = lazy(() => import('./components/talent-search/CompanyTalentSearchPage'));
+const CompanyProfileViewPage = lazy(() => import('./components/company/CompanyProfileViewPage'));
+const CreditsManagementPage = lazy(() => import('./components/company/CreditsManagementPage'));
+const SavedSearchesPage = lazy(() => import('./components/company/SavedSearchesPage'));
+const ExportsHistoryPage = lazy(() => import('./components/company/ExportsHistoryPage'));
+const CompanyTeamPage = lazy(() => import('./components/company/CompanyTeamPage'));
+const CompanySettingsPage = lazy(() => import('./components/company/CompanySettingsPage_NEW'));
+const CompanyAnalyticsPage = lazy(() => import('./components/company/CompanyAnalyticsPage'));
+const CompanyMessagesPage = lazy(() => import('./components/company/CompanyMessagesPage'));
+const JobPostingsManagementPage = lazy(() => import('./components/company/JobPostingsManagementPage'));
+const CreateJobPostingPage = lazy(() => import('./components/company/CreateJobPostingPage'));
+const JobApplicationsPage = lazy(() => import('./components/company/JobApplicationsPage'));
+
+// Public job search pages
+const JobSearchPage = lazy(() => import('./components/JobSearchPage'));
+const JobDetailPage = lazy(() => import('./components/JobDetailPage'));
 
 // 404 Not Found page
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Dev tools (removed - only for development)
+// const TemplatePreviewGenerator = lazy(() => import('./pages/TemplatePreviewGenerator'));
 
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
@@ -75,8 +97,32 @@ const AppContent: React.FC = () => {
 
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/talentos" element={<TalentCategoriesIndex />} />
-            <Route path="/admin/talentos/:category" element={<TalentCategoryPage />} />
+            <Route path="/admin/search" element={<AdminTalentSearchPage />} />
+          </Route>
+
+          {/* Public Job Search */}
+          <Route path="/jobs" element={<JobSearchPage />} />
+          <Route path="/jobs/:slug" element={<JobDetailPage />} />
+          <Route path="/empleos" element={<JobSearchPage />} />
+          <Route path="/empleos/:slug" element={<JobDetailPage />} />
+
+          {/* Company routes */}
+          <Route path="/company/register" element={<CompanyRegistrationPage />} />
+          <Route element={<CompanyProtectedRoute />}>
+            <Route path="/company/dashboard" element={<CompanyDashboardPage />} />
+            <Route path="/company/search" element={<CompanyTalentSearchPage />} />
+            <Route path="/company/profile/:profileId" element={<CompanyProfileViewPage />} />
+            <Route path="/company/messages" element={<CompanyMessagesPage />} />
+            <Route path="/company/credits" element={<CreditsManagementPage />} />
+            <Route path="/company/saved-searches" element={<SavedSearchesPage />} />
+            <Route path="/company/exports" element={<ExportsHistoryPage />} />
+            <Route path="/company/team" element={<CompanyTeamPage />} />
+            <Route path="/company/settings" element={<CompanySettingsPage />} />
+            <Route path="/company/analytics" element={<CompanyAnalyticsPage />} />
+            <Route path="/company/jobs" element={<JobPostingsManagementPage />} />
+            <Route path="/company/jobs/new" element={<CreateJobPostingPage />} />
+            <Route path="/company/jobs/edit/:id" element={<CreateJobPostingPage />} />
+            <Route path="/company/jobs/applications" element={<JobApplicationsPage />} />
           </Route>
 
           {/* Dynamically generated routes from routeConfig */}
@@ -94,29 +140,20 @@ const AppContent: React.FC = () => {
           })}
 
           {/* Public CV Route */}
-          <Route path="/cv/:slug" element={<ProfileSearchPage />} />
+          <Route path="/cv/:slug" element={<ProfileViewPage />} />
 
-          {/* Public Verification Route */}
-          <Route path="/verify/:token" element={<VerifyPage />} />
-
-          {/* Blog Post Route */}
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-          <Route path="/resources/blog/:slug" element={<BlogPostPage />} />
+          {/* Blog Routes - Language specific */}
+          <Route path="/recursos/blog" element={<BlogPage />} />
           <Route path="/recursos/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/resources/blog" element={<BlogPage />} />
+          <Route path="/resources/blog/:slug" element={<BlogPostPage />} />
 
-          {/* Profile Category Routes - SEO Optimized */}
-          <Route path="/profiles/:country/:city/:role" element={<ProfileCategoryPage />} />
-          <Route path="/profiles/:country/:city" element={<ProfileCategoryPage />} />
-          <Route path="/profiles/:country" element={<ProfileCategoryPage />} />
-          <Route path="/profiles/:role" element={<ProfileCategoryPage />} />
-          <Route path="/perfiles/:country/:city/:role" element={<ProfileCategoryPage />} />
-          <Route path="/perfiles/:country/:city" element={<ProfileCategoryPage />} />
-          <Route path="/perfiles/:country" element={<ProfileCategoryPage />} />
-          <Route path="/perfiles/:role" element={<ProfileCategoryPage />} />
+          {/* Dev Tool - Template Preview Generator (REMOVED - only for development) */}
+          {/* <Route path="/dev/template-previews" element={<TemplatePreviewGenerator />} /> */}
 
           {/* 404 Not Found Routes */}
           <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     );
@@ -140,6 +177,7 @@ const App: React.FC = () => {
                 </LanguageProvider>
               </AuthProvider>
             </Router>
+            <Toaster position="top-right" />
           </ToastProvider>
         </HelmetProvider>
       </QueryProvider>

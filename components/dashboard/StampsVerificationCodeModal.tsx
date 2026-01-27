@@ -35,6 +35,37 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentCodeId, setSentCodeId] = useState<string | null>(null);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
+
+  // Fetch remaining attempts when modal opens
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      fetchRemainingAttempts();
+    }
+  }, [isOpen, user?.id, stampType]);
+
+  const fetchRemainingAttempts = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('stamp_request_availability')
+        .select('remaining_attempts')
+        .eq('profile_id', user.id)
+        .eq('type', stampType)
+        .single();
+
+      if (!error && data) {
+        setRemainingAttempts(data.remaining_attempts);
+      } else {
+        // No previous attempts, so user has all 4 attempts
+        setRemainingAttempts(4);
+      }
+    } catch (err) {
+      // Default to 4 if we can't fetch
+      setRemainingAttempts(4);
+    }
+  };
 
   // Persist modal state in localStorage to survive page refreshes
   useEffect(() => {
@@ -351,6 +382,7 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
     setVerificationCode('');
     setSentCodeId(null);
     setError(null);
+    setRemainingAttempts(null);
 
     // Clear localStorage state
     if (user?.id) {
@@ -400,6 +432,61 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
 
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          {/* Attempts counter - shown for both steps */}
+          {remainingAttempts !== null && (
+            <div className={`mb-4 p-4 rounded-xl border ${
+              remainingAttempts <= 1
+                ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                : remainingAttempts <= 2
+                ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheckIcon className={`w-5 h-5 ${
+                    remainingAttempts <= 1
+                      ? 'text-red-600 dark:text-red-400'
+                      : remainingAttempts <= 2
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-blue-600 dark:text-blue-400'
+                  }`} />
+                  <span className={`text-sm font-medium ${
+                    remainingAttempts <= 1
+                      ? 'text-red-900 dark:text-red-200'
+                      : remainingAttempts <= 2
+                      ? 'text-orange-900 dark:text-orange-200'
+                      : 'text-blue-900 dark:text-blue-200'
+                  }`}>
+                    Intentos de verificación
+                  </span>
+                </div>
+                <span className={`text-lg font-bold ${
+                  remainingAttempts <= 1
+                    ? 'text-red-600 dark:text-red-400'
+                    : remainingAttempts <= 2
+                    ? 'text-orange-600 dark:text-orange-400'
+                    : 'text-blue-600 dark:text-blue-400'
+                }`}>
+                  {remainingAttempts}/4
+                </span>
+              </div>
+              <p className={`text-xs mt-2 ${
+                remainingAttempts <= 1
+                  ? 'text-red-700 dark:text-red-300'
+                  : remainingAttempts <= 2
+                  ? 'text-orange-700 dark:text-orange-300'
+                  : 'text-blue-700 dark:text-blue-300'
+              }`}>
+                {remainingAttempts === 0
+                  ? 'Has alcanzado el límite máximo de intentos de verificación.'
+                  : remainingAttempts === 1
+                  ? '¡Último intento disponible! Asegúrate de ingresar la información correcta.'
+                  : `Te quedan ${remainingAttempts} intentos para completar esta verificación.`
+                }
+              </p>
+            </div>
+          )}
+
           {step === 'input' ? (
             <form id="verification-form" onSubmit={handleSendCode} className="space-y-5">
               {stampType === 'EMAIL' ? (

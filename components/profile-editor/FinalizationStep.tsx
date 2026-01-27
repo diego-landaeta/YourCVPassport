@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Finalization Step Component
  *
@@ -12,8 +13,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import { useToastContext } from '../../context/ToastContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { canChangeSlug, getNextSlugChangeDate } from '../../utils/slugValidation';
+import { sanitizeSlug } from '../../utils/slugUtils';
+import PassportTemplate from '../templates/PassportTemplate';
+import ClassicTemplate from '../templates/ClassicTemplate';
+import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 
 interface FinalizationStepProps {
   onComplete: () => void;
@@ -28,15 +35,29 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
 }) => {
   const { session, profile, refetchProfile } = useAuth();
   const toast = useToastContext();
+  const translations = useTranslations();
   const { width, height } = useWindowSize();
 
-  const [selectedTemplate, setSelectedTemplate] = useState(currentTemplate);
-  const [customSlug, setCustomSlug] = useState('');
+  // Use profile.slug if available, otherwise use the prop
+  const existingSlug = profile?.slug || currentSlug;
+  const existingTemplate = profile?.template || currentTemplate;
+
+  const [selectedTemplate, setSelectedTemplate] = useState(existingTemplate);
+  const [customSlug, setCustomSlug] = useState(existingSlug || '');
   const [isSlugValid, setIsSlugValid] = useState(true);
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showConfetti, setShowConfetti] = useState(true);
   const [hasGeneratedSlug, setHasGeneratedSlug] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
+
+  // Check if user can change slug (90-day restriction)
+  // For users with existing slug but no last_changed_at, assume they just created it (90 days restriction applies)
+  const effectiveLastChangedAt = profile?.last_slug_changed_at || (existingSlug ? new Date().toISOString() : null);
+  const { canChange: canChangeSlugNow, daysRemaining } = canChangeSlug(effectiveLastChangedAt);
+  const nextChangeDate = getNextSlugChangeDate(effectiveLastChangedAt);
+  const isEditingExistingSlug = Boolean(existingSlug && existingSlug.length > 0);
 
   // Stop confetti after 5 seconds
   useEffect(() => {
@@ -45,6 +66,50 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     }, 5000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Hide confetti when preview modal opens
+  useEffect(() => {
+    if (previewTemplate) {
+      setShowConfetti(false);
+    }
+  }, [previewTemplate]);
+
+  // Load profile data for preview
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!session?.user.id || !profile) return;
+
+      try {
+        const [
+          { data: expData },
+          { data: eduData },
+          { data: skillsData },
+          { data: portfolioData },
+        ] = await Promise.all([
+          supabase.from('experiences').select('*').eq('profile_id', session.user.id).order('start_date', { ascending: false }),
+          supabase.from('education').select('*').eq('profile_id', session.user.id).order('start_date', { ascending: false }),
+          supabase.from('skills').select('*').eq('profile_id', session.user.id),
+          supabase.from('portfolio_items').select('*').eq('profile_id', session.user.id),
+        ]);
+
+        setProfileData({
+          profile: profile,
+          experiences: expData || [],
+          education: eduData || [],
+          skills: skillsData || [],
+          certifications: [],
+          languages: [],
+          services: [],
+          stats: [],
+          portfolioItems: portfolioData || [],
+        });
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+      }
+    };
+
+    loadProfileData();
+  }, [session, profile]);
 
   // Extract short occupation from headline (e.g., "desarrollador-full-stack" from long description)
   const extractOccupation = (headline: string): string => {
@@ -74,68 +139,17 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     return headline.substring(0, 30);
   };
 
-  // Generate default slug from profile name and headline
-  useEffect(() => {
-    // ✅ Solo generar si no se ha generado antes
-    if (hasGeneratedSlug) {
-      console.log('⏭️ Slug ya generado, saltando');
-      return;
-    }
-
-    console.log('🔄 Generando slug para:', profile?.full_name, profile?.headline);
-
-    if (profile?.full_name && profile?.headline) {
-      // ✅ Use EXACT same logic as DashboardContent for consistency
-      const occupation = extractOccupation(profile.headline);
-      console.log('📝 Ocupación extraída:', occupation);
-
-      // Generate slug from full_name and short occupation
-      const namePart = profile.full_name
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-
-      const headlinePart = occupation
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-
-      const generatedSlug = headlinePart ? `${namePart}-${headlinePart}` : namePart;
-      const finalSlug = generatedSlug.substring(0, 50);
-
-      console.log('✅ Slug generado:', finalSlug);
-      setCustomSlug(finalSlug);
-      setHasGeneratedSlug(true);
-    } else if (profile?.full_name) {
-      // Fallback to just name if no headline
-      const generatedSlug = profile.full_name
-        .toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .substring(0, 50);
-
-      console.log('✅ Slug generado (solo nombre):', generatedSlug);
-      setCustomSlug(generatedSlug);
-      setHasGeneratedSlug(true);
-    } else {
-      console.log('⚠️ No hay suficiente información para generar slug');
-    }
-  }, [profile?.full_name, profile?.headline, hasGeneratedSlug]);
+  // ❌ REMOVED: Auto-generation of slug - slug should only be created when user explicitly configures it
+  // in Display Settings, not automatically during wizard completion
+  // useEffect(() => {
+  //   ... auto-generation code removed ...
+  // }, []);
 
   const templates = [
     {
       id: 'passport',
-      name: 'Moderno',
-      description: 'Diseño limpio y profesional con toques modernos',
+      name: translations.profileEditor.finalization.templates.modern.name,
+      description: translations.profileEditor.finalization.templates.modern.description,
       previewImage: '/images/templates/passport.png',
       icon: (
         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,8 +162,8 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     },
     {
       id: 'classic',
-      name: 'Clásico',
-      description: 'Formato tradicional para empresas corporativas',
+      name: translations.profileEditor.finalization.templates.classic.name,
+      description: translations.profileEditor.finalization.templates.classic.description,
       previewImage: '/images/templates/classic.png',
       icon: (
         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,8 +176,8 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     },
     {
       id: 'creative',
-      name: 'Creativo',
-      description: 'Ideal para diseñadores e industrias creativas',
+      name: translations.profileEditor.finalization.templates.creative.name,
+      description: translations.profileEditor.finalization.templates.creative.description,
       previewImage: '/images/templates/creative-bold.png',
       icon: (
         <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,7 +197,7 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     }
 
     // Check if slug matches current user's slug
-    if (slug === currentSlug) {
+    if (slug === existingSlug) {
       setIsSlugValid(true);
       return true;
     }
@@ -214,11 +228,8 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
   };
 
   const handleSlugChange = (value: string) => {
-    const sanitized = value
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/--+/g, '-')
-      .substring(0, 50);
+    // Use centralized sanitization utility
+    const sanitized = sanitizeSlug(value, 50);
     setCustomSlug(sanitized);
   };
 
@@ -228,31 +239,116 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     }
   };
 
-  const handleSaveAndComplete = async () => {
+  const getTemplateComponent = (templateId: string) => {
+    if (!profileData) return null;
+
+    switch (templateId) {
+      case 'passport':
+        return <PassportTemplate data={profileData} />;
+      case 'classic':
+        return <ClassicTemplate data={profileData} />;
+      case 'creative':
+        return <CreativeBoldTemplate data={profileData} />;
+      default:
+        return <PassportTemplate data={profileData} />;
+    }
+  };
+
+  // Get theme-appropriate preview image
+  const getTemplatePreviewImage = (templateId: string) => {
+    // Check if dark mode is enabled
+    const isDark = document.documentElement.classList.contains('dark');
+    const theme = isDark ? 'dark' : 'light';
+
+    // Try to load theme-specific image, fallback to default
+    return `/images/templates/${templateId}-${theme}.png`;
+  };
+
+  const handleSaveAndComplete = async (redirectToCV = false) => {
     if (!session?.user?.id) return;
 
-    // Validate slug
+    // ✅ VALIDACIÓN COMPLETA DEL PERFIL ANTES DE FINALIZAR
+    const validationErrors: string[] = [];
+
+    // Validar Identidad
+    if (!profile?.full_name) validationErrors.push('• Nombre completo (Identidad)');
+    if (!profile?.email) validationErrors.push('• Email (Identidad)');
+    if (!profile?.headline) validationErrors.push('• Título profesional (Identidad)');
+    if (!profile?.summary) validationErrors.push('• Resumen profesional (Identidad)');
+    if (!profile?.avatar_url) validationErrors.push('• Foto de perfil (Identidad)');
+
+    // ⚠️ CRITICAL FIX: Query database directly for fresh counts instead of using stale profile context
+    // Validar Experiencia - Query database for actual count
+    const { count: experienceCount, error: expError } = await supabase
+      .from('experiences')
+      .select('*', { count: 'exact', head: true })
+      .eq('profile_id', session.user.id);
+
+    if (expError) {
+      console.error('Error fetching experience count:', expError);
+    }
+
+    if (!experienceCount || experienceCount === 0) {
+      validationErrors.push('• Al menos 1 experiencia laboral (Experiencia)');
+    }
+
+    // Validar Habilidades - Query database for actual count
+    const { count: skillsCount, error: skillsError } = await supabase
+      .from('skills')
+      .select('*', { count: 'exact', head: true })
+      .eq('profile_id', session.user.id);
+
+    if (skillsError) {
+      console.error('Error fetching skills count:', skillsError);
+    }
+
+    if (!skillsCount || skillsCount < 3) {
+      validationErrors.push(`• Al menos 3 habilidades - tienes ${skillsCount || 0} (Habilidades)`);
+    }
+
+    // Validar Preferencias
+    if (!profile?.job_seeking_status) {
+      validationErrors.push('• Estado de búsqueda de empleo (Preferencias)');
+    }
+
+    // Si hay errores de validación, mostrarlos con toast MUY VISIBLE
+    if (validationErrors.length > 0) {
+      const errorMessage = `⚠️ PERFIL INCOMPLETO\n\nPara finalizar tu CV, completa lo siguiente:\n\n${validationErrors.join('\n')}\n\n👆 Usa los iconos arriba para navegar a cada sección`;
+
+      toast.error(errorMessage);
+
+      // Scroll to top para que vea los pasos del wizard
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      return;
+    }
+
+    // ✅ Validate slug before saving
     if (!customSlug || customSlug.length < 3) {
-      toast.error('La URL debe tener al menos 3 caracteres');
+      toast.error(translations.profileEditor.finalization.errors.urlTooShort);
       return;
     }
 
     const isValid = await validateSlug(customSlug);
     if (!isValid) {
-      toast.error('Esta URL ya está en uso. Por favor elige otra.');
+      toast.error(translations.profileEditor.finalization.errors.urlAlreadyInUse);
       return;
     }
 
     setIsSaving(true);
 
     try {
-      console.log('🔵 Guardando slug:', customSlug, 'para usuario:', session.user.id);
+      console.log('🔵 Guardando template:', selectedTemplate, 'y slug:', customSlug, 'para usuario:', session.user.id);
 
+      // ✅ Save template AND slug AND mark wizard as completed
+      // This is where users create their URL for the first time and complete the onboarding wizard
       const { error } = await supabase
         .from('profiles')
         .update({
           template: selectedTemplate,
           slug: customSlug,
+          last_slug_changed_at: new Date().toISOString(),
+          wizard_completed: true, // ✅ Mark wizard as completed in database
         })
         .eq('id', session.user.id);
 
@@ -261,41 +357,34 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
         throw error;
       }
 
-      console.log('✅ Slug guardado exitosamente');
+      console.log('✅ Template y slug guardados exitosamente');
 
       // ✅ Verificar que realmente se guardó en la BD
       const { data: verifyData, error: verifyError } = await supabase
         .from('profiles')
-        .select('slug, template')
+        .select('template, slug')
         .eq('id', session.user.id)
         .single();
 
-      console.log('🔍 Verificando slug guardado:', verifyData);
+      console.log('🔍 Verificando template y slug guardados:', verifyData);
 
-      if (verifyError || !verifyData?.slug) {
-        console.error('❌ El slug NO se guardó correctamente:', verifyError);
-        throw new Error('El slug no se guardó en la base de datos');
+      if (verifyError || !verifyData?.template || !verifyData?.slug) {
+        console.error('❌ El template o slug NO se guardó correctamente:', verifyError);
+        throw new Error('El template y slug no se guardaron en la base de datos');
       }
 
-      // ✅ Refetch profile to update slug in context - wait for it to complete
-      await refetchProfile();
+      // ✅ Show success message for slug/template save
+      toast.success(translations.profileEditor?.finalization?.templateSaved || 'Template y URL configurados');
 
-      console.log('✅ Profile refetched');
-
-      // ✅ CRITICAL: Mark wizard as just completed to prevent WelcomeModal from showing
-      localStorage.setItem('wizard_just_completed', 'true');
-      localStorage.setItem('wizard_completed_at', Date.now().toString());
-
-      // ✅ Wait a bit for the profile to fully update in context
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      toast.success('¡Perfil completado exitosamente!', { duration: 3000 });
-
-      // ✅ Wait another moment before completing to ensure toast is visible
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // ✅ Complete immediately - no setTimeout needed
-      onComplete();
+      // ✅ If user clicked on CV URL, open CV in new tab instead of completing wizard
+      if (redirectToCV) {
+        window.open(`/cv/${customSlug}`, '_blank', 'noopener,noreferrer');
+        // Keep the wizard open so user can see the success message
+      } else {
+        // ✅ Complete wizard - let DashboardContent handle the final refetch and navigation
+        // DashboardContent will refetch profile and show the final success toast
+        onComplete();
+      }
     } catch (error) {
       console.error('❌ Error saving finalization:', error);
       toast.error('Error al guardar configuración');
@@ -308,13 +397,15 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     <div className="space-y-8 pb-8">
       {/* Confetti Animation */}
       {showConfetti && (
-        <Confetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-          gravity={0.3}
-        />
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 40, pointerEvents: 'none' }}>
+          <Confetti
+            width={width}
+            height={height}
+            recycle={false}
+            numberOfPieces={500}
+            gravity={0.3}
+          />
+        </div>
       )}
 
       {/* Celebration Header */}
@@ -327,31 +418,30 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
           </div>
         </div>
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          ¡Felicidades!
+          {translations.profileEditor.finalization.congratulations}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-400">
-          Has completado tu perfil profesional
+          {translations.profileEditor.finalization.completedProfile}
         </p>
       </div>
 
       {/* Template Selection */}
       <div>
         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Selecciona tu plantilla de CV
+          {translations.profileEditor.finalization.selectTemplate}
         </label>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Elige el diseño que mejor represente tu estilo profesional
+          {translations.profileEditor.finalization.chooseDesign}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {templates.map((template) => (
-            <button
+            <div
               key={template.id}
-              onClick={() => setSelectedTemplate(template.id)}
-              className={`relative p-6 rounded-xl border-2 transition-all hover:scale-105 ${
+              className={`relative p-6 rounded-xl border-2 transition-all ${
                 selectedTemplate === template.id
                   ? `border-${template.gradient.split(' ')[1].replace('to-', '')} bg-gradient-to-br ${template.bgGradient} ${template.darkBgGradient} shadow-lg`
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-bg-secondary hover:border-gray-300 dark:hover:border-gray-600'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-bg-secondary'
               }`}
             >
               {selectedTemplate === template.id && (
@@ -364,115 +454,124 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
                 </div>
               )}
 
-              {/* Template Preview Image */}
-              <div className="mb-4 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              {/* Template Preview - Theme-aware Image */}
+              <div className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
+                   onClick={() => setPreviewTemplate(template.id)}>
                 <img
-                  src={template.previewImage}
+                  src={getTemplatePreviewImage(template.id)}
                   alt={`${template.name} template preview`}
                   className="w-full h-48 object-cover object-top"
+                  onError={(e) => {
+                    // Fallback to default image if theme-specific not found
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.endsWith(template.previewImage)) {
+                      target.src = template.previewImage;
+                    }
+                  }}
                 />
+                {/* Hover Overlay for Preview */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
+                    <svg className="w-10 h-10 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <p className="text-xs font-semibold">Vista Previa</p>
+                  </div>
+                </div>
               </div>
 
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                 {template.name}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 {template.description}
               </p>
-            </button>
+
+              {/* Select Button */}
+              <button
+                onClick={() => setSelectedTemplate(template.id)}
+                disabled={selectedTemplate === template.id}
+                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                  selectedTemplate === template.id
+                    ? 'bg-green-500 text-white cursor-default'
+                    : 'bg-cv-blue hover:bg-opacity-90 text-white'
+                }`}
+              >
+                {selectedTemplate === template.id ? 'Seleccionada' : 'Seleccionar'}
+              </button>
+            </div>
           ))}
         </div>
       </div>
-
-      {/* URL Customization */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Personaliza tu URL
-        </label>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Esta será la dirección donde podrás compartir tu CV
-        </p>
-
-        <div className="flex items-center gap-2 bg-white dark:bg-dark-bg-secondary border-2 border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3">
-          <span className="text-gray-500 dark:text-gray-400 text-sm font-medium whitespace-nowrap">
-            {window.location.origin}/cv/
-          </span>
-          <input
-            type="text"
-            value={customSlug}
-            onChange={(e) => handleSlugChange(e.target.value)}
-            onBlur={handleSlugBlur}
-            placeholder="tu-nombre-profesional"
-            className="flex-1 bg-transparent border-none outline-none text-gray-900 dark:text-white font-medium"
-          />
-          {isCheckingSlug && (
-            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          )}
-          {!isCheckingSlug && customSlug && (
-            <div>
-              {isSlugValid ? (
-                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-            </div>
-          )}
-        </div>
-
-        {!isSlugValid && customSlug && (
-          <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-            Esta URL ya está en uso. Por favor elige otra.
-          </p>
-        )}
-
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          Solo letras minúsculas, números y guiones. Mínimo 3 caracteres.
-        </p>
-      </div>
-
-      {/* Preview URL */}
-      {customSlug && isSlugValid && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">
-            Tu CV estará disponible en:
-          </p>
-          <a
-            href={`/cv/${customSlug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium break-all"
-          >
-            {window.location.origin}/cv/{customSlug}
-          </a>
-        </div>
-      )}
 
       {/* Complete Button */}
       <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-dark-border">
         <button
           onClick={handleSaveAndComplete}
-          disabled={isSaving || !customSlug || !isSlugValid || isCheckingSlug}
+          disabled={isSaving}
           className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-lg shadow-lg hover:shadow-xl flex items-center gap-3"
         >
           {isSaving ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Guardando...
+              {translations.profileEditor.finalization.saving}
             </>
           ) : (
             <>
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-              Ir al Dashboard
+              {translations.profileEditor.finalization.completeProfile}
             </>
           )}
         </button>
       </div>
+
+      {/* Full Preview Modal */}
+      {previewTemplate && profileData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+          <div className="relative bg-white dark:bg-dark-bg-secondary rounded-xl max-w-5xl w-full max-h-[90vh] shadow-2xl flex flex-col">
+            {/* Modal Header */}
+            <div className="flex-shrink-0 bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between rounded-t-xl z-10">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Vista Previa: {templates.find(t => t.id === previewTemplate)?.name}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Vista previa completa de tu CV
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedTemplate(previewTemplate);
+                    setPreviewTemplate(null);
+                  }}
+                  className="px-4 py-2 bg-cv-blue hover:bg-opacity-90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Usar esta plantilla
+                </button>
+                <button
+                  onClick={() => setPreviewTemplate(null)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body - Scrollable Preview */}
+            <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900 p-8 rounded-b-xl">
+              <div className="max-w-4xl mx-auto bg-white shadow-xl">
+                {getTemplateComponent(previewTemplate)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

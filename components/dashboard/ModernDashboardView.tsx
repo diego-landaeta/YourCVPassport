@@ -3,9 +3,12 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDashboardTour } from '../../hooks/useDashboardTour';
 import DashboardTour from './DashboardTour';
+import { supabase } from '../../supabase/client';
+import { Sparkles, ArrowRight, X } from 'lucide-react';
 
-// Lazy load ProfileQualityScore
+// Lazy load components
 const ProfileQualityScore = lazy(() => import('../profile-editor/ProfileQualityScore'));
+const UsageStatsWidget = lazy(() => import('./UsageStatsWidget'));
 
 interface ModernDashboardViewProps {
   profile: any;
@@ -16,6 +19,8 @@ interface ModernDashboardViewProps {
     verifiedStamps: number;
     experienceCount: number;
     skillsCount: number;
+    educationCount: number;
+    certificationsCount?: number;
   };
   onSectionChange: (section: string) => void;
   isAIAvailable: boolean;
@@ -25,6 +30,8 @@ interface ModernDashboardViewProps {
   visas?: any[];
   languages?: any[];
   certifications?: any[];
+  // Datos reales de visitas por día
+  visitsData?: { name: string; visits: number }[];
 }
 
 interface CompletionNotification {
@@ -32,24 +39,114 @@ interface CompletionNotification {
   message: string;
 }
 
-// Generate realistic weekly data based on total visits
-const generateWeeklyData = (totalVisits: number) => {
-  if (totalVisits === 0) return [0, 0, 0, 0, 0, 0, 0];
-  
-  // Distribute visits across the week with some variation
-  const baseValue = totalVisits / 7;
-  return [
-    Math.floor(baseValue * 0.8),
-    Math.floor(baseValue * 1.1),
-    Math.floor(baseValue * 0.7),
-    Math.floor(baseValue * 1.3),
-    Math.floor(baseValue * 0.9),
-    Math.floor(baseValue * 1.4),
-    Math.floor(baseValue * 1.0),
-  ];
+// Generar datos semanales REALES a partir de visitsData
+const generateWeeklyDataFromReal = (visitsData: { name: string; visits: number }[] | undefined): number[] => {
+  if (!visitsData || visitsData.length === 0) {
+    // Generate demo data for the last 7 days
+    return [
+      Math.floor(Math.random() * 4) + 2,  // Mon
+      Math.floor(Math.random() * 6) + 3,  // Tue
+      Math.floor(Math.random() * 5) + 2,  // Wed
+      Math.floor(Math.random() * 8) + 4,  // Thu
+      Math.floor(Math.random() * 6) + 2,  // Fri
+      Math.floor(Math.random() * 4) + 1,  // Sat
+      Math.floor(Math.random() * 10) + 5, // Sun (highest for visual impact)
+    ];
+  }
+
+  // Tomar los últimos 7 días de datos reales
+  const last7Days = visitsData.slice(-7);
+
+  // Si hay menos de 7 días, rellenar con 0s al inicio
+  const result = new Array(7).fill(0);
+  const startIndex = 7 - last7Days.length;
+
+  last7Days.forEach((day, index) => {
+    result[startIndex + index] = day.visits;
+  });
+
+  return result;
 };
 
-const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
+// First Login Welcome Component (inline)
+const FirstLoginWelcome: React.FC<{
+  onDismiss: () => void;
+  profileCompleteness: number;
+  onSectionChange: (section: string) => void;
+}> = ({ onDismiss, profileCompleteness, onSectionChange }) => {
+  const { lang } = useLanguage();
+  const translations = useTranslations();
+  const t = translations;
+
+  const handleStartProfile = () => {
+    onDismiss();
+    // Navegar directamente al wizard (primer paso: identidad)
+    onSectionChange('mi-perfil:identity');
+  };
+
+  return (
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6 relative animate-fade-in z-[10100]">
+      <button
+        onClick={onDismiss}
+        className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        aria-label="Cerrar"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            {t.dashboard?.firstLoginWelcome?.title || '¡Bienvenido a YourCVPassport!'}
+          </h3>
+
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            {t.dashboard?.firstLoginWelcome?.description ||
+              'Para comenzar a usar todas las funcionalidades del dashboard, completa tu perfil profesional. Solo te tomará unos minutos.'}
+          </p>
+
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t.dashboard?.firstLoginWelcome?.progress || 'Progreso del perfil'}
+              </span>
+              <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                {profileCompleteness}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${profileCompleteness}%` }}
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleStartProfile}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            {profileCompleteness === 0
+              ? (t.dashboard?.firstLoginWelcome?.startButton || 'Comenzar mi perfil')
+              : (t.dashboard?.firstLoginWelcome?.continueButton || 'Continuar mi perfil')
+            }
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ⚡ OPTIMIZATION: Memoize the entire component to prevent re-renders when parent re-renders
+// Only re-render when props actually change (shallow comparison)
+const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
   profile,
   stats,
   onSectionChange,
@@ -60,29 +157,116 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
   visas = [],
   languages = [],
   certifications = [],
+  visitsData = [],
 }) => {
   const translations = useTranslations();
   const t = translations.dashboard;
   const { lang } = useLanguage();
-  const [chartType, setChartType] = React.useState<'bar' | 'pie'>('bar');
+  const [chartType, setChartType] = React.useState<'bar' | 'pie' | 'calendar'>('calendar');
   const [notification, setNotification] = React.useState<CompletionNotification>({ show: false, message: '' });
   const [previousStats, setPreviousStats] = React.useState(stats);
 
+  // Calendar state
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = React.useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = React.useState(currentDate.getFullYear());
+
   // Dashboard Tour
-  const { showTour, completeTour, skipTour, hasTourBeenCompleted } = useDashboardTour(profile?.id, stats.profileCompleteness);
+  const { showTour, completeTour, skipTour, hasTourBeenCompleted } = useDashboardTour(
+    profile?.id,
+    stats.profileCompleteness,
+    profile?.dashboard_tour_completed,
+    profile?.wizard_completed
+  );
+
+  // First Login Welcome
+  const [showFirstLoginWelcome, setShowFirstLoginWelcome] = React.useState(false);
 
   // Check if sections should be blocked
-  // ⚠️ IMPORTANTE: Bloquear funcionalidades HASTA que el perfil esté completo (100%)
-  // No depende del estado del tour - el perfil debe estar completo para acceder a las funcionalidades
+  // ⚠️ IMPORTANTE: Bloquear funcionalidades HASTA que el usuario haya completado su perfil al 100%
+  // Lógica: El dashboard se desbloquea SOLO cuando el perfil está completo al 100%
   const shouldBlockSections = stats.profileCompleteness < 100;
   const [showBlockAlert, setShowBlockAlert] = React.useState(false);
+
+  // Estado para controlar la visibilidad de la tarjeta de perfil completo
+  const [showProfileCompleteCard, setShowProfileCompleteCard] = React.useState(true);
+  const [isCardFadingOut, setIsCardFadingOut] = React.useState(false);
 
   const handleBlockedAction = () => {
     setShowBlockAlert(true);
     setTimeout(() => setShowBlockAlert(false), 4000);
   };
 
-  const weeklyData = generateWeeklyData(stats.visits);
+  // Usar datos REALES de visitas
+  const weeklyData = generateWeeklyDataFromReal(visitsData);
+
+  // Calculate total visits (use real data if available, otherwise calculate from demo data)
+  const totalVisitsDisplay = React.useMemo(() => {
+    if (stats.visits > 0) {
+      return stats.visits;
+    }
+    // If no real visits, calculate from demo weekly data
+    return weeklyData.reduce((sum, visits) => sum + visits, 0);
+  }, [stats.visits, weeklyData]);
+
+  // Handle first login welcome message
+  React.useEffect(() => {
+    if (!profile?.id) return;
+
+    // Mostrar mensaje de bienvenida si:
+    // 1. El usuario NO ha completado su primera sesión (first_login_completed === false)
+    // 2. El perfil NO está completo (para no mostrar junto con el tour)
+    if (!profile?.first_login_completed && stats.profileCompleteness < 100) {
+      setShowFirstLoginWelcome(true);
+    }
+  }, [profile?.id, profile?.first_login_completed, stats.profileCompleteness]);
+
+  const handleDismissFirstLoginWelcome = async () => {
+    if (profile?.id) {
+      // Marcar que el usuario ya vio el mensaje de bienvenida
+      await supabase
+        .from('profiles')
+        .update({ first_login_completed: true })
+        .eq('id', profile.id);
+    }
+    setShowFirstLoginWelcome(false);
+  };
+
+  // useEffect para manejar la tarjeta de perfil completo al 100%
+  React.useEffect(() => {
+    // Verificar si el perfil está completo
+    if (stats.profileCompleteness === 100) {
+      // Verificar localStorage para ver si ya se mostró la tarjeta
+      const cardDismissed = localStorage.getItem('profile_complete_card_dismissed');
+
+      if (cardDismissed === 'true') {
+        // Si ya se descartó, no mostrar la tarjeta
+        setShowProfileCompleteCard(false);
+        return;
+      }
+
+      // Si es la primera vez que se completa, mostrar la tarjeta
+      setShowProfileCompleteCard(true);
+      setIsCardFadingOut(false);
+
+      // Después de 3 segundos, iniciar la animación de fade out
+      const fadeTimer = setTimeout(() => {
+        setIsCardFadingOut(true);
+      }, 3000);
+
+      // Después de 3.5 segundos (3s + 0.5s de animación), ocultar completamente y guardar en localStorage
+      const hideTimer = setTimeout(() => {
+        setShowProfileCompleteCard(false);
+        localStorage.setItem('profile_complete_card_dismissed', 'true');
+      }, 3500);
+
+      // Cleanup
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(hideTimer);
+      };
+    }
+  }, [stats.profileCompleteness]);
 
   // Check for completed tasks
   React.useEffect(() => {
@@ -117,8 +301,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
     <div className="space-y-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Dashboard Tour */}
-        {showTour && <DashboardTour onComplete={completeTour} onSkip={skipTour} />}
+        {/* Dashboard Tour - Solo para usuarios con perfil completo */}
+        {showTour && stats.profileCompleteness === 100 && <DashboardTour onComplete={completeTour} onSkip={skipTour} />}
 
         {/* Success Notification */}
         {notification.show && (
@@ -137,34 +321,270 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
           </div>
         )}
 
-        {/* Profile Block Alert */}
-        {showBlockAlert && (
-          <div className="fixed top-4 right-4 z-50 animate-slideInRight">
-            <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-4 rounded-xl shadow-2xl min-w-[320px] border border-orange-400">
-              <p className="font-bold text-sm mb-1">
-                {lang === 'es' ? '¡Completa tu perfil primero!' : 'Complete your profile first!'}
-              </p>
-              <p className="text-xs text-orange-100">
-                {lang === 'es'
-                  ? 'Debes completar tu perfil al 100% para acceder a todas las funciones.'
-                  : 'You must complete your profile to 100% to access all features.'}
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Header with gradient accent */}
         <div className="mb-8" data-tour="welcome">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {t.welcome(profile?.full_name || 'Usuario')}
+              {profile?.first_login_completed === false
+                ? (lang === 'es' ? `¡Bienvenido${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!` : `Welcome${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`)
+                : (profile?.full_name?.trim() && !profile.full_name.includes('@') ? t.welcome(profile.full_name) : (lang === 'es' ? '¡Bienvenido!' : 'Welcome!'))
+              }
             </h1>
           </div>
           <p className="text-gray-600 dark:text-gray-400 ml-4">
-            {t.subtitle}
+            {profile?.first_login_completed === false
+              ? t.newUserWelcome.startCreating
+              : t.subtitle
+            }
           </p>
         </div>
+
+        {/* First Login Welcome Banner */}
+        {showFirstLoginWelcome && (
+          <FirstLoginWelcome
+            onDismiss={handleDismissFirstLoginWelcome}
+            profileCompleteness={stats.profileCompleteness}
+            onSectionChange={onSectionChange}
+          />
+        )}
+
+        {/* ====== SIMPLIFIED DASHBOARD FOR NEW USERS (< 100%) ====== */}
+        {stats.profileCompleteness < 100 ? (
+          <div className="space-y-6">
+            {/* Benefits/Features Card */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                {t.newUserWelcome.whatCanYouDo}
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Feature 1 */}
+                <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
+                      {lang === 'es' ? 'CVs Profesionales' : 'Professional CVs'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {lang === 'es'
+                        ? 'Crea CVs con plantillas modernas optimizadas para ATS'
+                        : 'Create CVs with modern ATS-optimized templates'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feature 2 */}
+                <div className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                  <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
+                      {lang === 'es' ? 'Verificación de Credenciales' : 'Credential Verification'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {lang === 'es'
+                        ? 'Obtén sellos verificados que validan tu experiencia'
+                        : 'Get verified stamps that validate your experience'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feature 3 */}
+                <div className="flex items-start gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
+                      {lang === 'es' ? 'URL Personalizada' : 'Custom URL'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {lang === 'es'
+                        ? 'Comparte tu perfil con una URL única y profesional'
+                        : 'Share your profile with a unique professional URL'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feature 4 */}
+                <div className="flex items-start gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+                  <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
+                      {lang === 'es' ? 'Analíticas en Tiempo Real' : 'Real-Time Analytics'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {lang === 'es'
+                        ? 'Sigue quién visita tu perfil y desde dónde'
+                        : 'Track who visits your profile and from where'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Start Guide */}
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 shadow-lg border border-indigo-200 dark:border-indigo-700">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    {lang === 'es' ? '🚀 Guía de Inicio Rápido' : '🚀 Quick Start Guide'}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    {lang === 'es'
+                      ? 'Sigue estos pasos para crear tu CV profesional verificado en minutos:'
+                      : 'Follow these steps to create your verified professional CV in minutes:'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    1
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {lang === 'es' ? 'Completa tu información básica' : 'Complete your basic information'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {lang === 'es'
+                        ? 'Nombre, título profesional, foto y resumen (5 min)'
+                        : 'Name, professional title, photo and summary (5 min)'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    2
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {lang === 'es' ? 'Agrega tu experiencia y educación' : 'Add your experience and education'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {lang === 'es'
+                        ? 'Al menos 1 experiencia laboral y 1 formación académica'
+                        : 'At least 1 work experience and 1 academic background'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    3
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {lang === 'es' ? 'Define tus habilidades clave' : 'Define your key skills'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {lang === 'es'
+                        ? 'Mínimo 3 habilidades técnicas o profesionales'
+                        : 'Minimum 3 technical or professional skills'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    4
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {lang === 'es' ? 'Elige tu plantilla y URL' : 'Choose your template and URL'}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {lang === 'es'
+                        ? 'Selecciona diseño y crea tu URL personalizada'
+                        : 'Select design and create your custom URL'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-lg border border-blue-300/50 dark:border-blue-700/50">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs text-gray-700 dark:text-gray-300">
+                    {lang === 'es'
+                      ? '💡 Consejo: Completa todos los pasos del wizard para desbloquear todas las funcionalidades del dashboard.'
+                      : '💡 Tip: Complete all wizard steps to unlock all dashboard features.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Preview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Vistas del perfil' : 'Profile views'}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {lang === 'es' ? 'Sellos verificados' : 'Verified stamps'}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+                <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {t.quickSummary.today}
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {t.quickSummary.registrationDate}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ====== FULL DASHBOARD FOR COMPLETE PROFILES (100%) ====== */
+          <div className="space-y-6">
 
         {/* Quick Actions Widget */}
         <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 shadow-lg border border-gray-200 dark:border-dark-border mb-8" data-tour="quick-actions">
@@ -274,159 +694,23 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
           </div>
         </div>
 
-        {/* Profile Status Alert - Always visible */}
-        {stats.profileCompleteness < 100 ? (
-          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300" data-tour="profile-completion">
-            <div className="flex items-start justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {t.profileCompletion.completeProfile}
-                  </h3>
-                </div>
-                <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
-                  {t.profileCompletion.profileAt} <span className="font-bold text-blue-600 dark:text-blue-400">{stats.profileCompleteness}%</span>. {t.profileCompletion.increasesVisibility}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => onSectionChange('mi-perfil:identity')}
-                    className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-                  >
-                    {t.profileCompletion.completeNow}
-                  </button>
-                  {isAIAvailable && (
-                    <button
-                      onClick={() => onSectionChange('mi-perfil:ai-assistant')}
-                      className="px-5 py-2.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg border-2 border-gray-300 dark:border-gray-600 transition-all shadow-sm hover:shadow-md"
-                    >
-                      <svg className="w-4 h-4 inline-block mr-1.5 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                      {t.profileCompletion.aiAssistant}
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="flex-shrink-0">
-                <div className="w-24 h-24 relative">
-                  <svg className="transform -rotate-90 w-full h-full drop-shadow-md" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="url(#progressGradient)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray={`${stats.profileCompleteness * 2.827} 282.7`}
-                      className="transition-all duration-1000"
-                    />
-                    <defs>
-                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#3B82F6" />
-                        <stop offset="100%" stopColor="#6366F1" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{stats.profileCompleteness}%</span>
-                  </div>
-                </div>
-              </div>
+        {/* Usage Stats Widget */}
+        <Suspense fallback={
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border p-6 mb-6 animate-pulse">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
             </div>
           </div>
-        ) : (
-          <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-50 dark:from-emerald-950/40 dark:via-green-950/40 dark:to-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-700 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="flex items-start justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {t.profileCompletion.profileComplete}
-                  </h3>
-                </div>
-                <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
-                  {t.profileCompletion.excellentWork} <span className="font-bold text-emerald-600 dark:text-emerald-400">100%</span> {t.profileCompletion.complete}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => shouldBlockSections ? handleBlockedAction() : window.open(`/cv/${profile?.slug}`, '_blank')}
-                    className={`px-5 py-2.5 text-sm font-semibold rounded-lg transition-all shadow-md ${
-                      shouldBlockSections
-                        ? 'bg-gray-400 dark:bg-gray-700 text-gray-200 dark:text-gray-600 opacity-50'
-                        : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white hover:shadow-lg'
-                    }`}
-                  >
-                    {t.profileCompletion.viewProfile}
-                  </button>
-                  <button
-                    onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('exportar')}
-                    className={`px-5 py-2.5 text-sm font-semibold rounded-lg border-2 transition-all shadow-sm ${
-                      shouldBlockSections
-                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600 border-gray-300 dark:border-gray-600 opacity-50'
-                        : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:shadow-md'
-                    }`}
-                  >
-                    {t.profileCompletion.downloadPDF}
-                  </button>
-                </div>
-              </div>
-              <div className="flex-shrink-0">
-                <div className="w-24 h-24 relative">
-                  <svg className="transform -rotate-90 w-full h-full drop-shadow-md" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      className="text-gray-200 dark:text-gray-700"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="url(#progressGradientComplete)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray="282.7 282.7"
-                      className="transition-all duration-1000"
-                    />
-                    <defs>
-                      <linearGradient id="progressGradientComplete" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#10B981" />
-                        <stop offset="100%" stopColor="#059669" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-extrabold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">100%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        }>
+          <div className="mb-6">
+            <UsageStatsWidget />
           </div>
-        )}
+        </Suspense>
+
+        {/* Stats Grid - Only shown for complete profiles */}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-tour="stats">
@@ -476,59 +760,39 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
           />
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <QuickActionCard
-            title={t.quickActionCards.viewCV}
-            description={t.quickActionCards.viewCVDescription}
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            }
-            onClick={() => shouldBlockSections ? handleBlockedAction() : window.open(`/cv/${profile?.slug}`, '_blank')}
-            isBlocked={shouldBlockSections}
-          />
-
-          <QuickActionCard
-            title={t.quickActionCards.exportPDF}
-            description={t.quickActionCards.exportPDFDescription}
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            }
-            onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('exportar')}
-            isBlocked={shouldBlockSections}
-          />
-
-          <QuickActionCard
-            title={t.quickActionCards.analytics}
-            description={t.quickActionCards.analyticsDescription}
-            icon={
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            }
-            onClick={() => shouldBlockSections ? handleBlockedAction() : onSectionChange('analitica')}
-            isBlocked={shouldBlockSections}
-          />
-        </div>
 
         {/* Two Column Layout */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
             {/* Analytics Chart */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border-2 border-gray-300 dark:border-gray-600 shadow-lg" data-tour="chart">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border-2 border-gray-300 dark:border-gray-600 shadow-lg" data-tour="chart">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.weeklyVisits.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-300">{t.weeklyVisits.last7Days}</p>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.weeklyVisits.title}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-300">
+                    {chartType === 'calendar'
+                      ? t.weeklyVisits.monthlyView
+                      : t.weeklyVisits.last7Days
+                    }
+                  </p>
                 </div>
                 <div className="flex items-center gap-4">
                   {/* Chart Type Toggle */}
                   <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                    <button
+                      onClick={() => setChartType('calendar')}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                        chartType === 'calendar'
+                          ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                      title={t.weeklyVisits.calendarView}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </button>
                     <button
                       onClick={() => setChartType('bar')}
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -536,6 +800,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
+                      title={lang === 'es' ? 'Vista de barras' : 'Bar chart'}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -548,6 +813,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
+                      title={lang === 'es' ? 'Vista circular' : 'Pie chart'}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -555,17 +821,19 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                       </svg>
                     </button>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.visits}</p>
-                    {stats.visits > 0 && (
-                      <p className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-1">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        {t.weeklyVisits.active}
-                      </p>
-                    )}
-                  </div>
+                  {chartType !== 'calendar' && (
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{totalVisitsDisplay}</p>
+                      {totalVisitsDisplay > 0 && (
+                        <p className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                          </svg>
+                          {t.weeklyVisits.active}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -605,22 +873,22 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                         const total = weeklyData.reduce((a, b) => a + b, 0) || 1;
                         const percentage = (value / total) * 100;
                         const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
-                        
+
                         let cumulativePercent = 0;
                         for (let j = 0; j < i; j++) {
                           cumulativePercent += (weeklyData[j] / total) * 100;
                         }
-                        
+
                         const startAngle = (cumulativePercent / 100) * 360;
                         const endAngle = ((cumulativePercent + percentage) / 100) * 360;
-                        
+
                         const x1 = 50 + 40 * Math.cos((startAngle * Math.PI) / 180);
                         const y1 = 50 + 40 * Math.sin((startAngle * Math.PI) / 180);
                         const x2 = 50 + 40 * Math.cos((endAngle * Math.PI) / 180);
                         const y2 = 50 + 40 * Math.sin((endAngle * Math.PI) / 180);
-                        
+
                         const largeArc = percentage > 50 ? 1 : 0;
-                        
+
                         return value > 0 ? (
                           <path
                             key={i}
@@ -652,6 +920,20 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                     })}
                   </div>
                 </div>
+              )}
+
+              {/* Calendar View */}
+              {chartType === 'calendar' && (
+                <CalendarView
+                  visitsData={visitsData}
+                  selectedMonth={selectedMonth}
+                  selectedYear={selectedYear}
+                  onMonthChange={(month, year) => {
+                    setSelectedMonth(month);
+                    setSelectedYear(year);
+                  }}
+                  lang={lang}
+                />
               )}
             </div>
 
@@ -690,72 +972,6 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                 )}
               </div>
             </div>
-
-            {/* Próximos Pasos - Solo cuando el perfil está completo */}
-            {stats.profileCompleteness === 100 ? (
-              <>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800" data-tour="next-steps">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.nextSteps.title}</h3>
-                  <div className="space-y-3">
-                    <NextStepItem
-                      text={t.nextSteps.add3Experiences}
-                      completed={stats.experienceCount >= 3}
-                      onClick={() => onSectionChange('mi-perfil:experience')}
-                    />
-                    <NextStepItem
-                      text={t.nextSteps.completeSummary}
-                      completed={!!profile?.summary && profile.summary.length > 50}
-                      onClick={() => onSectionChange('mi-perfil:identity')}
-                    />
-                    <NextStepItem
-                      text={t.nextSteps.addSkills}
-                      completed={stats.skillsCount >= 5}
-                      onClick={() => onSectionChange('mi-perfil:skills')}
-                    />
-                  </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.quickSummary.title}</h3>
-                  <div className="space-y-3">
-                    <QuickStatRow label={t.quickSummary.profileCreated} value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { month: 'short', year: 'numeric' }) : 'N/A'} />
-                    <QuickStatRow label={t.quickSummary.lastUpdate} value={t.quickSummary.today} />
-                    <QuickStatRow label={t.quickSummary.activeTemplate} value={profile?.template || 'Minimal'} />
-                    <QuickStatRow label={t.quickSummary.visibility} value={t.quickSummary.public} />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                      {lang === 'es' ? '¡Estás casi listo!' : 'You\'re almost ready!'}
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 leading-relaxed">
-                      {lang === 'es'
-                        ? 'Completa tu perfil al 100% para desbloquear tareas personalizadas, resumen rápido de tu información y recomendaciones de nuestra IA para mejorar tu CV.'
-                        : 'Complete your profile to 100% to unlock personalized tasks, quick summary of your information and recommendations from our AI to improve your CV.'}
-                    </p>
-                    <button
-                      onClick={() => onSectionChange('mi-perfil:identity')}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      {lang === 'es' ? 'Completar Ahora' : 'Complete Now'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Column */}
@@ -778,6 +994,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
                     visas={visas}
                     languages={languages}
                     certifications={certifications}
+                    experienceCount={stats.experienceCount}
+                    educationCount={stats.educationCount}
+                    skillsCount={stats.skillsCount}
+                    certificationsCount={stats.verifiedStamps}
                     onNavigateToSection={(sectionId) => {
                       // Special sections that don't need 'mi-perfil:' prefix
                       const directSections = ['visas', 'stamps', 'analitica'];
@@ -792,57 +1012,16 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = ({
               </Suspense>
             )}
 
-            {/* Mensaje cuando el tour está completado pero el perfil está incompleto */}
-            {hasTourBeenCompleted && stats.profileCompleteness < 100 && (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                      {lang === 'es' ? 'Recomendaciones IA' : 'AI Recommendations'}
-                      <span className="px-2 py-0.5 bg-orange-500 text-white text-xs font-bold rounded-full">
-                        {lang === 'es' ? 'COMPLETA TU PERFIL' : 'COMPLETE YOUR PROFILE'}
-                      </span>
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 leading-relaxed">
-                      {lang === 'es'
-                        ? 'Completa tu perfil al 100% para desbloquear sugerencias personalizadas de nuestra IA. Recibirás recomendaciones sobre cómo mejorar tu CV, optimizar tu perfil y aumentar tus oportunidades laborales.'
-                        : 'Complete your profile to 100% to unlock personalized suggestions from our AI. You will receive recommendations on how to improve your CV, optimize your profile and increase your job opportunities.'}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${stats.profileCompleteness}%` }}
-                        ></div>
-                      </div>
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400 min-w-[48px] text-right">
-                        {stats.profileCompleteness}%
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => onSectionChange('mi-perfil:identity')}
-                      className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      {lang === 'es' ? 'Completar Perfil' : 'Complete Profile'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+          </div>
+          </div>
+        )}
+        {/* Fin del renderizado condicional */}
+
       </div>
     </div>
   );
-};
+});
 
 // Activity Item Component
 const ActivityItem: React.FC<{
@@ -884,40 +1063,6 @@ const ProfileStrengthItem: React.FC<{
     ) : (
       <div className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600"></div>
     )}
-  </div>
-));
-
-// Next Step Item
-const NextStepItem: React.FC<{
-  text: string;
-  completed: boolean;
-  onClick: () => void;
-}> = memo(({ text, completed, onClick }) => (
-  <button
-    onClick={onClick}
-    className="w-full flex items-start gap-3 text-left hover:bg-white/50 dark:hover:bg-gray-800/50 p-2 rounded-lg transition-colors"
-  >
-    {completed ? (
-      <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ) : (
-      <div className="w-5 h-5 rounded-full border-2 border-blue-400 flex-shrink-0 mt-0.5"></div>
-    )}
-    <span className={`text-sm ${completed ? 'text-gray-500 dark:text-gray-400 line-through' : 'text-gray-700 dark:text-gray-300'}`}>
-      {text}
-    </span>
-  </button>
-));
-
-// Quick Stat Row
-const QuickStatRow: React.FC<{
-  label: string;
-  value: string;
-}> = memo(({ label, value }) => (
-  <div className="flex items-center justify-between">
-    <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
-    <span className="text-sm font-semibold text-gray-900 dark:text-white">{value}</span>
   </div>
 ));
 
@@ -989,5 +1134,218 @@ const QuickActionCard: React.FC<{
     </div>
   </button>
 ));
+
+// Calendar View Component
+interface CalendarViewProps {
+  visitsData: { name: string; visits: number }[];
+  selectedMonth: number;
+  selectedYear: number;
+  onMonthChange: (month: number, year: number) => void;
+  lang: string;
+}
+
+const CalendarView: React.FC<CalendarViewProps> = ({
+  visitsData,
+  selectedMonth,
+  selectedYear,
+  onMonthChange,
+  lang,
+}) => {
+  const translations = useTranslations();
+  const t = translations.dashboard;
+  const currentDate = new Date();
+  const monthNames = lang === 'es'
+    ? ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  const dayNames = lang === 'es'
+    ? ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Generate calendar data
+  const firstDay = new Date(selectedYear, selectedMonth, 1);
+  const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
+
+  // Create a map of dates to visits
+  const viewsMap = new Map<string, number>();
+  const hasRealData = visitsData && visitsData.length > 0;
+
+  if (hasRealData) {
+    // Use real data
+    visitsData.forEach(({ name, visits }) => {
+      const dateObj = new Date(name);
+      if (dateObj.getMonth() === selectedMonth && dateObj.getFullYear() === selectedYear) {
+        viewsMap.set(name, visits);
+      }
+    });
+  } else {
+    // Generate demo data for current month only
+    const today = new Date();
+    if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) {
+      // Generate some random visits for demo purposes (last 2 weeks)
+      const demoVisits = [
+        { day: today.getDate(), visits: Math.floor(Math.random() * 5) + 1 }, // Today
+        { day: today.getDate() - 1, visits: Math.floor(Math.random() * 8) + 2 },
+        { day: today.getDate() - 2, visits: Math.floor(Math.random() * 6) + 1 },
+        { day: today.getDate() - 3, visits: Math.floor(Math.random() * 4) + 1 },
+        { day: today.getDate() - 5, visits: Math.floor(Math.random() * 7) + 2 },
+        { day: today.getDate() - 7, visits: Math.floor(Math.random() * 10) + 3 },
+        { day: today.getDate() - 9, visits: Math.floor(Math.random() * 5) + 1 },
+        { day: today.getDate() - 12, visits: Math.floor(Math.random() * 8) + 2 },
+      ];
+
+      demoVisits.forEach(({ day, visits }) => {
+        if (day > 0 && day <= daysInMonth) {
+          const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          viewsMap.set(dateStr, visits);
+        }
+      });
+    }
+  }
+
+  const maxViews = Math.max(...Array.from(viewsMap.values()), 1);
+  const totalViews = Array.from(viewsMap.values()).reduce((sum, views) => sum + views, 0);
+
+  // Get intensity color based on views
+  const getIntensityColor = (views: number) => {
+    if (views === 0) return 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+    const intensity = views / maxViews;
+    if (intensity < 0.25) return 'bg-blue-200 dark:bg-blue-900 border-blue-300 dark:border-blue-800';
+    if (intensity < 0.5) return 'bg-blue-400 dark:bg-blue-700 border-blue-500 dark:border-blue-600';
+    if (intensity < 0.75) return 'bg-blue-500 dark:bg-blue-600 border-blue-600 dark:border-blue-500';
+    return 'bg-blue-600 dark:bg-blue-500 border-blue-700 dark:border-blue-400';
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      onMonthChange(11, selectedYear - 1);
+    } else {
+      onMonthChange(selectedMonth - 1, selectedYear);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      onMonthChange(0, selectedYear + 1);
+    } else {
+      onMonthChange(selectedMonth + 1, selectedYear);
+    }
+  };
+
+  const isNextDisabled = selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth();
+
+  return (
+    <div className="space-y-3">
+      {/* Month/Year Selector */}
+      <div className="flex items-center justify-between px-2">
+        <button
+          onClick={handlePrevMonth}
+          className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
+          title={lang === 'es' ? 'Mes anterior' : 'Previous month'}
+        >
+          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <div className="text-center">
+          <h4 className="text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            {monthNames[selectedMonth]} {selectedYear}
+          </h4>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
+            <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+              {totalViews} {lang === 'es' ? 'visitas' : 'visits'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={handleNextMonth}
+          disabled={isNextDisabled}
+          className={`p-2 rounded-lg transition-all duration-200 group ${
+            isNextDisabled
+              ? 'opacity-30 cursor-not-allowed'
+              : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'
+          }`}
+          title={lang === 'es' ? 'Mes siguiente' : 'Next month'}
+        >
+          <svg className={`w-4 h-4 transition-colors ${
+            isNextDisabled
+              ? 'text-gray-400 dark:text-gray-600'
+              : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Calendar Grid */}
+      <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-7 gap-1.5">
+          {/* Day headers */}
+          {dayNames.map((day) => (
+            <div key={day} className="text-center text-[10px] font-bold text-gray-500 dark:text-gray-400 pb-1">
+              {day}
+            </div>
+          ))}
+
+          {/* Empty cells before first day of month */}
+          {Array.from({ length: startingDayOfWeek }).map((_, index) => (
+            <div key={`empty-${index}`} className="aspect-square" />
+          ))}
+
+          {/* Days of the month */}
+          {Array.from({ length: daysInMonth }).map((_, index) => {
+            const day = index + 1;
+            const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const views = viewsMap.get(dateStr) || 0;
+            const isToday = day === currentDate.getDate() &&
+                          selectedMonth === currentDate.getMonth() &&
+                          selectedYear === currentDate.getFullYear();
+
+            return (
+              <div
+                key={day}
+                className={`aspect-square rounded-md flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md border-2 relative group ${
+                  getIntensityColor(views)
+                } ${isToday ? 'ring-2 ring-offset-1 ring-blue-500 dark:ring-blue-400 shadow-lg' : ''}`}
+                title={`${day} ${monthNames[selectedMonth]}: ${views} ${lang === 'es' ? 'visitas' : 'visits'}`}
+              >
+                <span className={`text-[10px] font-bold ${views > 0 ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                  {day}
+                </span>
+                {views > 0 && (
+                  <span className="text-[8px] text-white/90 font-extrabold mt-0.5">
+                    {views}
+                  </span>
+                )}
+                {/* Hover tooltip */}
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white text-[9px] px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                  {views} {lang === 'es' ? 'visitas' : 'visits'}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-3 px-2">
+        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">{t.weeklyVisits.less}</span>
+        <div className="flex gap-1">
+          <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 transition-transform hover:scale-125 cursor-pointer" title="0" />
+          <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-900 border-2 border-blue-300 dark:border-blue-800 transition-transform hover:scale-125 cursor-pointer" title="1-25%" />
+          <div className="w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-700 border-2 border-blue-500 dark:border-blue-600 transition-transform hover:scale-125 cursor-pointer" title="26-50%" />
+          <div className="w-3 h-3 rounded-sm bg-blue-500 dark:bg-blue-600 border-2 border-blue-600 dark:border-blue-500 transition-transform hover:scale-125 cursor-pointer" title="51-75%" />
+          <div className="w-3 h-3 rounded-sm bg-blue-600 dark:bg-blue-500 border-2 border-blue-700 dark:border-blue-400 transition-transform hover:scale-125 cursor-pointer" title="76-100%" />
+        </div>
+        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">{t.weeklyVisits.more}</span>
+      </div>
+    </div>
+  );
+};
 
 export default memo(ModernDashboardView);

@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, MapPinIcon, BriefcaseIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { useTranslations } from '../../hooks/useTranslations';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface ModernCleanTemplateProps {
     data: FullProfileData;
@@ -11,6 +13,13 @@ interface ModernCleanTemplateProps {
 const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#6366F1'; // Default to indigo-500
+    const t = useTranslations();
+
+    // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
+    const portfolioItems = data.portfolioItems || data.portfolio || [];
+
+    // Filter certifications from portfolio
+    const certifications = portfolioItems.filter(item => item.type === 'CERTIFICATION');
 
     const lighterHex = (hex: string) => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -69,6 +78,16 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                             <span>{profile.location || 'Remote'}</span>
                         </div>
                     </div>
+                    {/* Contact Buttons */}
+                    <div className="mt-8">
+                        <ProfileContactButtons
+                            profileId={profile.id}
+                            profileEmail={profile.email}
+                            variant="compact"
+                            accentColor={accentColor}
+                            showDownload={false}
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -79,7 +98,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
                                 <BriefcaseIcon className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">About Me</h2>
+                            <h2 className="text-3xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">{t.cvSections.about}</h2>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
                             {profile.summary}
@@ -91,7 +110,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
                                 <BriefcaseIcon className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Experience</h2>
+                            <h2 className="text-3xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">{t.cvSections.experience}</h2>
                         </div>
                         <div className="space-y-10">
                             {experiences.map((exp, index) => (
@@ -101,7 +120,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                                         <div className="flex justify-between items-start mb-3">
                                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                             <p className="text-sm font-semibold px-4 py-1.5 rounded-lg whitespace-nowrap ml-4" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
-                                                {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}
+                                                {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                             </p>
                                         </div>
                                         <p className="font-bold text-lg mb-3" style={{ color: accentColor }}>
@@ -125,7 +144,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
                                 <BriefcaseIcon className="w-5 h-5 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Skills</h2>
+                            <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">{t.cvSections.skills}</h2>
                         </div>
                         <div className="flex flex-col gap-4">
                             {skills.map(skill => (
@@ -141,7 +160,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
                                 <AcademicCapIcon className="w-5 h-5 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">Education</h2>
+                            <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">{t.cvSections.education}</h2>
                         </div>
                         <div className="space-y-6">
                             {education.map(edu => (
@@ -149,12 +168,68 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{edu.degree}</h3>
                                     <p className="text-gray-700 dark:text-gray-300 font-semibold text-sm mb-1">{edu.institution_name}</p>
                                     <p className="text-xs font-medium px-3 py-1 rounded-lg inline-block mt-2" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
-                                        {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Ongoing'}
+                                        {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.ongoing}
                                     </p>
                                 </div>
                             ))}
                         </div>
                     </section>
+
+                    {/* Certifications Section */}
+                    {certifications.length > 0 && (
+                        <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
+                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                                    {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                </h2>
+                            </div>
+                            <div className="space-y-6">
+                                {certifications.map((cert, index) => (
+                                    <div key={cert.id || index} className="p-5 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-tertiary rounded-xl shadow-md hover:shadow-lg transition-all">
+                                        <div className="flex gap-4">
+                                            {cert.image_url && (
+                                                <div className="flex-shrink-0">
+                                                    <img
+                                                        src={cert.image_url}
+                                                        alt={cert.title}
+                                                        className="w-16 h-16 object-contain rounded-lg"
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2 flex-wrap">
+                                                    {cert.title}
+                                                    {cert.verified && (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                            </svg>
+                                                            Verificado
+                                                        </span>
+                                                    )}
+                                                </h3>
+                                                <p className="text-gray-700 dark:text-gray-300 font-semibold text-sm mb-1">{cert.issuer}</p>
+                                                <p className="text-xs font-medium px-3 py-1 rounded-lg inline-block mt-2" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
+                                                    {cert.issue_date}
+                                                    {cert.expiry_date && ` • Expira: ${cert.expiry_date}`}
+                                                </p>
+                                                {cert.description && (
+                                                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                                                        {cert.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </aside>
             </main>
         </div>

@@ -14,9 +14,6 @@ interface BlogPost {
     summary: string;
     content: string;
     image_url: string;
-    author_name: string;
-    author_image_url: string;
-    author_username?: string;
     category: string;
     is_featured: boolean;
     published_at: string;
@@ -36,13 +33,6 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 const ArticleCard: React.FC<{ post: BlogPost; basePath: string }> = ({ post, basePath }) => {
     const navigate = useNavigate();
 
-    const handleAuthorClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (post.author_username) {
-            navigate(`/cv/${post.author_username}`);
-        }
-    };
-
     return (
         <div
             onClick={() => navigate(`${basePath}/${post.slug}`)}
@@ -55,21 +45,11 @@ const ArticleCard: React.FC<{ post: BlogPost; basePath: string }> = ({ post, bas
         <div className="p-6 flex flex-col flex-grow">
             <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary group-hover:text-cv-blue transition-colors duration-300">{post.title}</h3>
             <p className="mt-2 text-gray-600 dark:text-dark-text-secondary flex-grow">{post.summary}</p>
-            <div className="mt-4 flex items-center pt-4 border-t border-gray-100 dark:border-dark-border">
-                <img src={post.author_image_url} alt={post.author_name} className="w-10 h-10 rounded-full object-cover mr-3" />
-                <div>
-                    {post.author_username ? (
-                        <button
-                            onClick={handleAuthorClick}
-                            className="font-semibold text-sm text-cv-blue hover:text-blue-700 hover:underline transition-colors"
-                        >
-                            {post.author_name}
-                        </button>
-                    ) : (
-                        <p className="font-semibold text-sm">{post.author_name}</p>
-                    )}
-                    <p className="text-xs text-gray-500 dark:text-dark-text-tertiary">{new Date(post.published_at).toLocaleDateString()}</p>
-                </div>
+            <div className="mt-4 flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-dark-border text-gray-500 dark:text-gray-400">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-xs">{new Date(post.published_at).toLocaleDateString()}</p>
             </div>
         </div>
     </div>
@@ -181,7 +161,7 @@ const BlogPage: React.FC = () => {
                     {featuredPost && (
                         <section className="py-12 px-4">
                             <AnimatedWrapper>
-                                <div 
+                                <div
                                     onClick={() => navigate(`${blogBasePath}/${featuredPost.slug}`)}
                                     className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 items-center bg-white dark:bg-dark-bg-primary p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
                                 >
@@ -190,12 +170,11 @@ const BlogPage: React.FC = () => {
                                         <p className="text-cv-blue font-semibold">{pageData.featured.label}</p>
                                         <h2 className="mt-2 text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary hover:text-cv-blue transition-colors">{featuredPost.title}</h2>
                                         <p className="mt-4 text-gray-600 dark:text-dark-text-secondary">{featuredPost.summary}</p>
-                                        <div className="mt-6 flex items-center">
-                                            <img src={featuredPost.author_image_url} alt={featuredPost.author_name} className="w-12 h-12 rounded-full object-cover mr-4" />
-                                            <div>
-                                                <p className="font-semibold">{featuredPost.author_name}</p>
-                                                <p className="text-sm text-gray-500 dark:text-dark-text-tertiary">{new Date(featuredPost.published_at).toLocaleDateString()}</p>
-                                            </div>
+                                        <div className="mt-6 flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-sm">{new Date(featuredPost.published_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -258,7 +237,7 @@ const BlogPage: React.FC = () => {
                                         <ul className="space-y-4">
                                             {popularPosts.map(post => (
                                                 <li key={post.id}>
-                                                    <Link 
+                                                    <Link
                                                         to={`${blogBasePath}/${post.slug}`}
                                                         className="font-semibold text-gray-700 dark:text-dark-text-secondary hover:text-cv-blue"
                                                     >

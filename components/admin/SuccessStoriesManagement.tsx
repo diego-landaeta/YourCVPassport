@@ -53,6 +53,7 @@ const SuccessStoriesManagement: React.FC = () => {
       const { data, error } = await supabase
         .from('success_stories')
         .select('*')
+        .order('featured', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -132,7 +133,7 @@ const SuccessStoriesManagement: React.FC = () => {
     const confirmed = await showConfirm({
       title: `Confirmar ${action}`,
       message: `¿Deseas ${action} esta historia?`,
-      type: 'info',
+      type: 'confirm',
       confirmText: action === 'aprobar' ? 'Aprobar' : 'Rechazar',
       cancelText: 'Cancelar'
     });
@@ -149,6 +150,29 @@ const SuccessStoriesManagement: React.FC = () => {
       showAlert({
         title: 'Éxito',
         message: `Historia ${action === 'aprobar' ? 'aprobada' : 'rechazada'} correctamente`,
+        type: 'success'
+      });
+      loadStories();
+    } catch (err: any) {
+      showAlert({
+        title: 'Error',
+        message: 'Error al actualizar: ' + err.message,
+        type: 'error'
+      });
+    }
+  };
+
+  const handleToggleFeatured = async (id: string, currentFeaturedStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('success_stories')
+        .update({ featured: !currentFeaturedStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+      showAlert({
+        title: 'Éxito',
+        message: `Historia ${!currentFeaturedStatus ? 'marcada' : 'desmarcada'} como destacada`,
         type: 'success'
       });
       loadStories();
@@ -455,106 +479,220 @@ const SuccessStoriesManagement: React.FC = () => {
             No hay historias publicadas. Crea la primera historia.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-              <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Historia
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Industria/Objetivo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-dark-border">
-                {stories.map((story) => (
-                  <tr key={story.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <img
-                          src={story.image_url}
-                          alt={story.name}
-                          className="h-10 w-10 rounded-full object-cover"
-                        />
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {story.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {story.role}
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Historia
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Industria/Objetivo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Estado
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Fecha
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-dark-border">
+                  {stories.map((story) => (
+                    <tr key={story.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <img
+                            src={story.image_url}
+                            alt={story.name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {story.name}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {story.role}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{story.industry}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{story.goal}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          story.approved
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                        }`}>
-                          {story.approved ? '✓ Aprobada' : '⏳ Pendiente'}
-                        </span>
-                        {story.featured && (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                            ⭐ Destacada
-                          </span>
-                        )}
-                        {story.user_id && (
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                            👤 Usuario
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(story.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => handleApprove(story.id, story.approved)}
-                          className={`px-3 py-1 rounded ${
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">{story.industry}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{story.goal}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             story.approved
-                              ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
-                              : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400'
-                          }`}
-                        >
-                          {story.approved ? 'Rechazar' : 'Aprobar'}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(story)}
-                          className="text-cv-blue hover:text-blue-700 px-3 py-1"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(story.id, story.name)}
-                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 px-3 py-1"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                          }`}>
+                            {story.approved ? '✓ Aprobada' : '⏳ Pendiente'}
+                          </span>
+                          {story.featured && (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                              ⭐ Destacada
+                            </span>
+                          )}
+                          {story.user_id && (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                              👤 Usuario
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(story.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleToggleFeatured(story.id, story.featured)}
+                            className={`px-3 py-1 rounded ${
+                              story.featured
+                                ? 'bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
+                            }`}
+                            title={story.featured ? 'Quitar de destacadas' : 'Marcar como destacada'}
+                          >
+                            {story.featured ? '⭐' : '☆'}
+                          </button>
+                          <button
+                            onClick={() => handleApprove(story.id, story.approved)}
+                            className={`px-3 py-1 rounded ${
+                              story.approved
+                                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400'
+                            }`}
+                          >
+                            {story.approved ? 'Rechazar' : 'Aprobar'}
+                          </button>
+                          <button
+                            onClick={() => handleEdit(story)}
+                            className="text-cv-blue hover:text-blue-700 px-3 py-1"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(story.id, story.name)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 px-3 py-1"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="block md:hidden divide-y divide-gray-200 dark:divide-dark-border">
+              {stories.map((story) => (
+                <div key={story.id} className="p-4 bg-white dark:bg-dark-bg-secondary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
+                  {/* Header with Image and Name */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={story.image_url}
+                      alt={story.name}
+                      className="h-12 w-12 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                        {story.name}
+                      </h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {story.role}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Industry and Goal */}
+                  <div className="mb-3 space-y-1">
+                    <div className="text-xs text-gray-900 dark:text-white">
+                      <span className="font-medium">Industria:</span> {story.industry}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="font-medium">Objetivo:</span> {story.goal}
+                    </div>
+                  </div>
+
+                  {/* Status Badges */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      story.approved
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    }`}>
+                      {story.approved ? '✓ Aprobada' : '⏳ Pendiente'}
+                    </span>
+                    {story.featured && (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        ⭐ Destacada
+                      </span>
+                    )}
+                    {story.user_id && (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        👤 Usuario
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Date */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    {new Date(story.created_at).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleToggleFeatured(story.id, story.featured)}
+                      className={`flex-1 px-3 py-2 text-xs rounded ${
+                        story.featured
+                          ? 'bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400'
+                      }`}
+                    >
+                      {story.featured ? '⭐ Destacada' : '☆ Destacar'}
+                    </button>
+                    <button
+                      onClick={() => handleApprove(story.id, story.approved)}
+                      className={`flex-1 px-3 py-2 text-xs rounded ${
+                        story.approved
+                          ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400'
+                      }`}
+                    >
+                      {story.approved ? 'Rechazar' : 'Aprobar'}
+                    </button>
+                    <button
+                      onClick={() => handleEdit(story)}
+                      className="flex-1 px-3 py-2 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(story.id, story.name)}
+                      className="flex-1 px-3 py-2 text-xs rounded bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

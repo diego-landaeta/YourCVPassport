@@ -7,10 +7,24 @@ export interface DateValidationResult {
   error?: string;
 }
 
+export interface DateValidationTranslations {
+  dateFormatInvalid: string;
+  yearInvalid: string;
+  yearTooOld: string;
+  yearFuture: string;
+  monthInvalid: string;
+  endDateBeforeStart: string;
+  dateRangeTooLong: string;
+}
+
 /**
  * Valida que una fecha sea lógica y realista
  */
-export function validateDate(dateStr: string | null | undefined, fieldName: string = 'La fecha'): DateValidationResult {
+export function validateDate(
+  dateStr: string | null | undefined,
+  fieldName: string = 'Date',
+  t?: DateValidationTranslations
+): DateValidationResult {
   // Si no hay fecha, es válido (campo opcional)
   if (!dateStr) {
     return { isValid: true };
@@ -37,7 +51,7 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
   } else {
     return {
       isValid: false,
-      error: `${fieldName} tiene un formato inválido. Use YYYY-MM (ej: 2024-03)`
+      error: t?.dateFormatInvalid || `${fieldName} has invalid format. Use YYYY-MM (eg: 2024-03)`
     };
   }
 
@@ -45,7 +59,7 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
   if (year < 1000 || year > 9999 || isNaN(year)) {
     return {
       isValid: false,
-      error: `${fieldName} debe tener un año de 4 dígitos válido (YYYY)`
+      error: t?.yearInvalid || `${fieldName} must have a valid 4-digit year (YYYY)`
     };
   }
 
@@ -57,14 +71,14 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
   if (year < minYear) {
     return {
       isValid: false,
-      error: `${fieldName} no puede ser anterior a ${minYear}`
+      error: t?.yearTooOld || `${fieldName} cannot be before ${minYear}`
     };
   }
 
   if (year > maxYear) {
     return {
       isValid: false,
-      error: `${fieldName} no puede ser posterior a ${maxYear}`
+      error: t?.yearFuture || `${fieldName} cannot be after ${maxYear}`
     };
   }
 
@@ -72,7 +86,7 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
   if (month < 1 || month > 12) {
     return {
       isValid: false,
-      error: `El mes debe estar entre 01 y 12`
+      error: t?.monthInvalid || `Month must be between 01 and 12`
     };
   }
 
@@ -82,7 +96,7 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
     if (day < 1 || day > daysInMonth) {
       return {
         isValid: false,
-        error: `El día debe estar entre 01 y ${daysInMonth} para ${month}/${year}`
+        error: `Day must be between 01 and ${daysInMonth} for ${month}/${year}`
       };
     }
   }
@@ -96,10 +110,11 @@ export function validateDate(dateStr: string | null | undefined, fieldName: stri
 export function validateDateRange(
   startDate: string | null | undefined,
   endDate: string | null | undefined,
-  isCurrent: boolean = false
+  isCurrent: boolean = false,
+  t?: DateValidationTranslations
 ): DateValidationResult {
   // Validar fecha de inicio
-  const startValidation = validateDate(startDate, 'La fecha de inicio');
+  const startValidation = validateDate(startDate, 'Start date', t);
   if (!startValidation.isValid) {
     return startValidation;
   }
@@ -116,7 +131,7 @@ export function validateDateRange(
   }
 
   // Validar fecha de fin
-  const endValidation = validateDate(endDate, 'La fecha de fin');
+  const endValidation = validateDate(endDate, 'End date', t);
   if (!endValidation.isValid) {
     return endValidation;
   }
@@ -129,7 +144,7 @@ export function validateDateRange(
     if (end < start) {
       return {
         isValid: false,
-        error: 'La fecha de fin no puede ser anterior a la fecha de inicio'
+        error: t?.endDateBeforeStart || 'End date cannot be before start date'
       };
     }
 
@@ -138,7 +153,7 @@ export function validateDateRange(
     if (yearsDiff > 50) {
       return {
         isValid: false,
-        error: 'El rango de fechas no puede ser mayor a 50 años'
+        error: t?.dateRangeTooLong || 'Date range cannot be longer than 50 years'
       };
     }
   }

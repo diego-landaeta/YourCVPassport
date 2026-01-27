@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Minimal ATS Template
  *

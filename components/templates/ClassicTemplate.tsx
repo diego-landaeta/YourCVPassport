@@ -3,6 +3,8 @@ import { FullProfileData } from '../../types';
 import { BriefcaseIcon, AcademicCapIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
 import VerifiedStampsBadge from '../VerifiedStampsBadge';
+import { useTranslations } from '../../hooks/useTranslations';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface ClassicTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,14 @@ interface ClassicTemplateProps {
 const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#0052FF'; // Default to cv-blue
+    const t = useTranslations();
+
+    // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
+    const portfolioItems = data.portfolioItems || data.portfolio || [];
+
+    // Filter certifications and collaborations from portfolio
+    const certifications = portfolioItems.filter(item => item.type === 'CERTIFICATION');
+    const collaborations = data.collaborations || [];
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
@@ -54,6 +64,16 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                         <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
                     </div>
                 )}
+                {/* Contact Buttons */}
+                <div className="mt-6 flex justify-center">
+                    <ProfileContactButtons
+                        profileId={profile.id}
+                        profileEmail={profile.email}
+                        variant="compact"
+                        accentColor={accentColor}
+                        showDownload={false}
+                    />
+                </div>
             </header>
 
             <main className="grid md:grid-cols-3 gap-12">
@@ -63,14 +83,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}DD)` }}>
                                 <SparklesIcon className="w-5 h-5 text-white" />
                             </div>
-                            <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">Summary</h2>
+                            <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white">{t.cvSections.summary}</h2>
                         </div>
                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-serif">
                             {profile.summary}
                         </p>
                     </section>
                     <section className="bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
-                        <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white mb-6">Skills</h2>
+                        <h2 className="text-xl font-serif font-bold text-gray-900 dark:text-white mb-6">{t.cvSections.skills}</h2>
                         <div className="flex flex-wrap gap-3">
                             {skills.map(skill => (
                                 <span
@@ -94,7 +114,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}DD)` }}>
                                 <BriefcaseIcon className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">Work Experience</h2>
+                            <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">{t.cvSections.workExperience}</h2>
                         </div>
                         <div className="space-y-8">
                             {experiences.map((exp, index) => (
@@ -108,7 +128,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                             {exp.company_name}
                                         </p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">
-                                            {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : 'Present'}
+                                            {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : t.cvSections.present}
                                         </p>
                                         {exp.description && (
                                             <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -125,7 +145,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}DD)` }}>
                                 <AcademicCapIcon className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">Education</h2>
+                            <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">{t.cvSections.education}</h2>
                         </div>
                          <div className="space-y-6">
                             {education.map(edu => (
@@ -141,7 +161,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                             {edu.degree}{edu.field_of_study && `, ${edu.field_of_study}`}
                                         </p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : 'Ongoing'}
+                                            {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : t.cvSections.ongoing}
                                         </p>
                                         {edu.description && (
                                             <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
@@ -153,6 +173,102 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                             ))}
                         </div>
                     </section>
+
+                    {/* Certifications Section */}
+                    {certifications.length > 0 && (
+                        <section className="bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}DD)` }}>
+                                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">
+                                    {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                </h2>
+                            </div>
+                            <div className="space-y-6">
+                                {certifications.map((cert, index) => (
+                                    <div key={cert.id || index} className="flex gap-5 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-dark-bg-primary dark:to-gray-800 rounded-xl hover:shadow-md transition-all">
+                                        {cert.image_url && (
+                                            <div className="flex-shrink-0">
+                                                <img
+                                                    src={cert.image_url}
+                                                    alt={cert.title}
+                                                    className="w-16 h-16 object-contain rounded-lg"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-serif font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2 flex-wrap">
+                                                {cert.title}
+                                                {cert.verified && (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                        </svg>
+                                                        Verificado
+                                                    </span>
+                                                )}
+                                            </h3>
+                                            <p className="font-semibold text-gray-700 dark:text-gray-300">
+                                                {cert.issuer}
+                                            </p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                {cert.issue_date}
+                                                {cert.expiry_date && ` • Expira: ${cert.expiry_date}`}
+                                            </p>
+                                            {cert.description && (
+                                                <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+                                                    {cert.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Collaborations Section */}
+                    {collaborations.length > 0 && (
+                        <section className="bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}DD)` }}>
+                                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">
+                                    {t.cvSections?.collaborations || 'Collaborations'}
+                                </h2>
+                            </div>
+                            <div className="space-y-6">
+                                {collaborations.map((collab, index) => (
+                                    <div key={collab.id || index} className="p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-dark-bg-primary dark:to-gray-800 rounded-xl hover:shadow-md transition-all">
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-serif font-bold text-gray-900 dark:text-white mb-1">
+                                                {collab.title}
+                                            </h3>
+                                            <p className="font-semibold text-gray-700 dark:text-gray-300">
+                                                {collab.organization} {collab.role && `• ${collab.role}`}
+                                            </p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                {collab.start_date && formatDate(collab.start_date)}
+                                                {collab.end_date && !collab.is_current && ` - ${formatDate(collab.end_date)}`}
+                                                {collab.is_current && ' - Present'}
+                                            </p>
+                                            {collab.description && (
+                                                <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+                                                    {collab.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
             </main>
         </div>

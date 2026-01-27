@@ -2,12 +2,13 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import { useLanguage } from '../contexts/LanguageContext';
 
 const ProtectedRoute: React.FC = () => {
   const { session, loading } = useAuth();
   const location = useLocation();
-  const { lang } = useLanguage();
+
+  // Get saved language from localStorage for loading message
+  const lang = (localStorage.getItem('language') === 'es') ? 'es' : 'en';
 
   if (loading) {
     const message = lang === 'es' ? 'Verificando sesión...' : 'Verifying session...';

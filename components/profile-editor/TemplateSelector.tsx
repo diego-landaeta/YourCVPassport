@@ -25,7 +25,7 @@ import ModernMinimalistTemplate from '../templates/ModernMinimalistTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from '../templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from '../templates/HealthcareProfessionalTemplate';
-
+import UrbanTemplate from '../templates/UrbanTemplate';
 interface TemplateSelectorProps {
   currentTemplate?: string;
   onTemplateChange: (templateId: string) => void;
@@ -123,7 +123,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
       certifications: [],
       languages: [],
     };
-
+// Regular templates
     switch (templateId) {
       case 'passport':
         return <PassportTemplate data={data} />;
@@ -165,6 +165,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
         return <ProfessionalClassicTemplate data={data} />;
       case 'healthcare-professional':
         return <HealthcareProfessionalTemplate data={data} />;
+      case 'urban':
+        return <UrbanTemplate data={data} />;
       default:
         return <PassportTemplate data={data} />;
     }
@@ -186,8 +188,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
 
   return (
     <>
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
-        {/* Upgrade Prompt */}
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">{/* Upgrade Prompt */}
         {!isPro && (
           <div className="mb-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6">
             <div className="flex items-start gap-4">
@@ -233,7 +234,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
               >
                 {/* Template Preview - Static Image with Click to Preview */}
                 <div
-                  className="aspect-[3/4] bg-white dark:bg-dark-bg-tertiary relative overflow-hidden cursor-pointer group"
+                  className="aspect-[3/4] bg-white relative overflow-hidden cursor-pointer group"
                   onClick={() => !isLocked && setPreviewTemplate(template.id)}
                 >
                   <img
@@ -274,9 +275,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
                       </svg>
                       {t.selected}
                     </div>
-                  )}
-
-                  {/* Pro Badge */}
+                  )}{/* Pro Badge */}
                   {template.isPro && !isLocked && (
                     <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded text-xs font-semibold z-10">
                       {t.proLabel}
@@ -351,8 +350,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
             </div>
 
             {/* Modal Body - Scrollable Preview */}
-            <div className="overflow-y-auto max-h-[calc(90vh-80px)] bg-gray-100 dark:bg-gray-900 p-8">
-              <div className="max-w-4xl mx-auto bg-white dark:bg-dark-bg-secondary shadow-xl">
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] bg-gray-100 p-8">
+              <div className="max-w-4xl mx-auto bg-white shadow-xl">
                 {getTemplateComponent(previewTemplate)}
               </div>
             </div>

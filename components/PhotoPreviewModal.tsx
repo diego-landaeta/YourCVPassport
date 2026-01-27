@@ -73,21 +73,91 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
     setPosition({ x: 0, y: 0 });
   };
 
-  const handleConfirm = () => {
-    onConfirm(originalFile, { scale, x: position.x, y: position.y });
+  const handleConfirm = async () => {
+    // Create a canvas to crop the image
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size to desired output (square for profile photo)
+    const outputSize = 512;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+
+    // Load the image
+    const img = new Image();
+    img.src = imageUrl;
+
+    await new Promise<void>((resolve) => {
+      img.onload = () => {
+        // Calculate the dimensions
+        const containerWidth = imageRef.current?.offsetWidth || 400;
+        const containerHeight = imageRef.current?.offsetHeight || 400;
+
+        // Calculate scaled image dimensions
+        const scaledWidth = img.naturalWidth * scale;
+        const scaledHeight = img.naturalHeight * scale;
+
+        // Calculate the position of the image within the container
+        const imgX = (containerWidth - scaledWidth) / 2 + position.x;
+        const imgY = (containerHeight - scaledHeight) / 2 + position.y;
+
+        // Calculate the circular crop area (80% of container as per the guide)
+        const cropRadius = (containerWidth * 0.4); // 80% diameter = 40% radius
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+
+        // Calculate source coordinates (what part of the scaled image to crop)
+        const sourceX = centerX - cropRadius - imgX;
+        const sourceY = centerY - cropRadius - imgY;
+        const sourceDiameter = cropRadius * 2;
+
+        // Draw circular clipping path
+        ctx.beginPath();
+        ctx.arc(outputSize / 2, outputSize / 2, outputSize / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        // Draw the image
+        ctx.drawImage(
+          img,
+          sourceX / scale,
+          sourceY / scale,
+          sourceDiameter / scale,
+          sourceDiameter / scale,
+          0,
+          0,
+          outputSize,
+          outputSize
+        );
+
+        resolve();
+      };
+    });
+
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const croppedFile = new File([blob], originalFile.name, {
+          type: 'image/png',
+          lastModified: Date.now(),
+        });
+        onConfirm(croppedFile, { scale, x: position.x, y: position.y });
+      }
+    }, 'image/png', 0.95);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75">
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-xl max-w-2xl w-full">
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-xl max-w-lg w-full">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-dark-border">
+        <div className="p-4 border-b border-gray-200 dark:border-dark-border">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Ajusta tu foto de perfil
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Centra y ajusta el zoom de tu imagen
               </p>
             </div>
@@ -103,7 +173,7 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
         </div>
 
         {/* Preview Area */}
-        <div className="p-6">
+        <div className="p-4">
           <div className="relative w-full aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
             {/* Circular Crop Overlay */}
             <div className="absolute inset-0 pointer-events-none z-10">
@@ -132,6 +202,7 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
                 draggable={false}
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                  transformOrigin: 'center center',
                   transition: isDragging ? 'none' : 'transform 0.1s ease-out',
                 }}
               />
@@ -144,7 +215,7 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
           </div>
 
           {/* Controls */}
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-3">
             {/* Zoom Slider */}
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -199,7 +270,7 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary">
+        <div className="p-4 border-t border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary">
           <div className="flex gap-3">
             <button
               onClick={handleReset}

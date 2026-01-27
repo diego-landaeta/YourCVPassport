@@ -10,6 +10,8 @@ interface SEOHeadProps {
   currentLang?: 'en' | 'es';
   canonicalUrl?: string;
   keywords?: string;
+  profileSkills?: string[]; // Top skills from profile
+  profileExperience?: string[]; // Job titles from experience
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
@@ -18,7 +20,9 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   profile,
   currentLang = 'en',
   canonicalUrl,
-  keywords
+  keywords: propKeywords,
+  profileSkills = [],
+  profileExperience = []
 }) => {
   const baseUrl = 'https://yourcvpassport.com';
 
@@ -44,9 +48,81 @@ const SEOHead: React.FC<SEOHeadProps> = ({
 
   if (profile) {
     title = propTitle || profile.meta_title || `${profile.full_name} - ${profile.headline} | YourCVPassport`;
-    description = propDescription || profile.meta_description || 
-      profile.summary?.substring(0, 160) || 
-      `Professional profile of ${profile.full_name}. ${profile.headline}`;
+
+    // Build a rich, profile-specific description
+    if (!propDescription && !profile.meta_description) {
+      // Create description from profile data
+      let descParts: string[] = [];
+
+      // Add headline
+      if (profile.headline) {
+        descParts.push(profile.headline);
+      }
+
+      // Add location if available
+      if (profile.location) {
+        descParts.push(`Based in ${profile.location}`);
+      }
+
+      // Add summary if available (truncated to fit within 160 chars total)
+      if (profile.summary && profile.summary.length > 0) {
+        const remainingChars = 160 - descParts.join('. ').length - 3; // -3 for ". " separator
+        if (remainingChars > 50) {
+          const summarySnippet = profile.summary.substring(0, remainingChars).trim();
+          descParts.push(summarySnippet);
+        }
+      }
+
+      description = descParts.join('. ');
+
+      // Ensure we don't exceed 160 characters
+      if (description.length > 160) {
+        description = description.substring(0, 157) + '...';
+      }
+
+      // Fallback if we couldn't build a good description
+      if (!description || description.length < 20) {
+        description = `Professional profile of ${profile.full_name}. ${profile.headline}`;
+      }
+    } else {
+      description = propDescription || profile.meta_description ||
+        profile.summary?.substring(0, 160) ||
+        `Professional profile of ${profile.full_name}. ${profile.headline}`;
+    }
+
+    // Ensure description doesn't end abruptly
+    if (description && !description.endsWith('.') && !description.endsWith('...')) {
+      description = description + '.';
+    }
+  }
+
+  // Generate keywords automatically from profile data if not provided
+  let keywords = propKeywords;
+  if (!keywords && profile) {
+    const keywordParts: string[] = [];
+
+    // Add name and headline
+    if (profile.full_name) keywordParts.push(profile.full_name);
+    if (profile.headline) keywordParts.push(profile.headline);
+
+    // Add location
+    if (profile.location) keywordParts.push(profile.location);
+
+    // Add top skills (limit to 5-7)
+    if (profileSkills && profileSkills.length > 0) {
+      keywordParts.push(...profileSkills.slice(0, 7));
+    }
+
+    // Add job titles from experience (limit to 3)
+    if (profileExperience && profileExperience.length > 0) {
+      keywordParts.push(...profileExperience.slice(0, 3));
+    }
+
+    // Add generic professional terms
+    keywordParts.push('professional profile', 'CV', 'resume');
+
+    // Create comma-separated keywords string
+    keywords = keywordParts.filter(Boolean).join(', ');
   }
 
   // Person Schema.org structured data (Only if profile exists)
@@ -81,12 +157,14 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     es: `${baseUrl}/es?lang=es`
   };
 
+  // Generate unique key to force updates
+  const helmetKey = profile ? `profile-${profile.slug || profile.id}` : 'default';
+
   return (
-    <Helmet>
+    <Helmet key={helmetKey}>
       {/* Basic Meta Tags */}
       <title>{title}</title>
       <meta name="description" content={description} />
-      {/* @ts-ignore */}
       {keywords && <meta name="keywords" content={keywords} />}
       {profileUrl && <link rel="canonical" href={profileUrl} />}
       

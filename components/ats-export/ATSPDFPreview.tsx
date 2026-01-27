@@ -5,7 +5,7 @@
  * Permite seleccionar entre diferentes plantillas y opciones de exportación
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PDFViewer, PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { ClassicATSTemplate, ModernATSTemplate, MinimalATSTemplate } from './templates';
 import {
@@ -21,6 +21,9 @@ import {
 } from '../../utils/pdf/ats-optimizer';
 import { FullProfileData, Stamp } from '../../types';
 import { useATSExport } from '../../hooks/useATSExport';
+import { useATSExportAccess, FeatureLimitCheck } from '../../hooks/useUsageLimits';
+import { UsageLimitModal, UsageLimitWarning } from '../UsageLimitModal';
+import { useNavigate } from 'react-router-dom';
 
 interface ATSPDFPreviewProps {
   profile: FullProfileData;
@@ -35,16 +38,27 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
   language = 'en',
   onDownloadComplete,
 }) => {
+  const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] = useState<ATSTemplateType>('modern');
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [useServerSide, setUseServerSide] = useState(false);
   const [exportFormat, setExportFormat] = useState<'pdf' | 'docx'>('pdf');
+  const [showLimitModal, setShowLimitModal] = useState(false);
+
+  // Check usage limits
+  const { canUse, isChecking, limitInfo } = useATSExportAccess();
 
   // Use the new export hook
   const { exportAndDownload, isExporting, error: exportError, progress } = useATSExport({
     preferServerSide: useServerSide,
   });
+
+  // Handle upgrade navigation
+  const handleUpgrade = () => {
+    setShowLimitModal(false);
+    navigate('/pricing');
+  };
 
   // Procesar datos del perfil para ATS
   const processedData: ATSProcessedData = useMemo(
@@ -80,8 +94,29 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
 
   // Descargar documento (PDF o DOCX)
   const handleDirectDownload = async () => {
+    // Check if user can export
+    if (canUse === false) {
+      setShowLimitModal(true);
+      return;
+    }
+
     setIsGenerating(true);
     try {
+      // Record usage before export
+      const { supabase } = await import('../../supabase/client');
+      const { data: recordResult, error: recordError } = await supabase.rpc('record_usage', {
+        p_user_id: profile.profile.id,
+        p_feature_type: 'ats_export',
+        p_metadata: { template: selectedTemplate, format: exportFormat },
+      });
+
+      if (recordError || (recordResult && !recordResult.success)) {
+        // Limit reached
+        setShowLimitModal(true);
+        setIsGenerating(false);
+        return;
+      }
+
       const doc = generateDocument();
 
       await exportAndDownload(
@@ -166,6 +201,35 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Usage Limit Warning */}
+      {!isChecking && limitInfo && (
+        <div className="mb-4">
+          {canUse === false ? (
+            <UsageLimitWarning
+              featureType="ats_export"
+              limitInfo={limitInfo}
+              onUpgrade={handleUpgrade}
+            />
+          ) : limitInfo.limit !== 'unlimited' && typeof limitInfo.remaining === 'number' && limitInfo.remaining <= 2 && (
+            <div className="flex items-center justify-between rounded-lg bg-blue-50 dark:bg-blue-900/20 px-4 py-3 border border-blue-200 dark:border-blue-700">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                <span>
+                  {language === 'en'
+                    ? `${limitInfo.remaining} export${limitInfo.remaining !== 1 ? 's' : ''} remaining this month`
+                    : `${limitInfo.remaining} exportaci${limitInfo.remaining !== 1 ? 'ones' : 'ón'} restante${limitInfo.remaining !== 1 ? 's' : ''} este mes`}
+                </span>
+              </div>
+              <button
+                onClick={handleUpgrade}
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {language === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Template Selector */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
@@ -439,6 +503,15 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
           )}
         </ul>
       </div>
+
+      {/* Usage Limit Modal */}
+      <UsageLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        featureType="ats_export"
+        limitInfo={limitInfo}
+        onUpgrade={handleUpgrade}
+      />
     </div>
   );
 };

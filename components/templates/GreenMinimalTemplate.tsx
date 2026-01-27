@@ -2,6 +2,7 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface GreenMinimalTemplateProps {
     data: FullProfileData;
@@ -44,6 +45,15 @@ const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color
                             <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
                         </div>
                     )}
+                    {/* Contact Buttons */}
+                    <div className="mt-6 flex justify-center">
+                        <ProfileContactButtons
+                            profileId={profile.id}
+                            profileEmail={profile.email}
+                            variant="minimal"
+                            accentColor={accentColor}
+                        />
+                    </div>
                 </div>
 
                 <div className="w-20 h-1.5 mx-auto my-20 rounded-full shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #2DD4BF)` }}></div>

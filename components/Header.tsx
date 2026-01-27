@@ -231,7 +231,7 @@ const Header: React.FC = () => {
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { session, openModal, profile } = useAuth();
+  const { session, openModal, profile, company, companyUser, isCompanyUser } = useAuth();
   const navigate = useNavigate();
   const t = useTranslations();
   const { lang } = useLanguage();
@@ -321,12 +321,32 @@ const Header: React.FC = () => {
                   </button>
                   {isUserMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-bg-secondary rounded-md shadow-lg dark:shadow-2xl ring-1 ring-black ring-opacity-5 dark:ring-dark-border-light z-20 py-1 border border-transparent dark:border-dark-border">
-                          {profile?.role === 'admin' && (
-                            <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Admin Panel</Link>
+                          {/* Company credit badge */}
+                          {isCompanyUser && company && company.status === 'APPROVED' && (
+                            <>
+                              <div className="px-4 py-2 border-b border-gray-200 dark:border-dark-border">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-500 dark:text-dark-text-tertiary">Credits</span>
+                                  <span className="text-sm font-semibold text-cv-blue dark:text-cv-blue-light">{company.credit_balance}</span>
+                                </div>
+                              </div>
+                              <Link to="/company/dashboard" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+                                Company Panel
+                              </Link>
+                            </>
                           )}
-                          <Link to={dashboardPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Dashboard</Link>
-                          <Link to={publicProfilePath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.dashboard}</Link>
-                          <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
+                          {profile?.role === 'admin' ? (
+                            <>
+                              <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Admin Panel</Link>
+                              <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
+                            </>
+                          ) : (
+                            <>
+                              <Link to={dashboardPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Dashboard</Link>
+                              <Link to={publicProfilePath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.dashboard}</Link>
+                              <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
+                            </>
+                          )}
                       </div>
                   )}
               </div>
@@ -419,29 +439,50 @@ const Header: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{profile.full_name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{profile.headline}</p>
+                        {isCompanyUser && company && company.status === 'APPROVED' && (
+                          <p className="text-xs text-cv-blue dark:text-cv-blue-light font-semibold mt-1">
+                            {company.credit_balance} credits
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
-                  {profile?.role === 'admin' && (
-                    <Link to={adminPath} onClick={closeMobileMenu} className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                      </svg>
-                      Admin Panel
-                    </Link>
+                  {profile?.role === 'admin' ? (
+                    <>
+                      <Link to={adminPath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors text-sm font-medium">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Admin Panel
+                      </Link>
+                      <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
+                        {t.header.logout}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {isCompanyUser && company && company.status === 'APPROVED' && (
+                        <Link to="/company/dashboard" onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors text-sm font-medium">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          Company Panel
+                        </Link>
+                      )}
+                      <Link to={dashboardPath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-cv-blue text-white hover:bg-cv-blue-dark transition-colors text-sm font-medium">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                      </Link>
+                      <Link to={publicProfilePath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
+                        {t.header.dashboard}
+                      </Link>
+                      <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
+                        {t.header.logout}
+                      </button>
+                    </>
                   )}
-                  <Link to={dashboardPath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-cv-blue text-white hover:bg-cv-blue-dark transition-colors text-sm font-medium">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Dashboard
-                  </Link>
-                  <Link to={publicProfilePath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
-                    {t.header.dashboard}
-                  </Link>
-                  <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
-                    {t.header.logout}
-                  </button>
                 </>
               ) : (
                 <>

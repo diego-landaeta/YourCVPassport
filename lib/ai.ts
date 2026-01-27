@@ -164,26 +164,66 @@ export async function listAvailableModels(): Promise<string[]> {
 // ==================================================
 
 /**
- * Check if user has access to AI features based on plan
+ * Check if user has access to AI features based on plan and usage limits
  */
-export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolean; plan: string | null }> {
+export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolean; plan: string | null; remaining?: number | 'unlimited'; reason?: string }> {
   try {
     const { supabase } = await import('../supabase/client');
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', userId)
-      .single();
 
-    if (error || !profile) {
-      return { hasAccess: false, plan: null };
+    // Use the new check_feature_limit function
+    const { data: limitCheck, error: limitError } = await supabase.rpc('check_feature_limit', {
+      p_user_id: userId,
+      p_feature_type: 'ai_request',
+    });
+
+    if (limitError) {
+      // Fallback to old method if RPC fails
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', userId)
+        .single();
+
+      if (error || !profile) {
+        return { hasAccess: false, plan: null };
+      }
+
+      const hasAccess = profile.plan === 'pro' || profile.plan === 'enterprise';
+      return { hasAccess, plan: profile.plan || null };
     }
 
-    // Only Pro and Enterprise users have access to AI features
-    const hasAccess = profile.plan === 'pro' || profile.plan === 'enterprise';
-    return { hasAccess, plan: profile.plan || null };
+    return {
+      hasAccess: limitCheck.allowed,
+      plan: limitCheck.plan,
+      remaining: limitCheck.remaining,
+      reason: limitCheck.reason,
+    };
   } catch (error) {
     return { hasAccess: false, plan: null };
+  }
+}
+
+/**
+ * Record AI usage after successful request
+ */
+export async function recordAIUsage(userId: string, metadata?: Record<string, unknown>): Promise<boolean> {
+  try {
+    const { supabase } = await import('../supabase/client');
+    const { data, error } = await supabase.rpc('record_usage', {
+      p_user_id: userId,
+      p_feature_type: 'ai_request',
+      p_metadata: metadata || {},
+    });
+
+    if (error) {
+      console.error('Error recording AI usage:', error);
+      return false;
+    }
+
+    return data?.success || false;
+  } catch (error) {
+    console.error('Error recording AI usage:', error);
+    return false;
   }
 }
 
@@ -198,11 +238,20 @@ export async function generateText(
   try {
     // Check AI access for premium users only
     if (userId) {
-      const { hasAccess, plan } = await checkAIAccess(userId);
+      const { hasAccess, plan, reason, remaining } = await checkAIAccess(userId);
       if (!hasAccess) {
+        const planText = plan || 'Free';
+        let errorMessage = reason || `Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium.`;
+
+        if (plan === 'free') {
+          errorMessage = `Las funcionalidades de IA no están disponibles en el plan Free. Actualiza a Pro para acceder a optimización con IA, sugerencias de habilidades y más.`;
+        } else if (remaining === 0) {
+          errorMessage = `Has alcanzado tu límite mensual de solicitudes de IA (plan ${planText}). Actualiza tu plan para obtener acceso ilimitado.`;
+        }
+
         return {
           success: false,
-          error: `Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`,
+          error: errorMessage,
         };
       }
     }
@@ -227,12 +276,13 @@ export async function generateText(
         const result = await model.generateContent(prompt);
         const text = result.response.text().trim();
 
-        // Record request
+        // Record request (rate limit)
         if (userId) {
           recordRequest(userId);
+          // Also record in database for plan limits
+          await recordAIUsage(userId, { model: modelName, prompt_length: prompt.length });
         }
 
-        
         return {
           success: true,
           data: text,
@@ -594,143 +644,100 @@ export interface ProfileQualitySuggestion {
 
 /**
  * Calculate profile completeness score (0-100)
+ *
+ * CRITERIOS FUNDAMENTALES para un CV profesional:
+ * - Resumen profesional: 25 puntos
+ * - Al menos 1 experiencia laboral: 30 puntos
+ * - Al menos 1 educación: 25 puntos
+ * - Al menos 3 habilidades: 10 puntos
+ * - Verificaciones (stamps): 10 puntos (diferenciador importante - valida identidad, educación, idiomas, etc.)
  */
 export function calculateProfileScore(check: ProfileQualityCheck): number {
   let score = 0;
 
-  // Photo (10 points)
-  if (check.hasPhoto) score += 10;
+  // Resumen profesional (25 puntos) - Lo primero que ven los reclutadores
+  if (check.hasSummary) score += 25;
 
-  // Email verified (10 points)
-  if (check.hasEmail && check.emailVerified) score += 10;
-  else if (check.hasEmail) score += 5;
+  // Experiencia laboral (30 puntos) - Core del CV
+  if (check.experienceCount >= 1) score += 30;
 
-  // Summary (15 points)
-  if (check.hasSummary) score += 15;
+  // Educación (25 puntos) - Requisito básico
+  if (check.educationCount >= 1) score += 25;
 
-  // Experiences (25 points)
-  if (check.experienceCount >= 3) score += 25;
-  else if (check.experienceCount >= 2) score += 18;
-  else if (check.experienceCount >= 1) score += 10;
-
-  // Skills (15 points)
-  if (check.skillsCount >= 5) score += 15;
-  else if (check.skillsCount >= 3) score += 10;
+  // Habilidades (10 puntos) - Mínimo 3 para filtros ATS
+  if (check.skillsCount >= 3) score += 10;
   else if (check.skillsCount >= 1) score += 5;
 
-  // Education (10 points)
-  if (check.educationCount >= 1) score += 10;
-
-  // Visas/Projects (10 points)
-  if (check.visasCount >= 1) score += 10;
-  else score += check.visasCount * 3;
-
-  // Languages (3 points)
-  if (check.languagesCount >= 2) score += 3;
-  else if (check.languagesCount >= 1) score += 1;
-
-  // Certifications (2 points)
-  if (check.certificationsCount >= 1) score += 2;
+  // Verificaciones/Stamps (10 puntos) - Diferenciador profesional importante (identidad, educación, idiomas, empleo)
+  if (check.certificationsCount >= 1) score += 10;
 
   return Math.min(100, score);
 }
 
 /**
  * Generate actionable suggestions to improve profile
+ *
+ * SOLO MUESTRA LO FUNDAMENTAL - sin sugerencias genéricas o innecesarias
+ * Prioridades:
+ * - HIGH: Lo que DEBE tener un CV profesional
+ * - MEDIUM: Diferenciadores importantes
  */
 export function generateProfileSuggestions(
   check: ProfileQualityCheck
 ): ProfileQualitySuggestion[] {
   const suggestions: ProfileQualitySuggestion[] = [];
 
-  if (!check.hasPhoto) {
-    suggestions.push({
-      category: 'Foto de perfil',
-      message: 'Agrega una foto profesional para aumentar tus posibilidades de contratación',
-      actionable: true,
-      priority: 'high',
-    });
-  }
-
-  if (!check.emailVerified) {
-    suggestions.push({
-      category: 'Email',
-      message: 'Verifica tu dirección de email para aumentar tu credibilidad',
-      actionable: true,
-      priority: 'high',
-    });
-  }
-
+  // 1. RESUMEN - Lo primero que ven los reclutadores
   if (!check.hasSummary) {
     suggestions.push({
       category: 'Resumen profesional',
-      message: 'Agrega un resumen profesional para destacar tu perfil',
+      message: 'El resumen es lo primero que lee un reclutador. Describe tu propuesta de valor en 3-4 líneas',
       actionable: true,
       priority: 'high',
     });
   }
 
-  if (check.experienceCount < 3) {
+  // 2. EXPERIENCIA - Core del CV
+  if (check.experienceCount === 0) {
     suggestions.push({
       category: 'Experiencia laboral',
-      message: `Agrega al menos ${3 - check.experienceCount} experiencia(s) más para fortalecer tu CV`,
+      message: 'Agrega tu experiencia laboral - es el contenido más importante de tu CV',
       actionable: true,
       priority: 'high',
     });
   }
 
-  if (check.skillsCount < 5) {
-    suggestions.push({
-      category: 'Habilidades',
-      message: `Agrega al menos ${5 - check.skillsCount} habilidad(es) más`,
-      actionable: true,
-      priority: 'medium',
-    });
-  }
-
+  // 3. EDUCACIÓN - Requisito básico
   if (check.educationCount === 0) {
     suggestions.push({
       category: 'Educación',
-      message: 'Agrega tu formación académica',
+      message: 'Incluye tu formación académica - muchas empresas lo requieren como filtro inicial',
       actionable: true,
-      priority: 'medium',
+      priority: 'high',
     });
   }
 
-  if (check.visasCount === 0) {
+  // 4. HABILIDADES - Mínimo para ATS
+  if (check.skillsCount < 3) {
+    const remaining = 3 - check.skillsCount;
     suggestions.push({
-      category: 'Proyectos (Visas)',
-      message: 'Agrega al menos 1 proyecto destacado usando el sistema STAR',
+      category: 'Habilidades',
+      message: `Agrega ${remaining} habilidad${remaining > 1 ? 'es' : ''} más - los sistemas ATS filtran por palabras clave`,
       actionable: true,
-      priority: 'medium',
+      priority: 'high',
     });
   }
 
-  if (check.languagesCount < 2) {
-    suggestions.push({
-      category: 'Idiomas',
-      message: 'Agrega los idiomas que dominas',
-      actionable: true,
-      priority: 'low',
-    });
-  }
-
-  // Sugerencia para subir certificados de idiomas si tiene idiomas agregados
-  if (check.languagesCount > 0) {
+  // 5. VERIFICACIONES (STAMPS) - Diferenciador profesional (solo si ya tiene lo básico)
+  if (check.certificationsCount === 0 &&
+      check.hasSummary &&
+      check.experienceCount >= 1 &&
+      check.educationCount >= 1) {
     suggestions.push({
       category: 'Verificaciones',
-      message: 'Sube certificados de idiomas (TOEFL, IELTS, DELE, etc.) para verificar tu nivel y aumentar tu credibilidad',
+      message: 'Las verificaciones validan tu identidad, educación, idiomas y experiencia, aumentando la confianza en tu perfil',
       actionable: true,
       priority: 'medium',
-    });
-  }
-
-  if (check.certificationsCount === 0) {
-    suggestions.push({
-      category: 'Certificaciones',
-      message: 'Agrega certificaciones profesionales si las tienes',
-      actionable: true,
-      priority: 'low',
     });
   }
 
@@ -753,6 +760,7 @@ export default {
   generateText,
   listAvailableModels,
   checkAIAccess,
+  recordAIUsage,
 
   // CV optimization
   optimizeExperience,

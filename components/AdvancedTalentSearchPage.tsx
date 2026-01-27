@@ -8,6 +8,10 @@ import { supabase } from '../supabase/client';
 import { Link } from 'react-router-dom';
 import { CountryBadge } from './CountrySelector';
 import HeroImage from './HeroImage';
+import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid';
+import { StarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { isPremiumProfile, getVerifiedStampsCount } from '../utils/profileSorting';
+import { translateSkill } from '../utils/skillsTranslation';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -20,114 +24,126 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 
 const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, skills }) => {
     const t = useTranslations();
-    
-    // Get avatar URL or generate initials
-    const avatarUrl = profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
-    
-    return (
-        <div className="group relative bg-white dark:bg-dark-bg-secondary rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 border-gray-100 dark:border-gray-700 hover:border-cv-blue dark:hover:border-cv-blue overflow-hidden aspect-square flex flex-col">
-            {/* Gradient Background Effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    const { lang } = useLanguage();
 
-            {/* Content */}
-            <div className="relative p-4 flex flex-col h-full">
-                {/* Header with Avatar and Badge */}
-                <div className="flex items-start gap-3 mb-3">
+    // DEBUG: Log skills in ProfileCard
+    if (profile.full_name === 'James Wilson') {
+        console.log('🎨 ProfileCard James Wilson:', {
+            skillsLength: skills.length,
+            skills: skills,
+            willShowCounter: skills.length > 2
+        });
+    }
+
+    // Get avatar URL or generate initials
+    const avatarUrl = profile.avatar_url || profile.photo_url || profile.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || 'User')}&background=2563eb&color=fff&size=200`;
+
+    // Check premium and verified status
+    const isPremium = isPremiumProfile(profile);
+    const verifiedStampsCount = getVerifiedStampsCount(profile);
+    const isCertified = verifiedStampsCount > 0;
+
+    return (
+        <Link
+            to={`/cv/${profile.slug || profile.id}`}
+            className="group relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 dark:hover:shadow-blue-500/10 hover:-translate-y-1 overflow-hidden block flex flex-col"
+            style={{ height: '340px' }}
+        >
+            {/* Card Content */}
+            <div className="p-6 flex flex-col h-full">
+                {/* Avatar and Name Row - Fixed height */}
+                <div className="flex items-center gap-3 mb-3" style={{ minHeight: '56px' }}>
                     <div className="relative flex-shrink-0">
                         <img
                             src={avatarUrl}
-                            alt={profile.full_name}
-                            className="w-16 h-16 rounded-xl object-cover ring-2 ring-white dark:ring-gray-800 shadow-md group-hover:ring-cv-blue/30 transition-all" 
+                            alt={profile.full_name || ''}
+                            className="w-14 h-14 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
                             onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name)}&background=0052FF&color=fff&size=128`;
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || 'User')}&background=2563eb&color=fff&size=200`;
                             }}
                         />
-                        {profile.plan !== 'Free' && (
-                            <div className="absolute -top-2 -right-2 bg-cv-green text-white p-1.5 rounded-full shadow-lg">
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                                </svg>
+                        {/* Verified Badge on Avatar */}
+                        {isCertified && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-600 dark:bg-green-500 flex items-center justify-center border-2 border-white dark:border-gray-800">
+                                <CheckBadgeIconSolid className="w-3.5 h-3.5 text-white" />
                             </div>
                         )}
                     </div>
-                    
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-0.5 truncate group-hover:text-cv-blue transition-colors">
-                            {profile.full_name}
-                        </h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                            {profile.headline || 'Professional'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Location with Country Badge */}
-                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
-                    {profile.country_code ? (
                         <div className="flex items-center gap-2">
-                            <CountryBadge countryCode={profile.country_code} size="md" showName={false} />
-                            {profile.location && (
-                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                                    <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                                    </svg>
-                                    <span className="font-medium">{profile.location}</span>
-                                </div>
+                            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {profile.full_name || 'Anonymous'}
+                            </h3>
+                            {isPremium && (
+                                <StarIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
                             )}
                         </div>
-                    ) : profile.location ? (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                            <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                            </svg>
-                            <span className="font-medium">{profile.location}</span>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                            {(profile.title || profile.professional_title || profile.headline) || '\u00A0'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Bio/Headline - Fixed height */}
+                <div className="mb-4" style={{ minHeight: '44px' }}>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                        {(profile.headline || profile.bio) || '\u00A0'}
+                    </p>
+                </div>
+
+                {/* Location - Fixed height */}
+                <div className="mb-4" style={{ minHeight: '20px' }}>
+                    {profile.location ? (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                            <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{profile.location}</span>
                         </div>
                     ) : (
-                        <div className="flex items-center text-sm text-gray-400 dark:text-gray-600 italic">
-                            <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
-                            </svg>
-                            <span>Ubicación no especificada</span>
+                        <div style={{ height: '20px' }}></div>
+                    )}
+                </div>
+
+                {/* Skills - Fixed height */}
+                <div className="mb-4" style={{ minHeight: '72px', maxHeight: '72px', overflow: 'hidden' }}>
+                    {skills && skills.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {skills.slice(0, 2).map((skill, idx) => (
+                                <span
+                                    key={idx}
+                                    className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+                                >
+                                    {skill}
+                                </span>
+                            ))}
+                            {skills.length > 2 && (
+                                <span
+                                    className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-600 shadow-sm flex-shrink-0"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log(`${profile.full_name} tiene ${skills.length} skills:`, skills);
+                                    }}
+                                >
+                                    +{skills.length - 2}
+                                </span>
+                            )}
                         </div>
+                    ) : (
+                        <div style={{ height: '72px' }}></div>
                     )}
                 </div>
 
-                {/* Skills */}
-                <div className="flex-grow mb-3">
-                    <div className="flex flex-wrap gap-1.5">
-                        {skills.slice(0, 3).map((skill: string, index: number) => (
-                            <span
-                                key={index}
-                                className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-cv-blue/10 to-indigo-500/10 dark:from-cv-blue/20 dark:to-indigo-500/20 text-cv-blue dark:text-cv-blue-light text-xs font-medium rounded-md border border-cv-blue/20 dark:border-cv-blue/30"
-                            >
-                                {skill}
-                            </span>
-                        ))}
-                        {skills.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md">
-                                +{skills.length - 3} más
-                            </span>
-                        )}
-                    </div>
-                    {skills.length === 0 && (
-                        <p className="text-xs text-gray-400 dark:text-gray-600 italic">
-                            Sin habilidades
-                        </p>
-                    )}
+                {/* View Profile Button - Fixed at bottom */}
+                <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <button className="w-full px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg group">
+                        <span>{lang === 'es' ? 'Ver Perfil' : 'View Profile'}</span>
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
-
-                {/* View Profile Button */}
-                <Link
-                    to={`/cv/${profile.slug || profile.id}`}
-                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-lg text-center flex items-center justify-center gap-2 text-sm"
-                >
-                    <span>Ver Perfil</span>
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </Link>
             </div>
-        </div>
+        </Link>
     );
 }
 
@@ -147,30 +163,33 @@ interface FilterSectionProps {
 
 const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, onApplyFilters }) => {
     const t = useTranslations();
+    const { lang } = useLanguage();
     const { filters: filterLabels } = t.advancedTalentSearch;
-    
+
     return (
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 overflow-hidden flex flex-col backdrop-blur-sm" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
             {/* Header */}
-            <div className="bg-gradient-to-r from-cv-blue to-indigo-600 p-4">
-                <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <h3 className="text-lg font-bold text-white">{filterLabels.title}</h3>
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 p-4 flex-shrink-0">
+                <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-base font-bold text-white">{filterLabels.title}</h3>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="p-4 space-y-3">
+            {/* Filters - Scrollable */}
+            <div className="p-5 space-y-4 overflow-y-auto flex-1" style={{ minHeight: 0 }}>
 
                 <div>
-                     <label htmlFor="skills" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                     <label htmlFor="skills" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
                         {filterLabels.skills.label}
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                         </div>
@@ -180,57 +199,47 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                             placeholder={filterLabels.skills.placeholder}
                             value={filters.skills}
                             onChange={(e) => onFilterChange({ ...filters, skills: e.target.value })}
-                            className="w-full pl-9 pr-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                            className="w-full pl-9 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                      </div>
                 </div>
 
                 <div>
-                     <label htmlFor="country" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Country
-                        </div>
+                     <label htmlFor="country" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+                        {lang === 'es' ? 'País' : 'Country'}
                      </label>
                      <select
                         id="country"
                         value={filters.country}
                         onChange={(e) => onFilterChange({ ...filters, country: e.target.value })}
-                        className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all appearance-none bg-white cursor-pointer text-sm"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                      >
-                        <option value="">All countries</option>
-                        <option value="ES">Spain</option>
-                        <option value="MX">Mexico</option>
+                        <option value="">{lang === 'es' ? 'Todos los países' : 'All countries'}</option>
+                        <option value="ES">{lang === 'es' ? 'España' : 'Spain'}</option>
+                        <option value="MX">{lang === 'es' ? 'México' : 'Mexico'}</option>
                         <option value="AR">Argentina</option>
                         <option value="CO">Colombia</option>
                         <option value="CL">Chile</option>
-                        <option value="PE">Peru</option>
-                        <option value="US">United States</option>
-                        <option value="GB">United Kingdom</option>
-                        <option value="FR">France</option>
-                        <option value="DE">Germany</option>
-                        <option value="IT">Italy</option>
-                        <option value="BR">Brazil</option>
+                        <option value="PE">{lang === 'es' ? 'Perú' : 'Peru'}</option>
+                        <option value="US">{lang === 'es' ? 'Estados Unidos' : 'United States'}</option>
+                        <option value="GB">{lang === 'es' ? 'Reino Unido' : 'United Kingdom'}</option>
+                        <option value="FR">{lang === 'es' ? 'Francia' : 'France'}</option>
+                        <option value="DE">{lang === 'es' ? 'Alemania' : 'Germany'}</option>
+                        <option value="IT">{lang === 'es' ? 'Italia' : 'Italy'}</option>
+                        <option value="BR">Brasil</option>
                      </select>
                 </div>
 
                 <div>
-                     <label htmlFor="location" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {filterLabels.location.label}
-                        </div>
+                     <label htmlFor="location" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+                        {lang === 'es' ? 'Ubicación' : 'Location'}
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
+                            <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                         <input
@@ -239,64 +248,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                             placeholder={filterLabels.location.placeholder}
                             value={filters.location}
                             onChange={(e) => onFilterChange({ ...filters, location: e.target.value })}
-                            className="w-full pl-9 pr-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
+                            className="w-full pl-9 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                      </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
-                        </svg>
-                        Ciudad o región específica
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {lang === 'es' ? 'Ciudad o región específica' : 'City or specific region'}
                     </p>
                 </div>
 
                 <div>
-                     <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {filterLabels.salary.label}
-                        </div>
-                     </label>
-                     <div className="grid grid-cols-2 gap-2">
-                        <div>
-                            <input
-                                id="salary"
-                                type="number"
-                                placeholder={filterLabels.salary.min}
-                                value={filters.salaryMin}
-                                onChange={(e) => onFilterChange({ ...filters, salaryMin: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
-                            />
-                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Mínimo</p>
-                        </div>
-                        <div>
-                            <input
-                                type="number"
-                                placeholder={filterLabels.salary.max}
-                                value={filters.salaryMax}
-                                onChange={(e) => onFilterChange({ ...filters, salaryMax: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all"
-                            />
-                            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Máximo</p>
-                        </div>
-                     </div>
-                </div>
-
-                <div>
-                    <label htmlFor="experience" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            {filterLabels.experience.label}
-                        </div>
+                    <label htmlFor="experience" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+                        {filterLabels.experience.label}
                     </label>
                     <select
-                        className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white transition-all appearance-none bg-white dark:bg-dark-bg-tertiary cursor-pointer"
+                        id="experience"
                         value={filters.experienceLevel}
                         onChange={(e) => onFilterChange({ ...filters, experienceLevel: e.target.value })}
+                        className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all appearance-none bg-white cursor-pointer text-sm"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                     >
                         {filterLabels.experience.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
@@ -304,13 +272,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                 </div>
             </div>
 
-            {/* Apply Button */}
-            <div className="p-4 pt-0">
+            {/* Apply Button - Fixed at bottom */}
+            <div className="p-5 border-t border-gray-200 dark:border-gray-600 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800/50 dark:to-gray-800/80 flex-shrink-0">
                 <button
                     onClick={onApplyFilters}
-                    className="w-full bg-gradient-to-r from-cv-blue to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2.5 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white py-3 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group"
                 >
-                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <span>{filterLabels.applyButton}</span>
@@ -325,12 +293,13 @@ const AdvancedTalentSearchPage: React.FC = () => {
     const { lang } = useLanguage();
     const t = useTranslations();
     const pageData = t.advancedTalentSearch;
-    
+
     // State for profiles and filters
     const [profiles, setProfiles] = useState<any[]>([]);
     const [profileSkills, setProfileSkills] = useState<{ [key: string]: string[] }>({});
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [displayLimit, setDisplayLimit] = useState(12);
     const [filters, setFilters] = useState({
         verifiedOnly: false,
         skills: '',
@@ -338,13 +307,13 @@ const AdvancedTalentSearchPage: React.FC = () => {
         location: '',
         salaryMin: '',
         salaryMax: '',
-        experienceLevel: 'Cualquiera'
+        experienceLevel: lang === 'es' ? 'Cualquiera' : 'Any'
     });
 
     // Load profiles from database
     useEffect(() => {
         loadProfiles();
-    }, []);
+    }, [lang]);
 
     const loadProfiles = async () => {
         try {
@@ -353,32 +322,63 @@ const AdvancedTalentSearchPage: React.FC = () => {
             // Get profiles with complete information, prioritizing premium users
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
-                .select('*')
+                .select(`
+                    *,
+                    stamps (
+                        id,
+                        type,
+                        status,
+                        verified_at
+                    )
+                `)
                 .not('full_name', 'is', null)
                 .not('headline', 'is', null)
                 .not('summary', 'is', null)
+                // IMPORTANT: Only show profiles that have completed the wizard and have a slug
+                .eq('wizard_completed', true)
+                .not('slug', 'is', null)
+                .not('template', 'is', null)
                 .order('plan', { ascending: false, nullsFirst: false })
                 .order('created_at', { ascending: false })
                 .limit(50);
 
             if (profilesError) throw profilesError;
 
-            // Get skills for each profile
+            // Get skills for ALL profiles in ONE query (optimized)
             const skillsMap: { [key: string]: string[] } = {};
-            
-            if (profilesData) {
-                for (const profile of profilesData) {
-                    const { data: skillsData } = await supabase
-                        .from('skills')
-                        .select('name')
-                        .eq('profile_id', profile.id);
-                    
-                    skillsMap[profile.id] = skillsData?.map(s => s.name) || [];
+
+            if (profilesData && profilesData.length > 0) {
+                const profileIds = profilesData.map(p => p.id);
+
+                // Load ALL skills for all profiles in a SINGLE query
+                const { data: allSkillsData, error: skillsError } = await supabase
+                    .from('skills')
+                    .select('profile_id, name')
+                    .in('profile_id', profileIds);
+
+                if (skillsError) {
+                    console.error('Error loading skills:', skillsError);
                 }
+
+                // Group skills by profile_id and translate them
+                allSkillsData?.forEach(skill => {
+                    if (!skillsMap[skill.profile_id]) {
+                        skillsMap[skill.profile_id] = [];
+                    }
+                    // Translate skill name to current language
+                    const translatedSkillName = translateSkill(skill.name, lang as 'en' | 'es');
+                    skillsMap[skill.profile_id].push(translatedSkillName);
+                });
             }
 
-            setProfiles(profilesData || []);
+            // Attach skills to each profile object to avoid sync issues
+            const profilesWithSkills = (profilesData || []).map(profile => ({
+                ...profile,
+                _skills: skillsMap[profile.id] || []
+            }));
+
             setProfileSkills(skillsMap);
+            setProfiles(profilesWithSkills);
         } catch (err) {} finally {
             setLoading(false);
         }
@@ -390,11 +390,11 @@ const AdvancedTalentSearchPage: React.FC = () => {
         // Filter by search query
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.full_name?.toLowerCase().includes(query) ||
                 p.headline?.toLowerCase().includes(query) ||
                 p.summary?.toLowerCase().includes(query) ||
-                profileSkills[p.id]?.some(skill => skill.toLowerCase().includes(query))
+                p._skills?.some(skill => skill.toLowerCase().includes(query))
             );
         }
 
@@ -406,8 +406,8 @@ const AdvancedTalentSearchPage: React.FC = () => {
         // Filter by skills
         if (filters.skills.trim()) {
             const skillQuery = filters.skills.toLowerCase();
-            filtered = filtered.filter(p => 
-                profileSkills[p.id]?.some(skill => skill.toLowerCase().includes(skillQuery))
+            filtered = filtered.filter(p =>
+                p._skills?.some(skill => skill.toLowerCase().includes(skillQuery))
             );
         }
 
@@ -508,7 +508,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 {pageData.interfaceTitle}
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                                Encuentra el talento perfecto para tu equipo con filtros avanzados
+                                {lang === 'es' ? 'Encuentra el talento perfecto para tu equipo con filtros avanzados' : 'Find the perfect talent for your team with advanced filters'}
                             </p>
                         </div>
                         
@@ -536,7 +536,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 {loading ? (
                                     <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-sm">
                                         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-cv-blue mb-4"></div>
-                                        <p className="text-gray-600 dark:text-gray-400">Cargando perfiles...</p>
+                                        <p className="text-gray-600 dark:text-gray-400">{lang === 'es' ? 'Cargando perfiles...' : 'Loading profiles...'}</p>
                                     </div>
                                 ) : filteredProfiles.length === 0 ? (
                                     <div className="text-center py-20 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-sm border-2 border-dashed border-gray-300 dark:border-gray-700">
@@ -602,14 +602,48 @@ const AdvancedTalentSearchPage: React.FC = () => {
 
                                         {/* Profile Cards Grid */}
                                         <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                            {filteredProfiles.map(profile => (
-                                                <ProfileCard 
-                                                    key={profile.id} 
-                                                    profile={profile}
-                                                    skills={profileSkills[profile.id] || []}
-                                                />
-                                            ))}
+                                            {filteredProfiles.slice(0, displayLimit).map(profile => {
+                                                const skills = profile._skills || [];
+
+                                                // DEBUG: Si James Wilson aparece sin skills
+                                                if (profile.full_name === 'James Wilson') {
+                                                    console.log('🔴 James Wilson skills:', {
+                                                        has_skills: !!profile._skills,
+                                                        length: skills.length,
+                                                        skills: skills
+                                                    });
+                                                }
+
+                                                return (
+                                                    <ProfileCard
+                                                        key={profile.id}
+                                                        profile={profile}
+                                                        skills={skills}
+                                                    />
+                                                );
+                                            })}
                                         </div>
+
+                                        {/* Load More Button */}
+                                        {filteredProfiles.length > displayLimit && (
+                                            <div className="mt-8 text-center">
+                                                <button
+                                                    onClick={() => setDisplayLimit(prev => prev + 12)}
+                                                    className="px-8 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
+                                                >
+                                                    {lang === 'es' ? 'Ver Más' : 'Load More'}
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                                                    {lang === 'es'
+                                                        ? `Mostrando ${displayLimit} de ${filteredProfiles.length} perfiles`
+                                                        : `Showing ${displayLimit} of ${filteredProfiles.length} profiles`
+                                                    }
+                                                </p>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </div>

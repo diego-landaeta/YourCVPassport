@@ -7,14 +7,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
-import { suggestSkills } from '../../lib/ai';
+import { suggestSkills, checkAIAccess } from '../../lib/ai';
+import { useNavigate } from 'react-router-dom';
 import {
   SparklesIcon,
   PlusCircleIcon,
   CheckCircleIcon,
   ArrowPathIcon,
   LightBulbIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/solid';
 
 interface AISkillsSuggestionProps {
@@ -29,25 +33,51 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
   onSkillAdded,
 }) => {
   const { session } = useAuth();
+  const t = useTranslations();
+  const { lang } = useLanguage();
+  const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
   const [addedSkills, setAddedSkills] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [isAddingSkill, setIsAddingSkill] = useState<string | null>(null);
   const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
+  const [aiAccessInfo, setAiAccessInfo] = useState<{ hasAccess: boolean; plan: string | null; remaining?: number | 'unlimited' } | null>(null);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+
+  // Check AI access on mount
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!session?.user.id) {
+        setIsCheckingAccess(false);
+        return;
+      }
+      try {
+        const accessInfo = await checkAIAccess(session.user.id);
+        setAiAccessInfo(accessInfo);
+      } catch (err) {
+        console.error('Error checking AI access:', err);
+      } finally {
+        setIsCheckingAccess(false);
+      }
+    };
+    checkAccess();
+  }, [session?.user.id]);
 
   const analyzeSuggestSkills = async () => {
     if (!session?.user.id || experiences.length === 0) {
-      setError('Necesitas al menos 1 experiencia laboral para obtener sugerencias');
+      setError(lang === 'en'
+        ? 'You need at least 1 work experience to get suggestions'
+        : 'Necesitas al menos 1 experiencia laboral para obtener sugerencias');
       return;
     }
 
     // Check if user has AI access
-    const { checkAIAccess } = await import('../../lib/ai');
-    const { hasAccess, plan } = await checkAIAccess(session.user.id);
+    const accessInfo = await checkAIAccess(session.user.id);
+    setAiAccessInfo(accessInfo);
 
-    if (!hasAccess) {
-      setError(`Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`);
+    if (!accessInfo.hasAccess) {
+      // Don't set error, show upgrade banner instead
       return;
     }
 
@@ -78,12 +108,12 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
     }
   };
 
-  // ✅ Auto-analizar al montar el componente si hay experiencias
+  // ✅ Auto-analizar al montar el componente si hay experiencias y tiene acceso
   useEffect(() => {
-    if (!hasAutoAnalyzed && experiences.length > 0 && session?.user.id) {
+    if (!hasAutoAnalyzed && experiences.length > 0 && session?.user.id && aiAccessInfo?.hasAccess && !isCheckingAccess) {
       analyzeSuggestSkills();
     }
-  }, [experiences.length, session?.user.id]);
+  }, [experiences.length, session?.user.id, aiAccessInfo?.hasAccess, isCheckingAccess]);
 
   const addSkill = async (skillName: string) => {
     if (!session?.user.id) return;
@@ -129,8 +159,104 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
     );
   }
 
+  // Show premium upgrade banner if no access
+  if (!isCheckingAccess && aiAccessInfo && !aiAccessInfo.hasAccess) {
+    const planName = aiAccessInfo.plan || 'Free';
+    return (
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <SparklesIcon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
+                {t.profileEditor.aiSkills.title}
+              </h3>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                IA
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Required Banner */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+              <LockClosedIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-lg font-semibold text-amber-900 dark:text-amber-200">
+                {lang === 'en' ? 'Premium Feature' : 'Función Premium'}
+              </h4>
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
+                {lang === 'en'
+                  ? `AI-powered skill suggestions are available on Pro and Enterprise plans. Current plan: ${planName}`
+                  : `Las sugerencias de habilidades con IA están disponibles en los planes Pro y Enterprise. Plan actual: ${planName}`}
+              </p>
+
+              {/* Benefits */}
+              <ul className="mt-4 space-y-2">
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'Automatic skill detection from your experience' : 'Detección automática de habilidades de tu experiencia'}
+                </li>
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'Industry-relevant skill recommendations' : 'Recomendaciones de habilidades relevantes para tu industria'}
+                </li>
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'One-click skill addition' : 'Agregar habilidades con un clic'}
+                </li>
+              </ul>
+
+              <button
+                onClick={() => navigate('/pricing')}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all hover:from-amber-600 hover:to-orange-600"
+              >
+                {lang === 'en' ? 'Upgrade to Pro' : 'Mejorar a Pro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Usage Limit Info */}
+      {aiAccessInfo && aiAccessInfo.remaining !== 'unlimited' && typeof aiAccessInfo.remaining === 'number' && (
+        <div className={`rounded-lg p-3 border ${
+          aiAccessInfo.remaining === 0
+            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
+            : aiAccessInfo.remaining <= 5
+            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700'
+            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${
+              aiAccessInfo.remaining === 0
+                ? 'text-red-800 dark:text-red-200'
+                : 'text-gray-700 dark:text-gray-300'
+            }`}>
+              {lang === 'en'
+                ? `${aiAccessInfo.remaining} AI requests remaining this month`
+                : `${aiAccessInfo.remaining} solicitudes de IA restantes este mes`}
+            </span>
+            {aiAccessInfo.remaining <= 5 && (
+              <button
+                onClick={() => navigate('/pricing')}
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                {lang === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header & Analyze Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -138,37 +264,53 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
-                Sugerencias de Habilidades con IA
+                {t.profileEditor.aiSkills.title}
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                 IA
               </span>
+              {aiAccessInfo?.remaining === 'unlimited' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  {lang === 'en' ? 'Unlimited' : 'Ilimitado'}
+                </span>
+              )}
             </div>
             <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-              Basadas en tus {experiences.length} experiencia(s) laboral(es)
+              {lang === 'en'
+                ? `Based on your ${experiences.length} work experience(s)`
+                : `Basadas en tus ${experiences.length} experiencia(s) laboral(es)`}
             </p>
           </div>
         </div>
 
         <button
           onClick={analyzeSuggestSkills}
-          disabled={isAnalyzing}
-          className="flex items-center gap-2 px-6 py-3 bg-purple-600 dark:bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-700 dark:hover:bg-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isAnalyzing || (aiAccessInfo?.remaining === 0)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+            aiAccessInfo?.remaining === 0
+              ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+              : 'bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isAnalyzing ? (
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
-              Analizando con IA...
+              {lang === 'en' ? 'Analyzing with AI...' : 'Analizando con IA...'}
+            </>
+          ) : aiAccessInfo?.remaining === 0 ? (
+            <>
+              <LockClosedIcon className="w-5 h-5" />
+              {lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado'}
             </>
           ) : hasAutoAnalyzed ? (
             <>
               <ArrowPathIcon className="w-5 h-5" />
-              Regenerar Sugerencias IA
+              {lang === 'en' ? 'Regenerate AI Suggestions' : 'Regenerar Sugerencias IA'}
             </>
           ) : (
             <>
               <SparklesIcon className="w-5 h-5" />
-              Generar Sugerencias IA
+              {lang === 'en' ? 'Generate AI Suggestions' : 'Generar Sugerencias IA'}
             </>
           )}
         </button>
@@ -186,7 +328,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
         <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6">
           <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
             <LightBulbIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            Habilidades Sugeridas ({suggestedSkills.length})
+            {t.profileEditor.aiSkills.suggested} ({suggestedSkills.length})
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

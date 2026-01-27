@@ -14,10 +14,11 @@ import {
   SparklesIcon,
   LinkIcon
 } from '@heroicons/react/24/outline';
-import ContactLeadModal from '../ContactLeadModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { CTATracker } from './CTATracker';
 import PublicStampBadges from '../PublicStampBadges';
+import { useTranslations } from '../../hooks/useTranslations';
+import { useToastContext } from '../../context/ToastContext';
 
 interface PassportTemplateProps {
   data: FullProfileData;
@@ -27,20 +28,26 @@ interface PassportTemplateProps {
 const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#0052FF' }) => {
   const { profile, experiences = [], education = [], skills = [], portfolioItems = [], stamps = [] } = data || {};
   const { user, openModal } = useAuth();
+  const t = useTranslations();
+  const toast = useToastContext();
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [showContactModal, setShowContactModal] = useState(false);
+
+  // Debug: Log profile URLs
+  console.log('🔍 PassportTemplate - Profile URLs:', {
+    profile_exists: !!profile,
+    linkedin_url: profile?.linkedin_url,
+    github_url: profile?.github_url,
+    portfolio_url: profile?.portfolio_url,
+    show_connect_links: profile?.show_connect_links,
+    linkedin_length: profile?.linkedin_url?.length,
+    github_length: profile?.github_url?.length,
+    portfolio_length: profile?.portfolio_url?.length,
+    hasAnyURL: profile && !!(profile.linkedin_url || profile.github_url || profile.portfolio_url)
+  });
 
   // Check if viewing own profile
   const isOwnProfile = user?.id === profile.id;
-
-  const handleContactClick = () => {
-    if (!user) {
-      openModal('login');
-      return;
-    }
-    setShowContactModal(true);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-bg-primary dark:to-dark-bg-secondary">
@@ -97,34 +104,20 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
               {/* Premium Action Buttons - Only show if NOT viewing own profile */}
               {!isOwnProfile && (
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start print:hidden">
-                  <CTATracker
-                    profileId={profile.id}
-                    ctaType="contact_button"
-                    ctaLabel="Contact Me"
-                    onClick={handleContactClick}
-                    className="group relative inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  <button
+                    onClick={() => toast.info('Funcionalidad en desarrollo')}
+                    className="group relative inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
                   >
                     <EnvelopeIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
-                    <span>Contact Me</span>
-                  </CTATracker>
-                  <CTATracker
-                    profileId={profile.id}
-                    ctaType="schedule_meeting"
-                    ctaLabel="Schedule Meeting"
-                    className="inline-flex items-center gap-2 px-7 py-3 bg-white dark:bg-dark-bg-tertiary border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+                    <span>{t.cvSections.contactMe}</span>
+                  </button>
+                  <button
+                    onClick={() => toast.info('Funcionalidad en desarrollo')}
+                    className="inline-flex items-center gap-2 px-7 py-3 bg-white dark:bg-dark-bg-tertiary border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg cursor-pointer"
                   >
                     <CalendarIcon className="w-5 h-5" />
-                    <span>Schedule Meeting</span>
-                  </CTATracker>
-                  <CTATracker
-                    profileId={profile.id}
-                    ctaType="download_cv"
-                    ctaLabel="Download CV"
-                    className="inline-flex items-center gap-2 px-7 py-3 bg-white dark:bg-dark-bg-tertiary border-2 border-gray-200 dark:border-gray-600 hover:border-gray-400 text-gray-700 dark:text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
-                  >
-                    <ArrowDownTrayIcon className="w-5 h-5" />
-                    <span>Download CV</span>
-                  </CTATracker>
+                    <span>{t.cvSections.scheduleMeeting}</span>
+                  </button>
                 </div>
               )}
               
@@ -142,7 +135,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
       </header>
 
       {/* Main Content with Premium Cards */}
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6 pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-8">
@@ -153,7 +146,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
                     <SparklesIcon className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">About</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.about}</h2>
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-lg">
                   {profile.summary}
@@ -178,7 +171,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                     <BriefcaseIcon className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Experience</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.experience}</h2>
                 </div>
                 <div className="space-y-8">
                   {experiences.map((exp, index) => (
@@ -192,7 +185,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                           {exp.company_name}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-500 mb-3 font-medium">
-                          {exp.start_date} - {exp.end_date || 'Present'}
+                          {exp.start_date} - {exp.end_date || t.cvSections.present}
                         </p>
                         {exp.description && (
                           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -213,7 +206,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
                     <AcademicCapIcon className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Education</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.education}</h2>
                 </div>
                 <div className="space-y-4">
                   {education.map((edu, index) => (
@@ -233,25 +226,6 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                         </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Skills Section with Modern Pills */}
-            {skills.length > 0 && (
-              <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                  Skills & Expertise
-                </h2>
-                <div className="flex flex-wrap gap-3">
-                  {skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="group relative px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-dark-bg-tertiary dark:to-gray-800 text-gray-800 dark:text-gray-200 rounded-xl text-sm font-semibold hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all cursor-default shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                    >
-                      {skill.name}
-                    </span>
                   ))}
                 </div>
               </section>
@@ -288,71 +262,72 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
             {/* Note: Verified credentials are now shown using stamps system only (see main content area)
                  Admins verify users through the stamps system, not user-controlled settings */}
 
-            {/* Professional Links - Optional */}
-            {profile.show_connect_links && (profile.linkedin_url || profile.portfolio_url || profile.github_url) && (
-              <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-xl">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-5">
-                  Connect With Me
+            {/* Skills Section - Compact Sidebar Version */}
+            {skills.length > 0 && (
+              <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                  </svg>
+                  {t.cvSections.skillsExpertise}
                 </h3>
-                <div className="space-y-3">
-                  {profile.linkedin_url && (
-                    <CTATracker
-                      profileId={profile.id}
-                      ctaType="linkedin"
-                      ctaLabel="LinkedIn Profile"
-                      href={profile.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl transition-all group"
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-semibold border border-blue-200 dark:border-blue-800"
                     >
-                      <LinkIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">LinkedIn Profile</span>
-                    </CTATracker>
-                  )}
-                  {profile.portfolio_url && (
-                    <CTATracker
-                      profileId={profile.id}
-                      ctaType="portfolio"
-                      ctaLabel="Portfolio Website"
-                      href={profile.portfolio_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 rounded-xl transition-all group"
-                    >
-                      <GlobeAltIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">Portfolio Website</span>
-                    </CTATracker>
-                  )}
-                  {profile.github_url && (
-                    <CTATracker
-                      profileId={profile.id}
-                      ctaType="github"
-                      ctaLabel="GitHub Profile"
-                      href={profile.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-xl transition-all group"
-                    >
-                      <LinkIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">GitHub</span>
-                    </CTATracker>
-                  )}
+                      {skill.name}
+                    </span>
+                  ))}
                 </div>
-              </div>
+              </section>
             )}
 
+            {/* Certifications Section - Compact Sidebar Version */}
+            {(() => {
+              const certifications = portfolioItems?.filter(item => item.type === 'CERTIFICATION') || [];
+              return certifications.length > 0 && (
+                <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    {t.cvSections?.certifications || 'Certificaciones'}
+                  </h3>
+                  <div className="space-y-3">
+                    {certifications.map((cert, index) => (
+                      <div key={index} className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-dark-bg-tertiary dark:to-gray-800/50 rounded-lg hover:shadow-md transition-shadow border-l-4 border-yellow-500">
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1 flex items-center gap-2 flex-wrap">
+                          {cert.title}
+                          {cert.verified && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-semibold rounded-full">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                              </svg>
+                            </span>
+                          )}
+                        </h4>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs font-medium mb-1">{cert.issuer}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          {cert.issue_date}
+                          {cert.expiry_date && <span> • Expira: {cert.expiry_date}</span>}
+                        </p>
+                        {cert.description && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            {cert.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
 
           </div>
         </div>
       </div>
-
-      {/* Contact Lead Modal */}
-      <ContactLeadModal
-        isOpen={showContactModal}
-        onClose={() => setShowContactModal(false)}
-        recipientId={profile.id}
-        recipientName={profile.full_name}
-      />
 
       {/* Print Styles */}
       <style>{`

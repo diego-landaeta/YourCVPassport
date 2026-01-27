@@ -13,23 +13,80 @@ function getVisitorId(): string {
   return visitorId;
 }
 
-// Trackear visita a un perfil
+// Verificar si el usuario autenticado es el dueño del perfil
+async function isOwnProfile(profileId: string): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    // Obtener el perfil para verificar si pertenece al usuario actual
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('id', profileId)
+      .single();
+
+    return profile?.user_id === user.id;
+  } catch {
+    return false;
+  }
+}
+
+// Verificar si ya se registró una visita reciente de este visitor_id
+function hasRecentView(profileId: string, visitorId: string): boolean {
+  const storageKey = `view_${profileId}_${visitorId}`;
+  const lastView = localStorage.getItem(storageKey);
+
+  if (lastView) {
+    const lastViewTime = parseInt(lastView, 10);
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    // Si la última visita fue hace menos de 24 horas, no registrar
+    if (now - lastViewTime < twentyFourHours) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Marcar que se registró una visita
+function markViewRecorded(profileId: string, visitorId: string): void {
+  const storageKey = `view_${profileId}_${visitorId}`;
+  localStorage.setItem(storageKey, Date.now().toString());
+}
+
+// Trackear visita a un perfil (solo si no es el propio usuario y no hay visita reciente)
 export async function trackView(profileId: string) {
   if (!profileId) return;
 
   try {
+    // No registrar si es el propio usuario viendo su perfil
+    const isOwner = await isOwnProfile(profileId);
+    if (isOwner) return;
+
     const visitorId = getVisitorId();
+
+    // No registrar si ya hay una visita reciente de este visitante
+    if (hasRecentView(profileId, visitorId)) return;
+
     const userAgent = typeof window !== 'undefined' ? navigator.userAgent : '';
     const referrer = typeof window !== 'undefined' ? document.referrer : '';
 
-    await supabase.from('analytics_views').insert({
+    const { error } = await supabase.from('analytics_views').insert({
       profile_id: profileId,
       visitor_id: visitorId,
       user_agent: userAgent,
       referrer: referrer,
     });
+
+    // Solo marcar como registrado si se insertó correctamente
+    if (!error) {
+      markViewRecorded(profileId, visitorId);
+    }
   } catch (error) {
-    
+
   }
 }
 

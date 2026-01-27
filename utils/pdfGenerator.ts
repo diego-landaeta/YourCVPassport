@@ -41,13 +41,14 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     iframe.style.left = '-9999px';
     iframe.style.top = '-9999px';
     iframe.style.width = '1200px';
-    iframe.style.height = '1600px';
+    iframe.style.height = '8000px'; // Increased height to ensure full content loads
+    iframe.style.overflow = 'visible';
     document.body.appendChild(iframe);
 
     // Load CV in iframe
     await new Promise<void>((resolve, reject) => {
       iframe.onload = () => {
-        setTimeout(() => resolve(), 2000); // Wait for all content to render
+        setTimeout(() => resolve(), 3000); // Increased wait time for all content to render
       };
       iframe.onerror = () => reject(new Error('Failed to load CV'));
       iframe.src = cvUrl;
@@ -78,6 +79,12 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     if (!cvContainer) {
       throw new Error('CV template container not found');
     }
+
+    // Force the CV container to show ALL content (remove any height restrictions)
+    const cvElement = cvContainer as HTMLElement;
+    cvElement.style.height = 'auto';
+    cvElement.style.maxHeight = 'none';
+    cvElement.style.overflow = 'visible';
 
     // Only hide floating buttons and external navigation (not CV content)
     const floatingButtons = iframeDoc.querySelectorAll('button[class*="fixed"], button[class*="floating"]');
@@ -182,20 +189,31 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     // Wait a bit more for styles to apply
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Generate canvas from wrapper element with optimized settings
+    // Force wrapper to have full height for complete capture
+    const fullHeight = wrapper.scrollHeight;
+    wrapper.style.height = `${fullHeight}px`;
+
+    // Wait for layout to settle
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Generate canvas from wrapper element with optimized settings for FULL content
     const canvas = await html2canvas(wrapper, {
-      scale: 2, // Higher quality
+      scale: 3, // Higher quality (increased from 2)
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
       windowWidth: 1200,
-      windowHeight: wrapper.scrollHeight,
+      windowHeight: fullHeight, // Use full height
+      width: wrapper.scrollWidth,
+      height: fullHeight, // Capture full height
       x: 0,
       y: 0,
       scrollX: 0,
       scrollY: 0,
       allowTaint: true,
-      foreignObjectRendering: false
+      foreignObjectRendering: false,
+      imageTimeout: 15000, // Increased timeout
+      removeContainer: false
     });
 
     if (onProgress) onProgress(70);
@@ -208,29 +226,30 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-    // Create PDF
+    // Create PDF with better compression settings
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
-      compress: true
+      compress: true,
+      precision: 2
     });
 
-    // Convert canvas to image
-    const imgData = canvas.toDataURL('image/png', 1.0);
+    // Convert canvas to image with maximum quality
+    const imgData = canvas.toDataURL('image/jpeg', 0.95); // Use JPEG with high quality for smaller file size
 
     let heightLeft = imgHeight;
     let position = 0;
 
     // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
     heightLeft -= pageHeight;
 
-    // Add additional pages if content is longer
+    // Add additional pages if content is longer than one page
     while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
+      position = heightLeft - imgHeight; // Move up by the remaining height
       pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pageHeight;
     }
 

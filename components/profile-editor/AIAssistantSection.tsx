@@ -5,6 +5,9 @@ import { supabase } from '../../supabase/client';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../context/ToastContext';
 import { useConfirmDialog } from '../ConfirmDialog';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
+import { checkAIAccess, recordAIUsage } from '../../lib/ai';
 import {
   SparklesIcon,
   CheckCircleIcon,
@@ -14,6 +17,7 @@ import {
   AcademicCapIcon,
   ChatBubbleLeftRightIcon,
   XMarkIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/solid';
 
 interface AIAssistantSectionProps {
@@ -37,15 +41,40 @@ const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusCha
   const aiT = t.aiAssistantSection;
   const toast = useToastContext();
   const confirm = useConfirmDialog();
+  const { lang } = useLanguage();
+  const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [selectedTab, setSelectedTab] = useState<'summary' | 'experience' | 'education'>('summary');
   const [isApplying, setIsApplying] = useState<string | null>(null);
   const [confirmationModal, setConfirmationModal] = useState<SuggestionItem | null>(null);
 
+  // AI Access state
+  const [aiAccessInfo, setAiAccessInfo] = useState<{ hasAccess: boolean; plan: string | null; remaining?: number | 'unlimited' } | null>(null);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+
   // @ts-ignore
   const apiKey = import.meta.env?.VITE_GOOGLE_AI_API_KEY || '';
   const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+  // Check AI access on mount
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!session?.user.id) {
+        setIsCheckingAccess(false);
+        return;
+      }
+      try {
+        const accessInfo = await checkAIAccess(session.user.id);
+        setAiAccessInfo(accessInfo);
+      } catch (err) {
+        console.error('Error checking AI access:', err);
+      } finally {
+        setIsCheckingAccess(false);
+      }
+    };
+    checkAccess();
+  }, [session?.user.id]);
 
   useEffect(() => {
     if (!apiKey) {}
@@ -305,7 +334,36 @@ INSTRUCCIONES:
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    // Check AI access before analyzing
+    if (!session?.user.id) {
+      toast.error(lang === 'es' ? 'Debes iniciar sesión para usar esta función' : 'You must be logged in to use this feature');
+      return;
+    }
+
+    // Re-check access to get latest status
+    const accessInfo = await checkAIAccess(session.user.id);
+    setAiAccessInfo(accessInfo);
+
+    if (!accessInfo.hasAccess) {
+      toast.error(
+        lang === 'es'
+          ? accessInfo.reason || 'No tienes acceso a las funciones de IA en tu plan actual'
+          : accessInfo.reason || 'You don\'t have access to AI features on your current plan'
+      );
+      return;
+    }
+
+    // Record usage BEFORE making the AI call
+    try {
+      await recordAIUsage(session.user.id, { action: 'analyze', tab: selectedTab });
+      // Refresh access info after recording usage
+      const updatedAccess = await checkAIAccess(session.user.id);
+      setAiAccessInfo(updatedAccess);
+    } catch (err) {
+      console.error('Error recording AI usage:', err);
+    }
+
     if (selectedTab === 'summary') {
       analyzeSummary();
     } else if (selectedTab === 'experience') {
@@ -340,15 +398,21 @@ INSTRUCCIONES:
                 </h4>
                 <ul className="space-y-2 text-yellow-800 dark:text-yellow-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 dark:text-yellow-400">✓</span>
+                    <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
                     <span>{aiT.notConfigured.alternatives.editManually}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 dark:text-yellow-400">✓</span>
+                    <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
                     <span>{aiT.notConfigured.alternatives.useTemplates}</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-600 dark:text-yellow-400">✓</span>
+                    <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
                     <span>{aiT.notConfigured.alternatives.exportPDF}</span>
                   </li>
                 </ul>
@@ -363,8 +427,98 @@ INSTRUCCIONES:
     );
   }
 
+  // Show premium upgrade banner if no access
+  if (!isCheckingAccess && aiAccessInfo && !aiAccessInfo.hasAccess) {
+    return (
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-8 shadow-lg">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-800/30 rounded-full flex items-center justify-center">
+                <LockClosedIcon className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold text-amber-900 dark:text-amber-200 mb-3">
+                {lang === 'es' ? 'Función Premium' : 'Premium Feature'}
+              </h3>
+              <p className="text-amber-800 dark:text-amber-300 mb-4 text-lg">
+                {lang === 'es'
+                  ? 'Las funciones de IA para mejorar tu perfil están disponibles en planes Basic, Pro y Enterprise.'
+                  : 'AI features to improve your profile are available on Basic, Pro and Enterprise plans.'}
+              </p>
+              <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-2">
+                  {lang === 'es' ? '¿Qué incluye?' : 'What\'s included?'}
+                </h4>
+                <ul className="space-y-2 text-amber-800 dark:text-amber-300">
+                  <li className="flex items-start gap-2">
+                    <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span>{lang === 'es' ? 'Mejora automática de tu resumen profesional' : 'Automatic improvement of your professional summary'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span>{lang === 'es' ? 'Optimización de descripciones de experiencia' : 'Optimization of experience descriptions'}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span>{lang === 'es' ? 'Mejora de secciones de educación' : 'Improvement of education sections'}</span>
+                  </li>
+                </ul>
+              </div>
+              <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
+                {lang === 'es' ? 'Plan actual: ' : 'Current plan: '}
+                <span className="font-semibold capitalize">{aiAccessInfo.plan || 'Free'}</span>
+              </p>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg"
+              >
+                {lang === 'es' ? 'Ver Planes Premium' : 'View Premium Plans'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto">
+      {/* Usage Limit Info Banner */}
+      {aiAccessInfo && aiAccessInfo.hasAccess && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm text-blue-800 dark:text-blue-300">
+                {lang === 'es' ? 'Solicitudes IA este mes: ' : 'AI Requests this month: '}
+                {aiAccessInfo.remaining === 'unlimited' ? (
+                  <span className="font-semibold text-green-600 dark:text-green-400">
+                    {lang === 'es' ? 'Ilimitadas' : 'Unlimited'}
+                  </span>
+                ) : (
+                  <span className="font-semibold">
+                    {aiAccessInfo.remaining} {lang === 'es' ? 'restantes' : 'remaining'}
+                  </span>
+                )}
+              </span>
+            </div>
+            {aiAccessInfo.plan && (
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                aiAccessInfo.plan === 'pro' || aiAccessInfo.plan === 'enterprise'
+                  ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
+                  : aiAccessInfo.plan === 'basic'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+              }`}>
+                {aiAccessInfo.plan.charAt(0).toUpperCase() + aiAccessInfo.plan.slice(1)}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-dark-border p-6 mb-6">
         <div className="flex items-center justify-between mb-6">
@@ -385,10 +539,15 @@ INSTRUCCIONES:
           {/* Analyze Button */}
           <button
             onClick={handleAnalyze}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || isCheckingAccess || (aiAccessInfo && !aiAccessInfo.hasAccess)}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-lg font-semibold hover:from-cv-blue/90 hover:to-purple-600/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
-            {isAnalyzing ? (
+            {isCheckingAccess ? (
+              <>
+                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                {lang === 'es' ? 'Verificando...' : 'Checking...'}
+              </>
+            ) : isAnalyzing ? (
               <>
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
                 {aiT.analyzingButton}

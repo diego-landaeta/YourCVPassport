@@ -2,6 +2,7 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CreativeBoldTemplateProps {
     data: FullProfileData;
@@ -57,6 +58,15 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                                         <span>LinkedIn</span>
                                     </a>
                                 )}
+                            </div>
+                            {/* Contact Buttons */}
+                            <div className="mt-4">
+                                <ProfileContactButtons
+                                    profileId={profile.id}
+                                    profileEmail={profile.email}
+                                    variant="minimal"
+                                    accentColor={accentColor}
+                                />
                             </div>
                         </div>
                     </div>

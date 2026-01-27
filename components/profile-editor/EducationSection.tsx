@@ -1,7 +1,8 @@
-import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, lazy, Suspense, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { educationSchema, EducationFormData } from '../../schemas/profileSchemas';
+import { EducationFormData } from '../../schemas/profileSchemas';
+import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useConfirmDialog } from '../ConfirmDialog';
 import { useToastContext } from '../../context/ToastContext';
@@ -44,14 +45,14 @@ interface SortableEducationItemProps {
   education: EducationFormData;
   onEdit: () => void;
   onDelete: () => void;
-  onToggleVerify: () => void;
+  lang: 'es' | 'en';
 }
 
 const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   education,
   onEdit,
   onDelete,
-  onToggleVerify,
+  lang,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: education.id || `temp-${Date.now()}`,
@@ -64,12 +65,13 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return 'Present';
+    if (!date) return lang === 'es' ? 'Presente' : 'Present';
     // Parse date manually to avoid timezone issues
     const [year, month] = date.split('-').map(Number);
     // Create date using local time constructor (year, monthIndex)
     const d = new Date(year, month - 1);
-    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const locale = lang === 'es' ? 'es-ES' : 'en-US';
+    return d.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
   };
 
   return (
@@ -122,16 +124,6 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
 
         {/* Actions */}
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={onToggleVerify}
-            className={`${education.verified ? 'text-gray-400' : 'text-green-500'} hover:opacity-70`}
-            title={education.verified ? 'Unverify' : 'Mark as Verified'}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </button>
           <button
             type="button"
             onClick={onEdit}
@@ -221,6 +213,10 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
   const modals = translations.dashboard.modals;
   const { confirm, Dialog } = useConfirmDialog();
   const toast = useToastContext();
+
+  // Get schema with translated error messages
+  const { educationSchema } = useMemo(() => getProfileSchemas(translations), [translations]);
+
   const [education, setEducation] = useState<EducationFormData[]>(initialData);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -311,10 +307,10 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
             localStorage.setItem('education_draft_last_prompt', Date.now().toString());
 
             const shouldRestore = await confirm({
-              title: 'Restaurar Borrador',
-              message: modals.restoreDraft || '¿Restaurar borrador guardado?',
-              confirmText: 'Restaurar',
-              cancelText: 'Descartar',
+              title: modals.restoreDraftTitle,
+              message: modals.restoreDraft,
+              confirmText: modals.restoreButton,
+              cancelText: modals.discardButton,
               type: 'info'
             });
             if (shouldRestore && parsed.formData) {
@@ -395,6 +391,35 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
   const handleEdit = (index: number) => {
     const edu = education[index];
     setEditingIndex(index);
+
+    // Helper function to ensure date is in YYYY-MM format
+    const normalizeDate = (date: string | null | undefined): string => {
+      if (!date) return '';
+
+      // If already in YYYY-MM format, return as is
+      if (/^\d{4}-\d{2}$/.test(date)) {
+        return date;
+      }
+
+      // If in YYYY-MM-DD format, extract YYYY-MM
+      if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
+        return date.substring(0, 7);
+      }
+
+      // Try to parse as date and format to YYYY-MM
+      try {
+        const d = new Date(date);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        }
+      } catch (e) {
+        console.error('Error parsing date:', date, e);
+      }
+
+      return '';
+    };
 
     // Clean markdown from description
     const cleanedDescription = cleanMarkdown(edu.description);
@@ -484,6 +509,10 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       field_of_study: fieldOfStudy,
       grade: grade,
       description: description,
+      // Normalize dates to YYYY-MM format for month input
+      start_date: normalizeDate(edu.start_date),
+      end_date: edu.is_current ? '' : normalizeDate(edu.end_date),
+      is_current: edu.is_current || false,
     };
 
     // Extraer y establecer la escala del GPA si existe
@@ -500,7 +529,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
 
   const handleDelete = async (index: number) => {
     const shouldDelete = await confirm({
-      title: 'Eliminar Educación',
+      title: translations.profileEditor.deleteModal.deleteEducation,
       message: modals.deleteEducationConfirm,
       confirmText: 'Eliminar',
       cancelText: 'Cancelar',
@@ -574,46 +603,36 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
 
       // Save to database through parent component
       await onSave(updated);
-
-      toast.success('Sugerencias de IA aplicadas correctamente');
     } catch (error) {toast.error('Error al aplicar la sugerencia');
       throw error;
     }
   };
 
-  const handleToggleVerify = (index: number) => {
-    const updated = education.map((edu, i) =>
-      i === index ? { ...edu, verified: !edu.verified } : edu
-    );
-    setEducation(updated);
-    onSave(updated);
-  };
-
   const onSubmit = async (data: EducationFormData) => {
     // Validar campos requeridos
     if (!data.institution_name || data.institution_name.trim() === '') {
-      toast.error('El nombre de la institución es obligatorio');
+      toast.error(translations.validationErrors.education.institutionRequired);
       return;
     }
 
     if (!data.degree || data.degree.trim() === '') {
-      toast.error('El título es obligatorio');
+      toast.error(translations.validationErrors.education.degreeRequired);
       return;
     }
 
     if (!data.field_of_study || data.field_of_study.trim() === '') {
-      toast.error('El campo de estudio es obligatorio');
+      toast.error(translations.validationErrors.education.fieldRequired);
       return;
     }
 
     if (!data.start_date || data.start_date.trim() === '') {
-      toast.error('La fecha de inicio es obligatoria');
+      toast.error(translations.validationErrors.education.startDateRequired);
       return;
     }
 
     // Validar que si NO está marcado como actual, debe tener fecha de fin
     if (!data.is_current && (!data.end_date || data.end_date.trim() === '')) {
-      toast.error('La fecha de fin es obligatoria. Si aún estudias aquí, marca "Actualmente estudio aquí"');
+      toast.error(translations.validationErrors.education.endDateRequired);
       return;
     }
 
@@ -621,11 +640,12 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
     const dateValidation = validateDateRange(
       data.start_date,
       data.end_date,
-      data.is_current || false
+      data.is_current || false,
+      translations.validationErrors.education
     );
 
     if (!dateValidation.isValid) {
-      toast.error(dateValidation.error || 'Las fechas no son válidas');
+      toast.error(dateValidation.error || translations.validationErrors.education.dateFormatInvalid);
       return;
     }
 
@@ -662,17 +682,19 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
       localStorage.removeItem('education_draft_last_prompt');
     }, 0);
 
+    // ✅ Cerrar formulario INMEDIATAMENTE para mejor UX
+    setIsFormOpen(false);
+    reset();
+
     try {
       await onSave(updated);
     } catch (error) {
       // Even if refetch fails, draft is already cleaned since DB save succeeded
       // The error toast will be shown from DashboardContent
     } finally {
-      // Double-check cleanup and close form
+      // Double-check cleanup
       localStorage.removeItem('education_draft');
       localStorage.removeItem('education_draft_last_prompt');
-      setIsFormOpen(false);
-      reset();
     }
   };
 
@@ -680,8 +702,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
     <>
       <Dialog />
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{modals.addEducation.replace('Añadir ', '').replace('Add ', '')}</h2>
+      <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-3">
           <button
             onClick={handleAdd}
@@ -695,8 +716,8 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
         </div>
       </div>
 
-      {/* Verification Info Banner */}
-      {education.length > 0 && (
+      {/* Verification Info Banner - Only show when NOT in wizard mode (onNext is undefined means we're not in wizard) */}
+      {education.length > 0 && !onNext && onNavigateToVerifications && (
         <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
@@ -738,7 +759,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 education={edu}
                 onEdit={() => handleEdit(index)}
                 onDelete={() => handleDelete(index)}
-                onToggleVerify={() => handleToggleVerify(index)}
+                lang={lang}
               />
             ))}
           </div>
@@ -761,7 +782,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
             onClick={onNext}
             className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            Siguiente
+            {translations.common?.next || 'Next'}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -784,10 +805,14 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 <input
                   {...register('institution_name')}
                   type="text"
+                  maxLength={80}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   placeholder={modals.institutionPlaceholder}
                 />
                 {errors.institution_name && <p className="text-red-500 text-sm mt-1">{errors.institution_name.message}</p>}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {watch('institution_name')?.length || 0}/80 {translations.common.characters}
+                </p>
               </div>
 
               <div>
@@ -797,10 +822,14 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 <input
                   {...register('degree')}
                   type="text"
+                  maxLength={50}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   placeholder={modals.degreePlaceholder}
                 />
                 {errors.degree && <p className="text-red-500 text-sm mt-1">{errors.degree.message}</p>}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {watch('degree')?.length || 0}/50 {translations.common.characters}
+                </p>
               </div>
             </div>
 
@@ -811,10 +840,14 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
               <input
                 {...register('field_of_study')}
                 type="text"
+                maxLength={60}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                 placeholder={modals.fieldOfStudyPlaceholder}
               />
               {errors.field_of_study && <p className="text-red-500 text-sm mt-1">{errors.field_of_study.message}</p>}
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {watch('field_of_study')?.length || 0}/60 {translations.common.characters}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -822,31 +855,34 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.startDate} *
                 </label>
-                <input
-                  {...register('start_date')}
-                  type="month"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
-                />
+                <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
+                  <input
+                    {...register('start_date')}
+                    type="month"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
+                  />
+                </div>
                 {errors.start_date && <p className="text-red-500 text-sm mt-1">{errors.start_date.message}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
-                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">(Actual)</span>}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({lang === 'es' ? 'Actual' : 'Current'})</span>}
                 </label>
-                <input
-                  {...register('end_date')}
-                  type="month"
-                  disabled={isCurrent}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
-                  placeholder={isCurrent ? "Presente" : ""}
-                />
+                <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
+                  <input
+                    {...register('end_date')}
+                    type="month"
+                    disabled={isCurrent}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  GPA / Nota Media (Opcional)
+                  {translations.validationErrors.education.gpaLabel}
                 </label>
                 <div className="flex gap-2">
                   {/* Selector de formato */}
@@ -866,10 +902,15 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                       }
                     }}
                   >
-                    <option value="4.0">Escala 4.0</option>
-                    <option value="5.0">Escala 5.0</option>
-                    <option value="10">Escala 10</option>
-                    <option value="100">Porcentaje 100</option>
+                    <option value="4.0">{translations.validationErrors.education.gpaScale4}</option>
+                    <option value="4.3">{lang === 'es' ? 'Escala 4.3' : '4.3 Scale'}</option>
+                    <option value="5.0">{translations.validationErrors.education.gpaScale5}</option>
+                    <option value="7.0">{lang === 'es' ? 'Escala 7.0' : '7.0 Scale'}</option>
+                    <option value="9.0">{lang === 'es' ? 'Escala 9.0' : '9.0 Scale'}</option>
+                    <option value="10">{translations.validationErrors.education.gpaScale10}</option>
+                    <option value="12">{lang === 'es' ? 'Escala 12' : '12 Scale'}</option>
+                    <option value="20">{lang === 'es' ? 'Escala 20' : '20 Scale'}</option>
+                    <option value="100">{translations.validationErrors.education.gpaScale100}</option>
                   </select>
 
                   {/* Input numérico */}
@@ -880,8 +921,13 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                     max={parseFloat(gradeScale)}
                     placeholder={
                       gradeScale === '4.0' ? '0.0 - 4.0' :
+                      gradeScale === '4.3' ? '0.0 - 4.3' :
                       gradeScale === '5.0' ? '0.0 - 5.0' :
+                      gradeScale === '7.0' ? '0.0 - 7.0' :
+                      gradeScale === '9.0' ? '0.0 - 9.0' :
                       gradeScale === '10' ? '0 - 10' :
+                      gradeScale === '12' ? '0 - 12' :
+                      gradeScale === '20' ? '0 - 20' :
                       '0 - 100'
                     }
                     value={watch('grade')?.match(/[\d.]+/)?.[0] || ''}
@@ -898,7 +944,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                       const numValue = parseFloat(value);
 
                       if (numValue > maxValue) {
-                        toast.error(`El valor máximo para esta escala es ${maxValue}`);
+                        toast.error(`${translations.validationErrors.education.gpaMaxError} ${maxValue}`);
                         return;
                       }
 
@@ -908,10 +954,15 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
-                  {gradeScale === '4.0' && 'GPA en escala de 0.0 a 4.0 (ej: 3.85)'}
-                  {gradeScale === '5.0' && 'Nota en escala de 0.0 a 5.0 (ej: 4.2)'}
-                  {gradeScale === '10' && 'Nota en escala de 0 a 10 (ej: 8.5)'}
-                  {gradeScale === '100' && 'Porcentaje de 0 a 100 (ej: 85)'}
+                  {gradeScale === '4.0' && translations.validationErrors.education.gpaPlaceholder}
+                  {gradeScale === '4.3' && (lang === 'es' ? 'GPA en escala de 0.0 a 4.3 (ej: 3.9)' : 'GPA on a 0.0 to 4.3 scale (eg: 3.9)')}
+                  {gradeScale === '5.0' && (lang === 'es' ? 'Nota en escala de 0.0 a 5.0 (ej: 4.2)' : 'Grade on a 0.0 to 5.0 scale (eg: 4.2)')}
+                  {gradeScale === '7.0' && (lang === 'es' ? 'GPA en escala de 0.0 a 7.0 (ej: 6.5)' : 'GPA on a 0.0 to 7.0 scale (eg: 6.5)')}
+                  {gradeScale === '9.0' && (lang === 'es' ? 'CGPA en escala de 0.0 a 9.0 (ej: 8.2)' : 'CGPA on a 0.0 to 9.0 scale (eg: 8.2)')}
+                  {gradeScale === '10' && (lang === 'es' ? 'Nota en escala de 0 a 10 (ej: 8.5)' : 'Grade on a 0 to 10 scale (eg: 8.5)')}
+                  {gradeScale === '12' && (lang === 'es' ? 'Nota en escala de 0 a 12 (ej: 10)' : 'Grade on a 0 to 12 scale (eg: 10)')}
+                  {gradeScale === '20' && (lang === 'es' ? 'Nota en escala de 0 a 20 (ej: 16)' : 'Grade on a 0 to 20 scale (eg: 16)')}
+                  {gradeScale === '100' && (lang === 'es' ? 'Porcentaje de 0 a 100 (ej: 85)' : 'Percentage from 0 to 100 (eg: 85)')}
                 </p>
               </div>
             </div>
@@ -923,9 +974,13 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
               <textarea
                 {...register('description')}
                 rows={4}
+                maxLength={400}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white resize-none"
                 placeholder={modals.descriptionPlaceholder}
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {watch('description')?.length || 0}/400 {translations.common.characters}
+              </p>
             </div>
 
             <div>

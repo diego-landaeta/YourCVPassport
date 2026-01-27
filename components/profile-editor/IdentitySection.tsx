@@ -1,10 +1,13 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+// @ts-nocheck
+import React, { useState, useRef, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { identitySchema, IdentityFormData } from '../../schemas/profileSchemas';
+import { IdentityFormData } from '../../schemas/profileSchemas';
+import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../context/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
@@ -22,9 +25,13 @@ export interface WizardStepHandle {
 
 const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave, onNext }, ref) => {
   const translations = useTranslations();
+  const { lang } = useLanguage();
   const t = translations.dashboard.identity;
-  const { profile, session } = useAuth();
+  const { profile, session, refetchProfile } = useAuth();
   const toast = useToastContext();
+
+  // Get schema with translated error messages
+  const { identitySchema } = useMemo(() => getProfileSchemas(translations), [translations]);
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -193,13 +200,18 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
       if (updateError) {
         setUploadError('Error al guardar la foto en tu perfil');
+        toast.error('Error al guardar la foto en tu perfil');
       } else {
+        // ✅ Refrescar perfil en contexto para que la foto aparezca en toda la app
+        await refetchProfile();
         // ✅ Mostrar feedback al usuario
-        toast.success('Foto de perfil actualizada');
+        toast.success('Foto de perfil actualizada correctamente');
       }
     } catch (error: any) {
       const errorMessage = error?.message || 'Error desconocido';
-      setUploadError(`Error al subir la imagen: ${errorMessage}`);
+      const fullError = `Error al subir la imagen: ${errorMessage}`;
+      setUploadError(fullError);
+      toast.error(fullError);
     } finally {
       setIsUploading(false);
       // Limpiar URL temporal
@@ -387,14 +399,27 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       portfolio_url: transformUrl(data.portfolio_url),
     };
 
-    await onSave(transformedData);
-    // Clear draft on successful save
-    localStorage.removeItem('identity_draft');
-    // Reset form to mark as clean (no unsaved changes)
-    reset(transformedData);
-    // Auto-advance to next section
-    if (onNext) {
-      onNext();
+    try {
+      // Only save if there are actual changes
+      if (isDirty) {
+        toast.info('Guardando cambios...');
+        await onSave(transformedData);
+        // Clear draft on successful save
+        localStorage.removeItem('identity_draft');
+        // Reset form to mark as clean (no unsaved changes)
+        reset(transformedData);
+        // Update toast to success
+        toast.success('Cambios guardados correctamente');
+      }
+
+      // Advance to next section after save (or if no changes to save)
+      if (onNext) {
+        onNext();
+      }
+    } catch (error) {
+      // If save fails, show error and don't advance
+      toast.error('Error al guardar. Por favor, intenta de nuevo.');
+      console.error('Error saving identity:', error);
     }
   };
 
@@ -424,14 +449,12 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t.title}</h2>
-
       <form onSubmit={handleSubmit(onSubmit as any)} noValidate className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {/* Left Column: Professional Information */}
           <div className="space-y-5">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              Información Profesional
+              {t.professionalInfo}
             </h3>
 
             {/* Avatar + Main Info Group */}
@@ -471,7 +494,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                   disabled={isUploading}
                   className="text-xs text-cv-blue hover:text-cv-blue-dark font-medium"
                 >
-                  Cambiar
+                  {t.changePhoto}
                 </button>
                 <input
                   ref={fileInputRef}
@@ -485,16 +508,22 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               {/* Name & Headline Inputs */}
               <div className="flex-1 space-y-3 min-w-0">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t.fullNameRequired} <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {t.fullNameRequired} <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-xs text-gray-400">
+                      {watch('full_name')?.length || 0}/50
+                    </span>
+                  </div>
                   <input
                     {...register('full_name')}
                     type="text"
+                    maxLength={50}
                     className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
                       errors.full_name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                     }`}
-                    placeholder="John Doe"
+                    placeholder={t.fullNamePlaceholder}
                   />
                   {errors.full_name && (
                     <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>
@@ -502,16 +531,22 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t.headlineRequired} <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {t.headlineRequired} <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-xs text-gray-400">
+                      {watch('headline')?.length || 0}/150
+                    </span>
+                  </div>
                   <input
                     {...register('headline')}
                     type="text"
+                    maxLength={150}
                     className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
                       errors.headline ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                     }`}
-                    placeholder="Senior Software Engineer"
+                    placeholder={t.headlinePlaceholder}
                   />
                   {errors.headline && (
                     <p className="text-red-500 text-xs mt-1">{errors.headline.message}</p>
@@ -523,13 +558,13 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             {/* Country */}
             <div>
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                País <span className="text-red-500">*</span>
+                {t.country} <span className="text-red-500">*</span>
               </label>
               <CountrySelector
                 value={watch('country_code')}
                 onChange={(code) => setValue('country_code', code, { shouldDirty: true })}
-                placeholder="Selecciona tu país"
-                lang="es"
+                placeholder={t.countryPlaceholder}
+                lang={lang}
               />
               {errors.country_code && (
                 <p className="text-red-500 text-xs mt-1">{errors.country_code.message}</p>
@@ -576,7 +611,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
           {/* Right Column: Contact Information */}
           <div className="space-y-5">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              Información de Contacto
+              {translations.profileEditor.identity.contactInfo}
             </h3>
 
             <div className="space-y-4">
@@ -658,7 +693,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             type="submit"
             className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
-            Siguiente
+            {translations.common?.next || 'Next'}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>

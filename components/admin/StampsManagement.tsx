@@ -17,7 +17,9 @@ import {
   XMarkIcon,
   FunnelIcon,
   MagnifyingGlassPlusIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  UserGroupIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import { useToast } from '../../hooks/useToast';
 import Toast from '../common/Toast';
@@ -26,14 +28,23 @@ const StampsManagement: React.FC = () => {
   const [stamps, setStamps] = useState<Stamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StampStatus | 'ALL'>('PENDING');
+  const [userFilter, setUserFilter] = useState<'ALL' | 'WITH_PENDING' | 'WITHOUT_STAMPS'>('ALL');
   const [selectedStamp, setSelectedStamp] = useState<Stamp | null>(null);
+  const [usersWithoutStamps, setUsersWithoutStamps] = useState<any[]>([]);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [stampToReject, setStampToReject] = useState<Stamp | null>(null);
+  const [quickRejectReason, setQuickRejectReason] = useState('');
   const [actionNotes, setActionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
-  
+  const [showUserInfoModal, setShowUserInfoModal] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<any>(null);
+  const [loadingUserProfile, setLoadingUserProfile] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   // Magnifier state
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [isZoomEnabled, setIsZoomEnabled] = useState(false);
@@ -70,12 +81,14 @@ const StampsManagement: React.FC = () => {
     pending: 0,
     verified: 0,
     rejected: 0,
-    expired: 0
+    expired: 0,
+    usersWithPending: 0,
+    usersWithoutStamps: 0
   });
 
   useEffect(() => {
     loadStamps();
-  }, [filter]);
+  }, [filter, userFilter]);
 
   const loadStamps = async () => {
     try {
@@ -97,28 +110,64 @@ const StampsManagement: React.FC = () => {
 
       if (error) throw error;
 
-      // Filter out PENDING EMAIL and PHONE stamps (they should only show when VERIFIED)
-      const filteredData = (data || []).filter(stamp => {
-        if ((stamp.type === 'EMAIL' || stamp.type === 'PHONE') && stamp.status === 'PENDING') {
+      // Filter out PENDING EMAIL stamps (they should only show when VERIFIED)
+      let filteredData = (data || []).filter(stamp => {
+        if (stamp.type === 'EMAIL' && stamp.status === 'PENDING') {
           return false;
         }
         return true;
       });
 
+      // Apply user filter
+      if (userFilter === 'WITH_PENDING') {
+        // Get unique profile IDs that have pending stamps
+        const profilesWithPending = new Set(
+          filteredData
+            .filter(s => s.status === 'PENDING')
+            .map(s => s.profile_id)
+        );
+
+        // Only show stamps from users who have at least one pending stamp
+        filteredData = filteredData.filter(stamp =>
+          profilesWithPending.has(stamp.profile_id)
+        );
+      }
+
       setStamps(filteredData);
 
-      // Calculate stats
-      const { data: allStamps } = await supabase
-        .from('stamps')
-        .select('status');
+      // Calculate stats and get users without stamps
+      const [stampsResponse, profilesResponse] = await Promise.all([
+        supabase.from('stamps').select('status, profile_id'),
+        supabase.from('profiles').select('id, full_name, email, avatar_url, created_at')
+      ]);
 
-      if (allStamps) {
+      if (stampsResponse.data && profilesResponse.data) {
+        const allStamps = stampsResponse.data;
+        const allProfiles = profilesResponse.data;
+
+        // Calculate unique users with pending stamps
+        const uniqueUsersWithPending = new Set(
+          allStamps
+            .filter(s => s.status === 'PENDING')
+            .map(s => s.profile_id)
+        ).size;
+
+        // Get users without any stamps
+        const profileIdsWithStamps = new Set(allStamps.map(s => s.profile_id));
+        const usersWithoutAnyStamps = allProfiles.filter(
+          profile => !profileIdsWithStamps.has(profile.id)
+        );
+
+        setUsersWithoutStamps(usersWithoutAnyStamps);
+
         setStats({
           total: allStamps.length,
           pending: allStamps.filter(s => s.status === 'PENDING').length,
           verified: allStamps.filter(s => s.status === 'VERIFIED').length,
           rejected: allStamps.filter(s => s.status === 'REJECTED').length,
-          expired: allStamps.filter(s => s.status === 'EXPIRED').length
+          expired: allStamps.filter(s => s.status === 'EXPIRED').length,
+          usersWithPending: uniqueUsersWithPending,
+          usersWithoutStamps: usersWithoutAnyStamps.length
         });
       }
 
@@ -131,24 +180,24 @@ const StampsManagement: React.FC = () => {
     const iconClass = "w-5 h-5";
     switch (type) {
       case 'EMAIL': return <EnvelopeIcon className={iconClass} />;
-      case 'PHONE': return <PhoneIcon className={iconClass} />;
       case 'IDENTITY': return <IdentificationIcon className={iconClass} />;
       case 'EDUCATION': return <AcademicCapIcon className={iconClass} />;
       case 'CERTIFICATION': return <DocumentTextIcon className={iconClass} />;
       case 'EMPLOYMENT': return <BriefcaseIcon className={iconClass} />;
       case 'SKILL': return <CodeBracketIcon className={iconClass} />;
+      case 'LANGUAGE': return <ShieldCheckIcon className={iconClass} />;
     }
   };
 
   const getStampTypeName = (type: StampType): string => {
     const names: Record<StampType, string> = {
       'EMAIL': 'Email',
-      'PHONE': 'Teléfono',
       'IDENTITY': 'Identidad',
       'EDUCATION': 'Educación',
       'CERTIFICATION': 'Certificación',
       'EMPLOYMENT': 'Empleo',
-      'SKILL': 'Habilidad'
+      'SKILL': 'Habilidad',
+      'LANGUAGE': 'Idiomas'
     };
     return names[type];
   };
@@ -222,6 +271,64 @@ const StampsManagement: React.FC = () => {
     const signedUrl = await getDocumentSignedUrl(evidence.document_url);
     setDocumentUrl(signedUrl);
     setLoadingDocument(false);
+  };
+
+  const viewUserProfile = async (profileId: string) => {
+    setLoadingUserProfile(true);
+    setShowUserInfoModal(true);
+
+    try {
+      // Fetch profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', profileId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Fetch related data in parallel
+      const [experienceRes, educationRes, skillsRes, languagesRes, portfolioRes] = await Promise.all([
+        supabase.from('experiences').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
+        supabase.from('education').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
+        supabase.from('skills').select('*').eq('profile_id', profileId),
+        supabase.from('languages').select('*').eq('profile_id', profileId),
+        supabase.from('portfolio_items').select('*').eq('profile_id', profileId)
+      ]);
+
+      // Log any errors from the parallel queries
+      if (experienceRes.error) console.error('Experience error:', experienceRes.error);
+      if (educationRes.error) console.error('Education error:', educationRes.error);
+      if (skillsRes.error) console.error('Skills error:', skillsRes.error);
+      if (languagesRes.error) console.error('Languages error:', languagesRes.error);
+      if (portfolioRes.error) console.error('Portfolio error:', portfolioRes.error);
+
+      // Log the data to see what we got
+      console.log('Portfolio data:', portfolioRes.data);
+      console.log('Languages data:', languagesRes.data);
+      console.log('Skills data:', skillsRes.data);
+      console.log('Experience data:', experienceRes.data);
+      console.log('Education data:', educationRes.data);
+
+      // Combine all data
+      const combinedProfile = {
+        ...profileData,
+        experience: experienceRes.data || [],
+        education: educationRes.data || [],
+        skills: skillsRes.data || [],
+        languages: languagesRes.data || [],
+        portfolio: portfolioRes.data || []
+      };
+
+      console.log('Combined profile:', combinedProfile);
+      setSelectedUserProfile(combinedProfile);
+    } catch (err: any) {
+      error('Error al cargar el perfil del usuario');
+      console.error('Full error:', err);
+      setShowUserInfoModal(false);
+    } finally {
+      setLoadingUserProfile(false);
+    }
   };
 
   const approveStamp = async (stampId: string) => {
@@ -304,19 +411,24 @@ const StampsManagement: React.FC = () => {
     }
   };
 
-  const handleQuickReject = async (stamp: Stamp) => {
-    const reason = prompt('Por favor, ingresa el motivo del rechazo:');
+  const handleQuickReject = (stamp: Stamp) => {
+    setStampToReject(stamp);
+    setQuickRejectReason('');
+    setShowRejectModal(true);
+  };
 
-    if (reason === null) {
-      return; // User cancelled
-    }
+  const confirmQuickReject = async () => {
+    if (!stampToReject) return;
 
-    if (!reason.trim()) {
+    if (!quickRejectReason.trim()) {
       error('Debes proporcionar un motivo para rechazar');
       return;
     }
 
-    await rejectStamp(stamp.id, reason);
+    await rejectStamp(stampToReject.id, quickRejectReason);
+    setShowRejectModal(false);
+    setStampToReject(null);
+    setQuickRejectReason('');
   };
 
   const formatDate = (dateString: string) => {
@@ -339,65 +451,191 @@ const StampsManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</div>
-        </div>
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Pendientes</div>
-          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{stats.pending}</div>
-        </div>
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Verificados</div>
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.verified}</div>
-        </div>
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Rechazados</div>
-          <div className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{stats.rejected}</div>
-        </div>
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Expirados</div>
-          <div className="text-2xl font-bold text-gray-600 dark:text-gray-400 mt-1">{stats.expired}</div>
-        </div>
+      {/* Filtros y Estadísticas - Una sola fila compacta */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Filtro: Pendientes */}
+        <button
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filter === 'PENDING' && userFilter === 'ALL'
+              ? 'bg-yellow-500 text-white'
+              : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-yellow-400'
+          }`}
+          onClick={() => {
+            setIsTransitioning(true);
+            setFilter('PENDING');
+            setUserFilter('ALL');
+            setTimeout(() => setIsTransitioning(false), 200);
+          }}
+        >
+          <ClockIcon className="w-4 h-4" />
+          Pendientes
+          <span className="font-bold">{stats.pending}</span>
+        </button>
+
+        {/* Filtro: Verificados */}
+        <button
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filter === 'VERIFIED' && userFilter === 'ALL'
+              ? 'bg-green-500 text-white'
+              : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-green-400'
+          }`}
+          onClick={() => {
+            setIsTransitioning(true);
+            setFilter('VERIFIED');
+            setUserFilter('ALL');
+            setTimeout(() => setIsTransitioning(false), 200);
+          }}
+        >
+          <CheckCircleIcon className="w-4 h-4" />
+          Verificados
+          <span className="font-bold">{stats.verified}</span>
+        </button>
+
+        {/* Filtro: Rechazados */}
+        <button
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filter === 'REJECTED' && userFilter === 'ALL'
+              ? 'bg-red-500 text-white'
+              : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-red-400'
+          }`}
+          onClick={() => {
+            setIsTransitioning(true);
+            setFilter('REJECTED');
+            setUserFilter('ALL');
+            setTimeout(() => setIsTransitioning(false), 200);
+          }}
+        >
+          <XCircleIcon className="w-4 h-4" />
+          Rechazados
+          <span className="font-bold">{stats.rejected}</span>
+        </button>
+
+        {/* Separador */}
+        <div className="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+        {/* Filtro: Todos */}
+        <button
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filter === 'ALL' && userFilter === 'ALL'
+              ? 'bg-gray-700 dark:bg-gray-600 text-white'
+              : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
+          }`}
+          onClick={() => {
+            setIsTransitioning(true);
+            setFilter('ALL');
+            setUserFilter('ALL');
+            setTimeout(() => setIsTransitioning(false), 200);
+          }}
+        >
+          <Squares2X2Icon className="w-4 h-4" />
+          Todos
+          <span className="font-bold">{stats.total}</span>
+        </button>
+
+        {/* Filtro: Sin verificaciones */}
+        <button
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            userFilter === 'WITHOUT_STAMPS'
+              ? 'bg-orange-500 text-white'
+              : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-orange-400'
+          }`}
+          onClick={() => {
+            setIsTransitioning(true);
+            setFilter('ALL');
+            setUserFilter('WITHOUT_STAMPS');
+            setTimeout(() => setIsTransitioning(false), 200);
+          }}
+        >
+          <UserGroupIcon className="w-4 h-4" />
+          Sin verificar
+          <span className="font-bold">{stats.usersWithoutStamps}</span>
+        </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4">
-        <div className="flex items-center gap-3">
-          <FunnelIcon className="w-5 h-5 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por estado:</span>
-          <div className="flex gap-2">
-            {(['ALL', 'PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED'] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                {status === 'ALL' ? 'Todos' : status.charAt(0) + status.slice(1).toLowerCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Stamps List */}
+      {/* Stamps List or Users Without Stamps */}
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow overflow-hidden">
-        {stamps.length === 0 ? (
-          <div className="text-center py-12">
-            <CheckBadgeIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              No hay stamps {filter !== 'ALL' && `con estado ${filter.toLowerCase()}`}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <div className={`transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+          {userFilter === 'WITHOUT_STAMPS' ? (
+              // Show users without any stamps
+              usersWithoutStamps.length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckBadgeIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Todos los usuarios han solicitado al menos una verificación
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Usuario
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Registrado
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-gray-700">
+                    {usersWithoutStamps.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.full_name}`}
+                              alt=""
+                              className="w-10 h-10 rounded-full flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {user.full_name || 'Sin nombre'}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.email || 'Sin email'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {formatDate(user.created_at)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => viewUserProfile(user.id)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1"
+                          >
+                            <EyeIcon className="w-4 h-4" />
+                            Ver Perfil
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            )
+          ) : stamps.length === 0 ? (
+            <div className="text-center py-12">
+              <CheckBadgeIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No hay stamps {filter !== 'ALL' && `con estado ${filter.toLowerCase()}`}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -423,21 +661,28 @@ const StampsManagement: React.FC = () => {
               <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-gray-700">
                 {stamps.map((stamp) => (
                   <tr key={stamp.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
                         <img
                           src={(stamp.profiles as any)?.avatar_url || `https://ui-avatars.com/api/?name=${(stamp.profiles as any)?.full_name}`}
                           alt=""
-                          className="w-10 h-10 rounded-full"
+                          className="w-10 h-10 rounded-full flex-shrink-0"
                         />
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {(stamp.profiles as any)?.full_name || 'Unknown'}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                             {(stamp.profiles as any)?.email || 'No email'}
                           </div>
                         </div>
+                        <button
+                          onClick={() => viewUserProfile(stamp.profile_id)}
+                          className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          title="Ver información completa del usuario"
+                        >
+                          <IdentificationIcon className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -482,15 +727,17 @@ const StampsManagement: React.FC = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
-        )}
+              </table>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Document Modal */}
       {showDocumentModal && selectedStamp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-6xl w-full h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-6xl w-full my-4 max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
             {/* Header - Compact */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex-shrink-0">
               <div className="flex items-center justify-between">
@@ -518,10 +765,10 @@ const StampsManagement: React.FC = () => {
             </div>
 
             {/* Content - Fixed Height with Internal Scroll */}
-            <div className="flex-1 overflow-hidden p-6 bg-gray-50 dark:bg-dark-bg-primary">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-dark-bg-primary">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Left Column: Info & Actions */}
-                <div className="flex flex-col gap-6 h-full">
+                <div className="flex flex-col gap-4 sm:gap-6">
                   {/* Stamp Info Card */}
                   <div className="bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <div className="grid grid-cols-2 gap-4">
@@ -540,14 +787,14 @@ const StampsManagement: React.FC = () => {
                   </div>
 
                   {/* Evidence Details Card - Scrollable */}
-                  <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex-1 flex flex-col min-h-0 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+                  <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                       <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <DocumentTextIcon className="w-4 h-4 text-blue-500" />
                         Información Proporcionada
                       </h3>
                     </div>
-                    <div className="p-4 overflow-y-auto custom-scrollbar">
+                    <div className="p-4 max-h-64 overflow-y-auto scrollbar-hide">
                       <div className="space-y-0 text-sm">
                         {Object.entries(selectedStamp.evidence as any).map(([key, value]) => {
                           if (key === 'document_url' || key === 'verification_code' || key === 'expires_at' || key === 'attempts' || key === 'file_type' || key === 'file_name') return null;
@@ -630,7 +877,7 @@ const StampsManagement: React.FC = () => {
                 </div>
 
                 {/* Right Column: Document Preview */}
-                <div className="flex flex-col h-full bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div className="flex flex-col min-h-[500px] lg:h-full bg-white dark:bg-dark-bg-secondary p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                       <EyeIcon className="w-4 h-4 text-blue-500" />
@@ -771,6 +1018,72 @@ const StampsManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Quick Reject Modal */}
+      {showRejectModal && stampToReject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <XCircleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                  Rechazar Verificación
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {getStampTypeName(stampToReject.type)} de {(stampToReject.profiles as any)?.full_name}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Motivo del rechazo <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={quickRejectReason}
+                onChange={(e) => setQuickRejectReason(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all resize-none"
+                placeholder="Explica el motivo del rechazo al usuario..."
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setStampToReject(null);
+                  setQuickRejectReason('');
+                }}
+                disabled={processing}
+                className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-all disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmQuickReject}
+                disabled={processing || !quickRejectReason.trim()}
+                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {processing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Rechazando...
+                  </>
+                ) : (
+                  <>
+                    <XCircleIcon className="w-5 h-5" />
+                    Rechazar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Notifications */}
       {toasts.map(toast => (
         <Toast
@@ -780,6 +1093,231 @@ const StampsManagement: React.FC = () => {
           onClose={() => removeToast(toast.id)}
         />
       ))}
+
+      {/* User Information Modal */}
+      {showUserInfoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl max-w-4xl w-full max-h-[90vh] shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 rounded-t-2xl flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <IdentificationIcon className="w-6 h-6 text-indigo-200" />
+                  Información Completa del Usuario
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowUserInfoModal(false);
+                    setSelectedUserProfile(null);
+                  }}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 min-h-0">
+              {loadingUserProfile ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : selectedUserProfile ? (
+                <div className="space-y-6 pb-6">
+                  {/* Personal Information */}
+                  <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <IdentificationIcon className="w-5 h-5 text-blue-500" />
+                      Información Personal
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Nombre Completo</label>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.full_name || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Email</label>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.email || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Teléfono</label>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.phone || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">País</label>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.country_code || selectedUserProfile.location || 'N/A'}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Headline / Profesión</label>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.headline || selectedUserProfile.profession || 'N/A'}</p>
+                      </div>
+                      {selectedUserProfile.summary && (
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Resumen / Biografía</label>
+                          <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.summary}</p>
+                        </div>
+                      )}
+                      {selectedUserProfile.bio && !selectedUserProfile.summary && (
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Biografía</label>
+                          <p className="text-sm text-gray-900 dark:text-white mt-1">{selectedUserProfile.bio}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Experience */}
+                  {selectedUserProfile.experience?.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <BriefcaseIcon className="w-5 h-5 text-blue-500" />
+                        Experiencia Laboral ({selectedUserProfile.experience.length})
+                      </h3>
+                      <div className="space-y-4">
+                        {selectedUserProfile.experience.map((exp: any, idx: number) => (
+                          <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                            <h4 className="font-bold text-gray-900 dark:text-white">{exp.position}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{exp.company}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              {exp.start_date} - {exp.end_date || 'Presente'}
+                            </p>
+                            {exp.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">{exp.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Education */}
+                  {selectedUserProfile.education?.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <AcademicCapIcon className="w-5 h-5 text-blue-500" />
+                        Educación ({selectedUserProfile.education.length})
+                      </h3>
+                      <div className="space-y-4">
+                        {selectedUserProfile.education.map((edu: any, idx: number) => (
+                          <div key={idx} className="border-l-4 border-green-500 pl-4">
+                            <h4 className="font-bold text-gray-900 dark:text-white">{edu.degree}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{edu.institution}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              {edu.start_date} - {edu.end_date || 'Presente'}
+                            </p>
+                            {edu.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">{edu.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Skills */}
+                  {selectedUserProfile.skills?.length > 0 && (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <CodeBracketIcon className="w-5 h-5 text-blue-500" />
+                        Habilidades ({selectedUserProfile.skills.length})
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedUserProfile.skills.map((skill: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
+                          >
+                            {skill.name}
+                            {skill.level && <span className="ml-1 text-xs opacity-75">({skill.level})</span>}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Languages */}
+                  {selectedUserProfile.languages?.length > 0 ? (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                        Idiomas ({selectedUserProfile.languages.length})
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {selectedUserProfile.languages.map((lang: any, idx: number) => (
+                          <div key={idx} className="bg-white dark:bg-dark-bg-secondary p-3 rounded-lg">
+                            <p className="font-medium text-gray-900 dark:text-white">{lang.language || lang.name || 'Idioma'}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{lang.proficiency || lang.level || 'N/A'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                        Idiomas
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay idiomas registrados</p>
+                    </div>
+                  )}
+
+                  {/* Portfolio */}
+                  {selectedUserProfile.portfolio?.length > 0 ? (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                        Portafolio ({selectedUserProfile.portfolio.length})
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedUserProfile.portfolio.map((item: any, idx: number) => (
+                          <div key={idx} className="bg-white dark:bg-dark-bg-secondary p-3 rounded-lg">
+                            <h4 className="font-medium text-gray-900 dark:text-white">{item.title}</h4>
+                            {item.description && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
+                            )}
+                            {item.url && (
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block"
+                              >
+                                Ver proyecto →
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 dark:bg-dark-bg-tertiary p-4 rounded-xl">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                        Portafolio
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay proyectos de portafolio registrados</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No se pudo cargar la información del usuario
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 bg-gray-50 dark:bg-dark-bg-tertiary px-6 py-4 rounded-b-2xl border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => {
+                  setShowUserInfoModal(false);
+                  setSelectedUserProfile(null);
+                }}
+                className="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

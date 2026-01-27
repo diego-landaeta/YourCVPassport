@@ -327,14 +327,350 @@ const LeadsInboxModern: React.FC = () => {
     );
   }
 
+  // Función para renderizar el chat (usado tanto en móvil como en desktop)
+  const renderChatView = () => {
+    if (!selectedLead) {
+      return (
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white dark:from-dark-bg-primary dark:to-dark-bg-secondary">
+          <div className="text-center">
+            <ChatBubbleLeftRightIcon className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              {t.leadsInbox.emptyState.noMessages}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              {t.leadsInbox.emptyState.noMessagesDescription}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex-1 flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
+        {/* Header de conversación */}
+        <div className="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-dark-border bg-gradient-to-r from-gray-50 to-white dark:from-dark-bg-tertiary dark:to-dark-bg-secondary">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-4">
+              {/* Back button for mobile */}
+              <button
+                onClick={() => setSelectedLead(null)}
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-base md:text-lg">
+                {selectedLead.sender_name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  {selectedLead.sender_name}
+                  {selectedLead.status === 'ACCEPTED' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-medium">
+                      <CheckCircleIcon className="w-4 h-4" />
+                      Aceptado
+                    </span>
+                  )}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedLead.company_name || selectedLead.sender_email}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowLeadDetails(!showLeadDetails)}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors hidden md:block"
+                title="Detalles"
+              >
+                <EllipsisVerticalIcon className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white dark:from-dark-bg-primary/50 dark:to-dark-bg-secondary">
+          {/* All messages */}
+          {messages.map((msg, index) => {
+            const isOwn = msg.sender_id === user?.id;
+            const isFirstMessage = index === 0;
+            const showFullDate = isFirstMessage ||
+              new Date(msg.created_at).toDateString() !== new Date(messages[index - 1]?.created_at).toDateString();
+
+            return (
+              <div key={msg.id} className={`flex gap-2 md:gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
+                {!isOwn && (
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm md:text-base font-bold flex-shrink-0">
+                    {msg.sender_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className={`flex-1 max-w-2xl ${isOwn ? 'flex flex-col items-end' : ''}`}>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white">{msg.sender_name}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {showFullDate
+                        ? new Date(msg.created_at).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : new Date(msg.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                      }
+                    </span>
+                  </div>
+                  <div className={`rounded-2xl px-3 md:px-4 py-2 md:py-3 shadow-sm text-sm md:text-base ${
+                    isOwn
+                      ? 'bg-blue-600 text-white rounded-tr-sm'
+                      : 'bg-white dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-tl-sm'
+                  }`}>
+                    {/* Show subject only on first message */}
+                    {isFirstMessage && selectedLead.subject && (
+                      <p className="text-sm md:text-base font-semibold mb-2">{selectedLead.subject}</p>
+                    )}
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+
+                    {/* Job details if available - only show on first message */}
+                    {isFirstMessage && selectedLead.position_offered && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <BriefcaseIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span className="font-medium">{selectedLead.position_offered}</span>
+                        </div>
+                        {selectedLead.location && (
+                          <div className="flex items-center gap-2 text-sm opacity-80">
+                            <MapPinIcon className="w-4 h-4" />
+                            {selectedLead.location}
+                          </div>
+                        )}
+                        {selectedLead.salary_range && (
+                          <div className="flex items-center gap-2 text-sm opacity-80">
+                            <CurrencyDollarIcon className="w-4 h-4" />
+                            {selectedLead.salary_range}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Empty state when no messages */}
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+              <p>No hay mensajes en esta conversación</p>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 border-t border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary">
+          {selectedLead.status === 'PENDING' && (
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => updateLeadStatus('ACCEPTED')}
+                className="flex-1 py-2 px-3 md:px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm md:text-base font-medium transition-colors flex items-center justify-center gap-1.5 md:gap-2"
+              >
+                <CheckCircleIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden xs:inline">{t.leadsInbox.actions.accept}</span>
+                <span className="xs:hidden">✓</span>
+              </button>
+              <button
+                onClick={() => updateLeadStatus('REJECTED')}
+                className="flex-1 py-2 px-3 md:px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm md:text-base font-medium transition-colors flex items-center justify-center gap-1.5 md:gap-2"
+              >
+                <XCircleIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden xs:inline">{t.leadsInbox.actions.reject}</span>
+                <span className="xs:hidden">✕</span>
+              </button>
+            </div>
+          )}
+
+          <div className="flex gap-2 md:gap-3">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder={t.leadsInbox.messageInput.placeholder}
+              className="flex-1 px-3 md:px-4 py-2.5 md:py-3 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm md:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              disabled={sending}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!newMessage.trim() || sending}
+              className="px-4 md:px-6 py-2.5 md:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+            >
+              <PaperAirplaneIcon className="w-5 h-5" />
+              <span className="hidden sm:inline">{t.leadsInbox.actions.send}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-gray-50 dark:bg-dark-bg-primary rounded-xl overflow-hidden border border-gray-200 dark:border-dark-border shadow-xl">
-      {/* Sidebar - Lista de conversaciones */}
-      <div className="w-96 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col">
+    <div className="h-[calc(100vh-8rem)] bg-gray-50 dark:bg-dark-bg-primary rounded-xl overflow-hidden border border-gray-200 dark:border-dark-border shadow-xl">
+      {/* Vista móvil: Lista de conversaciones O chat (uno a la vez) */}
+      <div className="md:hidden h-full">
+        {!selectedLead ? (
+          /* Lista de conversaciones en móvil */
+          <div className="w-full h-full bg-white dark:bg-dark-bg-secondary flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-200 dark:border-dark-border">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <EnvelopeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                {t.leadsInbox.title}
+              </h2>
+
+              {/* Search */}
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={t.leadsInbox.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-thin">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    filter === 'all'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {t.leadsInbox.filters.all} ({leads.length})
+                </button>
+                <button
+                  onClick={() => setFilter('unread')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    filter === 'unread'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {t.leadsInbox.filters.unread}
+                </button>
+                <button
+                  onClick={() => setFilter('job_offers')}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                    filter === 'job_offers'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {t.leadsInbox.filters.job_offers}
+                </button>
+              </div>
+            </div>
+
+            {/* Lista de conversaciones */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredLeads.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                  <EnvelopeIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">
+                    {t.leadsInbox.emptyState.noConversations}
+                  </p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                    {t.leadsInbox.emptyState.noConversationsDescription}
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100 dark:divide-dark-border">
+                  {filteredLeads.map((lead) => {
+                    const typeInfo = getLeadTypeInfo(lead.lead_type);
+                    const Icon = typeInfo.icon;
+                    const isUnread = !lead.read_at || (lead.unread_count && lead.unread_count > 0);
+
+                    return (
+                      <div
+                        key={lead.id}
+                        onClick={() => setSelectedLead(lead)}
+                        className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all relative group cursor-pointer ${
+                          isUnread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Avatar */}
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-white text-lg bg-gradient-to-br from-blue-500 to-indigo-600">
+                            {lead.sender_name.charAt(0).toUpperCase()}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <h3 className={`font-semibold truncate ${
+                                isUnread ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'
+                              }`}>
+                                {lead.sender_name}
+                              </h3>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                                {formatDate(lead.created_at)}
+                              </span>
+                            </div>
+
+                            {lead.company_name && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 truncate">
+                                {lead.company_name}
+                              </p>
+                            )}
+
+                            <p className={`text-sm truncate mb-2 ${
+                              isUnread ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400'
+                            }`}>
+                              {lead.subject}
+                            </p>
+
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${typeInfo.color}`}>
+                                <Icon className="w-3 h-3" />
+                                {typeInfo.label}
+                              </span>
+
+                              {isUnread && lead.unread_count && lead.unread_count > 0 && (
+                                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                  {lead.unread_count}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Chat abierto en móvil - pantalla completa */
+          renderChatView()
+        )}
+      </div>
+
+      {/* Vista Desktop: Sidebar + Chat lado a lado */}
+      <div className="hidden md:flex h-full">
+        {/* Sidebar - Lista de conversaciones */}
+        <div className="w-96 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-dark-border">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <EnvelopeIcon className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+        <div className="p-3 md:p-4 border-b border-gray-200 dark:border-dark-border">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+            <EnvelopeIcon className="w-6 h-6 md:w-7 md:h-7 text-blue-600 dark:text-blue-400" />
             {t.leadsInbox.title}
           </h2>
 
@@ -406,10 +742,10 @@ const LeadsInboxModern: React.FC = () => {
                 const isSelected = selectedLead?.id === lead.id;
 
                 return (
-                  <button
+                  <div
                     key={lead.id}
                     onClick={() => setSelectedLead(lead)}
-                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all relative group ${
+                    className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all relative group cursor-pointer ${
                       isSelected ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600' : ''
                     } ${isUnread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
                   >
@@ -461,21 +797,21 @@ const LeadsInboxModern: React.FC = () => {
                       </div>
 
                       {/* Star */}
-                      <button
+                      <div
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStar(lead.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       >
                         {starred.has(lead.id) ? (
                           <StarSolidIcon className="w-5 h-5 text-yellow-500" />
                         ) : (
                           <StarIcon className="w-5 h-5 text-gray-400 hover:text-yellow-500" />
                         )}
-                      </button>
+                      </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -483,182 +819,13 @@ const LeadsInboxModern: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content - Conversación */}
-      {selectedLead ? (
-        <div className="flex-1 flex flex-col bg-white dark:bg-dark-bg-secondary">
-          {/* Header de conversación */}
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-border bg-gradient-to-r from-gray-50 to-white dark:from-dark-bg-tertiary dark:to-dark-bg-secondary">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-                  {selectedLead.sender_name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    {selectedLead.sender_name}
-                    {selectedLead.status === 'ACCEPTED' && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-medium">
-                        <CheckCircleIcon className="w-4 h-4" />
-                        Aceptado
-                      </span>
-                    )}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {selectedLead.company_name || selectedLead.sender_email}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowLeadDetails(!showLeadDetails)}
-                  className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors"
-                  title="Detalles"
-                >
-                  <EllipsisVerticalIcon className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white dark:from-dark-bg-primary/50 dark:to-dark-bg-secondary">
-            {/* Initial message from lead */}
-            <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                {selectedLead.sender_name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-semibold text-gray-900 dark:text-white">{selectedLead.sender_name}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(selectedLead.created_at).toLocaleDateString('es-ES', {
-                      day: 'numeric',
-                      month: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                </div>
-                <div className="bg-white dark:bg-dark-bg-tertiary rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100 dark:border-dark-border">
-                  <p className="font-semibold text-gray-900 dark:text-white mb-2">{selectedLead.subject}</p>
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedLead.message}</p>
-
-                  {/* Job details if available */}
-                  {selectedLead.position_offered && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <BriefcaseIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        <span className="font-medium text-gray-900 dark:text-white">{selectedLead.position_offered}</span>
-                      </div>
-                      {selectedLead.location && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPinIcon className="w-4 h-4" />
-                          {selectedLead.location}
-                        </div>
-                      )}
-                      {selectedLead.salary_range && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <CurrencyDollarIcon className="w-4 h-4" />
-                          {selectedLead.salary_range}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Follow-up messages */}
-            {messages.map((msg) => {
-              const isOwn = msg.sender_id === user?.id;
-              return (
-                <div key={msg.id} className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
-                  {!isOwn && (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {msg.sender_name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className={`flex-1 max-w-2xl ${isOwn ? 'flex flex-col items-end' : ''}`}>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="font-semibold text-gray-900 dark:text-white text-sm">{msg.sender_name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(msg.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className={`rounded-2xl px-4 py-3 shadow-sm ${
-                      isOwn
-                        ? 'bg-blue-600 text-white rounded-tr-sm'
-                        : 'bg-white dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-tl-sm'
-                    }`}>
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input Area */}
-          <div className="p-4 border-t border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary">
-            {selectedLead.status === 'PENDING' && (
-              <div className="flex gap-2 mb-3">
-                <button
-                  onClick={() => updateLeadStatus('ACCEPTED')}
-                  className="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckCircleIcon className="w-5 h-5" />
-                  {t.leadsInbox.actions.accept}
-                </button>
-                <button
-                  onClick={() => updateLeadStatus('REJECTED')}
-                  className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <XCircleIcon className="w-5 h-5" />
-                  {t.leadsInbox.actions.reject}
-                </button>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                placeholder={t.leadsInbox.messageInput.placeholder}
-                className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                disabled={sending}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!newMessage.trim() || sending}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
-              >
-                <PaperAirplaneIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">{t.leadsInbox.actions.send}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-white dark:from-dark-bg-primary dark:to-dark-bg-secondary">
-          <div className="text-center">
-            <ChatBubbleLeftRightIcon className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {t.leadsInbox.emptyState.noMessages}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400">
-              {t.leadsInbox.emptyState.noMessagesDescription}
-            </p>
-          </div>
-        </div>
-      )}
+        {/* Chat - Desktop */}
+        {renderChatView()}
+      </div>
 
       {/* Details Panel (opcional, slide from right) */}
       {showLeadDetails && selectedLead && (
-        <div className="w-80 bg-gray-50 dark:bg-dark-bg-tertiary border-l border-gray-200 dark:border-dark-border p-6 overflow-y-auto">
+        <div className="absolute md:relative inset-0 md:inset-auto md:w-80 bg-gray-50 dark:bg-dark-bg-tertiary border-l border-gray-200 dark:border-dark-border p-4 md:p-6 overflow-y-auto z-50">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t.leadsInbox.detailView.leadDetails}</h3>
             <button

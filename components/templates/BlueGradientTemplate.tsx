@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FullProfileData } from '../../types';
 import { UserIcon, BriefcaseIcon, AcademicCapIcon, EnvelopeIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface BlueGradientTemplateProps {
     data: FullProfileData;
@@ -11,6 +12,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
     const { profile, skills = [], experiences = [], education = [], portfolioItems = [] } = data || {};
     const [activeTab, setActiveTab] = useState('About');
     const accentColor = color || '#6366F1'; // Default to indigo-500
+    const t = useTranslations();
 
     const renderContent = () => {
         switch (activeTab) {
@@ -22,7 +24,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
                                     <BriefcaseIcon className="w-6 h-6 text-white" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Experience</h2>
+                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.experience}</h2>
                             </div>
                             <div className="space-y-6">
                                 {experiences.length > 0 ? experiences.map((exp, index) => (
@@ -32,7 +34,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{exp.position}</h3>
                                             <p className="font-semibold text-lg mb-1" style={{ color: accentColor }}>{exp.company_name}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                                {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}
+                                                {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                             </p>
                                             {exp.description && (
                                                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">{exp.description}</p>
@@ -47,7 +49,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                 <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
                                     <AcademicCapIcon className="w-6 h-6 text-white" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Education</h2>
+                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.education}</h2>
                             </div>
                             <div className="space-y-6">
                                 {education.length > 0 ? education.map(edu => (
@@ -59,7 +61,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{edu.degree}</h3>
                                             <p className="font-semibold text-gray-700 dark:text-gray-300">{edu.institution_name}</p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Present'}
+                                                {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.present}
                                             </p>
                                         </div>
                                     </div>
@@ -111,7 +113,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                             <div className="space-y-4 text-lg text-gray-700 dark:text-gray-300">
                                 {profile.meta_description && (
                                     <p className="flex items-center justify-center gap-2">
-                                        <strong>Email:</strong>
+                                        <strong>{t.cvSections.email}:</strong>
                                         <a href={`mailto:${profile.meta_description}`} className="hover:underline" style={{ color: accentColor }}>
                                             {profile.meta_description}
                                         </a>
@@ -119,7 +121,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                 )}
                                 {profile.phone && (
                                     <p className="flex items-center justify-center gap-2">
-                                        <strong>Phone:</strong> {profile.phone}
+                                        <strong>{t.cvSections.phone}:</strong> {profile.phone}
                                     </p>
                                 )}
                                 {profile.linkedin_url && (

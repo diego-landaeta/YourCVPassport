@@ -5,15 +5,18 @@
  * El usuario puede aceptar o rechazar cada sugerencia
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { optimizeExperience, optimizeEducation } from '../../lib/ai';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
+import { optimizeExperience, optimizeEducation, checkAIAccess } from '../../lib/ai';
 import {
   SparklesIcon,
   CheckCircleIcon,
   XMarkIcon,
   ArrowPathIcon,
   LightBulbIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/solid';
 
 interface OptimizationSuggestion {
@@ -44,10 +47,33 @@ interface AITextOptimizerProps {
 
 const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplySuggestion }) => {
   const { session } = useAuth();
+  const { lang } = useLanguage();
+  const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [aiAccessInfo, setAiAccessInfo] = useState<{ hasAccess: boolean; plan: string | null; remaining?: number | 'unlimited' } | null>(null);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+
+  // Check AI access on mount
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!session?.user.id) {
+        setIsCheckingAccess(false);
+        return;
+      }
+      try {
+        const accessInfo = await checkAIAccess(session.user.id);
+        setAiAccessInfo(accessInfo);
+      } catch (err) {
+        console.error('Error checking AI access:', err);
+      } finally {
+        setIsCheckingAccess(false);
+      }
+    };
+    checkAccess();
+  }, [session?.user.id]);
 
   /**
    * Convert markdown to HTML
@@ -103,16 +129,18 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 
   const analyzeSuggestions = async () => {
     if (!session?.user.id || items.length === 0) {
-      setError(`Necesitas al menos 1 ${type === 'experience' ? 'experiencia' : 'educación'} para obtener sugerencias`);
+      setError(lang === 'en'
+        ? `You need at least 1 ${type === 'experience' ? 'experience' : 'education'} to get suggestions`
+        : `Necesitas al menos 1 ${type === 'experience' ? 'experiencia' : 'educación'} para obtener sugerencias`);
       return;
     }
 
     // Check if user has AI access
-    const { checkAIAccess } = await import('../../lib/ai');
-    const { hasAccess, plan } = await checkAIAccess(session.user.id);
+    const accessInfo = await checkAIAccess(session.user.id);
+    setAiAccessInfo(accessInfo);
 
-    if (!hasAccess) {
-      setError(`Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es: ${plan || 'Free'}. Actualiza tu plan para acceder a estas funciones.`);
+    if (!accessInfo.hasAccess) {
+      // Don't set error, show upgrade banner instead
       return;
     }
 
@@ -214,11 +242,78 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           <LightBulbIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
           <div>
             <h4 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
-              Sugerencias de IA no disponibles
+              {lang === 'en' ? 'AI suggestions not available' : 'Sugerencias de IA no disponibles'}
             </h4>
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Agrega al menos 1 {type === 'experience' ? 'experiencia laboral' : 'educación'} con descripción para que la IA pueda optimizarla.
+              {lang === 'en'
+                ? `Add at least 1 ${type === 'experience' ? 'work experience' : 'education'} with a description so AI can optimize it.`
+                : `Agrega al menos 1 ${type === 'experience' ? 'experiencia laboral' : 'educación'} con descripción para que la IA pueda optimizarla.`}
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show premium upgrade banner if no access
+  if (!isCheckingAccess && aiAccessInfo && !aiAccessInfo.hasAccess) {
+    const planName = aiAccessInfo.plan || 'Free';
+    return (
+      <div className="space-y-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700 rounded-xl p-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <SparklesIcon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {lang === 'en' ? 'AI Optimization' : 'Optimización con IA'}
+              </h3>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                IA
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Required Banner */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+              <LockClosedIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-lg font-semibold text-amber-900 dark:text-amber-200">
+                {lang === 'en' ? 'Premium Feature' : 'Función Premium'}
+              </h4>
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
+                {lang === 'en'
+                  ? `AI-powered ${type} optimization is available on Pro and Enterprise plans. Current plan: ${planName}`
+                  : `La optimización de ${type === 'experience' ? 'experiencias' : 'educación'} con IA está disponible en los planes Pro y Enterprise. Plan actual: ${planName}`}
+              </p>
+
+              {/* Benefits */}
+              <ul className="mt-4 space-y-2">
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'Transform descriptions into impactful content' : 'Transforma descripciones en contenido impactante'}
+                </li>
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'Generate achievement bullet points' : 'Genera puntos de logros destacados'}
+                </li>
+                <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+                  <SparklesIcon className="h-4 w-4" />
+                  {lang === 'en' ? 'Improve visibility with recruiters' : 'Mejora tu visibilidad con reclutadores'}
+                </li>
+              </ul>
+
+              <button
+                onClick={() => navigate('/pricing')}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all hover:from-amber-600 hover:to-orange-600"
+              >
+                {lang === 'en' ? 'Upgrade to Pro' : 'Mejorar a Pro'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -227,6 +322,37 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 
   return (
     <div className="space-y-6 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700 rounded-xl p-6">
+      {/* Usage Limit Info */}
+      {aiAccessInfo && aiAccessInfo.remaining !== 'unlimited' && typeof aiAccessInfo.remaining === 'number' && (
+        <div className={`rounded-lg p-3 border ${
+          aiAccessInfo.remaining === 0
+            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
+            : aiAccessInfo.remaining <= 5
+            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700'
+            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-sm ${
+              aiAccessInfo.remaining === 0
+                ? 'text-red-800 dark:text-red-200'
+                : 'text-gray-700 dark:text-gray-300'
+            }`}>
+              {lang === 'en'
+                ? `${aiAccessInfo.remaining} AI requests remaining this month`
+                : `${aiAccessInfo.remaining} solicitudes de IA restantes este mes`}
+            </span>
+            {aiAccessInfo.remaining <= 5 && (
+              <button
+                onClick={() => navigate('/pricing')}
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                {lang === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -234,37 +360,53 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Optimización con IA
+                {lang === 'en' ? 'AI Optimization' : 'Optimización con IA'}
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                 IA
               </span>
+              {aiAccessInfo?.remaining === 'unlimited' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  {lang === 'en' ? 'Unlimited' : 'Ilimitado'}
+                </span>
+              )}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {items.length} {type === 'experience' ? 'experiencia(s)' : 'educación(es)'} para analizar
+              {lang === 'en'
+                ? `${items.length} ${type === 'experience' ? 'experience(s)' : 'education(s)'} to analyze`
+                : `${items.length} ${type === 'experience' ? 'experiencia(s)' : 'educación(es)'} para analizar`}
             </p>
           </div>
         </div>
 
         <button
           onClick={analyzeSuggestions}
-          disabled={isAnalyzing}
-          className="flex items-center gap-2 px-6 py-3 bg-purple-600 dark:bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-700 dark:hover:bg-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isAnalyzing || (aiAccessInfo?.remaining === 0)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+            aiAccessInfo?.remaining === 0
+              ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+              : 'bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isAnalyzing ? (
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
-              Analizando con IA...
+              {lang === 'en' ? 'Analyzing with AI...' : 'Analizando con IA...'}
+            </>
+          ) : aiAccessInfo?.remaining === 0 ? (
+            <>
+              <LockClosedIcon className="w-5 h-5" />
+              {lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado'}
             </>
           ) : suggestions.length > 0 ? (
             <>
               <ArrowPathIcon className="w-5 h-5" />
-              Regenerar Sugerencias IA
+              {lang === 'en' ? 'Regenerate AI Suggestions' : 'Regenerar Sugerencias IA'}
             </>
           ) : (
             <>
               <SparklesIcon className="w-5 h-5" />
-              Generar Sugerencias IA
+              {lang === 'en' ? 'Generate AI Suggestions' : 'Generar Sugerencias IA'}
             </>
           )}
         </button>
@@ -385,7 +527,9 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                         const formattedAchievement = achievement.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>');
                         return (
                           <li key={idx} className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
-                            <span className="text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0">✓</span>
+                            <svg className="w-4 h-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                            </svg>
                             <span
                               className="font-medium"
                               dangerouslySetInnerHTML={{ __html: formattedAchievement }}

@@ -56,17 +56,17 @@ export const useUnreadLeadsCount = () => {
       if (error) {
         // Check if error is about missing table
         if (error.code === '42P01' || error.message.includes('does not exist') || error.message.includes('relation')) {
-          console.warn('Leads table does not exist yet. Leads feature will be disabled.');
+          // Table doesn't exist - this is normal for new installations
           setLeadsTableExists(false);
         } else {
-          // Other errors (like RLS) mean table exists
+          // Other errors (like RLS) mean table exists but user may not have access
           setLeadsTableExists(true);
         }
       } else {
         setLeadsTableExists(true);
       }
     } catch (err) {
-      console.warn('Could not check leads table existence:', err);
+      // Silently handle - leads feature is optional
       setLeadsTableExists(false);
     }
   };
@@ -81,12 +81,22 @@ export const useUnreadLeadsCount = () => {
         .eq('recipient_id', profile.id)
         .eq('status', 'NEW');
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a table not found error
+        if (error.code === '42P01' || error.message.includes('does not exist') || error.message.includes('relation')) {
+          setLeadsTableExists(false);
+          setUnreadCount(0);
+          return;
+        }
+        throw error;
+      }
       setUnreadCount(count || 0);
-    } catch (err) {
-      // Silently fail - leads feature may not be enabled for this user
-      // Don't show error toast as it's not critical functionality
-      console.warn('Could not load unread leads count:', err);
+    } catch (err: any) {
+      // Silently fail for permission errors or other non-critical issues
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Could not load unread leads count:', err?.message || err);
+      }
       setUnreadCount(0);
     } finally {
       setLoading(false);

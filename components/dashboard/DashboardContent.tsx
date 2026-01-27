@@ -7,11 +7,12 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../context/ToastContext';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
+import { canChangeSlug, getNextSlugChangeDate, updateSlugWithValidation } from '../../utils/slugValidation';
+import { sanitizeSlug } from '../../utils/slugUtils';
 import ModernDashboardView from './ModernDashboardView';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CVVersionsSection } from './CVVersionsSection';
 import Modal from '../ui/Modal';
-import { generateCVPDF } from '../../utils/pdfGenerator';
 
 // Lazy load heavy components for better performance
 
@@ -34,6 +35,9 @@ const StampsSection = lazy(() => import('./StampsSection'));
 const ATSExportModal = lazy(() => import('../ats-export/ATSExportModal'));
 const AnalyticsDashboard = lazy(() => import('./AnalyticsDashboard'));
 const SuccessStorySubmission = lazy(() => import('./SuccessStorySubmission'));
+const OpportunitiesSection = lazy(() => import('./OpportunitiesSection'));
+const JobSearchSection = lazy(() => import('./JobSearchSection'));
+const MyApplicationsSection = lazy(() => import('./MyApplicationsSection'));
 import {
   IdentityFormData,
   ExperienceFormData,
@@ -43,6 +47,8 @@ import {
   PortfolioItemFormData,
   PreferencesFormData,
 } from '../../schemas/profileSchemas';
+import { useUsageLimits, FeatureLimitCheck } from '../../hooks/useUsageLimits';
+import { UsageLimitModal, UsageLimitWarning } from '../UsageLimitModal';
 
 interface DashboardContentProps {
   activeSection: string;
@@ -60,19 +66,239 @@ interface DashboardStats {
   educationCount: number;
   languagesCount: number;
   portfolioCount: number;
+  certificationsCount: number;
 }
 
 type ProfileSectionKey = 'identity' | 'experience' | 'education' | 'skills' | 'languages' | 'portfolio' | 'preferences' | 'template' | 'stamps' | 'ai-assistant';
 
 // Loading component for Suspense
-const SectionLoader: React.FC = () => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-      <p className="text-gray-600 dark:text-gray-400 text-sm">Cargando...</p>
+const SectionLoader: React.FC = () => {
+  const t = useTranslations();
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">{t.dashboard.loading}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
+
+// Slug Editor Component with 90-day restriction
+interface SlugEditorProps {
+  currentSlug: string;
+  lastChangedAt: string | null;
+  userId: string;
+  onSlugUpdated: () => void;
+}
+
+const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, userId, onSlugUpdated }) => {
+  const toast = useToastContext();
+  const translations = useTranslations();
+  const [isEditing, setIsEditing] = useState(false);
+  const [slugValue, setSlugValue] = useState(currentSlug);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+
+  const { canChange, daysRemaining } = canChangeSlug(lastChangedAt);
+  const nextChangeDate = getNextSlugChangeDate(lastChangedAt);
+
+  useEffect(() => {
+    setSlugValue(currentSlug);
+  }, [currentSlug]);
+
+  const sanitizeSlug = (value: string): string => {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/--+/g, '-')
+      .substring(0, 50);
+  };
+
+  const checkSlugAvailability = async (slug: string) => {
+    if (!slug || slug.length < 3 || slug === currentSlug) {
+      setIsAvailable(null);
+      return;
+    }
+
+    setIsCheckingAvailability(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('slug', slug)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        setIsAvailable(true);
+      } else if (data) {
+        setIsAvailable(false);
+      }
+    } catch {
+      setIsAvailable(false);
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  const handleSlugChange = (value: string) => {
+    const sanitized = sanitizeSlug(value);
+    setSlugValue(sanitized);
+
+    // Debounce availability check
+    if (sanitized !== currentSlug) {
+      const timeoutId = setTimeout(() => {
+        checkSlugAvailability(sanitized);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!slugValue || slugValue.length < 3) {
+      toast.error(translations.notifications.urlTooShort);
+      return;
+    }
+
+    if (slugValue === currentSlug) {
+      setIsEditing(false);
+      return;
+    }
+
+    if (isAvailable === false) {
+      toast.error(translations.notifications.urlAlreadyInUse);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await updateSlugWithValidation(userId, slugValue, currentSlug, lastChangedAt);
+
+      if (result.success) {
+        toast.success(translations.notifications.urlUpdated);
+        setIsEditing(false);
+        onSlugUpdated();
+      } else {
+        toast.error(result.error || translations.notifications.errorUpdating);
+        // Reset to current slug on error
+        setSlugValue(currentSlug);
+      }
+    } catch (error) {
+      toast.error(translations.notifications.errorUpdating);
+      setSlugValue(currentSlug);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setSlugValue(currentSlug);
+    setIsEditing(false);
+    setIsAvailable(null);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <span className="px-4 py-2 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg text-gray-500 dark:text-gray-400 whitespace-nowrap">
+          {window.location.origin}/cv/
+        </span>
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={slugValue}
+            onChange={(e) => handleSlugChange(e.target.value)}
+            onFocus={() => canChange && setIsEditing(true)}
+            disabled={!canChange || isSaving}
+            placeholder="tu-nombre-profesional"
+            className={`w-full px-4 py-2 border rounded-lg transition-colors ${
+              !canChange
+                ? 'bg-gray-100 dark:bg-dark-bg-tertiary border-gray-300 dark:border-dark-border text-gray-500 cursor-not-allowed'
+                : isEditing
+                ? 'bg-white dark:bg-dark-bg-tertiary border-cv-blue dark:border-cv-blue text-gray-900 dark:text-white'
+                : 'bg-gray-50 dark:bg-dark-bg-tertiary border-gray-300 dark:border-dark-border text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500'
+            }`}
+          />
+          {isCheckingAvailability && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-cv-blue border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+          {!isCheckingAvailability && isAvailable !== null && slugValue !== currentSlug && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {isAvailable ? (
+                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Restriction Message */}
+      {!canChange && daysRemaining > 0 && (
+        <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <svg className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
+              Debes esperar {daysRemaining} día{daysRemaining !== 1 ? 's' : ''} más para cambiar tu URL
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              Próxima fecha disponible: {nextChangeDate}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Actions */}
+      {isEditing && canChange && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !slugValue || slugValue.length < 3 || isAvailable === false}
+            className="flex-1 px-4 py-2 bg-cv-blue hover:bg-opacity-90 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSaving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Guardar
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleCancel}
+            disabled={isSaving}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {/* Helper Text */}
+      {isEditing && canChange && (
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Solo letras minúsculas, números y guiones. Mínimo 3 caracteres. Podrás cambiarla nuevamente en 90 días.
+        </p>
+      )}
+    </div>
+  );
+};
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSectionChange, onSaveStatusChange }) => {
   const { profile, session, refetchProfile } = useAuth();
@@ -90,6 +316,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     educationCount: 0,
     languagesCount: 0,
     portfolioCount: 0,
+    certificationsCount: 0,
   });
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Cargando dashboard');
@@ -101,6 +328,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfProgress, setPdfProgress] = useState(0);
   const [stamps, setStamps] = useState<any[]>([]);
+
+  // Usage limits
+  const { checkFeatureLimit, recordUsage, usageStats, fetchUsageStats, getCurrentPlan, PLAN_INFO } = useUsageLimits();
+  const [showExportLimitModal, setShowExportLimitModal] = useState(false);
+  const [exportLimitInfo, setExportLimitInfo] = useState<FeatureLimitCheck | null>(null);
 
   // Check if AI is available
   // @ts-ignore
@@ -218,6 +450,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const slugCheckedRef = useRef(false);
 
   const checkAndUpdateSlug = async () => {
+    // ❌ DISABLED: Auto-generation of slugs removed
+    // Users must create their URL explicitly in the finalization wizard
+    // Keeping this function for backward compatibility but it does nothing now
+    return;
+
+    /* ORIGINAL CODE COMMENTED OUT - DO NOT AUTO-GENERATE SLUGS
     if (!session?.user.id || !profile) return;
 
     // ✅ PREVENIR ejecuciones múltiples
@@ -233,71 +471,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                                    profile.slug.startsWith('user-'); // Is generic user-id format
 
       if (shouldRegenerateSlug && profile.full_name && profile.headline) {
-        // Generate slug from full_name and headline
-        const namePart = profile.full_name
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .trim();
-
-        const headlinePart = profile.headline
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .substring(0, 30)
-          .trim();
-
-        let generatedSlug = headlinePart ? `${namePart}-${headlinePart}` : namePart;// Check if slug already exists
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('slug', generatedSlug)
-          .maybeSingle();
-
-        // If slug exists, add a number suffix
-        if (existingProfile && existingProfile.id !== session.user.id) {
-          let counter = 1;
-          let uniqueSlug = `${generatedSlug}-${counter}`;
-
-          while (true) {
-            const { data: checkProfile } = await supabase
-              .from('profiles')
-              .select('id')
-              .eq('slug', uniqueSlug)
-              .maybeSingle();
-
-            if (!checkProfile) {
-              generatedSlug = uniqueSlug;
-              break;
-            }
-            counter++;
-            uniqueSlug = `${generatedSlug}-${counter}`;
-          }
-        }
-
-        // Update the slug
-        const { error } = await supabase
-          .from('profiles')
-          .update({ slug: generatedSlug, updated_at: new Date().toISOString() })
-          .eq('id', session.user.id);
-
-        if (error) {
-          toast.error('Error al actualizar el slug del perfil');
-          slugCheckedRef.current = false; // ✅ Permitir reintentar si falla
-        } else {
-          // NO recargar la página, ya marcado como completado
-        }
+        // [ALL AUTO-GENERATION LOGIC REMOVED]
       } else {}
     } catch (error) {
       // Silent fail - will retry on next load
-      slugCheckedRef.current = false; // ✅ Permitir reintentar si falla
+      slugCheckedRef.current = false;
     }
+    END OF COMMENTED CODE */
   };
 
 
@@ -334,7 +514,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setVisas(visasData || []);
       setCertifications(certificationsData || []);
     } catch (error) {
-      toast.error('Error al cargar datos del perfil');
+      toast.error(translations.notifications.errorLoading);
     }
   };
 
@@ -375,7 +555,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .from('stamps')
           .select('id', { count: 'exact' })
           .eq('profile_id', session.user.id)
-          .eq('status', 'verified')
+          .eq('status', 'VERIFIED')
           .limit(1),
 
         // Datos mínimos
@@ -383,7 +563,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .from('stamps')
           .select('id, type, status')
           .eq('profile_id', session.user.id)
-          .eq('status', 'verified')
+          .eq('status', 'VERIFIED')
           .limit(3),
 
         supabase
@@ -408,6 +588,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .select('id', { count: 'exact' })
           .eq('profile_id', session.user.id)
           .limit(1),
+
+        // Certifications count
+        supabase
+          .from('certifications')
+          .select('id', { count: 'exact' })
+          .eq('profile_id', session.user.id)
+          .limit(1),
       ]);
 
       // Extraer resultados con fallbacks
@@ -420,6 +607,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       const analytics = results[6].status === 'fulfilled' ? results[6].value : null;
       const langCount = results[7].status === 'fulfilled' ? results[7].value.count : 0;
       const portCount = results[8].status === 'fulfilled' ? results[8].value.count : 0;
+      const certCount = results[9].status === 'fulfilled' ? results[9].value.count : 0;
 
       console.log('📊 CONTEOS DASHBOARD:', {
         experiences: expCount,
@@ -427,6 +615,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         education: eduCount,
         languages: langCount,
         portfolio: portCount,
+        certifications: certCount,
+        stamps: stampsCount,
       });
 
       if (results[6].status === 'rejected') {
@@ -449,9 +639,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
       // ✅ Configurar analytics (ya cargado en el Promise.allSettled)
       if (analytics) {
-        // Process views by day for chart
-        const chartData = analytics.viewsByDay.map((item: any, index: number) => ({
-          name: `Día ${index + 1}`,
+        // Process views by day for chart - usar fechas reales
+        const chartData = analytics.viewsByDay.map((item: any) => ({
+          name: item.date, // Usar la fecha real en lugar de "Día X"
           visits: item.views,
         }));
         setVisitsData(chartData.slice(-30)); // Last 30 days
@@ -505,13 +695,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         educationCount: eduCount || 0,
         languagesCount: langCount || 0,
         portfolioCount: portCount || 0,
+        certificationsCount: certCount || 0,
       });
 
       
       setLoading(false); // ✅ Dashboard visible con TODO cargado
 
     } catch (error) {
-      toast.error('Error al cargar datos del dashboard');
+      toast.error(translations.notifications.errorLoading);
       dashboardDataLoadedRef.current = false; // ✅ Permitir reintentar si falla
       setLoading(false); // ✅ Mostrar error pero no bloquear UI
     }
@@ -545,31 +736,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                                      generatedSlug === profile?.id; // Is UUID
 
       if (shouldRegenerateSlug && data.full_name) {
-        // Create slug from full_name and headline (SEO-friendly, no timestamp)
-        const namePart = data.full_name
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "") // Remove accents
-          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-          .replace(/\s+/g, '-') // Replace spaces with hyphens
-          .replace(/-+/g, '-') // Remove consecutive hyphens
-          .trim();
-
-        const headlinePart = data.headline
-          ? data.headline
-              .toLowerCase()
-              .normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .replace(/[^a-z0-9\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .replace(/-+/g, '-')
-              .substring(0, 30)
-              .trim()
-          : '';
-
-        generatedSlug = headlinePart
-          ? `${namePart}-${headlinePart}`
-          : namePart;
+        // Create slug from full_name ONLY (not headline) - SEO-friendly, no timestamp
+        // Use centralized sanitization utility for consistency
+        generatedSlug = sanitizeSlug(data.full_name, 50);
 
         // Check if slug already exists
         const { data: existingProfile } = await supabase
@@ -578,9 +747,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           .eq('slug', generatedSlug)
           .maybeSingle();
 
-        // If slug exists, add a number suffix
+        // If slug exists, add a number suffix (-2, -3, etc.)
         if (existingProfile && existingProfile.id !== session?.user.id) {
-          let counter = 1;
+          let counter = 2;
           let uniqueSlug = `${generatedSlug}-${counter}`;
 
           while (true) {
@@ -634,7 +803,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Identity saved successfully!');
     } catch (error) {
-      toast.error('Error al guardar identidad');
+      toast.error(translations.notifications.errorSaving);
       showSaveMessage('Failed to save identity', true);
     } finally {
       setIsSaving(false);
@@ -696,10 +865,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       // Show appropriate message based on action
       if (isDeleting) {
         showSaveMessage('Experience deleted successfully!');
-        toast.success('Experiencia eliminada exitosamente');
+        toast.success(translations.notifications.experienceDeleted);
       } else {
         showSaveMessage('Experience saved successfully!');
-        toast.success('Experiencia guardada exitosamente');
+        toast.success(translations.notifications.experienceSaved);
       }
     } catch (error: any) {
       const errorMessage = error?.message || error?.error_description || 'Error desconocido';
@@ -751,7 +920,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       setLastSaved(new Date());
       showSaveMessage('Education saved successfully!');
     } catch (error) {
-      toast.error('Error al guardar educación');
       showSaveMessage('Failed to save education', true);
     } finally {
       setIsSaving(false);
@@ -761,7 +929,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const handleSkillsSave = async (data: SkillFormData[]) => {
     setIsSaving(true);
     try {
-      await supabase.from('skills').delete().eq('profile_id', session?.user.id);
+      const { error: deleteError } = await supabase.from('skills').delete().eq('profile_id', session?.user.id);
+      if (deleteError) throw deleteError;
 
       if (data.length > 0) {
         const skillsToInsert = data.map((skill, index) => ({
@@ -781,9 +950,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Skills saved successfully!');
-    } catch (error) {
-      toast.error('Error al guardar habilidades');
+      // ❌ REMOVED: Duplicate toast - SkillsSection already shows success toast
+      // toast.success(translations.notifications.skillsSaved);
+    } catch (error: any) {
+      console.error('Error saving skills:', error);
+      const errorMessage = error?.message || 'Error desconocido';
+      toast.error(`Error al guardar habilidades: ${errorMessage}`);
       showSaveMessage('Failed to save skills', true);
+      throw error; // Re-throw to propagate to the caller
     } finally {
       setIsSaving(false);
     }
@@ -792,14 +966,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const handleLanguagesSave = async (data: LanguageFormData[]) => {
     setIsSaving(true);
     try {
-      await supabase.from('languages').delete().eq('profile_id', session?.user.id);
+      const { error: deleteError } = await supabase.from('languages').delete().eq('profile_id', session?.user.id);
+      if (deleteError) throw deleteError;
 
       if (data.length > 0) {
         const languagesToInsert = data.map((lang, index) => ({
           profile_id: session?.user.id,
           name: lang.name,
           level: lang.level,
-          is_native: lang.is_native || false,
+          is_native: lang.is_native || (lang as any).isNative || false,
+          percentage: lang.percentage ?? null,
           sort_order: index,
         }));
 
@@ -811,11 +987,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Languages saved successfully!');
-      toast.success('Idiomas guardados correctamente');
-    } catch (error) {
+      toast.success(translations.notifications.languagesSaved);
+    } catch (error: any) {
       console.error('Error saving languages:', error);
-      toast.error('Error al guardar idiomas');
+      const errorMessage = error?.message || 'Error desconocido';
+      toast.error(`Error al guardar idiomas: ${errorMessage}`);
       showSaveMessage('Failed to save languages', true);
+      throw error; // Re-throw to propagate to the caller
     } finally {
       setIsSaving(false);
     }
@@ -830,12 +1008,33 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         const items = data.map((item, index) => ({
           profile_id: session?.user.id,
           title: item.title,
-          category: item.category || null,
-          link: item.link || null,
           description: item.description || null,
+          type: item.type || 'PROJECT',
+
+          // Project fields
+          category: item.category || null,
+          url: item.url || null,
           image_url: item.image_url || null,
           file_url: item.file_url || null,
+
+          // Certification fields
+          issuer: item.issuer || null,
+          issue_date: item.issue_date || null,
+          expiry_date: item.expiry_date || null,
+          credential_id: item.credential_id || null,
+          credential_url: item.credential_url || null,
+
+          // Collaboration fields
+          organization: item.organization || null,
+          role: item.role || null,
+          start_date: item.start_date || null,
+          end_date: item.end_date || null,
+          is_current: item.is_current || null,
+          collaborators: item.collaborators || null,
+
+          // Common fields
           sort_order: index,
+          verified: item.verified || null,
         }));const { error } = await supabase.from('portfolio_items').insert(items);
         if (error) {throw error;
         }
@@ -845,7 +1044,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Portfolio guardado correctamente');
-    } catch (error) {toast.error('Error al guardar portfolio');
+      toast.success(translations.notifications.portfolioSaved);
+    } catch (error) {toast.error(translations.notifications.errorSaving);
       showSaveMessage('Error al guardar portfolio', true);
     } finally {
       setIsSaving(false);
@@ -884,7 +1084,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       await refetchProfile(); // Refetch to update UI
       setLastSaved(new Date());
       showSaveMessage('Preferences saved successfully!');
-      toast.success('Preferencias guardadas correctamente');
+      // ❌ REMOVED: Duplicate toast - PreferencesSection already shows success toast
+      // toast.success(translations.notifications.preferencesSaved);
     } catch (error: any) {
       toast.error(`Error al guardar preferencias: ${error?.message || 'Error desconocido'}`);
       showSaveMessage('Failed to save preferences', true);
@@ -983,6 +1184,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         visas={visas}
         languages={languages}
         certifications={certifications}
+        visitsData={visitsData}
       />
     );
   }
@@ -1327,6 +1529,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       <div className="animate-fade-in">
         <Suspense fallback={<SectionLoader />}>
           <ProfileWizard
+            key={`profile-wizard-${session?.user.id}`}
             profile={profile}
             experiences={experiences}
             education={education}
@@ -1344,8 +1547,16 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             onSavePortfolio={handlePortfolioSave}
             onSavePreferences={handlePreferencesSave}
 
-            onComplete={() => {
-              toast.success('¡Perfil completado y optimizado con éxito!');
+            onComplete={async () => {
+              // ✅ Refetch profile to update wizard_completed status
+              await refetchProfile();
+
+              // ✅ Wait for context to fully update before changing section
+              // This ensures ModernDashboardView receives the updated wizard_completed value
+              // Need to wait long enough for React state updates to propagate
+              await new Promise(resolve => setTimeout(resolve, 500));
+
+              toast.success(translations.notifications.profileCompleted);
               onSectionChange('dashboard');
             }}
           />
@@ -1390,8 +1601,117 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
 
   // Exportar Section
   if (activeSection === 'exportar') {
+    const currentPlan = getCurrentPlan();
+    const planInfo = PLAN_INFO[currentPlan];
+    const atsExportInfo = usageStats?.ats_export;
+
+    // Handler for PDF export with limit check
+    const handlePDFExport = async () => {
+      const limitCheck = await checkFeatureLimit('ats_export');
+      if (limitCheck && !limitCheck.allowed) {
+        setExportLimitInfo(limitCheck);
+        setShowExportLimitModal(true);
+        return;
+      }
+      setShowPDFExportModal(true);
+    };
+
     return (
       <div className="space-y-6">
+        {/* Usage Limit Banner */}
+        {atsExportInfo && atsExportInfo.limit !== 'unlimited' && (
+          <div className={`rounded-xl p-4 border ${
+            atsExportInfo.remaining === 0
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              : (atsExportInfo.remaining as number) <= 2
+              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+          }`}>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  atsExportInfo.remaining === 0
+                    ? 'bg-red-100 dark:bg-red-800'
+                    : 'bg-blue-100 dark:bg-blue-800'
+                }`}>
+                  <svg className={`w-5 h-5 ${
+                    atsExportInfo.remaining === 0
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-blue-600 dark:text-blue-400'
+                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${
+                      atsExportInfo.remaining === 0
+                        ? 'text-red-900 dark:text-red-200'
+                        : 'text-gray-900 dark:text-white'
+                    }`}>
+                      {lang === 'en' ? 'Monthly Export Limit' : 'Límite de Exportaciones Mensual'}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
+                      {planInfo.name}
+                    </span>
+                  </div>
+                  <p className={`text-sm ${
+                    atsExportInfo.remaining === 0
+                      ? 'text-red-700 dark:text-red-300'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {atsExportInfo.remaining === 0 ? (
+                      lang === 'en'
+                        ? 'You have reached your monthly limit. Upgrade for unlimited exports.'
+                        : 'Has alcanzado tu límite mensual. Actualiza para exportaciones ilimitadas.'
+                    ) : (
+                      lang === 'en'
+                        ? `${atsExportInfo.remaining} of ${atsExportInfo.limit} exports remaining this month`
+                        : `${atsExportInfo.remaining} de ${atsExportInfo.limit} exportaciones restantes este mes`
+                    )}
+                  </p>
+                </div>
+              </div>
+              {currentPlan !== 'pro' && currentPlan !== 'enterprise' && (
+                <Link
+                  to="/pricing"
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md"
+                >
+                  {lang === 'en' ? 'Upgrade Plan' : 'Mejorar Plan'}
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Unlimited badge for Pro/Enterprise */}
+        {atsExportInfo && atsExportInfo.limit === 'unlimited' && (
+          <div className="rounded-xl p-4 border bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {lang === 'en' ? 'Unlimited Exports' : 'Exportaciones Ilimitadas'}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
+                    {planInfo.name}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {lang === 'en'
+                    ? 'Export your CV as many times as you need'
+                    : 'Exporta tu CV tantas veces como necesites'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.export.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
@@ -1424,13 +1744,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               </span>
             </div>
             <button
-              onClick={() => setShowPDFExportModal(true)}
-              className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              onClick={handlePDFExport}
+              disabled={atsExportInfo && atsExportInfo.remaining === 0}
+              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                atsExportInfo && atsExportInfo.remaining === 0
+                  ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {t.export.pdf.button}
+              {atsExportInfo && atsExportInfo.remaining === 0
+                ? (lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado')
+                : t.export.pdf.button}
             </button>
           </div>
 
@@ -1665,6 +1992,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                       setIsGeneratingPDF(true);
                       setPdfProgress(0);
                       try {
+                        // Dynamic import for PDF generator to reduce initial bundle size
+                        const { generateCVPDF } = await import('../../utils/pdfGenerator');
                         await generateCVPDF({
                           profileSlug: profile?.slug || '',
                           profileId: session?.user.id || '',
@@ -1672,7 +2001,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                           onProgress: (progress) => {
                             setPdfProgress(progress);
                           },
-                          onSuccess: () => {
+                          onSuccess: async () => {
+                            // Record usage for the export
+                            await recordUsage('ats_export');
+                            // Refresh usage stats to update the UI
+                            await fetchUsageStats();
                             setTimeout(() => {
                               setIsGeneratingPDF(false);
                               setPdfProgress(0);
@@ -1732,6 +2065,18 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             )}
           </div>
         </Modal>
+
+        {/* Usage Limit Modal */}
+        <UsageLimitModal
+          isOpen={showExportLimitModal}
+          onClose={() => setShowExportLimitModal(false)}
+          featureType="ats_export"
+          limitInfo={exportLimitInfo}
+          onUpgrade={() => {
+            setShowExportLimitModal(false);
+            window.location.href = '/pricing';
+          }}
+        />
       </div>
     );
   }
@@ -2127,6 +2472,36 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     );
   }
 
+  // Job Search Section - Browse and search for jobs
+  if (activeSection === 'vacantes') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <JobSearchSection profileId={profile.id} />
+      </Suspense>
+    );
+  }
+
+  // My Applications Section - Track job applications
+  if (activeSection === 'postulaciones') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <MyApplicationsSection profileId={profile.id} />
+      </Suspense>
+    );
+  }
+
+  // Opportunities Section (kept for backwards compatibility if accessed directly)
+  if (activeSection === 'opportunities') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <OpportunitiesSection
+          profileId={profile.id}
+          defaultTab="recommended"
+        />
+      </Suspense>
+    );
+  }
+
   // Ajustes Section
   if (activeSection === 'ajustes') {
     return (
@@ -2179,17 +2554,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Username (URL personalizada)
               </label>
-              <div className="flex gap-2">
-                <span className="px-4 py-2 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg text-gray-500 dark:text-gray-400">
-                  {window.location.origin}/cv/
-                </span>
-                <input
-                  type="text"
-                  value={profile?.handle || profile?.slug || session?.user.id?.slice(0, 8)}
-                  placeholder="username"
-                  className="flex-1 px-4 py-2 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-white"
-                />
-              </div>
+              <SlugEditor
+                currentSlug={profile?.slug || ''}
+                lastChangedAt={profile?.last_slug_changed_at || null}
+                userId={session?.user.id || ''}
+                onSlugUpdated={() => refetchProfile()}
+              />
             </div>
           </div>
 
@@ -2244,7 +2614,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   }
 
   // Template section
-  if (activeSection === 'template') {
+  if (activeSection === 'template' || activeSection === 'plantillas') {
     return (
       <div className="space-y-6">
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-100 dark:border-purple-800">
@@ -2271,7 +2641,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                 onSaveStatusChange(t.templateSection.templateUpdated, new Date().toISOString());
               }
             } catch (error) {
-              toast.error('Error al actualizar plantilla');
+              toast.error(translations.notifications.errorUpdatingTemplate);
               if (onSaveStatusChange) {
                 onSaveStatusChange(t.templateSection.templateUpdateError, new Date().toISOString());
               }

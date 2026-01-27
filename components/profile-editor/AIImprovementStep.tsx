@@ -55,7 +55,7 @@ const AIImprovementStep: React.FC<AIImprovementStepProps> = ({
           <SparklesIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Dale el toque final con IA
+          {t.profileEditor.aiImprovement.title}
         </h3>
         <p className="text-gray-600 dark:text-gray-400">
           Nuestra inteligencia artificial analizará tus descripciones y sugerirá mejoras para hacer tu perfil más profesional y atractivo.
@@ -73,7 +73,7 @@ const AIImprovementStep: React.FC<AIImprovementStepProps> = ({
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
           >
-            Experiencia
+            {t.profileEditor.aiImprovement.experienceTab}
           </button>
           <button
             onClick={() => setActiveTab('education')}
@@ -83,7 +83,7 @@ const AIImprovementStep: React.FC<AIImprovementStepProps> = ({
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
             }`}
           >
-            Educación
+            {t.profileEditor.aiImprovement.educationTab}
           </button>
         </div>
       </div>
@@ -109,7 +109,7 @@ const AIImprovementStep: React.FC<AIImprovementStepProps> = ({
         <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-1" />
         <div>
           <h4 className="font-bold text-green-800 dark:text-green-300 mb-1">
-            ¡Estás a un paso de terminar!
+            {t.profileEditor.aiImprovement.almostDone}
           </h4>
           <p className="text-sm text-green-700 dark:text-green-400">
             Revisa las sugerencias de la IA y aplícalas si te gustan. Cuando estés listo, haz clic en "Finalizar" para guardar todos los cambios y ver tu perfil completo.

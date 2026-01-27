@@ -31,7 +31,7 @@ export interface MissingFieldInfo {
  *
  * CAMPOS IMPORTANTES (40%):
  * - Al menos 1 educación: 15%
- * - Al menos 1 skill: 20%
+ * - Al menos 3 skills: 20%
  * - Al menos 1 idioma: 5%
  *
  * NOTA: Ubicación, teléfono, portfolio, template y slug NO suman (son opcionales)
@@ -95,11 +95,11 @@ export const calculateProfileCompleteness = (
     debug.push('❌ Educación: 0%');
   }
 
-  if (counts.skills && counts.skills >= 1) {
+  if (counts.skills && counts.skills >= 3) {
     completeness += 20;
     debug.push(`✅ Skills (${counts.skills}): +20%`);
   } else {
-    debug.push(`❌ Skills (${counts.skills || 0}): 0%`);
+    debug.push(`❌ Skills (${counts.skills || 0}): 0% (necesitas al menos 3)`);
   }
 
   if (counts.languages && counts.languages > 0) {

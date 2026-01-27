@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../supabase/client';
+import CompanyVisibilityWidget from './analytics/CompanyVisibilityWidget';
 
 interface AnalyticsDashboardProps {
   profileId: string;
@@ -198,6 +199,19 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
         })
         .sort((a, b) => b.clicks - a.clicks);
 
+      // Get recent views (last 10, sorted by most recent)
+      const recentViews = (views || [])
+        .sort((a, b) => new Date(b.viewed_at).getTime() - new Date(a.viewed_at).getTime())
+        .slice(0, 10);
+
+      // Calculate growth percentage (compare first half vs second half of period)
+      const midPoint = Math.floor(timeSeries.length / 2);
+      const firstHalfViews = timeSeries.slice(0, midPoint).reduce((sum, day) => sum + day.views, 0);
+      const secondHalfViews = timeSeries.slice(midPoint).reduce((sum, day) => sum + day.views, 0);
+      const growthPercentage = firstHalfViews > 0
+        ? ((secondHalfViews - firstHalfViews) / firstHalfViews) * 100
+        : 0;
+
       return {
         summary: {
           views: viewsCount || 0,
@@ -215,6 +229,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
         trafficSources,
         devices,
         ctaClicks,
+        recentViews,
+        growthPercentage,
       };
     },
     enabled: !!profileId,
@@ -404,7 +420,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
             {/* CTA */}
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => window.location.href = '/dashboard?section=compartir'}
+                onClick={() => {
+                  // Use custom event to change section without page reload
+                  const event = new CustomEvent('change-dashboard-section', {
+                    detail: { section: 'compartir' }
+                  });
+                  window.dispatchEvent(event);
+                }}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -532,42 +554,6 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           </ResponsiveContainer>
         </div>
 
-        {/* Top Countries Bar Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Top 5 Países
-          </h3>
-          {analyticsData.topCountries.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analyticsData.topCountries}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="country" stroke="#9CA3AF" fontSize={12} />
-                <YAxis stroke="#9CA3AF" fontSize={12} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1F2937',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#F3F4F6',
-                  }}
-                />
-                <Bar dataKey="views" fill={COLORS.primary} radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[300px] flex items-center justify-center">
-              <div className="text-center">
-                <svg className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  No hay datos de países disponibles todavía
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Traffic Sources Pie Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -680,6 +666,15 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           </div>
         </div>
       )}
+
+      {/* Company Visibility Widget - Premium Feature */}
+      <CompanyVisibilityWidget
+        isPremium={false}
+        topCountries={analyticsData.topCountries}
+        summary={analyticsData.summary}
+        recentViews={analyticsData.recentViews}
+        growthPercentage={analyticsData.growthPercentage}
+      />
     </div>
   );
 };

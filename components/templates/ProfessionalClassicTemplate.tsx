@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, LinkIcon } from '@heroicons/react/24/solid';
 import { CountryBadge } from '../CountrySelector';
+import { useTranslations } from '../../hooks/useTranslations';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface ProfessionalClassicTemplateProps {
     data: FullProfileData;
@@ -11,6 +13,13 @@ interface ProfessionalClassicTemplateProps {
 const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#1F2937'; // Default to gray-800
+    const t = useTranslations();
+
+    // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
+    const portfolioItems = data.portfolioItems || data.portfolio || [];
+
+    // Filter certifications from portfolio
+    const certifications = portfolioItems.filter(item => item.type === 'CERTIFICATION');
 
     return (
         <div className="font-serif bg-white dark:bg-dark-bg-primary">
@@ -60,6 +69,16 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                         </div>
                     )}
                 </div>
+                {/* Contact Buttons */}
+                <div className="mt-6 flex justify-center">
+                    <ProfileContactButtons
+                        profileId={profile.id}
+                        profileEmail={profile.email}
+                        variant="compact"
+                        accentColor={accentColor}
+                        showDownload={false}
+                    />
+                </div>
             </header>
 
             <div className="max-w-4xl mx-auto p-12">
@@ -69,7 +88,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                         <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Resumen Profesional</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.profile}</h2>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base whitespace-pre-wrap pl-16">
                         {profile.summary}
@@ -82,7 +101,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                         <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Experiencia Profesional</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.professionalExperience}</h2>
                     </div>
                     <div className="space-y-8 pl-16">
                         {experiences.map(exp => (
@@ -90,7 +109,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                                 <div className="flex justify-between items-baseline mb-2">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                     <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
-                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Presente'}
+                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                     </span>
                                 </div>
                                 <p className="font-semibold mb-3" style={{ color: accentColor }}>{exp.company_name}</p>
@@ -108,7 +127,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                         <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Educación</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.education}</h2>
                     </div>
                     <div className="space-y-6 pl-16">
                         {education.map(edu => (
@@ -116,7 +135,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                                 <div className="flex justify-between items-baseline mb-1">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
                                     <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
-                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Presente'}
+                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.present}
                                     </span>
                                 </div>
                                 <p className="font-semibold" style={{ color: accentColor }}>{edu.institution_name}</p>
@@ -125,13 +144,86 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                     </div>
                 </section>
 
+                {/* Education */}
+                <section className="mb-12">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
+                            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.education}</h2>
+                    </div>
+                    <div className="space-y-6 pl-16">
+                        {education.map(edu => (
+                            <div key={edu.id}>
+                                <div className="flex justify-between items-baseline mb-1">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
+                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
+                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.present}
+                                    </span>
+                                </div>
+                                <p className="font-semibold" style={{ color: accentColor }}>{edu.institution_name}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Certifications */}
+                {certifications.length > 0 && (
+                    <section className="mb-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
+                                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                                {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                            </h2>
+                        </div>
+                        <div className="space-y-6 pl-16">
+                            {certifications.map((cert, index) => (
+                                <div key={cert.id || index}>
+                                    <div className="flex items-start gap-4">
+                                        {cert.image_url && (
+                                            <img
+                                                src={cert.image_url}
+                                                alt={cert.title}
+                                                className="w-12 h-12 object-contain"
+                                            />
+                                        )}
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
+                                                {cert.title}
+                                                {cert.verified && (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                                                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                        </svg>
+                                                        Verificado
+                                                    </span>
+                                                )}
+                                            </h3>
+                                            <p className="font-semibold" style={{ color: accentColor }}>{cert.issuer}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                                {cert.issue_date}
+                                                {cert.expiry_date && ` – ${cert.expiry_date}`}
+                                            </p>
+                                            {cert.description && (
+                                                <p className="text-gray-600 dark:text-gray-400 mt-2">{cert.description}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {/* Skills */}
                 <section>
                     <div className="flex items-center gap-4 mb-8">
                         <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Competencias</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.competencies}</h2>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pl-16">
                         {skills.map(skill => (

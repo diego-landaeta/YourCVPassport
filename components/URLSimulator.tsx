@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from '../hooks/useTranslations';
+import { sanitizeSlug } from '../utils/slugUtils';
 
 type Status = 'idle' | 'checking' | 'available' | 'taken';
 
@@ -68,8 +69,8 @@ const URLSimulator: React.FC = () => {
     const {buttonText, buttonClasses, message} = getStatusStyles();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Simple slugification
-        const value = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        // Use centralized sanitization utility
+        const value = sanitizeSlug(e.target.value);
         setSlug(value);
         setStatus('idle'); // Reset status on new input
     };

@@ -29,7 +29,7 @@ const ConfirmPage: React.FC = () => {
 
           // Redirect to dashboard after 2 seconds
           setTimeout(() => {
-            navigate('/dashboard', { replace: true });
+            navigate('/dashboard');
           }, 2000);
         } else {
           // Email might be confirmed, but no active session

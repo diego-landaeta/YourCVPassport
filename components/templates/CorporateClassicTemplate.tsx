@@ -1,6 +1,7 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CorporateClassicTemplateProps {
     data: FullProfileData;
@@ -39,6 +40,16 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                     <div className="flex justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
                         <span>📧 {profile.meta_description || 'N/A'}</span>
                         <span>📍 Location</span>
+                    </div>
+                    {/* Contact Buttons */}
+                    <div className="mt-6 flex justify-center">
+                        <ProfileContactButtons
+                            profileId={profile.id}
+                            profileEmail={profile.email}
+                            variant="compact"
+                            accentColor={accentColor}
+                            showDownload={false}
+                        />
                     </div>
                 </header>
 

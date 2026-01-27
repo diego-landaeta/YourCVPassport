@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FullProfileData } from '../../types';
 import { SparklesIcon, BriefcaseIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface YellowMinimalistTemplateProps {
     data: FullProfileData;
@@ -160,10 +161,19 @@ const YellowMinimalistTemplate: React.FC<YellowMinimalistTemplateProps> = ({ dat
                         {profile.headline}
                     </span>
                     {profile.country_code && (
-                        <div className="flex items-center justify-center gap-2 mb-12">
+                        <div className="flex items-center justify-center gap-2 mb-6">
                             <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
                         </div>
                     )}
+                    {/* Contact Buttons */}
+                    <div className="mb-12 flex justify-center">
+                        <ProfileContactButtons
+                            profileId={profile.id}
+                            profileEmail={profile.email}
+                            variant="minimal"
+                            accentColor={accentColor}
+                        />
+                    </div>
 
                     <div className="flex justify-center gap-8 flex-wrap mt-12">
                         <div

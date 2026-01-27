@@ -12,8 +12,8 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Test data
-const TEST_EMAIL = 'nangelm.dev@gmail.com';
-const TEST_PHONE = '+584129543569';
+const TEST_EMAIL = '';
+const TEST_PHONE = '+';
 
 test.describe('Email Verification Functions', () => {
   test('send-verification-email - should handle request (may fail without real user)', async ({ request }) => {
