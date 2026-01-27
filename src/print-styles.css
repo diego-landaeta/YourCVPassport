@@ -1,0 +1,130 @@
+/* Print and PDF Styles */
+body {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Ocultar contenedor de impresión en pantalla */
+#print-mount {
+  display: none;
+}
+
+/* REGLAS DE IMPRESIÓN - CRÍTICO PARA PDF */
+@media print {
+  @page {
+    margin: 0;
+    size: A4;
+  }
+
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ocultar toda la interfaz de la app */
+  #root {
+    display: none !important;
+  }
+
+  /* Mostrar solo el contenido de impresión */
+  #print-mount {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+  }
+
+  /* Resetear posicionamiento */
+  #print-mount > div {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  /* Eliminar márgenes y espacios que causan páginas en blanco */
+  #print-mount * {
+    max-width: 100% !important;
+  }
+
+  #print-mount > div > *:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Evitar cortes de página en elementos importantes */
+  #print-mount header,
+  #print-mount section,
+  #print-mount article,
+  #print-mount .experience-item,
+  #print-mount .education-item,
+  #print-mount .skill-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Evitar que los títulos queden solos al final de la página */
+  #print-mount h1,
+  #print-mount h2,
+  #print-mount h3,
+  #print-mount h4 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Mantener elementos relacionados juntos */
+  #print-mount .keep-together {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Asegurar que el header sea visible */
+  #print-mount header {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+  }
+
+  /* Asegurar que las imágenes del header sean visibles */
+  #print-mount header img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Asegurar que los textos del header sean visibles */
+  #print-mount header h1,
+  #print-mount header p,
+  #print-mount header div {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Preservar colores y fondos */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Ocultar elementos interactivos */
+  .print\:hidden, nav {
+    display: none !important;
+  }
+
+  /* Ocultar botones EXCEPTO los del header del CV */
+  #print-mount header button {
+    display: inline-flex !important;
+    pointer-events: none !important;
+  }
+}

@@ -1,0 +1,46 @@
+# Robots.txt for YourCVPassport
+# Bloquear indexación de páginas privadas (post-login, admin, dashboard)
+
+User-agent: *
+
+# Páginas públicas permitidas
+Allow: /
+Allow: /cv/
+Allow: /profiles
+Allow: /jobs
+Allow: /empleos
+Allow: /recursos/blog
+Allow: /resources/blog
+Allow: /product/ai
+
+# Bloquear páginas de autenticación
+Disallow: /login
+Disallow: /signup
+Disallow: /magic-link
+Disallow: /recovery
+Disallow: /callback
+Disallow: /confirm
+
+# Bloquear dashboard de usuario
+Disallow: /dashboard
+Disallow: /dashboard/
+
+# Bloquear área de administración
+Disallow: /admin
+Disallow: /admin/
+
+# Bloquear área de empresa (requiere login)
+Disallow: /company/dashboard
+Disallow: /company/search
+Disallow: /company/profile/
+Disallow: /company/messages
+Disallow: /company/credits
+Disallow: /company/saved-searches
+Disallow: /company/exports
+Disallow: /company/team
+Disallow: /company/settings
+Disallow: /company/analytics
+Disallow: /company/jobs
+
+# Sitemap
+Sitemap: https://yourcvpassport.com/sitemap.xml

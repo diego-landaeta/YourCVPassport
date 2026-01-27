@@ -1,0 +1,35 @@
+{
+  "name": "yourcvpassport-ssr-server",
+  "version": "1.0.0",
+  "description": "Server-Side Rendering server for YourCVPassport to handle proper 404 status codes",
+  "main": "ssr-server-example.js",
+  "scripts": {
+    "start": "node ssr-server-example.js",
+    "dev": "nodemon ssr-server-example.js",
+    "pm2:start": "pm2 start ssr-server-example.js --name yourcvpassport-ssr",
+    "pm2:stop": "pm2 stop yourcvpassport-ssr",
+    "pm2:restart": "pm2 restart yourcvpassport-ssr",
+    "pm2:logs": "pm2 logs yourcvpassport-ssr",
+    "pm2:monitor": "pm2 monit",
+    "test": "node test-ssr.js"
+  },
+  "keywords": [
+    "ssr",
+    "nginx",
+    "yourcvpassport",
+    "404"
+  ],
+  "author": "YourCVPassport Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
