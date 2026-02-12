@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, PhoneIcon, LinkIcon, BriefcaseIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface ClassicSidebarTemplateProps {
     data: FullProfileData;
@@ -11,9 +13,12 @@ interface ClassicSidebarTemplateProps {
 const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#1E293B'; // Default to slate-800
+    const { lang } = useLanguage();
+    const t = useTranslations();
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+        const formatted = new Date(dateString).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short' });
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
     };
 
     return (
@@ -142,7 +147,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                                 <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 ring-4 ring-white dark:ring-dark-bg-secondary -translate-x-[11px] shadow-lg"></div>
                                 <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-tertiary rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all">
                                     <p className="text-sm text-blue-600 dark:text-blue-400 font-bold mb-2">
-                                        {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : 'Present'}
+                                        {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : t.cvSections.present}
                                     </p>
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                                         {exp.position}

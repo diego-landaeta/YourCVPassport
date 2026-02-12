@@ -4,7 +4,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate';

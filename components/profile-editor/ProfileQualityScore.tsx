@@ -12,6 +12,7 @@ import {
   calculateProfileScore,
   generateProfileSuggestions,
   ProfileQualityCheck,
+  SuggestionType,
 } from '../../lib/ai';
 import {
   CheckCircleIcon,
@@ -121,23 +122,36 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
   const scoreDisplay = getScoreDisplay(score);
   const ScoreIcon = scoreDisplay.icon;
 
-  // Map suggestion categories to section IDs
-  const getSectionIdFromCategory = (category: string): string | null => {
-    const categoryMap: Record<string, string> = {
-      'Foto de perfil': 'identity',
-      'Email': 'identity',
-      'Resumen profesional': 'identity',
-      [t.profileEditor.qualityScore.workExperience]: 'experience',
-      'Experiencia laboral': 'experience',
-      'Habilidades': 'skills',
-      [t.profileEditor.qualityScore.education]: 'education',
-      'Educación': 'education',
-      'Proyectos (Visas)': 'visas',
-      [t.profileEditor.qualityScore.languages]: 'languages',
-      'Certificaciones': 'stamps',
-      'Verificaciones': 'stamps',
+  // Map suggestion types to section IDs
+  const getSectionIdFromType = (type: SuggestionType): string | null => {
+    const typeMap: Record<SuggestionType, string> = {
+      'summary': 'identity',
+      'experience': 'experience',
+      'education': 'education',
+      'skills': 'skills',
+      'verifications': 'stamps',
     };
-    return categoryMap[category] || null;
+    return typeMap[type] || null;
+  };
+
+  // Get translated category and message for a suggestion type
+  const getSuggestionText = (type: SuggestionType, data?: { remaining?: number }) => {
+    const messages = t.profileEditor.qualityScore.suggestionMessages;
+    const suggestionData = messages[type];
+
+    if (type === 'skills' && data?.remaining !== undefined) {
+      return {
+        category: suggestionData.category,
+        message: typeof suggestionData.message === 'function'
+          ? suggestionData.message(data.remaining)
+          : suggestionData.message,
+      };
+    }
+
+    return {
+      category: suggestionData.category,
+      message: suggestionData.message as string,
+    };
   };
 
   // Priority badge
@@ -279,8 +293,9 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
           <div className="space-y-3">
             {suggestions.map((suggestion, index) => {
               const priorityBadge = getPriorityBadge(suggestion.priority);
-              const sectionId = getSectionIdFromCategory(suggestion.category);
+              const sectionId = getSectionIdFromType(suggestion.type);
               const isClickable = onNavigateToSection && sectionId;
+              const suggestionText = getSuggestionText(suggestion.type, suggestion.data);
 
               const cardContent = (
                 <>
@@ -292,10 +307,10 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-900 dark:text-dark-text-primary mb-1.5">
-                        {suggestion.category}
+                        {suggestionText.category}
                       </p>
                       <p className="text-sm text-gray-700 dark:text-dark-text-secondary leading-relaxed">
-                        {suggestion.message}
+                        {suggestionText.message}
                       </p>
                     </div>
                     {isClickable && (
@@ -331,7 +346,7 @@ const ProfileQualityScore: React.FC<ProfileQualityScoreProps> = ({
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Las sugerencias se ordenan automáticamente por prioridad para ayudarte a optimizar tu perfil.
+              {t.profileEditor.qualityScore.suggestionsOrderedByPriority}
             </p>
           </div>
         </div>

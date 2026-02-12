@@ -244,6 +244,8 @@ const DashboardPage: React.FC = () => {
               setSaveMessage(message);
               if (timestamp) setLastSaved(timestamp);
             }}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           />
         </div>
       </div>

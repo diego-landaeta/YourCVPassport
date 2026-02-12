@@ -29,6 +29,7 @@ export const translations = {
         backToHome: 'Volver al Inicio',
         contactSupport: 'Contactar Soporte',
         loading: 'Cargando...',
+        translating: 'Traduciendo...',
         save: 'Guardar',
         cancel: 'Cancelar',
         delete: 'Eliminar',
@@ -861,7 +862,10 @@ export const translations = {
     },
     dashboard: {
         title: "Panel de Control",
-        welcome: (name: string) => `¡Bienvenido de nuevo, ${name}!`,
+        welcome: (name: string, gender?: string) => {
+            const greeting = gender === 'female' ? 'Bienvenida' : 'Bienvenido';
+            return `¡${greeting} de nuevo, ${name}!`;
+        },
         loading: "Cargando...",
         subtitle: "Gestiona tu perfil profesional y destaca entre miles",
         firstLoginWelcome: {
@@ -2886,7 +2890,10 @@ export const translations = {
         sendMessage: 'Enviar Mensaje',
         certifications: 'Certificaciones',
         portfolio: 'Portafolio',
-        recommendations: 'Recomendaciones'
+        recommendations: 'Recomendaciones',
+        verified: 'Verificado',
+        verifiedProfile: 'Perfil Verificado',
+        expires: 'Expira:'
     },
     // Secciones del Editor de Perfil
     profileEditor: {
@@ -2930,7 +2937,30 @@ export const translations = {
                 high: 'Alta',
                 medium: 'Media',
                 low: 'Baja',
-            }
+            },
+            suggestionsOrderedByPriority: 'Las sugerencias se ordenan automáticamente por prioridad para ayudarte a optimizar tu perfil.',
+            suggestionMessages: {
+                summary: {
+                    category: 'Resumen profesional',
+                    message: 'El resumen es lo primero que lee un reclutador. Describe tu propuesta de valor en 3-4 líneas',
+                },
+                experience: {
+                    category: 'Experiencia laboral',
+                    message: 'Agrega tu experiencia laboral - es el contenido más importante de tu CV',
+                },
+                education: {
+                    category: 'Educación',
+                    message: 'Incluye tu formación académica - muchas empresas lo requieren como filtro inicial',
+                },
+                skills: {
+                    category: 'Habilidades',
+                    message: (remaining: number) => `Agrega ${remaining} habilidad${remaining > 1 ? 'es' : ''} más - los sistemas ATS filtran por palabras clave`,
+                },
+                verifications: {
+                    category: 'Verificaciones',
+                    message: 'Las verificaciones validan tu identidad, educación, idiomas y experiencia, aumentando la confianza en tu perfil',
+                },
+            },
         },
         deleteModal: {
             deleteEducation: 'Eliminar Educación',
@@ -3005,7 +3035,8 @@ export const translations = {
             headlineRequired: 'El título profesional es obligatorio (mínimo 5 caracteres)',
             summaryRequired: 'El resumen "Acerca de mí" es obligatorio',
             summaryMax: 'Máximo 500 caracteres',
-            countryRequired: 'Debes seleccionar un país'
+            countryRequired: 'Debes seleccionar un país',
+            genderRequired: 'Debes seleccionar tu género'
         },
         experience: {
             positionRequired: 'El puesto es obligatorio',
@@ -3704,5 +3735,70 @@ export const translations = {
             specializationLabel: 'Especialización',
             specializationDescription: 'Búsqueda combinada en ambos campos'
         }
+    },
+    feed: {
+        title: 'Feed de Actividad',
+        subtitle: 'Comparte tus logros y conecta con otros profesionales',
+        beta: 'Beta',
+        createPost: {
+            placeholder: '¿Que tienes en mente?',
+            publish: 'Publicar',
+            publishing: 'Publicando...',
+            addImage: 'Agregar imagen',
+            maxImages: 'Maximo 4 imagenes'
+        },
+        post: {
+            like: 'Me gusta',
+            comment: 'Comentar',
+            share: 'Compartir',
+            edited: 'Editado',
+            delete: 'Eliminar',
+            edit: 'Editar',
+            save: 'Guardar',
+            cancel: 'Cancelar',
+            confirmDelete: '¿Estas seguro de eliminar esta publicacion?',
+            deleting: 'Eliminando...'
+        },
+        comments: {
+            placeholder: 'Escribe un comentario...',
+            post: 'Publicar',
+            posting: 'Publicando...',
+            reply: 'Responder',
+            replies: 'respuestas',
+            showReplies: 'Ver respuestas',
+            hideReplies: 'Ocultar respuestas',
+            noComments: 'Se el primero en comentar',
+            loadingComments: 'Cargando comentarios...',
+            edited: 'editado'
+        },
+        stats: {
+            likes: 'me gusta',
+            comments: 'comentarios',
+            shares: 'compartidos'
+        },
+        empty: {
+            title: 'Tu feed esta vacio',
+            description: 'Comparte tu primera publicacion o espera a que otros publiquen. Los logros profesionales y actualizaciones apareceran aqui.',
+            hint: '¡Comienza compartiendo en que estas trabajando!'
+        },
+        share: {
+            repost: 'Repostear',
+            copyLink: 'Copiar enlace',
+            copied: '¡Copiado!'
+        },
+        achievements: {
+            unlocked: 'Logro desbloqueado',
+            profileCompleted: '¡Perfil completado al 100%!',
+            gotHired: '¡Nuevo empleo conseguido!',
+            stampVerified: '¡Credencial verificada!',
+            milestone: '¡Hito profesional alcanzado!'
+        },
+        errors: {
+            loadingFeed: 'Error al cargar el feed',
+            creatingPost: 'Error al crear publicacion',
+            uploadingImage: 'Error al subir imagen',
+            retry: 'Reintentar'
+        },
+        noMore: 'No hay mas publicaciones'
     }
 };

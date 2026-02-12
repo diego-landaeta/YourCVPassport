@@ -4,7 +4,6 @@ import { FullProfileData } from '../../types';
 import { CountryBadge } from '../CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslatedSkills } from '../../hooks/useTranslatedSkills';
 import { CTATracker } from './CTATracker';
 import { ChatBubbleLeftRightIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 
@@ -27,7 +26,6 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
 
     const t = useTranslations();
     const { user } = useAuth();
-    const translatedSkills = useTranslatedSkills(skills);
 
     const handleContactClick = () => {
         setIsContactModalOpen(true);
@@ -250,7 +248,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                             <div className="bg-yellow-400 dark:bg-yellow-500 border-4 border-black dark:border-white p-5 sm:p-6 print:bg-yellow-400 print:border-black">
                                 <h3 className="font-black text-lg sm:text-xl uppercase mb-4 border-b-4 border-black dark:border-white pb-2 dark:text-black print:text-black print:border-black">Arsenal</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {translatedSkills.map(s => (
+                                    {skills.map(s => (
                                         <span
                                             key={s.id}
                                             className="bg-white border-2 border-black px-2 py-1 font-bold text-xs uppercase shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:bg-black dark:text-white dark:border-white dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] print:bg-white print:text-black print:border-black print:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"

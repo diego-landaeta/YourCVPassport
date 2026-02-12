@@ -11,19 +11,49 @@ interface TourStep {
 interface DashboardTourProps {
   onComplete: () => void;
   onSkip: () => void;
+  onOpenMobileMenu?: () => void;
+  isMobileMenuOpen?: boolean;
+  userGender?: string;
 }
 
-const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => {
+const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpenMobileMenu, isMobileMenuOpen, userGender }) => {
   const { lang } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [arrowPosition, setArrowPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('bottom');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+
+  // Map sidebar targets to mobile menu targets
+  const sidebarToMobileMap: Record<string, string> = {
+    '[data-tour="sidebar-mi-perfil"]': '[data-tour="mobile-mi-perfil"]',
+    '[data-tour="sidebar-ver-cv"]': '[data-tour="mobile-ver-cv"]',
+    '[data-tour="sidebar-plantillas"]': '[data-tour="mobile-plantillas"]',
+    '[data-tour="sidebar-stamps"]': '[data-tour="mobile-stamps"]',
+    '[data-tour="sidebar-vacantes"]': '[data-tour="mobile-vacantes"]',
+    '[data-tour="sidebar-postulaciones"]': '[data-tour="mobile-postulaciones"]',
+    '[data-tour="sidebar-leads"]': '[data-tour="mobile-leads"]',
+    '[data-tour="sidebar-analitica"]': '[data-tour="mobile-analitica"]',
+    '[data-tour="sidebar-visas"]': '[data-tour="mobile-visas"]',
+    '[data-tour="sidebar-ajustes"]': '[data-tour="mobile-ajustes"]',
+  };
+
+  // Gender-aware greeting for Spanish
+  const welcomeGreeting = userGender === 'female' ? 'Bienvenida' : 'Bienvenido';
 
   const tourSteps: Record<string, TourStep[]> = {
     es: [
       {
         target: '[data-tour="welcome"]',
-        title: '¡Bienvenido a tu Dashboard!',
+        title: `¡${welcomeGreeting} a tu Dashboard!`,
         content: 'Este es tu panel principal donde puedes ver todas las estadísticas y accesos rápidos a las funciones más importantes.',
         placement: 'bottom',
       },
@@ -206,29 +236,108 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
     ],
   };
 
-  const steps = tourSteps[lang] || tourSteps.es;
+  // Get steps and map sidebar targets to mobile targets when on mobile
+  const allSteps = tourSteps[lang] || tourSteps.es;
+  const steps = isMobile
+    ? allSteps.map(step => {
+        // If this is a sidebar step and we're on mobile, map to mobile menu target
+        if (sidebarToMobileMap[step.target]) {
+          return {
+            ...step,
+            target: sidebarToMobileMap[step.target],
+            placement: 'left' as const, // Mobile menu items should have tooltip on left
+          };
+        }
+        return step;
+      })
+    : allSteps;
+
+  // Open mobile menu when we reach a mobile menu step
+  useEffect(() => {
+    const step = steps[currentStep];
+    if (isMobile && step && step.target.includes('mobile-') && step.target !== '[data-tour="mobile-menu-toggle"]') {
+      // This is a mobile menu item step - ensure menu is open
+      if (!isMobileMenuOpen && onOpenMobileMenu) {
+        onOpenMobileMenu();
+      }
+    }
+  }, [currentStep, isMobile, isMobileMenuOpen, onOpenMobileMenu, steps]);
+
+  // Scroll to target element when step changes
+  useEffect(() => {
+    const step = steps[currentStep];
+    if (!step || step.target === 'center') return;
+
+    // For mobile menu items, wait until menu is open
+    const isMobileMenuItem = step.target.includes('mobile-') && !step.target.includes('mobile-menu-toggle');
+    if (isMobile && isMobileMenuItem && !isMobileMenuOpen) {
+      // Don't scroll yet - wait for menu to open
+      return;
+    }
+
+    // Wait for DOM to update and animations to complete
+    // Mobile menu has 300ms transition, so we wait 400ms for mobile menu items
+    const delay = isMobile && isMobileMenuItem ? 400 : 150;
+
+    const timeoutId = setTimeout(() => {
+      const targetElement = document.querySelector(step.target);
+      if (targetElement) {
+        const rect = targetElement.getBoundingClientRect();
+        const currentIsMobile = window.innerWidth < 1024;
+
+        if (currentIsMobile && !isMobileMenuItem) {
+          // En móvil, usar scroll manual para evitar problemas con el header fijo
+          const headerHeight = 80; // pt-20 = 80px
+          const elementTop = rect.top + window.scrollY;
+          const scrollTarget = elementTop - headerHeight - 20; // 20px extra margin
+
+          window.scrollTo({
+            top: Math.max(0, scrollTarget),
+            behavior: 'smooth'
+          });
+        } else {
+          // En desktop o para items del menú móvil, usar scrollIntoView
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+        }
+      }
+    }, delay);
+
+    return () => clearTimeout(timeoutId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, isMobile, isMobileMenuOpen]);
 
   useEffect(() => {
     updateTooltipPosition();
+
+    // Use an interval to continuously track the element position
+    const intervalId = setInterval(() => {
+      updateTooltipPosition();
+    }, 16); // ~60fps
+
     window.addEventListener('resize', updateTooltipPosition);
-    window.addEventListener('scroll', updateTooltipPosition);
 
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener('resize', updateTooltipPosition);
-      window.removeEventListener('scroll', updateTooltipPosition);
     };
-  }, [currentStep]);
+  }, [currentStep, isMobileMenuOpen]);
 
   const updateTooltipPosition = () => {
     const step = steps[currentStep];
     if (!step) return;
 
+    const currentIsMobile = window.innerWidth < 1024;
+    const tooltipWidth = currentIsMobile ? Math.min(window.innerWidth - 32, 360) : 360;
+    const tooltipHeight = 240;
+
     // Si el target es 'center', posicionar en el centro de la pantalla
     if (step.target === 'center') {
-      const tooltipWidth = 360;
-      const tooltipHeight = 240;
       const top = (window.innerHeight - tooltipHeight) / 2;
-      const left = (window.innerWidth - tooltipWidth) / 2;
+      const left = currentIsMobile ? 16 : (window.innerWidth - tooltipWidth) / 2;
       setTooltipPosition({ top, left });
       setArrowPosition('top'); // No se mostrará la flecha en este caso
       return;
@@ -237,14 +346,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
     const targetElement = document.querySelector(step.target);
     if (!targetElement) return;
 
-    // Si es un elemento del sidebar, hacer scroll para que sea visible
-    if (step.target.includes('sidebar-')) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
     const rect = targetElement.getBoundingClientRect();
-    const tooltipWidth = 360;
-    const tooltipHeight = 240;
     let offset = 24;
     const margin = 16;
 
@@ -257,7 +359,52 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
       offset = 60; // Aumentar el offset para este paso específico
     }
 
-    // Para elementos del sidebar, siempre colocar a la derecha
+    // En móvil
+    if (currentIsMobile) {
+      // Para elementos del menú móvil, posicionar basándose en la posición del elemento
+      // Si el elemento está en la mitad superior, poner tooltip abajo; si está abajo, poner arriba
+      if (step.target.includes('mobile-') && !step.target.includes('mobile-menu-toggle')) {
+        const elementCenterY = rect.top + rect.height / 2;
+        const screenMidpoint = window.innerHeight / 2;
+
+        let tooltipTop;
+        if (elementCenterY < screenMidpoint) {
+          // Elemento en la mitad superior -> tooltip en la parte inferior
+          tooltipTop = window.innerHeight - tooltipHeight - margin - 20;
+        } else {
+          // Elemento en la mitad inferior -> tooltip en la parte superior
+          tooltipTop = margin + 70; // Debajo del header
+        }
+
+        setArrowPosition('top');
+        setTooltipPosition({ top: tooltipTop, left: 16 });
+
+        // Add highlight to target element
+        targetElement.classList.add('tour-highlight');
+        document.querySelectorAll('.tour-highlight').forEach((el) => {
+          if (el !== targetElement) {
+            el.classList.remove('tour-highlight');
+          }
+        });
+        return;
+      }
+
+      // Para otros elementos en móvil, posicionar en la parte SUPERIOR de la pantalla
+      const fixedMobileTop = 80;
+      setArrowPosition('bottom');
+      setTooltipPosition({ top: fixedMobileTop, left: 16 });
+
+      // Add highlight to target element
+      targetElement.classList.add('tour-highlight');
+      document.querySelectorAll('.tour-highlight').forEach((el) => {
+        if (el !== targetElement) {
+          el.classList.remove('tour-highlight');
+        }
+      });
+      return;
+    }
+
+    // Para elementos del sidebar, siempre colocar a la derecha (solo en desktop)
     if (step.target.includes('sidebar-')) {
       placement = 'right';
     }
@@ -424,24 +571,25 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
   const step = steps[currentStep];
   if (!step) return null;
 
-  // Determinar si estamos en pasos del sidebar (5-14) o dashboard (1-4, 15)
-  const isSidebarStep = currentStep >= 4 && currentStep <= 13; // Steps 5-14 son sidebar (index 4-13), el paso 15 (index 14) vuelve al dashboard
+  // Determinar si estamos en pasos del sidebar o menú móvil basándose en el target del paso actual
+  const isSidebarStep = step.target.includes('sidebar-');
+  const isMobileMenuItem = step.target.includes('mobile-') && !step.target.includes('mobile-menu-toggle');
 
   return (
     <>
-      {/* Overlay - Bloqueante (no hace nada al hacer clic) */}
+      {/* Overlay - Visual only, allows scroll through */}
       <div
-        className="fixed inset-0 bg-black/60 z-[9998] backdrop-blur-sm"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // No hacer nada - el overlay bloquea los clics
-        }}
+        className="fixed inset-0 bg-black/60 z-[9998] backdrop-blur-sm pointer-events-none"
       />
 
-      {/* Tooltip con mejor contraste */}
+      {/* Tooltip con mejor contraste - responsive para móvil */}
       <div
-        className="fixed z-[10000] w-[360px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-3 border-blue-600 dark:border-blue-400 transition-all duration-300 animate-fadeIn"
+        data-tour-tooltip
+        className={`fixed z-[10000] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-3 border-blue-600 dark:border-blue-400 transition-all duration-300 animate-fadeIn ${
+          isMobile
+            ? 'w-[calc(100vw-32px)] max-w-[400px]' // Full width en móvil
+            : 'w-[360px]'
+        }`}
         style={{
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
@@ -451,8 +599,8 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
           e.stopPropagation();
         }}
       >
-        {/* Arrow pointing to highlighted element - No mostrar si es el paso centrado */}
-        {step.target !== 'center' && (
+        {/* Arrow pointing to highlighted element - No mostrar en móvil ni si es el paso centrado */}
+        {step.target !== 'center' && !isMobile && (
           <div
             className={`absolute w-0 h-0 ${
               arrowPosition === 'top'
@@ -574,29 +722,16 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip }) => 
           body:has(.tour-highlight) [data-tour="sidebar"] {
             z-index: 10000 !important;
           }
-        ` : `
-          /* En pasos del dashboard: BLOQUEAR sidebar (visible pero no clickeable) */
-          body:has(.tour-highlight) [data-tour="sidebar"] {
-            opacity: 0.3 !important;
-            pointer-events: none !important;
-            filter: grayscale(100%) !important;
+        ` : isMobileMenuItem ? `
+          /* En pasos del menú móvil: elevar z-index del menú móvil */
+          body:has(.tour-highlight) [data-tour="mobile-menu"] {
+            z-index: 10000 !important;
           }
-        `}
+        ` : ``}
 
-        /* Bloquear TODAS las interacciones excepto el tooltip */
-        body:has(.tour-highlight) * {
-          pointer-events: none !important;
-        }
-
-        /* SOLO permitir interacción con el tooltip (botones de navegación) */
-        body:has(.tour-highlight) [class*="fixed"][class*="z-[10000]"],
-        body:has(.tour-highlight) [class*="fixed"][class*="z-[10000]"] * {
+        /* Tooltip siempre interactivo */
+        [data-tour-tooltip] {
           pointer-events: auto !important;
-        }
-
-        /* El elemento resaltado debe ser visible pero NO interactuable */
-        body:has(.tour-highlight) .tour-highlight {
-          pointer-events: none !important;
         }
 
         @keyframes fadeIn {

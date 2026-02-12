@@ -5,7 +5,7 @@ import { ChangelogChangeType } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
-import Modal from './ui/Modal';
+import Modal from './Modal';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -413,10 +413,13 @@ const SystemStatusPage: React.FC = () => {
                 <Modal
                     isOpen={selectedVersion !== null}
                     onClose={() => setSelectedVersion(null)}
-                    title={`${pageData.version} ${t.CHANGELOG_ENTRIES[selectedVersion].version}`}
                     maxWidth="4xl"
                 >
                     <div className="p-8">
+                        {/* Title */}
+                        <h2 className="text-2xl font-bold text-cv-dark-gray dark:text-dark-text-primary mb-6">
+                            {pageData.version} {t.CHANGELOG_ENTRIES[selectedVersion].version}
+                        </h2>
                         {/* Date Badge */}
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-3 h-3 bg-cv-blue rounded-full shadow-md"></div>

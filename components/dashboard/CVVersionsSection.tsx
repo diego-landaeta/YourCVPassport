@@ -9,7 +9,7 @@ import { useATSExport } from '../../hooks/useATSExport';
 import { useAuth } from '../../contexts/AuthContext';
 import { CVVersion } from '../../types';
 import { CreateVersionModal } from './CreateVersionModal';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 // SVG Icons
 const PlusIcon = () => (

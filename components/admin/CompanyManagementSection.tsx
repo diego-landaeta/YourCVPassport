@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import type { Company, CompanyUser } from '../../types';
 import {
   BuildingOfficeIcon,

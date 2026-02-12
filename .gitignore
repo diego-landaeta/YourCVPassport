@@ -119,3 +119,7 @@ debug-*.html
 
 # Keep important files
 !README.md
+
+# Testing outputs
+test-results/
+playwright-report/

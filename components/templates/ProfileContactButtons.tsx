@@ -3,7 +3,7 @@ import { EnvelopeIcon, CalendarIcon, ArrowDownTrayIcon } from '@heroicons/react/
 import { CTATracker } from './CTATracker';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface ProfileContactButtonsProps {
   profileId: string;

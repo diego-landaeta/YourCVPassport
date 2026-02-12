@@ -16,6 +16,8 @@ import UserModeration from './UserModeration';
 import AdminTestingHub from './AdminTestingHub';
 import EnterpriseFeaturesManagement from './EnterpriseFeaturesManagement';
 import { TemplateManagement } from './TemplateManagement';
+import TranslationCacheManagement from './TranslationCacheManagement';
+import FeedSection from '../dashboard/feed/FeedSection';
 import {
   UsersIcon,
   BuildingOfficeIcon,
@@ -32,6 +34,8 @@ import {
   PaintBrushIcon,
   BeakerIcon,
   StarIcon,
+  LanguageIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 interface AdminStats {
@@ -62,7 +66,7 @@ const AdminDashboard: React.FC = () => {
     companiesThisMonth: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profiles' | 'blog' | 'stories' | 'stamps' | 'companies' | 'companies-view' | 'jobs' | 'applications' | 'monitoring' | 'user-moderation' | 'templates' | 'testing' | 'enterprise' | null>(null);
+  const [activeTab, setActiveTab] = useState<'profiles' | 'blog' | 'stories' | 'stamps' | 'companies' | 'companies-view' | 'jobs' | 'applications' | 'monitoring' | 'user-moderation' | 'templates' | 'testing' | 'enterprise' | 'translations' | 'feed' | null>(null);
 
   useEffect(() => {
     if (!profile || profile.role !== 'admin') {
@@ -601,6 +605,51 @@ const AdminDashboard: React.FC = () => {
                       </svg>
                     </button>
 
+                    {/* Translation Cache */}
+                    <button
+                      onClick={() => setActiveTab('translations')}
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                    >
+                      <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                        <LanguageIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
+                          {lang === 'es' ? 'Caché de Traducciones' : 'Translation Cache'}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
+                          {lang === 'es' ? 'Gestiona traducciones cacheadas' : 'Manage cached translations'}
+                        </p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+
+                    {/* Feed (Beta) */}
+                    <button
+                      onClick={() => setActiveTab('feed')}
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                    >
+                      <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <h3 className="font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
+                          Feed
+                          <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded">
+                            Beta
+                          </span>
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
+                          {lang === 'es' ? 'Prueba el feed social de actividad' : 'Test the social activity feed'}
+                        </p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+
                     {/* Talent Search */}
                     <Link
                       to="/admin/search"
@@ -661,6 +710,12 @@ const AdminDashboard: React.FC = () => {
               <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
                 <EnterpriseFeaturesManagement />
               </div>
+            ) : activeTab === 'translations' ? (
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
+                <TranslationCacheManagement />
+              </div>
+            ) : activeTab === 'feed' ? (
+              <FeedSection />
             ) : (
               <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
                 {activeTab === 'profiles' && <ProfilesManagement />}

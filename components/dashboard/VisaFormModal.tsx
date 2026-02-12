@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Visa } from '../../types';
-import Modal from '../ui/Modal';
+import Modal from '../Modal';
 import { useTranslations } from '../../hooks/useTranslations';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 

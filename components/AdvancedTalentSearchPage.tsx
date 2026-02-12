@@ -11,7 +11,8 @@ import HeroImage from './HeroImage';
 import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid';
 import { StarIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { isPremiumProfile, getVerifiedStampsCount } from '../utils/profileSorting';
-import { translateSkill } from '../utils/skillsTranslation';
+import { translateBatch, detectSourceLanguage } from '../services/translation';
+import { correctGender, inferGenderFromName } from '../utils/genderCorrection';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -25,15 +26,6 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, skills }) => {
     const t = useTranslations();
     const { lang } = useLanguage();
-
-    // DEBUG: Log skills in ProfileCard
-    if (profile.full_name === 'James Wilson') {
-        console.log('🎨 ProfileCard James Wilson:', {
-            skillsLength: skills.length,
-            skills: skills,
-            willShowCounter: skills.length > 2
-        });
-    }
 
     // Get avatar URL or generate initials
     const avatarUrl = profile.avatar_url || profile.photo_url || profile.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || 'User')}&background=2563eb&color=fff&size=200`;
@@ -121,7 +113,6 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        console.log(`${profile.full_name} tiene ${skills.length} skills:`, skills);
                                     }}
                                 >
                                     +{skills.length - 2}
@@ -298,6 +289,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
     const [profiles, setProfiles] = useState<any[]>([]);
     const [profileSkills, setProfileSkills] = useState<{ [key: string]: string[] }>({});
     const [loading, setLoading] = useState(true);
+    const [isTranslating, setIsTranslating] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [displayLimit, setDisplayLimit] = useState(12);
     const [filters, setFilters] = useState({
@@ -351,23 +343,23 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 const profileIds = profilesData.map(p => p.id);
 
                 // Load ALL skills for all profiles in a SINGLE query
+                // Use a higher limit to ensure we get all skills (Supabase default is 1000)
                 const { data: allSkillsData, error: skillsError } = await supabase
                     .from('skills')
                     .select('profile_id, name')
-                    .in('profile_id', profileIds);
+                    .in('profile_id', profileIds)
+                    .limit(5000);
 
                 if (skillsError) {
                     console.error('Error loading skills:', skillsError);
                 }
 
-                // Group skills by profile_id and translate them
+                // Group skills by profile_id (keep original names, translate later via API)
                 allSkillsData?.forEach(skill => {
                     if (!skillsMap[skill.profile_id]) {
                         skillsMap[skill.profile_id] = [];
                     }
-                    // Translate skill name to current language
-                    const translatedSkillName = translateSkill(skill.name, lang as 'en' | 'es');
-                    skillsMap[skill.profile_id].push(translatedSkillName);
+                    skillsMap[skill.profile_id].push(skill.name);
                 });
             }
 
@@ -379,8 +371,92 @@ const AdvancedTalentSearchPage: React.FC = () => {
 
             setProfileSkills(skillsMap);
             setProfiles(profilesWithSkills);
+
+            // Translate headlines dynamically if needed
+            translateProfileTexts(profilesWithSkills);
         } catch (err) {} finally {
             setLoading(false);
+        }
+    };
+
+    // Function to translate profile texts (headlines + skills) dynamically via API
+    const translateProfileTexts = async (profilesList: any[]) => {
+        if (!profilesList || profilesList.length === 0) return;
+
+        // Collect texts grouped by detected language
+        const textsInSpanish: string[] = [];
+        const textsInEnglish: string[] = [];
+
+        profilesList.forEach(profile => {
+            const textsToCheck = [
+                profile.headline,
+                profile.title,
+                profile.professional_title,
+                ...(profile._skills || [])
+            ].filter(t => t && t.trim() !== '');
+
+            textsToCheck.forEach(text => {
+                if (text) {
+                    const textLang = detectSourceLanguage(text);
+                    if (textLang === 'es') {
+                        textsInSpanish.push(text);
+                    } else {
+                        textsInEnglish.push(text);
+                    }
+                }
+            });
+        });
+
+        // Determine what needs translation based on current UI language
+        const textsToTranslate = lang === 'en' ? textsInSpanish : textsInEnglish;
+        const sourceLang = lang === 'en' ? 'es' : 'en';
+
+        const uniqueTexts = [...new Set(textsToTranslate)];
+
+        console.log(`[TalentSearch] Language: ${lang}, Spanish texts: ${textsInSpanish.length}, English texts: ${textsInEnglish.length}, To translate: ${uniqueTexts.length}`);
+
+        if (uniqueTexts.length === 0) return;
+
+        setIsTranslating(true);
+
+        try {
+            console.log(`[TalentSearch] Translating ${uniqueTexts.length} texts: ${sourceLang} -> ${lang}...`);
+            const translations = await translateBatch(uniqueTexts, lang as 'en' | 'es', sourceLang as 'en' | 'es');
+
+            // Apply translations to profiles (headlines + skills)
+            // Apply gender correction for Spanish translations
+            const translatedProfiles = profilesList.map(profile => {
+                // Determine gender from profile data or infer from name
+                const gender = profile.gender || inferGenderFromName(profile.full_name);
+
+                // Get translations (only if the text was in the source language)
+                let headline = profile.headline ? (translations.get(profile.headline) || profile.headline) : profile.headline;
+                let title = profile.title ? (translations.get(profile.title) || profile.title) : profile.title;
+                let professionalTitle = profile.professional_title ? (translations.get(profile.professional_title) || profile.professional_title) : profile.professional_title;
+
+                // Apply gender correction only for Spanish
+                if (lang === 'es' && gender) {
+                    headline = correctGender(headline, gender);
+                    title = correctGender(title, gender);
+                    professionalTitle = correctGender(professionalTitle, gender);
+                }
+
+                return {
+                    ...profile,
+                    headline,
+                    title,
+                    professional_title: professionalTitle,
+                    _skills: profile._skills?.map((skill: string) => translations.get(skill) || skill) || [],
+                };
+            });
+
+            setProfiles(translatedProfiles);
+            console.log(`[TalentSearch] Translation complete with gender correction`);
+        } catch (error) {
+            console.error('[TalentSearch] Translation error:', error);
+            // Keep original profiles on error
+        } finally {
+            setIsTranslating(false);
         }
     };
 
@@ -583,45 +659,46 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Resultados encontrados</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{lang === 'es' ? 'Resultados encontrados' : 'Results found'}</p>
                                                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                                        {filteredProfiles.length} {filteredProfiles.length === 1 ? 'perfil' : 'perfiles'}
+                                                        {filteredProfiles.length} {filteredProfiles.length === 1 ? (lang === 'es' ? 'perfil' : 'profile') : (lang === 'es' ? 'perfiles' : 'profiles')}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => loadProfiles()}
-                                                className="px-4 py-2 text-sm font-medium text-cv-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex items-center gap-2"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                </svg>
-                                                Actualizar
-                                            </button>
+                                            <div className="flex items-center gap-3">
+                                                {/* Translation Indicator */}
+                                                {isTranslating && (
+                                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full border border-purple-200 dark:border-purple-700/50 animate-pulse">
+                                                        <svg className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                                                            {lang === 'es' ? 'Traduciendo...' : 'Translating...'}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <button
+                                                    onClick={() => loadProfiles()}
+                                                    className="px-4 py-2 text-sm font-medium text-cv-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex items-center gap-2"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                    </svg>
+                                                    {lang === 'es' ? 'Actualizar' : 'Refresh'}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {/* Profile Cards Grid */}
                                         <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                            {filteredProfiles.slice(0, displayLimit).map(profile => {
-                                                const skills = profile._skills || [];
-
-                                                // DEBUG: Si James Wilson aparece sin skills
-                                                if (profile.full_name === 'James Wilson') {
-                                                    console.log('🔴 James Wilson skills:', {
-                                                        has_skills: !!profile._skills,
-                                                        length: skills.length,
-                                                        skills: skills
-                                                    });
-                                                }
-
-                                                return (
-                                                    <ProfileCard
-                                                        key={profile.id}
-                                                        profile={profile}
-                                                        skills={skills}
-                                                    />
-                                                );
-                                            })}
+                                            {filteredProfiles.slice(0, displayLimit).map(profile => (
+                                                <ProfileCard
+                                                    key={profile.id}
+                                                    profile={profile}
+                                                    skills={profile._skills || []}
+                                                />
+                                            ))}
                                         </div>
 
                                         {/* Load More Button */}

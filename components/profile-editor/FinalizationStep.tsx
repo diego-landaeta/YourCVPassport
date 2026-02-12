@@ -12,7 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';

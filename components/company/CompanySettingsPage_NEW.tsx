@@ -4,7 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser } from '../../types';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import {
   BellIcon,
   ShieldCheckIcon,

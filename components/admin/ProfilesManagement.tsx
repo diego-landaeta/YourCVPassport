@@ -151,10 +151,37 @@ const ProfilesManagement: React.FC = () => {
     }
 
     try {
-      // Delete user from auth.users (this will cascade delete the profile)
-      const { error } = await supabase.rpc('delete_user_by_id', { user_id: profileId });
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (error) throw error;
+      if (!session?.access_token) {
+        throw new Error('No hay sesión activa');
+      }
+
+      // Call the admin API endpoint to delete the user
+      const response = await fetch(`/api/admin/users/${profileId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Handle response - check status first, then try to parse JSON
+      let data: any = {};
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (e) {
+          // JSON parsing failed - response might be empty
+          console.error('Failed to parse response JSON:', e);
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || `Error del servidor: ${response.status}`);
+      }
 
       showAlert({
         title: 'Éxito',
@@ -162,7 +189,8 @@ const ProfilesManagement: React.FC = () => {
         type: 'success'
       });
       loadProfiles();
-    } catch (err: any) {showAlert({
+    } catch (err: any) {
+      showAlert({
         title: 'Error',
         message: 'Error al eliminar perfil: ' + err.message,
         type: 'error'

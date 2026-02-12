@@ -9,11 +9,13 @@ import { parseCV, ParsedCVData } from '../utils/cvParser';
 interface OnboardingState {
     currentStep: number;
     goal: string | null;
+    gender: 'male' | 'female' | null;
     cvFile: File | null;
     generatedSummary: string;
     generatedExperience: string[];
     setStep: (step: number) => void;
     setGoal: (goal: string) => void;
+    setGender: (gender: 'male' | 'female') => void;
     setCvFile: (file: File | null) => void;
     reset: () => void;
     setGeneratedSummary: (summary: string) => void;
@@ -27,17 +29,19 @@ const useOnboardingStore = create<OnboardingState>()(
         (set) => ({
             currentStep: 0,
             goal: null,
+            gender: null,
             cvFile: null,
             generatedSummary: '',
             generatedExperience: [],
             handle: '',
             setStep: (step) => set({ currentStep: step }),
             setGoal: (goal) => set({ goal }),
+            setGender: (gender) => set({ gender }),
             setCvFile: (file) => set({ cvFile: file }),
             setGeneratedSummary: (summary) => set({ generatedSummary: summary }),
             setGeneratedExperience: (experience) => set({ generatedExperience: experience }),
             setHandle: (handle) => set({ handle }),
-            reset: () => set({ currentStep: 0, goal: null, cvFile: null, generatedSummary: '', generatedExperience: [], handle: '' }),
+            reset: () => set({ currentStep: 0, goal: null, gender: null, cvFile: null, generatedSummary: '', generatedExperience: [], handle: '' }),
         }),
         {
             name: 'onboarding-progress', // unique name
@@ -54,7 +58,7 @@ interface OnboardingWizardProps {
 
 const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile, onSave }) => {
     const t = useTranslations();
-    const { currentStep, goal, cvFile, generatedSummary, generatedExperience, handle, setStep, setGoal, setCvFile, setGeneratedSummary, setGeneratedExperience, setHandle, reset } = useOnboardingStore();
+    const { currentStep, goal, gender, cvFile, generatedSummary, generatedExperience, handle, setStep, setGoal, setGender, setCvFile, setGeneratedSummary, setGeneratedExperience, setHandle, reset } = useOnboardingStore();
     const [isGenerating, setIsGenerating] = useState(false);
     const [handleStatus, setHandleStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
     const [copied, setCopied] = useState(false);
@@ -78,7 +82,8 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile
                         summary: generatedSummary,
                         experience: generatedExperience,
                         goal: goal,
-                        handle: finalHandle
+                        handle: finalHandle,
+                        gender: gender
                     });
                 } catch (error) {}
             }
@@ -154,23 +159,65 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile
                         </button>
                     </div>
                 );
-            case 1: // Role & Goal
+            case 1: // Role & Goal + Gender
                 return (
-                    <div className="space-y-4 animate-fade-in">
-                        {t.onboardingWizard.goals.map((goalOption) => (
-                            <div 
-                                key={goalOption} 
-                                onClick={() => setGoal(goalOption)}
-                                className={`p-5 text-center rounded-lg border-2 cursor-pointer hover:border-cv-blue hover:bg-cv-blue/5 dark:hover:bg-cv-blue/10 transition-all duration-200 flex items-center justify-center gap-3 text-lg font-semibold ${
-                                    goal === goalOption 
-                                    ? 'border-cv-blue bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue' 
-                                    : 'bg-gray-100 dark:bg-dark-bg-tertiary border-transparent text-gray-800 dark:text-dark-text-primary'
-                                }`}
-                            >
-                                {goal === goalOption && <CheckCircleIcon className="w-6 h-6" />}
-                                <span>{goalOption}</span>
+                    <div className="space-y-6 animate-fade-in w-full">
+                        {/* Gender Selection - Required */}
+                        <div>
+                            <label className="block mb-3 font-semibold text-lg text-gray-800 dark:text-dark-text-primary">
+                                Selecciona tu género <span className="text-red-500">*</span>
+                            </label>
+                            <div className="flex gap-4">
+                                <div
+                                    onClick={() => setGender('male')}
+                                    className={`flex-1 p-4 text-center rounded-lg border-2 cursor-pointer hover:border-cv-blue hover:bg-cv-blue/5 dark:hover:bg-cv-blue/10 transition-all duration-200 flex items-center justify-center gap-2 font-semibold ${
+                                        gender === 'male'
+                                        ? 'border-cv-blue bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue'
+                                        : 'bg-gray-100 dark:bg-dark-bg-tertiary border-transparent text-gray-800 dark:text-dark-text-primary'
+                                    }`}
+                                >
+                                    {gender === 'male' && <CheckCircleIcon className="w-5 h-5" />}
+                                    <span>Masculino</span>
+                                </div>
+                                <div
+                                    onClick={() => setGender('female')}
+                                    className={`flex-1 p-4 text-center rounded-lg border-2 cursor-pointer hover:border-cv-blue hover:bg-cv-blue/5 dark:hover:bg-cv-blue/10 transition-all duration-200 flex items-center justify-center gap-2 font-semibold ${
+                                        gender === 'female'
+                                        ? 'border-cv-blue bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue'
+                                        : 'bg-gray-100 dark:bg-dark-bg-tertiary border-transparent text-gray-800 dark:text-dark-text-primary'
+                                    }`}
+                                >
+                                    {gender === 'female' && <CheckCircleIcon className="w-5 h-5" />}
+                                    <span>Femenino</span>
+                                </div>
                             </div>
-                        ))}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                Se usa para personalizar correctamente las traducciones de tu perfil
+                            </p>
+                        </div>
+
+                        {/* Goal Selection */}
+                        <div>
+                            <label className="block mb-3 font-semibold text-lg text-gray-800 dark:text-dark-text-primary">
+                                ¿Cuál es tu objetivo? <span className="text-red-500">*</span>
+                            </label>
+                            <div className="space-y-3">
+                                {t.onboardingWizard.goals.map((goalOption) => (
+                                    <div
+                                        key={goalOption}
+                                        onClick={() => setGoal(goalOption)}
+                                        className={`p-4 text-center rounded-lg border-2 cursor-pointer hover:border-cv-blue hover:bg-cv-blue/5 dark:hover:bg-cv-blue/10 transition-all duration-200 flex items-center justify-center gap-3 font-semibold ${
+                                            goal === goalOption
+                                            ? 'border-cv-blue bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue'
+                                            : 'bg-gray-100 dark:bg-dark-bg-tertiary border-transparent text-gray-800 dark:text-dark-text-primary'
+                                        }`}
+                                    >
+                                        {goal === goalOption && <CheckCircleIcon className="w-5 h-5" />}
+                                        <span>{goalOption}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 );
             case 2: // Import CV or Create with AI
@@ -439,7 +486,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, profile
     const isNextDisabled = () => {
         switch (currentStep) {
             case 1:
-                return !goal;
+                return !goal || !gender; // Both gender and goal required
             case 2:
                 // Allow to proceed either with CV or without (to use AI questionnaire)
                 return false;

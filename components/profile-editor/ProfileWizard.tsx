@@ -225,8 +225,8 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     return Promise.resolve(true);
   };
 
-  // Check if user has premium plan
-  const isPremiumUser = profile?.plan && (profile.plan === 'Premium' || profile.plan === 'Pro');
+  // Check if user has premium plan (lowercase: 'pro', 'premium', 'enterprise')
+  const isPremiumUser = profile?.plan && ['pro', 'premium', 'enterprise'].includes(profile.plan.toLowerCase());
 
   const handleAIClick = () => {
     // Check if user has premium access
@@ -349,15 +349,15 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   return (
     <div className="max-w-5xl mx-auto">
       {/* Stepper Header */}
-      <div className="mb-8 overflow-x-auto">
-        <div className="flex items-center justify-center min-w-max px-4">
+      <div className="mb-8 overflow-x-auto pb-2">
+        <div className="flex items-center justify-start sm:justify-center gap-1 sm:gap-0 px-2 sm:px-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
             const isCompleted = completedSteps.includes(index);
 
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center flex-shrink-0">
                 <div
                   className={`flex flex-col items-center cursor-pointer group transition-all ${
                     isActive ? 'text-cv-blue' : isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
@@ -388,7 +388,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   }}
                 >
                   <div className={`
-                    w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
+                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
                     group-hover:scale-110 group-hover:shadow-md
                     ${isActive
                       ? 'border-cv-blue bg-blue-50 dark:bg-blue-900/20'
@@ -397,12 +397,12 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
                     }
                   `}>
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-xs font-medium mt-2">{step.title}</span>
+                  <span className={`text-[10px] sm:text-xs font-medium mt-1 sm:mt-2 max-w-[50px] sm:max-w-none text-center truncate ${isActive ? '' : 'hidden sm:block'}`}>{step.title}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`h-0.5 w-10 mx-2 ${completedSteps.includes(index) ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`} />
+                  <div className={`h-0.5 w-4 sm:w-10 mx-0.5 sm:mx-2 ${completedSteps.includes(index) ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-700'}`} />
                 )}
               </div>
             );
@@ -550,11 +550,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
       )}
 
       {/* Content */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 min-h-[500px]">
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 min-h-[400px] sm:min-h-[500px]">
         {steps[currentStep] && (
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              {React.createElement(steps[currentStep].icon, { className: "w-8 h-8 text-cv-blue" })}
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
+              {React.createElement(steps[currentStep].icon, { className: "w-6 h-6 sm:w-8 sm:h-8 text-cv-blue" })}
               {steps[currentStep].title}
             </h2>
           </div>

@@ -3,7 +3,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { Visa } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import {
   PlusIcon,
   PencilIcon,
@@ -31,7 +31,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import VisaFormModal from './VisaFormModal';
-import ConfirmDialog from '../ui/ConfirmDialog';
+import { ConfirmDialog } from '../ConfirmDialog';
 
 // Sortable Visa Card Component
 interface SortableVisaCardProps {

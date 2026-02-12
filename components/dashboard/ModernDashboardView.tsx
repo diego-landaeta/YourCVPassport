@@ -32,6 +32,9 @@ interface ModernDashboardViewProps {
   certifications?: any[];
   // Datos reales de visitas por día
   visitsData?: { name: string; visits: number }[];
+  // Mobile menu control for tour
+  isMobileMenuOpen?: boolean;
+  onOpenMobileMenu?: () => void;
 }
 
 interface CompletionNotification {
@@ -73,10 +76,12 @@ const FirstLoginWelcome: React.FC<{
   onDismiss: () => void;
   profileCompleteness: number;
   onSectionChange: (section: string) => void;
-}> = ({ onDismiss, profileCompleteness, onSectionChange }) => {
+  userGender?: string;
+}> = ({ onDismiss, profileCompleteness, onSectionChange, userGender }) => {
   const { lang } = useLanguage();
   const translations = useTranslations();
   const t = translations;
+  const welcomeGreeting = userGender === 'female' ? 'Bienvenida' : 'Bienvenido';
 
   const handleStartProfile = () => {
     onDismiss();
@@ -85,7 +90,7 @@ const FirstLoginWelcome: React.FC<{
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6 relative animate-fade-in z-[10100]">
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-6 relative animate-fade-in">
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -103,7 +108,7 @@ const FirstLoginWelcome: React.FC<{
 
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {t.dashboard?.firstLoginWelcome?.title || '¡Bienvenido a YourCVPassport!'}
+            {t.dashboard?.firstLoginWelcome?.title || `¡${welcomeGreeting} a YourCVPassport!`}
           </h3>
 
           <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -158,6 +163,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
   languages = [],
   certifications = [],
   visitsData = [],
+  isMobileMenuOpen,
+  onOpenMobileMenu,
 }) => {
   const translations = useTranslations();
   const t = translations.dashboard;
@@ -302,7 +309,15 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Dashboard Tour - Solo para usuarios con perfil completo */}
-        {showTour && stats.profileCompleteness === 100 && <DashboardTour onComplete={completeTour} onSkip={skipTour} />}
+        {showTour && stats.profileCompleteness === 100 && (
+          <DashboardTour
+            onComplete={completeTour}
+            onSkip={skipTour}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onOpenMobileMenu={onOpenMobileMenu}
+            userGender={profile?.gender}
+          />
+        )}
 
         {/* Success Notification */}
         {notification.show && (
@@ -327,8 +342,12 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
             <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {profile?.first_login_completed === false
-                ? (lang === 'es' ? `¡Bienvenido${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!` : `Welcome${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`)
-                : (profile?.full_name?.trim() && !profile.full_name.includes('@') ? t.welcome(profile.full_name) : (lang === 'es' ? '¡Bienvenido!' : 'Welcome!'))
+                ? (lang === 'es'
+                    ? `¡${profile?.gender === 'female' ? 'Bienvenida' : 'Bienvenido'}${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`
+                    : `Welcome${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`)
+                : (profile?.full_name?.trim() && !profile.full_name.includes('@')
+                    ? t.welcome(profile.full_name, profile?.gender)
+                    : (lang === 'es' ? `¡${profile?.gender === 'female' ? 'Bienvenida' : 'Bienvenido'}!` : 'Welcome!'))
               }
             </h1>
           </div>
@@ -346,6 +365,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
             onDismiss={handleDismissFirstLoginWelcome}
             profileCompleteness={stats.profileCompleteness}
             onSectionChange={onSectionChange}
+            userGender={profile?.gender}
           />
         )}
 

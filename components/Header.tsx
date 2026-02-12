@@ -234,7 +234,7 @@ const Header: React.FC = () => {
   const { session, openModal, profile, company, companyUser, isCompanyUser } = useAuth();
   const navigate = useNavigate();
   const t = useTranslations();
-  const { lang } = useLanguage();
+  const { lang, setLangWithNav } = useLanguage();
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
@@ -256,6 +256,18 @@ const Header: React.FC = () => {
       document.head.removeChild(style);
     };
   }, []);
+
+  // Bloquear scroll cuando el menú móvil está abierto
+  React.useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -292,6 +304,7 @@ const Header: React.FC = () => {
   const publicProfilePath = profile?.slug ? `/cv/${profile.slug}` : profileEditPath;
 
   return (
+    <>
     <header className="bg-white/80 dark:bg-dark-bg-primary/95 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:shadow-lg dark:shadow-dark-bg-primary/50 border-b border-transparent dark:border-dark-border">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
@@ -358,49 +371,44 @@ const Header: React.FC = () => {
             )}
           </div>
           <div className="lg:hidden flex items-center">
-            <button
-              onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-dark-text-secondary hover:text-gray-500 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cv-blue dark:focus:ring-cv-blue-light transition-colors"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <span className="sr-only">Open main menu</span>
-              {isMobileMenuOpen ? (
-                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                 </svg>
-              ) : (
+            {!isMobileMenuOpen && (
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-dark-text-secondary hover:text-gray-500 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cv-blue dark:focus:ring-cv-blue-light transition-colors"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <span className="sr-only">Open main menu</span>
                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
-              )}
-            </button>
+              </button>
+            )}
           </div>
         </div>
       </div>
+    </header>
 
-      {isMobileMenuOpen && (
-        <>
-          {/* Overlay oscuro */}
-          <div
-            onClick={closeMobileMenu}
-            className="lg:hidden fixed inset-0 bg-black/50 z-[9998]"
-            style={{ animation: 'fadeIn 0.2s ease-in-out' }}
-          />
+    {/* Mobile menu - fuera del header para que el overlay cubra todo */}
+    {isMobileMenuOpen && (
+      <>
+        {/* Overlay oscuro */}
+        <div
+          onClick={closeMobileMenu}
+          className="lg:hidden fixed inset-0 bg-black/50 z-[9998]"
+          style={{ animation: 'fadeIn 0.2s ease-in-out' }}
+        />
 
-          {/* Sidebar deslizante desde la izquierda */}
-          <div
-            className="lg:hidden fixed top-0 left-0 h-screen w-72 bg-white dark:bg-[#0f0f0f] shadow-2xl z-[9999] overflow-y-auto flex flex-col"
-            style={{ animation: 'slideInLeft 0.3s ease-out' }}
-          >
+        {/* Sidebar deslizante desde la izquierda */}
+        <div
+          className="lg:hidden fixed inset-y-0 left-0 w-72 bg-white dark:bg-[#0f0f0f] shadow-2xl z-[9999] overflow-y-auto flex flex-col"
+          style={{ animation: 'slideInLeft 0.3s ease-out' }}
+        >
             {/* Header del sidebar con logo y botón cerrar */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800/50">
-              <Link to={homePath} onClick={closeMobileMenu} className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-cv-blue rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">YC</span>
-                </div>
-                <span className="text-gray-800 dark:text-white font-semibold text-base">YourCVPassport</span>
+              <Link to={homePath} onClick={closeMobileMenu} className="text-xl font-bold text-cv-blue dark:text-cv-blue-light">
+                YourCVPassport
               </Link>
-              <button onClick={closeMobileMenu} className="text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+              <button onClick={closeMobileMenu} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -498,7 +506,34 @@ const Header: React.FC = () => {
           </div>
         </>
       )}
-    </header>
+
+    {/* Indicador de idioma flotante global - solo en móvil */}
+    <div className="lg:hidden fixed bottom-5 right-4 z-[50] pointer-events-none">
+      <button
+        onClick={() => {
+          const newLang = lang === 'es' ? 'en' : 'es';
+          setLangWithNav(newLang);
+        }}
+        className="pointer-events-auto w-9 h-9 rounded-full shadow-lg active:scale-90 transition-transform touch-manipulation overflow-hidden border-2 border-white dark:border-gray-700 bg-gray-100"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+      >
+        {lang === 'es' ? (
+          <svg viewBox="0 0 512 512" className="w-full h-full">
+            <rect fill="#AA151B" width="512" height="512"/>
+            <rect fill="#F1BF00" y="128" width="512" height="256"/>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 512 512" className="w-full h-full">
+            <rect fill="#012169" width="512" height="512"/>
+            <path fill="#FFF" d="M512 0v64L322 256l190 187v69h-67L254 324 68 512H0v-68l186-187L0 74V0h62l192 188L440 0z"/>
+            <path fill="#C8102E" d="M184 324l11 34L42 512H0v-3l184-185zm124-12l54 8 150 147v45L308 312zM512 0L320 196l-4-44L466 0h46zM0 1l193 189-59-8L0 49V1z"/>
+            <path fill="#FFF" d="M176 0v512h160V0H176zM0 176v160h512V176H0z"/>
+            <path fill="#C8102E" d="M0 208v96h512v-96H0zM208 0v512h96V0h-96z"/>
+          </svg>
+        )}
+      </button>
+    </div>
+    </>
   );
 };
 

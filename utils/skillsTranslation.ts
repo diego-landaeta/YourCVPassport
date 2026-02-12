@@ -62,7 +62,12 @@ export const SKILLS_EN_TO_ES: Record<string, string> = {
 
   // Soft Skills
   'Leadership': 'Liderazgo',
+  'Leadership Development': 'Desarrollo de Liderazgo',
+  'Conscious Leadership': 'Liderazgo Consciente',
+  'Executive Leadership': 'Liderazgo Ejecutivo',
   'Team Management': 'Gestión de Equipos',
+  'Team Leadership': 'Liderazgo de Equipos',
+  'Team Facilitation': 'Facilitación de Equipos',
   'Communication': 'Comunicación',
   'Public Speaking': 'Oratoria',
   'Presentation Skills': 'Habilidades de Presentación',
@@ -77,15 +82,43 @@ export const SKILLS_EN_TO_ES: Record<string, string> = {
   'Emotional Intelligence': 'Inteligencia Emocional',
   'Mentoring': 'Mentoría',
   'Coaching': 'Coaching',
+  'Executive Coaching': 'Coaching Ejecutivo',
+  'Life Coaching': 'Coaching de Vida',
+  'Career Coaching': 'Coaching de Carrera',
   'Active Listening': 'Escucha Activa',
   'Collaboration': 'Colaboración',
   'Customer Service': 'Servicio al Cliente',
   'Networking': 'Networking',
   'Teamwork': 'Trabajo en Equipo',
+  'Team Player': 'Jugador de Equipo',
   'Empathy': 'Empatía',
   'Motivation': 'Motivación',
   'Delegation': 'Delegación',
   'Organization': 'Organización',
+  'Analytical Skills': 'Habilidades Analíticas',
+  'Attention to Detail': 'Atención al Detalle',
+  'Self-Motivation': 'Automotivación',
+  'Flexibility': 'Flexibilidad',
+  'Patience': 'Paciencia',
+  'Interpersonal Skills': 'Habilidades Interpersonales',
+  'Work Ethic': 'Ética de Trabajo',
+  'Accountability': 'Responsabilidad',
+  'Integrity': 'Integridad',
+  'Culture Transformation': 'Transformación Cultural',
+  'Organizational Culture': 'Cultura Organizacional',
+  'Cultural Change': 'Cambio Cultural',
+  'Personal Development': 'Desarrollo Personal',
+  'Professional Development': 'Desarrollo Profesional',
+  'Self-Awareness': 'Autoconocimiento',
+  'Mindfulness': 'Mindfulness',
+  'Work-Life Balance': 'Equilibrio Trabajo-Vida',
+  'Stress Management': 'Gestión del Estrés',
+  'Resilience': 'Resiliencia',
+  'Innovation': 'Innovación',
+  'Strategic Thinking': 'Pensamiento Estratégico',
+  'Visionary Leadership': 'Liderazgo Visionario',
+  'Servant Leadership': 'Liderazgo de Servicio',
+  'Transformational Leadership': 'Liderazgo Transformacional',
 
   // Marketing & Sales
   'Digital Marketing': 'Marketing Digital',
@@ -139,6 +172,98 @@ export const SKILLS_EN_TO_ES: Record<string, string> = {
   'Organizational Development': 'Desarrollo Organizacional',
   'Payroll': 'Nómina',
   'Personnel Selection': 'Selección de Personal',
+
+  // Nature, Environment & Ecopsychology
+  'Ecopsychology': 'Ecopsicología',
+  'Forest Therapy': 'Terapia Forestal',
+  'Forest Bathing': 'Baño de Bosque',
+  'Environmental Education': 'Educación Ambiental',
+  'Group Facilitation': 'Facilitación de Grupos',
+  'Retreat Design': 'Diseño de Retiros',
+  'Mindfulness in Nature': 'Mindfulness en la Naturaleza',
+  'Ecological Anxiety Management': 'Gestión de la Ansiedad Ecológica',
+  'Conservation Biology': 'Biología de la Conservación',
+  'Environmental Interpretation': 'Interpretación Ambiental',
+  'Nature Reconnection Practices': 'Prácticas de Reconexión con la Naturaleza',
+  'Deep Ecology': 'Ecología Profunda',
+  'Nature Experience Design': 'Diseño de Experiencias en la Naturaleza',
+  'Trauma-Informed Nature Therapy': 'Terapia de Naturaleza Informada en Trauma',
+  'Sustainability Communication': 'Comunicación de Sostenibilidad',
+  'Ecological Dialogue Facilitation': 'Facilitación de Diálogo Ecológico',
+  'Nature-Based Therapy': 'Terapia Basada en la Naturaleza',
+  'Eco-Therapy': 'Eco-Terapia',
+  'Ecotherapy': 'Ecoterapia',
+  'Wildlife Conservation': 'Conservación de Vida Silvestre',
+  'Environmental Science': 'Ciencias Ambientales',
+  'Sustainability': 'Sostenibilidad',
+  'Sustainable Development': 'Desarrollo Sostenible',
+  'Climate Change': 'Cambio Climático',
+  'Renewable Energy': 'Energía Renovable',
+  'Green Technology': 'Tecnología Verde',
+  'Ecological Restoration': 'Restauración Ecológica',
+  'Biodiversity': 'Biodiversidad',
+  'Environmental Policy': 'Política Ambiental',
+  'Carbon Footprint': 'Huella de Carbono',
+  'Waste Management': 'Gestión de Residuos',
+  'Water Conservation': 'Conservación del Agua',
+  'Sustainable Agriculture': 'Agricultura Sostenible',
+  'Permaculture': 'Permacultura',
+  'Organic Farming': 'Agricultura Orgánica',
+  'Environmental Impact Assessment': 'Evaluación de Impacto Ambiental',
+  'Nature Photography': 'Fotografía de Naturaleza',
+  'Outdoor Education': 'Educación al Aire Libre',
+  'Adventure Therapy': 'Terapia de Aventura',
+  'Wilderness Skills': 'Habilidades de Supervivencia',
+  'Environmental Consulting': 'Consultoría Ambiental',
+  'Nature Connection': 'Conexión con la Naturaleza',
+  'Holistic Health': 'Salud Holística',
+  'Wellness Coaching': 'Coaching de Bienestar',
+  'Mind-Body Connection': 'Conexión Mente-Cuerpo',
+  'Meditation': 'Meditación',
+  'Yoga': 'Yoga',
+  'Breathwork': 'Trabajo de Respiración',
+  'Sound Healing': 'Sanación con Sonido',
+  'Energy Healing': 'Sanación Energética',
+  'Alternative Medicine': 'Medicina Alternativa',
+  'Integrative Health': 'Salud Integrativa',
+  'Nature Guiding': 'Guía de Naturaleza',
+  'Wilderness Therapy': 'Terapia de Vida Silvestre',
+
+  // Nutrition & Dietetics
+  'Holistic Nutrition': 'Nutrición Holística',
+  'Mindful Eating': 'Alimentación Consciente',
+  'Functional Nutrition': 'Nutrición Funcional',
+  'Personalized Dietary Planning': 'Planificación Dietética Personalizada',
+  'Salud Integrativa': 'Salud Integrativa',
+  'Nutritional Education': 'Educación Nutricional',
+  'Clinical Nutrition': 'Nutrición Clínica',
+  'Gut-Brain Connection': 'Conexión Intestino-Cerebro',
+  'Preventive Nutrition': 'Nutrición Preventiva',
+  'Nutritional Assessment': 'Evaluación Nutricional',
+  'Chronic Disease Management': 'Manejo de Enfermedades Crónicas',
+  'Therapeutic Cooking': 'Cocina Terapéutica',
+  'Emotional Nutrition': 'Nutrición Emocional',
+  'Functional Supplementation': 'Suplementación Funcional',
+  'Nutritional Communication': 'Comunicación Nutricional',
+  'Dietetics': 'Dietética',
+  'Food Science': 'Ciencia de los Alimentos',
+  'Meal Planning': 'Planificación de Comidas',
+  'Sports Nutrition': 'Nutrición Deportiva',
+  'Pediatric Nutrition': 'Nutrición Pediátrica',
+  'Geriatric Nutrition': 'Nutrición Geriátrica',
+  'Weight Management': 'Control de Peso',
+  'Eating Disorders': 'Trastornos Alimentarios',
+  'Nutrition Counseling': 'Asesoramiento Nutricional',
+  'Nutrition Therapy': 'Terapia Nutricional',
+  'Registered Dietitian': 'Dietista Registrado',
+  'Food Allergies': 'Alergias Alimentarias',
+  'Plant-Based Nutrition': 'Nutrición Basada en Plantas',
+  'Gut Health': 'Salud Intestinal',
+  'Microbiome': 'Microbioma',
+  'Anti-Inflammatory Diet': 'Dieta Antiinflamatoria',
+  'Ketogenic Diet': 'Dieta Cetogénica',
+  'Intermittent Fasting': 'Ayuno Intermitente',
+  'Food Technology': 'Tecnología Alimentaria',
 
   // Healthcare & Medical
   'Patient Care': 'Atención al Paciente',
@@ -298,8 +423,25 @@ export const SKILLS_ES_TO_EN: Record<string, string> = Object.entries(SKILLS_EN_
   {} as Record<string, string>
 );
 
+// Case-insensitive lookup maps (lowercase key -> original key)
+const EN_LOWERCASE_MAP: Record<string, string> = Object.keys(SKILLS_EN_TO_ES).reduce(
+  (acc, key) => {
+    acc[key.toLowerCase()] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+const ES_LOWERCASE_MAP: Record<string, string> = Object.keys(SKILLS_ES_TO_EN).reduce(
+  (acc, key) => {
+    acc[key.toLowerCase()] = key;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
 /**
- * Translates a skill name to the target language
+ * Translates a skill name to the target language (case-insensitive)
  * @param skillName - The skill name to translate
  * @param targetLang - Target language ('en' or 'es')
  * @returns Translated skill name, or original if no translation found
@@ -307,12 +449,31 @@ export const SKILLS_ES_TO_EN: Record<string, string> = Object.entries(SKILLS_EN_
 export function translateSkill(skillName: string, targetLang: 'en' | 'es'): string {
   if (!skillName) return skillName;
 
+  const trimmed = skillName.trim();
+  const lowerName = trimmed.toLowerCase();
+
   if (targetLang === 'es') {
-    // Translate from English to Spanish
-    return SKILLS_EN_TO_ES[skillName] || skillName;
+    // Try exact match first
+    if (SKILLS_EN_TO_ES[trimmed]) {
+      return SKILLS_EN_TO_ES[trimmed];
+    }
+    // Try case-insensitive match
+    const originalKey = EN_LOWERCASE_MAP[lowerName];
+    if (originalKey) {
+      return SKILLS_EN_TO_ES[originalKey];
+    }
+    return trimmed;
   } else {
-    // Translate from Spanish to English
-    return SKILLS_ES_TO_EN[skillName] || skillName;
+    // Try exact match first
+    if (SKILLS_ES_TO_EN[trimmed]) {
+      return SKILLS_ES_TO_EN[trimmed];
+    }
+    // Try case-insensitive match
+    const originalKey = ES_LOWERCASE_MAP[lowerName];
+    if (originalKey) {
+      return SKILLS_ES_TO_EN[originalKey];
+    }
+    return trimmed;
   }
 }
 
@@ -333,10 +494,12 @@ export function translateSkills<T extends { name: string }>(
 }
 
 /**
- * Checks if a skill is a predefined skill (exists in translation map)
+ * Checks if a skill is a predefined skill (exists in translation map) - case-insensitive
  * @param skillName - The skill name to check
  * @returns true if skill is predefined, false otherwise
  */
 export function isPredefinedSkill(skillName: string): boolean {
-  return skillName in SKILLS_EN_TO_ES || skillName in SKILLS_ES_TO_EN;
+  if (!skillName) return false;
+  const lowerName = skillName.trim().toLowerCase();
+  return lowerName in EN_LOWERCASE_MAP || lowerName in ES_LOWERCASE_MAP;
 }

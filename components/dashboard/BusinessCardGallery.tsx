@@ -5,7 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { businessCardStyles, BusinessCardStyle } from './businessCardStyles';
 import { templates } from '../templates/templateData';
 import { supabase } from '../../supabase/client';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface BusinessCardGalleryProps {
   profile: Profile | null;

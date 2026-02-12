@@ -1,15 +1,15 @@
 // @ts-nocheck
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser, Stamp } from '../../types';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import type { TalentSearchPageProps } from './types';
 import { CountryBadge } from '../CountrySelector';
 import { sortProfilesByPriority } from '../../utils/profileSorting';
-import { translateSkill } from '../../utils/skillsTranslation';
+import { translateBatch, detectSourceLanguage, TranslationLanguage } from '../../services/translation';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -94,6 +94,11 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
   const [locations, setLocations] = useState<string[]>([]);
   const [allSkills, setAllSkills] = useState<string[]>([]);
 
+  // Translation state for profile cards
+  const [profileTranslations, setProfileTranslations] = useState<Map<string, string>>(new Map());
+  const [isTranslating, setIsTranslating] = useState(false);
+  const lastTranslationLang = useRef<string>('');
+
   // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -106,6 +111,12 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
     }
     return value || key;
   };
+
+  // Helper to get translated text
+  const getTranslation = useCallback((text: string | null | undefined): string => {
+    if (!text) return '';
+    return profileTranslations.get(text) || text;
+  }, [profileTranslations]);
 
   // Load filter options on mount
   useEffect(() => {
@@ -121,6 +132,80 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, locationFilter, remotePrefFilter, availabilityFilter, experienceLevelFilter, skillFilter]);
+
+  // Translate profile cards when profiles load or language changes
+  useEffect(() => {
+    if (profiles.length === 0) {
+      setProfileTranslations(new Map());
+      return;
+    }
+
+    // Skip if already translated for this language + profiles combination
+    const profilesKey = `${lang}-${profiles.map(p => p.id).join(',')}`;
+    if (lastTranslationLang.current === profilesKey) {
+      return;
+    }
+
+    // Extract all translatable texts from profiles, grouped by detected language
+    const textsInSpanish: string[] = [];
+    const textsInEnglish: string[] = [];
+
+    profiles.forEach(profile => {
+      const textsToCheck = [
+        profile.headline,
+        profile.bio,
+        profile.summary,
+        ...(profile.skills?.map(s => s.name) || [])
+      ].filter(t => t && t.trim() !== '');
+
+      textsToCheck.forEach(text => {
+        if (text) {
+          const textLang = detectSourceLanguage(text);
+          if (textLang === 'es') {
+            textsInSpanish.push(text);
+          } else {
+            textsInEnglish.push(text);
+          }
+        }
+      });
+    });
+
+    // Determine what needs translation based on current UI language
+    const textsToTranslate = lang === 'en' ? textsInSpanish : textsInEnglish;
+    const sourceLang: TranslationLanguage = lang === 'en' ? 'es' : 'en';
+
+    const uniqueTexts = [...new Set(textsToTranslate)];
+
+    console.log(`[TalentSearch] Language: ${lang}, Spanish texts: ${textsInSpanish.length}, English texts: ${textsInEnglish.length}, To translate: ${uniqueTexts.length}`);
+
+    if (uniqueTexts.length === 0) {
+      lastTranslationLang.current = profilesKey;
+      return;
+    }
+
+    const doTranslate = async () => {
+      setIsTranslating(true);
+      try {
+        console.log(`[TalentSearch] Translating ${uniqueTexts.length} texts: ${sourceLang} -> ${lang}`);
+        const translations = await translateBatch(uniqueTexts, lang as TranslationLanguage, sourceLang);
+        setProfileTranslations(prev => {
+          const newMap = new Map(prev);
+          translations.forEach((value, key) => newMap.set(key, value));
+          return newMap;
+        });
+        lastTranslationLang.current = profilesKey;
+        console.log(`[TalentSearch] Translated ${translations.size} texts`);
+      } catch (error) {
+        console.error('[TalentSearch] Translation error:', error);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+
+    // Debounce translation to avoid too many API calls
+    const timeoutId = setTimeout(doTranslate, 300);
+    return () => clearTimeout(timeoutId);
+  }, [profiles, lang]);
 
   const loadFilterOptions = useCallback(async () => {
     // Check cache first
@@ -253,11 +338,13 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
         const profileIds = profilesData.map(p => p.id);
 
         // Load ALL skills for these profiles
+        // Use a higher limit to ensure we get all skills (Supabase default is 1000)
         const { data: allSkillsData, error: skillsError } = await supabase
           .from('skills')
           .select('profile_id, id, name')
           .in('profile_id', profileIds)
-          .order('name');
+          .order('name')
+          .limit(5000);
 
         console.log('🔍 Skills Query Result:', {
           profileIds,
@@ -270,15 +357,14 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           console.error('❌ Error loading skills:', skillsError);
         }
 
-        // Group skills by profile and translate them
+        // Group skills by profile (translation is handled dynamically via profileTranslations)
         const skillsMap = new Map<string, Array<{ id: string; name: string }>>();
         allSkillsData?.forEach((skill: any) => {
           if (!skillsMap.has(skill.profile_id)) {
             skillsMap.set(skill.profile_id, []);
           }
-          // Translate skill name to current language
-          const translatedName = translateSkill(skill.name, lang as 'en' | 'es');
-          skillsMap.get(skill.profile_id)!.push({ id: skill.id, name: translatedName });
+          // Keep original name - translation is done dynamically via translateBatch
+          skillsMap.get(skill.profile_id)!.push({ id: skill.id, name: skill.name });
         });
 
         // Attach all skills to profiles
@@ -648,7 +734,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                               )}
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
-                              {profile.headline || '\u00A0'}
+                              {getTranslation(profile.headline) || '\u00A0'}
                             </p>
                           </div>
                         </div>
@@ -656,7 +742,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                         {/* Bio/Headline - Fixed height */}
                         <div className="mb-4" style={{ minHeight: '44px' }}>
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            {(profile.bio || profile.summary) || '\u00A0'}
+                            {getTranslation(profile.bio) || getTranslation(profile.summary) || '\u00A0'}
                           </p>
                         </div>
 
@@ -681,7 +767,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                                   key={skill.id || idx}
                                   className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
                                 >
-                                  {skill.name}
+                                  {getTranslation(skill.name)}
                                 </span>
                               ))}
                               {skills.length > 3 && (

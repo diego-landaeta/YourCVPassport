@@ -8,7 +8,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../CountrySelector';
 import PhotoPreviewModal, { CropData } from '../PhotoPreviewModal';
@@ -47,6 +47,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   const [showPhotoPreview, setShowPhotoPreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showContactInfo, setShowContactInfo] = useState(true);
 
   const {
     register,
@@ -448,115 +449,112 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   }, [handleOptimizeWithAI]);
 
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-6">
-      <form onSubmit={handleSubmit(onSubmit as any)} noValidate className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          {/* Left Column: Professional Information */}
-          <div className="space-y-5">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              {t.professionalInfo}
-            </h3>
-
-            {/* Avatar + Main Info Group */}
-            <div className="flex gap-5 items-start">
-              {/* Avatar */}
-              <div className="flex flex-col items-center gap-2 pt-1">
-                <div className="relative group">
-                  <div
-                    onClick={handleAvatarClick}
-                    className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-600 shadow-sm group-hover:border-cv-blue transition-colors"
-                  >
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <svg className="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    )}
-                  </div>
-                  <div 
-                    className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                    onClick={handleAvatarClick}
-                  >
-                    <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    </svg>
-                  </div>
-                  {isUploading && (
-                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
+    <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-100 dark:border-dark-border p-4 sm:p-6">
+      <form onSubmit={handleSubmit(onSubmit as any)} noValidate className="space-y-6">
+        {/* Main Info Section */}
+        <div className="space-y-5">
+          {/* Avatar + Name + Headline Row */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-center sm:items-start">
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-2 pt-1 flex-shrink-0">
+              <div className="relative group">
+                <div
                   onClick={handleAvatarClick}
-                  disabled={isUploading}
-                  className="text-xs text-cv-blue hover:text-cv-blue-dark font-medium"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-600 shadow-sm group-hover:border-cv-blue transition-colors"
                 >
-                  {t.changePhoto}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Name & Headline Inputs */}
-              <div className="flex-1 space-y-3 min-w-0">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      {t.fullNameRequired} <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-xs text-gray-400">
-                      {watch('full_name')?.length || 0}/50
-                    </span>
-                  </div>
-                  <input
-                    {...register('full_name')}
-                    type="text"
-                    maxLength={50}
-                    className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
-                      errors.full_name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    placeholder={t.fullNamePlaceholder}
-                  />
-                  {errors.full_name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   )}
                 </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      {t.headlineRequired} <span className="text-red-500">*</span>
-                    </label>
-                    <span className="text-xs text-gray-400">
-                      {watch('headline')?.length || 0}/150
-                    </span>
-                  </div>
-                  <input
-                    {...register('headline')}
-                    type="text"
-                    maxLength={150}
-                    className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
-                      errors.headline ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    placeholder={t.headlinePlaceholder}
-                  />
-                  {errors.headline && (
-                    <p className="text-red-500 text-xs mt-1">{errors.headline.message}</p>
-                  )}
+                <div
+                  className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={handleAvatarClick}
+                >
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  </svg>
                 </div>
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  </div>
+                )}
               </div>
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                disabled={isUploading}
+                className="text-xs text-cv-blue hover:text-cv-blue-dark font-medium"
+              >
+                {t.changePhoto}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
 
+            {/* Name & Headline Inputs */}
+            <div className="flex-1 space-y-3 min-w-0 w-full">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {t.fullNameRequired} <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-xs text-gray-400">
+                    {watch('full_name')?.length || 0}/50
+                  </span>
+                </div>
+                <input
+                  {...register('full_name')}
+                  type="text"
+                  maxLength={50}
+                  className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
+                    errors.full_name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                  placeholder={t.fullNamePlaceholder}
+                />
+                {errors.full_name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>
+                )}
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                    {t.headlineRequired} <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-xs text-gray-400">
+                    {watch('headline')?.length || 0}/150
+                  </span>
+                </div>
+                <input
+                  {...register('headline')}
+                  type="text"
+                  maxLength={150}
+                  className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm ${
+                    errors.headline ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                  placeholder={t.headlinePlaceholder}
+                />
+                {errors.headline && (
+                  <p className="text-red-500 text-xs mt-1">{errors.headline.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Country + Gender + Remote Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-3 sm:gap-4 items-start">
             {/* Country */}
-            <div>
+            <div className="col-span-2 sm:col-span-5">
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t.country} <span className="text-red-500">*</span>
               </label>
@@ -570,67 +568,124 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 <p className="text-red-500 text-xs mt-1">{errors.country_code.message}</p>
               )}
             </div>
-            
-            <div className="flex items-center pt-1">
-              <input
-                {...register('remote')}
-                type="checkbox"
-                id="remote-check"
-                className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
-              />
-              <label htmlFor="remote-check" className="ml-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                {t.remoteWork}
+
+            {/* Gender Selection */}
+            <div className="col-span-1 sm:col-span-3">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {lang === 'es' ? 'Género' : 'Gender'} <span className="text-red-500">*</span>
               </label>
+              <div className="flex gap-1">
+                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
+                  watch('gender') === 'male'
+                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
+                }`}>
+                  <input
+                    type="radio"
+                    {...register('gender')}
+                    value="male"
+                    className="sr-only"
+                  />
+                  <span>M</span>
+                </label>
+                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
+                  watch('gender') === 'female'
+                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
+                }`}>
+                  <input
+                    type="radio"
+                    {...register('gender')}
+                    value="female"
+                    className="sr-only"
+                  />
+                  <span>F</span>
+                </label>
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
+              )}
             </div>
 
-            {/* About / Summary */}
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {t.aboutMe} <span className="text-red-500">*</span>
+            {/* Remote Work */}
+            <div className="col-span-1 sm:col-span-4 flex items-end h-full pb-1">
+              <div className="flex items-center">
+                <input
+                  {...register('remote')}
+                  type="checkbox"
+                  id="remote-check"
+                  className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
+                />
+                <label htmlFor="remote-check" className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 cursor-pointer whitespace-nowrap">
+                  {t.remoteWork}
                 </label>
-                <span className="text-xs text-gray-400">
-                  {watch('summary')?.length || 0}/500
-                </span>
               </div>
-              <textarea
-                {...register('summary')}
-                rows={4}
-                maxLength={500}
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white resize-none text-sm ${
-                  errors.summary ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
-                }`}
-                placeholder={t.aboutMePlaceholder}
-              />
-              {errors.summary && (
-                <p className="text-red-500 text-xs mt-1">{errors.summary.message}</p>
-              )}
             </div>
           </div>
 
-          {/* Right Column: Contact Information */}
-          <div className="space-y-5">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-              {translations.profileEditor.identity.contactInfo}
-            </h3>
+          {/* About / Summary */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                {t.aboutMe} <span className="text-red-500">*</span>
+              </label>
+              <span className="text-xs text-gray-400">
+                {watch('summary')?.length || 0}/500
+              </span>
+            </div>
+            <textarea
+              {...register('summary')}
+              rows={4}
+              maxLength={500}
+              className={`w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white resize-none text-sm ${
+                errors.summary ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+              }`}
+              placeholder={t.aboutMePlaceholder}
+            />
+            {errors.summary && (
+              <p className="text-red-500 text-xs mt-1">{errors.summary.message}</p>
+            )}
+          </div>
+        </div>
 
-            <div className="space-y-4">
-              {/* Social Links Grid */}
-              <div className="grid grid-cols-1 gap-4">
+        {/* Contact Information - Collapsible Section */}
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowContactInfo(!showContactInfo)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {translations.profileEditor.identity.contactInfo}
+              </span>
+              <span className="text-xs text-gray-500">({lang === 'es' ? 'Opcional' : 'Optional'})</span>
+            </div>
+            <svg className={`w-5 h-5 text-gray-500 transition-transform ${showContactInfo ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showContactInfo && (
+            <div className="p-4 space-y-4 bg-white dark:bg-dark-bg-secondary">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t.linkedinUrl}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                       </svg>
                     </div>
                     <input
                       {...register('linkedin_url')}
                       type="url"
-                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
                       placeholder="linkedin.com/in/user"
                     />
                   </div>
@@ -645,14 +700,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                       </svg>
                     </div>
                     <input
                       {...register('github_url')}
                       type="url"
-                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
                       placeholder="github.com/user"
                     />
                   </div>
@@ -667,14 +722,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                       </svg>
                     </div>
                     <input
                       {...register('portfolio_url')}
                       type="url"
-                      className="w-full pl-12 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+                      className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
                       placeholder="yourportfolio.com"
                     />
                   </div>
@@ -684,7 +739,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Next Button */}

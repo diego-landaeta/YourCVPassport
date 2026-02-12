@@ -14,6 +14,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import translate from 'google-translate-api-x';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,11 +25,194 @@ dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar Supabase
+// Middleware para parsear JSON
+app.use(express.json());
+
+// Configurar Supabase (cliente anónimo para consultas públicas)
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.VITE_SUPABASE_ANON_KEY
 );
+
+// Cliente Admin de Supabase (para operaciones privilegiadas como eliminar usuarios)
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!serviceRoleKey) {
+  console.warn('[Server] WARNING: SUPABASE_SERVICE_ROLE_KEY not set. Admin operations (like user deletion) will fail.');
+}
+
+const supabaseAdmin = serviceRoleKey ? createClient(
+  process.env.VITE_SUPABASE_URL,
+  serviceRoleKey,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+) : null;
+
+// ===== API DE TRADUCCIÓN =====
+// Endpoint para traducir textos usando Google Translate (server-side, sin CORS)
+
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { texts, sourceLang, targetLang } = req.body;
+
+    if (!texts || !Array.isArray(texts) || texts.length === 0) {
+      return res.status(400).json({ error: 'texts array is required' });
+    }
+
+    if (!sourceLang || !targetLang) {
+      return res.status(400).json({ error: 'sourceLang and targetLang are required' });
+    }
+
+    // Filtrar textos vacíos y obtener únicos
+    const uniqueTexts = [...new Set(texts.filter(t => t && t.trim() !== ''))];
+
+    if (uniqueTexts.length === 0) {
+      return res.json({ translations: {} });
+    }
+
+    // Si mismo idioma, devolver sin cambios
+    if (sourceLang === targetLang) {
+      const translations = {};
+      uniqueTexts.forEach(t => translations[t] = t);
+      return res.json({ translations });
+    }
+
+    console.log(`[Translate API] Translating ${uniqueTexts.length} texts: ${sourceLang} -> ${targetLang}`);
+
+    const translations = {};
+    let successCount = 0;
+
+    // Traducir en batches pequeños para evitar problemas
+    const BATCH_SIZE = 10;
+
+    for (let i = 0; i < uniqueTexts.length; i += BATCH_SIZE) {
+      const batch = uniqueTexts.slice(i, i + BATCH_SIZE);
+
+      try {
+        // google-translate-api-x soporta arrays
+        const results = await translate(batch, {
+          from: sourceLang,
+          to: targetLang,
+        });
+
+        // Procesar resultados (puede ser array o objeto único)
+        const resultsArray = Array.isArray(results) ? results : [results];
+
+        batch.forEach((text, idx) => {
+          if (resultsArray[idx] && resultsArray[idx].text) {
+            translations[text] = resultsArray[idx].text;
+            successCount++;
+          }
+        });
+
+        console.log(`[Translate API] Batch ${Math.floor(i/BATCH_SIZE) + 1}: ${batch.length} texts processed`);
+
+      } catch (batchError) {
+        console.error(`[Translate API] Batch error:`, batchError.message);
+        // Intentar uno por uno si el batch falla
+        for (const text of batch) {
+          try {
+            const result = await translate(text, { from: sourceLang, to: targetLang });
+            translations[text] = result.text;
+            successCount++;
+          } catch (singleError) {
+            console.error(`[Translate API] Single error for "${text.substring(0, 30)}...":`, singleError.message);
+          }
+        }
+      }
+    }
+
+    console.log(`[Translate API] Completed: ${successCount}/${uniqueTexts.length} texts translated`);
+
+    res.json({ translations, success: successCount, total: uniqueTexts.length });
+
+  } catch (error) {
+    console.error('[Translate API] Error:', error.message);
+    res.status(500).json({ error: 'Translation failed', message: error.message });
+  }
+});
+
+// Endpoint de health check para la API de traducción
+app.get('/api/translate/health', async (req, res) => {
+  try {
+    const result = await translate('hello', { from: 'en', to: 'es' });
+    res.json({
+      status: 'ok',
+      provider: 'google-translate-api-x',
+      test: { input: 'hello', output: result.text }
+    });
+  } catch (error) {
+    res.status(503).json({ status: 'error', message: error.message });
+  }
+});
+
+// ===== API DE ADMINISTRACIÓN =====
+
+// Endpoint para eliminar usuarios (requiere admin)
+app.delete('/api/admin/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verificar el token y obtener el usuario
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    // Verificar que el usuario es admin
+    const { data: adminProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !adminProfile || adminProfile.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized: Admin access required' });
+    }
+
+    // Prevenir que un admin se elimine a sí mismo
+    if (userId === user.id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    console.log(`[Admin API] Admin ${user.id} deleting user ${userId}`);
+
+    // Verificar que el cliente admin está configurado
+    if (!supabaseAdmin) {
+      console.error('[Admin API] supabaseAdmin not configured - SUPABASE_SERVICE_ROLE_KEY missing');
+      return res.status(500).json({
+        error: 'Server configuration error',
+        details: 'Admin operations not available. SUPABASE_SERVICE_ROLE_KEY not configured.'
+      });
+    }
+
+    // Usar el cliente Admin para eliminar el usuario de auth.users
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error(`[Admin API] Error deleting user:`, deleteError);
+      return res.status(500).json({ error: 'Failed to delete user', details: deleteError.message });
+    }
+
+    console.log(`[Admin API] User ${userId} deleted successfully`);
+    res.json({ success: true, message: 'User deleted successfully' });
+
+  } catch (error) {
+    console.error('[Admin API] Error:', error.message);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
 
 // Servir archivos estáticos
 app.use(express.static('dist'));

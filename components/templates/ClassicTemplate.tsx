@@ -4,6 +4,7 @@ import { BriefcaseIcon, AcademicCapIcon, SparklesIcon } from '@heroicons/react/2
 import { CountryBadge } from '../CountrySelector';
 import VerifiedStampsBadge from '../VerifiedStampsBadge';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface ClassicTemplateProps {
@@ -15,6 +16,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#0052FF'; // Default to cv-blue
     const t = useTranslations();
+    const { lang } = useLanguage();
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -24,7 +26,8 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
     const collaborations = data.collaborations || [];
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+        const formatted = new Date(dateString).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short' });
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
     };
 
     // Helper to generate a lighter version of the accent color for backgrounds
@@ -207,7 +210,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                                         <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                                         </svg>
-                                                        Verificado
+                                                        {t.cvSections.verified}
                                                     </span>
                                                 )}
                                             </h3>
@@ -216,7 +219,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                             </p>
                                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                                 {cert.issue_date}
-                                                {cert.expiry_date && ` • Expira: ${cert.expiry_date}`}
+                                                {cert.expiry_date && ` • ${t.cvSections.expires} ${cert.expiry_date}`}
                                             </p>
                                             {cert.description && (
                                                 <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">

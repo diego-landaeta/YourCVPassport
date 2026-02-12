@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { routeConfig } from '../routeConfig';
+import { routeConfig } from '../config/routeConfig';
 
 type Language = 'en' | 'es';
 

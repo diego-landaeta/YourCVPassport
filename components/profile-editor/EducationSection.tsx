@@ -5,7 +5,7 @@ import { EducationFormData } from '../../schemas/profileSchemas';
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useConfirmDialog } from '../ConfirmDialog';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import { validateDateRange } from '../../utils/dateValidation';
 import { useAuth } from '../../contexts/AuthContext';
 import {

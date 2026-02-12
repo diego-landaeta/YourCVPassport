@@ -246,6 +246,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
         </div>
 
         <button
+          data-tour="mobile-menu-toggle"
           onClick={onToggle}
           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors"
         >
@@ -265,6 +266,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
 
       {/* Slide-out Menu */}
       <div
+        data-tour="mobile-menu"
         className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-72 bg-white dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-border transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -276,6 +278,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
               return (
                 <li key={item.id}>
                   <button
+                    data-tour={`mobile-${item.id}`}
                     onClick={() => handleMenuClick(item)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                       isBlocked

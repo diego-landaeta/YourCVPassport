@@ -18,7 +18,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { CTATracker } from './CTATracker';
 import PublicStampBadges from '../PublicStampBadges';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface PassportTemplateProps {
   data: FullProfileData;
@@ -30,6 +31,15 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
   const { user, openModal } = useAuth();
   const t = useTranslations();
   const toast = useToastContext();
+  const { lang } = useLanguage();
+
+  // Format date to show month and year (e.g., "Jan 2022" or "Ene 2022")
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const formatted = date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short' });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  };
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -73,14 +83,16 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full p-2.5 shadow-lg">
-                <CheckBadgeIcon className="w-7 h-7" />
-              </div>
+              {stamps && stamps.length >= 3 && (
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full p-2.5 shadow-lg">
+                  <CheckBadgeIcon className="w-7 h-7" />
+                </div>
+              )}
             </div>
 
             {/* Info with Modern Typography */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-5xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-3">
+              <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-3">
                 {profile.full_name}
               </h1>
               <p className="text-2xl text-gray-600 dark:text-gray-400 mb-4 font-medium">
@@ -148,19 +160,9 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   </div>
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.about}</h2>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-lg">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
                   {profile.summary}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {['Leadership', 'Innovation', 'Problem Solving', 'Team Player'].map((strength) => (
-                    <span
-                      key={strength}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold border border-blue-200 dark:border-blue-800"
-                    >
-                      {strength}
-                    </span>
-                  ))}
-                </div>
               </section>
             )}
 
@@ -185,7 +187,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                           {exp.company_name}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-500 mb-3 font-medium">
-                          {exp.start_date} - {exp.end_date || t.cvSections.present}
+                          {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : t.cvSections.present}
                         </p>
                         {exp.description && (
                           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -222,7 +224,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                           {edu.institution_name}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                          {edu.start_date} - {edu.end_date}
+                          {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : t.cvSections.ongoing}
                         </p>
                       </div>
                     </div>
@@ -310,8 +312,8 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                         </h4>
                         <p className="text-gray-600 dark:text-gray-400 text-xs font-medium mb-1">{cert.issuer}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-500">
-                          {cert.issue_date}
-                          {cert.expiry_date && <span> • Expira: {cert.expiry_date}</span>}
+                          {formatDate(cert.issue_date)}
+                          {cert.expiry_date && <span> • {t.cvSections.expires} {formatDate(cert.expiry_date)}</span>}
                         </p>
                         {cert.description && (
                           <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">

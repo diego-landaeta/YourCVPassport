@@ -798,7 +798,7 @@ export const translations = {
     },
     dashboard: {
         title: "Dashboard",
-        welcome: (name: string) => `Welcome back, ${name}!`,
+        welcome: (name: string, _gender?: string) => `Welcome back, ${name}!`,
         loading: "Loading...",
         subtitle: "Manage your professional profile and stand out among thousands",
         firstLoginWelcome: {
@@ -2818,7 +2818,10 @@ export const translations = {
         sendMessage: 'Send Message',
         certifications: 'Certifications',
         portfolio: 'Portfolio',
-        recommendations: 'Recommendations'
+        recommendations: 'Recommendations',
+        verified: 'Verified',
+        verifiedProfile: 'Verified Profile',
+        expires: 'Expires:'
     },
     // Profile Editor Sections
     profileEditor: {
@@ -2862,7 +2865,30 @@ export const translations = {
                 high: 'High',
                 medium: 'Medium',
                 low: 'Low',
-            }
+            },
+            suggestionsOrderedByPriority: 'Suggestions are automatically ordered by priority to help you optimize your profile.',
+            suggestionMessages: {
+                summary: {
+                    category: 'Professional Summary',
+                    message: 'The summary is the first thing a recruiter reads. Describe your value proposition in 3-4 lines',
+                },
+                experience: {
+                    category: 'Work Experience',
+                    message: 'Add your work experience - it is the most important content of your CV',
+                },
+                education: {
+                    category: 'Education',
+                    message: 'Include your academic background - many companies require it as an initial filter',
+                },
+                skills: {
+                    category: 'Skills',
+                    message: (remaining: number) => `Add ${remaining} more skill${remaining > 1 ? 's' : ''} - ATS systems filter by keywords`,
+                },
+                verifications: {
+                    category: 'Verifications',
+                    message: 'Verifications validate your identity, education, languages and experience, increasing trust in your profile',
+                },
+            },
         },
         deleteModal: {
             deleteEducation: 'Delete Education',
@@ -2937,7 +2963,8 @@ export const translations = {
             headlineRequired: 'Professional title is required (minimum 5 characters)',
             summaryRequired: 'About me summary is required',
             summaryMax: 'Maximum 500 characters',
-            countryRequired: 'You must select a country'
+            countryRequired: 'You must select a country',
+            genderRequired: 'You must select your gender'
         },
         experience: {
             positionRequired: 'Position is required',
@@ -3647,6 +3674,7 @@ export const translations = {
         backToHome: 'Back to Home',
         contactSupport: 'Contact Support',
         loading: 'Loading...',
+        translating: 'Translating...',
         save: 'Save',
         cancel: 'Cancel',
         delete: 'Delete',
@@ -3699,5 +3727,70 @@ export const translations = {
         urlAlreadyInUse: 'This URL is already in use. Please choose another.',
         templateUpdated: 'Template updated successfully',
         errorUpdatingTemplate: 'Error updating template',
+    },
+    feed: {
+        title: 'Activity Feed',
+        subtitle: 'Share your achievements and connect with other professionals',
+        beta: 'Beta',
+        createPost: {
+            placeholder: 'What\'s on your mind?',
+            publish: 'Publish',
+            publishing: 'Publishing...',
+            addImage: 'Add image',
+            maxImages: 'Maximum 4 images'
+        },
+        post: {
+            like: 'Like',
+            comment: 'Comment',
+            share: 'Share',
+            edited: 'Edited',
+            delete: 'Delete',
+            edit: 'Edit',
+            save: 'Save',
+            cancel: 'Cancel',
+            confirmDelete: 'Are you sure you want to delete this post?',
+            deleting: 'Deleting...'
+        },
+        comments: {
+            placeholder: 'Write a comment...',
+            post: 'Post',
+            posting: 'Posting...',
+            reply: 'Reply',
+            replies: 'replies',
+            showReplies: 'Show replies',
+            hideReplies: 'Hide replies',
+            noComments: 'Be the first to comment',
+            loadingComments: 'Loading comments...',
+            edited: 'edited'
+        },
+        stats: {
+            likes: 'likes',
+            comments: 'comments',
+            shares: 'shares'
+        },
+        empty: {
+            title: 'Your feed is empty',
+            description: 'Share your first post or wait for others to post. Professional achievements and updates will appear here.',
+            hint: 'Start by sharing what you\'re working on!'
+        },
+        share: {
+            repost: 'Repost',
+            copyLink: 'Copy link',
+            copied: 'Copied!'
+        },
+        achievements: {
+            unlocked: 'Achievement unlocked',
+            profileCompleted: 'Profile completed 100%!',
+            gotHired: 'New job achieved!',
+            stampVerified: 'Credential verified!',
+            milestone: 'Professional milestone reached!'
+        },
+        errors: {
+            loadingFeed: 'Error loading feed',
+            creatingPost: 'Error creating post',
+            uploadingImage: 'Error uploading image',
+            retry: 'Retry'
+        },
+        noMore: 'No more posts'
     }
 };

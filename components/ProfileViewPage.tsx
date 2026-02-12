@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../supabase/client';
 import { FullProfileData, Profile, Experience, Education, Skill, Service, Stat, PortfolioItem } from '../types';
@@ -30,13 +30,14 @@ import UrbanTemplate from './templates/UrbanTemplate';
 import { AdminTemplateLoader, adminTemplatesList } from './templates/AdminTemplateLoader';
 import SEOHead from './SEOHead';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslatedProfile } from '../hooks/useTranslatedProfile';
+import { TranslationProgressIndicator } from './TranslationProgressIndicator';
 
 
 const ProfileSearchPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { lang } = useLanguage();
     const { profile: currentUserProfile } = useAuth();
-    const navigate = useNavigate();
     const [profileData, setProfileData] = useState<FullProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,6 +50,12 @@ const ProfileSearchPage: React.FC = () => {
 
     // Track profile views
     useAnalytics(profileData?.profile?.id || null);
+
+    // Auto-translate profile content when language changes
+    const { translatedProfile, isTranslating, progress } = useTranslatedProfile(profileData);
+
+    // Use translated data if available, otherwise fallback to original
+    const displayData = translatedProfile || profileData;
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -153,52 +160,52 @@ const ProfileSearchPage: React.FC = () => {
     };
 
     const renderTemplate = () => {
-        if (!profileData) return null;
-        const color = profileData.profile.template_color;
+        if (!displayData) return null;
+        const color = displayData.profile.template_color;
         // If admin and selected a template, use that; otherwise use profile's default
-        const templateToRender = isAdmin && selectedTemplate ? selectedTemplate : profileData.profile.template;
+        const templateToRender = isAdmin && selectedTemplate ? selectedTemplate : displayData.profile.template;
 
         // Check if it's an admin template
         if (templateToRender.startsWith('admin-')) {
-            return <AdminTemplateLoader templateId={templateToRender} data={profileData} />;
+            return <AdminTemplateLoader templateId={templateToRender} data={displayData} />;
         }
 
         switch(templateToRender) {
             // Free Templates
-            case 'classic': return <ClassicTemplate data={profileData} color={color} onContactClick={handleContactClick} />;
-            case 'passport': return <PassportTemplate data={profileData} color={color} />;
-            case 'modern-professional': return <ModernProfessionalTemplate data={profileData} color={color} />;
+            case 'classic': return <ClassicTemplate data={displayData} color={color} onContactClick={handleContactClick} />;
+            case 'passport': return <PassportTemplate data={displayData} color={color} />;
+            case 'modern-professional': return <ModernProfessionalTemplate data={displayData} color={color} />;
 
             // Premium: Professional/Corporate
-            case 'corporate-classic': return <CorporateClassicTemplate data={profileData} color={color} />;
-            case 'professional-classic': return <ProfessionalClassicTemplate data={profileData} color={color} />;
-            case 'academic-standard': return <AcademicStandardTemplate data={profileData} color={color} />;
+            case 'corporate-classic': return <CorporateClassicTemplate data={displayData} color={color} />;
+            case 'professional-classic': return <ProfessionalClassicTemplate data={displayData} color={color} />;
+            case 'academic-standard': return <AcademicStandardTemplate data={displayData} color={color} />;
 
             // Premium: Creative/Design
-            case 'creative-minimalist': return <CreativeMinimalistTemplate data={profileData} color={color} />;
-            case 'creative-bold': return <CreativeBoldTemplate data={profileData} color={color} />;
-            case 'creative-orange': return <CreativeOrangeTemplate data={profileData} color={color} />;
-            case 'creative-modern': return <CreativeModernTemplate data={profileData} color={color} />;
-            case 'urban': return <UrbanTemplate data={profileData} color={color} />;
+            case 'creative-minimalist': return <CreativeMinimalistTemplate data={displayData} color={color} />;
+            case 'creative-bold': return <CreativeBoldTemplate data={displayData} color={color} />;
+            case 'creative-orange': return <CreativeOrangeTemplate data={displayData} color={color} />;
+            case 'creative-modern': return <CreativeModernTemplate data={displayData} color={color} />;
+            case 'urban': return <UrbanTemplate data={displayData} color={color} />;
 
             // Premium: Tech/Modern
-            case 'gradient-blue': return <BlueGradientTemplate data={profileData} color={color} />;
-            case 'modern-clean': return <ModernCleanTemplate data={profileData} color={color} />;
-            case 'modern-minimalist': return <ModernMinimalistTemplate data={profileData} color={color} />;
-            case 'professional-blue': return <ProfessionalBlueTemplate data={profileData} color={color} />;
-            case 'elegant-minimal': return <ElegantMinimalTemplate data={profileData} color={color} />;
+            case 'gradient-blue': return <BlueGradientTemplate data={displayData} color={color} />;
+            case 'modern-clean': return <ModernCleanTemplate data={displayData} color={color} />;
+            case 'modern-minimalist': return <ModernMinimalistTemplate data={displayData} color={color} />;
+            case 'professional-blue': return <ProfessionalBlueTemplate data={displayData} color={color} />;
+            case 'elegant-minimal': return <ElegantMinimalTemplate data={displayData} color={color} />;
 
             // Premium: Colorful/Unique
-            case 'minimalist-yellow': return <YellowMinimalistTemplate data={profileData} color={color} />;
-            case 'coral-pink': return <CoralPinkTemplate data={profileData} color={color} />;
-            case 'green-minimal': return <GreenMinimalTemplate data={profileData} color={color} />;
-            case 'classic-sidebar': return <ClassicSidebarTemplate data={profileData} color={color} />;
+            case 'minimalist-yellow': return <YellowMinimalistTemplate data={displayData} color={color} />;
+            case 'coral-pink': return <CoralPinkTemplate data={displayData} color={color} />;
+            case 'green-minimal': return <GreenMinimalTemplate data={displayData} color={color} />;
+            case 'classic-sidebar': return <ClassicSidebarTemplate data={displayData} color={color} />;
 
             // Premium: Industry Specific
-            case 'healthcare-professional': return <HealthcareProfessionalTemplate data={profileData} color={color} />;
+            case 'healthcare-professional': return <HealthcareProfessionalTemplate data={displayData} color={color} />;
 
             default:
-                return <ClassicTemplate data={profileData} color={color} onContactClick={handleContactClick} />;
+                return <ClassicTemplate data={displayData} color={color} onContactClick={handleContactClick} />;
         }
     };
 
@@ -291,19 +298,18 @@ const ProfileSearchPage: React.FC = () => {
                     profileExperience={profileData.experiences?.slice(0, 3).map(exp => exp.title) || []}
                 />
             )}
-            <div className="dark:bg-dark-bg-primary">
-                {/* Back Button */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="no-print fixed top-24 left-8 z-50 bg-white dark:bg-dark-bg-secondary hover:bg-gray-80 dark:hover:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-primary px-2 py-1.5 rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-1.5 group border border-gray-200 dark:border-dark-border cursor-pointer"
-                    aria-label="Regresar"
-                >
-                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span className="hidden sm:inline text-sm">Regresar</span>
-                </button>
 
+            {/* Translation Progress Indicator */}
+            {progress && (
+                <TranslationProgressIndicator
+                    current={progress.current}
+                    total={progress.total}
+                    percentage={progress.percentage}
+                    isVisible={isTranslating}
+                />
+            )}
+
+            <div className="dark:bg-dark-bg-primary">
                 {/* Admin Template Selector */}
                 {isAdmin && profileData && (
                     <div className="no-print fixed top-24 right-8 z-50 bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg border border-gray-200 dark:border-dark-border p-4">
@@ -508,6 +514,7 @@ const ProfileSearchPage: React.FC = () => {
                         </div>
                     </>
                 )}
+
 
 
                 {/* CV Template Container - Required for print styles */}

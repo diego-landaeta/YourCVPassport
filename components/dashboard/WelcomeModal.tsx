@@ -5,9 +5,10 @@ interface WelcomeModalProps {
   onStartProfile: () => void;
   onDismiss: () => void;
   userName?: string;
+  userGender?: string;
 }
 
-const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStartProfile, onDismiss, userName }) => {
+const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStartProfile, onDismiss, userName, userGender }) => {
   const { lang } = useLanguage();
 
   return (
@@ -28,7 +29,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onStartProfile, onDismiss, 
           {/* Title */}
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-4">
             {lang === 'es'
-              ? `¡Bienvenido${userName ? `, ${userName}` : ''}!`
+              ? `¡${userGender === 'female' ? 'Bienvenida' : 'Bienvenido'}${userName ? `, ${userName}` : ''}!`
               : `Welcome${userName ? `, ${userName}` : ''}!`}
           </h2>
 

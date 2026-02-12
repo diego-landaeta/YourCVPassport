@@ -111,11 +111,20 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
         return null;
     }
 
+    // Group stamps by type to avoid duplicates - keep only one per type
+    const uniqueStampsByType = stamps.reduce((acc, stamp) => {
+        if (!acc.has(stamp.type)) {
+            acc.set(stamp.type, stamp);
+        }
+        return acc;
+    }, new Map<string, Stamp>());
+    const uniqueStamps = Array.from(uniqueStampsByType.values());
+
     if (compact) {
         // Compact mode: just show icons with tooltip
         return (
             <div className="flex items-center gap-1.5">
-                {stamps.slice(0, 5).map((stamp) => (
+                {uniqueStamps.slice(0, 5).map((stamp) => (
                     <div
                         key={stamp.id}
                         className="relative group"
@@ -130,9 +139,9 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                         </div>
                     </div>
                 ))}
-                {stamps.length > 5 && (
+                {uniqueStamps.length > 5 && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                        +{stamps.length - 5}
+                        +{uniqueStamps.length - 5}
                     </span>
                 )}
             </div>
@@ -152,14 +161,14 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                         {lang === 'es' ? 'Verificaciones' : 'Verifications'}
                     </h3>
                     <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                        {stamps.length}
+                        {uniqueStamps.length}
                     </span>
                 </div>
             )}
 
             {/* Badges Grid */}
             <div className="flex flex-wrap gap-2">
-                {stamps.map((stamp) => (
+                {uniqueStamps.map((stamp) => (
                     <button
                         key={stamp.id}
                         onClick={() => setSelectedStamp(stamp)}

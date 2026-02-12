@@ -7,8 +7,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
-import { useToastContext } from '../../context/ToastContext';
-import { useTranslatedSkills } from '../../hooks/useTranslatedSkills';
+import { useToastContext } from '../../contexts/ToastContext';
 import {
   DndContext,
   closestCenter,
@@ -510,9 +509,6 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
   // Detectar si estamos en modo wizard (onNext presente = wizard mode)
   const isWizardMode = !!onNext;
 
-  // Traducir habilidades automáticamente según el idioma activo
-  const translatedSkills = useTranslatedSkills(skills);
-
   // Sync local state with initialData when it changes
   React.useEffect(() => {
     setSkills(initialData);
@@ -805,7 +801,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
           strategy={horizontalListSortingStrategy}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-            {translatedSkills.map((skill, index) => (
+            {skills.map((skill, index) => (
               <SortableSkillItem
                 key={skills[index]?.id || `${skills[index]?.name}-${index}`}
                 skill={skill}

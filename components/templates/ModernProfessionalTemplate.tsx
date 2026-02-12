@@ -107,7 +107,7 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                                             <p className="opacity-90 text-xs mt-1">{cert.issuer}</p>
                                             <p className="text-xs opacity-75">
                                                 {cert.issue_date}
-                                                {cert.expiry_date && <span> • Expira: {cert.expiry_date}</span>}
+                                                {cert.expiry_date && <span> • {t.cvSections.expires} {cert.expiry_date}</span>}
                                             </p>
                                         </div>
                                     ))}

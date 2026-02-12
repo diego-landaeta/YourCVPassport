@@ -3,6 +3,7 @@ import { FullProfileData } from '../../types';
 import { SparklesIcon, BriefcaseIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface YellowMinimalistTemplateProps {
     data: FullProfileData;
@@ -19,6 +20,15 @@ const YellowMinimalistTemplate: React.FC<YellowMinimalistTemplateProps> = ({ dat
     } = data || {};
     const [activeTab, setActiveTab] = useState('about');
     const accentColor = color || '#F59E0B'; // Default to yellow-500
+    const { lang } = useLanguage();
+
+    // Format date to show month and year (e.g., "Jan 2022" or "Ene 2022")
+    const formatDate = (dateString: string | null | undefined): string => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const formatted = date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short' });
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    };
 
     const renderContent = () => {
         switch (activeTab) {
@@ -37,7 +47,7 @@ const YellowMinimalistTemplate: React.FC<YellowMinimalistTemplateProps> = ({ dat
                                     <div key={exp.id} className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-gray-800 dark:to-dark-bg-tertiary rounded-xl hover:shadow-md transition-all border-l-4" style={{ borderColor: accentColor }}>
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                         <p className="font-semibold mt-1" style={{ color: accentColor }}>{exp.company_name}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{exp.start_date} - {exp.end_date || 'Present'}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : 'Present'}</p>
                                         {exp.description && (
                                             <p className="mt-3 text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{exp.description}</p>
                                         )}
@@ -53,7 +63,7 @@ const YellowMinimalistTemplate: React.FC<YellowMinimalistTemplateProps> = ({ dat
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.institution_name}</h3>
                                         <p className="font-semibold text-gray-700 dark:text-gray-300 mt-1">{edu.degree}</p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                            {edu.start_date} - {edu.end_date || 'Present'}
+                                            {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : 'Present'}
                                         </p>
                                     </div>
                                 ))}

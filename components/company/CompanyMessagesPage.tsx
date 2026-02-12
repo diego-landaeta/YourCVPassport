@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import type { Company, CompanyUser, Profile } from '../../types';
 import {
   PaperAirplaneIcon,

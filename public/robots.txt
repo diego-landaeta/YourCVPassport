@@ -1,35 +1,53 @@
 # Robots.txt for YourCVPassport
+# Updated: 2026-02-12
 # Bloquear indexación de páginas privadas (post-login, admin, dashboard)
 
 User-agent: *
 
-# Páginas públicas permitidas
+# Crawl-delay para no sobrecargar el servidor
+Crawl-delay: 1
+
+# ==========================================
+# PÁGINAS PÚBLICAS PERMITIDAS (SEO)
+# ==========================================
 Allow: /
 Allow: /cv/
 Allow: /profiles
 Allow: /jobs
 Allow: /empleos
-Allow: /recursos/blog
-Allow: /resources/blog
-Allow: /product/ai
+Allow: /product/
+Allow: /professionals/
+Allow: /companies/
+Allow: /resources/
+Allow: /about/
+Allow: /pricing
 
-# Bloquear páginas de autenticación
+# ==========================================
+# BLOQUEAR AUTENTICACIÓN
+# ==========================================
 Disallow: /login
 Disallow: /signup
 Disallow: /magic-link
 Disallow: /recovery
 Disallow: /callback
 Disallow: /confirm
+Disallow: /auth/
 
-# Bloquear dashboard de usuario
+# ==========================================
+# BLOQUEAR DASHBOARD DE USUARIO
+# ==========================================
 Disallow: /dashboard
 Disallow: /dashboard/
 
-# Bloquear área de administración
+# ==========================================
+# BLOQUEAR ÁREA DE ADMINISTRACIÓN
+# ==========================================
 Disallow: /admin
 Disallow: /admin/
 
-# Bloquear área de empresa (requiere login)
+# ==========================================
+# BLOQUEAR ÁREA DE EMPRESA (REQUIERE LOGIN)
+# ==========================================
 Disallow: /company/dashboard
 Disallow: /company/search
 Disallow: /company/profile/
@@ -42,5 +60,17 @@ Disallow: /company/settings
 Disallow: /company/analytics
 Disallow: /company/jobs
 
-# Sitemap
-Sitemap: https://yourcvpassport.com/sitemap.xml
+# ==========================================
+# BLOQUEAR ARCHIVOS Y RECURSOS TÉCNICOS
+# ==========================================
+Disallow: /api/
+Disallow: /_next/
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /*.json$
+Disallow: /*.map$
+
+# ==========================================
+# SITEMAP
+# ==========================================
+Sitemap: https://www.yourcvpassport.com/sitemap.xml

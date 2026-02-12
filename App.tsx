@@ -8,11 +8,11 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
-import { routeConfig } from './routeConfig';
+import { routeConfig } from './config/routeConfig';
 import LoadingSpinner from './components/LoadingSpinner';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
-import { ToastProvider } from './context/ToastContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for better performance

@@ -635,11 +635,13 @@ export interface ProfileQualityCheck {
   certificationsCount: number;
 }
 
+export type SuggestionType = 'summary' | 'experience' | 'education' | 'skills' | 'verifications';
+
 export interface ProfileQualitySuggestion {
-  category: string;
-  message: string;
+  type: SuggestionType;
   actionable: boolean;
   priority: 'high' | 'medium' | 'low';
+  data?: { remaining?: number };
 }
 
 /**
@@ -690,8 +692,7 @@ export function generateProfileSuggestions(
   // 1. RESUMEN - Lo primero que ven los reclutadores
   if (!check.hasSummary) {
     suggestions.push({
-      category: 'Resumen profesional',
-      message: 'El resumen es lo primero que lee un reclutador. Describe tu propuesta de valor en 3-4 líneas',
+      type: 'summary',
       actionable: true,
       priority: 'high',
     });
@@ -700,8 +701,7 @@ export function generateProfileSuggestions(
   // 2. EXPERIENCIA - Core del CV
   if (check.experienceCount === 0) {
     suggestions.push({
-      category: 'Experiencia laboral',
-      message: 'Agrega tu experiencia laboral - es el contenido más importante de tu CV',
+      type: 'experience',
       actionable: true,
       priority: 'high',
     });
@@ -710,8 +710,7 @@ export function generateProfileSuggestions(
   // 3. EDUCACIÓN - Requisito básico
   if (check.educationCount === 0) {
     suggestions.push({
-      category: 'Educación',
-      message: 'Incluye tu formación académica - muchas empresas lo requieren como filtro inicial',
+      type: 'education',
       actionable: true,
       priority: 'high',
     });
@@ -721,10 +720,10 @@ export function generateProfileSuggestions(
   if (check.skillsCount < 3) {
     const remaining = 3 - check.skillsCount;
     suggestions.push({
-      category: 'Habilidades',
-      message: `Agrega ${remaining} habilidad${remaining > 1 ? 'es' : ''} más - los sistemas ATS filtran por palabras clave`,
+      type: 'skills',
       actionable: true,
       priority: 'high',
+      data: { remaining },
     });
   }
 
@@ -734,8 +733,7 @@ export function generateProfileSuggestions(
       check.experienceCount >= 1 &&
       check.educationCount >= 1) {
     suggestions.push({
-      category: 'Verificaciones',
-      message: 'Las verificaciones validan tu identidad, educación, idiomas y experiencia, aumentando la confianza en tu perfil',
+      type: 'verifications',
       actionable: true,
       priority: 'medium',
     });

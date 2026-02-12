@@ -4,7 +4,7 @@ import { supabase } from '../../supabase/client';
 import { getAnalyticsStats } from '../../hooks/useAnalytics';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 import { canChangeSlug, getNextSlugChangeDate, updateSlugWithValidation } from '../../utils/slugValidation';
@@ -12,7 +12,7 @@ import { sanitizeSlug } from '../../utils/slugUtils';
 import ModernDashboardView from './ModernDashboardView';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CVVersionsSection } from './CVVersionsSection';
-import Modal from '../ui/Modal';
+import Modal from '../Modal';
 
 // Lazy load heavy components for better performance
 
@@ -54,6 +54,8 @@ interface DashboardContentProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   onSaveStatusChange?: (message: string, timestamp?: string) => void;
+  isMobileMenuOpen?: boolean;
+  onOpenMobileMenu?: () => void;
 }
 
 interface DashboardStats {
@@ -300,7 +302,7 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   );
 };
 
-const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSectionChange, onSaveStatusChange }) => {
+const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSectionChange, onSaveStatusChange, isMobileMenuOpen, onOpenMobileMenu }) => {
   const { profile, session, refetchProfile } = useAuth();
   const translations = useTranslations();
   const { lang } = useLanguage();
@@ -772,6 +774,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       // Preparar datos para actualizar
       const updateData: any = {
         full_name: data.full_name,
+        gender: data.gender,
         headline: data.headline,
         summary: data.summary,
         country_code: data.country_code,
@@ -1185,6 +1188,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         languages={languages}
         certifications={certifications}
         visitsData={visitsData}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onOpenMobileMenu={onOpenMobileMenu}
       />
     );
   }

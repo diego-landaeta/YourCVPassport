@@ -6,7 +6,7 @@ import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 import { useConfirmDialog } from '../ConfirmDialog';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
@@ -125,7 +125,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ item, onEdit, onDelete, typ
         <img
           src={item.image_url}
           alt={item.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-32 sm:h-48 object-cover"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const placeholder = e.currentTarget.nextElementSibling;
@@ -133,15 +133,15 @@ const SortableItem: React.FC<SortableItemProps> = ({ item, onEdit, onDelete, typ
           }}
         />
       ) : null}
-      <div className={`w-full h-48 bg-gray-200 dark:bg-dark-bg-primary flex items-center justify-center ${item.image_url ? 'hidden' : ''}`}>
-        <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className={`w-full h-32 sm:h-48 bg-gray-200 dark:bg-dark-bg-primary flex items-center justify-center ${item.image_url ? 'hidden' : ''}`}>
+        <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </div>
 
-      <div className="p-4">
-        <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{item.category}</p>
+      <div className="p-3 sm:p-4">
+        <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base line-clamp-2">{item.title}</h4>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">{item.category}</p>
         {item.url && (
           <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-cv-blue hover:underline mt-1 block truncate">
             {item.url}
@@ -441,13 +441,13 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
   return (
     <>
       <Dialog />
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-4 sm:p-6">
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-dark-border mb-6">
-          <div className="flex gap-4">
+        <div className="border-b border-gray-200 dark:border-dark-border mb-4 sm:mb-6 overflow-x-auto">
+          <div className="flex gap-1 sm:gap-4 min-w-max">
             <button
               onClick={() => { setActiveTab('projects'); setIsFormOpen(false); }}
-              className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
                 activeTab === 'projects'
                   ? 'border-cv-blue text-cv-blue'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -456,11 +456,11 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
-              {modals.tabProjects}
+              <span className="hidden xs:inline sm:inline">{modals.tabProjects}</span>
             </button>
             <button
               onClick={() => { setActiveTab('certifications'); setIsFormOpen(false); }}
-              className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
                 activeTab === 'certifications'
                   ? 'border-cv-blue text-cv-blue'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -469,11 +469,11 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
               </svg>
-              {modals.tabCertifications}
+              <span className="hidden xs:inline sm:inline">{modals.tabCertifications}</span>
             </button>
             <button
               onClick={() => { setActiveTab('collaborations'); setIsFormOpen(false); }}
-              className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 flex items-center gap-2 ${
+              className={`px-2 sm:px-4 py-2 font-medium text-xs sm:text-sm transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
                 activeTab === 'collaborations'
                   ? 'border-cv-blue text-cv-blue'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -482,15 +482,15 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              {modals.tabCollaborations}
+              <span className="hidden xs:inline sm:inline">{modals.tabCollaborations}</span>
             </button>
           </div>
         </div>
 
         {/* Add Button */}
-        <div className="flex items-center justify-end mb-6">
-          <button onClick={handleAdd} className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-sm font-medium flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex items-center justify-center sm:justify-end mb-4 sm:mb-6">
+          <button onClick={handleAdd} className="px-3 sm:px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             {activeTab === 'certifications' ? modals.addCertification :

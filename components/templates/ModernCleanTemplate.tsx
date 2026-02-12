@@ -209,14 +209,14 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                                                             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                                             </svg>
-                                                            Verificado
+                                                            {t.cvSections.verified}
                                                         </span>
                                                     )}
                                                 </h3>
                                                 <p className="text-gray-700 dark:text-gray-300 font-semibold text-sm mb-1">{cert.issuer}</p>
                                                 <p className="text-xs font-medium px-3 py-1 rounded-lg inline-block mt-2" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
                                                     {cert.issue_date}
-                                                    {cert.expiry_date && ` • Expira: ${cert.expiry_date}`}
+                                                    {cert.expiry_date && ` • ${t.cvSections.expires} ${cert.expiry_date}`}
                                                 </p>
                                                 {cert.description && (
                                                     <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">

@@ -21,6 +21,7 @@ export const getProfileSchemas = (t: any) => {
     portfolio_url: z.string().optional().nullable(),
     remote: z.boolean().optional().nullable(),
     avatar_url: z.string().optional().nullable(),
+    gender: z.enum(['male', 'female'], { required_error: t.validationErrors?.identity?.genderRequired || 'Gender is required' }),
   });
 
   const experienceSchema = z.object({

@@ -5,7 +5,7 @@ import { PreferencesFormData } from '../../schemas/profileSchemas';
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useToastContext } from '../../context/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface PreferencesSectionProps {
   initialData?: Partial<PreferencesFormData>;
