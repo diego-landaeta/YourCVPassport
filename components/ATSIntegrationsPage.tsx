@@ -2,10 +2,10 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
-import PageSEO from './PageSEO';
-import InlineCTA from './InlineCTA';
+import PageSEO from './shared/PageSEO';
+import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
-import HeroImage from './HeroImage';
+import HeroImage from './landing/HeroImage';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });

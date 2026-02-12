@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../supabase/client';
-import { CountryBadge } from './CountrySelector';
+import { CountryBadge } from './shared/CountrySelector';
 
 interface ProfileCardProps {
     profile: any;

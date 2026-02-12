@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { Link } from 'react-router-dom';
-import { CountryBadge } from '../CountrySelector';
-import AlertModal from '../AlertModal';
+import { CountryBadge } from '../shared/CountrySelector';
+import AlertModal from '../shared/AlertModal';
 import { useCustomDialog } from '../../hooks/useCustomDialog';
 import { useEnterpriseAdmin, UserEnterpriseFeatures } from '../../hooks/useEnterpriseFeatures';
 import { useLanguage } from '../../contexts/LanguageContext';

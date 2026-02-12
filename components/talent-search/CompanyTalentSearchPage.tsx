@@ -7,7 +7,7 @@ import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser, Stamp } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import type { TalentSearchPageProps } from './types';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import { sortProfilesByPriority } from '../../utils/profileSorting';
 import { translateBatch, detectSourceLanguage, TranslationLanguage } from '../../services/translation';
 import {
@@ -277,7 +277,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
         .from('profiles')
         .select(`
           id, full_name, headline, location, country_code, avatar_url, plan, handle, slug,
-          availability, remote_preference, role, bio, summary,
+          availability, remote_preference, role, summary,
           stamps (
             id,
             type,
@@ -739,10 +739,10 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                           </div>
                         </div>
 
-                        {/* Bio/Headline - Fixed height */}
+                        {/* Bio - Fixed height */}
                         <div className="mb-4" style={{ minHeight: '44px' }}>
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            {getTranslation(profile.bio) || getTranslation(profile.summary) || '\u00A0'}
+                            {getTranslation(profile.bio) || '\u00A0'}
                           </p>
                         </div>
 

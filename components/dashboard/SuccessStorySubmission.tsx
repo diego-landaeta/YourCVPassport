@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
-import AlertModal from '../AlertModal';
+import AlertModal from '../shared/AlertModal';
 import { useCustomDialog } from '../../hooks/useCustomDialog';
 import { useTranslations } from '../../hooks/useTranslations';
 

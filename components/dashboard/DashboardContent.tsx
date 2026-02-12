@@ -12,7 +12,7 @@ import { sanitizeSlug } from '../../utils/slugUtils';
 import ModernDashboardView from './ModernDashboardView';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CVVersionsSection } from './CVVersionsSection';
-import Modal from '../Modal';
+import Modal from '../shared/Modal';
 
 // Lazy load heavy components for better performance
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import LoadingSpinner from './LoadingSpinner';
+import LoadingSpinner from './shared/LoadingSpinner';
 
 const AdminProtectedRoute: React.FC = () => {
   const { session, loading, profile, profileLoading } = useAuth();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
-import LoadingSpinner from '../LoadingSpinner';
+import LoadingSpinner from '../shared/LoadingSpinner';
 import type { Company, CompanyUser } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';

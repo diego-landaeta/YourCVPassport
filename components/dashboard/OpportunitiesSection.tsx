@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import LoadingSpinner from '../LoadingSpinner';
+import LoadingSpinner from '../shared/LoadingSpinner';
 
 // Lazy load tab components for better performance
 const RecommendedJobsTab = lazy(() => import('./opportunities/RecommendedJobsTab'));

@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { useEnterpriseAdmin, FeatureCategory } from '../../hooks/useEnterpriseFeatures';
 import { useCustomDialog } from '../../hooks/useCustomDialog';
 import { useLanguage } from '../../contexts/LanguageContext';
-import AlertModal from '../AlertModal';
+import AlertModal from '../shared/AlertModal';
 
 interface EnterpriseFeatureRow {
   id: string;

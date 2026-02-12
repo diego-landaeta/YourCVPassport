@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import LoadingSpinner from '../../LoadingSpinner';
+import LoadingSpinner from '../../shared/LoadingSpinner';
 
 interface JobPosting {
   id: string;

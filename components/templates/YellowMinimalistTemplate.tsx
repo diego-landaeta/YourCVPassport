@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FullProfileData } from '../../types';
 import { SparklesIcon, BriefcaseIcon, FolderIcon } from '@heroicons/react/24/outline';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
 import { useLanguage } from '../../contexts/LanguageContext';
 

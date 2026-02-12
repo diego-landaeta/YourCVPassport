@@ -13,7 +13,7 @@ import {
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import MatchScoreBadge from '../../jobs/MatchScoreBadge';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import LoadingSpinner from '../../LoadingSpinner';
+import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 interface RecommendedJob {

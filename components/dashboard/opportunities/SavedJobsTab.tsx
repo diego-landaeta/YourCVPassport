@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import LoadingSpinner from '../../LoadingSpinner';
+import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 interface SavedJob {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CorporateClassicTemplateProps {

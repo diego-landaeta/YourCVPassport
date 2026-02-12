@@ -97,10 +97,10 @@ const TalentProfileCard: React.FC<TalentProfileCardProps> = ({
           </div>
         </div>
 
-        {/* Bio/Headline */}
-        {(profile.headline || profile.bio) && (
+        {/* Bio */}
+        {profile.bio && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-            {profile.headline || profile.bio}
+            {profile.bio}
           </p>
         )}
 

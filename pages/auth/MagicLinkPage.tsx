@@ -1,6 +1,6 @@
 import React from 'react';
 import MagicLinkForm from '../../components/auth/MagicLinkForm';
-import SEOHead from '../../components/SEOHead';
+import SEOHead from '../../components/shared/SEOHead';
 
 const MagicLinkPage: React.FC = () => {
   return (

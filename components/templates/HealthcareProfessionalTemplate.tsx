@@ -1,7 +1,7 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
 import { EnvelopeIcon, PhoneIcon, AcademicCapIcon, BriefcaseIcon, BeakerIcon } from '@heroicons/react/24/outline';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface HealthcareProfessionalTemplateProps {

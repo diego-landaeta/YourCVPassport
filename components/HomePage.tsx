@@ -1,15 +1,15 @@
 import React from 'react';
-import Hero from './Hero';
-import Companies from './Companies';
-import Features from './Features';
-import HowItWorks from './HowItWorks';
-import Testimonials from './Testimonials';
-import Pricing from './Pricing';
-import Security from './Security';
-import Faq from './Faq';
-import CallToAction from './CallToAction';
-import PageSEO from './PageSEO';
-import InlineCTA from './InlineCTA';
+import Hero from './landing/Hero';
+import Companies from './landing/Companies';
+import Features from './landing/Features';
+import HowItWorks from './landing/HowItWorks';
+import Testimonials from './landing/Testimonials';
+import Pricing from './landing/Pricing';
+import Security from './landing/Security';
+import Faq from './landing/Faq';
+import CallToAction from './landing/CallToAction';
+import PageSEO from './shared/PageSEO';
+import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const HomePage: React.FC = () => {

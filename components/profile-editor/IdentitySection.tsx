@@ -10,7 +10,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
-import CountrySelector from '../CountrySelector';
+import CountrySelector from '../shared/CountrySelector';
 import PhotoPreviewModal, { CropData } from '../PhotoPreviewModal';
 
 interface IdentitySectionProps {

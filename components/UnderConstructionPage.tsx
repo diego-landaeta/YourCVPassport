@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslations } from '../hooks/useTranslations';
-import PageSEO from './PageSEO';
+import PageSEO from './shared/PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface UnderConstructionPageProps {

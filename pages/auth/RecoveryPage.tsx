@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PasswordRecoveryForm from '../../components/auth/PasswordRecoveryForm';
-import SEOHead from '../../components/SEOHead';
+import SEOHead from '../../components/shared/SEOHead';
 
 const RecoveryPage: React.FC = () => {
   const location = useLocation();

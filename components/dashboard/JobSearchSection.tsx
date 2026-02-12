@@ -2,7 +2,7 @@ import React, { useState, Suspense, lazy } from 'react';
 import { SparklesIcon, BriefcaseIcon, BookmarkIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import LoadingSpinner from '../LoadingSpinner';
+import LoadingSpinner from '../shared/LoadingSpinner';
 
 // Lazy load tab components
 const RecommendedJobsTab = lazy(() => import('./opportunities/RecommendedJobsTab'));

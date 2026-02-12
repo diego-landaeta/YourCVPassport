@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
-import LanguageSelector, { getLanguageByName } from '../LanguageSelector';
+import LanguageSelector, { getLanguageByName } from '../shared/LanguageSelector';
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 
 type LanguageFormData = {

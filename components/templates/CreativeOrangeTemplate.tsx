@@ -1,7 +1,7 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
 import { SparklesIcon, FolderIcon, TrophyIcon } from '@heroicons/react/24/outline';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
 
 interface CreativeOrangeTemplateProps {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FullProfileData } from '../../types';
 import { UserIcon, BriefcaseIcon, FolderIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 
 interface CoralPinkTemplateProps {
     data: FullProfileData;

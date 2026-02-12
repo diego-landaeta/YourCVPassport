@@ -5,7 +5,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { Stamp, StampType, StampStatus, CreateStampRequest, StampsSummary } from '../../types';
 import StampsUploadModal from './StampsUploadModal';
 import StampsVerificationCodeModal from './StampsVerificationCodeModal';
-import Modal from '../Modal';
+import Modal from '../shared/Modal';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useUsageLimits, FeatureLimitCheck } from '../../hooks/useUsageLimits';
 import { UsageLimitModal } from '../UsageLimitModal';

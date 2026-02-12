@@ -9,7 +9,7 @@ import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
 import { routeConfig } from './config/routeConfig';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from './components/shared/LoadingSpinner';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
@@ -17,16 +17,16 @@ import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./components/HomePage'));
-const DashboardPage = lazy(() => import('./components/DashboardPage'));
-const ProfileViewPage = lazy(() => import('./components/ProfileViewPage'));
+const DashboardPage = lazy(() => import('./components/pages/DashboardPage'));
+const ProfileViewPage = lazy(() => import('./components/pages/ProfileViewPage'));
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminTalentSearchPage = lazy(() => import('./components/admin/AdminTalentSearchPage'));
 const VisasPage = lazy(() => import('./components/dashboard/VisasPage'));
 const VisaFormPage = lazy(() => import('./components/dashboard/VisaFormPage'));
 const LeadsPage = lazy(() => import('./components/dashboard/LeadsPage'));
-const BlogPage = lazy(() => import('./components/BlogPage'));
-const BlogPostPage = lazy(() => import('./components/BlogPostPage'));
-const AIProductPage = lazy(() => import('./components/AIProductPage'));
+const BlogPage = lazy(() => import('./components/pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./components/pages/BlogPostPage'));
+const AIProductPage = lazy(() => import('./components/pages/AIProductPage'));
 
 // Authentication pages
 const AuthPage = lazy(() => import('./pages/auth/AuthPage'));
@@ -53,8 +53,8 @@ const CreateJobPostingPage = lazy(() => import('./components/company/CreateJobPo
 const JobApplicationsPage = lazy(() => import('./components/company/JobApplicationsPage'));
 
 // Public job search pages
-const JobSearchPage = lazy(() => import('./components/JobSearchPage'));
-const JobDetailPage = lazy(() => import('./components/JobDetailPage'));
+const JobSearchPage = lazy(() => import('./components/pages/JobSearchPage'));
+const JobDetailPage = lazy(() => import('./components/pages/JobDetailPage'));
 
 // 404 Not Found page
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));

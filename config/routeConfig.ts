@@ -1,31 +1,31 @@
 import React, { lazy } from 'react';
 
 // Lazy load all page components for better performance
-const ProductOverviewPage = lazy(() => import('../components/ProductOverviewPage'));
+const ProductOverviewPage = lazy(() => import('../components/pages/ProductOverviewPage'));
 const StampsPage = lazy(() => import('../components/StampsPage'));
 const ATSExportPage = lazy(() => import('../components/ATSExportPage'));
 const CustomDomainPage = lazy(() => import('../components/CustomDomainPage'));
-const ProfileAnalyticsPage = lazy(() => import('../components/ProfileAnalyticsPage'));
-const AIProductPage = lazy(() => import('../components/AIProductPage'));
-const AdvancedTalentSearchPage = lazy(() => import('../components/AdvancedTalentSearchPage'));
-const AboutUs = lazy(() => import('../components/AboutUs'));
-const MissionAndValuesPage = lazy(() => import('../components/MissionAndValuesPage'));
-const PressKitPage = lazy(() => import('../components/PressKitPage'));
-const ContactPage = lazy(() => import('../components/ContactPage'));
-const HowItWorksProfessionalsPage = lazy(() => import('../components/HowItWorksProfessionalsPage'));
-const TemplatesAndExamplesPage = lazy(() => import('../components/TemplatesAndExamplesPage'));
-const PricingPage = lazy(() => import('../components/PricingPage'));
+const ProfileAnalyticsPage = lazy(() => import('../components/pages/ProfileAnalyticsPage'));
+const AIProductPage = lazy(() => import('../components/pages/AIProductPage'));
+const AdvancedTalentSearchPage = lazy(() => import('../components/pages/AdvancedTalentSearchPage'));
+const AboutUs = lazy(() => import('../components/landing/AboutUs'));
+const MissionAndValuesPage = lazy(() => import('../components/landing/MissionAndValuesPage'));
+const PressKitPage = lazy(() => import('../components/landing/PressKitPage'));
+const ContactPage = lazy(() => import('../components/landing/ContactPage'));
+const HowItWorksProfessionalsPage = lazy(() => import('../components/landing/HowItWorksProfessionalsPage'));
+const TemplatesAndExamplesPage = lazy(() => import('../components/pages/TemplatesAndExamplesPage'));
+const PricingPage = lazy(() => import('../components/pages/PricingPage'));
 const HelpCenterPage = lazy(() => import('../components/HelpCenterPage'));
 const CompanyPlansPage = lazy(() => import('../components/CompanyPlansPage'));
 const ATSIntegrationsPage = lazy(() => import('../components/ATSIntegrationsPage'));
 const SecurityCompliancePage = lazy(() => import('../components/SecurityCompliancePage'));
-const BlogPage = lazy(() => import('../components/BlogPage'));
-const TemplateLibraryPage = lazy(() => import('../components/TemplateLibraryPage'));
-const SystemStatusPage = lazy(() => import('../components/SystemStatusPage'));
-const SuccessStoriesPage = lazy(() => import('../components/SuccessStoriesPage'));
+const BlogPage = lazy(() => import('../components/pages/BlogPage'));
+const TemplateLibraryPage = lazy(() => import('../components/pages/TemplateLibraryPage'));
+const SystemStatusPage = lazy(() => import('../components/pages/SystemStatusPage'));
+const SuccessStoriesPage = lazy(() => import('../components/landing/SuccessStoriesPage'));
 const UnderConstructionPage = lazy(() => import('../components/UnderConstructionPage'));
-const TemplatePreviewCapture = lazy(() => import('../components/TemplatePreviewCapture'));
-const AllTemplatesPreview = lazy(() => import('../components/AllTemplatesPreview'));
+const TemplatePreviewCapture = lazy(() => import('../components/pages/TemplatePreviewCapture'));
+const AllTemplatesPreview = lazy(() => import('../components/pages/AllTemplatesPreview'));
 const TermsPage = lazy(() => import('../components/TermsPage'));
 const PrivacyPage = lazy(() => import('../components/PrivacyPage'));
 

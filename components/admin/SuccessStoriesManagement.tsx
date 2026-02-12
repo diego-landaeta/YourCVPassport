@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
-import AlertModal from '../AlertModal';
+import AlertModal from '../shared/AlertModal';
 import { useCustomDialog } from '../../hooks/useCustomDialog';
 
 interface SuccessStory {

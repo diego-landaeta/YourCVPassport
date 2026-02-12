@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 import { supabase } from '../supabase/client';
 import { templates } from './templates/templateData';
-import AlertModal from './AlertModal';
+import AlertModal from './shared/AlertModal';
 import { useCustomDialog } from '../hooks/useCustomDialog';
 import {
   ArrowLeftIcon,

@@ -9,7 +9,7 @@ import {
 import { useJobApplications, JobApplicationStatus } from '../../../hooks/useJobApplications';
 import ApplicationTimeline from '../../jobs/ApplicationTimeline';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import LoadingSpinner from '../../LoadingSpinner';
+import LoadingSpinner from '../../shared/LoadingSpinner';
 
 interface MyApplicationsTabProps {
   profileId: string;

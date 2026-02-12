@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import SEOHead from '../../components/SEOHead';
+import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import SEOHead from '../../components/shared/SEOHead';
 
 const CallbackPage: React.FC = () => {
   const navigate = useNavigate();

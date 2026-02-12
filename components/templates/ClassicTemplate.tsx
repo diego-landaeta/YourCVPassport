@@ -1,7 +1,7 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
 import { BriefcaseIcon, AcademicCapIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { CountryBadge } from '../CountrySelector';
+import { CountryBadge } from '../shared/CountrySelector';
 import VerifiedStampsBadge from '../VerifiedStampsBadge';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';

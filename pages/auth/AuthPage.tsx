@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import AuthScreen from '../../components/auth/AuthScreen';
-import SEOHead from '../../components/SEOHead';
+import SEOHead from '../../components/shared/SEOHead';
 
 const AuthPage: React.FC = () => {
   const location = useLocation();
