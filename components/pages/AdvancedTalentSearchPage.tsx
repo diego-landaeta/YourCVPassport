@@ -76,10 +76,10 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                     </div>
                 </div>
 
-                {/* Bio/Headline - Fixed height */}
+                {/* Summary - Fixed height */}
                 <div className="mb-4" style={{ minHeight: '44px' }}>
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                        {(profile.headline || profile.bio) || '\u00A0'}
+                        {(profile.summary || profile.bio) || '\u00A0'}
                     </p>
                 </div>
 
@@ -392,6 +392,8 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 profile.headline,
                 profile.title,
                 profile.professional_title,
+                profile.summary,
+                profile.bio,
                 ...(profile._skills || [])
             ].filter(t => t && t.trim() !== '');
 
@@ -433,12 +435,16 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 let headline = profile.headline ? (translations.get(profile.headline) || profile.headline) : profile.headline;
                 let title = profile.title ? (translations.get(profile.title) || profile.title) : profile.title;
                 let professionalTitle = profile.professional_title ? (translations.get(profile.professional_title) || profile.professional_title) : profile.professional_title;
+                let summary = profile.summary ? (translations.get(profile.summary) || profile.summary) : profile.summary;
+                let bio = profile.bio ? (translations.get(profile.bio) || profile.bio) : profile.bio;
 
                 // Apply gender correction only for Spanish
                 if (lang === 'es' && gender) {
                     headline = correctGender(headline, gender);
                     title = correctGender(title, gender);
                     professionalTitle = correctGender(professionalTitle, gender);
+                    summary = correctGender(summary, gender);
+                    bio = correctGender(bio, gender);
                 }
 
                 return {
@@ -446,6 +452,8 @@ const AdvancedTalentSearchPage: React.FC = () => {
                     headline,
                     title,
                     professional_title: professionalTitle,
+                    summary,
+                    bio,
                     _skills: profile._skills?.map((skill: string) => translations.get(skill) || skill) || [],
                 };
             });
