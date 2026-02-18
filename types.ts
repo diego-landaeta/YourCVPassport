@@ -348,6 +348,13 @@ export interface PortfolioItem {
   credential_url?: string | null;
   verified?: boolean | null;
 
+  // Collaboration-specific fields (when type = 'COLLABORATION')
+  organization?: string | null;
+  role?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  is_current?: boolean | null;
+  collaborators?: string[] | null;
   // Legacy fields (for backward compatibility)
   category?: string;
   link?: string | null;

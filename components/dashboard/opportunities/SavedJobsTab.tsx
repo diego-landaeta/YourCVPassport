@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { BookmarkIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -38,6 +39,7 @@ interface SavedJobsTabProps {
 
 const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
       setSavedJobs(data || []);
     } catch (error: any) {
       console.error('Error loading saved jobs:', error);
-      toast.error(lang === 'es' ? 'Error al cargar ofertas guardadas' : 'Error loading saved jobs');
+      toast.error(t.dashboard.opportunities.errorLoadingSavedJobs);
     } finally {
       setLoading(false);
     }
@@ -76,11 +78,11 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
 
       setSavedJobs(prev => prev.filter(job => job.saved_id !== savedId));
       toast.success(
-        lang === 'es' ? `"${jobTitle}" eliminada de guardados` : `"${jobTitle}" removed from saved`
+        t.dashboard.opportunities.jobRemovedFromSaved(jobTitle)
       );
     } catch (error: any) {
       console.error('Error unsaving job:', error);
-      toast.error(lang === 'es' ? 'Error al quitar guardado' : 'Error removing saved job');
+      toast.error(t.dashboard.opportunities.errorRemovingSavedJob);
     }
   };
 
@@ -88,27 +90,27 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
     if (!min && !max) return null;
     const curr = currency || '$';
     if (min && max) return `${curr}${min.toLocaleString()} - ${curr}${max.toLocaleString()}`;
-    if (min) return `${lang === 'es' ? 'Desde' : 'From'} ${curr}${min.toLocaleString()}`;
-    return `${lang === 'es' ? 'Hasta' : 'Up to'} ${curr}${max!.toLocaleString()}`;
+    if (min) return `${t.dashboard.opportunities.salaryFrom} ${curr}${min.toLocaleString()}`;
+    return `${t.dashboard.opportunities.salaryUpTo} ${curr}${max!.toLocaleString()}`;
   };
 
   const getEmploymentTypeLabel = (type: string) => {
-    const labels: Record<string, { es: string; en: string }> = {
-      FULL_TIME: { es: 'Tiempo Completo', en: 'Full Time' },
-      PART_TIME: { es: 'Medio Tiempo', en: 'Part Time' },
-      CONTRACT: { es: 'Contrato', en: 'Contract' },
-      TEMPORARY: { es: 'Temporal', en: 'Temporary' },
-      INTERNSHIP: { es: 'Pasantía', en: 'Internship' },
-      FREELANCE: { es: 'Freelance', en: 'Freelance' }
+    const labels: Record<string, string> = {
+      FULL_TIME: t.dashboard.opportunities.fullTime,
+      PART_TIME: t.dashboard.opportunities.partTime,
+      CONTRACT: t.dashboard.opportunities.contract,
+      TEMPORARY: t.dashboard.opportunities.temporary,
+      INTERNSHIP: t.dashboard.opportunities.internship,
+      FREELANCE: 'Freelance'
     };
-    return labels[type]?.[lang] || type;
+    return labels[type] || type;
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24">
         <LoadingSpinner
-          message={lang === 'es' ? 'Cargando ofertas guardadas...' : 'Loading saved jobs...'}
+          message={t.dashboard.opportunities.loadingSavedJobs}
           size="large"
         />
       </div>
@@ -120,18 +122,16 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-12 text-center">
         <BookmarkIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          {lang === 'es' ? 'No tienes ofertas guardadas' : 'No saved jobs'}
+          {t.dashboard.opportunities.noSavedJobs}
         </h3>
         <p className="text-gray-500 dark:text-gray-400 mb-6">
-          {lang === 'es'
-            ? 'Guarda ofertas interesantes para revisarlas más tarde'
-            : 'Save interesting jobs to review them later'}
+          {t.dashboard.opportunities.noSavedJobsDescription}
         </p>
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('change-opportunities-tab', { detail: { tab: 'all' } }))}
           className="px-6 py-3 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors"
         >
-          {lang === 'es' ? 'Explorar Ofertas' : 'Explore Jobs'}
+          {t.dashboard.opportunities.exploreJobs}
         </button>
       </div>
     );
@@ -144,7 +144,7 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
           <span className="font-semibold text-cv-blue dark:text-cv-blue-light text-lg">
             {savedJobs.length}
           </span>{' '}
-          {lang === 'es' ? 'ofertas guardadas' : 'saved jobs'}
+          {t.dashboard.opportunities.savedJobsCount}
         </p>
       </div>
 
@@ -187,7 +187,7 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
                 {job.is_remote ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                     <MapPinIcon className="w-3 h-3" />
-                    {lang === 'es' ? 'Remoto' : 'Remote'}
+                    {t.dashboard.opportunities.remote}
                   </span>
                 ) : job.location_city && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
@@ -210,14 +210,14 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
                   onClick={() => navigate(`/jobs/${job.job_slug}`)}
                   className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
                 >
-                  {lang === 'es' ? 'Ver Detalles' : 'View Details'}
+                  {t.dashboard.opportunities.viewDetails}
                 </button>
                 <button
                   onClick={() => unsaveJob(job.saved_id, job.job_title)}
                   className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm flex items-center gap-2"
                 >
                   <TrashIcon className="w-4 h-4" />
-                  {lang === 'es' ? 'Quitar' : 'Remove'}
+                  {t.dashboard.opportunities.remove}
                 </button>
               </div>
             </div>

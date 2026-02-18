@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { DocumentCheckIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import MyApplicationsTab from './opportunities/MyApplicationsTab';
 import { JobApplicationStatus, ACTIVE_APPLICATION_STATUSES } from '../../hooks/useJobApplications';
 
@@ -12,7 +13,7 @@ type FilterId = 'all' | 'active' | 'offers' | 'hired' | 'rejected';
 
 interface StatusFilter {
   id: FilterId;
-  label: { es: string; en: string };
+  labelKey: 'filterAll' | 'filterActive' | 'filterOffers' | 'filterAccepted' | 'filterRejected';
   color: string;
 }
 
@@ -27,32 +28,33 @@ interface StatusFilter {
  */
 const MyApplicationsSection: React.FC<MyApplicationsSectionProps> = ({ profileId }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const [selectedFilter, setSelectedFilter] = useState<FilterId>('all');
 
   const statusFilters: StatusFilter[] = [
     {
       id: 'all',
-      label: { es: 'Todas', en: 'All' },
+      labelKey: 'filterAll',
       color: 'bg-blue-600 text-white'
     },
     {
       id: 'active',
-      label: { es: 'Activas', en: 'Active' },
+      labelKey: 'filterActive',
       color: 'bg-orange-500 text-white'
     },
     {
       id: 'offers',
-      label: { es: 'Ofertas', en: 'Offers' },
+      labelKey: 'filterOffers',
       color: 'bg-green-600 text-white'
     },
     {
       id: 'hired',
-      label: { es: 'Aceptado', en: 'Accepted' },
+      labelKey: 'filterAccepted',
       color: 'bg-emerald-600 text-white'
     },
     {
       id: 'rejected',
-      label: { es: 'Rechazadas', en: 'Rejected' },
+      labelKey: 'filterRejected',
       color: 'bg-red-600 text-white'
     }
   ];
@@ -84,12 +86,10 @@ const MyApplicationsSection: React.FC<MyApplicationsSectionProps> = ({ profileId
             <DocumentCheckIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {lang === 'es' ? 'Mis Postulaciones' : 'My Applications'}
+                {t.dashboard.opportunities.myApplications}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {lang === 'es'
-                  ? 'Seguimiento completo de tus aplicaciones con estados actualizados'
-                  : 'Complete tracking of your applications with updated statuses'}
+                {t.dashboard.opportunities.myApplicationsDescription}
               </p>
             </div>
           </div>
@@ -100,7 +100,7 @@ const MyApplicationsSection: React.FC<MyApplicationsSectionProps> = ({ profileId
           <div className="flex items-center gap-2 mb-3">
             <FunnelIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {lang === 'es' ? 'Filtrar por estado:' : 'Filter by status:'}
+              {t.dashboard.opportunities.filterByStatus}
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -117,7 +117,7 @@ const MyApplicationsSection: React.FC<MyApplicationsSectionProps> = ({ profileId
                   }
                 `}
               >
-                {filter.label[lang]}
+                {t.dashboard.opportunities[filter.labelKey]}
               </button>
             ))}
           </div>

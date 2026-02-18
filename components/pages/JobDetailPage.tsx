@@ -69,7 +69,7 @@ const JobDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { lang: language } = useLanguage();
   const t = useTranslations();
 
   const [job, setJob] = useState<JobPosting | null>(null);
@@ -128,17 +128,7 @@ const JobDetailPage: React.FC = () => {
       setJob(transformedJob);
 
       // Track view (non-blocking, ignore errors)
-      supabase.from('job_posting_views').insert({
-        job_posting_id: job.id,
-        profile_id: user?.id || null,
-      }).then(() => {
-        // Update views count
-        supabase.rpc('increment', {
-          row_id: job.id,
-          table_name: 'job_postings',
-          column_name: 'views_count',
-        }).catch(() => {}); // Ignore increment errors
-      }).catch(() => {}); // Ignore view tracking errors
+      void (async () => { try { await supabase.from("job_posting_views").insert({ job_posting_id: job.id, profile_id: user?.id || null }); await supabase.rpc("increment", { row_id: job.id, table_name: "job_postings", column_name: "views_count" }); } catch { /* Ignore tracking errors */ } })()
 
       // Load questions
       const { data: questionsData } = await supabase

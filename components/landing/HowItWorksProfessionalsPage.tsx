@@ -117,11 +117,9 @@ const HowItWorksProfessionalsPage: React.FC = () => {
             <div className="px-4">
                 <div className="max-w-5xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? '¿Listo para crear tu perfil?' : 'Ready to create your profile?'}
-                        description={lang === 'es'
-                            ? 'Sigue estos pasos y tendrás tu perfil profesional verificado en menos de 10 minutos.'
-                            : 'Follow these steps and you will have your verified professional profile in less than 10 minutes.'}
-                        buttonText={lang === 'es' ? 'Comenzar ahora' : 'Start now'}
+                        title={pageData.inlineCta.title}
+                        description={pageData.inlineCta.description}
+                        buttonText={pageData.inlineCta.button}
                         variant="gradient"
                     />
                 </div>
@@ -140,7 +138,7 @@ const HowItWorksProfessionalsPage: React.FC = () => {
                              <p className="mt-2">{pageData.video.subtitle}</p>
                              <div className="mt-6 bg-white/90 dark:bg-dark-bg-primary/90 backdrop-blur-sm px-6 py-3 rounded-lg">
                                 <p className="text-cv-blue dark:text-cv-blue-light font-semibold text-lg">
-                                    {lang === 'es' ? 'Video próximamente' : 'Video coming soon'}
+                                    {pageData.videoComingSoon}
                                 </p>
                              </div>
                         </div>

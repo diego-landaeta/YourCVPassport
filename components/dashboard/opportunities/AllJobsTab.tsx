@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 
 interface JobPosting {
@@ -48,6 +49,7 @@ interface AllJobsTabProps {
 
 const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const navigate = useNavigate();
 
   const [jobs, setJobs] = useState<JobPosting[]>([]);
@@ -131,7 +133,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
       setTotalJobs(finalJobs.length);
     } catch (error: any) {
       console.error('Error loading jobs:', error);
-      toast.error(lang === 'es' ? 'Error al cargar vacantes' : 'Error loading jobs');
+      toast.error(t.dashboard.opportunities.errorLoadingJobs);
     } finally {
       setLoading(false);
     }
@@ -153,12 +155,12 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
 
       toast.success(
         currentlySaved
-          ? lang === 'es' ? `"${jobTitle}" eliminada de guardados` : `"${jobTitle}" removed`
-          : lang === 'es' ? `"${jobTitle}" guardada` : `"${jobTitle}" saved`
+          ? t.dashboard.opportunities.jobRemoved(jobTitle)
+          : t.dashboard.opportunities.jobSaved(jobTitle)
       );
     } catch (error: any) {
       console.error('Error toggling save:', error);
-      toast.error(lang === 'es' ? 'Error al guardar' : 'Error saving job');
+      toast.error(t.dashboard.opportunities.errorSavingJob);
     }
   };
 
@@ -171,36 +173,36 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
   };
 
   const getEmploymentTypeLabel = (type: string) => {
-    const labels: Record<string, { es: string; en: string }> = {
-      FULL_TIME: { es: 'Tiempo Completo', en: 'Full Time' },
-      PART_TIME: { es: 'Medio Tiempo', en: 'Part Time' },
-      CONTRACT: { es: 'Contrato', en: 'Contract' },
-      TEMPORARY: { es: 'Temporal', en: 'Temporary' },
-      INTERNSHIP: { es: 'Pasantía', en: 'Internship' },
-      FREELANCE: { es: 'Freelance', en: 'Freelance' }
+    const labels: Record<string, string> = {
+      FULL_TIME: t.dashboard.opportunities.fullTime,
+      PART_TIME: t.dashboard.opportunities.partTime,
+      CONTRACT: t.dashboard.opportunities.contract,
+      TEMPORARY: t.dashboard.opportunities.temporary,
+      INTERNSHIP: t.dashboard.opportunities.internship,
+      FREELANCE: 'Freelance'
     };
-    return labels[type]?.[lang] || type;
+    return labels[type] || type;
   };
 
   const getWorkModeLabel = (mode: string) => {
-    const labels: Record<string, { es: string; en: string }> = {
-      REMOTE: { es: 'Remoto', en: 'Remote' },
-      ONSITE: { es: 'Presencial', en: 'On-site' },
-      HYBRID: { es: 'Híbrido', en: 'Hybrid' }
+    const labels: Record<string, string> = {
+      REMOTE: t.dashboard.opportunities.remote,
+      ONSITE: t.dashboard.opportunities.onSite,
+      HYBRID: t.dashboard.opportunities.hybrid
     };
-    return labels[mode]?.[lang] || mode;
+    return labels[mode] || mode;
   };
 
   const getExperienceLevelLabel = (level: string) => {
-    const labels: Record<string, { es: string; en: string }> = {
-      ENTRY: { es: 'Sin experiencia', en: 'Entry Level' },
-      JUNIOR: { es: 'Junior', en: 'Junior' },
-      MID: { es: 'Semi-senior', en: 'Mid-level' },
-      SENIOR: { es: 'Senior', en: 'Senior' },
-      LEAD: { es: 'Lead', en: 'Lead' },
-      EXECUTIVE: { es: 'Ejecutivo', en: 'Executive' }
+    const labels: Record<string, string> = {
+      ENTRY: t.dashboard.opportunities.entryLevel,
+      JUNIOR: t.dashboard.opportunities.junior,
+      MID: t.dashboard.opportunities.midLevel,
+      SENIOR: t.dashboard.opportunities.senior,
+      LEAD: t.dashboard.opportunities.lead,
+      EXECUTIVE: t.dashboard.opportunities.executive
     };
-    return labels[level]?.[lang] || level;
+    return labels[level] || level;
   };
 
   const formatSalary = (min: number | null, max: number | null, currency: string) => {
@@ -208,22 +210,22 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
     if (min && max) {
       return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
     }
-    if (min) return `${lang === 'es' ? 'Desde' : 'From'} ${currency} ${min.toLocaleString()}`;
-    return `${lang === 'es' ? 'Hasta' : 'Up to'} ${currency} ${max!.toLocaleString()}`;
+    if (min) return `${t.dashboard.opportunities.salaryFrom} ${currency} ${min.toLocaleString()}`;
+    return `${t.dashboard.opportunities.salaryUpTo} ${currency} ${max!.toLocaleString()}`;
   };
 
   const getDaysAgo = (date: string) => {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return lang === 'es' ? 'Hoy' : 'Today';
-    if (days === 1) return lang === 'es' ? 'Ayer' : 'Yesterday';
-    return lang === 'es' ? `Hace ${days} días` : `${days} days ago`;
+    if (days === 0) return t.dashboard.opportunities.today;
+    if (days === 1) return t.dashboard.opportunities.yesterday;
+    return t.dashboard.opportunities.daysAgo(days);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24">
         <LoadingSpinner
-          message={lang === 'es' ? 'Cargando vacantes...' : 'Loading jobs...'}
+          message={t.dashboard.opportunities.loadingJobs}
           size="large"
         />
       </div>
@@ -239,7 +241,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-600" />
             <input
               type="text"
-              placeholder={lang === 'es' ? 'Título, palabra clave o empresa...' : 'Title, keyword or company...'}
+              placeholder={t.dashboard.opportunities.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-dark-bg-primary border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 transition-all"
@@ -249,7 +251,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
             <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-600" />
             <input
               type="text"
-              placeholder={lang === 'es' ? 'Ciudad, país o "remoto"...' : 'City, country or "remote"...'}
+              placeholder={t.dashboard.opportunities.locationPlaceholder}
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-dark-bg-primary border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500 transition-all"
@@ -260,7 +262,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
             className="flex items-center justify-center px-6 py-3 bg-cv-blue text-white rounded-lg font-semibold hover:bg-cv-blue-dark transition-all"
           >
             <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2" />
-            {lang === 'es' ? 'Filtros' : 'Filters'}
+            {t.dashboard.opportunities.filters}
             {(employmentTypeFilter || workModeFilter || experienceLevelFilter) && (
               <span className="ml-2 bg-white text-cv-blue rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">
                 {[employmentTypeFilter, workModeFilter, experienceLevelFilter].filter(Boolean).length}
@@ -276,7 +278,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
               <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2 text-cv-blue dark:text-cv-blue-light" />
-              {lang === 'es' ? 'Filtros Avanzados' : 'Advanced Filters'}
+              {t.dashboard.opportunities.advancedFilters}
             </h3>
             <button
               onClick={() => setShowFilters(false)}
@@ -290,19 +292,19 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <BriefcaseIcon className="h-4 w-4 inline mr-1" />
-                {lang === 'es' ? 'Tipo de Empleo' : 'Employment Type'}
+                {t.dashboard.opportunities.employmentType}
               </label>
               <select
                 value={employmentTypeFilter}
                 onChange={(e) => setEmploymentTypeFilter(e.target.value)}
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-bg-primary border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-white transition-all"
               >
-                <option value="">{lang === 'es' ? 'Todos' : 'All'}</option>
-                <option value="FULL_TIME">{lang === 'es' ? 'Tiempo Completo' : 'Full Time'}</option>
-                <option value="PART_TIME">{lang === 'es' ? 'Medio Tiempo' : 'Part Time'}</option>
-                <option value="CONTRACT">{lang === 'es' ? 'Contrato' : 'Contract'}</option>
-                <option value="TEMPORARY">{lang === 'es' ? 'Temporal' : 'Temporary'}</option>
-                <option value="INTERNSHIP">{lang === 'es' ? 'Pasantía' : 'Internship'}</option>
+                <option value="">{t.dashboard.opportunities.allMasculine}</option>
+                <option value="FULL_TIME">{t.dashboard.opportunities.fullTime}</option>
+                <option value="PART_TIME">{t.dashboard.opportunities.partTime}</option>
+                <option value="CONTRACT">{t.dashboard.opportunities.contract}</option>
+                <option value="TEMPORARY">{t.dashboard.opportunities.temporary}</option>
+                <option value="INTERNSHIP">{t.dashboard.opportunities.internship}</option>
                 <option value="FREELANCE">Freelance</option>
               </select>
             </div>
@@ -310,37 +312,37 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <MapPinIcon className="h-4 w-4 inline mr-1" />
-                {lang === 'es' ? 'Modalidad' : 'Work Mode'}
+                {t.dashboard.opportunities.workMode}
               </label>
               <select
                 value={workModeFilter}
                 onChange={(e) => setWorkModeFilter(e.target.value)}
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-bg-primary border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-white transition-all"
               >
-                <option value="">{lang === 'es' ? 'Todas' : 'All'}</option>
-                <option value="REMOTE">{lang === 'es' ? 'Remoto' : 'Remote'}</option>
-                <option value="ONSITE">{lang === 'es' ? 'Presencial' : 'On-site'}</option>
-                <option value="HYBRID">{lang === 'es' ? 'Híbrido' : 'Hybrid'}</option>
+                <option value="">{t.dashboard.opportunities.allFeminine}</option>
+                <option value="REMOTE">{t.dashboard.opportunities.remote}</option>
+                <option value="ONSITE">{t.dashboard.opportunities.onSite}</option>
+                <option value="HYBRID">{t.dashboard.opportunities.hybrid}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <ClockIcon className="h-4 w-4 inline mr-1" />
-                {lang === 'es' ? 'Nivel de Experiencia' : 'Experience Level'}
+                {t.dashboard.opportunities.experienceLevel}
               </label>
               <select
                 value={experienceLevelFilter}
                 onChange={(e) => setExperienceLevelFilter(e.target.value)}
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-bg-primary border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-white transition-all"
               >
-                <option value="">{lang === 'es' ? 'Todos' : 'All'}</option>
-                <option value="ENTRY">{lang === 'es' ? 'Sin experiencia' : 'Entry Level'}</option>
-                <option value="JUNIOR">Junior</option>
-                <option value="MID">{lang === 'es' ? 'Semi-senior' : 'Mid-level'}</option>
-                <option value="SENIOR">Senior</option>
-                <option value="LEAD">Lead</option>
-                <option value="EXECUTIVE">{lang === 'es' ? 'Ejecutivo' : 'Executive'}</option>
+                <option value="">{t.dashboard.opportunities.allMasculine}</option>
+                <option value="ENTRY">{t.dashboard.opportunities.entryLevel}</option>
+                <option value="JUNIOR">{t.dashboard.opportunities.junior}</option>
+                <option value="MID">{t.dashboard.opportunities.midLevel}</option>
+                <option value="SENIOR">{t.dashboard.opportunities.senior}</option>
+                <option value="LEAD">{t.dashboard.opportunities.lead}</option>
+                <option value="EXECUTIVE">{t.dashboard.opportunities.executive}</option>
               </select>
             </div>
           </div>
@@ -350,7 +352,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
               onClick={clearFilters}
               className="px-6 py-2.5 text-gray-600 dark:text-gray-400 hover:text-cv-blue dark:hover:text-cv-blue-light font-medium transition-colors"
             >
-              {lang === 'es' ? 'Limpiar filtros' : 'Clear filters'}
+              {t.dashboard.opportunities.clearFilters}
             </button>
           </div>
         </div>
@@ -362,9 +364,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
           <span className="font-semibold text-cv-blue dark:text-cv-blue-light text-lg">
             {totalJobs}
           </span>{' '}
-          {lang === 'es'
-            ? `vacante${totalJobs !== 1 ? 's' : ''} encontrada${totalJobs !== 1 ? 's' : ''}`
-            : `job${totalJobs !== 1 ? 's' : ''} found`}
+          {t.dashboard.opportunities.jobsFound(totalJobs)}
         </p>
       </div>
 
@@ -373,18 +373,16 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
         <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-16 text-center">
           <BriefcaseIcon className="h-20 w-20 text-gray-300 dark:text-gray-600 mx-auto mb-6" />
           <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">
-            {lang === 'es' ? 'No se encontraron vacantes' : 'No jobs found'}
+            {t.dashboard.opportunities.noJobsFound}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            {lang === 'es'
-              ? 'Intenta ajustar tus filtros de búsqueda o amplía los criterios'
-              : 'Try adjusting your search filters or broaden the criteria'}
+            {t.dashboard.opportunities.noJobsFoundDescription}
           </p>
           <button
             onClick={clearFilters}
             className="px-8 py-3 bg-cv-blue text-white rounded-lg font-semibold hover:bg-cv-blue-dark transition-all"
           >
-            {lang === 'es' ? 'Limpiar filtros' : 'Clear filters'}
+            {t.dashboard.opportunities.clearFilters}
           </button>
         </div>
       ) : (
@@ -423,7 +421,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
                     <div className="flex flex-wrap gap-2 mb-3">
                       {job.has_applied && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-2 border-green-500">
-                          ✓ {lang === 'es' ? 'Ya aplicaste' : 'Already applied'}
+                          ✓ {t.dashboard.opportunities.alreadyApplied}
                         </span>
                       )}
 
@@ -441,7 +439,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
                       {job.is_remote && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                           <MapPinIcon className="w-3 h-3" />
-                          {lang === 'es' ? 'Remoto' : 'Remote'}
+                          {t.dashboard.opportunities.remote}
                         </span>
                       )}
 
@@ -496,7 +494,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
                         onClick={() => navigate(`/jobs/${job.slug}`)}
                         className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
                       >
-                        {lang === 'es' ? 'Ver Detalles' : 'View Details'}
+                        {t.dashboard.opportunities.viewDetails}
                       </button>
                       {!job.has_applied && (
                         <button
@@ -513,8 +511,8 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
                             <BookmarkIcon className="w-4 h-4" />
                           )}
                           {job.is_saved
-                            ? lang === 'es' ? 'Guardada' : 'Saved'
-                            : lang === 'es' ? 'Guardar' : 'Save'}
+                            ? t.dashboard.opportunities.saved
+                            : t.dashboard.opportunities.save}
                         </button>
                       )}
                     </div>

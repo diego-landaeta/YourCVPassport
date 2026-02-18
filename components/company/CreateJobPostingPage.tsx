@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 
@@ -31,7 +31,8 @@ interface JobFormData {
 }
 
 const CreateJobPostingPage: React.FC = () => {
-  const { lang } = useLanguage();
+  const t = useTranslations();
+  const translations = t.company.createJobPosting;
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditMode = !!id;
@@ -70,193 +71,6 @@ const CreateJobPostingPage: React.FC = () => {
   const [skillInput, setSkillInput] = useState('');
   const [optionalSkillInput, setOptionalSkillInput] = useState('');
 
-  const t = {
-    en: {
-      titleCreate: 'Create Job Posting',
-      titleEdit: 'Edit Job Posting',
-      subtitle: 'Fill in the details to post your job vacancy',
-      steps: {
-        basic: 'Basic Info',
-        description: 'Description',
-        requirements: 'Requirements',
-        compensation: 'Compensation',
-      },
-      fields: {
-        title: 'Job Title',
-        titlePlaceholder: 'e.g. Senior React Developer',
-        department: 'Department',
-        departmentPlaceholder: 'e.g. Engineering',
-        employmentType: 'Employment Type',
-        workMode: 'Work Mode',
-        experienceLevel: 'Experience Level',
-        location: 'Location',
-        city: 'City',
-        cityPlaceholder: 'e.g. Madrid',
-        state: 'State/Province',
-        statePlaceholder: 'e.g. Community of Madrid',
-        country: 'Country',
-        isRemote: 'Remote position',
-        description: 'Job Description',
-        descriptionPlaceholder: 'Describe the role, responsibilities, and what makes this opportunity unique...',
-        responsibilities: 'Key Responsibilities',
-        requirements: 'Requirements',
-        niceToHave: 'Nice to Have',
-        benefits: 'Benefits',
-        requiredSkills: 'Required Skills',
-        optionalSkills: 'Optional Skills',
-        skillPlaceholder: 'Type a skill and press Enter',
-        salaryRange: 'Salary Range',
-        salaryMin: 'Minimum',
-        salaryMax: 'Maximum',
-        currency: 'Currency',
-        period: 'Period',
-        showSalary: 'Display salary publicly',
-        deadline: 'Application Deadline',
-        instructions: 'Application Instructions',
-        instructionsPlaceholder: 'Additional instructions for candidates...',
-      },
-      employmentTypes: {
-        FULL_TIME: 'Full Time',
-        PART_TIME: 'Part Time',
-        CONTRACT: 'Contract',
-        TEMPORARY: 'Temporary',
-        INTERNSHIP: 'Internship',
-        FREELANCE: 'Freelance',
-      },
-      workModes: {
-        REMOTE: 'Remote',
-        ONSITE: 'On-site',
-        HYBRID: 'Hybrid',
-      },
-      experienceLevels: {
-        ENTRY: 'Entry Level',
-        JUNIOR: 'Junior',
-        MID: 'Mid-Level',
-        SENIOR: 'Senior',
-        LEAD: 'Lead',
-        EXECUTIVE: 'Executive',
-      },
-      periods: {
-        HOURLY: 'Per Hour',
-        MONTHLY: 'Per Month',
-        YEARLY: 'Per Year',
-      },
-      actions: {
-        previous: 'Previous',
-        next: 'Next',
-        saveDraft: 'Save as Draft',
-        publish: 'Publish',
-        update: 'Update',
-        cancel: 'Cancel',
-        addItem: 'Add item',
-        removeItem: 'Remove',
-      },
-      validation: {
-        titleRequired: 'Job title is required',
-        descriptionRequired: 'Job description is required',
-        salaryInvalid: 'Maximum salary must be greater than minimum',
-      },
-      success: {
-        created: 'Job posting created successfully!',
-        updated: 'Job posting updated successfully!',
-        published: 'Job posting published successfully!',
-      },
-    },
-    es: {
-      titleCreate: 'Crear Vacante',
-      titleEdit: 'Editar Vacante',
-      subtitle: 'Completa los detalles para publicar tu vacante',
-      steps: {
-        basic: 'Info Básica',
-        description: 'Descripción',
-        requirements: 'Requisitos',
-        compensation: 'Compensación',
-      },
-      fields: {
-        title: 'Título del Puesto',
-        titlePlaceholder: 'ej. Desarrollador React Senior',
-        department: 'Departamento',
-        departmentPlaceholder: 'ej. Ingeniería',
-        employmentType: 'Tipo de Empleo',
-        workMode: 'Modalidad',
-        experienceLevel: 'Nivel de Experiencia',
-        location: 'Ubicación',
-        city: 'Ciudad',
-        cityPlaceholder: 'ej. Madrid',
-        state: 'Estado/Provincia',
-        statePlaceholder: 'ej. Comunidad de Madrid',
-        country: 'País',
-        isRemote: 'Posición remota',
-        description: 'Descripción del Puesto',
-        descriptionPlaceholder: 'Describe el rol, responsabilidades y qué hace única esta oportunidad...',
-        responsibilities: 'Responsabilidades Clave',
-        requirements: 'Requisitos',
-        niceToHave: 'Deseable',
-        benefits: 'Beneficios',
-        requiredSkills: 'Habilidades Requeridas',
-        optionalSkills: 'Habilidades Opcionales',
-        skillPlaceholder: 'Escribe una habilidad y presiona Enter',
-        salaryRange: 'Rango Salarial',
-        salaryMin: 'Mínimo',
-        salaryMax: 'Máximo',
-        currency: 'Moneda',
-        period: 'Período',
-        showSalary: 'Mostrar salario públicamente',
-        deadline: 'Fecha Límite',
-        instructions: 'Instrucciones de Aplicación',
-        instructionsPlaceholder: 'Instrucciones adicionales para candidatos...',
-      },
-      employmentTypes: {
-        FULL_TIME: 'Tiempo Completo',
-        PART_TIME: 'Medio Tiempo',
-        CONTRACT: 'Contrato',
-        TEMPORARY: 'Temporal',
-        INTERNSHIP: 'Pasantía',
-        FREELANCE: 'Freelance',
-      },
-      workModes: {
-        REMOTE: 'Remoto',
-        ONSITE: 'Presencial',
-        HYBRID: 'Híbrido',
-      },
-      experienceLevels: {
-        ENTRY: 'Nivel Inicial',
-        JUNIOR: 'Junior',
-        MID: 'Semi-Senior',
-        SENIOR: 'Senior',
-        LEAD: 'Líder',
-        EXECUTIVE: 'Ejecutivo',
-      },
-      periods: {
-        HOURLY: 'Por Hora',
-        MONTHLY: 'Por Mes',
-        YEARLY: 'Por Año',
-      },
-      actions: {
-        previous: 'Anterior',
-        next: 'Siguiente',
-        saveDraft: 'Guardar Borrador',
-        publish: 'Publicar',
-        update: 'Actualizar',
-        cancel: 'Cancelar',
-        addItem: 'Agregar ítem',
-        removeItem: 'Eliminar',
-      },
-      validation: {
-        titleRequired: 'El título es requerido',
-        descriptionRequired: 'La descripción es requerida',
-        salaryInvalid: 'El salario máximo debe ser mayor al mínimo',
-      },
-      success: {
-        created: '¡Vacante creada exitosamente!',
-        updated: '¡Vacante actualizada exitosamente!',
-        published: '¡Vacante publicada exitosamente!',
-      },
-    },
-  };
-
-  const translations = t[lang];
-
   useEffect(() => {
     fetchCompanyAndJobPosting();
   }, [id]);
@@ -276,7 +90,7 @@ const CreateJobPostingPage: React.FC = () => {
         .single();
 
       if (companyUserError || !companyUser) {
-        toast.error(lang === 'en' ? 'No company found' : 'No se encontró empresa');
+        toast.error(translations.toasts.noCompanyFound);
         navigate('/company/register');
         return;
       }
@@ -292,7 +106,7 @@ const CreateJobPostingPage: React.FC = () => {
           .single();
 
         if (jobError || !jobPosting) {
-          toast.error(lang === 'en' ? 'Job posting not found' : 'Vacante no encontrada');
+          toast.error(translations.toasts.jobNotFound);
           navigate('/company/jobs');
           return;
         }
@@ -324,7 +138,7 @@ const CreateJobPostingPage: React.FC = () => {
         });
       }
     } catch (error: any) {
-      toast.error(lang === 'en' ? 'Error loading data' : 'Error al cargar datos');
+      toast.error(translations.toasts.errorLoadingData);
     }
   };
 
@@ -465,7 +279,7 @@ const CreateJobPostingPage: React.FC = () => {
 
       navigate('/company/jobs');
     } catch (error: any) {
-      toast.error(error.message || (lang === 'en' ? 'Error saving job posting' : 'Error al guardar vacante'));
+      toast.error(error.message || translations.toasts.errorSaving);
     } finally {
       setLoading(false);
     }
@@ -803,7 +617,7 @@ const CreateJobPostingPage: React.FC = () => {
                   onClick={() => handleAddSkill('required')}
                   className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700"
                 >
-                  Add
+                  {translations.actions.addSkill}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -842,7 +656,7 @@ const CreateJobPostingPage: React.FC = () => {
                   onClick={() => handleAddSkill('optional')}
                   className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
                 >
-                  Add
+                  {translations.actions.addSkill}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -884,7 +698,7 @@ const CreateJobPostingPage: React.FC = () => {
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value && parseFloat(value) > 10000000) {
-                      toast.error(lang === 'en' ? 'Maximum salary is 10,000,000' : 'El salario máximo es 10,000,000');
+                      toast.error(translations.toasts.maxSalary);
                       return;
                     }
                     setFormData({ ...formData, salary_min: value });
@@ -899,7 +713,7 @@ const CreateJobPostingPage: React.FC = () => {
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value && parseFloat(value) > 10000000) {
-                      toast.error(lang === 'en' ? 'Maximum salary is 10,000,000' : 'El salario máximo es 10,000,000');
+                      toast.error(translations.toasts.maxSalary);
                       return;
                     }
                     setFormData({ ...formData, salary_max: value });
@@ -941,9 +755,7 @@ const CreateJobPostingPage: React.FC = () => {
                   </span>
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {lang === 'en'
-                    ? 'Tip: Leave salary fields empty to show "To be negotiated" to candidates'
-                    : 'Consejo: Deja los campos de salario vacíos para mostrar "A convenir" a los candidatos'}
+                  {translations.salaryTip}
                 </p>
               </div>
             </div>

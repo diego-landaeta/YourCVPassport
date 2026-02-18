@@ -9,6 +9,7 @@ import {
 import { useJobApplications, JobApplicationStatus } from '../../../hooks/useJobApplications';
 import ApplicationTimeline from '../../jobs/ApplicationTimeline';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 
 interface MyApplicationsTabProps {
@@ -27,6 +28,7 @@ interface MyApplicationsTabProps {
  */
 const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, statusFilter: externalStatusFilter }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const navigate = useNavigate();
 
   // Use external filter if provided, otherwise allow internal filtering
@@ -92,7 +94,7 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
     return (
       <div className="flex justify-center items-center py-24">
         <LoadingSpinner
-          message={lang === 'es' ? 'Cargando tus aplicaciones...' : 'Loading your applications...'}
+          message={t.dashboard.opportunities.loadingApplications}
           size="large"
         />
       </div>
@@ -103,7 +105,7 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
         <p className="text-red-700 dark:text-red-400">
-          {lang === 'es' ? 'Error al cargar aplicaciones: ' : 'Error loading applications: '}
+          {t.dashboard.opportunities.errorLoadingApplications}{': '}
           {error}
         </p>
       </div>
@@ -115,32 +117,32 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard
-          label={lang === 'es' ? 'Total' : 'Total'}
+          label={t.dashboard.opportunities.statsTotal}
           value={stats.total}
           color="blue"
         />
         <StatCard
-          label={lang === 'es' ? 'Activas' : 'Active'}
+          label={t.dashboard.opportunities.statsActive}
           value={stats.active}
           color="yellow"
         />
         <StatCard
-          label={lang === 'es' ? 'Entrevistas' : 'Interviews'}
+          label={t.dashboard.opportunities.statsInterviews}
           value={stats.interviewing}
           color="indigo"
         />
         <StatCard
-          label={lang === 'es' ? 'Ofertas' : 'Offers'}
+          label={t.dashboard.opportunities.statsOffers}
           value={stats.offers}
           color="green"
         />
         <StatCard
-          label={lang === 'es' ? 'Aceptado' : 'Accepted'}
+          label={t.dashboard.opportunities.statsAccepted}
           value={stats.hired}
           color="emerald"
         />
         <StatCard
-          label={lang === 'es' ? 'Rechazadas' : 'Rejected'}
+          label={t.dashboard.opportunities.statsRejected}
           value={stats.rejected}
           color="red"
         />
@@ -153,22 +155,18 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
         <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-12 text-center">
           <DocumentCheckIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            {lang === 'es' ? 'No hay aplicaciones' : 'No applications'}
+            {t.dashboard.opportunities.noApplications}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-6">
             {externalStatusFilter
-              ? lang === 'es'
-                ? 'No hay aplicaciones con este estado'
-                : 'No applications with this status'
-              : lang === 'es'
-                ? 'Aún no has aplicado a ninguna vacante'
-                : 'You haven\'t applied to any jobs yet'}
+              ? t.dashboard.opportunities.noApplicationsWithStatus
+              : t.dashboard.opportunities.noApplicationsYet}
           </p>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-opportunities-tab', { detail: { tab: 'all' } }))}
             className="px-6 py-3 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors"
           >
-            {lang === 'es' ? 'Explorar Ofertas' : 'Explore Jobs'}
+            {t.dashboard.opportunities.exploreJobs}
           </button>
         </div>
       ) : (
@@ -211,7 +209,7 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
                           {application.viewed_by_company && (
                             <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                               <EyeIcon className="w-3.5 h-3.5" />
-                              {lang === 'es' ? 'Vista por empresa' : 'Viewed by company'}
+                              {t.dashboard.opportunities.viewedByCompany}
                             </span>
                           )}
                         </div>
@@ -223,9 +221,9 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <span className="flex items-center gap-1">
                       <ClockIcon className="w-4 h-4" />
-                      {lang === 'es' ? 'Aplicado hace' : 'Applied'}{' '}
+                      {t.dashboard.opportunities.appliedAgo}{' '}
                       {Math.floor((new Date().getTime() - new Date(application.created_at).getTime()) / (1000 * 60 * 60 * 24))}{' '}
-                      {lang === 'es' ? 'días' : 'days ago'}
+                      {t.dashboard.opportunities.daysLabel}
                     </span>
                   </div>
 
@@ -235,14 +233,14 @@ const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, status
                       onClick={() => navigate(`/jobs/${application.job_posting?.slug}`)}
                       className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
                     >
-                      {lang === 'es' ? 'Ver Vacante' : 'View Job'}
+                      {t.dashboard.opportunities.viewJob}
                     </button>
                     <button
                       onClick={() => {/* TODO: Open messaging */}}
                       className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm flex items-center gap-2"
                     >
                       <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                      {lang === 'es' ? 'Mensaje' : 'Message'}
+                      {t.dashboard.opportunities.message}
                     </button>
                   </div>
                 </div>

@@ -13,6 +13,7 @@ import {
 import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import MatchScoreBadge from '../../jobs/MatchScoreBadge';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -45,6 +46,7 @@ interface RecommendedJobsTabProps {
 
 const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSwitchToAllJobs }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<RecommendedJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,7 +157,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
       setJobs(finalJobs.filter(j => (j.match_score || 0) >= 40).slice(0, 20));
     } catch (error: any) {
       console.error('Error loading recommended jobs:', error);
-      toast.error(lang === 'es' ? 'Error al cargar recomendaciones' : 'Error loading recommendations');
+      toast.error(t.dashboard.opportunities.errorLoadingRecommendations);
     } finally {
       setLoading(false);
     }
@@ -177,12 +179,12 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
 
       toast.success(
         currentlySaved
-          ? lang === 'es' ? `"${jobTitle}" eliminada de guardados` : `"${jobTitle}" removed`
-          : lang === 'es' ? `"${jobTitle}" guardada` : `"${jobTitle}" saved`
+          ? t.dashboard.opportunities.jobRemoved(jobTitle)
+          : t.dashboard.opportunities.jobSaved(jobTitle)
       );
     } catch (error: any) {
       console.error('Error toggling save:', error);
-      toast.error(lang === 'es' ? 'Error al guardar' : 'Error saving job');
+      toast.error(t.dashboard.opportunities.errorSavingJob);
     }
   };
 
@@ -190,34 +192,34 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
     if (!min && !max) return null;
     const curr = currency || '$';
     if (min && max) return `${curr}${min.toLocaleString()} - ${curr}${max.toLocaleString()}`;
-    if (min) return `${lang === 'es' ? 'Desde' : 'From'} ${curr}${min.toLocaleString()}`;
-    return `${lang === 'es' ? 'Hasta' : 'Up to'} ${curr}${max!.toLocaleString()}`;
+    if (min) return `${t.dashboard.opportunities.salaryFrom} ${curr}${min.toLocaleString()}`;
+    return `${t.dashboard.opportunities.salaryUpTo} ${curr}${max!.toLocaleString()}`;
   };
 
   const getEmploymentTypeLabel = (type: string) => {
-    const labels: Record<string, { es: string; en: string }> = {
-      FULL_TIME: { es: 'Tiempo Completo', en: 'Full Time' },
-      PART_TIME: { es: 'Medio Tiempo', en: 'Part Time' },
-      CONTRACT: { es: 'Contrato', en: 'Contract' },
-      TEMPORARY: { es: 'Temporal', en: 'Temporary' },
-      INTERNSHIP: { es: 'Pasantía', en: 'Internship' },
-      FREELANCE: { es: 'Freelance', en: 'Freelance' }
+    const labels: Record<string, string> = {
+      FULL_TIME: t.dashboard.opportunities.fullTime,
+      PART_TIME: t.dashboard.opportunities.partTime,
+      CONTRACT: t.dashboard.opportunities.contract,
+      TEMPORARY: t.dashboard.opportunities.temporary,
+      INTERNSHIP: t.dashboard.opportunities.internship,
+      FREELANCE: 'Freelance'
     };
-    return labels[type]?.[lang] || type;
+    return labels[type] || type;
   };
 
   const getDaysAgo = (date: string) => {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return lang === 'es' ? 'Hoy' : 'Today';
-    if (days === 1) return lang === 'es' ? 'Ayer' : 'Yesterday';
-    return lang === 'es' ? `Hace ${days} días` : `${days} days ago`;
+    if (days === 0) return t.dashboard.opportunities.today;
+    if (days === 1) return t.dashboard.opportunities.yesterday;
+    return t.dashboard.opportunities.daysAgo(days);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24">
         <LoadingSpinner
-          message={lang === 'es' ? 'Encontrando las mejores ofertas...' : 'Finding best matches...'}
+          message={t.dashboard.opportunities.loadingRecommendations}
           size="large"
         />
       </div>
@@ -229,19 +231,17 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-12 text-center">
         <SparklesIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          {lang === 'es' ? 'No hay recomendaciones disponibles' : 'No recommendations available'}
+          {t.dashboard.opportunities.noRecommendations}
         </h3>
         <p className="text-gray-500 dark:text-gray-400 mb-6">
-          {lang === 'es'
-            ? 'No encontramos vacantes que coincidan con tu perfil en este momento. Explora todas las ofertas disponibles o intenta más tarde.'
-            : 'We didn\'t find jobs matching your profile right now. Explore all available positions or try again later.'}
+          {t.dashboard.opportunities.noRecommendationsDescription}
         </p>
         <div className="flex justify-center gap-3">
           <button
             onClick={onSwitchToAllJobs}
             className="px-6 py-3 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors"
           >
-            {lang === 'es' ? 'Ver Todas las Ofertas' : 'View All Jobs'}
+            {t.dashboard.opportunities.viewAllJobs}
           </button>
         </div>
       </div>
@@ -254,13 +254,11 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
         <div className="flex items-center gap-3 mb-2">
           <SparklesIcon className="w-8 h-8" />
           <h2 className="text-2xl font-bold">
-            {lang === 'es' ? 'Ofertas Recomendadas' : 'Recommended Jobs'}
+            {t.dashboard.opportunities.recommendedJobs}
           </h2>
         </div>
         <p className="opacity-90">
-          {lang === 'es'
-            ? `Encontramos ${jobs.length} ofertas con alta compatibilidad con tu perfil`
-            : `We found ${jobs.length} jobs with high compatibility with your profile`}
+          {t.dashboard.opportunities.recommendedJobsDescription(jobs.length)}
         </p>
       </div>
 
@@ -302,7 +300,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
               <div className="flex flex-wrap gap-2 mb-3">
                 {job.has_applied && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-2 border-green-500">
-                    ✓ {lang === 'es' ? 'Ya aplicaste' : 'Already applied'}
+                    ✓ {t.dashboard.opportunities.alreadyApplied}
                   </span>
                 )}
 
@@ -314,7 +312,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
                 {job.is_remote && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                     <MapPinIcon className="w-3 h-3" />
-                    {lang === 'es' ? 'Remoto' : 'Remote'}
+                    {t.dashboard.opportunities.remote}
                   </span>
                 )}
 
@@ -363,7 +361,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
                   onClick={() => navigate(`/jobs/${job.slug}`)}
                   className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
                 >
-                  {lang === 'es' ? 'Ver Detalles' : 'View Details'}
+                  {t.dashboard.opportunities.viewDetails}
                 </button>
                 <button
                   onClick={() => toggleSave(job.id, job.title, job.is_saved || false)}
@@ -379,8 +377,8 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
                     <BookmarkIcon className="w-4 h-4" />
                   )}
                   {job.is_saved
-                    ? lang === 'es' ? 'Guardada' : 'Saved'
-                    : lang === 'es' ? 'Guardar' : 'Save'}
+                    ? t.dashboard.opportunities.saved
+                    : t.dashboard.opportunities.save}
                 </button>
               </div>
             </div>

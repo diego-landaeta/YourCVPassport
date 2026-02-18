@@ -83,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'plantillas',
-      label: menu.templates || (lang === 'es' ? 'Plantillas' : 'Templates'),
+      label: menu.templates,
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     // JOB OPPORTUNITIES (Unified section)
     {
       id: 'vacantes',
-      label: menu.jobSearch || (lang === 'es' ? 'Oportunidades' : 'Opportunities'),
+      label: menu.jobSearch,
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -113,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'postulaciones',
-      label: menu.myApplications || (lang === 'es' ? 'Mis Aplicaciones' : 'My Applications'),
+      label: menu.myApplications,
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     // COMPANY DASHBOARD (if applicable)
     ...(isCompanyUser ? [{
       id: 'empresa',
-      label: menu.companyDashboard || (lang === 'es' ? 'Panel de Empresa' : 'Company Dashboard'),
+      label: menu.companyDashboard,
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -230,12 +230,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="flex-1">
                 <p className="font-bold text-sm mb-1">
-                  {lang === 'es' ? 'Completa el wizard primero' : 'Complete the wizard first'}
+                  {menu.wizardAlertTitle}
                 </p>
                 <p className="text-xs text-blue-100">
-                  {lang === 'es'
-                    ? 'Debes completar el wizard de perfil (incluyendo el paso de Finalización) para acceder a todas las funcionalidades.'
-                    : 'You must complete the profile wizard (including the Finalization step) to access all features.'}
+                  {menu.wizardAlertDescription}
                 </p>
               </div>
             </div>

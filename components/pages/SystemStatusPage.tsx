@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import { ChangelogChangeType } from '../types';
+import { ChangelogChangeType } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -90,7 +90,7 @@ const SystemStatusPage: React.FC = () => {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-3xl font-extrabold text-green-800 dark:text-green-400">{pageData.incidents.noIncidents}</p>
-                                    <p className="text-lg text-green-700 dark:text-green-500 mt-2 font-medium">Sistema operando con normalidad</p>
+                                    <p className="text-lg text-green-700 dark:text-green-500 mt-2 font-medium">{pageData.systemNormal}</p>
                                 </div>
                             </div>
                         </div>
@@ -174,11 +174,11 @@ const SystemStatusPage: React.FC = () => {
                                                     {pageData.version} {entry.version}
                                                 </h3>
                                                 <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                                    {entry.changes.length} {entry.changes.length === 1 ? 'cambio' : 'cambios'}
+                                                    {entry.changes.length} {entry.changes.length === 1 ? pageData.changeSingular : pageData.changePlural}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2 text-cv-blue group-hover:translate-x-1 transition-transform">
-                                                <span className="font-semibold text-sm">{lang === 'es' ? 'Ver detalles' : 'View details'}</span>
+                                                <span className="font-semibold text-sm">{pageData.viewDetails}</span>
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                                                 </svg>
@@ -217,7 +217,7 @@ const SystemStatusPage: React.FC = () => {
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary mb-4">{pageData.historyTitle}</h2>
                             <p className="text-lg text-gray-600 dark:text-dark-text-secondary max-w-2xl mx-auto">
-                                Historial completo de incidentes, mantenimientos y actualizaciones del sistema
+                                {pageData.incidentHistorySubtitle}
                             </p>
                         </div>
 
@@ -235,10 +235,10 @@ const SystemStatusPage: React.FC = () => {
                                             <div className="flex-1">
                                                 <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incidents.latency}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    {pageData.dates.june15} • Duración: 45 minutos
+                                                    {pageData.dates.june15} • {pageData.incident1Duration}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Se identificó y resolvió un problema de latencia temporal en la API que afectaba a un subconjunto de usuarios en la región EU-West.
+                                                    {pageData.incident1Desc}
                                                 </p>
                                             </div>
                                         </div>
@@ -266,10 +266,10 @@ const SystemStatusPage: React.FC = () => {
                                             <div className="flex-1">
                                                 <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incidents.maintenance}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    {pageData.dates.may30} • Ventana: 02:00 - 04:00 UTC
+                                                    {pageData.dates.may30} • {pageData.incident2Window}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Actualización programada de infraestructura para mejorar el rendimiento y la seguridad. Se implementaron nuevas optimizaciones de base de datos.
+                                                    {pageData.incident2Desc}
                                                 </p>
                                             </div>
                                         </div>
@@ -294,12 +294,12 @@ const SystemStatusPage: React.FC = () => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">Error de Autenticación OAuth</h3>
+                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incident3.title}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    15 de octubre de 2025 • Duración: 2 horas
+                                                    {pageData.incident3.date} • {pageData.incident3.duration}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Problema con el proveedor de autenticación OAuth que impedía el inicio de sesión a algunos usuarios. Se solucionó actualizando las credenciales y renovando los certificados SSL.
+                                                    {pageData.incident3.description}
                                                 </p>
                                             </div>
                                         </div>
@@ -307,7 +307,7 @@ const SystemStatusPage: React.FC = () => {
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                             </svg>
-                                            Resuelto
+                                            {pageData.incidentStatus.resolved}
                                         </span>
                                     </div>
                                 </div>
@@ -324,12 +324,12 @@ const SystemStatusPage: React.FC = () => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">Actualización de Seguridad v2.1.0</h3>
+                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incident4.title}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    5 de octubre de 2025 • Ventana: 01:00 - 03:30 UTC
+                                                    {pageData.incident4.date} • {pageData.incident4.window}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Despliegue de parches de seguridad críticos y actualización del sistema de verificación blockchain. Mejoras en la encriptación de datos end-to-end.
+                                                    {pageData.incident4.description}
                                                 </p>
                                             </div>
                                         </div>
@@ -337,7 +337,7 @@ const SystemStatusPage: React.FC = () => {
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                             </svg>
-                                            Completado
+                                            {pageData.incidentStatus.completed}
                                         </span>
                                     </div>
                                 </div>
@@ -354,12 +354,12 @@ const SystemStatusPage: React.FC = () => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">Lentitud en Generación de PDFs</h3>
+                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incident5.title}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    20 de septiembre de 2025 • Duración: 1 hora 15 minutos
+                                                    {pageData.incident5.date} • {pageData.incident5.duration}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Degradación del rendimiento en el servicio de generación de CVs en formato PDF. Se escalaron recursos del servidor y optimizó el proceso de renderizado.
+                                                    {pageData.incident5.description}
                                                 </p>
                                             </div>
                                         </div>
@@ -367,7 +367,7 @@ const SystemStatusPage: React.FC = () => {
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                             </svg>
-                                            Resuelto
+                                            {pageData.incidentStatus.resolved}
                                         </span>
                                     </div>
                                 </div>
@@ -384,12 +384,12 @@ const SystemStatusPage: React.FC = () => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">Migración de Base de Datos</h3>
+                                                <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.incident6.title}</h3>
                                                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                                                    5 de septiembre de 2025 • Ventana: 00:00 - 05:00 UTC
+                                                    {pageData.incident6.date} • {pageData.incident6.window}
                                                 </p>
                                                 <p className="mt-3 text-gray-700 dark:text-dark-text-secondary">
-                                                    Migración exitosa a nueva infraestructura de base de datos con mayor capacidad y redundancia. Mejora significativa en tiempos de respuesta (reducción del 40%).
+                                                    {pageData.incident6.description}
                                                 </p>
                                             </div>
                                         </div>
@@ -397,7 +397,7 @@ const SystemStatusPage: React.FC = () => {
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                             </svg>
-                                            Completado
+                                            {pageData.incidentStatus.completed}
                                         </span>
                                     </div>
                                 </div>

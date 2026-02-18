@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Identity Section Schema
 export const identitySchema = z.object({
   full_name: z.string().min(2, 'El nombre completo es obligatorio (mínimo 2 caracteres)').max(50, 'El nombre no puede exceder 50 caracteres'),
-  gender: z.enum(['male', 'female'], { required_error: 'Debes seleccionar tu género' }),
+  gender: z.enum(['male', 'female'], { message: 'Debes seleccionar tu género' }),
   headline: z.string().min(5, 'El título profesional es obligatorio (mínimo 5 caracteres)').max(150, 'El título profesional no puede exceder 150 caracteres'),
   summary: z.string().min(1, 'El resumen "Acerca de mí" es obligatorio').max(800, 'Máximo 800 caracteres'),
   country_code: z.union([

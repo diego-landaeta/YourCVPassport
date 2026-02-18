@@ -29,6 +29,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { TemplatePreviewSelector, ALL_TEMPLATES } from './TemplatePreviewSelector';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 // SVG Icons as simple functions
 function FiX({ className = "w-5 h-5" }: { className?: string }) {
@@ -93,20 +94,9 @@ interface CreateVersionModalProps {
   editingVersion?: CVVersion | null;
 }
 
-const AVAILABLE_SECTIONS: Array<{
-  id: CVSectionType;
-  label: string;
-  description: string;
-}> = [
-  { id: 'profile', label: 'Perfil', description: 'Información básica y resumen' },
-  { id: 'experience', label: 'Experiencia', description: 'Historial laboral' },
-  { id: 'education', label: 'Educación', description: 'Formación académica' },
-  { id: 'skills', label: 'Habilidades', description: 'Competencias técnicas' },
-  { id: 'languages', label: 'Idiomas', description: 'Conocimientos lingüísticos' },
-  { id: 'certifications', label: 'Certificaciones', description: 'Certificados y acreditaciones' },
-  { id: 'portfolio', label: 'Portfolio', description: 'Proyectos y trabajos destacados' },
-  { id: 'services', label: 'Servicios', description: 'Servicios ofrecidos' },
-  { id: 'stats', label: 'Estadísticas', description: 'Métricas y logros' }
+const SECTION_IDS: CVSectionType[] = [
+  'profile', 'experience', 'education', 'skills', 'languages',
+  'certifications', 'portfolio', 'services', 'stats'
 ];
 
 // Template type - support all template IDs
@@ -119,6 +109,14 @@ export function CreateVersionModal({
 }: CreateVersionModalProps) {
   const { createVersion, updateVersion, isCreating, error: hookError } = useCVVersions();
   const { profile } = useAuth();
+  const t = useTranslations();
+  const vm = t.dashboard.versionModal;
+
+  const AVAILABLE_SECTIONS = SECTION_IDS.map(id => ({
+    id,
+    label: vm.sectionLabels[id as keyof typeof vm.sectionLabels],
+    description: vm.sectionDescriptions[id as keyof typeof vm.sectionDescriptions],
+  }));
 
   // Form state
   const [versionName, setVersionName] = useState('');
@@ -195,12 +193,12 @@ export function CreateVersionModal({
 
     // Validation
     if (!versionName.trim()) {
-      setError('El nombre de la versión es obligatorio');
+      setError(vm.versionNameRequired);
       return;
     }
 
     if (selectedSections.length === 0) {
-      setError('Debes seleccionar al menos una sección');
+      setError(vm.selectAtLeastOne);
       return;
     }
 
@@ -218,7 +216,7 @@ export function CreateVersionModal({
           onClose();
         } else {
           // Get the error from the hook state
-          const errorMsg = hookError || 'Error al actualizar la versión';
+          const errorMsg = hookError || vm.updateError;
           setError(errorMsg);}
       } else {
         const created = await createVersion(request);
@@ -226,11 +224,11 @@ export function CreateVersionModal({
           onClose();
         } else {
           // Get the error from the hook state
-          const errorMsg = hookError || 'Error al crear la versión';
+          const errorMsg = hookError || vm.createError;
           setError(errorMsg);}
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      const errorMessage = err instanceof Error ? err.message : vm.unknownError;
       setError(errorMessage);}
   };
 
@@ -257,19 +255,19 @@ export function CreateVersionModal({
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
-                      Editar Versión
+                      {vm.editVersion}
                     </>
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      Nueva Versión
+                      {vm.newVersion}
                     </>
                   )}
                 </h3>
                 <p className="text-blue-100 text-[11px] mt-0.5">
-                  {editingVersion ? 'Personaliza tu CV para diferentes necesidades' : 'Crea una versión personalizada de tu CV'}
+                  {editingVersion ? vm.editSubtitle : vm.newSubtitle}
                 </p>
               </div>
               <button
@@ -301,18 +299,18 @@ export function CreateVersionModal({
                 <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Información Básica
+                {vm.basicInfo}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Nombre de la versión *
+                    {vm.versionNameLabel}
                   </label>
                   <input
                     type="text"
                     value={versionName}
                     onChange={(e) => setVersionName(e.target.value)}
-                    placeholder="Ej: CV USA - Frontend Developer"
+                    placeholder={vm.versionNamePlaceholder}
                     className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     required
                   />
@@ -320,26 +318,26 @@ export function CreateVersionModal({
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    País (opcional)
+                    {vm.countryLabel}
                   </label>
                   <input
                     type="text"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Ej: Estados Unidos"
+                    placeholder={vm.countryPlaceholder}
                     className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Rol (opcional)
+                    {vm.roleLabel}
                   </label>
                   <input
                     type="text"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    placeholder="Ej: Frontend Developer"
+                    placeholder={vm.rolePlaceholder}
                     className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
@@ -352,7 +350,7 @@ export function CreateVersionModal({
                 <div className="flex items-center gap-1.5">
                   <FiPalette className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Plantilla
+                    {vm.templateLabel}
                   </h4>
                 </div>
                 <div className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 text-[10px] font-medium text-gray-600 dark:text-gray-400">
@@ -361,9 +359,9 @@ export function CreateVersionModal({
                       <svg className="w-2.5 h-2.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Acceso completo
+                      {vm.fullAccess}
                     </span>
-                  ) : '10 gratis + 10 PRO'}
+                  ) : vm.freeAndPro}
                 </div>
               </div>
               <TemplatePreviewSelector
@@ -381,12 +379,12 @@ export function CreateVersionModal({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                   </svg>
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Secciones
+                    {vm.sections}
                   </h4>
                 </div>
                 <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                   <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300">
-                    {selectedSections.length} seleccionada{selectedSections.length !== 1 ? 's' : ''}
+                    {vm.selectedCount(selectedSections.length)}
                   </span>
                 </div>
               </div>
@@ -425,10 +423,10 @@ export function CreateVersionModal({
                   <div className="flex items-center gap-1.5 mb-2">
                     <FiMove className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">
-                      Orden
+                      {vm.order}
                     </span>
                     <span className="ml-auto text-[10px] text-gray-500 dark:text-gray-400 italic">
-                      Arrastra para reordenar
+                      {vm.dragToReorder}
                     </span>
                   </div>
                   <DndContext
@@ -465,12 +463,12 @@ export function CreateVersionModal({
                 <svg className="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
-                Notas (opcional)
+                {vm.notesLabel}
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Añade notas internas (ej: 'Sin foto para EE.UU.')..."
+                placeholder={vm.notesPlaceholder}
                 rows={2}
                 className="w-full px-2.5 py-1.5 border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
@@ -483,7 +481,7 @@ export function CreateVersionModal({
                 onClick={onClose}
                 className="px-4 py-1.5 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 font-medium transition-all text-sm"
               >
-                Cancelar
+                {vm.cancel}
               </button>
               <button
                 type="submit"
@@ -493,7 +491,7 @@ export function CreateVersionModal({
                 {isCreating ? (
                   <span className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {editingVersion ? 'Actualizando...' : 'Creando...'}
+                    {editingVersion ? vm.updating : vm.creating}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5">
@@ -502,14 +500,14 @@ export function CreateVersionModal({
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Actualizar
+                        {vm.update}
                       </>
                     ) : (
                       <>
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Crear
+                        {vm.create}
                       </>
                     )}
                   </span>

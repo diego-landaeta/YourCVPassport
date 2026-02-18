@@ -81,7 +81,7 @@ const HelpCenterPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Centro de Ayuda' : 'Help Center'}
+                                alt={pageData.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -126,7 +126,7 @@ const HelpCenterPage: React.FC = () => {
                                 <div className="relative text-center">
                                     <div className="bg-white/90 dark:bg-dark-bg-primary/90 backdrop-blur-sm px-6 py-3 rounded-lg">
                                         <p className="text-cv-blue dark:text-cv-blue-light font-semibold text-lg">
-                                            {lang === 'es' ? 'Video próximamente' : 'Video coming soon'}
+                                            {pageData.videoComingSoon}
                                         </p>
                                     </div>
                                 </div>

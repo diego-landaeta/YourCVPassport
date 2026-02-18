@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../../supabase/client';
-import { FullProfileData, Profile, Experience, Education, Skill, Service, Stat, PortfolioItem } from '../types';
+import { FullProfileData, Profile, Experience, Education, Skill, Service, Stat, PortfolioItem } from '../../types';
 import { useAnalytics } from '../../hooks/useAnalytics';
 import { useAuth } from '../../contexts/AuthContext';
 import { templates } from '../templates/templateData';
@@ -172,7 +172,7 @@ const ProfileSearchPage: React.FC = () => {
 
         switch(templateToRender) {
             // Free Templates
-            case 'classic': return <ClassicTemplate data={displayData} color={color} onContactClick={handleContactClick} />;
+            case 'classic': return <ClassicTemplate data={displayData} color={color} />;
             case 'passport': return <PassportTemplate data={displayData} color={color} />;
             case 'modern-professional': return <ModernProfessionalTemplate data={displayData} color={color} />;
 
@@ -205,7 +205,7 @@ const ProfileSearchPage: React.FC = () => {
             case 'healthcare-professional': return <HealthcareProfessionalTemplate data={displayData} color={color} />;
 
             default:
-                return <ClassicTemplate data={displayData} color={color} onContactClick={handleContactClick} />;
+                return <ClassicTemplate data={displayData} color={color} />;
         }
     };
 
@@ -386,7 +386,7 @@ const ProfileSearchPage: React.FC = () => {
                                 {/* Contact via App - PRINCIPAL */}
                                 <button
                                     onClick={() => {
-                                        setShowContactModal(true);
+                                        setShowContactMenu(true);
                                         setShowContactMenu(false);
                                         setShowProfessionalLinks(false);
                                     }}

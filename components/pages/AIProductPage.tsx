@@ -15,7 +15,7 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, threshold?: number, 
     );
 };
 
-const BeforeAfterExample: React.FC<{ before: string; after: string; title: string }> = ({ before, after, title }) => (
+const BeforeAfterExample: React.FC<{ before: string; after: string; title: string; beforeLabel: string; afterLabel: string }> = ({ before, after, title, beforeLabel, afterLabel }) => (
     <div className="bg-white dark:bg-dark-bg-secondary p-6 rounded-lg shadow-lg">
         <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary mb-4">{title}</h3>
         <div className="space-y-4">
@@ -24,7 +24,7 @@ const BeforeAfterExample: React.FC<{ before: string; after: string; title: strin
                     <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
-                    <span className="text-sm font-semibold text-red-700 dark:text-red-300">Antes</span>
+                    <span className="text-sm font-semibold text-red-700 dark:text-red-300">{beforeLabel}</span>
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">{before}</p>
             </div>
@@ -33,7 +33,7 @@ const BeforeAfterExample: React.FC<{ before: string; after: string; title: strin
                     <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    <span className="text-sm font-semibold text-green-700 dark:text-green-300">Después (con IA)</span>
+                    <span className="text-sm font-semibold text-green-700 dark:text-green-300">{afterLabel}</span>
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">{after}</p>
             </div>
@@ -99,17 +99,15 @@ const AIProductPage: React.FC = () => {
                 <section className="bg-gradient-to-br from-cv-blue to-purple-600 text-white text-center py-20 px-4">
                     <AnimatedWrapper>
                         <h1 className="text-4xl md:text-6xl font-extrabold mb-6">
-                            {lang === 'es' ? 'IA que potencia tu perfil profesional' : 'AI that powers your professional profile'}
+                            {t.aiProductPage.heroTitle}
                         </h1>
                         <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-white/90">
-                            {lang === 'es'
-                                ? 'Transforma tu CV en una herramienta profesional optimizada con el poder de la inteligencia artificial. Mejora automática, sugerencias inteligentes y análisis de calidad en tiempo real.'
-                                : 'Transform your CV into an optimized professional tool with the power of artificial intelligence. Automatic improvement, smart suggestions and real-time quality analysis.'}
+                            {t.aiProductPage.heroSubtitle}
                         </p>
                         <button
                             onClick={() => openModal('signup')}
                             className="mt-8 bg-white text-cv-blue px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            {lang === 'es' ? 'Optimizar mi perfil con IA' : 'Optimize my profile with AI'}
+                            {t.aiProductPage.heroCta}
                         </button>
                     </AnimatedWrapper>
                 </section>
@@ -120,12 +118,10 @@ const AIProductPage: React.FC = () => {
                         <AnimatedWrapper>
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary">
-                                    {lang === 'es' ? 'Funcionalidades de IA' : 'AI Features'}
+                                    {t.aiProductPage.featuresTitle}
                                 </h2>
                                 <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">
-                                    {lang === 'es'
-                                        ? 'Descubre cómo la IA mejora cada aspecto de tu CV profesional'
-                                        : 'Discover how AI improves every aspect of your professional CV'}
+                                    {t.aiProductPage.featuresSubtitle}
                                 </p>
                             </div>
                         </AnimatedWrapper>
@@ -139,19 +135,15 @@ const AIProductPage: React.FC = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     }
-                                    title={lang === 'es' ? 'Optimización de descripciones' : 'Description Optimization'}
-                                    description={lang === 'es'
-                                        ? 'La IA analiza y mejora automáticamente las descripciones de tu experiencia laboral para hacerlas más impactantes y profesionales, optimizadas para ATS.'
-                                        : 'AI analyzes and automatically improves your work experience descriptions to make them more impactful and professional, ATS-optimized.'}
+                                    title={t.aiProductPage.feature1Title}
+                                    description={t.aiProductPage.feature1Description}
                                     example={
                                         <BeforeAfterExample
-                                            title={lang === 'es' ? 'Ejemplo: Descripción de puesto' : 'Example: Job Description'}
-                                            before={lang === 'es'
-                                                ? 'Trabajé en proyectos de desarrollo web y ayudé al equipo con varias tareas.'
-                                                : 'Worked on web development projects and helped the team with various tasks.'}
-                                            after={lang === 'es'
-                                                ? 'Lideré el desarrollo full-stack de 5+ aplicaciones web empresariales, implementando arquitecturas escalables con React y Node.js que mejoraron la eficiencia operativa en un 40%. Colaboré con equipos multifuncionales en metodología ágil para entregar soluciones de alta calidad.'
-                                                : 'Led full-stack development of 5+ enterprise web applications, implementing scalable architectures with React and Node.js that improved operational efficiency by 40%. Collaborated with cross-functional teams in agile methodology to deliver high-quality solutions.'}
+                                            title={t.aiProductPage.feature1ExampleTitle}
+                                            before={t.aiProductPage.feature1Before}
+                                            after={t.aiProductPage.feature1After}
+                                            beforeLabel={t.aiProductPage.beforeLabel}
+                                            afterLabel={t.aiProductPage.afterLabel}
                                         />
                                     }
                                 />
@@ -167,19 +159,15 @@ const AIProductPage: React.FC = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
                                     }
-                                    title={lang === 'es' ? 'Generación de Summary Profesional' : 'Professional Summary Generation'}
-                                    description={lang === 'es'
-                                        ? 'Genera automáticamente un resumen profesional convincente que destaque tus fortalezas, experiencia y valor único en 2-3 párrafos impactantes.'
-                                        : 'Automatically generates a compelling professional summary that highlights your strengths, experience and unique value in 2-3 impactful paragraphs.'}
+                                    title={t.aiProductPage.feature2Title}
+                                    description={t.aiProductPage.feature2Description}
                                     example={
                                         <BeforeAfterExample
-                                            title={lang === 'es' ? 'Ejemplo: Summary profesional' : 'Example: Professional Summary'}
-                                            before={lang === 'es'
-                                                ? 'Desarrollador con experiencia en programación. Me gusta trabajar en equipo.'
-                                                : 'Developer with programming experience. I like working in teams.'}
-                                            after={lang === 'es'
-                                                ? 'Ingeniero de Software Full-Stack con 5+ años de experiencia construyendo aplicaciones web escalables para empresas Fortune 500. Especializado en React, Node.js y arquitecturas cloud (AWS). Reconocido por liderar equipos técnicos y entregar proyectos complejos 30% más rápido que el promedio de la industria, con un enfoque en código limpio y mejores prácticas.'
-                                                : 'Full-Stack Software Engineer with 5+ years of experience building scalable web applications for Fortune 500 companies. Specialized in React, Node.js and cloud architectures (AWS). Recognized for leading technical teams and delivering complex projects 30% faster than industry average, with a focus on clean code and best practices.'}
+                                            title={t.aiProductPage.feature2ExampleTitle}
+                                            before={t.aiProductPage.feature2Before}
+                                            after={t.aiProductPage.feature2After}
+                                            beforeLabel={t.aiProductPage.beforeLabel}
+                                            afterLabel={t.aiProductPage.afterLabel}
                                         />
                                     }
                                 />
@@ -195,14 +183,12 @@ const AIProductPage: React.FC = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                         </svg>
                                     }
-                                    title={lang === 'es' ? 'Sugerencias de Skills' : 'Skills Suggestions'}
-                                    description={lang === 'es'
-                                        ? 'Recibe recomendaciones inteligentes de habilidades técnicas y blandas relevantes para tu industria y rol, basadas en análisis de miles de perfiles exitosos.'
-                                        : 'Receive intelligent recommendations for technical and soft skills relevant to your industry and role, based on analysis of thousands of successful profiles.'}
+                                    title={t.aiProductPage.feature3Title}
+                                    description={t.aiProductPage.feature3Description}
                                     example={
                                         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg">
                                             <p className="text-sm font-semibold text-cv-dark-gray dark:text-dark-text-primary mb-3">
-                                                {lang === 'es' ? 'Sugerencias basadas en tu perfil:' : 'Suggestions based on your profile:'}
+                                                {t.aiProductPage.feature3SuggestionsLabel}
                                             </p>
                                             <div className="flex flex-wrap gap-2">
                                                 {['TypeScript', 'Docker', 'CI/CD', 'GraphQL', 'Microservices', 'Jest', 'Agile', 'Leadership'].map(skill => (
@@ -226,18 +212,16 @@ const AIProductPage: React.FC = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                         </svg>
                                     }
-                                    title={lang === 'es' ? 'Checklist de Calidad' : 'Quality Checklist'}
-                                    description={lang === 'es'
-                                        ? 'Análisis en tiempo real de la calidad de tu CV con recomendaciones accionables para mejorar cada sección y aumentar tus posibilidades de éxito.'
-                                        : 'Real-time analysis of your CV quality with actionable recommendations to improve each section and increase your chances of success.'}
+                                    title={t.aiProductPage.feature4Title}
+                                    description={t.aiProductPage.feature4Description}
                                     example={
                                         <div className="bg-white dark:bg-dark-bg-primary border-2 border-cv-blue/20 p-4 rounded-lg space-y-2">
                                             {[
-                                                { text: lang === 'es' ? 'Foto profesional agregada' : 'Professional photo added', done: true },
-                                                { text: lang === 'es' ? 'Summary optimizado para ATS' : 'ATS-optimized summary', done: true },
-                                                { text: lang === 'es' ? '3+ años de experiencia documentados' : '3+ years of experience documented', done: true },
-                                                { text: lang === 'es' ? 'Agregar al menos 2 certificaciones' : 'Add at least 2 certifications', done: false },
-                                                { text: lang === 'es' ? 'Incluir enlaces a portfolio/GitHub' : 'Include portfolio/GitHub links', done: false },
+                                                { text: t.aiProductPage.checklistItem1, done: true },
+                                                { text: t.aiProductPage.checklistItem2, done: true },
+                                                { text: t.aiProductPage.checklistItem3, done: true },
+                                                { text: t.aiProductPage.checklistItem4, done: false },
+                                                { text: t.aiProductPage.checklistItem5, done: false },
                                             ].map((item, idx) => (
                                                 <div key={idx} className="flex items-center">
                                                     {item.done ? (
@@ -257,7 +241,7 @@ const AIProductPage: React.FC = () => {
                                             <div className="mt-4 pt-4 border-t border-gray-200">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm font-semibold text-cv-dark-gray dark:text-dark-text-primary">
-                                                        {lang === 'es' ? 'Calidad del perfil:' : 'Profile quality:'}
+                                                        {t.aiProductPage.profileQuality}
                                                     </span>
                                                     <span className="text-lg font-bold text-cv-blue">75%</span>
                                                 </div>
@@ -277,11 +261,9 @@ const AIProductPage: React.FC = () => {
                 <div className="px-4">
                     <div className="max-w-7xl mx-auto">
                         <InlineCTA
-                            title={lang === 'es' ? 'Prueba la IA gratis' : 'Try AI for free'}
-                            description={lang === 'es'
-                                ? 'Descubre cómo la inteligencia artificial puede transformar tu CV en minutos. Sin tarjeta de crédito.'
-                                : 'Discover how artificial intelligence can transform your CV in minutes. No credit card required.'}
-                            buttonText={lang === 'es' ? 'Empezar ahora gratis' : 'Start now for free'}
+                            title={t.aiProductPage.midCtaTitle}
+                            description={t.aiProductPage.midCtaDescription}
+                            buttonText={t.aiProductPage.midCtaButton}
                             variant="gradient"
                         />
                     </div>
@@ -294,12 +276,10 @@ const AIProductPage: React.FC = () => {
                         <AnimatedWrapper>
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary">
-                                    {lang === 'es' ? 'Lo que dicen nuestros usuarios' : 'What our users say'}
+                                    {t.aiProductPage.testimonialsTitle}
                                 </h2>
                                 <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">
-                                    {lang === 'es'
-                                        ? 'Miles de profesionales han transformado sus CVs con nuestra IA'
-                                        : 'Thousands of professionals have transformed their CVs with our AI'}
+                                    {t.aiProductPage.testimonialsSubtitle}
                                 </p>
                             </div>
                         </AnimatedWrapper>
@@ -307,35 +287,29 @@ const AIProductPage: React.FC = () => {
                         <div className="grid md:grid-cols-3 gap-8">
                             <AnimatedWrapper>
                                 <TestimonialCard
-                                    name={lang === 'es' ? 'María García' : 'Maria Garcia'}
-                                    role={lang === 'es' ? 'Ingeniera de Software' : 'Software Engineer'}
+                                    name={t.aiProductPage.testimonial1Name}
+                                    role={t.aiProductPage.testimonial1Role}
                                     company="Tech Corp"
                                     avatar="MG"
-                                    text={lang === 'es'
-                                        ? 'La IA transformó mi CV en algo realmente profesional. Recibí 3 ofertas de trabajo en las primeras dos semanas después de optimizarlo.'
-                                        : 'The AI transformed my CV into something truly professional. I received 3 job offers in the first two weeks after optimizing it.'}
+                                    text={t.aiProductPage.testimonial1Text}
                                 />
                             </AnimatedWrapper>
                             <AnimatedWrapper delay="duration-1000">
                                 <TestimonialCard
-                                    name={lang === 'es' ? 'Carlos Rodríguez' : 'Carlos Rodriguez'}
-                                    role={lang === 'es' ? 'Gerente de Producto' : 'Product Manager'}
+                                    name={t.aiProductPage.testimonial2Name}
+                                    role={t.aiProductPage.testimonial2Role}
                                     company="StartupXYZ"
                                     avatar="CR"
-                                    text={lang === 'es'
-                                        ? 'Las sugerencias de skills fueron increíbles. Agregué competencias que no sabía que eran importantes para mi industria y ahora paso todos los filtros ATS.'
-                                        : 'The skills suggestions were amazing. I added competencies I didn\'t know were important for my industry and now I pass all ATS filters.'}
+                                    text={t.aiProductPage.testimonial2Text}
                                 />
                             </AnimatedWrapper>
                             <AnimatedWrapper delay="duration-1200">
                                 <TestimonialCard
-                                    name={lang === 'es' ? 'Ana Martínez' : 'Ana Martinez'}
-                                    role={lang === 'es' ? 'Diseñadora UX' : 'UX Designer'}
+                                    name={t.aiProductPage.testimonial3Name}
+                                    role={t.aiProductPage.testimonial3Role}
                                     company="Design Studio"
                                     avatar="AM"
-                                    text={lang === 'es'
-                                        ? 'El checklist de calidad me ayudó a identificar exactamente qué faltaba en mi CV. En 30 minutos tenía un perfil completo y profesional.'
-                                        : 'The quality checklist helped me identify exactly what was missing from my CV. In 30 minutes I had a complete and professional profile.'}
+                                    text={t.aiProductPage.testimonial3Text}
                                 />
                             </AnimatedWrapper>
                         </div>
@@ -347,22 +321,18 @@ const AIProductPage: React.FC = () => {
                     <div className="max-w-4xl mx-auto text-center">
                         <AnimatedWrapper>
                             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                                {lang === 'es'
-                                    ? '¿Listo para optimizar tu perfil con IA?'
-                                    : 'Ready to optimize your profile with AI?'}
+                                {t.aiProductPage.finalCtaTitle}
                             </h2>
                             <p className="text-lg md:text-xl text-white/90 mb-8">
-                                {lang === 'es'
-                                    ? 'Únete a miles de profesionales que ya están usando nuestra IA para destacar en el mercado laboral'
-                                    : 'Join thousands of professionals already using our AI to stand out in the job market'}
+                                {t.aiProductPage.finalCtaSubtitle}
                             </p>
                             <button
                                 onClick={() => openModal('signup')}
                                 className="bg-white text-cv-blue px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                {lang === 'es' ? 'Comenzar gratis ahora' : 'Start free now'}
+                                {t.aiProductPage.finalCtaButton}
                             </button>
                             <p className="mt-4 text-sm text-white/80">
-                                {lang === 'es' ? 'No se requiere tarjeta de crédito' : 'No credit card required'}
+                                {t.aiProductPage.finalCtaNote}
                             </p>
                         </AnimatedWrapper>
                     </div>

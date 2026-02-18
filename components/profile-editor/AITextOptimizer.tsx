@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import { useNavigate } from 'react-router-dom';
 import { optimizeExperience, optimizeEducation, checkAIAccess } from '../../lib/ai';
 import {
@@ -48,6 +49,8 @@ interface AITextOptimizerProps {
 const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplySuggestion }) => {
   const { session } = useAuth();
   const { lang } = useLanguage();
+  const t = useTranslations();
+  const aiTO = t.aiTextOptimizer;
   const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([]);
@@ -129,9 +132,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 
   const analyzeSuggestions = async () => {
     if (!session?.user.id || items.length === 0) {
-      setError(lang === 'en'
-        ? `You need at least 1 ${type === 'experience' ? 'experience' : 'education'} to get suggestions`
-        : `Necesitas al menos 1 ${type === 'experience' ? 'experiencia' : 'educación'} para obtener sugerencias`);
+      setError(type === 'experience' ? aiTO.needItemExperience : aiTO.needItemEducation);
       return;
     }
 
@@ -158,7 +159,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
         let title = '';
 
         if (type === 'experience') {
-          title = `${item.position || 'Sin título'} - ${item.company_name || 'Sin empresa'}`;
+          title = `${item.position || aiTO.noTitle} - ${item.company_name || aiTO.noCompany}`;
           response = await optimizeExperience(
             item.position || '',
             item.company_name || '',
@@ -180,7 +181,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           }
           continue; // Skip the generic processing below
         } else {
-          title = `${item.degree || 'Sin título'} - ${item.institution_name || 'Sin institución'}`;
+          title = `${item.degree || aiTO.noTitle} - ${item.institution_name || aiTO.noInstitution}`;
           response = await optimizeEducation(
             item.degree || '',
             item.institution_name || '',
@@ -202,11 +203,11 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       }
 
       if (newSuggestions.length === 0) {
-        setError('No se pudieron generar sugerencias. Asegúrate de tener descripciones en tus registros.');
+        setError(aiTO.noSuggestionsGenerated);
       } else {
         setSuggestions(newSuggestions);
       }
-    } catch (err) {setError('Error al generar sugerencias. Por favor, intenta de nuevo.');
+    } catch (err) {setError(aiTO.errorGenerating);
     } finally {
       setIsAnalyzing(false);
     }
@@ -223,7 +224,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       setSuggestions(prev =>
         prev.map(s => (s.id === suggestion.id ? { ...s, status: 'accepted' as const } : s))
       );
-    } catch (error) {setError('Error al aplicar la sugerencia');
+    } catch (error) {setError(aiTO.errorApplying);
     } finally {
       setApplyingId(null);
     }
@@ -242,12 +243,10 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           <LightBulbIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
           <div>
             <h4 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
-              {lang === 'en' ? 'AI suggestions not available' : 'Sugerencias de IA no disponibles'}
+              {aiTO.notAvailableTitle}
             </h4>
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              {lang === 'en'
-                ? `Add at least 1 ${type === 'experience' ? 'work experience' : 'education'} with a description so AI can optimize it.`
-                : `Agrega al menos 1 ${type === 'experience' ? 'experiencia laboral' : 'educación'} con descripción para que la IA pueda optimizarla.`}
+              {type === 'experience' ? aiTO.notAvailableDescExperience : aiTO.notAvailableDescEducation}
             </p>
           </div>
         </div>
@@ -266,7 +265,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {lang === 'en' ? 'AI Optimization' : 'Optimización con IA'}
+                {aiTO.aiOptimization}
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                 IA
@@ -283,27 +282,25 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-semibold text-amber-900 dark:text-amber-200">
-                {lang === 'en' ? 'Premium Feature' : 'Función Premium'}
+                {aiTO.premiumFeature}
               </h4>
               <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
-                {lang === 'en'
-                  ? `AI-powered ${type} optimization is available on Pro and Enterprise plans. Current plan: ${planName}`
-                  : `La optimización de ${type === 'experience' ? 'experiencias' : 'educación'} con IA está disponible en los planes Pro y Enterprise. Plan actual: ${planName}`}
+                {type === 'experience' ? aiTO.premiumOptimizeDescExperience(planName) : aiTO.premiumOptimizeDescEducation(planName)}
               </p>
 
               {/* Benefits */}
               <ul className="mt-4 space-y-2">
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'Transform descriptions into impactful content' : 'Transforma descripciones en contenido impactante'}
+                  {aiTO.transformDescriptions}
                 </li>
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'Generate achievement bullet points' : 'Genera puntos de logros destacados'}
+                  {aiTO.generateAchievements}
                 </li>
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'Improve visibility with recruiters' : 'Mejora tu visibilidad con reclutadores'}
+                  {aiTO.improveVisibility}
                 </li>
               </ul>
 
@@ -311,7 +308,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                 onClick={() => navigate('/pricing')}
                 className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all hover:from-amber-600 hover:to-orange-600"
               >
-                {lang === 'en' ? 'Upgrade to Pro' : 'Mejorar a Pro'}
+                {aiTO.upgradeToPro}
               </button>
             </div>
           </div>
@@ -337,16 +334,14 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                 ? 'text-red-800 dark:text-red-200'
                 : 'text-gray-700 dark:text-gray-300'
             }`}>
-              {lang === 'en'
-                ? `${aiAccessInfo.remaining} AI requests remaining this month`
-                : `${aiAccessInfo.remaining} solicitudes de IA restantes este mes`}
+              {aiTO.aiRequestsRemaining(aiAccessInfo.remaining)}
             </span>
             {aiAccessInfo.remaining <= 5 && (
               <button
                 onClick={() => navigate('/pricing')}
                 className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
               >
-                {lang === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
+                {aiTO.getUnlimited}
               </button>
             )}
           </div>
@@ -360,21 +355,19 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {lang === 'en' ? 'AI Optimization' : 'Optimización con IA'}
+                {aiTO.aiOptimization}
               </h3>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
                 IA
               </span>
               {aiAccessInfo?.remaining === 'unlimited' && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                  {lang === 'en' ? 'Unlimited' : 'Ilimitado'}
+                  {aiTO.unlimited}
                 </span>
               )}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {lang === 'en'
-                ? `${items.length} ${type === 'experience' ? 'experience(s)' : 'education(s)'} to analyze`
-                : `${items.length} ${type === 'experience' ? 'experiencia(s)' : 'educación(es)'} para analizar`}
+              {type === 'experience' ? aiTO.itemsToAnalyzeExperience(items.length) : aiTO.itemsToAnalyzeEducation(items.length)}
             </p>
           </div>
         </div>
@@ -391,22 +384,22 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
           {isAnalyzing ? (
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
-              {lang === 'en' ? 'Analyzing with AI...' : 'Analizando con IA...'}
+              {aiTO.analyzingWithAi}
             </>
           ) : aiAccessInfo?.remaining === 0 ? (
             <>
               <LockClosedIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado'}
+              {aiTO.limitReached}
             </>
           ) : suggestions.length > 0 ? (
             <>
               <ArrowPathIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Regenerate AI Suggestions' : 'Regenerar Sugerencias IA'}
+              {aiTO.regenerateSuggestions}
             </>
           ) : (
             <>
               <SparklesIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Generate AI Suggestions' : 'Generar Sugerencias IA'}
+              {aiTO.generateSuggestions}
             </>
           )}
         </button>
@@ -429,10 +422,10 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
             </div>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Analizando con IA...
+            {aiTO.analyzingWithAiLoading}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Optimizando tus descripciones para hacerlas más impactantes
+            {aiTO.optimizingDescriptions}
           </p>
         </div>
       )}
@@ -458,7 +451,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
               {/* Original Text */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                  Descripción Original:
+                  {aiTO.originalDescription}
                 </label>
                 <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4 border border-gray-200 dark:border-dark-border">
                   <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
@@ -471,7 +464,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
               {suggestion.originalAchievements && suggestion.originalAchievements.length > 0 && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                    Logros Originales:
+                    {aiTO.originalAchievements}
                   </label>
                   <div className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-4 border border-gray-200 dark:border-dark-border">
                     <ul className="space-y-1">
@@ -499,7 +492,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
               <div className="mb-4">
                 <label className="block text-sm font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
                   <SparklesIcon className="w-4 h-4" />
-                  Descripción Optimizada por IA:
+                  {aiTO.aiOptimizedDescription}
                 </label>
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-800 rounded-lg p-4">
                   <div
@@ -518,7 +511,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Logros Clave Optimizados:
+                    {aiTO.keyOptimizedAchievements}
                   </label>
                   <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border-2 border-purple-200 dark:border-purple-800 rounded-lg p-4">
                     <ul className="space-y-2">
@@ -549,7 +542,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                     onClick={() => handleReject(suggestion)}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors font-medium"
                   >
-                    Rechazar
+                    {aiTO.reject}
                   </button>
                   <button
                     onClick={() => handleAccept(suggestion)}
@@ -559,12 +552,12 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
                     {applyingId === suggestion.id ? (
                       <>
                         <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                        Aplicando...
+                        {aiTO.applying}
                       </>
                     ) : (
                       <>
                         <CheckCircleIcon className="w-5 h-5" />
-                        Aceptar y Aplicar
+                        {aiTO.acceptAndApply}
                       </>
                     )}
                   </button>
@@ -574,14 +567,14 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
               {suggestion.status === 'accepted' && (
                 <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold justify-end">
                   <CheckCircleIcon className="w-6 h-6" />
-                  <span>Cambios aplicados</span>
+                  <span>{aiTO.changesApplied}</span>
                 </div>
               )}
 
               {suggestion.status === 'rejected' && (
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium justify-end">
                   <XMarkIcon className="w-5 h-5" />
-                  <span>Rechazado</span>
+                  <span>{aiTO.rejected}</span>
                 </div>
               )}
             </div>
@@ -593,7 +586,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       {suggestions.length === 0 && !isAnalyzing && !error && (
         <div className="text-center py-8 text-gray-600 dark:text-gray-400">
           <LightBulbIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>Haz clic en "Generar Sugerencias" para optimizar tus descripciones con IA</p>
+          <p>{aiTO.emptyStateText}</p>
         </div>
       )}
     </div>

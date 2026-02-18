@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Profile } from '../../types';
 import QRCode from 'qrcode';
 import { getBusinessCardStyle, BusinessCardStyle } from './businessCardStyles';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface BusinessCardPreviewProps {
   profile: Profile | null;
@@ -11,6 +12,7 @@ interface BusinessCardPreviewProps {
 }
 
 const BusinessCardPreview: React.FC<BusinessCardPreviewProps> = ({ profile, shareUrl, userEmail, onDownload }) => {
+  const t = useTranslations();
   const cardRef = useRef<HTMLDivElement>(null);
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string>('');
 
@@ -97,9 +99,9 @@ const BusinessCardPreview: React.FC<BusinessCardPreviewProps> = ({ profile, shar
     } catch (error) {}
   };
 
-  const displayName = profile?.full_name || 'Tu Nombre';
-  const displayTitle = profile?.headline || 'Tu Título Profesional';
-  const displayEmail = userEmail || 'email@ejemplo.com';
+  const displayName = profile?.full_name || t.dashboard.businessCard.yourName;
+  const displayTitle = profile?.headline || t.dashboard.businessCard.yourTitle;
+  const displayEmail = userEmail || t.dashboard.businessCard.emailPlaceholder;
 
   // Generate production URL instead of localhost
   const getDisplayUrl = (url: string) => {
@@ -113,7 +115,7 @@ const BusinessCardPreview: React.FC<BusinessCardPreviewProps> = ({ profile, shar
 
   // Extract first 10 characters of UUID for ID display (in uppercase)
   const getShortId = (id: string | undefined) => {
-    if (!id) return 'TU-ID';
+    if (!id) return t.dashboard.businessCard.yourId;
     if (id.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/)) {
       return id.substring(0, 10).toUpperCase();
     }
@@ -408,7 +410,7 @@ const BusinessCardPreview: React.FC<BusinessCardPreviewProps> = ({ profile, shar
           <svg className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span className="relative z-10">Descargar PNG</span>
+          <span className="relative z-10">{t.dashboard.businessCard.downloadPNG}</span>
         </button>
 
         <button
@@ -419,13 +421,13 @@ const BusinessCardPreview: React.FC<BusinessCardPreviewProps> = ({ profile, shar
           <svg className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
-          <span className="relative z-10">Descargar PDF</span>
+          <span className="relative z-10">{t.dashboard.businessCard.downloadPDF}</span>
         </button>
       </div>
 
       {/* Info Text */}
       <p className="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
-        Descarga tu tarjeta de visita digital con código QR que coincide con el estilo de tu CV
+        {t.dashboard.businessCard.downloadDescription}
       </p>
     </div>
   );

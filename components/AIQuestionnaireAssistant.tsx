@@ -400,8 +400,8 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
           <div className="space-y-8">
             {/* Header Section */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{lang === 'es' ? 'Información Básica' : 'Basic Information'}</h2>
-              <p className="text-gray-600 dark:text-gray-400">{lang === 'es' ? 'Cuéntanos sobre ti' : 'Tell us about yourself'}</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{q.identity.heading}</h2>
+              <p className="text-gray-600 dark:text-gray-400">{q.identity.subtitle}</p>
             </div>
 
             {/* Form Grid */}
@@ -456,14 +456,14 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  {lang === 'es' ? 'País' : 'Country'}
+                  {q.identity.country}
                 </label>
                 <select
                   value={formData.country_code}
                   onChange={(e) => updateFormData('country_code', e.target.value)}
                   className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                 >
-                  <option value="">{lang === 'es' ? 'Selecciona tu país' : 'Select your country'}</option>
+                  <option value="">{q.identity.selectCountry}</option>
                   <option value="ES">🇪🇸 España</option>
                   <option value="AR">🇦🇷 Argentina</option>
                   <option value="MX">🇲🇽 México</option>
@@ -500,7 +500,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="w-full px-4 py-3 text-base border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                   disabled={!formData.country_code}
                 >
-                  <option value="">{formData.country_code ? (lang === 'es' ? 'Selecciona tu ciudad' : 'Select your city') : (lang === 'es' ? 'Primero selecciona un país' : 'First select a country')}</option>
+                  <option value="">{formData.country_code ? q.identity.selectCity : q.identity.selectCountryFirst}</option>
                   {formData.country_code === 'ES' && (
                     <>
                       <option value="Madrid, España">Madrid</option>
@@ -656,7 +656,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
             {/* Social Links Section */}
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{lang === 'es' ? 'Enlaces Profesionales' : 'Professional Links'}</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{q.identity.professionalLinks}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{q.identity.linkedin}</label>
@@ -694,7 +694,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             {/* Professional Summary Section */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{q.identity.summary} <span className="text-red-500">{q.required}</span></h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{lang === 'es' ? 'Describe tu perfil profesional en pocas palabras' : 'Describe your professional profile in a few words'}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{q.identity.summaryDescription}</p>
               <textarea
                 value={formData.summary}
                 onChange={(e) => updateFormData('summary', e.target.value)}
@@ -713,10 +713,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {lang === 'es' ? 'Experiencia Profesional' : 'Professional Experience'}
+                  {q.experience.heading}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Añade tus empleos anteriores' : 'Add your previous jobs'}
+                  {q.experience.subtitle}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -737,7 +737,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
+                  <span className="hidden sm:inline">{q.common.add}</span>
                 </button>
                 {formData.experiences.length > 1 && (
                   <button
@@ -835,10 +835,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {lang === 'es' ? 'Educación' : 'Education'}
+                  {q.education.heading}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Añade tu formación académica' : 'Add your academic background'}
+                  {q.education.subtitle}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -859,7 +859,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
+                  <span className="hidden sm:inline">{q.common.add}</span>
                 </button>
                 {formData.education.length > 1 && (
                   <button
@@ -956,10 +956,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {lang === 'es' ? 'Habilidades' : 'Skills'}
+                  {q.skills.heading}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Añade tus competencias técnicas y profesionales' : 'Add your technical and professional skills'}
+                  {q.skills.subtitle}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -980,7 +980,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
+                  <span className="hidden sm:inline">{q.common.add}</span>
                 </button>
                 {formData.skills.length > 1 && (
                   <button
@@ -1040,7 +1040,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  {lang === 'es' ? 'Nivel de dominio (%)' : 'Proficiency Level (%)'}
+                  {q.common.proficiencyLevelPercent}
                 </label>
                 <input
                   type="range"
@@ -1081,10 +1081,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {lang === 'es' ? 'Idiomas' : 'Languages'}
+                  {q.languages.heading}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Indica los idiomas que dominas' : 'Indicate the languages you speak'}
+                  {q.languages.subtitle}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -1105,7 +1105,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{lang === 'es' ? 'Añadir' : 'Add'}</span>
+                  <span className="hidden sm:inline">{q.common.add}</span>
                 </button>
                 {formData.languages.length > 1 && (
                   <button
@@ -1157,7 +1157,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  {lang === 'es' ? 'Nivel de dominio (%)' : 'Proficiency Level (%)'}
+                  {q.common.proficiencyLevelPercent}
                 </label>
                 <input
                   type="range"
@@ -1186,7 +1186,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
               {language.name && language.level && (
                 <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    {lang === 'es' ? 'Vista previa' : 'Preview'}
+                    {q.common.preview}
                   </h4>
                   <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between mb-2">
@@ -1208,7 +1208,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                     {language.percentage !== null && language.percentage !== undefined && language.percentage > 0 && (
                       <div className="mt-3">
                         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                          <span>{lang === 'es' ? 'Nivel de dominio' : 'Proficiency level'}</span>
+                          <span>{q.common.proficiencyLevel}</span>
                           <span>{language.percentage}%</span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -1232,10 +1232,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             {/* Header */}
             <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {lang === 'es' ? 'Preferencias Laborales' : 'Work Preferences'}
+                {q.preferences.heading}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {lang === 'es' ? 'Indica tus preferencias de trabajo' : 'Indicate your work preferences'}
+                {q.preferences.subtitle}
               </p>
             </div>
 
@@ -1306,10 +1306,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             {/* Header */}
             <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {lang === 'es' ? 'Elige tu Plantilla' : 'Choose Your Template'}
+                {q.template.heading}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {lang === 'es' ? 'Selecciona el diseño que mejor represente tu estilo profesional' : 'Select the design that best represents your professional style'}
+                {q.template.subtitle}
               </p>
             </div>
 
@@ -1329,7 +1329,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   <div className="relative w-full aspect-[3/4] bg-gray-100 dark:bg-gray-700">
                     <img
                       src={template.previewImg}
-                      alt={lang === 'es' ? template.name.es : template.name.en}
+                      alt={template.name[lang]}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         // Fallback si la imagen no carga
@@ -1353,17 +1353,10 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   {/* Template Info */}
                   <div className="p-4">
                     <div className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                      {lang === 'es' ? template.name.es : template.name.en}
+                      {template.name[lang]}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {lang === 'es'
-                        ? template.isPro
-                          ? 'Diseño premium con características avanzadas'
-                          : 'Diseño profesional y elegante'
-                        : template.isPro
-                          ? 'Premium design with advanced features'
-                          : 'Professional and elegant design'
-                      }
+                      {template.isPro ? q.template.premiumDescription : q.template.standardDescription}
                     </div>
                   </div>
                 </div>
@@ -1399,7 +1392,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{section.name}</h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {q.progress.step} {currentSection + 1} {q.progress.of} {SECTIONS.length} • {progress}% {lang === 'es' ? 'completado' : 'complete'}
+                  {q.progress.step} {currentSection + 1} {q.progress.of} {SECTIONS.length} • {progress}% {q.progress.complete}
                 </p>
               </div>
             </div>
@@ -1408,7 +1401,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             <button
               onClick={onComplete}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title={lang === 'es' ? 'Cerrar' : 'Close'}
+              title={q.navigation.close}
             >
               <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

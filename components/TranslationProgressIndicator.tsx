@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface TranslationProgressIndicatorProps {
   current: number;
@@ -14,11 +14,11 @@ export function TranslationProgressIndicator({
   percentage,
   isVisible,
 }: TranslationProgressIndicatorProps) {
-  const { lang } = useLanguage();
+  const t = useTranslations();
 
   if (!isVisible || total === 0) return null;
 
-  const translatingText = lang === 'es' ? 'Traduciendo...' : 'Translating...';
+  const translatingText = t.translationProgress.translating;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-lg p-4 shadow-xl min-w-[280px] animate-slide-up">

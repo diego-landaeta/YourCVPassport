@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SparklesIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import MatchBreakdown, { MatchBreakdownData } from './MatchBreakdown';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface MatchScoreBadgeProps {
   score: number;
@@ -28,6 +29,7 @@ const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({
   className = ''
 }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const [showTooltip, setShowTooltip] = useState(false);
 
   // Get color classes based on score
@@ -93,13 +95,13 @@ const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({
   // Get label based on score
   const getScoreLabel = () => {
     if (score >= 80) {
-      return lang === 'es' ? 'Excelente' : 'Excellent';
+      return t.matchScoreBadge.excellent;
     } else if (score >= 60) {
-      return lang === 'es' ? 'Bueno' : 'Good';
+      return t.matchScoreBadge.good;
     } else if (score >= 40) {
-      return lang === 'es' ? 'Aceptable' : 'Fair';
+      return t.matchScoreBadge.fair;
     } else {
-      return lang === 'es' ? 'Bajo' : 'Low';
+      return t.matchScoreBadge.low;
     }
   };
 
@@ -125,7 +127,7 @@ const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({
         <SparklesIcon className={sizes.icon} />
         <span className={sizes.score}>{score}%</span>
         <span className="hidden sm:inline font-medium">
-          {lang === 'es' ? 'Match' : 'Match'}
+          {t.matchScoreBadge.match}
         </span>
         {showBreakdown && breakdown && (
           <InformationCircleIcon className={`${sizes.icon} ml-1 opacity-70`} />

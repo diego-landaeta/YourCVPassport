@@ -22,6 +22,8 @@ export {
   saveCachedTranslation,
   deleteCachedTranslation,
   generateContentHash,
+  applyCachedTranslations,
+  extractTranslatedContent,
 } from './cache/databaseCache';
 
 export {

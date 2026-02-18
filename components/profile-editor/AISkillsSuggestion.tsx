@@ -34,6 +34,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 }) => {
   const { session } = useAuth();
   const t = useTranslations();
+  const aiS = t.aiSkillsSuggestion;
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -66,9 +67,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 
   const analyzeSuggestSkills = async () => {
     if (!session?.user.id || experiences.length === 0) {
-      setError(lang === 'en'
-        ? 'You need at least 1 work experience to get suggestions'
-        : 'Necesitas al menos 1 experiencia laboral para obtener sugerencias');
+      setError(aiS.needExperience);
       return;
     }
 
@@ -147,11 +146,10 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
           <LightBulbIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
           <div>
             <h4 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
-              Sugerencias de habilidades no disponibles
+              {aiS.notAvailableTitle}
             </h4>
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Agrega al menos 1 experiencia laboral para que la IA pueda sugerir habilidades
-              relevantes basadas en tu trayectoria profesional.
+              {aiS.notAvailableDesc}
             </p>
           </div>
         </div>
@@ -187,27 +185,25 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-semibold text-amber-900 dark:text-amber-200">
-                {lang === 'en' ? 'Premium Feature' : 'Función Premium'}
+                {aiS.premiumFeature}
               </h4>
               <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
-                {lang === 'en'
-                  ? `AI-powered skill suggestions are available on Pro and Enterprise plans. Current plan: ${planName}`
-                  : `Las sugerencias de habilidades con IA están disponibles en los planes Pro y Enterprise. Plan actual: ${planName}`}
+                {aiS.premiumSkillsDesc(planName)}
               </p>
 
               {/* Benefits */}
               <ul className="mt-4 space-y-2">
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'Automatic skill detection from your experience' : 'Detección automática de habilidades de tu experiencia'}
+                  {aiS.autoSkillDetection}
                 </li>
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'Industry-relevant skill recommendations' : 'Recomendaciones de habilidades relevantes para tu industria'}
+                  {aiS.industryRecommendations}
                 </li>
                 <li className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
                   <SparklesIcon className="h-4 w-4" />
-                  {lang === 'en' ? 'One-click skill addition' : 'Agregar habilidades con un clic'}
+                  {aiS.oneClickAdd}
                 </li>
               </ul>
 
@@ -215,7 +211,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
                 onClick={() => navigate('/pricing')}
                 className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30 transition-all hover:from-amber-600 hover:to-orange-600"
               >
-                {lang === 'en' ? 'Upgrade to Pro' : 'Mejorar a Pro'}
+                {aiS.upgradeToPro}
               </button>
             </div>
           </div>
@@ -241,16 +237,14 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
                 ? 'text-red-800 dark:text-red-200'
                 : 'text-gray-700 dark:text-gray-300'
             }`}>
-              {lang === 'en'
-                ? `${aiAccessInfo.remaining} AI requests remaining this month`
-                : `${aiAccessInfo.remaining} solicitudes de IA restantes este mes`}
+              {aiS.aiRequestsRemaining(aiAccessInfo.remaining)}
             </span>
             {aiAccessInfo.remaining <= 5 && (
               <button
                 onClick={() => navigate('/pricing')}
                 className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
               >
-                {lang === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
+                {aiS.getUnlimited}
               </button>
             )}
           </div>
@@ -271,14 +265,12 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
               </span>
               {aiAccessInfo?.remaining === 'unlimited' && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                  {lang === 'en' ? 'Unlimited' : 'Ilimitado'}
+                  {t.aiPremium.unlimited}
                 </span>
               )}
             </div>
             <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-              {lang === 'en'
-                ? `Based on your ${experiences.length} work experience(s)`
-                : `Basadas en tus ${experiences.length} experiencia(s) laboral(es)`}
+              {aiS.basedOnExperiences(experiences.length)}
             </p>
           </div>
         </div>
@@ -295,22 +287,22 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
           {isAnalyzing ? (
             <>
               <ArrowPathIcon className="w-5 h-5 animate-spin" />
-              {lang === 'en' ? 'Analyzing with AI...' : 'Analizando con IA...'}
+              {aiS.analyzingWithAi}
             </>
           ) : aiAccessInfo?.remaining === 0 ? (
             <>
               <LockClosedIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado'}
+              {aiS.limitReached}
             </>
           ) : hasAutoAnalyzed ? (
             <>
               <ArrowPathIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Regenerate AI Suggestions' : 'Regenerar Sugerencias IA'}
+              {aiS.regenerateSuggestions}
             </>
           ) : (
             <>
               <SparklesIcon className="w-5 h-5" />
-              {lang === 'en' ? 'Generate AI Suggestions' : 'Generar Sugerencias IA'}
+              {aiS.generateSuggestions}
             </>
           )}
         </button>
@@ -350,7 +342,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
                   {isAdded ? (
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium text-sm">
                       <CheckCircleIcon className="w-5 h-5" />
-                      Agregada
+                      {aiS.added}
                     </div>
                   ) : (
                     <button
@@ -361,12 +353,12 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
                       {isAdding ? (
                         <>
                           <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                          Agregando...
+                          {aiS.adding}
                         </>
                       ) : (
                         <>
                           <PlusCircleIcon className="w-4 h-4" />
-                          Agregar
+                          {aiS.add}
                         </>
                       )}
                     </button>
@@ -378,8 +370,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 
           <div className="mt-4 text-sm text-gray-600 dark:text-dark-text-secondary">
             <p>
-              💡 <strong>Tip:</strong> Estas habilidades fueron identificadas automáticamente
-              basándose en tus experiencias. Revisa y agrega las que realmente dominas.
+              <strong>{aiS.tip}</strong> {aiS.tipText}
             </p>
           </div>
         </div>
@@ -395,10 +386,10 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
             </div>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Analizando tus experiencias...
+            {aiS.analyzingExperiences}
           </h3>
           <p className="text-gray-600 dark:text-gray-400">
-            La IA está identificando habilidades relevantes basadas en tu trayectoria profesional
+            {aiS.aiIdentifyingSkills}
           </p>
         </div>
       )}
@@ -408,11 +399,10 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
         <div className="text-center py-12 bg-gray-50 dark:bg-dark-bg-secondary rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           <LightBulbIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No se encontraron habilidades nuevas
+            {aiS.noNewSkillsFound}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            La IA no detectó habilidades adicionales basándose en tus experiencias actuales.
-            Puedes volver a analizar más tarde después de agregar más experiencias.
+            {aiS.noNewSkillsDesc}
           </p>
         </div>
       )}

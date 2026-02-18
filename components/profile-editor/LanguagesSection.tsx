@@ -30,6 +30,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
   const translations = useTranslations();
   const { lang } = useLanguage();
   const modals = translations.dashboard.modals;
+  const langT = translations.profileEditor.languages;
 
   // Get schema with translated error messages
   const { languageSchema } = useMemo(() => getProfileSchemas(translations), [translations]);
@@ -156,18 +157,16 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
             </div>
             <div className="flex-1">
               <h4 className="text-xs font-semibold text-gray-900 dark:text-white mb-1">
-                {lang === 'en' ? 'Do you have a language certificate?' : '¿Cuentas con algún certificado de idioma?'}
+                {langT.haveCertificate}
               </h4>
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5">
-                {lang === 'en'
-                  ? 'Upload official certificates (TOEFL, IELTS, DELE, DELF, etc.) to verify your proficiency.'
-                  : 'Sube certificados oficiales (TOEFL, IELTS, DELE, DELF, etc.) para verificar tu nivel.'}
+                {langT.uploadCertificateDesc}
               </p>
               <button
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
-                {lang === 'en' ? 'Upload Certificate' : 'Subir Certificado'}
+                {langT.uploadCertificate}
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -188,12 +187,10 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                {lang === 'en' ? 'What is your native language?' : '¿Cuál es tu idioma nativo?'}
+                {langT.whatIsNativeLanguage}
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-                {lang === 'en'
-                  ? 'Start by selecting your native language. This is the language you speak fluently from birth or early childhood.'
-                  : 'Comienza seleccionando tu idioma nativo. Este es el idioma que hablas con fluidez desde tu nacimiento o infancia.'}
+                {langT.nativeLanguageDesc}
               </p>
               <button
                 onClick={handleAddNative}
@@ -202,7 +199,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                {lang === 'en' ? 'Add Native Language' : 'Agregar Idioma Nativo'}
+                {langT.addNativeLanguage}
               </button>
             </div>
           </div>
@@ -223,7 +220,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              {lang === 'en' ? 'Add Native' : 'Agregar Nativo'}
+              {langT.addNative}
             </button>
           </div>
           <div className="space-y-2">
@@ -247,7 +244,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                       <div className="flex items-center gap-2">
                         <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{nativeLanguage.name}</h4>
                         <span className="px-2 py-0.5 bg-indigo-600 dark:bg-indigo-500 text-white text-xs font-medium rounded uppercase">
-                          {lang === 'en' ? 'Native' : 'Nativo'}
+                          {langT.native}
                         </span>
                       </div>
                       {languageData && (
@@ -257,7 +254,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                     <button
                       onClick={() => handleEdit(index)}
                       className="p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title={lang === 'en' ? 'Edit' : 'Editar'}
+                      title={translations.common.edit}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -266,7 +263,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                     <button
                       onClick={() => handleDelete(index)}
                       className="p-1.5 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      title={lang === 'en' ? 'Delete' : 'Eliminar'}
+                      title={translations.common.delete}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -284,7 +281,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
       {isFormOpen && watch('isNative') && (
         <div className="mb-5 border-t dark:border-dark-border pt-6">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            {lang === 'en' ? 'Add Native Language' : 'Agregar Idioma Nativo'}
+            {langT.addNativeLanguage}
           </h3>
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
             {/* Hidden fields for form state */}
@@ -319,12 +316,12 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {lang === 'en' ? 'Language' : 'Idioma'} *
+                {langT.language} *
               </label>
               <LanguageSelector
                 value={watch('name')}
                 onChange={(languageName) => setValue('name', languageName, { shouldValidate: true, shouldDirty: true })}
-                placeholder={lang === 'en' ? 'Select a language' : 'Selecciona un idioma'}
+                placeholder={langT.selectLanguage}
                 lang={lang}
                 error={errors.name?.message}
                 excludeLanguages={languages.map(l => l.name)}
@@ -338,13 +335,13 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 onClick={() => setIsFormOpen(false)}
                 className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
               >
-                {lang === 'en' ? 'Cancel' : 'Cancelar'}
+                {translations.common.cancel}
               </button>
               <button
                 type="submit"
                 className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-lg transition-colors font-medium"
               >
-                {lang === 'en' ? 'Add Native Language' : 'Agregar Idioma Nativo'}
+                {langT.addNativeLanguage}
               </button>
             </div>
           </form>
@@ -365,7 +362,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              {lang === 'en' ? 'Add Language' : 'Agregar Idioma'}
+              {langT.addLanguage}
             </button>
           </div>
 
@@ -402,7 +399,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                         <button
                           onClick={() => handleEdit(index)}
                           className="p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                          title={lang === 'en' ? 'Edit' : 'Editar'}
+                          title={translations.common.edit}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -411,7 +408,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                         <button
                           onClick={() => handleDelete(index)}
                           className="p-1.5 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                          title={lang === 'en' ? 'Delete' : 'Eliminar'}
+                          title={translations.common.delete}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -422,7 +419,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                     {language.percentage !== undefined && language.percentage !== null && (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 dark:text-gray-400 font-medium min-w-[70px]">
-                          {lang === 'en' ? 'Proficiency' : 'Nivel de dominio'}
+                          {langT.proficiency}
                         </span>
                         <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                           <div
@@ -445,7 +442,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {lang === 'en' ? 'No additional languages yet' : 'Aún no has agregado otros idiomas'}
+                {langT.noAdditionalLanguages}
               </p>
             </div>
           )}
@@ -486,12 +483,12 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {lang === 'en' ? 'Language' : 'Idioma'} *
+                {langT.language} *
               </label>
               <LanguageSelector
                 value={watch('name')}
                 onChange={(languageName) => setValue('name', languageName, { shouldValidate: true, shouldDirty: true })}
-                placeholder={lang === 'en' ? 'Select a language' : 'Selecciona un idioma'}
+                placeholder={langT.selectLanguage}
                 lang={lang}
                 error={errors.name?.message}
                 excludeLanguages={languages.map(l => l.name)}
@@ -503,7 +500,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {lang === 'en' ? 'Proficiency Level' : 'Nivel de Dominio'} *
+                    {langT.proficiencyLevel} *
                   </label>
                   <select
                     {...register('level')}
@@ -518,7 +515,7 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {lang === 'en' ? 'Proficiency Percentage (%)' : 'Porcentaje de Dominio (%)'}
+                    {langT.proficiencyPercentage}
                   </label>
                   <input
                     {...register('percentage', {
@@ -545,17 +542,17 @@ const LanguagesSection: React.FC<LanguagesSectionProps> = ({ initialData = [], o
                 onClick={() => setIsFormOpen(false)}
                 className="px-6 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
               >
-                {lang === 'en' ? 'Cancel' : 'Cancelar'}
+                {translations.common.cancel}
               </button>
               <button
                 type="submit"
                 className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
               >
                 {watch('isNative')
-                  ? (lang === 'en' ? 'Add Native Language' : 'Agregar Idioma Nativo')
+                  ? langT.addNativeLanguage
                   : (editingIndex !== null
-                      ? (lang === 'en' ? 'Update' : 'Actualizar')
-                      : (lang === 'en' ? 'Add Language' : 'Agregar Idioma')
+                      ? langT.update
+                      : langT.addLanguage
                     )
                 }
               </button>

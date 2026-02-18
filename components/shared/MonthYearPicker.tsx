@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface MonthYearPickerProps {
   value?: string; // Format: YYYY-MM
@@ -17,9 +18,8 @@ const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
   className = '',
   disabled = false
 }) => {
-  const months = lang === 'es'
-    ? ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const t = useTranslations();
+  const months = t.monthYearPicker.months;
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1949 }, (_, i) => currentYear - i);
@@ -46,7 +46,7 @@ const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
         disabled={disabled}
         className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <option value="">{lang === 'es' ? 'Mes' : 'Month'}</option>
+        <option value="">{t.common.month}</option>
         {months.map((monthName, index) => (
           <option key={index} value={String(index + 1).padStart(2, '0')}>
             {monthName}
@@ -60,7 +60,7 @@ const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
         disabled={disabled}
         className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <option value="">{lang === 'es' ? 'Año' : 'Year'}</option>
+        <option value="">{t.common.year}</option>
         {years.map((yearValue) => (
           <option key={yearValue} value={yearValue}>
             {yearValue}

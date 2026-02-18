@@ -1,19 +1,17 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslations } from '../hooks/useTranslations';
 import LoadingSpinner from './shared/LoadingSpinner';
 
 const AdminProtectedRoute: React.FC = () => {
   const { session, loading, profile, profileLoading } = useAuth();
   const location = useLocation();
-
-  // Get saved language from localStorage for loading message
-  const lang = (localStorage.getItem('language') === 'es') ? 'es' : 'en';
+  const t = useTranslations();
 
   // Wait for BOTH session and profile to finish loading
   if (loading || profileLoading) {
-    const message = lang === 'es' ? 'Verificando permisos de administrador...' : 'Verifying admin permissions...';
-    return <LoadingSpinner message={message} size="large" />;
+    return <LoadingSpinner message={t.loadingMessages.verifyingAdminPermissions} size="large" />;
   }
 
   // Now check if user has session and admin role

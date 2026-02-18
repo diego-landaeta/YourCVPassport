@@ -15,9 +15,13 @@ import ModernMinimalistTemplate from '../templates/ModernMinimalistTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from '../templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from '../templates/HealthcareProfessionalTemplate';
+import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate';
+import CorporateClassicTemplate from '../templates/CorporateClassicTemplate';
+import CreativeMinimalistTemplate from '../templates/CreativeMinimalistTemplate';
+import AcademicStandardTemplate from '../templates/AcademicStandardTemplate';
+import UrbanTemplate from '../templates/UrbanTemplate';
 
 const TemplatePreviewCapture: React.FC = () => {
-    // 12 unique professional profiles
     const templates = [
         {
             name: 'Passport (New)',
@@ -318,6 +322,106 @@ const TemplatePreviewCapture: React.FC = () => {
                 ],
                 education: [{ id: '1', profile_id: '16', field_of_study: 'General', degree: 'Medicina y Cirugía', institution_name: 'Universidad Autónoma de Madrid', start_date: '2002-09-01', end_date: '2008-06-01', description: null, created_at: new Date().toISOString() }],
                 skills: ['Electrofisiología', 'Ecocardiografía', 'Implantes Cardíacos', 'Urgencias'].map((name, i) => ({ id: `${i + 1}`, profile_id: '16', name, created_at: new Date().toISOString() })),
+                certifications: [],
+                languages: [],
+                services: [],
+                stats: [],
+                portfolioItems: []
+            }
+        },
+        {
+            name: 'Modern Professional',
+            id: 'modern-professional',
+            component: ModernProfessionalTemplate,
+            color: '#4F46E5',
+            data: {
+                profile: { id: '17', full_name: 'Lucía Fernández Blanco', headline: 'Marketing Director | Growth', summary: 'Directora de marketing con 11 años liderando estrategias de crecimiento para startups tecnológicas. Especializada en growth hacking y marketing digital.', meta_description: 'lucia.fernandez@marketing.com', cv_visibility: 'public', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                experiences: [
+                    { id: '1', profile_id: '17', position: 'Marketing Director', company_name: 'ScaleUp Tech', start_date: '2019-01-01', end_date: null, description: 'Estrategia de crecimiento que llevó a la empresa de 1K a 50K usuarios. Gestión de equipo de 8 personas.', is_current: true, created_at: new Date().toISOString() },
+                    { id: '2', profile_id: '17', position: 'Growth Marketing Manager', company_name: 'Digital First Agency', start_date: '2015-06-01', end_date: '2018-12-01', description: 'Campañas de adquisición y retención. ROI promedio del 450%.', is_current: false, created_at: new Date().toISOString() }
+                ],
+                education: [{ id: '1', profile_id: '17', field_of_study: 'General', degree: 'Marketing y Comunicación', institution_name: 'ESADE Business School', start_date: '2010-09-01', end_date: '2014-06-01', description: null, created_at: new Date().toISOString() }],
+                skills: ['Growth Hacking', 'Google Ads', 'SEO/SEM', 'Analytics', 'HubSpot'].map((name, i) => ({ id: `${i + 1}`, profile_id: '17', name, created_at: new Date().toISOString() })),
+                certifications: [],
+                languages: [],
+                services: [],
+                stats: [],
+                portfolioItems: []
+            }
+        },
+        {
+            name: 'Corporate Classic',
+            id: 'corporate-classic',
+            component: CorporateClassicTemplate,
+            color: '#374151',
+            data: {
+                profile: { id: '18', full_name: 'Ricardo Moreno Valdés', headline: 'CFO | Dirección Financiera', summary: 'Director financiero con 18 años en gestión corporativa. Experto en planificación fiscal, tesorería y relaciones con inversores.', meta_description: 'ricardo.moreno@cfo.com', cv_visibility: 'public', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                experiences: [
+                    { id: '1', profile_id: '18', position: 'Chief Financial Officer', company_name: 'Grupo Industrial Ibérico', start_date: '2017-01-01', end_date: null, description: 'Dirección financiera de grupo con facturación de €200M. Reestructuración de deuda exitosa.', is_current: true, created_at: new Date().toISOString() },
+                    { id: '2', profile_id: '18', position: 'Finance Director', company_name: 'Multinacional España S.A.', start_date: '2010-03-01', end_date: '2016-12-01', description: 'Control financiero y reporting. Implementación de SAP.', is_current: false, created_at: new Date().toISOString() }
+                ],
+                education: [{ id: '1', profile_id: '18', field_of_study: 'General', degree: 'ADE + MBA Ejecutivo', institution_name: 'IESE Business School', start_date: '2004-09-01', end_date: '2008-06-01', description: null, created_at: new Date().toISOString() }],
+                skills: ['Financial Planning', 'Treasury', 'SAP FI/CO', 'IFRS', 'M&A'].map((name, i) => ({ id: `${i + 1}`, profile_id: '18', name, created_at: new Date().toISOString() })),
+                certifications: [],
+                languages: [],
+                services: [],
+                stats: [],
+                portfolioItems: []
+            }
+        },
+        {
+            name: 'Creative Minimalist',
+            id: 'creative-minimalist',
+            component: CreativeMinimalistTemplate,
+            color: '#EC4899',
+            data: {
+                profile: { id: '19', full_name: 'Sofía Ruiz Delgado', headline: 'Fotógrafa Profesional | Editorial', summary: 'Fotógrafa editorial con 9 años de experiencia. Publicaciones en Vogue, Elle y Harper\'s Bazaar.', meta_description: 'sofia.ruiz@photography.com', cv_visibility: 'public', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                experiences: [
+                    { id: '1', profile_id: '19', position: 'Freelance Photographer', company_name: 'Independiente', start_date: '2018-01-01', end_date: null, description: 'Fotografía editorial y de moda. Colaboraciones con revistas internacionales y marcas de lujo.', is_current: true, created_at: new Date().toISOString() },
+                    { id: '2', profile_id: '19', position: 'Staff Photographer', company_name: 'Estudio Creativo Madrid', start_date: '2015-03-01', end_date: '2017-12-01', description: 'Fotografía de producto y lifestyle para e-commerce.', is_current: false, created_at: new Date().toISOString() }
+                ],
+                education: [{ id: '1', profile_id: '19', field_of_study: 'General', degree: 'Fotografía Artística', institution_name: 'EFTI Centro Internacional', start_date: '2012-09-01', end_date: '2015-06-01', description: null, created_at: new Date().toISOString() }],
+                skills: ['Lightroom & Photoshop', 'Editorial Photography', 'Retouching', 'Color Grading'].map((name, i) => ({ id: `${i + 1}`, profile_id: '19', name, created_at: new Date().toISOString() })),
+                certifications: [],
+                languages: [],
+                services: [],
+                stats: [],
+                portfolioItems: []
+            }
+        },
+        {
+            name: 'Academic Standard',
+            id: 'academic-standard',
+            component: AcademicStandardTemplate,
+            color: '#7C3AED',
+            data: {
+                profile: { id: '20', full_name: 'Dr. Alejandro Vega Soto', headline: 'Investigador | Profesor Universitario', summary: 'Investigador en neurociencia computacional con 20 años de trayectoria académica. 45 publicaciones en revistas indexadas.', meta_description: 'alejandro.vega@university.com', cv_visibility: 'public', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                experiences: [
+                    { id: '1', profile_id: '20', position: 'Catedrático de Neurociencia', company_name: 'Universidad Complutense de Madrid', start_date: '2012-01-01', end_date: null, description: 'Investigación en neurociencia computacional. Dirección de 8 tesis doctorales. Responsable del laboratorio de neuroimagen.', is_current: true, created_at: new Date().toISOString() },
+                    { id: '2', profile_id: '20', position: 'Profesor Titular', company_name: 'Universidad de Granada', start_date: '2006-09-01', end_date: '2011-12-01', description: 'Docencia e investigación en psicobiología y métodos cuantitativos.', is_current: false, created_at: new Date().toISOString() }
+                ],
+                education: [{ id: '1', profile_id: '20', field_of_study: 'General', degree: 'Doctorado en Neurociencia', institution_name: 'Universidad de Oxford', start_date: '2002-09-01', end_date: '2006-06-01', description: null, created_at: new Date().toISOString() }],
+                skills: ['fMRI Analysis', 'MATLAB', 'Python', 'Statistical Modeling', 'Academic Writing'].map((name, i) => ({ id: `${i + 1}`, profile_id: '20', name, created_at: new Date().toISOString() })),
+                certifications: [],
+                languages: [],
+                services: [],
+                stats: [],
+                portfolioItems: []
+            }
+        },
+        {
+            name: 'Urban',
+            id: 'urban',
+            component: UrbanTemplate,
+            color: '#0F172A',
+            data: {
+                profile: { id: '21', full_name: 'Daniela Torres Medina', headline: 'Arquitecta | Diseño Urbano', summary: 'Arquitecta con 10 años especializada en diseño urbano sostenible y regeneración de espacios públicos.', meta_description: 'daniela.torres@architecture.com', cv_visibility: 'public', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                experiences: [
+                    { id: '1', profile_id: '21', position: 'Lead Architect', company_name: 'Urban Studio Architects', start_date: '2019-01-01', end_date: null, description: 'Diseño de proyectos de regeneración urbana. Ganadora de 3 premios de arquitectura.', is_current: true, created_at: new Date().toISOString() },
+                    { id: '2', profile_id: '21', position: 'Arquitecta Senior', company_name: 'Foster + Partners Madrid', start_date: '2014-06-01', end_date: '2018-12-01', description: 'Proyectos residenciales y comerciales de gran escala.', is_current: false, created_at: new Date().toISOString() }
+                ],
+                education: [{ id: '1', profile_id: '21', field_of_study: 'General', degree: 'Arquitectura', institution_name: 'ETSAM - UPM', start_date: '2008-09-01', end_date: '2013-06-01', description: null, created_at: new Date().toISOString() }],
+                skills: ['AutoCAD & Revit', 'SketchUp', 'Urban Planning', 'Sustainable Design', 'BIM'].map((name, i) => ({ id: `${i + 1}`, profile_id: '21', name, created_at: new Date().toISOString() })),
                 certifications: [],
                 languages: [],
                 services: [],

@@ -1015,29 +1015,29 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           type: item.type || 'PROJECT',
 
           // Project fields
-          category: item.category || null,
-          url: item.url || null,
+          category: (item as any).category || null,
+          url: (item as any).url || null,
           image_url: item.image_url || null,
-          file_url: item.file_url || null,
+          file_url: (item as any).file_url || null,
 
           // Certification fields
-          issuer: item.issuer || null,
-          issue_date: item.issue_date || null,
-          expiry_date: item.expiry_date || null,
-          credential_id: item.credential_id || null,
-          credential_url: item.credential_url || null,
+          issuer: (item as any).issuer || null,
+          issue_date: (item as any).issue_date || null,
+          expiry_date: (item as any).expiry_date || null,
+          credential_id: (item as any).credential_id || null,
+          credential_url: (item as any).credential_url || null,
 
           // Collaboration fields
-          organization: item.organization || null,
-          role: item.role || null,
-          start_date: item.start_date || null,
-          end_date: item.end_date || null,
-          is_current: item.is_current || null,
-          collaborators: item.collaborators || null,
+          organization: (item as any).organization || null,
+          role: (item as any).role || null,
+          start_date: (item as any).start_date || null,
+          end_date: (item as any).end_date || null,
+          is_current: (item as any).is_current || null,
+          collaborators: (item as any).collaborators || null,
 
           // Common fields
           sort_order: index,
-          verified: item.verified || null,
+          verified: (item as any).verified || null,
         }));const { error } = await supabase.from('portfolio_items').insert(items);
         if (error) {throw error;
         }
@@ -1654,7 +1654,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                         ? 'text-red-900 dark:text-red-200'
                         : 'text-gray-900 dark:text-white'
                     }`}>
-                      {lang === 'en' ? 'Monthly Export Limit' : 'Límite de Exportaciones Mensual'}
+                      {t.dashboard.export.monthlyLimit}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
                       {planInfo.name}
@@ -1666,13 +1666,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                       : 'text-gray-600 dark:text-gray-400'
                   }`}>
                     {atsExportInfo.remaining === 0 ? (
-                      lang === 'en'
-                        ? 'You have reached your monthly limit. Upgrade for unlimited exports.'
-                        : 'Has alcanzado tu límite mensual. Actualiza para exportaciones ilimitadas.'
+                      t.dashboard.export.limitReached
                     ) : (
-                      lang === 'en'
-                        ? `${atsExportInfo.remaining} of ${atsExportInfo.limit} exports remaining this month`
-                        : `${atsExportInfo.remaining} de ${atsExportInfo.limit} exportaciones restantes este mes`
+                      t.dashboard.export.remaining(atsExportInfo.remaining, atsExportInfo.limit)
                     )}
                   </p>
                 </div>
@@ -1682,7 +1678,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   to="/pricing"
                   className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md"
                 >
-                  {lang === 'en' ? 'Upgrade Plan' : 'Mejorar Plan'}
+                  {t.dashboard.export.upgradePlan}
                 </Link>
               )}
             </div>
@@ -1701,16 +1697,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {lang === 'en' ? 'Unlimited Exports' : 'Exportaciones Ilimitadas'}
+                    {t.dashboard.export.unlimitedExports}
                   </span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
                     {planInfo.name}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {lang === 'en'
-                    ? 'Export your CV as many times as you need'
-                    : 'Exporta tu CV tantas veces como necesites'}
+                  {t.dashboard.export.unlimitedDescription}
                 </p>
               </div>
             </div>
@@ -1720,9 +1714,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.export.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {lang === 'en'
-              ? 'Download and share your professional CV in multiple formats. Choose the best option based on your needs: PDF with full design for presentations, ATS-optimized PDF for job applications through automated systems, JSON for data backup, or a public link to share your always-updated CV online.'
-              : 'Descarga y comparte tu CV profesional en múltiples formatos. Elige la mejor opción según tus necesidades: PDF con diseño completo para presentaciones, PDF optimizado para ATS en aplicaciones a través de sistemas automatizados, JSON para respaldo de datos, o un enlace público para compartir tu CV siempre actualizado en línea.'}
+            {t.dashboard.export.sectionDescription}
           </p>
         </div>
 
@@ -1736,16 +1728,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.pdf.title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {lang === 'en'
-                ? 'Download your CV in PDF format with your selected template design. Perfect for printing and email attachments. Includes colors and graphics from your chosen template.'
-                : 'Descarga tu CV en formato PDF con el diseño de tu plantilla seleccionada. Perfecto para imprimir y adjuntar en correos. Incluye colores y gráficos de tu plantilla elegida.'}
+              {t.dashboard.export.pdf.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-                {lang === 'en' ? '🎨 Full Design' : '🎨 Diseño Completo'}
+                {t.dashboard.export.pdf.fullDesign}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-                {lang === 'en' ? '🖨️ Print Ready' : '🖨️ Listo para Imprimir'}
+                {t.dashboard.export.pdf.printReady}
               </span>
             </div>
             <button
@@ -1761,7 +1751,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               {atsExportInfo && atsExportInfo.remaining === 0
-                ? (lang === 'en' ? 'Limit Reached' : 'Límite Alcanzado')
+                ? t.dashboard.export.pdf.limitReached
                 : t.export.pdf.button}
             </button>
           </div>
@@ -1775,16 +1765,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.json.title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {lang === 'en'
-                ? 'Export all your profile data in JSON format. Ideal for developers, data backups, or importing into other systems. Includes all sections: experience, education, skills, and more.'
-                : 'Exporta todos los datos de tu perfil en formato JSON. Ideal para desarrolladores, respaldos de datos, o importar a otros sistemas. Incluye todas las secciones: experiencia, educación, habilidades, y más.'}
+              {t.dashboard.export.json.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
-                {lang === 'en' ? '💾 Data Backup' : '💾 Respaldo de Datos'}
+                {t.dashboard.export.json.dataBackup}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
-                {lang === 'en' ? '🔄 Portable' : '🔄 Portable'}
+                {t.dashboard.export.json.portable}
               </span>
             </div>
             <button
@@ -1822,19 +1810,17 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              {lang === 'en' ? 'ATS-Friendly PDF' : 'PDF ATS-Optimizado'}
+              {t.dashboard.export.ats.title}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {lang === 'en'
-                ? 'Optimized PDF for Applicant Tracking Systems (ATS) used by HR departments. Simple formatting ensures your CV is properly parsed by automated systems. Choose from 3 professional templates designed to pass ATS screening.'
-                : 'PDF optimizado para Sistemas de Seguimiento de Candidatos (ATS) usados por departamentos de RRHH. Formato simple que garantiza que tu CV sea procesado correctamente por sistemas automatizados. Elige entre 3 plantillas profesionales diseñadas para superar filtros ATS.'}
+              {t.dashboard.export.ats.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
-                {lang === 'en' ? '✅ ATS Compatible' : '✅ Compatible ATS'}
+                {t.dashboard.export.ats.compatible}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
-                {lang === 'en' ? '📋 3 Templates' : '📋 3 Plantillas'}
+                {t.dashboard.export.ats.templates}
               </span>
             </div>
             <button
@@ -1850,7 +1836,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {lang === 'en' ? 'Export ATS PDF' : 'Exportar PDF ATS'}
+              {t.dashboard.export.ats.button}
             </button>
           </div> */}
 
@@ -1864,16 +1850,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.publicLink}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {lang === 'en'
-                ? 'Share your CV with a personalized public link. Perfect for adding to email signatures, LinkedIn profiles, or sharing with recruiters. Your CV will be displayed with your selected template and always up-to-date.'
-                : 'Comparte tu CV con un enlace público personalizado. Perfecto para agregar a firmas de correo, perfiles de LinkedIn, o compartir con reclutadores. Tu CV se mostrará con tu plantilla seleccionada y siempre actualizado.'}
+              {t.dashboard.export.publicLinkDescription}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                {lang === 'en' ? '🔗 Easy Share' : '🔗 Fácil Compartir'}
+                {t.dashboard.export.easyShare}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                {lang === 'en' ? '🔄 Auto-Update' : '🔄 Auto-Actualización'}
+                {t.dashboard.export.autoUpdate}
               </span>
             </div>
             <button
@@ -1941,11 +1925,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   profile_id: session?.user.id || '',
                   description: item.description || null,
                   type: item.type || null,
-                  url: item.url || null,
-                  thumbnail_url: item.thumbnail_url || null,
-                  file_url: item.file_url || null,
-                  tags: item.tags || null,
-                  featured: item.featured || false,
+                  url: (item as any).url || null,
+                  thumbnail_url: (item as any).thumbnail_url || null,
+                  file_url: (item as any).file_url || null,
+                  tags: (item as any).tags || null,
+                  featured: (item as any).featured || false,
                   sort_order: item.sort_order || 0
                 })) as any,
                 certifications: [], // Will be loaded if needed
@@ -1990,7 +1974,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                     onClick={() => setShowPDFExportModal(false)}
                     className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
                   >
-                    {lang === 'en' ? 'Cancel' : 'Cancelar'}
+                    {t.dashboard.export.cancel}
                   </button>
                   <button
                     onClick={async () => {
@@ -2056,10 +2040,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   </div>
 
                   <p className="text-gray-700 dark:text-gray-300 font-medium">
-                    {pdfProgress < 30 && (lang === 'en' ? 'Preparing CV...' : 'Preparando CV...')}
-                    {pdfProgress >= 30 && pdfProgress < 60 && (lang === 'en' ? 'Capturing design...' : 'Capturando diseño...')}
-                    {pdfProgress >= 60 && pdfProgress < 90 && (lang === 'en' ? 'Generating PDF...' : 'Generando PDF...')}
-                    {pdfProgress >= 90 && (lang === 'en' ? 'Downloading...' : 'Descargando...')}
+                    {pdfProgress < 30 && t.dashboard.export.pdf.printDialog.preparing}
+                    {pdfProgress >= 30 && pdfProgress < 60 && t.dashboard.export.pdf.printDialog.capturing}
+                    {pdfProgress >= 60 && pdfProgress < 90 && t.dashboard.export.pdf.printDialog.generating}
+                    {pdfProgress >= 90 && t.dashboard.export.pdf.printDialog.downloading}
                   </p>
 
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -2215,9 +2199,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-green-100 dark:border-green-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.share.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {lang === 'en'
-              ? 'Share your professional CV with recruiters, colleagues, and on social networks. Use your personalized public link, share on LinkedIn, Twitter, or embed your CV on your website. Your CV will always display the latest information and your selected design template.'
-              : 'Comparte tu CV profesional con reclutadores, colegas y en redes sociales. Usa tu enlace público personalizado, comparte en LinkedIn, Twitter, o incrusta tu CV en tu sitio web. Tu CV siempre mostrará la información más reciente y tu plantilla de diseño seleccionada.'}
+            {t.dashboard.share.sectionDescription}
           </p>
         </div>
 
@@ -2514,9 +2496,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl p-6 border border-gray-100 dark:border-gray-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.settings.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {lang === 'en'
-              ? 'Configure your account preferences, display settings, and privacy options. Customize your CV visibility, manage your custom domain, update your personal information, and control how recruiters and visitors interact with your profile.'
-              : 'Configura las preferencias de tu cuenta, ajustes de visualización y opciones de privacidad. Personaliza la visibilidad de tu CV, administra tu dominio personalizado, actualiza tu información personal y controla cómo los reclutadores y visitantes interactúan con tu perfil.'}
+            {t.settings.sectionDescription}
           </p>
         </div>
 
@@ -2625,9 +2605,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-100 dark:border-purple-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.templateSection.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {lang === 'en'
-              ? 'Choose from our collection of professional CV templates. Each template is carefully designed to highlight your experience and skills. Select a modern design for creative industries, a classic template for corporate positions, or an ATS-friendly format for automated application systems. Your selection will apply to your public CV and PDF exports.'
-              : 'Elige entre nuestra colección de plantillas profesionales de CV. Cada plantilla está cuidadosamente diseñada para destacar tu experiencia y habilidades. Selecciona un diseño moderno para industrias creativas, una plantilla clásica para puestos corporativos, o un formato compatible con ATS para sistemas de aplicación automatizados. Tu selección se aplicará a tu CV público y exportaciones PDF.'}
+            {t.templateSection.sectionDescription}
           </p>
         </div>
         <Suspense fallback={<SectionLoader />}>

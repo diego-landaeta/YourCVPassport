@@ -79,7 +79,7 @@ const ATSIntegrationsPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Integraciones ATS' : 'ATS Integrations'}
+                                alt={pageData.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -127,11 +127,9 @@ const ATSIntegrationsPage: React.FC = () => {
             <div className="px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Conecta con cualquier ATS' : 'Connect with any ATS'}
-                        description={lang === 'es'
-                            ? 'Exporta tu CV optimizado directamente a los sistemas ATS más populares sin perder formato ni información.'
-                            : 'Export your optimized CV directly to the most popular ATS systems without losing format or information.'}
-                        buttonText={lang === 'es' ? 'Ver integraciones disponibles' : 'See available integrations'}
+                        title={pageData.inlineCta.title}
+                        description={pageData.inlineCta.description}
+                        buttonText={pageData.inlineCta.button}
                         variant="blue"
                     />
                 </div>

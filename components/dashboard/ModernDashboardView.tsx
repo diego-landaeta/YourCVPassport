@@ -342,12 +342,13 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
             <div className="w-1 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {profile?.first_login_completed === false
-                ? (lang === 'es'
-                    ? `¡${profile?.gender === 'female' ? 'Bienvenida' : 'Bienvenido'}${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`
-                    : `Welcome${profile?.full_name?.trim() && !profile.full_name.includes('@') ? ', ' + profile.full_name.split(' ')[0] : ''}!`)
+                ? t.modernView.welcomeFirstLogin(
+                    profile?.full_name?.trim() && !profile.full_name.includes('@') ? profile.full_name.split(' ')[0] : undefined,
+                    profile?.gender
+                  )
                 : (profile?.full_name?.trim() && !profile.full_name.includes('@')
                     ? t.welcome(profile.full_name, profile?.gender)
-                    : (lang === 'es' ? `¡${profile?.gender === 'female' ? 'Bienvenida' : 'Bienvenido'}!` : 'Welcome!'))
+                    : t.modernView.welcomeNoName(profile?.gender))
               }
             </h1>
           </div>
@@ -391,12 +392,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                      {lang === 'es' ? 'CVs Profesionales' : 'Professional CVs'}
+                      {t.modernView.features.professionalCVs}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {lang === 'es'
-                        ? 'Crea CVs con plantillas modernas optimizadas para ATS'
-                        : 'Create CVs with modern ATS-optimized templates'}
+                      {t.modernView.features.professionalCVsDesc}
                     </p>
                   </div>
                 </div>
@@ -410,12 +409,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                      {lang === 'es' ? 'Verificación de Credenciales' : 'Credential Verification'}
+                      {t.modernView.features.credentialVerification}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {lang === 'es'
-                        ? 'Obtén sellos verificados que validan tu experiencia'
-                        : 'Get verified stamps that validate your experience'}
+                      {t.modernView.features.credentialVerificationDesc}
                     </p>
                   </div>
                 </div>
@@ -429,12 +426,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                      {lang === 'es' ? 'URL Personalizada' : 'Custom URL'}
+                      {t.modernView.features.customURL}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {lang === 'es'
-                        ? 'Comparte tu perfil con una URL única y profesional'
-                        : 'Share your profile with a unique professional URL'}
+                      {t.modernView.features.customURLDesc}
                     </p>
                   </div>
                 </div>
@@ -448,12 +443,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                      {lang === 'es' ? 'Analíticas en Tiempo Real' : 'Real-Time Analytics'}
+                      {t.modernView.features.realTimeAnalytics}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {lang === 'es'
-                        ? 'Sigue quién visita tu perfil y desde dónde'
-                        : 'Track who visits your profile and from where'}
+                      {t.modernView.features.realTimeAnalyticsDesc}
                     </p>
                   </div>
                 </div>
@@ -470,12 +463,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    {lang === 'es' ? '🚀 Guía de Inicio Rápido' : '🚀 Quick Start Guide'}
+                    {`🚀 ${t.modernView.quickStartGuide.title}`}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    {lang === 'es'
-                      ? 'Sigue estos pasos para crear tu CV profesional verificado en minutos:'
-                      : 'Follow these steps to create your verified professional CV in minutes:'}
+                    {t.modernView.quickStartGuide.description}
                   </p>
                 </div>
               </div>
@@ -487,12 +478,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {lang === 'es' ? 'Completa tu información básica' : 'Complete your basic information'}
+                      {t.modernView.quickStartGuide.step1Title}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {lang === 'es'
-                        ? 'Nombre, título profesional, foto y resumen (5 min)'
-                        : 'Name, professional title, photo and summary (5 min)'}
+                      {t.modernView.quickStartGuide.step1Desc}
                     </p>
                   </div>
                 </div>
@@ -503,12 +492,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {lang === 'es' ? 'Agrega tu experiencia y educación' : 'Add your experience and education'}
+                      {t.modernView.quickStartGuide.step2Title}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {lang === 'es'
-                        ? 'Al menos 1 experiencia laboral y 1 formación académica'
-                        : 'At least 1 work experience and 1 academic background'}
+                      {t.modernView.quickStartGuide.step2Desc}
                     </p>
                   </div>
                 </div>
@@ -519,12 +506,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {lang === 'es' ? 'Define tus habilidades clave' : 'Define your key skills'}
+                      {t.modernView.quickStartGuide.step3Title}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {lang === 'es'
-                        ? 'Mínimo 3 habilidades técnicas o profesionales'
-                        : 'Minimum 3 technical or professional skills'}
+                      {t.modernView.quickStartGuide.step3Desc}
                     </p>
                   </div>
                 </div>
@@ -535,12 +520,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {lang === 'es' ? 'Elige tu plantilla y URL' : 'Choose your template and URL'}
+                      {t.modernView.quickStartGuide.step4Title}
                     </h4>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {lang === 'es'
-                        ? 'Selecciona diseño y crea tu URL personalizada'
-                        : 'Select design and create your custom URL'}
+                      {t.modernView.quickStartGuide.step4Desc}
                     </p>
                   </div>
                 </div>
@@ -552,9 +535,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-xs text-gray-700 dark:text-gray-300">
-                    {lang === 'es'
-                      ? '💡 Consejo: Completa todos los pasos del wizard para desbloquear todas las funcionalidades del dashboard.'
-                      : '💡 Tip: Complete all wizard steps to unlock all dashboard features.'}
+                    {`💡 ${t.modernView.quickStartGuide.tip}`}
                   </p>
                 </div>
               </div>
@@ -571,7 +552,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Vistas del perfil' : 'Profile views'}
+                  {t.modernView.statsPreview.profileViews}
                 </div>
               </div>
 
@@ -583,7 +564,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {lang === 'es' ? 'Sellos verificados' : 'Verified stamps'}
+                  {t.modernView.statsPreview.verifiedStamps}
                 </div>
               </div>
 
@@ -820,7 +801,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
-                      title={lang === 'es' ? 'Vista de barras' : 'Bar chart'}
+                      title={t.modernView.chartTitles.barChart}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -833,7 +814,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
-                      title={lang === 'es' ? 'Vista circular' : 'Pie chart'}
+                      title={t.modernView.chartTitles.pieChart}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -1174,13 +1155,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const translations = useTranslations();
   const t = translations.dashboard;
   const currentDate = new Date();
-  const monthNames = lang === 'es'
-    ? ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-  const dayNames = lang === 'es'
-    ? ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = t.modernView.calendar.monthNames;
+  const dayNames = t.modernView.calendar.dayNames;
 
   // Generate calendar data
   const firstDay = new Date(selectedYear, selectedMonth, 1);
@@ -1263,7 +1239,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         <button
           onClick={handlePrevMonth}
           className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
-          title={lang === 'es' ? 'Mes anterior' : 'Previous month'}
+          title={t.modernView.calendar.previousMonth}
         >
           <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -1277,7 +1253,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           <div className="flex items-center justify-center gap-1.5 mt-1">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
             <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-              {totalViews} {lang === 'es' ? 'visitas' : 'visits'}
+              {totalViews} {t.modernView.calendar.visits}
             </p>
           </div>
         </div>
@@ -1290,7 +1266,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               ? 'opacity-30 cursor-not-allowed'
               : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'
           }`}
-          title={lang === 'es' ? 'Mes siguiente' : 'Next month'}
+          title={t.modernView.calendar.nextMonth}
         >
           <svg className={`w-4 h-4 transition-colors ${
             isNextDisabled
@@ -1332,7 +1308,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 className={`aspect-square rounded-md flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md border-2 relative group ${
                   getIntensityColor(views)
                 } ${isToday ? 'ring-2 ring-offset-1 ring-blue-500 dark:ring-blue-400 shadow-lg' : ''}`}
-                title={`${day} ${monthNames[selectedMonth]}: ${views} ${lang === 'es' ? 'visitas' : 'visits'}`}
+                title={`${day} ${monthNames[selectedMonth]}: ${views} ${t.modernView.calendar.visits}`}
               >
                 <span className={`text-[10px] font-bold ${views > 0 ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                   {day}
@@ -1344,7 +1320,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 )}
                 {/* Hover tooltip */}
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white text-[9px] px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                  {views} {lang === 'es' ? 'visitas' : 'visits'}
+                  {views} {t.modernView.calendar.visits}
                 </div>
               </div>
             );

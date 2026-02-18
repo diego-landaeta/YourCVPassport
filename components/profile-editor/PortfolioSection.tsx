@@ -248,7 +248,7 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
       const { data: { publicUrl } } = supabase.storage.from('profile-assets').getPublicUrl(filePath);
       setImagePreview(publicUrl);
       setValue('image_url', publicUrl);
-      toast.success(translations.common.uploading);
+      toast.success(translations.common.loading);
     } catch (error) {
       toast.error('Error al subir la imagen. Por favor, intenta de nuevo.');
     } finally {

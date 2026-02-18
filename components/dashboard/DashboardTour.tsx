@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface TourStep {
   target: string;
   title: string;
   content: string;
-  placement: 'top' | 'bottom' | 'left' | 'right';
+  placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
 }
 
 interface DashboardTourProps {
@@ -18,9 +19,11 @@ interface DashboardTourProps {
 
 const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpenMobileMenu, isMobileMenuOpen, userGender }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
+  const tourUI = t.dashboard.tour;
   const [currentStep, setCurrentStep] = useState(0);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
-  const [arrowPosition, setArrowPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('bottom');
+  const [arrowPosition, setArrowPosition] = useState<'top' | 'bottom' | 'left' | 'right' | 'center'>('bottom');
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile on mount and resize
@@ -499,7 +502,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
     ];
 
     // Intentar cada posición hasta encontrar una válida
-    let finalPosition = { top: margin, left: margin, arrow: 'top' as const };
+    let finalPosition: { top: number; left: number; arrow: 'top' | 'bottom' | 'left' | 'right' | 'center' } = { top: margin, left: margin, arrow: 'top' };
 
     for (const pos of positions) {
       const calculated = pos.calculate();
@@ -515,7 +518,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
       finalPosition = {
         top: Math.max(margin, Math.min(rect.top, window.innerHeight - tooltipHeight - margin)),
         left: Math.min(rect.right + offset, window.innerWidth - tooltipWidth - margin),
-        arrow: 'left' as const
+        arrow: 'left'
       };
     }
 
@@ -634,7 +637,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
             <button
               onClick={handleSkipTour}
               className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors hover:scale-110"
-              title={lang === 'en' ? 'Close tour' : 'Cerrar tutorial'}
+              title={tourUI.closeTour}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -661,7 +664,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
               onClick={handleSkipTour}
               className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:underline transition-colors"
             >
-              {lang === 'en' ? 'Skip Tour' : 'Saltar Tutorial'}
+              {tourUI.skipTour}
             </button>
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
@@ -669,7 +672,7 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
                   onClick={handlePrevious}
                   className="px-4 py-2 text-sm font-bold text-gray-800 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all shadow-sm hover:shadow-md"
                 >
-                  {lang === 'en' ? 'Back' : 'Atrás'}
+                  {tourUI.back}
                 </button>
               )}
               <button
@@ -677,12 +680,8 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ onComplete, onSkip, onOpe
                 className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
                 {currentStep === steps.length - 1
-                  ? lang === 'en'
-                    ? 'Finish'
-                    : 'Finalizar'
-                  : lang === 'en'
-                  ? 'Next'
-                  : 'Siguiente'}
+                  ? tourUI.finish
+                  : tourUI.next}
               </button>
             </div>
           </div>

@@ -39,6 +39,7 @@ const AIAssistantSection: React.FC<AIAssistantSectionProps> = ({ onSaveStatusCha
   const { profile, session, refetchProfile } = useAuth();
   const t = useTranslations();
   const aiT = t.aiAssistantSection;
+  const aiP = t.aiPremium;
   const toast = useToastContext();
   const confirm = useConfirmDialog();
   const { lang } = useLanguage();
@@ -337,7 +338,7 @@ INSTRUCCIONES:
   const handleAnalyze = async () => {
     // Check AI access before analyzing
     if (!session?.user.id) {
-      toast.error(lang === 'es' ? 'Debes iniciar sesión para usar esta función' : 'You must be logged in to use this feature');
+      toast.error(aiP.mustBeLoggedIn);
       return;
     }
 
@@ -346,11 +347,7 @@ INSTRUCCIONES:
     setAiAccessInfo(accessInfo);
 
     if (!accessInfo.hasAccess) {
-      toast.error(
-        lang === 'es'
-          ? accessInfo.reason || 'No tienes acceso a las funciones de IA en tu plan actual'
-          : accessInfo.reason || 'You don\'t have access to AI features on your current plan'
-      );
+      toast.error(accessInfo.reason || aiP.noAiAccess);
       return;
     }
 
@@ -440,41 +437,39 @@ INSTRUCCIONES:
             </div>
             <div className="flex-1">
               <h3 className="text-2xl font-bold text-amber-900 dark:text-amber-200 mb-3">
-                {lang === 'es' ? 'Función Premium' : 'Premium Feature'}
+                {aiP.premiumFeature}
               </h3>
               <p className="text-amber-800 dark:text-amber-300 mb-4 text-lg">
-                {lang === 'es'
-                  ? 'Las funciones de IA para mejorar tu perfil están disponibles en planes Basic, Pro y Enterprise.'
-                  : 'AI features to improve your profile are available on Basic, Pro and Enterprise plans.'}
+                {aiP.premiumDescription}
               </p>
               <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
                 <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-2">
-                  {lang === 'es' ? '¿Qué incluye?' : 'What\'s included?'}
+                  {aiP.whatsIncluded}
                 </h4>
                 <ul className="space-y-2 text-amber-800 dark:text-amber-300">
                   <li className="flex items-start gap-2">
                     <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span>{lang === 'es' ? 'Mejora automática de tu resumen profesional' : 'Automatic improvement of your professional summary'}</span>
+                    <span>{aiP.improveSummary}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span>{lang === 'es' ? 'Optimización de descripciones de experiencia' : 'Optimization of experience descriptions'}</span>
+                    <span>{aiP.optimizeExperience}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <SparklesIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span>{lang === 'es' ? 'Mejora de secciones de educación' : 'Improvement of education sections'}</span>
+                    <span>{aiP.improveEducation}</span>
                   </li>
                 </ul>
               </div>
               <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
-                {lang === 'es' ? 'Plan actual: ' : 'Current plan: '}
+                {aiP.currentPlan}
                 <span className="font-semibold capitalize">{aiAccessInfo.plan || 'Free'}</span>
               </p>
               <button
                 onClick={() => navigate('/pricing')}
                 className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-md hover:shadow-lg"
               >
-                {lang === 'es' ? 'Ver Planes Premium' : 'View Premium Plans'}
+                {aiP.viewPremiumPlans}
               </button>
             </div>
           </div>
@@ -492,14 +487,14 @@ INSTRUCCIONES:
             <div className="flex items-center gap-2">
               <SparklesIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span className="text-sm text-blue-800 dark:text-blue-300">
-                {lang === 'es' ? 'Solicitudes IA este mes: ' : 'AI Requests this month: '}
+                {aiP.aiRequestsMonth}
                 {aiAccessInfo.remaining === 'unlimited' ? (
                   <span className="font-semibold text-green-600 dark:text-green-400">
-                    {lang === 'es' ? 'Ilimitadas' : 'Unlimited'}
+                    {aiP.unlimited}
                   </span>
                 ) : (
                   <span className="font-semibold">
-                    {aiAccessInfo.remaining} {lang === 'es' ? 'restantes' : 'remaining'}
+                    {aiAccessInfo.remaining} {aiP.remaining}
                   </span>
                 )}
               </span>
@@ -545,7 +540,7 @@ INSTRUCCIONES:
             {isCheckingAccess ? (
               <>
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                {lang === 'es' ? 'Verificando...' : 'Checking...'}
+                {aiP.checking}
               </>
             ) : isAnalyzing ? (
               <>
@@ -701,7 +696,7 @@ INSTRUCCIONES:
               <div className="flex items-center gap-3">
                 <SparklesIcon className="w-7 h-7" />
                 <div>
-                  <h3 className="text-xl font-bold">Confirmar Aplicación de Cambios</h3>
+                  <h3 className="text-xl font-bold">{aiP.confirmApplyChanges}</h3>
                   {confirmationModal.title && (
                     <p className="text-sm text-white/80 mt-1">{confirmationModal.title}</p>
                   )}
@@ -721,7 +716,7 @@ INSTRUCCIONES:
               <div>
                 <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full"></span>
-                  Texto Original
+                  {aiP.originalText}
                 </h4>
                 <div className="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
                   <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -743,7 +738,7 @@ INSTRUCCIONES:
               <div>
                 <h4 className="text-sm font-bold text-green-600 dark:text-green-400 mb-3 uppercase tracking-wider flex items-center gap-2">
                   <SparklesIcon className="w-4 h-4" />
-                  Texto Mejorado por IA
+                  {aiP.aiImprovedText}
                 </h4>
                 <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-200 dark:border-green-800/50 rounded-lg">
                   <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
@@ -762,7 +757,7 @@ INSTRUCCIONES:
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-blue-800 dark:text-blue-300">
-                      <strong>Nota:</strong> Esta acción reemplazará el texto actual con la versión mejorada por IA. Los cambios se aplicarán inmediatamente en tu perfil.
+                      <strong>{aiP.note}</strong> {aiP.confirmNote}
                     </p>
                   </div>
                 </div>
@@ -775,7 +770,7 @@ INSTRUCCIONES:
                 onClick={() => setConfirmationModal(null)}
                 className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
               >
-                Cancelar
+                {aiP.cancel}
               </button>
               <button
                 onClick={applySuggestion}
@@ -785,12 +780,12 @@ INSTRUCCIONES:
                 {isApplying === confirmationModal.id ? (
                   <>
                     <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                    Aplicando...
+                    {aiP.applying}
                   </>
                 ) : (
                   <>
                     <CheckCircleIcon className="w-5 h-5" />
-                    Aplicar Cambios
+                    {aiP.applyChanges}
                   </>
                 )}
               </button>

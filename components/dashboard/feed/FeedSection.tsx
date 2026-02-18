@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import { useFeed } from '../../../hooks/useFeed';
 import CreatePostForm from './CreatePostForm';
 import FeedPost from './FeedPost';
@@ -10,6 +11,7 @@ import EmptyFeed from './EmptyFeed';
 const FeedSection: React.FC = () => {
   const { profile, session } = useAuth();
   const { lang } = useLanguage();
+  const t = useTranslations();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -23,21 +25,6 @@ const FeedSection: React.FC = () => {
     refreshFeed,
     isCreating
   } = useFeed();
-
-  const t = {
-    en: {
-      title: 'Activity Feed',
-      subtitle: 'Share your achievements and connect with other professionals',
-      beta: 'Beta'
-    },
-    es: {
-      title: 'Feed de Actividad',
-      subtitle: 'Comparte tus logros y conecta con otros profesionales',
-      beta: 'Beta'
-    }
-  };
-
-  const translations = t[lang];
 
   // Infinite scroll
   useEffect(() => {
@@ -77,14 +64,14 @@ const FeedSection: React.FC = () => {
       <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm p-6 border border-gray-100 dark:border-dark-border">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {translations.title}
+            {t.feed.title}
           </h2>
           <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-            {translations.beta}
+            {t.feed.beta}
           </span>
         </div>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          {translations.subtitle}
+          {t.feed.subtitle}
         </p>
       </div>
 
@@ -117,7 +104,7 @@ const FeedSection: React.FC = () => {
               {loading && <FeedSkeleton count={1} />}
               {!hasMore && posts.length > 0 && (
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  {lang === 'es' ? 'No hay mas publicaciones' : 'No more posts'}
+                  {t.feed.noMore}
                 </p>
               )}
             </div>
@@ -132,7 +119,7 @@ const FeedSection: React.FC = () => {
             onClick={refreshFeed}
             className="mt-2 text-sm text-red-600 dark:text-red-400 hover:underline"
           >
-            {lang === 'es' ? 'Reintentar' : 'Retry'}
+            {t.feed.errors.retry}
           </button>
         </div>
       )}

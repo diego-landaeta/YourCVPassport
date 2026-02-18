@@ -4,10 +4,11 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  title?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, maxWidth = '4xl' }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, maxWidth = '4xl' }) => {
   if (!isOpen) return null;
 
   const maxWidthClasses = {
@@ -43,6 +44,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, maxWidth = '4x
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+        {title && (
+          <div className="px-6 pt-6 pb-0">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
+          </div>
+        )}
         {children}
       </div>
     </div>

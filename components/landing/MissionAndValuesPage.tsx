@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import Testimonials from './Testimonials';
-import { ValueItem, MilestoneItem } from '../types';
+import { ValueItem, MilestoneItem } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';

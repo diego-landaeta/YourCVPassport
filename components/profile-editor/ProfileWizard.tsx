@@ -432,12 +432,10 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">
-                  {lang === 'es' ? 'Completa tu perfil' : 'Complete your profile'}
+                  {t.profileWizard.completeYourProfile}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                  {lang === 'es'
-                    ? 'Para crear tu CV profesional, necesitas completar:'
-                    : 'To create your professional CV, you need to complete:'}
+                  {t.profileWizard.toCreateCv}
                 </p>
                 <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
                   <ul className="space-y-2">
@@ -454,9 +452,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>
-                    {lang === 'es'
-                      ? 'Navega a las secciones correspondientes usando los iconos de arriba'
-                      : 'Navigate to the corresponding sections using the icons above'}
+                    {t.profileWizard.navigateToSections}
                   </span>
                 </div>
               </div>
@@ -485,12 +481,10 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
               </div>
               <div className="flex-1">
                 <p className="font-bold text-sm mb-1">
-                  {lang === 'es' ? 'Funcionalidad Premium' : 'Premium Feature'}
+                  {t.profileWizard.premiumFeature}
                 </p>
                 <p className="text-xs text-blue-100 mb-3">
-                  {lang === 'es'
-                    ? 'Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es Free.'
-                    : 'AI features are only available for Pro and Premium users. Your current plan is Free.'}
+                  {t.profileWizard.premiumAiDescription}
                 </p>
                 <button
                   onClick={() => {
@@ -499,7 +493,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   }}
                   className="w-full bg-white text-cv-blue px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors shadow-md"
                 >
-                  {lang === 'es' ? 'Ver Planes' : 'View Plans'}
+                  {t.profileWizard.viewPlans}
                 </button>
               </div>
               <button
@@ -524,7 +518,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
         <button
           onClick={handleAIClick}
           className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group"
-          title="Mejorar con IA"
+          title={t.profileWizard.improveWithAi}
         >
           {/* Premium Badge */}
           <span
@@ -544,7 +538,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
           </svg>
           {/* Tooltip */}
           <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            Mejorar con IA
+            {t.profileWizard.improveWithAi}
           </span>
         </button>
       )}

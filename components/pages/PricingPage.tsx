@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import Faq from '../landing/Faq';
 import Testimonials from '../landing/Testimonials';
-import { Plan } from '../types';
+import { Plan } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -36,7 +36,7 @@ const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnu
         : plan.price;
 
     const displayPeriod = isAnnual && annualPrice
-        ? (lang === 'es' ? '/ año' : '/ year')
+        ? t.pricingPage.perYear
         : plan.period;
 
     return (
@@ -50,9 +50,7 @@ const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnu
                 </div>
                 {isAnnual && monthlyFromAnnual && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-                        {lang === 'es'
-                            ? `€${monthlyFromAnnual} por mes`
-                            : `€${monthlyFromAnnual} per month`}
+                        {`€${monthlyFromAnnual} ${t.pricingPage.perMonth}`}
                     </p>
                 )}
             </div>

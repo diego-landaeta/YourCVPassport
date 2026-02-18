@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../supabase/client';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
@@ -10,7 +10,17 @@ import {
   ClockIcon,
   DocumentTextIcon,
   ChatBubbleLeftRightIcon,
+  BoltIcon,
 } from '@heroicons/react/24/outline';
+import { FullProfileData } from '../../types';
+import {
+  translateBatch,
+  detectSourceLanguage,
+  saveCachedTranslation,
+  generateContentHash,
+  extractTranslatedContent,
+  TranslationLanguage,
+} from '../../services/translation';
 
 interface CachedTranslation {
   id: string;
@@ -84,6 +94,12 @@ const TranslationCacheManagement: React.FC = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [clearingAll, setClearingAll] = useState(false);
 
+  // Bulk translation state
+  const [bulkTranslating, setBulkTranslating] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, currentName: '', errors: 0 });
+  const [bulkResult, setBulkResult] = useState<{ success: number; errors: number } | null>(null);
+  const abortRef = useRef(false);
+
   const t = {
     en: {
       title: 'Translation Cache',
@@ -132,6 +148,13 @@ const TranslationCacheManagement: React.FC = () => {
       empty: 'No cached translations found',
       emptyTexts: 'No cached text translations found',
       loading: 'Loading...',
+      bulk: {
+        translateAll: 'Translate All',
+        translating: 'Translating',
+        cancel: 'Cancel',
+        errors: 'errors',
+        profilesTranslated: 'profiles translated',
+      },
     },
     es: {
       title: 'Caché de Traducciones',
@@ -180,6 +203,13 @@ const TranslationCacheManagement: React.FC = () => {
       empty: 'No se encontraron traducciones en caché',
       emptyTexts: 'No se encontraron traducciones de texto en caché',
       loading: 'Cargando...',
+      bulk: {
+        translateAll: 'Traducir Todos',
+        translating: 'Traduciendo',
+        cancel: 'Cancelar',
+        errors: 'errores',
+        profilesTranslated: 'perfiles traducidos',
+      },
     },
   };
 
@@ -376,6 +406,186 @@ const TranslationCacheManagement: React.FC = () => {
     }
   };
 
+  /**
+   * Fetch full profile data for a single profile
+   */
+  const fetchFullProfile = async (profileId: string): Promise<FullProfileData | null> => {
+    const [
+      { data: profile },
+      { data: experiences },
+      { data: education },
+      { data: skills },
+      { data: portfolioItems },
+      { data: languages },
+      { data: stamps },
+    ] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', profileId).single(),
+      supabase.from('experiences').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
+      supabase.from('education').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
+      supabase.from('skills').select('*').eq('profile_id', profileId),
+      supabase.from('portfolio_items').select('*').eq('profile_id', profileId),
+      supabase.from('languages').select('*').eq('profile_id', profileId),
+      supabase.from('stamps').select('*').eq('profile_id', profileId).eq('status', 'VERIFIED'),
+    ]);
+
+    if (!profile) return null;
+
+    return {
+      profile,
+      experiences: experiences || [],
+      education: education || [],
+      skills: skills || [],
+      portfolioItems: portfolioItems || [],
+      portfolio: portfolioItems?.filter((item: any) => item.type === 'PROJECT' || !item.type),
+      certifications: portfolioItems?.filter((item: any) => item.type === 'CERTIFICATION') || [],
+      collaborations: portfolioItems?.filter((item: any) => item.type === 'COLLABORATION'),
+      languages: languages || [],
+      services: [],
+      stats: [],
+      stamps: stamps || [],
+    };
+  };
+
+  /**
+   * Extract translatable texts from profile (same logic as useTranslatedProfile)
+   */
+  const extractTexts = (data: FullProfileData): string[] => {
+    const texts: string[] = [];
+    if (data.profile.headline) texts.push(data.profile.headline);
+    if (data.profile.summary) texts.push(data.profile.summary);
+    data.experiences?.forEach(exp => {
+      if (exp.position) texts.push(exp.position);
+      if (exp.description) texts.push(exp.description);
+      exp.achievements?.forEach((a: string | null) => a && texts.push(a));
+    });
+    data.education?.forEach(edu => {
+      if (edu.degree) texts.push(edu.degree);
+      if (edu.field_of_study) texts.push(edu.field_of_study);
+      if (edu.description) texts.push(edu.description);
+      if (edu.grade) texts.push(edu.grade);
+    });
+    data.portfolioItems?.forEach(item => {
+      if (item.title) texts.push(item.title);
+      if (item.description) texts.push(item.description);
+    });
+    data.skills?.forEach(skill => {
+      if (skill.name) texts.push(skill.name);
+    });
+    data.certifications?.forEach(cert => {
+      const c = cert as any;
+      if (c.name) texts.push(c.name);
+      if (c.title) texts.push(c.title);
+      if (c.description) texts.push(c.description);
+    });
+    return texts.filter(t => t && t.trim() !== '');
+  };
+
+  /**
+   * Translate a single profile to a target language and save to cache
+   */
+  const translateProfile = async (profileData: FullProfileData, targetLang: TranslationLanguage): Promise<boolean> => {
+    try {
+      const allTexts = extractTexts(profileData);
+      if (allTexts.length === 0) return true;
+
+      // Separate texts by detected language
+      const textsInSpanish: string[] = [];
+      const textsInEnglish: string[] = [];
+      allTexts.forEach(text => {
+        const textLang = detectSourceLanguage(text);
+        if (textLang === 'es') textsInSpanish.push(text);
+        else textsInEnglish.push(text);
+      });
+
+      // Determine what needs translation
+      const textsToTranslate = targetLang === 'en' ? textsInSpanish : textsInEnglish;
+      const sourceLang: TranslationLanguage = targetLang === 'en' ? 'es' : 'en';
+      const uniqueTexts = [...new Set(textsToTranslate)].map(t => t.trim());
+
+      if (uniqueTexts.length === 0) return true;
+
+      const translations = await translateBatch(uniqueTexts, targetLang, sourceLang);
+
+      // Build skills translation array
+      const translatedSkills = (profileData.skills || []).map(skill => ({
+        id: skill.id || '',
+        name: translations.get(skill.name?.trim()) || skill.name,
+      }));
+
+      // Save to cache
+      const contentHash = generateContentHash(profileData);
+      const contentToCache = extractTranslatedContent(profileData, translations, translatedSkills);
+      await saveCachedTranslation(profileData.profile.id, targetLang, contentToCache, contentHash);
+
+      return true;
+    } catch (err) {
+      console.error(`[BulkTranslate] Error translating profile ${profileData.profile.full_name}:`, err);
+      return false;
+    }
+  };
+
+  /**
+   * Bulk translate all profiles
+   */
+  const handleTranslateAll = async () => {
+    setBulkTranslating(true);
+    setBulkResult(null);
+    abortRef.current = false;
+
+    try {
+      // Fetch all active profiles
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('is_active', true)
+        .order('full_name');
+
+      if (error || !profiles) {
+        console.error('Error fetching profiles:', error);
+        setBulkTranslating(false);
+        return;
+      }
+
+      const total = profiles.length;
+      setBulkProgress({ current: 0, total, currentName: '', errors: 0 });
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < profiles.length; i++) {
+        if (abortRef.current) break;
+
+        const profile = profiles[i];
+        setBulkProgress({ current: i + 1, total, currentName: profile.full_name || '', errors: errorCount });
+
+        const fullProfile = await fetchFullProfile(profile.id);
+        if (!fullProfile) {
+          errorCount++;
+          continue;
+        }
+
+        // Translate to both languages
+        const esOk = await translateProfile(fullProfile, 'es');
+        const enOk = await translateProfile(fullProfile, 'en');
+
+        if (esOk && enOk) successCount++;
+        else errorCount++;
+      }
+
+      setBulkResult({ success: successCount, errors: errorCount });
+      // Refresh the cache list
+      fetchTranslations();
+      fetchTextTranslations();
+    } catch (err) {
+      console.error('[BulkTranslate] Fatal error:', err);
+    } finally {
+      setBulkTranslating(false);
+    }
+  };
+
+  const handleAbortBulk = () => {
+    abortRef.current = true;
+  };
+
   const filteredTranslations = translations.filter(t => {
     const matchesSearch = !searchQuery ||
       t.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -439,6 +649,18 @@ const TranslationCacheManagement: React.FC = () => {
             {translations_t.actions.refresh}
           </button>
           <button
+            onClick={handleTranslateAll}
+            disabled={bulkTranslating}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {bulkTranslating ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+            ) : (
+              <BoltIcon className="h-4 w-4" />
+            )}
+            {translations_t.bulk.translateAll}
+          </button>
+          <button
             onClick={activeTab === 'profiles' ? handleClearAllCache : handleClearAllTextCache}
             disabled={clearingAll || (activeTab === 'profiles' ? translations.length === 0 : textTranslations.length === 0)}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -452,6 +674,57 @@ const TranslationCacheManagement: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Bulk Translation Progress */}
+      {bulkTranslating && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+              {`${translations_t.bulk.translating} ${bulkProgress.current}/${bulkProgress.total} — ${bulkProgress.currentName}...`}
+            </p>
+            <button
+              onClick={handleAbortBulk}
+              className="text-xs px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+            >
+              {translations_t.bulk.cancel}
+            </button>
+          </div>
+          <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2.5">
+            <div
+              className="bg-blue-600 dark:bg-blue-400 h-2.5 rounded-full transition-all duration-300"
+              style={{ width: `${bulkProgress.total > 0 ? (bulkProgress.current / bulkProgress.total) * 100 : 0}%` }}
+            />
+          </div>
+          {bulkProgress.errors > 0 && (
+            <p className="text-xs text-red-600 dark:text-red-400">
+              {bulkProgress.errors} {translations_t.bulk.errors}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Bulk Translation Result */}
+      {bulkResult && !bulkTranslating && (
+        <div className={`rounded-lg p-4 flex items-center justify-between ${
+          bulkResult.errors === 0
+            ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
+            : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'
+        }`}>
+          <p className={`text-sm font-medium ${
+            bulkResult.errors === 0
+              ? 'text-emerald-800 dark:text-emerald-300'
+              : 'text-amber-800 dark:text-amber-300'
+          }`}>
+            {`${bulkResult.success} ${translations_t.bulk.profilesTranslated}${bulkResult.errors > 0 ? `, ${bulkResult.errors} ${translations_t.bulk.errors}` : ''}`}
+          </p>
+          <button
+            onClick={() => setBulkResult(null)}
+            className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-dark-border">

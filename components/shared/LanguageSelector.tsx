@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslations } from '../../hooks/useTranslations';
 
 export interface Language {
   name: string;
@@ -46,6 +47,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   error,
   excludeLanguages = []
 }) => {
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -143,7 +145,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={lang === 'es' ? 'Buscar idioma...' : 'Search language...'}
+                placeholder={t.common.searchLanguage}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent dark:bg-dark-bg-tertiary dark:text-white text-sm"
                 autoFocus
               />
@@ -154,7 +156,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <div className="overflow-y-auto max-h-80">
             {filteredLanguages.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                {lang === 'es' ? 'No se encontraron idiomas' : 'No languages found'}
+                {t.common.noLanguagesFound}
               </div>
             ) : (
               filteredLanguages.map((language) => (

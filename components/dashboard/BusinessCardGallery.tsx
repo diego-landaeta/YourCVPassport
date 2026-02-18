@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Profile } from '../../types';
 import QRCode from 'qrcode';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import { businessCardStyles, BusinessCardStyle } from './businessCardStyles';
 import { templates } from '../templates/templateData';
 import { supabase } from '../../supabase/client';
@@ -36,13 +37,14 @@ const CardPreview: React.FC<CardPreviewProps> = ({
   qrCodeUrl,
   onSelect
 }) => {
+  const t = useTranslations();
   const customColor = profile?.template_color || style.accentColor;
-  const displayName = profile?.full_name || 'Tu Nombre';
-  const displayTitle = profile?.headline || 'Tu Título Profesional';
-  const displayEmail = userEmail || 'email@ejemplo.com';
+  const displayName = profile?.full_name || t.dashboard.businessCard.yourName;
+  const displayTitle = profile?.headline || t.dashboard.businessCard.yourTitle;
+  const displayEmail = userEmail || t.dashboard.businessCard.emailPlaceholder;
 
   const getShortId = (id: string | undefined) => {
-    if (!id) return 'TU-ID';
+    if (!id) return t.dashboard.businessCard.yourId;
     if (id.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/)) {
       return id.substring(0, 10).toUpperCase();
     }
@@ -112,7 +114,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              Tu Tarjeta Actual
+              {t.dashboard.businessCardGallery.currentCard}
             </div>
           </div>
         )}
@@ -156,7 +158,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
                   className="text-[0.55rem] font-medium mb-1 uppercase tracking-wider opacity-70"
                   style={{ color: style.textColor }}
                 >
-                  Tarjeta de Visita
+                  {t.dashboard.businessCardGallery.businessCardLabel}
                 </div>
                 <h2
                   className="text-base font-bold mb-1 leading-tight"
@@ -251,6 +253,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
 
 const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shareUrl, userEmail }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const toast = useToastContext();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [filter, setFilter] = useState<'all' | 'free' | 'pro'>('all');
@@ -279,7 +282,7 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
         });
         setQrCodeUrl(url);
       } catch (err) {
-        toast.error('Error al generar código QR');
+        toast.error(t.dashboard.businessCardGallery.qrError);
       }
     };
 
@@ -313,12 +316,12 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
         .eq('id', profile.id);
 
       if (error) {
-        toast.error('Error al guardar selección de tarjeta');
+        toast.error(t.dashboard.businessCardGallery.saveError);
         // Revert selection on error
         setSelectedCard(profile?.business_card_template || profile?.template || 'classic');
       }
     } catch (error) {
-      toast.error('Error al guardar tarjeta de presentación');
+      toast.error(t.dashboard.businessCardGallery.saveCardError);
       setSelectedCard(profile?.business_card_template || profile?.template || 'classic');
     } finally {
       setIsSaving(false);
@@ -333,14 +336,14 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
           <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
           </svg>
-          <span className="text-sm font-bold text-gray-700 dark:text-gray-200">Galería de Diseños</span>
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{t.dashboard.businessCardGallery.designGallery}</span>
         </div>
 
         <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-3 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-          Explora Todas las Tarjetas de Visita
+          {t.dashboard.businessCardGallery.exploreAllCards}
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Cada diseño coincide perfectamente con el estilo de tu CV. Tu tarjeta se actualiza automáticamente cuando cambias de template.
+          {t.dashboard.businessCardGallery.galleryDescription}
         </p>
 
         {/* Filter Buttons */}
@@ -357,7 +360,7 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              Todas
+              {t.dashboard.businessCardGallery.filterAll}
               <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
                 filter === 'all'
                   ? 'bg-white/20 text-white'
@@ -380,7 +383,7 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Gratis
+              {t.dashboard.businessCardGallery.filterFree}
               <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
                 filter === 'free'
                   ? 'bg-white/20 text-white'
@@ -446,7 +449,7 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span className="font-medium">Guardando tarjeta...</span>
+          <span className="font-medium">{t.dashboard.businessCardGallery.savingCard}</span>
         </div>
       )}
 
@@ -460,10 +463,10 @@ const BusinessCardGallery: React.FC<BusinessCardGalleryProps> = ({ profile, shar
           </div>
           <div className="text-left">
             <p className="text-sm font-bold text-gray-900 dark:text-white">
-              💡 Consejo Profesional
+              {t.dashboard.businessCardGallery.proTip}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              Haz clic en cualquier tarjeta para seleccionarla. Puedes elegir un diseño diferente al de tu CV.
+              {t.dashboard.businessCardGallery.proTipDescription}
             </p>
           </div>
         </div>

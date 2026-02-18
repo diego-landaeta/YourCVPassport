@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FaqItem } from '../types';
+import { FaqItem } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 
 const FaqItemComponent: React.FC<{ item: { question: string, answer: string } }> = ({ item }) => {

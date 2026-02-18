@@ -57,8 +57,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                                     {pageData.subtitle}
                                 </p>
                                 <p className="mt-4 text-base text-gray-600 dark:text-dark-text-secondary">
-                                    Plantillas diseñadas por expertos en recursos humanos, optimizadas para sistemas ATS como Greenhouse, Lever y Workday.
-                                    Personalizables en tiempo real y exportables a PDF de alta calidad.
+                                    {pageData.description}
                                 </p>
                                 <div className="mt-8">
                                     <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{pageData.templatesIncluded}</h3>
@@ -68,7 +67,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Plantillas de CV Profesionales' : 'Professional CV Templates'}
+                                alt={pageData.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -88,9 +87,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                                 {pageData.gallery.subtitle}
                             </p>
                             <p className="mt-4 max-w-2xl mx-auto text-base text-gray-600 dark:text-dark-text-secondary">
-                                Cada plantilla incluye secciones para experiencia profesional, educación, habilidades técnicas, idiomas y proyectos destacados.
-                                Cambia colores, fuentes y reorganiza el contenido con nuestro editor drag-and-drop. Todas compatibles con sistemas ATS para garantizar
-                                que tu CV sea correctamente procesado por los reclutadores.
+                                {pageData.gallery.description}
                             </p>
                         </div>
                     </AnimatedWrapper>
@@ -104,11 +101,9 @@ const TemplatesAndExamplesPage: React.FC = () => {
             <div className="px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Elige tu plantilla perfecta' : 'Choose your perfect template'}
-                        description={lang === 'es'
-                            ? 'Accede a todas nuestras plantillas profesionales optimizadas para ATS y empieza a destacar hoy.'
-                            : 'Access all our professional ATS-optimized templates and start standing out today.'}
-                        buttonText={lang === 'es' ? 'Explorar plantillas' : 'Explore templates'}
+                        title={pageData.inlineCta.title}
+                        description={pageData.inlineCta.description}
+                        buttonText={pageData.inlineCta.button}
                         variant="gradient"
                     />
                 </div>
@@ -122,9 +117,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                             <h2 className="text-2xl md:text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.successStories.title}</h2>
                             <p className="mt-3 text-base text-gray-600 dark:text-dark-text-secondary">{pageData.successStories.subtitle}</p>
                             <p className="mt-3 max-w-2xl mx-auto text-sm text-gray-600 dark:text-dark-text-secondary">
-                                La diferencia entre un CV genérico y uno profesionalmente diseñado puede determinar tu éxito en la búsqueda de empleo.
-                                Un diseño limpio y estructurado aumenta significativamente las probabilidades de que tu CV sea leído completamente
-                                y capte la atención de los reclutadores desde el primer vistazo.
+                                {pageData.successStories.description}
                             </p>
                         </div>
                         <div className="max-w-3xl mx-auto">
@@ -148,9 +141,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                              <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.customize.title}</h2>
                              <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">{pageData.customize.subtitle}</p>
                              <p className="mt-4 text-base text-gray-600 dark:text-dark-text-secondary">
-                                Editor visual intuitivo que te permite modificar cada elemento en tiempo real. Cambia fuentes, ajusta márgenes,
-                                reorganiza secciones con drag-and-drop y visualiza los cambios instantáneamente. Todo sin necesidad de conocimientos
-                                técnicos o de diseño gráfico.
+                                {pageData.customize.description}
                              </p>
                              <div className="mt-6 space-y-4">
                                 {pageData.customize.features.map((feature: string) => (
@@ -167,7 +158,7 @@ const TemplatesAndExamplesPage: React.FC = () => {
                             <div className="bg-gradient-to-r from-cv-blue/5 to-purple-500/5 dark:from-cv-blue/10 dark:to-purple-500/10 p-6 border-b border-gray-200 dark:border-gray-700">
                                 <h3 className="text-2xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center">{pageData.comparison.title}</h3>
                                 <p className="text-center text-sm text-gray-600 dark:text-dark-text-secondary mt-2">
-                                    Compara las ventajas de nuestras plantillas profesionales versus herramientas básicas.
+                                    {pageData.comparison.subtitle}
                                 </p>
                             </div>
                             <div className="overflow-x-auto">

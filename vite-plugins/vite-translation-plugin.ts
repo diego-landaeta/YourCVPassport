@@ -69,7 +69,7 @@ export function translationPlugin(): Plugin {
                     to: targetLang,
                   });
 
-                  const resultsArray = Array.isArray(results) ? results : [results];
+                  const resultsArray: any[] = Array.isArray(results) ? results : [results];
 
                   batch.forEach((text: string, idx: number) => {
                     if (resultsArray[idx] && resultsArray[idx].text) {
@@ -85,7 +85,7 @@ export function translationPlugin(): Plugin {
                   // Try one by one
                   for (const text of batch) {
                     try {
-                      const result = await translate(text, { from: sourceLang, to: targetLang });
+                      const result: any = await translate(text, { from: sourceLang, to: targetLang });
                       translations[text] = result.text;
                       successCount++;
                     } catch (e: any) {

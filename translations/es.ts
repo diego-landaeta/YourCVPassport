@@ -55,7 +55,14 @@ export const translations = {
         daysAgo: 'días atrás',
         send: 'Enviar',
         sending: 'Enviando...',
-        processing: 'Procesando...'
+        processing: 'Procesando...',
+        customize: 'Personalizar',
+        preview: 'Vista previa',
+        verified: 'Verificado',
+        month: 'Mes',
+        year: 'Año',
+        searchLanguage: 'Buscar idioma...',
+        noLanguagesFound: 'No se encontraron idiomas',
     },
     notifications: {
         savedSuccessfully: 'Guardado exitosamente',
@@ -149,6 +156,8 @@ export const translations = {
             { title: "Verifica Tus Credenciales", description: "Envía tus documentos para verificación. Nuestro proceso seguro añade sellos de confianza a tu perfil." },
             { title: "Comparte y Destaca", description: "Comparte tu enlace único de CV con reclutadores y en redes profesionales para que te encuentren." },
         ],
+        ctaButton: 'Comenzar ahora - Es gratis',
+        ctaSubtext: 'No se requiere tarjeta de cr\u00e9dito \u2022 Configuraci\u00f3n en 5 minutos',
     },
     testimonials: {
         title: "Casos de Éxito que Inspiran el Crecimiento Profesional",
@@ -158,6 +167,11 @@ export const translations = {
         title: 'Planes a Medida de Tus Necesidades Profesionales',
         subtitle: "Elige el plan adecuado para desbloquear tu potencial, ya sea que estés empezando o liderando un equipo.",
         compareCta: 'Comparar Todos los Planes y Características →',
+        monthly: 'Mensual',
+        annual: 'Anual',
+        save20: 'Ahorra 20%',
+        perYear: '/ a\u00f1o',
+        perMonthAmount: 'por mes',
     },
     security: {
         title: 'Seguridad y Cumplimiento RGPD: Tus Datos, Tu Control',
@@ -228,6 +242,7 @@ export const translations = {
     customDomain: {
         title: 'Dominio Personalizado y URL Profesional: El Centro de Tu Marca Personal',
         subtitle: 'Crea un enlace memorable y profesional para tu CV. Destaca con una URL personalizada como yourcvpassport.com/cv/tunombre o conecta tu propio dominio.',
+        heroImageAlt: 'Dominio Personalizado para tu CV',
         standOutTitle: 'Destaca de la Multitud con una URL Profesional',
         firstImpressionsTitle: 'Las Primeras Impresiones Cuentan',
         firstImpressionsBody: 'Una URL limpia y personalizada demuestra profesionalismo y atención al detalle. Es lo primero que ve un reclutador.',
@@ -275,6 +290,11 @@ export const translations = {
             'yourcvpassport.com/cv/juanperez',
             'yourcvpassport.com/cv/luislopez'
         ],
+        inlineCta: {
+            title: 'Reserva tu URL personalizada',
+            description: 'Crea tu marca personal profesional con una URL memorable que destaque ante reclutadores.',
+            button: 'Configurar mi URL ahora'
+        },
         ctaTitle: '¿Listo para Reclamar Tu URL Profesional?',
         ctaSubtitle: 'Actualiza a nuestro Plan Profesional para desbloquear tu dominio personalizado y construir una marca personal más fuerte.',
         ctaButton: 'Reclama Tu URL'
@@ -404,11 +424,13 @@ export const translations = {
             title: '¿Listo para Construir Confianza y Acelerar Tu Carrera?',
             subtitle: 'Verifica tus credenciales hoy y únete al nuevo estándar de confianza profesional.',
             button: 'Verifícame Ahora'
-        }
+        },
+        heroImageAlt: 'Verificación de Credenciales Blockchain'
     },
     atsPage: {
         title: 'Compatibilidad de Exportación ATS: Haz que tu CV Supere a los Robots',
         subtitle: 'Asegúrate de que tu solicitud sea vista por ojos humanos. Exporta tu perfil verificado en formatos PDF y DOCX compatibles con ATS, optimizados para el 98% de los sistemas de selección.',
+        heroImageAlt: 'Plantillas Optimizadas para ATS',
         cta: {
             export: 'Exporta tu CV compatible con ATS'
         },
@@ -500,13 +522,44 @@ export const translations = {
             step2: 'Selecciona tu Formato',
             button: 'Exportar Ahora'
         },
+        inlineCta: {
+            title: 'Optimiza tu CV para ATS ahora',
+            description: 'Accede a plantillas profesionales optimizadas para sistemas ATS y aumenta tus posibilidades de ser contactado.',
+            button: 'Probar plantillas ATS gratis'
+        },
         finalCta: {
             title: 'Deja de ser Rechazado por Robots. Empieza a Conseguir Entrevistas.',
             subtitle: 'Crea tu perfil y obtén acceso a exportaciones ilimitadas compatibles con ATS.',
             button: 'Crear Mi CV Ahora'
         }
     },
+    homePage: {
+        seo: {
+            title: 'CV Profesional Verificado',
+            description: 'Crea tu CV profesional verificado que los reclutadores confían. Optimización IA, compatible con ATS, visibilidad global. Únete a más de 10,000 profesionales con YourCVPassport.',
+        },
+        inlineCta1: {
+            title: '¿Listo para destacar?',
+            description: 'Únete a miles de profesionales que ya crearon su perfil verificado y reciben oportunidades laborales cada semana.',
+            button: 'Crear mi perfil gratis',
+        },
+        inlineCta2: {
+            title: 'Empieza hoy, gratis',
+            description: 'Crea tu perfil profesional en minutos. Sin tarjeta de crédito requerida.',
+            button: 'Registrarse ahora',
+        },
+    },
     aiPage: {
+        seo: {
+            title: 'Asistente IA para CV',
+            description: 'Optimiza tu CV con inteligencia artificial. Mejora automática de descripciones, sugerencias de palabras clave ATS, generador de cartas de presentación personalizado con YourCVPassport.',
+        },
+        heroImageAlt: 'Asistente de IA para CV',
+        inlineCta: {
+            title: 'Deja que la IA trabaje por ti',
+            description: 'Optimiza tu CV automáticamente y genera cartas de presentación personalizadas en segundos.',
+            button: 'Probar IA gratis',
+        },
         title: 'Asistente de IA: Tu Copiloto Profesional Personal',
         subtitle: 'Aprovecha el poder de la inteligencia artificial para mejorar el resumen de tu perfil, escribir cartas de presentación convincentes y sugerir palabras clave impactantes que te hagan destacar.',
         cta: {
@@ -607,11 +660,20 @@ export const translations = {
         ],
         finalCtaTitle: "Exporta Informes para Tu Estrategia Profesional",
         finalCtaSubtitle: "Desbloquea tu panel de analíticas y empieza a tomar decisiones basadas en datos.",
-        finalCtaButton: "Desbloquear Mis Analíticas"
+        finalCtaButton: "Desbloquear Mis Analíticas",
+        heroImageAlt: "Analítica de Perfil Profesional",
+        inlineCta: {
+            title: "Comienza a rastrear tus métricas hoy",
+            description: "Obtén insights detallados sobre quién visita tu perfil y optimiza tu estrategia de búsqueda de empleo.",
+            button: "Activar analíticas gratis"
+        }
     },
     libraryPage: {
         title: "Biblioteca de Plantillas: Recursos Profesionales para Acelerar Tu Búsqueda de Empleo",
         subtitle: "Descarga más de 50 plantillas profesionales gratuitas: CVs, cartas de presentación, correos de seguimiento, mensajes de LinkedIn. Formatos editables para cada industria. ¡Empieza a usarlas hoy!",
+        preview: "Vista previa",
+        downloads: "descargas",
+        all: "Todas",
         filters: {
             allIndustries: "Todas las Industrias",
             allLevels: "Todos los Niveles"
@@ -663,7 +725,40 @@ export const translations = {
         dates: {
           june15: "8 de noviembre de 2025",
           may30: "25 de octubre de 2025"
-        }
+        },
+        systemNormal: "Sistema operando con normalidad",
+        viewDetails: "Ver detalles",
+        changeSingular: "cambio",
+        changePlural: "cambios",
+        incidentHistorySubtitle: "Historial completo de incidentes, mantenimientos y actualizaciones del sistema",
+        incident3: {
+            title: "Error de Autenticación OAuth",
+            date: "15 de octubre de 2025",
+            duration: "Duración: 2 horas",
+            description: "Problema con el proveedor de autenticación OAuth que impedía el inicio de sesión a algunos usuarios. Se solucionó actualizando las credenciales y renovando los certificados SSL."
+        },
+        incident4: {
+            title: "Actualización de Seguridad v2.1.0",
+            date: "5 de octubre de 2025",
+            window: "Ventana: 01:00 - 03:30 UTC",
+            description: "Despliegue de parches de seguridad críticos y actualización del sistema de verificación blockchain. Mejoras en la encriptación de datos end-to-end."
+        },
+        incident5: {
+            title: "Lentitud en Generación de PDFs",
+            date: "20 de septiembre de 2025",
+            duration: "Duración: 1 hora 15 minutos",
+            description: "Degradación del rendimiento en el servicio de generación de CVs en formato PDF. Se escalaron recursos del servidor y optimizó el proceso de renderizado."
+        },
+        incident6: {
+            title: "Migración de Base de Datos",
+            date: "5 de septiembre de 2025",
+            window: "Ventana: 00:00 - 05:00 UTC",
+            description: "Migración exitosa a nueva infraestructura de base de datos con mayor capacidad y redundancia. Mejora significativa en tiempos de respuesta (reducción del 40%)."
+        },
+        incident1Duration: "Duración: 45 minutos",
+        incident1Desc: "Se identificó y resolvió un problema de latencia temporal en la API que afectaba a un subconjunto de usuarios en la región EU-West.",
+        incident2Window: "Ventana: 02:00 - 04:00 UTC",
+        incident2Desc: "Actualización programada de infraestructura para mejorar el rendimiento y la seguridad. Se implementaron nuevas optimizaciones de base de datos."
     },
     missionPage: {
         title: "Nuestra Misión y Valores: Construyendo Confianza en las Credenciales Profesionales a Nivel Mundial",
@@ -739,7 +834,10 @@ export const translations = {
             message: "Mensaje",
             submit: "Enviar Mensaje",
             alert: "¡Gracias por tu mensaje! Nos pondremos en contacto contigo en breve.",
-            inquiryTypes: ["Pregunta General", "Soporte Técnico", "Problema de Facturación", "Consulta de Ventas", "Asociación", "Prensa"]
+            inquiryTypes: ["Pregunta General", "Soporte Técnico", "Problema de Facturación", "Consulta de Ventas", "Asociación", "Prensa"],
+            successMessage: "¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.",
+            errorMessage: "Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo o contáctanos directamente por email.",
+            sending: "Enviando..."
         },
         office: {
             title: "Ubicaciones de Nuestras Oficinas",
@@ -754,12 +852,20 @@ export const translations = {
         mapImageUrl: "https://maps.googleapis.com/maps/api/staticmap?center=Ayuntamiento+de+Valencia,Spain&zoom=15&size=800x600&markers=color:blue%7Clabel:V%7CAyuntamiento+de+Valencia,Spain&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
     },
     successStoriesPage: {
+        seo: {
+            title: 'Casos de Éxito',
+            description: 'Lee historias reales de profesionales que consiguieron trabajo usando nuestras plantillas de CV. Transformaciones verificadas y resultados comprobados con YourCVPassport.',
+        },
+        whatUsersSay: 'Lo que dicen nuestros usuarios',
         title: 'Casos de Éxito: Resultados Reales de Profesionales Como Tú',
         subtitle: 'Descubre cómo los perfiles verificados, las herramientas de IA y una presencia profesional en línea han transformado carreras y acelerado el éxito.',
         stats: {
             hires: '5,000+ Contrataciones',
+            hiresLabel: 'desde nuestra plataforma',
             promotion: '3x Aumento de Ascensos',
-            timeSaved: '50% de Tiempo Ahorrado'
+            promotionLabel: 'en tasa de ascensos',
+            timeSaved: '50% de Tiempo Ahorrado',
+            timeSavedLabel: 'en tiempo de contratación para reclutadores'
         },
         filters: {
             industry: 'Filtrar por Industria',
@@ -867,6 +973,7 @@ export const translations = {
             return `¡${greeting} de nuevo, ${name}!`;
         },
         loading: "Cargando...",
+        native: "Nativo",
         subtitle: "Gestiona tu perfil profesional y destaca entre miles",
         firstLoginWelcome: {
             title: "¡Bienvenido a YourCVPassport!",
@@ -929,6 +1036,25 @@ export const translations = {
                 sun: "Dom",
             },
         },
+        analyticsPreview: {
+            totalViews: "Total de Visitas",
+            vsLastMonth: "vs mes anterior",
+            thisWeek: "Esta Semana",
+            last7Days: "Últimos 7 días",
+            avgTime: "Tiempo Promedio",
+            minutesPerSession: "Minutos por sesión",
+            visitsLast7Days: "Visitas en los últimos 7 días",
+            visits: "visitas",
+            days: {
+                mon: "Lun", monFull: "Lunes",
+                tue: "Mar", tueFull: "Martes",
+                wed: "Mié", wedFull: "Miércoles",
+                thu: "Jue", thuFull: "Jueves",
+                fri: "Vie", friFull: "Viernes",
+                sat: "Sáb", satFull: "Sábado",
+                sun: "Dom", sunFull: "Domingo",
+            },
+        },
         newUserWelcome: {
             startCreating: "Comienza creando tu perfil profesional",
             whatCanYouDo: "¿Qué puedes hacer con YourCVPassport?",
@@ -940,6 +1066,54 @@ export const translations = {
             profileUpdated: "Perfil actualizado",
             last7Days: "Últimos 7 días",
             totalAccumulated: "Total acumulado",
+        },
+        modernView: {
+            welcomeFirstLogin: (name?: string, gender?: string) => {
+                const greeting = gender === 'female' ? 'Bienvenida' : 'Bienvenido';
+                return name ? `\u00a1${greeting}, ${name}!` : `\u00a1${greeting}!`;
+            },
+            welcomeNoName: (gender?: string) => {
+                const greeting = gender === 'female' ? 'Bienvenida' : 'Bienvenido';
+                return `\u00a1${greeting}!`;
+            },
+            features: {
+                professionalCVs: 'CVs Profesionales',
+                professionalCVsDesc: 'Crea CVs con plantillas modernas optimizadas para ATS',
+                credentialVerification: 'Verificaci\u00f3n de Credenciales',
+                credentialVerificationDesc: 'Obt\u00e9n sellos verificados que validan tu experiencia',
+                customURL: 'URL Personalizada',
+                customURLDesc: 'Comparte tu perfil con una URL \u00fanica y profesional',
+                realTimeAnalytics: 'Anal\u00edticas en Tiempo Real',
+                realTimeAnalyticsDesc: 'Sigue qui\u00e9n visita tu perfil y desde d\u00f3nde',
+            },
+            quickStartGuide: {
+                title: 'Gu\u00eda de Inicio R\u00e1pido',
+                description: 'Sigue estos pasos para crear tu CV profesional verificado en minutos:',
+                step1Title: 'Completa tu informaci\u00f3n b\u00e1sica',
+                step1Desc: 'Nombre, t\u00edtulo profesional, foto y resumen (5 min)',
+                step2Title: 'Agrega tu experiencia y educaci\u00f3n',
+                step2Desc: 'Al menos 1 experiencia laboral y 1 formaci\u00f3n acad\u00e9mica',
+                step3Title: 'Define tus habilidades clave',
+                step3Desc: 'M\u00ednimo 3 habilidades t\u00e9cnicas o profesionales',
+                step4Title: 'Elige tu plantilla y URL',
+                step4Desc: 'Selecciona dise\u00f1o y crea tu URL personalizada',
+                tip: 'Consejo: Completa todos los pasos del wizard para desbloquear todas las funcionalidades del dashboard.',
+            },
+            statsPreview: {
+                profileViews: 'Vistas del perfil',
+                verifiedStamps: 'Sellos verificados',
+            },
+            chartTitles: {
+                barChart: 'Vista de barras',
+                pieChart: 'Vista circular',
+            },
+            calendar: {
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] as string[],
+                dayNames: ['Dom', 'Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b'] as string[],
+                previousMonth: 'Mes anterior',
+                nextMonth: 'Mes siguiente',
+                visits: 'visitas',
+            },
         },
         nextSteps: {
             title: "Próximos Pasos",
@@ -1231,6 +1405,7 @@ export const translations = {
             saveButton: "Guardar Preferencias",
             unsavedChanges: "Tienes cambios sin guardar",
         },
+        opportunities: { jobOpportunities: "Oportunidades Laborales", myApplications: "Mis Postulaciones", myApplicationsDescription: "Seguimiento completo de tus aplicaciones con estados actualizados", searchJobs: "Buscar Vacantes", searchJobsDescription: "Encuentra ofertas personalizadas y gestiona tus favoritas", tabRecommended: "Recomendadas", tabAllJobs: "Todas las Ofertas", tabSaved: "Guardadas", tabApplications: "Mis Aplicaciones", tabAll: "Todas", descRecommended: "Ofertas con mejor compatibilidad para tu perfil", descAllJobs: "Explora todas las vacantes disponibles", descSaved: "Ofertas que has guardado para revisar más tarde", descApplications: "Seguimiento de tus postulaciones", searchPlaceholder: "Título, palabra clave o empresa...", locationPlaceholder: "Ciudad, país o \"remoto\"...", filters: "Filtros", advancedFilters: "Filtros Avanzados", employmentType: "Tipo de Empleo", workMode: "Modalidad", experienceLevel: "Nivel de Experiencia", clearFilters: "Limpiar filtros", allMasculine: "Todos", allFeminine: "Todas", fullTime: "Tiempo Completo", partTime: "Medio Tiempo", contract: "Contrato", temporary: "Temporal", internship: "Pasantía", remote: "Remoto", onSite: "Presencial", hybrid: "Híbrido", entryLevel: "Sin experiencia", junior: "Junior", midLevel: "Semi-senior", senior: "Senior", lead: "Lead", executive: "Ejecutivo", salaryFrom: "Desde", salaryUpTo: "Hasta", today: "Hoy", yesterday: "Ayer", daysAgo: (days: number) => `Hace ${days} días`, jobsFound: (count: number) => `vacante${count !== 1 ? 's' : ''} encontrada${count !== 1 ? 's' : ''}`, noJobsFound: "No se encontraron vacantes", noJobsFoundDescription: "Intenta ajustar tus filtros de búsqueda o amplía los criterios", noApplications: "No hay aplicaciones", noApplicationsWithStatus: "No hay aplicaciones con este estado", noApplicationsYet: "Aún no has aplicado a ninguna vacante", noRecommendations: "No hay recomendaciones disponibles", noRecommendationsDescription: "No encontramos vacantes que coincidan con tu perfil en este momento. Explora todas las ofertas disponibles o intenta más tarde.", noSavedJobs: "No tienes ofertas guardadas", noSavedJobsDescription: "Guarda ofertas interesantes para revisarlas más tarde", savedJobsCount: "ofertas guardadas", viewDetails: "Ver Detalles", viewJob: "Ver Vacante", viewAllJobs: "Ver Todas las Ofertas", exploreJobs: "Explorar Ofertas", save: "Guardar", saved: "Guardada", remove: "Quitar", message: "Mensaje", alreadyApplied: "Ya aplicaste", viewedByCompany: "Vista por empresa", appliedAgo: "Aplicado hace", daysLabel: "días", recommendedJobs: "Ofertas Recomendadas", recommendedJobsDescription: (count: number) => `Encontramos ${count} ofertas con alta compatibilidad con tu perfil`, errorLoadingJobs: "Error al cargar vacantes", errorLoadingRecommendations: "Error al cargar recomendaciones", errorLoadingSavedJobs: "Error al cargar ofertas guardadas", errorSavingJob: "Error al guardar", errorRemovingSavedJob: "Error al quitar guardado", errorLoadingApplications: "Error al cargar aplicaciones", jobRemoved: (title: string) => `"${title}" eliminada de guardados`, jobSaved: (title: string) => `"${title}" guardada`, jobRemovedFromSaved: (title: string) => `"${title}" eliminada de guardados`, loadingJobs: "Cargando vacantes...", loadingApplications: "Cargando tus aplicaciones...", loadingRecommendations: "Encontrando las mejores ofertas...", loadingSavedJobs: "Cargando ofertas guardadas...", statsTotal: "Total", statsActive: "Activas", statsInterviews: "Entrevistas", statsOffers: "Ofertas", statsAccepted: "Aceptado", statsRejected: "Rechazadas", filterByStatus: "Filtrar por estado:", filterAll: "Todas", filterActive: "Activas", filterOffers: "Ofertas", filterAccepted: "Aceptado", filterRejected: "Rechazadas" },
         identity: {
             title: "Identidad",
             professionalInfo: "Información Profesional",
@@ -1413,6 +1588,12 @@ export const translations = {
             completeProfileFirst: "Completa tu perfil primero",
             editProfile: "Editar Perfil",
             viewPublicProfile: "Ver Perfil Público",
+            templates: "Plantillas",
+            jobSearch: "Oportunidades",
+            myApplications: "Mis Aplicaciones",
+            companyDashboard: "Panel de Empresa",
+            wizardAlertTitle: "Completa el wizard primero",
+            wizardAlertDescription: "Debes completar el wizard de perfil (incluyendo el paso de Finalización) para acceder a todas las funcionalidades.",
         },
         successStories: {
             title: "¡Comparte Tu Caso de Éxito!",
@@ -1494,6 +1675,91 @@ export const translations = {
             totalAccumulated: "Total acumulado",
             trackAnalytics: "Rastrear Analíticas",
             trackAnalyticsDescription: "Permite el seguimiento de visitas",
+            title: "Analíticas del Perfil",
+            subtitle: "Estadísticas y métricas de tu perfil profesional",
+            exportCSV: "Exportar CSV",
+            lastDays: (d: number) => `Últimos ${d} días`,
+            totalViews: "Total de Visitas",
+            uniqueVisitors: "Visitantes Únicos",
+            ctaClicksLabel: "Clics en CTAs",
+            ctr: "CTR",
+            visitsOverTime: "Visitas en el Tiempo",
+            visits: "Visitas",
+            clicks: "Clics",
+            trafficSources: "Fuentes de Tráfico",
+            devices: "Dispositivos",
+            topCountries: "Top 5 Países",
+            country: "País",
+            viewsLabel: "Visitas",
+            percentage: "Porcentaje",
+            topCTAs: "CTAs Más Clickeados",
+            type: "Tipo",
+            label: "Etiqueta",
+            loading: "Cargando analíticas...",
+            noData: {
+                title: "Aún no tienes datos analíticos",
+                description: "Comparte tu perfil profesional para empezar a recopilar estadísticas sobre visitas, clics y engagement",
+                discoverTitle: "Descubre información valiosa:",
+                items: [
+                    "Número de visitas y visitantes únicos",
+                    "Países y ciudades de origen",
+                    "Dispositivos utilizados (móvil, desktop)",
+                    "Interacciones con tus botones de contacto",
+                ],
+                viewProfile: "Ver mi perfil público",
+                dataWillAppear: "Los datos empezarán a aparecer cuando alguien visite tu perfil",
+            },
+            noActivity: {
+                title: "Sin actividad todavía",
+                description: "Tu perfil está listo, ahora solo falta que lo compartas para empezar a ver estadísticas",
+                comingSoon: "Próximamente verás:",
+                items: [
+                    "Tendencias de visitas diarias",
+                    "Ubicación geográfica de tus visitantes",
+                    "Fuentes de tráfico (redes sociales, búsquedas, directo)",
+                    "Tasa de conversión de clics en contacto",
+                ],
+                shareProfile: "Compartir mi perfil",
+                shareVia: "Comparte en LinkedIn, redes sociales o por email",
+            },
+            companyWidget: {
+                title: "Visibilidad de Empresas",
+                last30Days: "Últimos 30 días",
+                thisMonth: "este mes",
+                totalViews: "Vistas Totales",
+                uniqueVisitors: "Visitantes Únicos",
+                ctaClicks: "Clics en CTAs",
+                recentActivity: "Actividad Reciente",
+                noRecentActivity: "No hay actividad reciente",
+                anonymousVisitor: "Visitante Anónimo",
+                directAccess: "Acceso directo",
+                viaLinkedIn: "Vía LinkedIn",
+                googleSearch: "Búsqueda Google",
+                viewedProfile: "Vio perfil",
+                minutesAgo: (n: number) => `Hace ${n} minutos`,
+                hoursAgo: (n: number) => `Hace ${n} horas`,
+                daysAgo: (n: number) => `Hace ${n} días`,
+                topCountries: "Top 5 Países Interesados",
+                noCountryData: "No hay datos de países disponibles todavía",
+                premiumTitle: "Función Premium",
+                premiumDescription: "Descubre qué empresas vieron tu perfil, de qué países provienen, estadísticas avanzadas y notificaciones en tiempo real",
+                features: {
+                    identifyVisitors: "Identifica visitantes",
+                    identifyVisitorsDesc: "Ve ubicaciones exactas, ciudades y países",
+                    realTimeActivity: "Actividad en tiempo real",
+                    realTimeActivityDesc: "Recibe alertas instantáneas de nuevas visitas",
+                    geoAnalysis: "Análisis geográfico",
+                    geoAnalysisDesc: "Top 5 países con más interés en tu perfil",
+                    trafficSources: "Fuentes de tráfico",
+                    trafficSourcesDesc: "Descubre de dónde vienen: LinkedIn, Google, etc.",
+                    monthGrowth: "Crecimiento mes a mes",
+                    monthGrowthDesc: "Porcentaje de crecimiento de tu visibilidad",
+                    completeHistory: "Historial completo",
+                    completeHistoryDesc: "Acceso ilimitado a toda tu actividad histórica",
+                },
+                upgradeToPremium: "Mejorar a Premium",
+                pricing: "Desde €15/mes • Cancela cuando quieras",
+            },
         },
         stamps: {
             title: "Verificaciones de Credenciales",
@@ -1502,6 +1768,53 @@ export const translations = {
             pending: "Pendientes",
             rejected: "Rechazadas",
             expired: "Expiradas",
+            statusVerified: "Verificado",
+            statusPending: "Pendiente",
+            statusRejected: "Rechazado",
+            statusExpired: "Expirado",
+            types: {
+                email: "Email",
+                identity: "Identidad",
+                education: "Educación",
+                certification: "Certificación",
+                employment: "Empleo",
+                skill: "Habilidad",
+                language: "Idiomas",
+            },
+            availableTitle: "Verificaciones Disponibles",
+            cards: {
+                identity: { title: "Identidad", description: "Verifica tu identidad con DNI o pasaporte" },
+                education: { title: "Educación", description: "Verifica tus títulos académicos y diplomas" },
+                language: { title: "Idiomas", description: "Verifica certificados de idiomas (TOEFL, IELTS, DELE, DELF, etc.)" },
+                email: { title: "Email", description: "Verifica tu dirección de correo" },
+                employment: { title: "Empleo", description: "Verifica tu experiencia laboral" },
+                certification: { title: "Certificaciones", description: "Verifica tus certificaciones profesionales" },
+            },
+            requiresDocument: "Requiere subir documento",
+            limitReached: "Límite alcanzado",
+            maxAttemptsUsed: "Has usado los 4 intentos disponibles",
+            availableIn: (days: number) => `Disponible en ${days} día${days !== 1 ? 's' : ''}`,
+            requestEvery3Days: "Puedes solicitar esta verificación cada 3 días",
+            attemptsRemaining: (remaining: number) => `Intentos restantes: ${remaining}/4`,
+            requestVerification: "Solicitar Verificación",
+            monthlyUsage: "Verificaciones este mes:",
+            fewRemaining: "¡Quedan pocas verificaciones!",
+            upgradePlan: "Mejora tu plan",
+            forMore: "para obtener más.",
+            requested: "Solicitado:",
+            verifiedAt: "Verificado:",
+            expiresAt: "Expira:",
+            adminNote: "Nota del administrador:",
+            deleteTitle: "Eliminar Verificación",
+            deleteConfirm: "¿Estás seguro?",
+            deleteMessage: "¿Estás seguro de que deseas eliminar esta verificación pendiente? Esta acción no se puede deshacer.",
+            cancel: "Cancelar",
+            deleting: "Eliminando...",
+            delete: "Eliminar",
+            deleteSuccess: "Verificación eliminada exitosamente",
+            deleteError: (msg: string) => `Error al eliminar la verificación: ${msg}`,
+            waitMessage: (days: number, type: string) => `Debes esperar ${days} día${days !== 1 ? 's' : ''} más para solicitar otra verificación de ${type}.`,
+            deletePendingTitle: "Eliminar verificación pendiente",
         },
         cvBuilder: {
             title: "¡Crea tu Propio CV Profesional!",
@@ -1534,6 +1847,7 @@ export const translations = {
         templateSection: {
             title: "Selecciona tu Plantilla",
             subtitle: "Elige una plantilla profesional para tu CV",
+            sectionDescription: "Elige entre nuestra colección de plantillas profesionales de CV. Cada plantilla está cuidadosamente diseñada para destacar tu experiencia y habilidades. Selecciona un diseño moderno para industrias creativas, una plantilla clásica para puestos corporativos, o un formato compatible con ATS para sistemas de aplicación automatizados. Tu selección se aplicará a tu CV público y exportaciones PDF.",
             selectTemplate: "Selecciona una plantilla profesional",
             templateUpdated: "Plantilla actualizada correctamente",
             templateUpdateError: "Error al actualizar la plantilla",
@@ -1541,10 +1855,21 @@ export const translations = {
         export: {
             title: "Exportar CV",
             subtitle: "Descarga tu CV en diferentes formatos",
+            sectionDescription: "Descarga y comparte tu CV profesional en múltiples formatos. Elige la mejor opción según tus necesidades: PDF con diseño completo para presentaciones, PDF optimizado para ATS en aplicaciones a través de sistemas automatizados, JSON para respaldo de datos, o un enlace público para compartir tu CV siempre actualizado en línea.",
+            monthlyLimit: "Límite de Exportaciones Mensual",
+            limitReached: "Has alcanzado tu límite mensual. Mejora tu plan para exportaciones ilimitadas.",
+            remaining: (remaining: number, limit: number) => `${remaining} de ${limit} exportaciones restantes este mes`,
+            upgradePlan: "Mejorar Plan",
+            unlimitedExports: "Exportaciones Ilimitadas",
+            unlimitedDescription: "Exporta tu CV tantas veces como necesites",
+            cancel: "Cancelar",
             pdf: {
                 title: "Exportar PDF",
-                description: "Descarga tu CV en formato PDF",
+                description: "Descarga tu CV en formato PDF con el diseño de tu plantilla seleccionada. Perfecto para imprimir y adjuntar por correo. Incluye colores y gráficos de tu plantilla elegida.",
                 button: "Descargar PDF",
+                fullDesign: "Diseño Completo",
+                printReady: "Listo para Imprimir",
+                limitReached: "Límite Alcanzado",
                 printDialog: {
                     title: "Generando PDF de tu CV",
                     description: "Tu CV se está procesando y descargará automáticamente como archivo PDF con todos los colores y diseño.",
@@ -1558,17 +1883,29 @@ export const translations = {
             },
             json: {
                 title: "Exportar JSON",
-                description: "Descarga los datos de tu perfil en formato JSON",
+                description: "Exporta todos los datos de tu perfil en formato JSON. Ideal para desarrolladores, respaldos de datos o importar en otros sistemas. Incluye todas las secciones: experiencia, educación, habilidades y más.",
                 button: "Descargar JSON",
+                dataBackup: "Respaldo de Datos",
+                portable: "Portable",
+            },
+            ats: {
+                title: "PDF ATS-Optimizado",
+                description: "PDF optimizado para Sistemas de Seguimiento de Candidatos (ATS) utilizados por departamentos de RRHH. El formato simple asegura que tu CV sea correctamente procesado por sistemas automatizados. Elige entre 3 plantillas profesionales diseñadas para pasar el filtro ATS.",
+                button: "Exportar PDF ATS",
+                compatible: "Compatible ATS",
+                templates: "3 Plantillas",
             },
             publicLink: "Link Público",
-            publicLinkDescription: "Comparte tu CV con un link público personalizado",
+            publicLinkDescription: "Comparte tu CV con un enlace público personalizado. Perfecto para añadir a firmas de correo, perfiles de LinkedIn o compartir con reclutadores. Tu CV se mostrará con tu plantilla seleccionada y siempre actualizado.",
+            easyShare: "Fácil Compartir",
+            autoUpdate: "Auto-Actualización",
             copyLink: "Copiar Link",
             popupBlocked: "Por favor, permite las ventanas emergentes para exportar tu CV a PDF",
         },
         share: {
             title: "Compartir CV",
             subtitle: "Comparte tu CV profesional en redes sociales",
+            sectionDescription: "Comparte tu CV profesional con reclutadores, colegas y en redes sociales. Usa tu enlace público personalizado, comparte en LinkedIn, Twitter o inserta tu CV en tu sitio web. Tu CV siempre mostrará la información más reciente y tu plantilla de diseño seleccionada.",
             publicLink: "Link Público",
             publicLinkDescription: "Comparte tu CV con un link público personalizado",
             copyLink: "Copiar Link",
@@ -1628,6 +1965,19 @@ export const translations = {
             realTimeActivity: "Actividad en Tiempo Real",
             realTimeDescription: "Tu perfil está siendo visto ahora mismo. Los datos se actualizan automáticamente cada minuto.",
             viewAllCountries: "Ver todos los países",
+            totalVisits: "Visitas Totales",
+            ctaClicksMetric: "Clics en CTAs",
+            leadsGenerated: "Leads Generados",
+            conversionRate: "Tasa de Conversión",
+            lastPeriod: (range: string) => `Últimos ${range}`,
+            visitsTrend: "Tendencia de Visitas",
+            chartArea: "Área",
+            chartLine: "Línea",
+            chartBar: "Barras",
+            trafficSources: "Fuentes de Tráfico",
+            geoDistribution: "Distribución Geográfica",
+            csvDate: "Fecha",
+            csvVisits: "Visitas",
         },
         cvEditor: {
             title: "Editor de CV Personalizado",
@@ -1646,8 +1996,29 @@ export const translations = {
             createComingSoon: "La creación de Visas estará disponible próximamente",
             deleteConfirm: "¿Estás seguro de que quieres eliminar esta Visa?",
             deleteError: "Error al eliminar la Visa",
+            deleteTitle: "¿Eliminar Visa?",
+            deleteMessage: "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta visa?",
+            deleteButton: "Eliminar",
+            cancelButton: "Cancelar",
+            noPermission: "No tienes permisos para realizar esta acción",
+            saveError: "Error al guardar la visa",
             present: "Presente",
             metrics: "métricas",
+        },
+        tour: {
+            closeTour: "Cerrar tutorial",
+            skipTour: "Saltar Tutorial",
+            back: "Atrás",
+            next: "Siguiente",
+            finish: "Finalizar",
+        },
+        templatePreview: {
+            selected: "Seleccionada",
+            all: "Todas",
+            free: "Gratis",
+            unlockPro: "Desbloquea todas las plantillas PRO",
+            accessPremium: (count: number) => `Accede a ${count}+ plantillas premium diseñadas profesionalmente`,
+            upgradeToPro: "Actualizar a PRO",
         },
         helpSection: {
             title: "Centro de Ayuda",
@@ -1717,6 +2088,7 @@ export const translations = {
         settings: {
             title: "Ajustes de Cuenta",
             subtitle: "Configura tu cuenta y preferencias",
+            sectionDescription: "Configura las preferencias de tu cuenta, ajustes de visualización y opciones de privacidad. Personaliza la visibilidad de tu CV, administra tu dominio personalizado, actualiza tu información personal y controla cómo los reclutadores y visitantes interactúan con tu perfil.",
             accountInfo: "Información de Cuenta",
             privacy: "Privacidad",
             publicProfile: "Perfil Público",
@@ -1768,6 +2140,121 @@ export const translations = {
                 generic: "Error al generar sugerencia",
                 applyError: "Error al aplicar cambios"
             }
+        },
+        businessCard: {
+            yourName: "Tu Nombre",
+            yourTitle: "Tu Título Profesional",
+            emailPlaceholder: "email@ejemplo.com",
+            yourId: "TU-ID",
+            downloadPNG: "Descargar PNG",
+            downloadPDF: "Descargar PDF",
+            downloadDescription: "Descarga tu tarjeta de visita digital con código QR que coincide con el estilo de tu CV",
+        },
+        businessCardGallery: {
+            currentCard: "Tu Tarjeta Actual",
+            businessCardLabel: "Tarjeta de Visita",
+            qrError: "Error al generar código QR",
+            saveError: "Error al guardar selección de tarjeta",
+            saveCardError: "Error al guardar tarjeta de presentación",
+            designGallery: "Galería de Diseños",
+            exploreAllCards: "Explora Todas las Tarjetas de Visita",
+            galleryDescription: "Cada diseño coincide perfectamente con el estilo de tu CV. Tu tarjeta se actualiza automáticamente cuando cambias de template.",
+            filterAll: "Todas",
+            filterFree: "Gratis",
+            savingCard: "Guardando tarjeta...",
+            proTip: "Consejo Profesional",
+            proTipDescription: "Haz clic en cualquier tarjeta para seleccionarla. Puedes elegir un diseño diferente al de tu CV.",
+        },
+        messaging: {
+            userFallback: "Usuario",
+            sendError: "Error al enviar el mensaje",
+            online: "En línea",
+            startConversation: "Inicia la conversación enviando un mensaje",
+        },
+        versionModal: {
+            editVersion: "Editar Versión",
+            newVersion: "Nueva Versión",
+            editSubtitle: "Personaliza tu CV para diferentes necesidades",
+            newSubtitle: "Crea una versión personalizada de tu CV",
+            basicInfo: "Información Básica",
+            versionNameLabel: "Nombre de la versión *",
+            versionNamePlaceholder: "Ej: CV USA - Frontend Developer",
+            countryLabel: "País (opcional)",
+            countryPlaceholder: "Ej: Estados Unidos",
+            roleLabel: "Rol (opcional)",
+            rolePlaceholder: "Ej: Frontend Developer",
+            templateLabel: "Plantilla",
+            fullAccess: "Acceso completo",
+            freeAndPro: "10 gratis + 10 PRO",
+            sections: "Secciones",
+            selectedCount: (n: number) => `${n} seleccionada${n !== 1 ? 's' : ''}`,
+            order: "Orden",
+            dragToReorder: "Arrastra para reordenar",
+            notesLabel: "Notas (opcional)",
+            notesPlaceholder: "Añade notas internas (ej: 'Sin foto para EE.UU.')...",
+            cancel: "Cancelar",
+            updating: "Actualizando...",
+            creating: "Creando...",
+            update: "Actualizar",
+            create: "Crear",
+            versionNameRequired: "El nombre de la versión es obligatorio",
+            selectAtLeastOne: "Debes seleccionar al menos una sección",
+            updateError: "Error al actualizar la versión",
+            createError: "Error al crear la versión",
+            unknownError: "Error desconocido",
+            sectionLabels: {
+                profile: "Perfil",
+                experience: "Experiencia",
+                education: "Educación",
+                skills: "Habilidades",
+                languages: "Idiomas",
+                certifications: "Certificaciones",
+                portfolio: "Portfolio",
+                services: "Servicios",
+                stats: "Estadísticas",
+            },
+            sectionDescriptions: {
+                profile: "Información básica y resumen",
+                experience: "Historial laboral",
+                education: "Formación académica",
+                skills: "Competencias técnicas",
+                languages: "Conocimientos lingüísticos",
+                certifications: "Certificados y acreditaciones",
+                portfolio: "Proyectos y trabajos destacados",
+                services: "Servicios ofrecidos",
+                stats: "Métricas y logros",
+            },
+        },
+        welcomeModal: {
+            welcomeUser: (name?: string, gender?: string) => `\u00a1${gender === 'female' ? 'Bienvenida' : 'Bienvenido'}${name ? `, ${name}` : ''}!`,
+            description: 'Para acceder a todas las funcionalidades de tu dashboard profesional, primero necesitas completar tu perfil.',
+            featuresIntro: 'Una vez completes tu perfil, podrás:',
+            featureCustomizeCV: 'Ver y personalizar tu CV profesional',
+            featureExportPDF: 'Exportar tu CV en formato PDF',
+            featureShareProfile: 'Compartir tu perfil con reclutadores',
+            featureViewAnalytics: 'Ver analíticas de visitas y clics',
+            featureManageLeads: 'Recibir y gestionar leads de empresas',
+            estimatedTime: 'Tiempo estimado: 5-10 minutos',
+            estimatedTimeDescription: 'Completa tu información básica paso a paso. Puedes guardar y continuar después si lo necesitas.',
+            completeProfileNow: 'Completar mi perfil ahora',
+            later: 'Más tarde',
+        },
+        usageStats: {
+            title: 'Uso del Plan',
+            subtitle: 'Estadísticas de este mes',
+            upgrade: 'Mejorar Plan',
+            unlimited: 'Ilimitado',
+            notAvailable: 'No disponible',
+            used: 'usado',
+            remaining: 'restantes',
+            atsExportName: 'Exportaciones ATS',
+            atsExportDescription: 'PDF/DOCX este mes',
+            aiRequestName: 'Solicitudes IA',
+            aiRequestDescription: 'Mejoras de texto',
+            verificationsName: 'Verificaciones',
+            verificationsDescription: 'Stamps solicitados',
+            periodInfo: 'Se reinicia cada mes',
+            notIncludedInPlan: 'No incluido en tu plan',
         },
     },
     NAV_LINKS: [
@@ -2168,15 +2655,24 @@ export const translations = {
             title: "¿Listo para Empezar?",
             subtitle: "Crea tu CV profesional hoy.",
             button: "Empieza Gratis"
-        }
+        },
+        inlineCta: {
+            title: "¿Listo para crear tu perfil?",
+            description: "Sigue estos pasos y tendrás tu perfil profesional verificado en menos de 10 minutos.",
+            button: "Comenzar ahora"
+        },
+        videoComingSoon: "Video próximamente"
     },
     templatesAndExamplesPage: {
         title: "Biblioteca de Plantillas y Ejemplos",
         subtitle: "Plantillas diseñadas profesionalmente para cada industria y nivel de carrera.",
+        description: "Plantillas diseñadas por expertos en recursos humanos, optimizadas para sistemas ATS como Greenhouse, Lever y Workday. Personalizables en tiempo real y exportables a PDF de alta calidad.",
         templatesIncluded: "CVs, Cartas de Presentación, Correos y Más",
+        heroImageAlt: "Plantillas de CV Profesionales",
         gallery: {
             title: "Explora Nuestras Plantillas",
             subtitle: "Encuentra el diseño perfecto que coincida con tu marca personal.",
+            description: "Cada plantilla incluye secciones para experiencia profesional, educación, habilidades técnicas, idiomas y proyectos destacados. Cambia colores, fuentes y reorganiza el contenido con nuestro editor drag-and-drop. Todas compatibles con sistemas ATS para garantizar que tu CV sea correctamente procesado por los reclutadores.",
             categories: [
                 { key: 'All', name: 'Todo' },
                 { key: 'CV', name: 'CVs' },
@@ -2188,11 +2684,13 @@ export const translations = {
         successStories: {
             title: "Casos de Éxito Reales",
             subtitle: "Ve la transformación antes y después.",
+            description: "La diferencia entre un CV genérico y uno profesionalmente diseñado puede determinar tu éxito en la búsqueda de empleo. Un diseño limpio y estructurado aumenta significativamente las probabilidades de que tu CV sea leído completamente y capte la atención de los reclutadores desde el primer vistazo.",
             imageCaption: "Una plantilla bien estructurada puede marcar la diferencia."
         },
         customize: {
             title: "Editor Visual Intuitivo",
             subtitle: "Personaliza cada detalle sin esfuerzo.",
+            description: "Editor visual intuitivo que te permite modificar cada elemento en tiempo real. Cambia fuentes, ajusta márgenes, reorganiza secciones con drag-and-drop y visualiza los cambios instantáneamente. Todo sin necesidad de conocimientos técnicos o de diseño gráfico.",
             features: [
                 "Cambia colores, fuentes y estilos en tiempo real",
                 "Reorganiza secciones con drag-and-drop",
@@ -2203,6 +2701,7 @@ export const translations = {
         },
         comparison: {
             title: "YourCVPassport vs. Herramientas Tradicionales",
+            subtitle: "Compara las ventajas de nuestras plantillas profesionales versus herramientas básicas.",
             headers: ["Característica", "YourCVPassport", "Tradicional"],
             rows: [
                 { feature: "Optimizado para ATS", values: ["✓", "-"] },
@@ -2212,6 +2711,11 @@ export const translations = {
                 { feature: "Múltiples Formatos de Exportación", values: ["✓", "Limitado"] },
                 { feature: "Analíticas de Perfil", values: ["✓", "-"] }
             ]
+        },
+        inlineCta: {
+            title: "Elige tu plantilla perfecta",
+            description: "Accede a todas nuestras plantillas profesionales optimizadas para ATS y empieza a destacar hoy.",
+            button: "Explorar plantillas"
         },
         finalCta: {
             title: "Encuentra Tu Plantilla Perfecta",
@@ -2260,7 +2764,9 @@ export const translations = {
         },
         freePrice: "Gratis",
         customPrice: "A medida",
-        trialLabel: "Prueba de 14 Días"
+        trialLabel: "Prueba de 14 Días",
+        perYear: "/ año",
+        perMonth: "por mes"
     },
     helpCenterPage: {
         title: "Centro de Ayuda",
@@ -2293,7 +2799,9 @@ export const translations = {
             title: "Contactar a Soporte",
             description: "¿No encuentras una respuesta? Nuestro equipo está aquí para ayudar.",
             button: "Contáctanos"
-        }
+        },
+        heroImageAlt: "Centro de Ayuda",
+        videoComingSoon: "Video próximamente"
     },
     advancedTalentSearch: {
         title: "Búsqueda Avanzada de Talentos",
@@ -2310,8 +2818,35 @@ export const translations = {
             location: { label: "Ubicación", placeholder: "ej., Berlín, Alemania" },
             salary: { label: "Expectativa Salarial (EUR)", min: "Mín", max: "Máx" },
             experience: { label: "Años de Experiencia", options: ["Cualquiera", "0-2 años", "3-5 años", "6-10 años", "10+ años"] },
-            applyButton: "Aplicar Filtros"
+            applyButton: "Aplicar Filtros",
+            countryLabel: "País",
+            allCountries: "Todos los países",
+            countries: {
+                ES: "España",
+                MX: "México",
+                PE: "Perú",
+                US: "Estados Unidos",
+                GB: "Reino Unido",
+                FR: "Francia",
+                DE: "Alemania",
+                IT: "Italia",
+            },
+            locationLabel: "Ubicación",
+            locationHint: "Ciudad o región específica",
         },
+        heroImageAlt: "Búsqueda Avanzada de Talento",
+        interfaceSubtitle: "Encuentra el talento perfecto para tu equipo con filtros avanzados",
+        loadingProfiles: "Cargando perfiles...",
+        noResultsTitle: "No se encontraron perfiles",
+        noResultsSubtitle: "Intenta ajustar los filtros de búsqueda o ampliar tus criterios",
+        clearFilters: "Limpiar Filtros",
+        resultsFound: "Resultados encontrados",
+        profileSingular: "perfil",
+        profilePlural: "perfiles",
+        translating: "Traduciendo...",
+        refresh: "Actualizar",
+        loadMore: "Ver Más",
+        showingOf: "Mostrando {current} de {total} perfiles",
         aiMatching: {
             title: "Emparejamiento de Candidatos con IA",
             description: "Nuestra IA analiza la descripción de tu trabajo y te presenta los candidatos más relevantes y verificados de nuestra base de talentos.",
@@ -2365,6 +2900,14 @@ export const translations = {
     companyPlansPage: {
         title: "Planes para Empresas",
         subtitle: "Accede a un grupo de talento verificado y agiliza tu proceso de contratación.",
+        billing: {
+            monthly: "Mensual",
+            annual: "Anual",
+            save: "Ahorra 20%",
+            perMonth: "por mes",
+            perYear: "/ año",
+            perMonthShort: "/ mes",
+        },
         tiers: {
             title: "Nuestros Niveles",
             plans: [
@@ -2401,6 +2944,7 @@ export const translations = {
     atsIntegrationsPage: {
         title: "Integraciones ATS",
         subtitle: "Conecta sin problemas YourCVPassport con tus herramientas de contratación existentes.",
+        heroImageAlt: "Integraciones ATS",
         logos: ["Greenhouse", "Lever", "Workable", "SmartRecruiters"],
         learnMore: "Saber Más",
         showcase: {
@@ -2426,6 +2970,11 @@ export const translations = {
             title: "Seguro y Conforme",
             description: "Todas las integraciones se construyen con seguridad de nivel empresarial y son totalmente conformes con el RGPD.",
             badges: ["OAuth 2.0", "Cifrado de Datos", "Conforme con RGPD"]
+        },
+        inlineCta: {
+            title: "Conecta con cualquier ATS",
+            description: "Exporta tu CV optimizado directamente a los sistemas ATS más populares sin perder formato ni información.",
+            button: "Ver integraciones disponibles"
         },
         finalCta: {
             title: "Optimiza tu Flujo de Trabajo de Contratación",
@@ -2476,6 +3025,12 @@ export const translations = {
             title: "¿Tienes Preguntas?",
             subtitle: "Visita nuestro Centro de Confianza para informes y políticas detalladas.",
             button: "Visitar Centro de Confianza"
+        },
+        heroImageAlt: "Seguridad y Cumplimiento",
+        inlineCta: {
+            title: "Protege tu información profesional",
+            description: "Únete a miles de profesionales que confían en nuestra plataforma certificada para gestionar su información de manera segura.",
+            button: "Crear perfil seguro"
         }
     },
     blogPage: {
@@ -2754,13 +3309,21 @@ export const translations = {
         },
         progress: {
             step: 'Paso',
-            of: 'de'
+            of: 'de',
+            complete: 'completado'
         },
         navigation: {
             previous: 'Anterior',
             next: 'Siguiente',
             finish: 'Finalizar',
-            saving: 'Guardando...'
+            saving: 'Guardando...',
+            close: 'Cerrar'
+        },
+        common: {
+            add: 'Añadir',
+            proficiencyLevelPercent: 'Nivel de dominio (%)',
+            proficiencyLevel: 'Nivel de dominio',
+            preview: 'Vista previa'
         },
         identity: {
             name: 'Nombre',
@@ -2781,7 +3344,15 @@ export const translations = {
             portfolioPlaceholder: 'portfolio.com',
             summary: 'Resumen',
             summaryPlaceholder: 'Describe tu trayectoria profesional...',
-            countryPlaceholder: 'Selecciona tu país'
+            countryPlaceholder: 'Selecciona tu país',
+            heading: 'Información Básica',
+            subtitle: 'Cuéntanos sobre ti',
+            country: 'País',
+            selectCountry: 'Selecciona tu país',
+            selectCity: 'Selecciona tu ciudad',
+            selectCountryFirst: 'Primero selecciona un país',
+            professionalLinks: 'Enlaces Profesionales',
+            summaryDescription: 'Describe tu perfil profesional en pocas palabras'
         },
         experience: {
             label: 'Experiencia',
@@ -2793,7 +3364,9 @@ export const translations = {
             endDate: 'Fin',
             currentJob: 'Trabajo actual',
             description: 'Descripción',
-            descriptionPlaceholder: 'Responsabilidades y logros...'
+            descriptionPlaceholder: 'Responsabilidades y logros...',
+            heading: 'Experiencia Profesional',
+            subtitle: 'Añade tus empleos anteriores'
         },
         education: {
             label: 'Educación',
@@ -2806,7 +3379,9 @@ export const translations = {
             startDate: 'Inicio',
             endDate: 'Fin',
             description: 'Descripción',
-            descriptionPlaceholder: 'Logros y cursos relevantes...'
+            descriptionPlaceholder: 'Logros y cursos relevantes...',
+            heading: 'Educación',
+            subtitle: 'Añade tu formación académica'
         },
         skills: {
             label: 'Habilidad',
@@ -2818,7 +3393,9 @@ export const translations = {
             levelIntermediate: 'Intermedio',
             levelAdvanced: 'Avanzado',
             levelExpert: 'Experto',
-            years: 'Años'
+            years: 'Años',
+            heading: 'Habilidades',
+            subtitle: 'Añade tus competencias técnicas y profesionales'
         },
         languages: {
             label: 'Idioma',
@@ -2832,7 +3409,9 @@ export const translations = {
             levelB2: 'B2 - Intermedio-alto',
             levelC1: 'C1 - Avanzado',
             levelC2: 'C2 - Maestría',
-            levelNative: 'Nativo'
+            levelNative: 'Nativo',
+            heading: 'Idiomas',
+            subtitle: 'Indica los idiomas que dominas'
         },
         preferences: {
             availability: 'Disponibilidad',
@@ -2849,10 +3428,16 @@ export const translations = {
             workModeHybrid: 'Híbrido',
             expectedSalary: 'Salario esperado',
             expectedSalaryPlaceholder: '50.000€ - 60.000€',
-            relocationWilling: 'Dispuesto a relocalizarse'
+            relocationWilling: 'Dispuesto a relocalizarse',
+            heading: 'Preferencias Laborales',
+            subtitle: 'Indica tus preferencias de trabajo'
         },
         template: {
-            selectTemplate: 'Selecciona una plantilla'
+            selectTemplate: 'Selecciona una plantilla',
+            heading: 'Elige tu Plantilla',
+            subtitle: 'Selecciona el diseño que mejor represente tu estilo profesional',
+            premiumDescription: 'Diseño premium con características avanzadas',
+            standardDescription: 'Diseño profesional y elegante'
         },
         messages: {
             loadingError: 'Error al cargar el perfil',
@@ -2893,8 +3478,34 @@ export const translations = {
         recommendations: 'Recomendaciones',
         verified: 'Verificado',
         verifiedProfile: 'Perfil Verificado',
-        expires: 'Expira:'
+        expires: 'Expira:',
+        collaborations: 'Colaboraciones',
+        viewingOwnProfile: 'Este es tu perfil. Los visitantes veran los botones de contacto aqui.'
     },
+    languageNames: {
+        'English': 'Inglés',
+        'Spanish': 'Español',
+        'French': 'Francés',
+        'German': 'Alemán',
+        'Italian': 'Italiano',
+        'Portuguese': 'Portugués',
+        'Chinese': 'Chino',
+        'Mandarin Chinese': 'Chino Mandarín',
+        'Japanese': 'Japonés',
+        'Korean': 'Coreano',
+        'Arabic': 'Árabe',
+        'Russian': 'Ruso',
+        'Hindi': 'Hindi',
+        'Dutch': 'Holandés',
+        'Swedish': 'Sueco',
+        'Norwegian': 'Noruego',
+        'Danish': 'Danés',
+        'Finnish': 'Finlandés',
+        'Sanskrit': 'Sánscrito',
+        'Catalan': 'Catalán',
+        'Basque': 'Euskera',
+        'Galician': 'Gallego',
+    } as Record<string, string>,
     // Secciones del Editor de Perfil
     profileEditor: {
         aiImprovement: {
@@ -2966,13 +3577,70 @@ export const translations = {
             deleteEducation: 'Eliminar Educación',
             deleteExperience: 'Eliminar Experiencia',
         },
+        skills: {
+            aiSuggestionsTitle: 'Sugerencias de IA',
+            skillAlreadyExists: 'Esta habilidad ya existe en tu perfil',
+            skillSaved: 'Habilidad guardada correctamente',
+            errorSavingSkill: 'Error al guardar la habilidad: ',
+            typeToSeeSuggestions: 'Escribe para ver sugerencias',
+            popularSuggestions: 'Sugerencias populares - Haz clic para seleccionar',
+            customSkillTip: 'Tip: También puedes escribir habilidades personalizadas',
+            notSpecified: 'Sin especificar',
+            actionCannotBeUndone: 'Esta acción no se puede deshacer.',
+            saving: 'Guardando...',
+        },
+        education: {
+            verifyEducationTitle: 'Verifica tu educación',
+            verifyEducationDesc: 'Aumenta tu credibilidad verificando tu formación académica. Ve a la sección de Verificaciones para enviar tus certificados o diplomas.',
+            goToVerifications: 'Ir a Verificaciones',
+            gpaScale43: 'Escala 4.3',
+            gpaScale70: 'Escala 7.0',
+            gpaScale90: 'Escala 9.0',
+            gpaScale12: 'Escala 12',
+            gpaScale20: 'Escala 20',
+            gpaHint43: 'GPA en escala de 0.0 a 4.3 (ej: 3.9)',
+            gpaHint50: 'Nota en escala de 0.0 a 5.0 (ej: 4.2)',
+            gpaHint70: 'GPA en escala de 0.0 a 7.0 (ej: 6.5)',
+            gpaHint90: 'CGPA en escala de 0.0 a 9.0 (ej: 8.2)',
+            gpaHint10: 'Nota en escala de 0 a 10 (ej: 8.5)',
+            gpaHint12: 'Nota en escala de 0 a 12 (ej: 10)',
+            gpaHint20: 'Nota en escala de 0 a 20 (ej: 16)',
+            gpaHint100: 'Porcentaje de 0 a 100 (ej: 85)',
+        },
+        experience: {
+            verifyExperienceTitle: 'Verifica tu experiencia laboral',
+            verifyExperienceDesc: 'Añade credibilidad a tu perfil verificando tu experiencia laboral. Ve a la sección de Verificaciones para enviar la documentación.',
+            goToVerifications: 'Ir a Verificaciones',
+            positionRequired: 'El cargo es obligatorio',
+            companyRequired: 'El nombre de la empresa es obligatorio',
+            startDateRequired: 'La fecha de inicio es obligatoria',
+            endDateRequired: 'La fecha de fin es obligatoria. Si aún trabajas aquí, marca "Actualmente trabajo aquí"',
+            datesInvalid: 'Las fechas no son válidas',
+        },
         identity: {
             contactInfo: 'Información de Contacto',
+            gender: 'Género',
         },
         languages: {
             title: 'Idiomas',
             nativeLanguages: 'Idiomas Nativos',
             otherLanguages: 'Otros Idiomas',
+            haveCertificate: '¿Cuentas con algún certificado de idioma?',
+            uploadCertificateDesc: 'Sube certificados oficiales (TOEFL, IELTS, DELE, DELF, etc.) para verificar tu nivel.',
+            uploadCertificate: 'Subir Certificado',
+            whatIsNativeLanguage: '¿Cuál es tu idioma nativo?',
+            nativeLanguageDesc: 'Comienza seleccionando tu idioma nativo. Este es el idioma que hablas con fluidez desde tu nacimiento o infancia.',
+            addNativeLanguage: 'Agregar Idioma Nativo',
+            addNative: 'Agregar Nativo',
+            native: 'Nativo',
+            language: 'Idioma',
+            selectLanguage: 'Selecciona un idioma',
+            addLanguage: 'Agregar Idioma',
+            noAdditionalLanguages: 'Aún no has agregado otros idiomas',
+            proficiencyLevel: 'Nivel de Dominio',
+            proficiencyPercentage: 'Porcentaje de Dominio (%)',
+            proficiency: 'Nivel de dominio',
+            update: 'Actualizar',
         },
         finalization: {
             congratulations: '¡Felicidades!',
@@ -3004,7 +3672,114 @@ export const translations = {
             }
         }
     },
-    // Pasos del Wizard de Perfil
+    profileWizard: {
+        completeYourProfile: 'Completa tu perfil',
+        toCreateCv: 'Para crear tu CV profesional, necesitas completar:',
+        navigateToSections: 'Navega a las secciones correspondientes usando los iconos de arriba',
+        premiumFeature: 'Funcionalidad Premium',
+        premiumAiDescription: 'Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es Free.',
+        viewPlans: 'Ver Planes',
+        improveWithAi: 'Mejorar con IA',
+    },
+    preferencesToasts: {
+        completePreferences: 'Por favor, completa tus preferencias laborales para continuar',
+        savedAutomatically: 'Preferencias guardadas automáticamente',
+        savedSuccessfully: 'Preferencias guardadas correctamente',
+        errorSaving: 'Error al guardar preferencias',
+    },
+    aiPremium: {
+        premiumFeature: 'Función Premium',
+        premiumDescription: 'Las funciones de IA para mejorar tu perfil están disponibles en planes Basic, Pro y Enterprise.',
+        whatsIncluded: '¿Qué incluye?',
+        improveSummary: 'Mejora automática de tu resumen profesional',
+        optimizeExperience: 'Optimización de descripciones de experiencia',
+        improveEducation: 'Mejora de secciones de educación',
+        currentPlan: 'Plan actual: ',
+        viewPremiumPlans: 'Ver Planes Premium',
+        aiRequestsMonth: 'Solicitudes IA este mes: ',
+        unlimited: 'Ilimitadas',
+        remaining: 'restantes',
+        checking: 'Verificando...',
+        mustBeLoggedIn: 'Debes iniciar sesión para usar esta función',
+        noAiAccess: 'No tienes acceso a las funciones de IA en tu plan actual',
+        confirmApplyChanges: 'Confirmar Aplicación de Cambios',
+        originalText: 'Texto Original',
+        aiImprovedText: 'Texto Mejorado por IA',
+        confirmNote: 'Esta acción reemplazará el texto actual con la versión mejorada por IA. Los cambios se aplicarán inmediatamente en tu perfil.',
+        note: 'Nota:',
+        cancel: 'Cancelar',
+        applyChanges: 'Aplicar Cambios',
+        applying: 'Aplicando...',
+    },
+    aiSkillsSuggestion: {
+        notAvailableTitle: 'Sugerencias de habilidades no disponibles',
+        notAvailableDesc: 'Agrega al menos 1 experiencia laboral para que la IA pueda sugerir habilidades relevantes basadas en tu trayectoria profesional.',
+        premiumFeature: 'Función Premium',
+        premiumSkillsDesc: (planName: string) => `Las sugerencias de habilidades con IA están disponibles en los planes Pro y Enterprise. Plan actual: ${planName}`,
+        autoSkillDetection: 'Detección automática de habilidades de tu experiencia',
+        industryRecommendations: 'Recomendaciones de habilidades relevantes para tu industria',
+        oneClickAdd: 'Agregar habilidades con un clic',
+        upgradeToPro: 'Mejorar a Pro',
+        aiRequestsRemaining: (count: number) => `${count} solicitudes de IA restantes este mes`,
+        getUnlimited: 'Obtener Ilimitado',
+        basedOnExperiences: (count: number) => `Basadas en tus ${count} experiencia(s) laboral(es)`,
+        analyzingWithAi: 'Analizando con IA...',
+        limitReached: 'Límite Alcanzado',
+        regenerateSuggestions: 'Regenerar Sugerencias IA',
+        generateSuggestions: 'Generar Sugerencias IA',
+        needExperience: 'Necesitas al menos 1 experiencia laboral para obtener sugerencias',
+        added: 'Agregada',
+        adding: 'Agregando...',
+        add: 'Agregar',
+        analyzingExperiences: 'Analizando tus experiencias...',
+        aiIdentifyingSkills: 'La IA está identificando habilidades relevantes basadas en tu trayectoria profesional',
+        noNewSkillsFound: 'No se encontraron habilidades nuevas',
+        noNewSkillsDesc: 'La IA no detectó habilidades adicionales basándose en tus experiencias actuales. Puedes volver a analizar más tarde después de agregar más experiencias.',
+        tip: 'Tip:',
+        tipText: 'Estas habilidades fueron identificadas automáticamente basándose en tus experiencias. Revisa y agrega las que realmente dominas.',
+    },
+    aiTextOptimizer: {
+        notAvailableTitle: 'Sugerencias de IA no disponibles',
+        notAvailableDescExperience: 'Agrega al menos 1 experiencia laboral con descripción para que la IA pueda optimizarla.',
+        notAvailableDescEducation: 'Agrega al menos 1 educación con descripción para que la IA pueda optimizarla.',
+        aiOptimization: 'Optimización con IA',
+        premiumFeature: 'Función Premium',
+        premiumOptimizeDescExperience: (planName: string) => `La optimización de experiencias con IA está disponible en los planes Pro y Enterprise. Plan actual: ${planName}`,
+        premiumOptimizeDescEducation: (planName: string) => `La optimización de educación con IA está disponible en los planes Pro y Enterprise. Plan actual: ${planName}`,
+        transformDescriptions: 'Transforma descripciones en contenido impactante',
+        generateAchievements: 'Genera puntos de logros destacados',
+        improveVisibility: 'Mejora tu visibilidad con reclutadores',
+        upgradeToPro: 'Mejorar a Pro',
+        aiRequestsRemaining: (count: number) => `${count} solicitudes de IA restantes este mes`,
+        getUnlimited: 'Obtener Ilimitado',
+        itemsToAnalyzeExperience: (count: number) => `${count} experiencia(s) para analizar`,
+        itemsToAnalyzeEducation: (count: number) => `${count} educación(es) para analizar`,
+        analyzingWithAi: 'Analizando con IA...',
+        limitReached: 'Límite Alcanzado',
+        regenerateSuggestions: 'Regenerar Sugerencias IA',
+        generateSuggestions: 'Generar Sugerencias IA',
+        needItemExperience: 'Necesitas al menos 1 experiencia para obtener sugerencias',
+        needItemEducation: 'Necesitas al menos 1 educación para obtener sugerencias',
+        noSuggestionsGenerated: 'No se pudieron generar sugerencias. Asegúrate de tener descripciones en tus registros.',
+        errorGenerating: 'Error al generar sugerencias. Por favor, intenta de nuevo.',
+        errorApplying: 'Error al aplicar la sugerencia',
+        analyzingWithAiLoading: 'Analizando con IA...',
+        optimizingDescriptions: 'Optimizando tus descripciones para hacerlas más impactantes',
+        originalDescription: 'Descripción Original:',
+        originalAchievements: 'Logros Originales:',
+        aiOptimizedDescription: 'Descripción Optimizada por IA:',
+        keyOptimizedAchievements: 'Logros Clave Optimizados:',
+        reject: 'Rechazar',
+        acceptAndApply: 'Aceptar y Aplicar',
+        changesApplied: 'Cambios aplicados',
+        rejected: 'Rechazado',
+        emptyStateText: 'Haz clic en "Generar Sugerencias" para optimizar tus descripciones con IA',
+        noTitle: 'Sin título',
+        noCompany: 'Sin empresa',
+        noInstitution: 'Sin institución',
+        applying: 'Aplicando...',
+        unlimited: 'Ilimitado',
+    },
     wizardSteps: {
         identity: 'Identidad',
         experience: 'Experiencia',
@@ -3638,6 +4413,11 @@ export const translations = {
                 noCreditCard: 'Sin tarjeta de crédito',
                 setupTime: 'Configuración en 2 minutos'
             },
+            // Date labels
+            today: 'Hoy',
+            yesterday: 'Ayer',
+            daysAgoPrefix: 'Hace',
+            daysAgoSuffix: 'días',
             // Hero section
             hero: {
                 title: 'Encuentra tu próximo',
@@ -3734,7 +4514,194 @@ export const translations = {
             professionDescription: 'Extraído del campo "title" (título profesional)',
             specializationLabel: 'Especialización',
             specializationDescription: 'Búsqueda combinada en ambos campos'
-        }
+        },
+        jobPostingsManagement: {
+            title: 'Vacantes de Empleo',
+            subtitle: 'Gestiona tus vacantes y rastrea las aplicaciones',
+            newPosting: 'Nueva Vacante',
+            search: 'Buscar vacantes...',
+            filters: {
+                all: 'Todas',
+                draft: 'Borradores',
+                published: 'Publicadas',
+                paused: 'Pausadas',
+                closed: 'Cerradas',
+                filled: 'Ocupadas',
+            },
+            sort: {
+                label: 'Ordenar por',
+                newest: 'Más recientes',
+                oldest: 'Más antiguas',
+                most_views: 'Más vistas',
+                most_applications: 'Más aplicaciones',
+            },
+            status: {
+                DRAFT: 'Borrador',
+                PUBLISHED: 'Publicada',
+                PAUSED: 'Pausada',
+                CLOSED: 'Cerrada',
+                FILLED: 'Ocupada',
+            },
+            stats: {
+                views: 'vistas',
+                applications: 'aplicaciones',
+                published: 'Publicado el',
+                deadline: 'Fecha límite',
+                cost: 'créditos para publicar',
+            },
+            actions: {
+                edit: 'Editar',
+                publish: 'Publicar',
+                pause: 'Pausar',
+                resume: 'Reanudar',
+                close: 'Cerrar',
+                viewApplications: 'Ver Aplicaciones',
+                duplicate: 'Duplicar',
+                delete: 'Eliminar',
+            },
+            employmentType: {
+                FULL_TIME: 'Tiempo Completo',
+                PART_TIME: 'Medio Tiempo',
+                CONTRACT: 'Contrato',
+                TEMPORARY: 'Temporal',
+                INTERNSHIP: 'Pasantía',
+                FREELANCE: 'Freelance',
+            },
+            workMode: {
+                REMOTE: 'Remoto',
+                ONSITE: 'Presencial',
+                HYBRID: 'Híbrido',
+            },
+            emptyState: {
+                title: 'Sin vacantes aún',
+                description: 'Crea tu primera vacante para comenzar a recibir aplicaciones de candidatos calificados.',
+                action: 'Crear Vacante',
+            },
+            noResults: {
+                title: 'No se encontraron vacantes',
+                description: 'Intenta ajustar tus filtros o búsqueda.',
+            },
+            confirmDelete: '¿Estás seguro de que deseas eliminar esta vacante? Esta acción no se puede deshacer.',
+            confirmPublish: 'Esto consumirá {credits} créditos. ¿Deseas publicar esta vacante?',
+            toasts: {
+                noCompanyFound: 'No se encontró empresa',
+                errorLoading: 'Error al cargar vacantes',
+                publishSuccess: '¡Vacante publicada exitosamente!',
+                insufficientCredits: 'Créditos insuficientes. Por favor recarga.',
+                errorPublishing: 'Error al publicar vacante',
+                statusUpdated: 'Estado actualizado',
+                errorUpdatingStatus: 'Error al actualizar estado',
+                deleted: 'Vacante eliminada',
+                errorDeleting: 'Error al eliminar vacante',
+            },
+        },
+        createJobPosting: {
+            titleCreate: 'Crear Vacante',
+            titleEdit: 'Editar Vacante',
+            subtitle: 'Completa los detalles para publicar tu vacante',
+            steps: {
+                basic: 'Info Básica',
+                description: 'Descripción',
+                requirements: 'Requisitos',
+                compensation: 'Compensación',
+            },
+            fields: {
+                title: 'Título del Puesto',
+                titlePlaceholder: 'ej. Desarrollador React Senior',
+                department: 'Departamento',
+                departmentPlaceholder: 'ej. Ingeniería',
+                employmentType: 'Tipo de Empleo',
+                workMode: 'Modalidad',
+                experienceLevel: 'Nivel de Experiencia',
+                location: 'Ubicación',
+                city: 'Ciudad',
+                cityPlaceholder: 'ej. Madrid',
+                state: 'Estado/Provincia',
+                statePlaceholder: 'ej. Comunidad de Madrid',
+                country: 'País',
+                isRemote: 'Posición remota',
+                description: 'Descripción del Puesto',
+                descriptionPlaceholder: 'Describe el rol, responsabilidades y qué hace única esta oportunidad...',
+                responsibilities: 'Responsabilidades Clave',
+                requirements: 'Requisitos',
+                niceToHave: 'Deseable',
+                benefits: 'Beneficios',
+                requiredSkills: 'Habilidades Requeridas',
+                optionalSkills: 'Habilidades Opcionales',
+                skillPlaceholder: 'Escribe una habilidad y presiona Enter',
+                salaryRange: 'Rango Salarial',
+                salaryMin: 'Mínimo',
+                salaryMax: 'Máximo',
+                currency: 'Moneda',
+                period: 'Período',
+                showSalary: 'Mostrar salario públicamente',
+                deadline: 'Fecha Límite',
+                instructions: 'Instrucciones de Aplicación',
+                instructionsPlaceholder: 'Instrucciones adicionales para candidatos...',
+            },
+            employmentTypes: {
+                FULL_TIME: 'Tiempo Completo',
+                PART_TIME: 'Medio Tiempo',
+                CONTRACT: 'Contrato',
+                TEMPORARY: 'Temporal',
+                INTERNSHIP: 'Pasantía',
+                FREELANCE: 'Freelance',
+            },
+            workModes: {
+                REMOTE: 'Remoto',
+                ONSITE: 'Presencial',
+                HYBRID: 'Híbrido',
+            },
+            experienceLevels: {
+                ENTRY: 'Nivel Inicial',
+                JUNIOR: 'Junior',
+                MID: 'Semi-Senior',
+                SENIOR: 'Senior',
+                LEAD: 'Líder',
+                EXECUTIVE: 'Ejecutivo',
+            },
+            periods: {
+                HOURLY: 'Por Hora',
+                MONTHLY: 'Por Mes',
+                YEARLY: 'Por Año',
+            },
+            actions: {
+                previous: 'Anterior',
+                next: 'Siguiente',
+                saveDraft: 'Guardar Borrador',
+                publish: 'Publicar',
+                update: 'Actualizar',
+                cancel: 'Cancelar',
+                addItem: 'Agregar ítem',
+                removeItem: 'Eliminar',
+                addSkill: 'Agregar',
+            },
+            validation: {
+                titleRequired: 'El título es requerido',
+                descriptionRequired: 'La descripción es requerida',
+                salaryInvalid: 'El salario máximo debe ser mayor al mínimo',
+            },
+            success: {
+                created: '¡Vacante creada exitosamente!',
+                updated: '¡Vacante actualizada exitosamente!',
+                published: '¡Vacante publicada exitosamente!',
+            },
+            toasts: {
+                noCompanyFound: 'No se encontró empresa',
+                jobNotFound: 'Vacante no encontrada',
+                errorLoadingData: 'Error al cargar datos',
+                errorSaving: 'Error al guardar vacante',
+                maxSalary: 'El salario máximo es 10,000,000',
+            },
+            salaryTip: 'Consejo: Deja los campos de salario vacíos para mostrar "A convenir" a los candidatos',
+        },
+        registrationPage: {
+            alreadyRegistered: 'Ya tienes una empresa registrada. Redirigiendo al dashboard...',
+            verifyingStatus: 'Verificando estado...',
+            industryPlaceholder: 'ej., Tecnología, Salud, Finanzas',
+            selectSize: 'Seleccionar tamaño',
+            remove: 'Eliminar',
+        },
     },
     feed: {
         title: 'Feed de Actividad',
@@ -3800,5 +4767,105 @@ export const translations = {
             retry: 'Reintentar'
         },
         noMore: 'No hay mas publicaciones'
-    }
+    },
+    templateGallery: {
+        proTemplates: 'PLANTILLAS PRO',
+    },
+    countrySelector: {
+        searchPlaceholder: 'Buscar pa\u00eds...',
+        noResults: 'No se encontraron pa\u00edses',
+    },
+    monthYearPicker: {
+        months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+    },
+    stampBadges: {
+        verifications: 'Verificaciones',
+        verifiedOn: 'Verificado el',
+        provider: 'Proveedor',
+        validUntil: 'V\u00e1lido hasta',
+        authenticatedBy: 'Verificaci\u00f3n autenticada por YourCVPassport',
+    },
+    translationProgress: {
+        translating: 'Traduciendo...',
+    },
+    loadingMessages: {
+        verifyingSession: 'Verificando sesión...',
+        verifyingAdminPermissions: 'Verificando permisos de administrador...'
+    },
+    matchScoreBadge: {
+        excellent: 'Excelente',
+        good: 'Bueno',
+        fair: 'Aceptable',
+        low: 'Bajo',
+        match: 'Match'
+    },
+    applicationTimeline: {
+        updated: 'Actualizado: '
+    },
+    blogPost: {
+        backToBlog: 'Volver al Blog',
+        relatedArticles: 'Artículos Relacionados'
+    },
+    notFoundPage: {
+        title: '404 - Página No Encontrada',
+        heading: '¡Ups! Página No Encontrada',
+        description: 'La página que buscas no existe o ha sido movida.',
+        code: '404',
+        homeButton: 'Volver al Inicio',
+        searchButton: 'Buscar Perfiles',
+        goBack: 'Regresar',
+        suggestions: 'Aquí hay algunos enlaces útiles:',
+        link1: 'Inicio',
+        link2: 'Dashboard',
+        link3: 'Buscar Perfiles',
+        link4: 'Ayuda y Soporte',
+    },
+    aiProductPage: {
+        heroTitle: 'IA que potencia tu perfil profesional',
+        heroSubtitle: 'Transforma tu CV en una herramienta profesional optimizada con el poder de la inteligencia artificial. Mejora automática, sugerencias inteligentes y análisis de calidad en tiempo real.',
+        heroCta: 'Optimizar mi perfil con IA',
+        featuresTitle: 'Funcionalidades de IA',
+        featuresSubtitle: 'Descubre cómo la IA mejora cada aspecto de tu CV profesional',
+        feature1Title: 'Optimización de descripciones',
+        feature1Description: 'La IA analiza y mejora automáticamente las descripciones de tu experiencia laboral para hacerlas más impactantes y profesionales, optimizadas para ATS.',
+        feature1ExampleTitle: 'Ejemplo: Descripción de puesto',
+        feature1Before: 'Trabajé en proyectos de desarrollo web y ayudé al equipo con varias tareas.',
+        feature1After: 'Lideré el desarrollo full-stack de 5+ aplicaciones web empresariales, implementando arquitecturas escalables con React y Node.js que mejoraron la eficiencia operativa en un 40%. Colaboré con equipos multifuncionales en metodología ágil para entregar soluciones de alta calidad.',
+        feature2Title: 'Generación de Summary Profesional',
+        feature2Description: 'Genera automáticamente un resumen profesional convincente que destaque tus fortalezas, experiencia y valor único en 2-3 párrafos impactantes.',
+        feature2ExampleTitle: 'Ejemplo: Summary profesional',
+        feature2Before: 'Desarrollador con experiencia en programación. Me gusta trabajar en equipo.',
+        feature2After: 'Ingeniero de Software Full-Stack con 5+ años de experiencia construyendo aplicaciones web escalables para empresas Fortune 500. Especializado en React, Node.js y arquitecturas cloud (AWS). Reconocido por liderar equipos técnicos y entregar proyectos complejos 30% más rápido que el promedio de la industria, con un enfoque en código limpio y mejores prácticas.',
+        feature3Title: 'Sugerencias de Skills',
+        feature3Description: 'Recibe recomendaciones inteligentes de habilidades técnicas y blandas relevantes para tu industria y rol, basadas en análisis de miles de perfiles exitosos.',
+        feature3SuggestionsLabel: 'Sugerencias basadas en tu perfil:',
+        feature4Title: 'Checklist de Calidad',
+        feature4Description: 'Análisis en tiempo real de la calidad de tu CV con recomendaciones accionables para mejorar cada sección y aumentar tus posibilidades de éxito.',
+        checklistItem1: 'Foto profesional agregada',
+        checklistItem2: 'Summary optimizado para ATS',
+        checklistItem3: '3+ años de experiencia documentados',
+        checklistItem4: 'Agregar al menos 2 certificaciones',
+        checklistItem5: 'Incluir enlaces a portfolio/GitHub',
+        profileQuality: 'Calidad del perfil:',
+        midCtaTitle: 'Prueba la IA gratis',
+        midCtaDescription: 'Descubre cómo la inteligencia artificial puede transformar tu CV en minutos. Sin tarjeta de crédito.',
+        midCtaButton: 'Empezar ahora gratis',
+        testimonialsTitle: 'Lo que dicen nuestros usuarios',
+        testimonialsSubtitle: 'Miles de profesionales han transformado sus CVs con nuestra IA',
+        testimonial1Name: 'María García',
+        testimonial1Role: 'Ingeniera de Software',
+        testimonial1Text: 'La IA transformó mi CV en algo realmente profesional. Recibí 3 ofertas de trabajo en las primeras dos semanas después de optimizarlo.',
+        testimonial2Name: 'Carlos Rodríguez',
+        testimonial2Role: 'Gerente de Producto',
+        testimonial2Text: 'Las sugerencias de skills fueron increíbles. Agregué competencias que no sabía que eran importantes para mi industria y ahora paso todos los filtros ATS.',
+        testimonial3Name: 'Ana Martínez',
+        testimonial3Role: 'Diseñadora UX',
+        testimonial3Text: 'El checklist de calidad me ayudó a identificar exactamente qué faltaba en mi CV. En 30 minutos tenía un perfil completo y profesional.',
+        finalCtaTitle: '¿Listo para optimizar tu perfil con IA?',
+        finalCtaSubtitle: 'Únete a miles de profesionales que ya están usando nuestra IA para destacar en el mercado laboral',
+        finalCtaButton: 'Comenzar gratis ahora',
+        finalCtaNote: 'No se requiere tarjeta de crédito',
+        beforeLabel: 'Antes',
+        afterLabel: 'Después (con IA)',
+    },
 };

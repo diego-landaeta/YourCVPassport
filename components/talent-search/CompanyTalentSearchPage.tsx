@@ -741,7 +741,10 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                         {/* Summary - Fixed height */}
                         <div className="mb-4" style={{ minHeight: '44px' }}>
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            {getTranslation(profile.summary) || '\u00A0'}
+                            {(() => {
+                              console.log(`[DEBUG] ${profile.full_name} | headline: ${profile.headline?.length}ch | summary: ${profile.summary?.length}ch`);
+                              return getTranslation(profile.summary) || '\u00A0';
+                            })()}
                           </p>
                         </div>
 

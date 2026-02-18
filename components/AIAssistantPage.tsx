@@ -22,12 +22,8 @@ const AIAssistantPage: React.FC = () => {
     const t = useTranslations();
     const { lang } = useLanguage();
 
-    const seoTitle = lang === 'es'
-        ? 'Asistente IA para CV'
-        : 'AI Assistant for CV';
-    const seoDescription = lang === 'es'
-        ? 'Optimiza tu CV con inteligencia artificial. Mejora automática de descripciones, sugerencias de palabras clave ATS, generador de cartas de presentación personalizado con YourCVPassport.'
-        : 'Optimize your CV with artificial intelligence. Automatic description enhancement, ATS keyword suggestions, personalized cover letter generator with YourCVPassport.';
+    const seoTitle = t.aiPage.seo.title;
+    const seoDescription = t.aiPage.seo.description;
 
     return (
         <>
@@ -59,7 +55,7 @@ const AIAssistantPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Asistente de IA para CV' : 'AI Assistant for CV'}
+                                alt={t.aiPage.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -107,11 +103,9 @@ const AIAssistantPage: React.FC = () => {
             <div className="px-4">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Deja que la IA trabaje por ti' : 'Let AI work for you'}
-                        description={lang === 'es'
-                            ? 'Optimiza tu CV automáticamente y genera cartas de presentación personalizadas en segundos.'
-                            : 'Optimize your CV automatically and generate personalized cover letters in seconds.'}
-                        buttonText={lang === 'es' ? 'Probar IA gratis' : 'Try AI for free'}
+                        title={t.aiPage.inlineCta.title}
+                        description={t.aiPage.inlineCta.description}
+                        buttonText={t.aiPage.inlineCta.button}
                         variant="gradient"
                     />
                 </div>

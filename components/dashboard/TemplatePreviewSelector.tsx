@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslations } from '../../hooks/useTranslations';
 
 // All available templates with their properties and preview images
 // Based on templateData.ts - 10 FREE + 10 PRO templates
@@ -12,7 +13,7 @@ export const ALL_TEMPLATES = [
   { id: 'passport', label: 'Pasaporte', description: 'Estilo pasaporte profesional', isPro: false, category: 'Gratis', previewImage: '/images/templates/passport.png' },
   { id: 'classic', label: 'Clásico', description: 'Diseño tradicional y profesional', isPro: false, category: 'Gratis', previewImage: '/images/templates/classic.png' },
   { id: 'modern-professional', label: 'Profesional Moderno', description: 'Profesional contemporáneo', isPro: false, category: 'Gratis', previewImage: '/images/templates/modern-professional.png' },
-  { id: 'corporate-classic', label: 'Corporativo Clásico', description: 'Corporativo elegante', isPro: false, category: 'Gratis', previewImage: '/images/templates/classic-corporate.png' },
+  { id: 'corporate-classic', label: 'Corporativo Clásico', description: 'Corporativo elegante', isPro: false, category: 'Gratis', previewImage: '/images/templates/corporate-classic.png' },
   { id: 'creative-minimalist', label: 'Creativo Minimalista', description: 'Minimalista creativo', isPro: false, category: 'Gratis', previewImage: '/images/templates/creative-minimalist.png' },
   { id: 'academic-standard', label: 'Estándar Académico', description: 'Estándar académico', isPro: false, category: 'Gratis', previewImage: '/images/templates/academic-standard.png' },
   { id: 'modern-minimalist', label: 'Moderno Minimalista', description: 'Minimalista moderno', isPro: false, category: 'Gratis', previewImage: '/images/templates/modern-minimalist.png' },
@@ -51,6 +52,8 @@ function TemplatePreviewCard({
   userIsPro: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations();
+  const tp = t.dashboard.templatePreview;
   const isLocked = template.isPro && !userIsPro;
 
   return (
@@ -101,7 +104,7 @@ function TemplatePreviewCard({
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Seleccionada
+            {tp.selected}
           </div>
         )}
       </div>
@@ -114,6 +117,8 @@ export function TemplatePreviewSelector({
   onSelectTemplate,
   userIsPro
 }: TemplatePreviewSelectorProps) {
+  const t = useTranslations();
+  const tp = t.dashboard.templatePreview;
   const [filter, setFilter] = useState<'all' | 'free' | 'pro'>('all');
 
   const filteredTemplates = ALL_TEMPLATES.filter(template => {
@@ -135,7 +140,7 @@ export function TemplatePreviewSelector({
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
-          Todas ({ALL_TEMPLATES.length})
+          {tp.all} ({ALL_TEMPLATES.length})
         </button>
         <button
           type="button"
@@ -146,7 +151,7 @@ export function TemplatePreviewSelector({
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
-          Gratis ({ALL_TEMPLATES.filter(t => !t.isPro).length})
+          {tp.free} ({ALL_TEMPLATES.filter(t => !t.isPro).length})
         </button>
         <button
           type="button"
@@ -183,16 +188,16 @@ export function TemplatePreviewSelector({
             </svg>
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                Desbloquea todas las plantillas PRO
+                {tp.unlockPro}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Accede a {ALL_TEMPLATES.filter(t => t.isPro).length}+ plantillas premium diseñadas profesionalmente
+                {tp.accessPremium(ALL_TEMPLATES.filter(t => t.isPro).length)}
               </p>
               <button
                 type="button"
                 className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
               >
-                Actualizar a PRO →
+                {tp.upgradeToPro} →
               </button>
             </div>
           </div>

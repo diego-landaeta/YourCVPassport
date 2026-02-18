@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 
 interface BlogPost {
@@ -23,6 +24,7 @@ const BlogPostPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { lang } = useLanguage();
+    const t = useTranslations();
     const [post, setPost] = useState<BlogPost | null>(null);
     const [loading, setLoading] = useState(true);
     const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -100,7 +102,7 @@ const BlogPostPage: React.FC = () => {
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                             </svg>
-                            {lang === 'es' ? 'Volver al Blog' : 'Back to Blog'}
+                            {t.blogPost.backToBlog}
                         </button>
 
                         <div className="mb-6">
@@ -314,7 +316,7 @@ const BlogPostPage: React.FC = () => {
                     {relatedPosts.length > 0 && (
                         <div className="mt-16">
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                                Artículos Relacionados
+                                {t.blogPost.relatedArticles}
                             </h2>
                             <div className="grid md:grid-cols-3 gap-6">
                                 {relatedPosts.map(relatedPost => (

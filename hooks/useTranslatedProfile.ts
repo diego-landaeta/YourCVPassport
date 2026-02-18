@@ -1,8 +1,18 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FullProfileData } from '../types';
-import { translateBatchWithProgress, detectSourceLanguage, TranslationLanguage } from '../services/translation';
-import { correctGenderBatch, inferGenderFromName } from '../utils/genderCorrection';
+import {
+  translateBatch,
+  translateBatchWithProgress,
+  detectSourceLanguage,
+  TranslationLanguage,
+  getCachedTranslation,
+  saveCachedTranslation,
+  generateContentHash,
+  applyCachedTranslations,
+  extractTranslatedContent,
+} from '../services/translation';
+import { correctGender, correctGenderBatch, inferGenderFromName } from '../utils/genderCorrection';
 
 interface TranslationProgress {
   current: number;
@@ -33,6 +43,7 @@ export function useTranslatedProfile(
   const [apiTranslations, setApiTranslations] = useState<Map<string, string>>(new Map());
   const [progress, setProgress] = useState<TranslationProgress | null>(null);
   const [pendingTexts, setPendingTexts] = useState<Set<string>>(new Set());
+  const [cachedFullProfile, setCachedFullProfile] = useState<FullProfileData | null>(null);
   const lastTranslationKey = useRef<string>('');
 
   /**
@@ -46,6 +57,8 @@ export function useTranslatedProfile(
 
     data.experiences?.forEach(exp => {
       if (exp.position) texts.push(exp.position);
+      // company_name excluded: proper nouns should not go to translation API
+      // Only known overrides (e.g. "Self-Employed") are handled via getCompanyTranslation
       if (exp.description) texts.push(exp.description);
       exp.achievements?.forEach(a => a && texts.push(a));
     });
@@ -84,9 +97,67 @@ export function useTranslatedProfile(
     return texts.filter(t => t && t.trim() !== '');
   }, []);
 
+  // Known company name translations that the API gets wrong
+  const companyNameOverrides: Record<string, Record<string, string>> = {
+    es: {
+      'Self-Employed': 'Trabajo por cuenta propia',
+      'self-employed': 'Trabajo por cuenta propia',
+      'Self Employed': 'Trabajo por cuenta propia',
+      'Freelance': 'Trabajo independiente',
+      'Independent': 'Independiente',
+      'Independent Consultant': 'Consultor independiente',
+      'Independent Consulting': 'Consultoría independiente',
+    },
+    en: {
+      'Trabajo por cuenta propia': 'Self-Employed',
+      'Trabajo independiente': 'Freelance',
+      'Independiente': 'Independent',
+      'Consultor independiente': 'Independent Consultant',
+      'Consultoría independiente': 'Independent Consulting',
+      'Autónomo': 'Self-Employed',
+    },
+  };
+
   // Build the translated profile
   const translatedProfile = useMemo(() => {
     if (!profileData) return null;
+
+    // Helper: apply known company name overrides (Self-Employed, Freelance, etc.)
+    // For all other company names, preserve the ORIGINAL from DB (never the cached/translated version)
+    // This prevents the API from mistranslating proper nouns (e.g. "Solvenic" → "Solvenico")
+    const getCompanyName = (originalName: string | undefined, _cachedName?: string): string | undefined => {
+      if (!originalName) return originalName;
+      const override = companyNameOverrides[lang]?.[originalName.trim()];
+      return override || originalName;
+    };
+
+    // If we have a cached full profile translation from Supabase, use it
+    // but fix company names + apply gender correction (cache may have wrong gender)
+    if (cachedFullProfile) {
+      const gender = profileData.profile.gender || inferGenderFromName(profileData.profile.full_name);
+      const genderFix = (text: string | null | undefined): string | null | undefined => {
+        if (!text || lang !== 'es' || !gender) return text;
+        return correctGender(text, gender);
+      };
+
+      return {
+        ...cachedFullProfile,
+        profile: {
+          ...cachedFullProfile.profile,
+          headline: genderFix(cachedFullProfile.profile.headline) || cachedFullProfile.profile.headline,
+          summary: genderFix(cachedFullProfile.profile.summary) || cachedFullProfile.profile.summary,
+        },
+        experiences: cachedFullProfile.experiences?.map((exp, i) => ({
+          ...exp,
+          company_name: getCompanyName(
+            profileData.experiences?.[i]?.company_name,
+            exp.company_name
+          ) || exp.company_name,
+          position: genderFix(exp.position) || exp.position,
+          description: genderFix(exp.description),
+        })) || [],
+      };
+    }
 
     // Normalize text for consistent Map lookups (trim whitespace)
     const normalizeKey = (text: string): string => text.trim();
@@ -96,6 +167,12 @@ export function useTranslatedProfile(
       const normalized = normalizeKey(text);
       // Try both normalized and original key
       return apiTranslations.get(normalized) || apiTranslations.get(text) || text;
+    };
+
+    const getCompanyTranslation = (text: string | null | undefined): string | null | undefined => {
+      if (!text) return text;
+      // Only apply known overrides, never send to API (company names are proper nouns)
+      return companyNameOverrides[lang]?.[text.trim()] || text;
     };
 
     return {
@@ -108,6 +185,7 @@ export function useTranslatedProfile(
       experiences: profileData.experiences?.map(exp => ({
         ...exp,
         position: getTranslation(exp.position) || exp.position,
+        company_name: getCompanyTranslation(exp.company_name) || exp.company_name,
         description: getTranslation(exp.description),
         achievements: exp.achievements?.map(a => getTranslation(a) || a),
       })) || [],
@@ -152,12 +230,13 @@ export function useTranslatedProfile(
       visas: profileData.visas,
       stamps: profileData.stamps,
     };
-  }, [profileData, apiTranslations]);
+  }, [profileData, apiTranslations, cachedFullProfile]);
 
   // Effect to fetch API translations for all content
   useEffect(() => {
     if (!profileData) {
       setApiTranslations(new Map());
+      setCachedFullProfile(null);
       return;
     }
 
@@ -169,10 +248,35 @@ export function useTranslatedProfile(
     }
 
     const doTranslate = async () => {
-      setIsTranslating(true);
       setError(null);
+      setCachedFullProfile(null);
+
+      const profileId = profileData.profile.id;
+      const contentHash = generateContentHash(profileData);
 
       try {
+        // === STEP 1: Check profile-level cache in Supabase ===
+        console.log(`[useTranslatedProfile] Checking profile cache: ${profileId}, lang: ${lang}`);
+
+        const cachedContent = await getCachedTranslation(
+          profileId,
+          lang as TranslationLanguage,
+          contentHash
+        );
+
+        if (cachedContent) {
+          console.log(`[useTranslatedProfile] CACHE HIT! Applying cached translation for ${profileId}`);
+          const applied = applyCachedTranslations(profileData, cachedContent);
+          setCachedFullProfile(applied);
+          lastTranslationKey.current = translationKey;
+          return; // Skip API translation entirely
+        }
+
+        console.log(`[useTranslatedProfile] Cache miss, proceeding with API translation`);
+
+        // === STEP 2: Normal translation flow (cache miss) ===
+        setIsTranslating(true);
+
         const allTexts = extractTranslatableTexts(profileData);
 
         if (allTexts.length === 0) {
@@ -287,6 +391,26 @@ export function useTranslatedProfile(
 
         console.log(`[useTranslatedProfile] Translated ${translatedCount}/${uniqueTexts.length} texts`);
 
+        // === STEP 3: Save to profile-level cache for future users ===
+        try {
+          const translatedSkills = (profileData.skills || []).map(skill => ({
+            id: skill.id || '',
+            name: translations.get(skill.name?.trim()) || skill.name,
+          }));
+          const contentToCache = extractTranslatedContent(profileData, translations, translatedSkills);
+          saveCachedTranslation(
+            profileId,
+            lang as TranslationLanguage,
+            contentToCache,
+            contentHash
+          ).catch(err => {
+            console.warn('[useTranslatedProfile] Failed to save profile cache:', err);
+          });
+          console.log(`[useTranslatedProfile] Profile cache saved for ${profileId} (${lang})`);
+        } catch (cacheErr) {
+          console.warn('[useTranslatedProfile] Error preparing cache save:', cacheErr);
+        }
+
         setApiTranslations(translations);
         lastTranslationKey.current = translationKey;
 
@@ -305,6 +429,7 @@ export function useTranslatedProfile(
   const refreshTranslation = useCallback(() => {
     lastTranslationKey.current = '';
     setApiTranslations(new Map());
+    setCachedFullProfile(null);
   }, []);
 
   return {

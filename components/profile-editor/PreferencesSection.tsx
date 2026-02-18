@@ -136,11 +136,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
 
       if (!hasAtLeastOneField) {
         // Mostrar error si no hay ningún campo lleno
-        toast.error(
-          lang === 'es'
-            ? 'Por favor, completa tus preferencias laborales para continuar'
-            : 'Please complete your job preferences to continue'
-        );
+        toast.error(translations.preferencesToasts.completePreferences);
         // Lanzar evento de error para que el wizard no marque como completado
         window.dispatchEvent(new CustomEvent('auto-save-preferences-error'));
         return;
@@ -149,11 +145,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
       // Solo guardar si hay cambios pendientes
       if (isDirty) {
         await onSave(formValues);
-        toast.success(
-          lang === 'es'
-            ? 'Preferencias guardadas automáticamente'
-            : 'Preferences saved automatically'
-        );
+        toast.success(translations.preferencesToasts.savedAutomatically);
       }
 
       // Lanzar evento de éxito
@@ -173,11 +165,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
       // Only save if there are actual changes
       if (isDirty) {
         await onSave(data);
-        toast.success(
-          lang === 'es'
-            ? 'Preferencias guardadas correctamente'
-            : 'Preferences saved successfully'
-        );
+        toast.success(translations.preferencesToasts.savedSuccessfully);
       }
 
       // ALWAYS advance to next section (even if no changes to save)
@@ -190,11 +178,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
       }
     } catch (error) {
       console.error('❌ Error saving preferences:', error);
-      toast.error(
-        lang === 'es'
-          ? 'Error al guardar preferencias'
-          : 'Error saving preferences'
-      );
+      toast.error(translations.preferencesToasts.errorSaving);
       // Even on error, try to advance (user can come back later)
       if (onNext) {
         onNext();

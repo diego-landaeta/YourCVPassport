@@ -436,10 +436,10 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
   const getLevelTranslation = (level?: string) => {
     if (!level) return '';
     switch (level.toUpperCase()) {
-      case 'BEGINNER': return lang === 'es' ? 'Principiante' : 'Beginner';
-      case 'INTERMEDIATE': return lang === 'es' ? 'Intermedio' : 'Intermediate';
-      case 'ADVANCED': return lang === 'es' ? 'Avanzado' : 'Advanced';
-      case 'EXPERT': return lang === 'es' ? 'Experto' : 'Expert';
+      case 'BEGINNER': return modals.beginner;
+      case 'INTERMEDIATE': return modals.intermediate;
+      case 'ADVANCED': return modals.advanced;
+      case 'EXPERT': return modals.expert;
       default: return level.toLowerCase();
     }
   };
@@ -491,6 +491,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
 const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ initialData = [], onSave, onNext }, ref) => {
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
+  const t = translations.profileEditor.skills;
   const { session } = useAuth();
   const { lang } = useLanguage();
   const toast = useToastContext();
@@ -698,11 +699,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
       });
 
       if (isDuplicate) {
-        toast.error(
-          lang === 'es'
-            ? 'Esta habilidad ya existe en tu perfil'
-            : 'This skill already exists in your profile'
-        );
+        toast.error(t.skillAlreadyExists);
         return;
       }
 
@@ -724,22 +721,14 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
 
       // ⚠️ NO mostrar toast en modo wizard para no interrumpir el flujo
       if (!isWizardMode) {
-        toast.success(
-          lang === 'es'
-            ? 'Habilidad guardada correctamente'
-            : 'Skill saved successfully'
-        );
+        toast.success(t.skillSaved);
       }
 
       // Guardar en segundo plano
       await onSave(updated);
     } catch (error) {
       // Siempre mostrar errores, incluso en wizard mode
-      toast.error(
-        lang === 'es'
-          ? 'Error al guardar la habilidad: ' + (error as Error).message
-          : 'Error saving skill: ' + (error as Error).message
-      );
+      toast.error(t.errorSavingSkill + (error as Error).message);
     }
   };
 
@@ -768,7 +757,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                {lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+                {t.aiSuggestionsTitle}
               </h3>
             </div>
             <button
@@ -828,7 +817,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         <button
           onClick={() => setShowAISuggestions(prev => !prev)}
           className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-40 group"
-          title={lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+          title={t.aiSuggestionsTitle}
         >
           {/* Premium Badge */}
           <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-xs font-bold rounded-full shadow-lg flex items-center gap-1 animate-pulse z-10">
@@ -843,7 +832,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
           </svg>
           {/* Tooltip */}
           <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}
+            {t.aiSuggestionsTitle}
           </span>
         </button>
       )}
@@ -871,7 +860,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
               {modals.deleteSkillConfirm || '¿Eliminar habilidad?'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Esta acción no se puede deshacer.
+              {t.actionCannotBeUndone}
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -884,7 +873,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                 onClick={confirmDelete}
                 className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
               >
-                Eliminar
+                {translations.common.delete}
               </button>
             </div>
           </div>
@@ -932,9 +921,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
               {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
               {!errors.name && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  💡 {lang === 'es'
-                    ? 'Escribe para ver sugerencias'
-                    : 'Type to see suggestions'}
+                  {t.typeToSeeSuggestions}
                 </p>
               )}
 
@@ -946,7 +933,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
-                      {lang === 'es' ? 'Sugerencias populares - Haz clic para seleccionar' : 'Popular suggestions - Click to select'}
+                      {t.popularSuggestions}
                     </p>
                   </div>
                   {filteredSuggestions.map((suggestion, idx) => (
@@ -964,7 +951,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                   ))}
                   <div className="px-3 py-2 bg-gray-50 dark:bg-dark-bg-primary border-t border-gray-200 dark:border-dark-border sticky bottom-0">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      💡 {lang === 'es' ? 'Tip: También puedes escribir habilidades personalizadas' : 'Tip: You can also write custom skills'}
+                      {t.customSkillTip}
                     </p>
                   </div>
                 </div>
@@ -982,11 +969,11 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                   })}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                 >
-                  <option value="">{lang === 'es' ? 'Sin especificar' : 'Not specified'}</option>
-                  <option value="BEGINNER">{lang === 'es' ? 'Principiante' : 'Beginner'}</option>
-                  <option value="INTERMEDIATE">{lang === 'es' ? 'Intermedio' : 'Intermediate'}</option>
-                  <option value="ADVANCED">{lang === 'es' ? 'Avanzado' : 'Advanced'}</option>
-                  <option value="EXPERT">{lang === 'es' ? 'Experto' : 'Expert'}</option>
+                  <option value="">{t.notSpecified}</option>
+                  <option value="BEGINNER">{modals.beginner}</option>
+                  <option value="INTERMEDIATE">{modals.intermediate}</option>
+                  <option value="ADVANCED">{modals.advanced}</option>
+                  <option value="EXPERT">{modals.expert}</option>
                 </select>
               </div>
 
@@ -1037,7 +1024,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                 disabled={isSubmitting}
                 className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Guardando...' : editingIndex !== null ? modals.update : modals.add} {modals.addSkill.replace('Añadir ', '').replace('Add ', '')}
+                {isSubmitting ? t.saving : editingIndex !== null ? modals.update : modals.add} {modals.addSkill.replace('Añadir ', '').replace('Add ', '')}
               </button>
             </div>
           </form>

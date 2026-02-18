@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Profile } from '../types';
+import { Profile } from '../../types';
 import { normalizeUrl } from '../../utils/canonicalUrl';
 
 interface SEOHeadProps {

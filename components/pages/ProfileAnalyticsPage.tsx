@@ -105,7 +105,7 @@ const ProfileAnalyticsPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Analítica de Perfil Profesional' : 'Professional Profile Analytics'}
+                                alt={t.analyticsPage.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -202,11 +202,9 @@ const ProfileAnalyticsPage: React.FC = () => {
             <div className="px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Comienza a rastrear tus métricas hoy' : 'Start tracking your metrics today'}
-                        description={lang === 'es'
-                            ? 'Obtén insights detallados sobre quién visita tu perfil y optimiza tu estrategia de búsqueda de empleo.'
-                            : 'Get detailed insights into who visits your profile and optimize your job search strategy.'}
-                        buttonText={lang === 'es' ? 'Activar analíticas gratis' : 'Activate free analytics'}
+                        title={t.analyticsPage.inlineCta.title}
+                        description={t.analyticsPage.inlineCta.description}
+                        buttonText={t.analyticsPage.inlineCta.button}
                         variant="blue"
                     />
                 </div>

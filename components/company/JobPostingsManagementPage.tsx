@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 
@@ -26,7 +26,8 @@ interface JobPosting {
 }
 
 const JobPostingsManagementPage: React.FC = () => {
-  const { lang } = useLanguage();
+  const t = useTranslations();
+  const translations = t.company.jobPostingsManagement;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
@@ -35,149 +36,6 @@ const JobPostingsManagementPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_views' | 'most_applications'>('newest');
-
-  const t = {
-    en: {
-      title: 'Job Postings',
-      subtitle: 'Manage your job vacancies and track applications',
-      newPosting: 'New Job Posting',
-      search: 'Search job postings...',
-      filters: {
-        all: 'All',
-        draft: 'Drafts',
-        published: 'Published',
-        paused: 'Paused',
-        closed: 'Closed',
-        filled: 'Filled',
-      },
-      sort: {
-        label: 'Sort by',
-        newest: 'Newest first',
-        oldest: 'Oldest first',
-        most_views: 'Most views',
-        most_applications: 'Most applications',
-      },
-      status: {
-        DRAFT: 'Draft',
-        PUBLISHED: 'Published',
-        PAUSED: 'Paused',
-        CLOSED: 'Closed',
-        FILLED: 'Filled',
-      },
-      stats: {
-        views: 'views',
-        applications: 'applications',
-        published: 'Published on',
-        deadline: 'Deadline',
-        cost: 'credits to publish',
-      },
-      actions: {
-        edit: 'Edit',
-        publish: 'Publish',
-        pause: 'Pause',
-        resume: 'Resume',
-        close: 'Close',
-        viewApplications: 'View Applications',
-        duplicate: 'Duplicate',
-        delete: 'Delete',
-      },
-      employmentType: {
-        FULL_TIME: 'Full Time',
-        PART_TIME: 'Part Time',
-        CONTRACT: 'Contract',
-        TEMPORARY: 'Temporary',
-        INTERNSHIP: 'Internship',
-        FREELANCE: 'Freelance',
-      },
-      workMode: {
-        REMOTE: 'Remote',
-        ONSITE: 'On-site',
-        HYBRID: 'Hybrid',
-      },
-      emptyState: {
-        title: 'No job postings yet',
-        description: 'Create your first job posting to start receiving applications from qualified candidates.',
-        action: 'Create Job Posting',
-      },
-      noResults: {
-        title: 'No job postings found',
-        description: 'Try adjusting your filters or search query.',
-      },
-      confirmDelete: 'Are you sure you want to delete this job posting? This action cannot be undone.',
-      confirmPublish: 'This will consume {credits} credits. Do you want to publish this job posting?',
-    },
-    es: {
-      title: 'Vacantes de Empleo',
-      subtitle: 'Gestiona tus vacantes y rastrea las aplicaciones',
-      newPosting: 'Nueva Vacante',
-      search: 'Buscar vacantes...',
-      filters: {
-        all: 'Todas',
-        draft: 'Borradores',
-        published: 'Publicadas',
-        paused: 'Pausadas',
-        closed: 'Cerradas',
-        filled: 'Ocupadas',
-      },
-      sort: {
-        label: 'Ordenar por',
-        newest: 'Más recientes',
-        oldest: 'Más antiguas',
-        most_views: 'Más vistas',
-        most_applications: 'Más aplicaciones',
-      },
-      status: {
-        DRAFT: 'Borrador',
-        PUBLISHED: 'Publicada',
-        PAUSED: 'Pausada',
-        CLOSED: 'Cerrada',
-        FILLED: 'Ocupada',
-      },
-      stats: {
-        views: 'vistas',
-        applications: 'aplicaciones',
-        published: 'Publicado el',
-        deadline: 'Fecha límite',
-        cost: 'créditos para publicar',
-      },
-      actions: {
-        edit: 'Editar',
-        publish: 'Publicar',
-        pause: 'Pausar',
-        resume: 'Reanudar',
-        close: 'Cerrar',
-        viewApplications: 'Ver Aplicaciones',
-        duplicate: 'Duplicar',
-        delete: 'Eliminar',
-      },
-      employmentType: {
-        FULL_TIME: 'Tiempo Completo',
-        PART_TIME: 'Medio Tiempo',
-        CONTRACT: 'Contrato',
-        TEMPORARY: 'Temporal',
-        INTERNSHIP: 'Pasantía',
-        FREELANCE: 'Freelance',
-      },
-      workMode: {
-        REMOTE: 'Remoto',
-        ONSITE: 'Presencial',
-        HYBRID: 'Híbrido',
-      },
-      emptyState: {
-        title: 'Sin vacantes aún',
-        description: 'Crea tu primera vacante para comenzar a recibir aplicaciones de candidatos calificados.',
-        action: 'Crear Vacante',
-      },
-      noResults: {
-        title: 'No se encontraron vacantes',
-        description: 'Intenta ajustar tus filtros o búsqueda.',
-      },
-      confirmDelete: '¿Estás seguro de que deseas eliminar esta vacante? Esta acción no se puede deshacer.',
-      confirmPublish: 'Esto consumirá {credits} créditos. ¿Deseas publicar esta vacante?',
-    },
-  };
-
-  const translations = t[lang];
 
   useEffect(() => {
     fetchCompanyAndJobPostings();
@@ -206,7 +64,7 @@ const JobPostingsManagementPage: React.FC = () => {
         .single();
 
       if (companyUserError || !companyUser) {
-        toast.error(lang === 'en' ? 'No company found' : 'No se encontró empresa');
+        toast.error(translations.toasts.noCompanyFound);
         navigate('/company/register');
         return;
       }
@@ -225,7 +83,7 @@ const JobPostingsManagementPage: React.FC = () => {
       setJobPostings(postings || []);
     } catch (error: any) {
       console.error('Error fetching job postings:', error);
-      toast.error(lang === 'en' ? 'Error loading job postings' : 'Error al cargar vacantes');
+      toast.error(translations.toasts.errorLoading);
     } finally {
       setLoading(false);
     }
@@ -287,15 +145,15 @@ const JobPostingsManagementPage: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(lang === 'en' ? 'Job posting published successfully!' : '¡Vacante publicada exitosamente!');
+      toast.success(translations.toasts.publishSuccess);
       fetchCompanyAndJobPostings();
     } catch (error: any) {
       console.error('Error publishing job:', error);
       if (error.message.includes('Insufficient credits')) {
-        toast.error(lang === 'en' ? 'Insufficient credits. Please top up.' : 'Créditos insuficientes. Por favor recarga.');
+        toast.error(translations.toasts.insufficientCredits);
         navigate('/company/credits');
       } else {
-        toast.error(lang === 'en' ? 'Error publishing job posting' : 'Error al publicar vacante');
+        toast.error(translations.toasts.errorPublishing);
       }
     }
   };
@@ -309,11 +167,11 @@ const JobPostingsManagementPage: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(lang === 'en' ? 'Status updated' : 'Estado actualizado');
+      toast.success(translations.toasts.statusUpdated);
       fetchCompanyAndJobPostings();
     } catch (error: any) {
       console.error('Error updating status:', error);
-      toast.error(lang === 'en' ? 'Error updating status' : 'Error al actualizar estado');
+      toast.error(translations.toasts.errorUpdatingStatus);
     }
   };
 
@@ -328,11 +186,11 @@ const JobPostingsManagementPage: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(lang === 'en' ? 'Job posting deleted' : 'Vacante eliminada');
+      toast.success(translations.toasts.deleted);
       fetchCompanyAndJobPostings();
     } catch (error: any) {
       console.error('Error deleting job:', error);
-      toast.error(lang === 'en' ? 'Error deleting job posting' : 'Error al eliminar vacante');
+      toast.error(translations.toasts.errorDeleting);
     }
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface VerificationBadgeProps {
     stampId: string;
@@ -12,7 +12,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
     status,
     compact = false
 }) => {
-    const { lang } = useLanguage();
+    const t = useTranslations();
 
     if (status !== 'VERIFIED') {
         return null;
@@ -25,7 +25,7 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <span className="ml-1 text-sm font-medium text-cv-green">
-                    {lang === 'es' ? 'Verificado' : 'Verified'}
+                    {t.common.verified}
                 </span>
             </div>
         );

@@ -2,6 +2,7 @@ import React, { useState, memo } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import { useFeedActions } from '../../../hooks/useFeedActions';
 import LikeButton from './LikeButton';
 import ShareButton from './ShareButton';
@@ -18,6 +19,7 @@ interface FeedPostProps {
 
 const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpdated }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const [showComments, setShowComments] = useState(false);
   const [localPost, setLocalPost] = useState(post);
   const [isEditing, setIsEditing] = useState(false);
@@ -30,34 +32,18 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     locale: lang === 'es' ? es : undefined
   });
 
-  const t = {
-    en: {
-      like: 'Like',
-      comment: 'Comment',
-      share: 'Share',
-      edited: 'Edited',
-      comments: 'comments',
-      likes: 'likes',
-      shares: 'shares',
-      confirmDelete: 'Are you sure you want to delete this post?',
-      save: 'Save',
-      cancel: 'Cancel'
-    },
-    es: {
-      like: 'Me gusta',
-      comment: 'Comentar',
-      share: 'Compartir',
-      edited: 'Editado',
-      comments: 'comentarios',
-      likes: 'me gusta',
-      shares: 'compartidos',
-      confirmDelete: '¿Estas seguro de eliminar esta publicacion?',
-      save: 'Guardar',
-      cancel: 'Cancelar'
-    }
+  const translations = {
+    like: t.feed.post.like,
+    comment: t.feed.post.comment,
+    share: t.feed.post.share,
+    edited: t.feed.post.edited,
+    comments: t.feed.stats.comments,
+    likes: t.feed.stats.likes,
+    shares: t.feed.stats.shares,
+    confirmDelete: t.feed.post.confirmDelete,
+    save: t.feed.post.save,
+    cancel: t.feed.post.cancel
   };
-
-  const translations = t[lang];
 
   const handleLike = async () => {
     const result = await toggleLike(post.id, localPost.hasLiked || false);
@@ -122,7 +108,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 px-4 py-2 border-b border-amber-200 dark:border-amber-800">
           <p className="text-amber-700 dark:text-amber-400 text-sm font-medium flex items-center gap-2">
             <span>🏆</span>
-            {lang === 'es' ? 'Logro desbloqueado' : 'Achievement unlocked'}
+            {t.feed.achievements.unlocked}
           </p>
         </div>
       )}

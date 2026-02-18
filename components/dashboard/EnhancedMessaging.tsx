@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   PaperAirplaneIcon,
@@ -51,7 +52,9 @@ interface Lead {
 const EnhancedMessaging: React.FC = () => {
   const { user, profile } = useAuth();
   const t = useTranslations();
+  const { lang } = useLanguage();
   const toast = useToastContext();
+  const dateLocale = lang === 'es' ? 'es-ES' : 'en-US';
 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -182,7 +185,7 @@ const EnhancedMessaging: React.FC = () => {
       id: `temp-${Date.now()}`,
       lead_id: selectedLead.id,
       sender_id: user.id,
-      sender_name: profile.full_name || 'Usuario',
+      sender_name: profile.full_name || t.dashboard.messaging.userFallback,
       content: messageContent,
       is_read: false,
       created_at: new Date().toISOString()
@@ -198,7 +201,7 @@ const EnhancedMessaging: React.FC = () => {
         .insert([{
           lead_id: selectedLead.id,
           sender_id: user.id,
-          sender_name: profile.full_name || 'Usuario',
+          sender_name: profile.full_name || t.dashboard.messaging.userFallback,
           content: messageContent
         }])
         .select()
@@ -227,7 +230,7 @@ const EnhancedMessaging: React.FC = () => {
       setSelectedLead(prev => prev ? { ...prev, status: 'REPLIED' } : null);
     } catch (err: any) {setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent);
-      toast.error('Error al enviar el mensaje');
+      toast.error(t.dashboard.messaging.sendError);
     } finally {
       setSending(false);
     }
@@ -334,7 +337,7 @@ const EnhancedMessaging: React.FC = () => {
           {isRealtimeConnected && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-green-700 dark:text-green-400">En línea</span>
+              <span className="text-xs font-medium text-green-700 dark:text-green-400">{t.dashboard.messaging.online}</span>
             </div>
           )}
         </div>
@@ -440,7 +443,7 @@ const EnhancedMessaging: React.FC = () => {
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 flex items-center gap-1">
                       <ClockIcon className="w-3 h-3" />
-                      {new Date(lead.created_at).toLocaleDateString('es-ES', {
+                      {new Date(lead.created_at).toLocaleDateString(dateLocale, {
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
@@ -486,7 +489,7 @@ const EnhancedMessaging: React.FC = () => {
                       {lead.subject}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
-                      {new Date(lead.created_at).toLocaleDateString('es-ES', {
+                      {new Date(lead.created_at).toLocaleDateString(dateLocale, {
                         day: 'numeric',
                         month: 'short'
                       })}
@@ -578,7 +581,7 @@ const EnhancedMessaging: React.FC = () => {
                           <ChatBubbleLeftRightIcon className="w-8 h-8 text-gray-400" />
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Inicia la conversación enviando un mensaje
+                          {t.dashboard.messaging.startConversation}
                         </p>
                       </div>
                     </div>
@@ -604,7 +607,7 @@ const EnhancedMessaging: React.FC = () => {
                               </p>
                             </div>
                             <p className={`text-xs text-gray-500 dark:text-gray-500 mt-1 ${isMe ? 'text-right' : 'text-left'}`}>
-                              {new Date(message.created_at).toLocaleTimeString('es-ES', {
+                              {new Date(message.created_at).toLocaleTimeString(dateLocale, {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               })}

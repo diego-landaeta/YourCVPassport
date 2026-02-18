@@ -17,7 +17,7 @@ interface TemplateConfig {
 }
 
 export const TemplateManagement: React.FC = () => {
-  const { t } = useLanguage();
+  const { lang } = useLanguage();
   const [templateConfigs, setTemplateConfigs] = useState<TemplateConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

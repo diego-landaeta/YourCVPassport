@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { feedService } from '../../../services/feedService';
 import type { Profile } from '../../../types';
@@ -16,30 +17,20 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
   isSubmitting
 }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const t = {
-    en: {
-      placeholder: 'What\'s on your mind?',
-      publish: 'Publish',
-      publishing: 'Publishing...',
-      addImage: 'Add image',
-      maxImages: 'Maximum 4 images'
-    },
-    es: {
-      placeholder: '¿Que tienes en mente?',
-      publish: 'Publicar',
-      publishing: 'Publicando...',
-      addImage: 'Agregar imagen',
-      maxImages: 'Maximo 4 imagenes'
-    }
+  const translations = {
+    placeholder: t.feed.createPost.placeholder,
+    publish: t.feed.createPost.publish,
+    publishing: t.feed.createPost.publishing,
+    addImage: t.feed.createPost.addImage,
+    maxImages: t.feed.createPost.maxImages
   };
-
-  const translations = t[lang];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +59,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({
       setImages(prev => [...prev, ...newUrls]);
     } catch (err) {
       console.error('Error uploading images:', err);
-      setUploadError(lang === 'es' ? 'Error al subir imagen' : 'Error uploading image');
+      setUploadError(t.feed.errors.uploadingImage);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

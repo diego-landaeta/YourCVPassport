@@ -43,6 +43,12 @@ export interface TranslatedProfileContent {
     id: string;
     name: string;
   }>;
+  certifications?: Array<{
+    id: string;
+    name?: string | null;
+    title?: string | null;
+    description?: string | null;
+  }>;
 }
 
 /**
@@ -96,6 +102,18 @@ export function generateContentHash(profileData: FullProfileData): string {
   sortedSkills.forEach(skill => {
     contentParts.push(skill.id || '');
     contentParts.push(skill.name || '');
+  });
+
+  // Certifications (sorted by id)
+  const sortedCertifications = [...(profileData.certifications || [])].sort((a, b) =>
+    ((a as any).id || '').localeCompare((b as any).id || '')
+  );
+  sortedCertifications.forEach(cert => {
+    const certAny = cert as any;
+    contentParts.push(certAny.id || '');
+    contentParts.push(certAny.name || '');
+    contentParts.push(certAny.title || '');
+    contentParts.push(certAny.description || '');
   });
 
   // Create simple hash from concatenated content
@@ -240,6 +258,15 @@ export function extractTranslatedContent(
       description: getTranslation(item.description),
     })),
     skills: translatedSkills.map(s => ({ id: s.id || '', name: s.name })),
+    certifications: (profileData.certifications || []).map(cert => {
+      const certAny = cert as any;
+      return {
+        id: certAny.id || '',
+        name: certAny.name ? (getTranslation(certAny.name) || certAny.name) : certAny.name,
+        title: certAny.title ? (getTranslation(certAny.title) || certAny.title) : certAny.title,
+        description: getTranslation(certAny.description),
+      };
+    }),
   };
 }
 
@@ -311,7 +338,18 @@ export function applyCachedTranslations(
         name: cachedSkill.name,
       };
     }),
-    certifications: profileData.certifications,
+    certifications: (profileData.certifications || []).map(cert => {
+      const certAny = cert as any;
+      const certId = certAny.id || '';
+      const cachedCert = (cached.certifications || []).find(c => c.id === certId);
+      if (!cachedCert) return cert;
+      return {
+        ...cert,
+        name: cachedCert.name || certAny.name,
+        title: cachedCert.title || certAny.title,
+        description: cachedCert.description,
+      } as any;
+    }),
     collaborations: profileData.collaborations,
     languages: profileData.languages,
     services: profileData.services,

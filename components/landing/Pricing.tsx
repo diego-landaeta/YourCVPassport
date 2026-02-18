@@ -23,14 +23,14 @@ const Pricing: React.FC = () => {
           </p>
           <div className="mt-10 flex justify-center items-center space-x-4">
             <span className={`font-semibold ${!isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
-              {lang === 'es' ? 'Mensual' : 'Monthly'}
+              {t.pricing.monthly}
             </span>
             <label htmlFor="billing-toggle-main" className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="billing-toggle-main" className="sr-only peer" checked={isAnnual} onChange={() => setIsAnnual(!isAnnual)} />
               <div className="w-14 h-8 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-[4px] after:bg-white dark:after:bg-dark-text-primary after:border-gray-300 dark:border-dark-border-light after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cv-blue"></div>
             </label>
             <span className={`font-semibold ${isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
-              {lang === 'es' ? 'Anual' : 'Annual'} <span className="text-cv-green">({lang === 'es' ? 'Ahorra 20%' : 'Save 20%'})</span>
+              {t.pricing.annual} <span className="text-cv-green">({t.pricing.save20})</span>
             </span>
           </div>
         </div>
@@ -48,7 +48,7 @@ const Pricing: React.FC = () => {
               : plan.price;
 
             const displayPeriod = isAnnual && annualPrice
-              ? (lang === 'es' ? '/ año' : '/ year')
+              ? t.pricing.perYear
               : plan.period;
 
             return (
@@ -61,9 +61,7 @@ const Pricing: React.FC = () => {
                 </div>
                 {isAnnual && monthlyFromAnnual && (
                   <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-                    {lang === 'es'
-                      ? `€${monthlyFromAnnual} por mes`
-                      : `€${monthlyFromAnnual} per month`}
+                    {`\u20AC${monthlyFromAnnual} ${t.pricing.perMonthAmount}`}
                   </p>
                 )}
               </div>

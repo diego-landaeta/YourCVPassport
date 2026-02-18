@@ -157,7 +157,7 @@ const OpportunitiesSection: React.FC<OpportunitiesSectionProps> = ({
         <div className="flex items-start justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {lang === 'es' ? 'Oportunidades Laborales' : 'Job Opportunities'}
+              {t.dashboard.opportunities.jobOpportunities}
             </h1>
             {activeTabData && (
               <p className="text-gray-600 dark:text-gray-400">

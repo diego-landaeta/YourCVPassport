@@ -74,7 +74,7 @@ const SecurityCompliancePage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Seguridad y Cumplimiento' : 'Security and Compliance'}
+                                alt={pageData.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -157,11 +157,9 @@ const SecurityCompliancePage: React.FC = () => {
             <div className="px-4">
                 <div className="max-w-5xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Protege tu información profesional' : 'Protect your professional information'}
-                        description={lang === 'es'
-                            ? 'Únete a miles de profesionales que confían en nuestra plataforma certificada para gestionar su información de manera segura.'
-                            : 'Join thousands of professionals who trust our certified platform to manage their information securely.'}
-                        buttonText={lang === 'es' ? 'Crear perfil seguro' : 'Create secure profile'}
+                        title={pageData.inlineCta.title}
+                        description={pageData.inlineCta.description}
+                        buttonText={pageData.inlineCta.button}
                         variant="blue"
                     />
                 </div>

@@ -30,9 +30,12 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
         ? `€${annualPrice}`
         : plan.price;
 
+    const t = useTranslations();
+    const billing = t.companyPlansPage.billing;
+
     const displayPeriod = isAnnual && annualPrice
-        ? (lang === 'es' ? '/ año' : '/ year')
-        : (lang === 'es' ? '/ mes' : '/ month');
+        ? billing.perYear
+        : billing.perMonthShort;
 
     return (
         <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col ${plan.highlight ? 'border-cv-blue dark:border-cv-blue-light scale-105 bg-white dark:bg-dark-bg-secondary ring-2 ring-cv-blue/20 dark:ring-cv-blue-light/30' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg dark:shadow-2xl`}>
@@ -45,9 +48,7 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
                 </div>
                 {isAnnual && monthlyFromAnnual && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-                        {lang === 'es'
-                            ? `€${monthlyFromAnnual} por mes`
-                            : `€${monthlyFromAnnual} per month`}
+                        €{monthlyFromAnnual} {billing.perMonth}
                     </p>
                 )}
             </div>
@@ -106,14 +107,14 @@ const CompanyPlansPage: React.FC = () => {
                     </p>
                     <div className="mt-10 flex justify-center items-center space-x-4">
                         <span className={`font-semibold ${!isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
-                            {lang === 'es' ? 'Mensual' : 'Monthly'}
+                            {pageData.billing.monthly}
                         </span>
                         <label htmlFor="billing-toggle-company" className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="billing-toggle-company" className="sr-only peer" checked={isAnnual} onChange={() => setIsAnnual(!isAnnual)} />
                             <div className="w-14 h-8 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-[4px] after:bg-white dark:after:bg-dark-text-primary after:border-gray-300 dark:border-dark-border-light after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cv-blue"></div>
                         </label>
                         <span className={`font-semibold ${isAnnual ? 'text-cv-blue dark:text-cv-blue-light' : 'text-gray-500 dark:text-dark-text-tertiary'}`}>
-                            {lang === 'es' ? 'Anual' : 'Annual'} <span className="text-cv-green">({lang === 'es' ? 'Ahorra 20%' : 'Save 20%'})</span>
+                            {pageData.billing.annual} <span className="text-cv-green">({pageData.billing.save})</span>
                         </span>
                     </div>
                 </AnimatedWrapper>

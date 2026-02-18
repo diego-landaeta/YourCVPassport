@@ -42,10 +42,116 @@ const ICON_OPTIONS = [
   'users-cog', 'shield', 'layers', 'cpu', 'video', 'check', 'sparkles'
 ];
 
+const enterpriseTranslations = {
+  en: {
+    title: 'Enterprise Features',
+    featuresConfigured: 'features configured',
+    newFeature: 'New Feature',
+    editFeature: 'Edit Feature',
+    table: {
+      feature: 'Feature',
+      category: 'Category',
+      status: 'Status',
+      order: 'Order',
+      actions: 'Actions',
+    },
+    edit: 'Edit',
+    delete: 'Delete',
+    noFeaturesInCategory: 'No features in this category',
+    form: {
+      uniqueKey: 'Unique key *',
+      keyPlaceholder: 'e.g.: custom_feature',
+      nameEn: 'Name (EN) *',
+      nameEnPlaceholder: 'Feature Name',
+      nameEs: 'Name (ES) *',
+      nameEsPlaceholder: 'Feature Name',
+      descriptionEn: 'Description (EN)',
+      descriptionEnPlaceholder: 'Description...',
+      descriptionEs: 'Description (ES)',
+      descriptionEsPlaceholder: 'Description...',
+      category: 'Category',
+      icon: 'Icon',
+      displayOrder: 'Display order',
+      featureActive: 'Feature active',
+      saving: 'Saving...',
+      save: 'Save',
+      cancel: 'Cancel',
+    },
+    alerts: {
+      loadError: 'Error loading features',
+      requiredFields: 'Please fill in all required fields',
+      success: 'Success',
+      updated: 'Feature updated successfully',
+      created: 'Feature created successfully',
+      saveError: 'Error saving feature',
+      deleteTitle: 'Delete Feature',
+      deleteConfirm: 'Are you sure you want to delete',
+      deleteWarning: 'This will remove the feature from all users.',
+      deleteText: 'Delete',
+      cancelText: 'Cancel',
+      deleted: 'Feature deleted successfully',
+      deleteError: 'Error deleting feature',
+      updateError: 'Error updating feature',
+    },
+  },
+  es: {
+    title: 'Funcionalidades Enterprise',
+    featuresConfigured: 'funcionalidades configuradas',
+    newFeature: 'Nueva Funcionalidad',
+    editFeature: 'Editar Funcionalidad',
+    table: {
+      feature: 'Funcionalidad',
+      category: 'Categoría',
+      status: 'Estado',
+      order: 'Orden',
+      actions: 'Acciones',
+    },
+    edit: 'Editar',
+    delete: 'Eliminar',
+    noFeaturesInCategory: 'No hay funcionalidades en esta categoría',
+    form: {
+      uniqueKey: 'Clave única *',
+      keyPlaceholder: 'ej: custom_feature',
+      nameEn: 'Nombre (EN) *',
+      nameEnPlaceholder: 'Feature Name',
+      nameEs: 'Nombre (ES) *',
+      nameEsPlaceholder: 'Nombre de la Funcionalidad',
+      descriptionEn: 'Descripción (EN)',
+      descriptionEnPlaceholder: 'Description...',
+      descriptionEs: 'Descripción (ES)',
+      descriptionEsPlaceholder: 'Descripción...',
+      category: 'Categoría',
+      icon: 'Icono',
+      displayOrder: 'Orden de visualización',
+      featureActive: 'Funcionalidad activa',
+      saving: 'Guardando...',
+      save: 'Guardar',
+      cancel: 'Cancelar',
+    },
+    alerts: {
+      loadError: 'Error al cargar las funcionalidades',
+      requiredFields: 'Por favor completa todos los campos requeridos',
+      success: 'Éxito',
+      updated: 'Funcionalidad actualizada correctamente',
+      created: 'Funcionalidad creada correctamente',
+      saveError: 'Error al guardar la funcionalidad',
+      deleteTitle: 'Eliminar Funcionalidad',
+      deleteConfirm: '¿Estás seguro de eliminar',
+      deleteWarning: 'Esto eliminará la funcionalidad de todos los usuarios.',
+      deleteText: 'Eliminar',
+      cancelText: 'Cancelar',
+      deleted: 'Funcionalidad eliminada correctamente',
+      deleteError: 'Error al eliminar la funcionalidad',
+      updateError: 'Error al actualizar la funcionalidad',
+    },
+  },
+};
+
 const EnterpriseFeaturesManagement: React.FC = () => {
   const { getAllFeatures, createFeature, updateFeature, deleteFeature, isLoading } = useEnterpriseAdmin();
   const { dialogState, showAlert, showConfirm, handleConfirm, handleCancel } = useCustomDialog();
   const { lang } = useLanguage();
+  const et = enterpriseTranslations[lang];
 
   const [features, setFeatures] = useState<EnterpriseFeatureRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,7 +185,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
       console.error('Error loading features:', err);
       showAlert({
         title: 'Error',
-        message: 'Error al cargar las funcionalidades',
+        message: et.alerts.loadError,
         type: 'error'
       });
     } finally {
@@ -124,7 +230,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
       if (!formData.feature_key || !formData.name_en || !formData.name_es) {
         showAlert({
           title: 'Error',
-          message: 'Por favor completa todos los campos requeridos',
+          message: et.alerts.requiredFields,
           type: 'error'
         });
         return;
@@ -143,8 +249,8 @@ const EnterpriseFeaturesManagement: React.FC = () => {
           sort_order: formData.sort_order,
         });
         showAlert({
-          title: 'Éxito',
-          message: 'Funcionalidad actualizada correctamente',
+          title: et.alerts.success,
+          message: et.alerts.updated,
           type: 'success'
         });
       } else {
@@ -160,8 +266,8 @@ const EnterpriseFeaturesManagement: React.FC = () => {
           sort_order: formData.sort_order,
         });
         showAlert({
-          title: 'Éxito',
-          message: 'Funcionalidad creada correctamente',
+          title: et.alerts.success,
+          message: et.alerts.created,
           type: 'success'
         });
       }
@@ -171,19 +277,20 @@ const EnterpriseFeaturesManagement: React.FC = () => {
     } catch (err: any) {
       showAlert({
         title: 'Error',
-        message: err.message || 'Error al guardar la funcionalidad',
+        message: err.message || et.alerts.saveError,
         type: 'error'
       });
     }
   };
 
   const handleDelete = async (feature: EnterpriseFeatureRow) => {
+    const featureDisplayName = lang === 'es' ? feature.name_es : feature.name_en;
     const confirmed = await showConfirm({
-      title: 'Eliminar Funcionalidad',
-      message: `¿Estás seguro de eliminar "${feature.name_es}"? Esto eliminará la funcionalidad de todos los usuarios.`,
+      title: et.alerts.deleteTitle,
+      message: `${et.alerts.deleteConfirm} "${featureDisplayName}"? ${et.alerts.deleteWarning}`,
       type: 'warning',
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar'
+      confirmText: et.alerts.deleteText,
+      cancelText: et.alerts.cancelText
     });
 
     if (!confirmed) return;
@@ -191,15 +298,15 @@ const EnterpriseFeaturesManagement: React.FC = () => {
     try {
       await deleteFeature(feature.feature_key);
       showAlert({
-        title: 'Éxito',
-        message: 'Funcionalidad eliminada correctamente',
+        title: et.alerts.success,
+        message: et.alerts.deleted,
         type: 'success'
       });
       loadFeatures();
     } catch (err: any) {
       showAlert({
         title: 'Error',
-        message: err.message || 'Error al eliminar la funcionalidad',
+        message: err.message || et.alerts.deleteError,
         type: 'error'
       });
     }
@@ -214,7 +321,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
     } catch (err: any) {
       showAlert({
         title: 'Error',
-        message: err.message || 'Error al actualizar la funcionalidad',
+        message: err.message || et.alerts.updateError,
         type: 'error'
       });
     }
@@ -247,10 +354,10 @@ const EnterpriseFeaturesManagement: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Funcionalidades Enterprise
+            {et.title}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {features.length} funcionalidades configuradas
+            {features.length} {et.featuresConfigured}
           </p>
         </div>
         <button
@@ -260,7 +367,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
           </svg>
-          Nueva Funcionalidad
+          {et.newFeature}
         </button>
       </div>
 
@@ -291,19 +398,19 @@ const EnterpriseFeaturesManagement: React.FC = () => {
           <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Funcionalidad
+                {et.table.feature}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Categoría
+                {et.table.category}
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Estado
+                {et.table.status}
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Orden
+                {et.table.order}
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Acciones
+                {et.table.actions}
               </th>
             </tr>
           </thead>
@@ -361,7 +468,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                       <button
                         onClick={() => handleEdit(feature)}
                         className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 dark:text-indigo-400 rounded transition-colors"
-                        title="Editar"
+                        title={et.edit}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -370,7 +477,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                       <button
                         onClick={() => handleDelete(feature)}
                         className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 rounded transition-colors"
-                        title="Eliminar"
+                        title={et.delete}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -386,7 +493,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
 
         {filteredFeatures.length === 0 && (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            No hay funcionalidades en esta categoría
+            {et.noFeaturesInCategory}
           </div>
         )}
       </div>
@@ -398,7 +505,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {editingFeature ? 'Editar Funcionalidad' : 'Nueva Funcionalidad'}
+                  {editingFeature ? et.editFeature : et.newFeature}
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
@@ -414,14 +521,14 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 {/* Feature Key */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Clave única *
+                    {et.form.uniqueKey}
                   </label>
                   <input
                     type="text"
                     value={formData.feature_key}
                     onChange={(e) => setFormData({ ...formData, feature_key: e.target.value })}
                     disabled={!!editingFeature}
-                    placeholder="ej: custom_feature"
+                    placeholder={et.form.keyPlaceholder}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50"
                   />
                 </div>
@@ -430,25 +537,25 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Nombre (EN) *
+                      {et.form.nameEn}
                     </label>
                     <input
                       type="text"
                       value={formData.name_en}
                       onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
-                      placeholder="Feature Name"
+                      placeholder={et.form.nameEnPlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-dark-bg-tertiary dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Nombre (ES) *
+                      {et.form.nameEs}
                     </label>
                     <input
                       type="text"
                       value={formData.name_es}
                       onChange={(e) => setFormData({ ...formData, name_es: e.target.value })}
-                      placeholder="Nombre de la Funcionalidad"
+                      placeholder={et.form.nameEsPlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-dark-bg-tertiary dark:text-white"
                     />
                   </div>
@@ -458,25 +565,25 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Descripción (EN)
+                      {et.form.descriptionEn}
                     </label>
                     <textarea
                       value={formData.description_en}
                       onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
                       rows={2}
-                      placeholder="Description..."
+                      placeholder={et.form.descriptionEnPlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-dark-bg-tertiary dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Descripción (ES)
+                      {et.form.descriptionEs}
                     </label>
                     <textarea
                       value={formData.description_es}
                       onChange={(e) => setFormData({ ...formData, description_es: e.target.value })}
                       rows={2}
-                      placeholder="Descripción..."
+                      placeholder={et.form.descriptionEsPlaceholder}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:bg-dark-bg-tertiary dark:text-white"
                     />
                   </div>
@@ -486,7 +593,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Categoría
+                      {et.form.category}
                     </label>
                     <select
                       value={formData.category}
@@ -500,7 +607,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Icono
+                      {et.form.icon}
                     </label>
                     <select
                       value={formData.icon}
@@ -517,7 +624,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 {/* Sort Order */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Orden de visualización
+                    {et.form.displayOrder}
                   </label>
                   <input
                     type="number"
@@ -543,7 +650,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                     />
                   </button>
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Funcionalidad activa
+                    {et.form.featureActive}
                   </span>
                 </div>
 
@@ -554,13 +661,13 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                     disabled={isLoading}
                     className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
                   >
-                    {isLoading ? 'Guardando...' : 'Guardar'}
+                    {isLoading ? et.form.saving : et.form.save}
                   </button>
                   <button
                     onClick={() => setShowModal(false)}
                     className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                   >
-                    Cancelar
+                    {et.form.cancel}
                   </button>
                 </div>
               </div>

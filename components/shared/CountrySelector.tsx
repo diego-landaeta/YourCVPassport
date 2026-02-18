@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslations } from '../../hooks/useTranslations';
 
 export interface Country {
   code: string;
@@ -87,6 +88,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
   lang = 'es',
   className = ''
 }) => {
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -161,7 +163,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={lang === 'es' ? 'Buscar país...' : 'Search country...'}
+              placeholder={t.countrySelector.searchPlaceholder}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent dark:bg-dark-bg-tertiary dark:text-white"
               autoFocus
             />
@@ -171,7 +173,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           <div className="overflow-y-auto max-h-80">
             {filteredCountries.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                {lang === 'es' ? 'No se encontraron países' : 'No countries found'}
+                {t.countrySelector.noResults}
               </div>
             ) : (
               filteredCountries.map((country) => (

@@ -17,6 +17,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../supabase/client';
 import CompanyVisibilityWidget from './analytics/CompanyVisibilityWidget';
+import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface AnalyticsDashboardProps {
   profileId: string;
@@ -38,6 +40,9 @@ const PIE_COLORS = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#EC4899', '#F59
 
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) => {
   const [days, setDays] = useState<DateRange>(30);
+  const t = useTranslations();
+  const { lang } = useLanguage();
+  const a = t.dashboard.analytics;
 
   // Helper to get date range
   const getDateRange = () => {
@@ -272,7 +277,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Cargando analíticas...</p>
+          <p className="text-gray-600 dark:text-gray-400">{a.loading}</p>
         </div>
       </div>
     );
@@ -294,44 +299,28 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
 
             {/* Title */}
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              Aún no tienes datos analíticos
+              {a.noData.title}
             </h3>
 
             {/* Description */}
             <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              Comparte tu perfil profesional para empezar a recopilar estadísticas sobre visitas, clics y engagement
+              {a.noData.description}
             </p>
 
             {/* Benefits List */}
             <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-5 mb-6 text-left">
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Descubre información valiosa:
+                {a.noData.discoverTitle}
               </p>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li className="flex items-center gap-2">
+                {a.noData.items.map((item, i) => (
+                <li key={i} className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Número de visitas y visitantes únicos</span>
+                  <span>{item}</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Países y ciudades de origen</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Dispositivos utilizados (móvil, desktop)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Interacciones con tus botones de contacto</span>
-                </li>
+                ))}
               </ul>
             </div>
 
@@ -345,10 +334,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                Ver mi perfil público
+                {a.noData.viewProfile}
               </a>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Los datos empezarán a aparecer cuando alguien visite tu perfil
+                {a.noData.dataWillAppear}
               </p>
             </div>
           </div>
@@ -376,44 +365,28 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
 
             {/* Title */}
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              Sin actividad todavía
+              {a.noActivity.title}
             </h3>
 
             {/* Description */}
             <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              Tu perfil está listo, ahora solo falta que lo compartas para empezar a ver estadísticas
+              {a.noActivity.description}
             </p>
 
             {/* Benefits List */}
             <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-5 mb-6 text-left">
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Próximamente verás:
+                {a.noActivity.comingSoon}
               </p>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li className="flex items-center gap-2">
+                {a.noActivity.items.map((item, i) => (
+                <li key={i} className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Tendencias de visitas diarias</span>
+                  <span>{item}</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Ubicación geográfica de tus visitantes</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Fuentes de tráfico (redes sociales, búsquedas, directo)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Tasa de conversión de clics en contacto</span>
-                </li>
+                ))}
               </ul>
             </div>
 
@@ -432,10 +405,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
-                Compartir mi perfil
+                {a.noActivity.shareProfile}
               </button>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Comparte en LinkedIn, redes sociales o por email
+                {a.noActivity.shareVia}
               </p>
             </div>
           </div>
@@ -449,9 +422,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analíticas del Perfil</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{a.title}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Estadísticas y métricas de tu perfil profesional
+            {a.subtitle}
           </p>
         </div>
         <button
@@ -461,7 +434,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Exportar CSV
+          {a.exportCSV}
         </button>
       </div>
 
@@ -477,7 +450,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
-            Últimos {d} días
+            {a.lastDays(d)}
           </button>
         ))}
       </div>
@@ -485,7 +458,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Total de Visitas"
+          title={a.totalViews}
           value={analyticsData.summary.views}
           color="blue"
           icon={
@@ -496,7 +469,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           }
         />
         <MetricCard
-          title="Visitantes Únicos"
+          title={a.uniqueVisitors}
           value={analyticsData.summary.unique_visitors}
           color="green"
           icon={
@@ -506,7 +479,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           }
         />
         <MetricCard
-          title="Clics en CTAs"
+          title={a.ctaClicksLabel}
           value={analyticsData.summary.clicks}
           color="purple"
           icon={
@@ -516,7 +489,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
           }
         />
         <MetricCard
-          title="CTR"
+          title={a.ctr}
           value={`${analyticsData.summary.ctr}%`}
           color="orange"
           icon={
@@ -532,7 +505,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
         {/* Time Series Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Visitas en el Tiempo
+            {a.visitsOverTime}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={analyticsData.timeSeries}>
@@ -548,8 +521,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
                 }}
               />
               <Legend />
-              <Line type="monotone" dataKey="views" stroke={COLORS.primary} strokeWidth={2} name="Visitas" />
-              <Line type="monotone" dataKey="clicks" stroke={COLORS.success} strokeWidth={2} name="Clics" />
+              <Line type="monotone" dataKey="views" stroke={COLORS.primary} strokeWidth={2} name={a.visits} />
+              <Line type="monotone" dataKey="clicks" stroke={COLORS.success} strokeWidth={2} name={a.clicks} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -557,7 +530,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
         {/* Traffic Sources Pie Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Fuentes de Tráfico
+            {a.trafficSources}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -582,7 +555,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
         {/* Device Breakdown Pie Chart */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Dispositivos
+            {a.devices}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -608,15 +581,15 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       {/* Top Countries Table */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Top 5 Países
+          {a.topCountries}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">País</th>
-                <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">Visitas</th>
-                <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">Porcentaje</th>
+                <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">{a.country}</th>
+                <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">{a.viewsLabel}</th>
+                <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">{a.percentage}</th>
               </tr>
             </thead>
             <tbody>
@@ -638,16 +611,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       {analyticsData.ctaClicks.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            CTAs Más Clickeados
+            {a.topCTAs}
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">Tipo</th>
-                  <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">Etiqueta</th>
-                  <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">Clics</th>
-                  <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">Porcentaje</th>
+                  <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">{a.type}</th>
+                  <th className="text-left py-3 px-4 text-gray-700 dark:text-gray-300">{a.label}</th>
+                  <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">{a.clicks}</th>
+                  <th className="text-right py-3 px-4 text-gray-700 dark:text-gray-300">{a.percentage}</th>
                 </tr>
               </thead>
               <tbody>

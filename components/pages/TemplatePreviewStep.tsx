@@ -21,7 +21,7 @@ import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from '../templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from '../templates/HealthcareProfessionalTemplate';
 import UrbanTemplate from '../templates/UrbanTemplate';
-import { FullProfileData, Skill } from '../types';
+import { FullProfileData, Skill } from '../../types';
 
 interface TemplatePreviewStepProps {
     cvData: CVData;

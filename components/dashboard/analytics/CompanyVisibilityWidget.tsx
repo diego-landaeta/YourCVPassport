@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EyeIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslations } from '../../../hooks/useTranslations';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface CountryData {
@@ -42,13 +43,15 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
   recentViews = [],
   growthPercentage = 0
 }) => {
-  const { lang } = useLanguage();
+  const navigate = useNavigate();
+  const t = useTranslations();
+  const c = t.dashboard.analytics.companyWidget;
 
   const COLORS = {
     primary: '#6366F1',
   };
 
-  // Helper to get time ago in Spanish/English
+  // Helper to get time ago
   const getTimeAgo = (date: string): string => {
     const now = new Date();
     const viewDate = new Date(date);
@@ -58,11 +61,11 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
     const diffDays = Math.floor(diffMs / 86400000);
 
     if (diffMins < 60) {
-      return lang === 'es' ? `Hace ${diffMins} minutos` : `${diffMins} minutes ago`;
+      return c.minutesAgo(diffMins);
     } else if (diffHours < 24) {
-      return lang === 'es' ? `Hace ${diffHours} horas` : `${diffHours} hours ago`;
+      return c.hoursAgo(diffHours);
     } else {
-      return lang === 'es' ? `Hace ${diffDays} días` : `${diffDays} days ago`;
+      return c.daysAgo(diffDays);
     }
   };
 
@@ -80,13 +83,28 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
   // Determine action type from referrer
   const getActionType = (referrer?: string): string => {
     if (!referrer || referrer === '') {
-      return lang === 'es' ? 'Acceso directo' : 'Direct access';
+      return c.directAccess;
     }
     const lower = referrer.toLowerCase();
-    if (lower.includes('linkedin')) return lang === 'es' ? 'Vía LinkedIn' : 'Via LinkedIn';
-    if (lower.includes('google')) return lang === 'es' ? 'Búsqueda Google' : 'Google Search';
-    return lang === 'es' ? 'Vio perfil' : 'Viewed profile';
+    if (lower.includes('linkedin')) return c.viaLinkedIn;
+    if (lower.includes('google')) return c.googleSearch;
+    return c.viewedProfile;
   };
+
+  const checkIcon = (
+    <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    </svg>
+  );
+
+  const featureItems = [
+    { title: c.features.identifyVisitors, desc: c.features.identifyVisitorsDesc },
+    { title: c.features.realTimeActivity, desc: c.features.realTimeActivityDesc },
+    { title: c.features.geoAnalysis, desc: c.features.geoAnalysisDesc },
+    { title: c.features.trafficSources, desc: c.features.trafficSourcesDesc },
+    { title: c.features.monthGrowth, desc: c.features.monthGrowthDesc },
+    { title: c.features.completeHistory, desc: c.features.completeHistoryDesc },
+  ];
 
   return (
     <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -100,16 +118,16 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                {lang === 'es' ? 'Visibilidad de Empresas' : 'Company Visibility'}
+                {c.title}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {lang === 'es' ? 'Últimos 30 días' : 'Last 30 days'}
+                {c.last30Days}
               </p>
             </div>
           </div>
           {growthPercentage !== 0 && (
             <span className={`px-3 py-1 ${growthPercentage > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'} text-xs font-bold rounded-full`}>
-              {growthPercentage > 0 ? '+' : ''}{growthPercentage.toFixed(1)}% {lang === 'es' ? 'este mes' : 'this month'}
+              {growthPercentage > 0 ? '+' : ''}{growthPercentage.toFixed(1)}% {c.thisMonth}
             </span>
           )}
         </div>
@@ -119,19 +137,19 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{summary.views}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {lang === 'es' ? 'Vistas Totales' : 'Total Views'}
+              {c.totalViews}
             </div>
           </div>
           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{summary.unique_visitors}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {lang === 'es' ? 'Visitantes Únicos' : 'Unique Visitors'}
+              {c.uniqueVisitors}
             </div>
           </div>
           <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">{summary.clicks}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {lang === 'es' ? 'Clics en CTAs' : 'CTA Clicks'}
+              {c.ctaClicks}
             </div>
           </div>
         </div>
@@ -139,7 +157,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
         {/* Recent Activity */}
         <div className="space-y-3">
           <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-            {lang === 'es' ? 'Actividad Reciente' : 'Recent Activity'}
+            {c.recentActivity}
           </h4>
 
           {recentViews.length > 0 ? (
@@ -161,7 +179,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        {view.city && view.country ? `${view.city}, ${view.country}` : view.country || (lang === 'es' ? 'Visitante Anónimo' : 'Anonymous Visitor')}
+                        {view.city && view.country ? `${view.city}, ${view.country}` : view.country || c.anonymousVisitor}
                       </span>
                       <span className={`px-2 py-0.5 ${color.badge} text-xs rounded-full font-medium`}>
                         {getActionType(view.referrer)}
@@ -177,7 +195,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500 dark:text-gray-400 text-sm">
-                {lang === 'es' ? 'No hay actividad reciente' : 'No recent activity'}
+                {c.noRecentActivity}
               </p>
             </div>
           )}
@@ -186,7 +204,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
         {/* Top Countries Section */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-            {lang === 'es' ? 'Top 5 Países Interesados' : 'Top 5 Interested Countries'}
+            {c.topCountries}
           </h4>
           {topCountries.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
@@ -212,7 +230,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  {lang === 'es' ? 'No hay datos de países disponibles todavía' : 'No country data available yet'}
+                  {c.noCountryData}
                 </p>
               </div>
             </div>
@@ -231,15 +249,15 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {lang === 'es' ? 'Visibilidad de Empresas' : 'Company Visibility'}
+                    {c.title}
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {lang === 'es' ? 'Últimos 30 días' : 'Last 30 days'}
+                    {c.last30Days}
                   </p>
                 </div>
               </div>
               <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">
-                +247% {lang === 'es' ? 'este mes' : 'this month'}
+                +247% {c.thisMonth}
               </span>
             </div>
 
@@ -247,26 +265,26 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">1,247</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {lang === 'es' ? 'Vistas Totales' : 'Total Views'}
+                  {c.totalViews}
                 </div>
               </div>
               <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">856</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {lang === 'es' ? 'Visitantes Únicos' : 'Unique Visitors'}
+                  {c.uniqueVisitors}
                 </div>
               </div>
               <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">342</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {lang === 'es' ? 'Clics en CTAs' : 'CTA Clicks'}
+                  {c.ctaClicks}
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 mb-6">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {lang === 'es' ? 'Actividad Reciente' : 'Recent Activity'}
+                {c.recentActivity}
               </h4>
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900/20 rounded-lg border-l-4 border-gray-400">
@@ -283,7 +301,7 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
 
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                {lang === 'es' ? 'Top 5 Países Interesados' : 'Top 5 Interested Countries'}
+                {c.topCountries}
               </h4>
               <div className="h-[250px] bg-gray-100 dark:bg-gray-900/20 rounded-lg"></div>
             </div>
@@ -293,109 +311,44 @@ const CompanyVisibilityWidget: React.FC<CompanyVisibilityWidgetProps> = ({
 
       {/* Premium Lock Overlay */}
       {!isPremium && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600/96 to-purple-600/96">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600">
           <div className="text-center px-6 max-w-md">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full mb-5 ring-4 ring-white/30">
               <SparklesIcon className="w-10 h-10 text-white" />
             </div>
             <h4 className="text-2xl font-bold text-white mb-3">
-              {lang === 'es' ? 'Función Premium' : 'Premium Feature'}
+              {c.premiumTitle}
             </h4>
             <p className="text-white/95 text-base mb-6 leading-relaxed">
-              {lang === 'es'
-                ? 'Descubre qué empresas vieron tu perfil, de qué países provienen, estadísticas avanzadas y notificaciones en tiempo real'
-                : 'Discover which companies viewed your profile, where they\'re from, advanced analytics and real-time notifications'}
+              {c.premiumDescription}
             </p>
 
-            {/* Features list with 2 columns */}
+            {/* Features list */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-5 mb-6">
               <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Identifica visitantes' : 'Identify visitors'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Ve ubicaciones exactas, ciudades y países' : 'See exact locations, cities and countries'}
+                {featureItems.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 text-white text-sm">
+                    {checkIcon}
+                    <div>
+                      <div className="font-semibold">{item.title}</div>
+                      <div className="text-white/80 text-xs mt-0.5">
+                        {item.desc}
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Actividad en tiempo real' : 'Real-time activity'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Recibe alertas instantáneas de nuevas visitas' : 'Get instant alerts for new profile views'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Análisis geográfico' : 'Geographic analysis'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Top 5 países con más interés en tu perfil' : 'Top 5 countries most interested in your profile'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Fuentes de tráfico' : 'Traffic sources'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Descubre de dónde vienen: LinkedIn, Google, etc.' : 'Discover where they come from: LinkedIn, Google, etc.'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Crecimiento mes a mes' : 'Month-over-month growth'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Porcentaje de crecimiento de tu visibilidad' : 'Percentage growth of your visibility'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 text-white text-sm">
-                  <svg className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <div className="font-semibold">{lang === 'es' ? 'Historial completo' : 'Complete history'}</div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      {lang === 'es' ? 'Acceso ilimitado a toda tu actividad histórica' : 'Unlimited access to all your historical activity'}
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
             <button
-              onClick={() => {
-                // TODO: Navigate to pricing page
-                console.log('Navigate to pricing');
-              }}
+              onClick={() => navigate('/pricing')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl mb-3"
             >
               <SparklesIcon className="w-6 h-6" />
-              {lang === 'es' ? 'Mejorar a Premium' : 'Upgrade to Premium'}
+              {c.upgradeToPremium}
             </button>
             <p className="text-white/80 text-sm">
-              {lang === 'es' ? 'Desde $9.99/mes • Cancela cuando quieras' : 'From $9.99/mo • Cancel anytime'}
+              {c.pricing}
             </p>
           </div>
         </div>

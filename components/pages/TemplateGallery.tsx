@@ -118,7 +118,7 @@ const TemplateGallery: React.FC = () => {
             <div className="flex items-center justify-center my-12">
                 <div className="flex-grow border-t border-gray-300 dark:border-dark-border"></div>
                 <div className="mx-6 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold rounded-full shadow-lg">
-                    {lang === 'es' ? 'PLANTILLAS PRO' : 'PRO TEMPLATES'}
+                    {t.templateGallery.proTemplates}
                 </div>
                 <div className="flex-grow border-t border-gray-300 dark:border-dark-border"></div>
             </div>
@@ -184,7 +184,7 @@ const TemplateGallery: React.FC = () => {
                                 onClick={() => setPreviewTemplate(null)}
                                 className="px-6 py-2 rounded-md font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-dark-bg-primary hover:bg-gray-300 dark:hover:bg-dark-border-light transition-colors"
                             >
-                                {lang === 'es' ? 'Cerrar' : 'Close'}
+                                {t.common.close}
                             </button>
                             <button
                                 onClick={() => {
@@ -193,7 +193,7 @@ const TemplateGallery: React.FC = () => {
                                 }}
                                 className="px-6 py-2 rounded-md font-semibold text-white bg-cv-blue hover:bg-cv-blue/90 transition-colors"
                             >
-                                {lang === 'es' ? 'Personalizar' : 'Customize'}
+                                {t.common.customize}
                             </button>
                         </div>
                     </div>

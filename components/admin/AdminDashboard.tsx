@@ -183,7 +183,17 @@ const AdminDashboard: React.FC = () => {
       },
       comingSoon: 'Coming Soon',
       inDevelopment: 'This feature is currently in development',
-      back: 'Back to Dashboard'
+      back: 'Back to Dashboard',
+      testingTools: {
+        title: 'Testing & Tools',
+        testingHub: 'Testing Hub',
+        testingHubDesc: 'Test templates and download CVs',
+        enterpriseFeatures: 'Enterprise Features',
+        enterpriseFeaturesDesc: 'Manage Enterprise features',
+        translationCache: 'Translation Cache',
+        translationCacheDesc: 'Manage cached translations',
+        feedDesc: 'Test the social activity feed',
+      }
     },
     es: {
       title: 'Panel de Administrador',
@@ -245,7 +255,17 @@ const AdminDashboard: React.FC = () => {
       },
       comingSoon: 'Próximamente',
       inDevelopment: 'Esta funcionalidad está actualmente en desarrollo',
-      back: 'Volver al Dashboard'
+      back: 'Volver al Dashboard',
+      testingTools: {
+        title: 'Testing y Herramientas',
+        testingHub: 'Hub de Testing',
+        testingHubDesc: 'Prueba plantillas y descarga CVs',
+        enterpriseFeatures: 'Funcionalidades Enterprise',
+        enterpriseFeaturesDesc: 'Gestiona funcionalidades Enterprise',
+        translationCache: 'Caché de Traducciones',
+        translationCacheDesc: 'Gestiona traducciones cacheadas',
+        feedDesc: 'Prueba el feed social de actividad',
+      }
     }
   };
 
@@ -559,7 +579,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
                     <BeakerIcon className="h-5 w-5 text-gray-700 dark:text-dark-text-primary" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-                      Testing & Tools
+                      {translations.testingTools.title}
                     </h2>
                   </div>
                   <div className="p-6 space-y-4 flex-1">
@@ -573,10 +593,10 @@ const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
-                          Testing Hub
+                          {translations.testingTools.testingHub}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                          Prueba plantillas y descarga CVs
+                          {translations.testingTools.testingHubDesc}
                         </p>
                       </div>
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -594,10 +614,10 @@ const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
-                          Enterprise Features
+                          {translations.testingTools.enterpriseFeatures}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                          Gestiona funcionalidades Enterprise
+                          {translations.testingTools.enterpriseFeaturesDesc}
                         </p>
                       </div>
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -615,10 +635,10 @@ const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="flex-1 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
-                          {lang === 'es' ? 'Caché de Traducciones' : 'Translation Cache'}
+                          {translations.testingTools.translationCache}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                          {lang === 'es' ? 'Gestiona traducciones cacheadas' : 'Manage cached translations'}
+                          {translations.testingTools.translationCacheDesc}
                         </p>
                       </div>
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -642,7 +662,7 @@ const AdminDashboard: React.FC = () => {
                           </span>
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
-                          {lang === 'es' ? 'Prueba el feed social de actividad' : 'Test the social activity feed'}
+                          {translations.testingTools.feedDesc}
                         </p>
                       </div>
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

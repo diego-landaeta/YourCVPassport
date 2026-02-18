@@ -1,26 +1,13 @@
-import React, { useEffect } from 'react';
-import { Testimonial } from '../types';
+import React from 'react';
+import { Testimonial } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Testimonials: React.FC<{title?: string, description?: string, testimonials?: Testimonial[]}> = ({title, description, testimonials}) => {
   const t = useTranslations();
+  const { lang } = useLanguage();
   const defaultTitle = t.testimonials.title;
   const defaultDescription = t.testimonials.subtitle;
-
-  // Load Opynio widget script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://web.opynio.com/widget.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Cleanup: remove script when component unmounts
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
 
   return (
     <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20">
@@ -35,7 +22,7 @@ const Testimonials: React.FC<{title?: string, description?: string, testimonials
         </div>
         {/* Opynio Widget v6.0 - horizontal-carousel */}
         <div className="mt-12">
-          <div className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
+          <div key={lang} className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
         </div>
       </div>
     </section>

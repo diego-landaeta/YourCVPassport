@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import { Template } from '../types';
+import { Template } from '../../types';
 import Modal from '../shared/Modal';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
@@ -19,6 +19,7 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 const TemplateCard: React.FC<{ template: Template; onPreview: () => void; }> = ({ template, onPreview }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
     const [imgLoaded, setImgLoaded] = React.useState(false);
+    const t = useTranslations();
 
     return (
         <div ref={ref} className="bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 border border-gray-100 dark:border-dark-border">
@@ -39,7 +40,7 @@ const TemplateCard: React.FC<{ template: Template; onPreview: () => void; }> = (
                 )}
                 {!isVisible && <div className="w-full h-80 bg-gray-200 dark:bg-dark-bg-secondary" />}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="text-white text-lg font-bold">Preview</span>
+                    <span className="text-white text-lg font-bold">{t.libraryPage.preview}</span>
                 </div>
             </div>
             <div className="p-4">
@@ -49,7 +50,7 @@ const TemplateCard: React.FC<{ template: Template; onPreview: () => void; }> = (
                         <svg className="w-4 h-4 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                         <span>{template.rating}</span>
                     </div>
-                    <span>{template.downloads.toLocaleString()} downloads</span>
+                    <span>{template.downloads.toLocaleString()} {t.libraryPage.downloads}</span>
                 </div>
             </div>
         </div>
@@ -132,7 +133,7 @@ const TemplateLibraryPage: React.FC = () => {
                                         onClick={() => setActiveCategory(category as Template['category'] | 'All')}
                                         className={`px-4 py-2 rounded-full font-semibold text-sm ${activeCategory === category ? 'bg-cv-blue text-white' : 'bg-gray-100 dark:bg-dark-bg-tertiary hover:bg-gray-200 dark:hover:bg-dark-border-light text-gray-700 dark:text-dark-text-primary'}`}
                                     >
-                                        {category === 'All' ? 'All' : t.TEMPLATE_CATEGORY_NAMES[category as Template['category']]}
+                                        {category === 'All' ? pageData.all : t.TEMPLATE_CATEGORY_NAMES[category as Template['category']]}
                                     </button>
                                 ))}
                             </div>

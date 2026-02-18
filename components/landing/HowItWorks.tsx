@@ -2,7 +2,7 @@
 import React from 'react';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+
 
 const Step: React.FC<{ number: string; title: string; description: string }> = ({ number, title, description }) => (
   <div className="relative text-center">
@@ -17,7 +17,6 @@ const Step: React.FC<{ number: string; title: string; description: string }> = (
 const HowItWorks: React.FC = () => {
   const t = useTranslations();
   const { openModal } = useAuth();
-  const { lang } = useLanguage();
 
   return (
     <section className="py-20 bg-cv-light-gray dark:bg-dark-bg-primary">
@@ -45,10 +44,10 @@ const HowItWorks: React.FC = () => {
             onClick={() => openModal('signup')}
             className="bg-cv-blue text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-cv-blue-dark transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            {lang === 'es' ? 'Comenzar ahora - Es gratis' : 'Get started now - It\'s free'}
+            {t.howItWorks.ctaButton}
           </button>
           <p className="mt-3 text-sm text-gray-500 dark:text-dark-text-tertiary">
-            {lang === 'es' ? 'No se requiere tarjeta de crédito • Configuración en 5 minutos' : 'No credit card required • Setup in 5 minutes'}
+            {t.howItWorks.ctaSubtext}
           </p>
         </div>
       </div>

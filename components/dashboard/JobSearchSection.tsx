@@ -94,12 +94,10 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
           <BriefcaseIcon className="w-8 h-8 text-cv-blue dark:text-cv-blue-light" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {lang === 'es' ? 'Buscar Vacantes' : 'Search Jobs'}
+              {t.dashboard.opportunities.searchJobs}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {lang === 'es'
-                ? 'Encuentra ofertas personalizadas y gestiona tus favoritas'
-                : 'Find personalized offers and manage your favorites'}
+              {t.dashboard.opportunities.searchJobsDescription}
             </p>
           </div>
         </div>

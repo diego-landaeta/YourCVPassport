@@ -54,6 +54,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   onDelete,
   lang,
 }) => {
+  const translations = useTranslations();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: experience.id || 'temp-new',
   });
@@ -65,7 +66,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return lang === 'es' ? 'Presente' : 'Present';
+    if (!date) return translations.common.present;
     // Parse date manually to avoid timezone issues
     const [year, month] = date.split('-').map(Number);
     // Create date using local time constructor (year, monthIndex)
@@ -109,7 +110,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
           <p className="text-gray-700 dark:text-gray-300">{experience.company_name}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {formatDate(experience.start_date)} - {formatDate(experience.end_date)}
-            {experience.is_current && (lang === 'es' ? ' (Actual)' : ' (Current)')}
+            {experience.is_current && ` (${translations.common.current})`}
           </p>
           {experience.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
@@ -159,6 +160,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   const { lang } = useLanguage();
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
+  const tExp = translations.profileEditor.experience;
   const { confirm, Dialog } = useConfirmDialog();
   const toast = useToastContext();
 
@@ -407,8 +409,8 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     const shouldDelete = await confirm({
       title: translations.profileEditor.deleteModal.deleteExperience,
       message: modals.deleteConfirm,
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
+      confirmText: translations.common.delete,
+      cancelText: translations.common.cancel,
       type: 'danger'
     });
     if (shouldDelete) {
@@ -430,23 +432,23 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
   const onSubmit = async (data: ExperienceFormData) => {
     // Validar campos requeridos
     if (!data.position || data.position.trim() === '') {
-      toast.error('El cargo es obligatorio');
+      toast.error(tExp.positionRequired);
       return;
     }
 
     if (!data.company_name || data.company_name.trim() === '') {
-      toast.error('El nombre de la empresa es obligatorio');
+      toast.error(tExp.companyRequired);
       return;
     }
 
     if (!data.start_date || data.start_date.trim() === '') {
-      toast.error('La fecha de inicio es obligatoria');
+      toast.error(tExp.startDateRequired);
       return;
     }
 
     // Validar que si NO está marcado como actual, debe tener fecha de fin
     if (!data.is_current && (!data.end_date || data.end_date.trim() === '')) {
-      toast.error('La fecha de fin es obligatoria. Si aún trabajas aquí, marca "Actualmente trabajo aquí"');
+      toast.error(tExp.endDateRequired);
       return;
     }
 
@@ -458,7 +460,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     );
 
     if (!dateValidation.isValid) {
-      toast.error(dateValidation.error || 'Las fechas no son válidas');
+      toast.error(dateValidation.error || tExp.datesInvalid);
       return;
     }
 
@@ -581,18 +583,16 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {lang === 'en' ? 'Verify your work experience' : 'Verifica tu experiencia laboral'}
+                {tExp.verifyExperienceTitle}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {lang === 'en'
-                  ? 'Add credibility to your profile by verifying your work experience. Go to the Verifications section to submit documentation.'
-                  : 'Añade credibilidad a tu perfil verificando tu experiencia laboral. Ve a la sección de Verificaciones para enviar la documentación.'}
+                {tExp.verifyExperienceDesc}
               </p>
               <button
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
-                {lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
+                {tExp.goToVerifications}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -708,7 +708,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
-                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({lang === 'es' ? 'Actual' : 'Current'})</span>}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({translations.common.current})</span>}
                 </label>
                 <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
                   <input

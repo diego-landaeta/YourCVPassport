@@ -66,7 +66,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
   // Export functionality
   const exportToCSV = () => {
     const csvContent = [
-      ['Fecha', 'Visitas'],
+      [t.analyticsPanel.csvDate, t.analyticsPanel.csvVisits],
       ...filteredData.visitsData.map(d => [d.name, d.visits])
     ].map(row => row.join(',')).join('\n');
 
@@ -88,7 +88,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
   const metrics = [
     {
       id: 'visits',
-      title: 'Visitas Totales',
+      title: t.analyticsPanel.totalVisits,
       value: data.stats.visits,
       trend: calculateTrend(data.stats.visits, data.stats.visits * 0.85),
       icon: (
@@ -104,7 +104,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
     },
     {
       id: 'clicks',
-      title: 'Clics en CTAs',
+      title: t.analyticsPanel.ctaClicksMetric,
       value: data.stats.ctaClicks,
       trend: calculateTrend(data.stats.ctaClicks, data.stats.ctaClicks * 0.75),
       icon: (
@@ -119,7 +119,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
     },
     {
       id: 'leads',
-      title: 'Leads Generados',
+      title: t.analyticsPanel.leadsGenerated,
       value: data.recentLeads.length,
       trend: calculateTrend(data.recentLeads.length, data.recentLeads.length * 0.9),
       icon: (
@@ -134,7 +134,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
     },
     {
       id: 'conversion',
-      title: 'Tasa de Conversión',
+      title: t.analyticsPanel.conversionRate,
       value: data.stats.visits > 0 ? ((data.stats.ctaClicks / data.stats.visits) * 100).toFixed(1) + '%' : '0.0%',
       trend: data.stats.visits > 0 && data.stats.ctaClicks > 0
         ? calculateTrend(
@@ -329,7 +329,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
             </div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{metric.title}</p>
             <p className={`text-3xl font-bold ${metric.textColor}`}>{metric.value}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Últimos {dateRange}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">{t.analyticsPanel.lastPeriod(dateRange)}</p>
           </div>
         ))}
       </div>
@@ -337,14 +337,14 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
       {/* Main Chart */}
       <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border shadow-lg">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tendencia de Visitas</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t.analyticsPanel.visitsTrend}</h3>
 
           {/* Chart Type Selector */}
           <div className="flex gap-2">
             {[
-              { value: 'area' as ChartType, icon: '📊', label: 'Área' },
-              { value: 'line' as ChartType, icon: '📈', label: 'Línea' },
-              { value: 'bar' as ChartType, icon: '📊', label: 'Barras' }
+              { value: 'area' as ChartType, icon: '📊', label: t.analyticsPanel.chartArea },
+              { value: 'line' as ChartType, icon: '📈', label: t.analyticsPanel.chartLine },
+              { value: 'bar' as ChartType, icon: '📊', label: t.analyticsPanel.chartBar }
             ].map(({ value, icon, label }) => (
               <button
                 key={value}
@@ -371,7 +371,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Traffic Sources */}
         <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border shadow-lg">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Fuentes de Tráfico</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.analyticsPanel.trafficSources}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -409,7 +409,7 @@ const InteractiveAnalyticsPanel: React.FC<InteractiveAnalyticsPanelProps> = ({ d
 
         {/* Geographic Distribution */}
         <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border shadow-lg">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Distribución Geográfica</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{t.analyticsPanel.geoDistribution}</h3>
           <div className="space-y-3">
             {data.countriesData.slice(0, 5).map((country: any, index: number) => {
               const maxVisits = Math.max(...data.countriesData.map((c: any) => c.visits));

@@ -182,9 +182,11 @@ const JobSearchPage: React.FC = () => {
 
   const getDaysAgo = (date: string) => {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return lang === 'es' ? 'Hoy' : 'Today';
-    if (days === 1) return lang === 'es' ? 'Ayer' : 'Yesterday';
-    return lang === 'es' ? `Hace ${days} días` : `${days} days ago`;
+    if (days === 0) return t.company?.jobSearch?.today || 'Today';
+    if (days === 1) return t.company?.jobSearch?.yesterday || 'Yesterday';
+    const prefix = t.company?.jobSearch?.daysAgoPrefix || '';
+    const suffix = t.company?.jobSearch?.daysAgoSuffix || 'days ago';
+    return prefix ? `${prefix} ${days} ${suffix}` : `${days} ${suffix}`;
   };
 
   return (

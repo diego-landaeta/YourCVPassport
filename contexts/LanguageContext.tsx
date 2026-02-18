@@ -1,3 +1,4 @@
+// @refresh reset
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { routeConfig } from '../config/routeConfig';
@@ -11,6 +12,12 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+// Helper function to detect browser language preference
+const detectBrowserLanguage = (): Language => {
+    const browserLang = navigator.language || (navigator as any).userLanguage || '';
+    return browserLang.startsWith('es') ? 'es' : 'en';
+};
 
 // Helper function to detect language from URL path
 const detectLanguageFromPath = (pathname: string): Language | null => {
@@ -34,13 +41,24 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Initialize language: first check URL, then localStorage, then default to 'en'
+    // Initialize language: first check URL, then localStorage, then browser language
+    // Also sets document.documentElement.lang synchronously so it's always present from the first render
     const [lang, setLang] = useState<Language>(() => {
         const urlLang = detectLanguageFromPath(location.pathname);
-        if (urlLang) return urlLang;
+        if (urlLang) {
+            document.documentElement.lang = urlLang;
+            return urlLang;
+        }
 
         const savedLang = localStorage.getItem('language');
-        return (savedLang === 'es' || savedLang === 'en') ? savedLang : 'en';
+        if (savedLang === 'es' || savedLang === 'en') {
+            document.documentElement.lang = savedLang;
+            return savedLang;
+        }
+
+        const browserLang = detectBrowserLanguage();
+        document.documentElement.lang = browserLang;
+        return browserLang;
     });
 
     // Detect language from URL whenever route changes
@@ -51,9 +69,10 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
     }, [location.pathname]);
 
-    // Save language to localStorage whenever it changes
+    // Save language to localStorage and update HTML lang attribute whenever it changes
     React.useEffect(() => {
         localStorage.setItem('language', lang);
+        document.documentElement.lang = lang;
     }, [lang]);
 
     const setLangWithNav = (newLang: Language) => {

@@ -84,7 +84,7 @@ const ATSExportPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Plantillas Optimizadas para ATS' : 'ATS-Optimized Templates'}
+                                alt={t.atsPage.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -189,11 +189,9 @@ const ATSExportPage: React.FC = () => {
             <div className="px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Optimiza tu CV para ATS ahora' : 'Optimize your CV for ATS now'}
-                        description={lang === 'es'
-                            ? 'Accede a plantillas profesionales optimizadas para sistemas ATS y aumenta tus posibilidades de ser contactado.'
-                            : 'Access professional templates optimized for ATS systems and increase your chances of being contacted.'}
-                        buttonText={lang === 'es' ? 'Probar plantillas ATS gratis' : 'Try ATS templates free'}
+                        title={t.atsPage.inlineCta.title}
+                        description={t.atsPage.inlineCta.description}
+                        buttonText={t.atsPage.inlineCta.button}
                         variant="gradient"
                     />
                 </div>
@@ -298,7 +296,7 @@ const ATSExportPage: React.FC = () => {
                         <button
                             onClick={() => setSelectedTemplate(null)}
                             className="absolute top-4 right-4 z-10 bg-white/90 dark:bg-dark-bg-tertiary hover:bg-white dark:hover:bg-dark-bg-primary rounded-full p-2 transition-colors"
-                            aria-label="Cerrar"
+                            aria-label={t.common.close}
                         >
                             <svg className="w-6 h-6 text-gray-800 dark:text-dark-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

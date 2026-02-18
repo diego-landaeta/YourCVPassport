@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import { SuccessStory } from '../types';
+import { SuccessStory } from '../../types';
 import Modal from '../shared/Modal';
 import ImageComparisonSlider from './ImageComparisonSlider';
 import { useTranslations } from '../../hooks/useTranslations';
@@ -71,21 +71,6 @@ const SuccessStoriesPage: React.FC = () => {
 
     useEffect(() => {
         loadStoriesFromDB();
-    }, []);
-
-    // Cargar script de Opynio
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src = 'https://web.opynio.com/widget.js';
-        script.async = true;
-        document.body.appendChild(script);
-
-        return () => {
-            // Cleanup: remover el script cuando el componente se desmonte
-            if (document.body.contains(script)) {
-                document.body.removeChild(script);
-            }
-        };
     }, []);
 
     const loadStoriesFromDB = async () => {
@@ -200,9 +185,9 @@ const SuccessStoriesPage: React.FC = () => {
                         {pageData.subtitle}
                     </p>
                     <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.hires}</p><p className="mt-1 font-semibold">from our platform</p></div>
-                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.promotion}</p><p className="mt-1 font-semibold">in promotion rate</p></div>
-                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.timeSaved}</p><p className="mt-1 font-semibold">in hiring time for recruiters</p></div>
+                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.hires}</p><p className="mt-1 font-semibold">{pageData.stats.hiresLabel}</p></div>
+                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.promotion}</p><p className="mt-1 font-semibold">{pageData.stats.promotionLabel}</p></div>
+                        <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-6 rounded-lg"><p className="text-3xl font-bold text-cv-blue">{pageData.stats.timeSaved}</p><p className="mt-1 font-semibold">{pageData.stats.timeSavedLabel}</p></div>
                     </div>
                 </AnimatedWrapper>
             </section>
@@ -235,10 +220,10 @@ const SuccessStoriesPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
                         <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8">
-                            {lang === 'es' ? 'Lo que dicen nuestros usuarios' : 'What our users say'}
+                            {pageData.whatUsersSay}
                         </h2>
                         {/* Opynio Widget v6.0 - horizontal-carousel */}
-                        <div className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
+                        <div key={lang} className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
                     </AnimatedWrapper>
                 </div>
             </section>

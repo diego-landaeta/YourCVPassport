@@ -54,6 +54,7 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   onDelete,
   lang,
 }) => {
+  const translations = useTranslations();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: education.id || `temp-${Date.now()}`,
   });
@@ -65,7 +66,7 @@ const SortableEducationItem: React.FC<SortableEducationItemProps> = ({
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return lang === 'es' ? 'Presente' : 'Present';
+    if (!date) return translations.common.present;
     // Parse date manually to avoid timezone issues
     const [year, month] = date.split('-').map(Number);
     // Create date using local time constructor (year, monthIndex)
@@ -211,6 +212,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
   const translations = useTranslations();
   const { lang } = useLanguage();
   const modals = translations.dashboard.modals;
+  const tEdu = translations.profileEditor.education;
   const { confirm, Dialog } = useConfirmDialog();
   const toast = useToastContext();
 
@@ -531,8 +533,8 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
     const shouldDelete = await confirm({
       title: translations.profileEditor.deleteModal.deleteEducation,
       message: modals.deleteEducationConfirm,
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
+      confirmText: translations.common.delete,
+      cancelText: translations.common.cancel,
       type: 'danger'
     });
     if (shouldDelete) {
@@ -727,18 +729,16 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {lang === 'en' ? 'Verify your education' : 'Verifica tu educación'}
+                {tEdu.verifyEducationTitle}
               </h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                {lang === 'en'
-                  ? 'Boost your credibility by verifying your educational background. Go to the Verifications section to submit your certificates or diplomas.'
-                  : 'Aumenta tu credibilidad verificando tu formación académica. Ve a la sección de Verificaciones para enviar tus certificados o diplomas.'}
+                {tEdu.verifyEducationDesc}
               </p>
               <button
                 onClick={() => onNavigateToVerifications?.()}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
               >
-                {lang === 'en' ? 'Go to Verifications' : 'Ir a Verificaciones'}
+                {tEdu.goToVerifications}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -868,7 +868,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {modals.endDate}
-                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({lang === 'es' ? 'Actual' : 'Current'})</span>}
+                  {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({translations.common.current})</span>}
                 </label>
                 <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
                   <input
@@ -903,13 +903,13 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                     }}
                   >
                     <option value="4.0">{translations.validationErrors.education.gpaScale4}</option>
-                    <option value="4.3">{lang === 'es' ? 'Escala 4.3' : '4.3 Scale'}</option>
+                    <option value="4.3">{tEdu.gpaScale43}</option>
                     <option value="5.0">{translations.validationErrors.education.gpaScale5}</option>
-                    <option value="7.0">{lang === 'es' ? 'Escala 7.0' : '7.0 Scale'}</option>
-                    <option value="9.0">{lang === 'es' ? 'Escala 9.0' : '9.0 Scale'}</option>
+                    <option value="7.0">{tEdu.gpaScale70}</option>
+                    <option value="9.0">{tEdu.gpaScale90}</option>
                     <option value="10">{translations.validationErrors.education.gpaScale10}</option>
-                    <option value="12">{lang === 'es' ? 'Escala 12' : '12 Scale'}</option>
-                    <option value="20">{lang === 'es' ? 'Escala 20' : '20 Scale'}</option>
+                    <option value="12">{tEdu.gpaScale12}</option>
+                    <option value="20">{tEdu.gpaScale20}</option>
                     <option value="100">{translations.validationErrors.education.gpaScale100}</option>
                   </select>
 
@@ -955,14 +955,14 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
                   {gradeScale === '4.0' && translations.validationErrors.education.gpaPlaceholder}
-                  {gradeScale === '4.3' && (lang === 'es' ? 'GPA en escala de 0.0 a 4.3 (ej: 3.9)' : 'GPA on a 0.0 to 4.3 scale (eg: 3.9)')}
-                  {gradeScale === '5.0' && (lang === 'es' ? 'Nota en escala de 0.0 a 5.0 (ej: 4.2)' : 'Grade on a 0.0 to 5.0 scale (eg: 4.2)')}
-                  {gradeScale === '7.0' && (lang === 'es' ? 'GPA en escala de 0.0 a 7.0 (ej: 6.5)' : 'GPA on a 0.0 to 7.0 scale (eg: 6.5)')}
-                  {gradeScale === '9.0' && (lang === 'es' ? 'CGPA en escala de 0.0 a 9.0 (ej: 8.2)' : 'CGPA on a 0.0 to 9.0 scale (eg: 8.2)')}
-                  {gradeScale === '10' && (lang === 'es' ? 'Nota en escala de 0 a 10 (ej: 8.5)' : 'Grade on a 0 to 10 scale (eg: 8.5)')}
-                  {gradeScale === '12' && (lang === 'es' ? 'Nota en escala de 0 a 12 (ej: 10)' : 'Grade on a 0 to 12 scale (eg: 10)')}
-                  {gradeScale === '20' && (lang === 'es' ? 'Nota en escala de 0 a 20 (ej: 16)' : 'Grade on a 0 to 20 scale (eg: 16)')}
-                  {gradeScale === '100' && (lang === 'es' ? 'Porcentaje de 0 a 100 (ej: 85)' : 'Percentage from 0 to 100 (eg: 85)')}
+                  {gradeScale === '4.3' && tEdu.gpaHint43}
+                  {gradeScale === '5.0' && tEdu.gpaHint50}
+                  {gradeScale === '7.0' && tEdu.gpaHint70}
+                  {gradeScale === '9.0' && tEdu.gpaHint90}
+                  {gradeScale === '10' && tEdu.gpaHint10}
+                  {gradeScale === '12' && tEdu.gpaHint12}
+                  {gradeScale === '20' && tEdu.gpaHint20}
+                  {gradeScale === '100' && tEdu.gpaHint100}
                 </p>
               </div>
             </div>

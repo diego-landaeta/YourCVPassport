@@ -572,7 +572,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             {/* Gender Selection */}
             <div className="col-span-1 sm:col-span-3">
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {lang === 'es' ? 'Género' : 'Gender'} <span className="text-red-500">*</span>
+                {translations.profileEditor.identity.gender} <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-1">
                 <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
@@ -662,7 +662,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <span className="font-medium text-gray-900 dark:text-white">
                 {translations.profileEditor.identity.contactInfo}
               </span>
-              <span className="text-xs text-gray-500">({lang === 'es' ? 'Opcional' : 'Optional'})</span>
+              <span className="text-xs text-gray-500">({translations.common.optional})</span>
             </div>
             <svg className={`w-5 h-5 text-gray-500 transition-transform ${showContactInfo ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

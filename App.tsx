@@ -59,8 +59,8 @@ const JobDetailPage = lazy(() => import('./components/pages/JobDetailPage'));
 // 404 Not Found page
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Dev tools (removed - only for development)
-// const TemplatePreviewGenerator = lazy(() => import('./pages/TemplatePreviewGenerator'));
+// Dev tools
+const TemplatePreviewCapture = lazy(() => import('./components/pages/TemplatePreviewCapture'));
 
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
@@ -148,8 +148,8 @@ const AppContent: React.FC = () => {
           <Route path="/resources/blog" element={<BlogPage />} />
           <Route path="/resources/blog/:slug" element={<BlogPostPage />} />
 
-          {/* Dev Tool - Template Preview Generator (REMOVED - only for development) */}
-          {/* <Route path="/dev/template-previews" element={<TemplatePreviewGenerator />} /> */}
+          {/* Dev Tool - Template Preview Capture */}
+          <Route path="/dev/template-preview" element={<TemplatePreviewCapture />} />
 
           {/* 404 Not Found Routes */}
           <Route path="/404" element={<NotFoundPage />} />

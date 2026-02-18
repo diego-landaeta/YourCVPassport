@@ -24,7 +24,12 @@ const templates = [
     { name: 'modern-minimalist', selector: '#template-modern-minimalist' },
     { name: 'creative-bold', selector: '#template-creative-bold' },
     { name: 'professional-classic', selector: '#template-professional-classic' },
-    { name: 'healthcare-professional', selector: '#template-healthcare-professional' }
+    { name: 'healthcare-professional', selector: '#template-healthcare-professional' },
+    { name: 'modern-professional', selector: '#template-modern-professional' },
+    { name: 'corporate-classic', selector: '#template-corporate-classic' },
+    { name: 'creative-minimalist', selector: '#template-creative-minimalist' },
+    { name: 'academic-standard', selector: '#template-academic-standard' },
+    { name: 'urban', selector: '#template-urban' }
 ];
 
 async function generateTemplateScreenshots() {
@@ -55,7 +60,7 @@ async function generateTemplateScreenshots() {
         });
 
         // Navigate to the preview page
-        const previewUrl = 'http://localhost:3001/dev/template-preview';
+        const previewUrl = 'http://localhost:5173/dev/template-preview';
         console.log('📄 Navegando a:', previewUrl);
 
         try {
@@ -66,7 +71,7 @@ async function generateTemplateScreenshots() {
             console.log('✅ Página cargada correctamente\n');
         } catch (error) {
             console.error('❌ Error: No se pudo cargar la página');
-            console.error('   Asegúrate de que el servidor de desarrollo esté corriendo en localhost:3001');
+            console.error('   Asegúrate de que el servidor de desarrollo esté corriendo en localhost:5173');
             console.error('   Ejecuta: npm run dev\n');
             throw error;
         }

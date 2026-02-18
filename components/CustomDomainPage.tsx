@@ -64,7 +64,7 @@ const CustomDomainPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Dominio Personalizado para tu CV' : 'Custom Domain for Your CV'}
+                                alt={t.customDomain.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -120,11 +120,9 @@ const CustomDomainPage: React.FC = () => {
             <div className="px-4 py-12">
                 <div className="max-w-7xl mx-auto">
                     <InlineCTA
-                        title={lang === 'es' ? 'Reserva tu URL personalizada' : 'Reserve your custom URL'}
-                        description={lang === 'es'
-                            ? 'Crea tu marca personal profesional con una URL memorable que destaque ante reclutadores.'
-                            : 'Create your professional personal brand with a memorable URL that stands out to recruiters.'}
-                        buttonText={lang === 'es' ? 'Configurar mi URL ahora' : 'Set up my URL now'}
+                        title={t.customDomain.inlineCta.title}
+                        description={t.customDomain.inlineCta.description}
+                        buttonText={t.customDomain.inlineCta.button}
                         variant="blue"
                     />
                 </div>

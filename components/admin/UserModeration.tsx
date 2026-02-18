@@ -117,7 +117,23 @@ const UserModeration: React.FC = () => {
       blockMessages: 'Block messages',
       restrictions: 'Active Restrictions',
       suspendUser: 'Suspend User',
-      confirmAction: 'Confirm Suspension'
+      confirmAction: 'Confirm Suspension',
+      errorSuspending: 'Error suspending user',
+      userSuspended: 'User suspended successfully',
+      errorActivating: 'Error activating user',
+      userActivated: 'User activated successfully',
+      noName: 'No name',
+      selectDate: 'Select Date',
+      orByDays: 'or by days',
+      daySingular: 'day',
+      dayPlural: 'days',
+      suspendedUntil: 'Suspended until:',
+      notPubliclyVisible: 'Not publicly visible',
+      excludedFromSearches: 'Excluded from searches',
+      noMessagingAccess: 'No messaging access',
+      lastActivity: 'Last activity',
+      location: 'Location',
+      plan: 'Plan'
     },
     es: {
       title: 'Moderación de Usuarios',
@@ -173,7 +189,23 @@ const UserModeration: React.FC = () => {
       blockMessages: 'Bloquear mensajes',
       restrictions: 'Restricciones Activas',
       suspendUser: 'Suspender Usuario',
-      confirmAction: 'Confirmar Suspensión'
+      confirmAction: 'Confirmar Suspensión',
+      errorSuspending: 'Error al suspender usuario',
+      userSuspended: 'Usuario suspendido correctamente',
+      errorActivating: 'Error al activar usuario',
+      userActivated: 'Usuario activado correctamente',
+      noName: 'Sin nombre',
+      selectDate: 'Seleccionar Fecha',
+      orByDays: 'o por días',
+      daySingular: 'día',
+      dayPlural: 'días',
+      suspendedUntil: 'Suspensión hasta:',
+      notPubliclyVisible: 'No visible públicamente',
+      excludedFromSearches: 'Excluido de búsquedas',
+      noMessagingAccess: 'Sin acceso a mensajería',
+      lastActivity: 'Última actividad',
+      location: 'Ubicación',
+      plan: 'Plan'
     }
   };
 
@@ -292,7 +324,7 @@ const UserModeration: React.FC = () => {
         .eq('id', userId);
 
       if (error) {
-        showToast(lang === 'es' ? 'Error al suspender usuario' : 'Error suspending user', 'error');
+        showToast(t.errorSuspending, 'error');
         return;
       }
 
@@ -304,9 +336,9 @@ const UserModeration: React.FC = () => {
       setCustomDate('');
       setBanOptions({ profileHidden: false, searchBlocked: false, messagesBlocked: false });
       setSelectedUser(null);
-      showToast(lang === 'es' ? 'Usuario suspendido correctamente' : 'User suspended successfully', 'success');
+      showToast(t.userSuspended, 'success');
     } catch (error) {
-      showToast(lang === 'es' ? 'Error al suspender usuario' : 'Error suspending user', 'error');
+      showToast(t.errorSuspending, 'error');
     }
   };
 
@@ -327,16 +359,16 @@ const UserModeration: React.FC = () => {
         .eq('id', userId);
 
       if (error) {
-        showToast(lang === 'es' ? 'Error al activar usuario' : 'Error activating user', 'error');
+        showToast(t.errorActivating, 'error');
         return;
       }
 
       await loadUsers();
       setShowDetailModal(false);
       setSelectedUser(null);
-      showToast(lang === 'es' ? 'Usuario activado correctamente' : 'User activated successfully', 'success');
+      showToast(t.userActivated, 'success');
     } catch (error) {
-      showToast(lang === 'es' ? 'Error al activar usuario' : 'Error activating user', 'error');
+      showToast(t.errorActivating, 'error');
     }
   };
 
@@ -489,10 +521,10 @@ const UserModeration: React.FC = () => {
                     {t.email}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    Ubicación
+                    {t.location}
                   </th>
                   <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    Plan
+                    {t.plan}
                   </th>
                   <th scope="col" className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
                     {t.actions}
@@ -531,7 +563,7 @@ const UserModeration: React.FC = () => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="text-sm font-medium text-gray-900 dark:text-dark-text-primary truncate max-w-[180px]">
-                            {user.full_name || 'Sin nombre'}
+                            {user.full_name || t.noName}
                           </div>
                           {user.headline && (
                             <div className="text-xs text-gray-500 dark:text-dark-text-secondary truncate max-w-[180px]">
@@ -658,7 +690,7 @@ const UserModeration: React.FC = () => {
                 )}
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-                    {selectedUser.full_name || (lang === 'es' ? 'Sin nombre' : 'No name')}
+                    {selectedUser.full_name || t.noName}
                   </h4>
                   {selectedUser.headline && (
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">
@@ -720,7 +752,7 @@ const UserModeration: React.FC = () => {
                   </div>
                   {selectedUser.updated_at && (
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600 dark:text-dark-text-secondary">{t.lastActivity || 'Última actividad'}:</span>
+                      <span className="text-gray-600 dark:text-dark-text-secondary">{t.lastActivity}:</span>
                       <span className="text-gray-900 dark:text-dark-text-primary text-sm">
                         {new Date(selectedUser.updated_at).toLocaleDateString(lang)}
                       </span>
@@ -893,7 +925,7 @@ const UserModeration: React.FC = () => {
                     {/* Date Picker */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-2">
-                        {lang === 'es' ? 'Seleccionar Fecha' : 'Select Date'}
+                        {t.selectDate}
                       </label>
                       <input
                         type="date"
@@ -912,7 +944,7 @@ const UserModeration: React.FC = () => {
                       </div>
                       <div className="relative flex justify-center">
                         <span className="px-3 bg-gray-50 dark:bg-dark-bg-tertiary text-xs font-medium text-gray-500 dark:text-gray-400">
-                          {lang === 'es' ? 'o por días' : 'or by days'}
+                          {t.orByDays}
                         </span>
                       </div>
                     </div>
@@ -936,7 +968,7 @@ const UserModeration: React.FC = () => {
                           className="flex-1 p-3 sm:p-4 border-2 border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center font-bold text-xl sm:text-2xl shadow-sm"
                         />
                         <span className="text-gray-600 dark:text-dark-text-secondary font-semibold text-sm sm:text-base whitespace-nowrap">
-                          {customDays === 1 ? (lang === 'es' ? 'día' : 'day') : (lang === 'es' ? 'días' : 'days')}
+                          {customDays === 1 ? t.daySingular : t.dayPlural}
                         </span>
                       </div>
                     </div>
@@ -944,7 +976,7 @@ const UserModeration: React.FC = () => {
                     {/* Preview */}
                     <div className="pt-2 border-t border-gray-300 dark:border-gray-600">
                       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        <span className="font-semibold">{lang === 'es' ? 'Suspensión hasta:' : 'Suspended until:'}</span>
+                        <span className="font-semibold">{t.suspendedUntil}</span>
                         {' '}
                         {customDate
                           ? new Date(customDate).toLocaleDateString(lang === 'es' ? 'es' : 'en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -962,9 +994,9 @@ const UserModeration: React.FC = () => {
                   </label>
                   <div className="space-y-2 sm:space-y-3">
                     {[
-                      { key: 'profileHidden', label: t.hideProfile, icon: '👁️', description: lang === 'es' ? 'No visible públicamente' : 'Not publicly visible' },
-                      { key: 'searchBlocked', label: t.blockSearch, icon: '🔍', description: lang === 'es' ? 'Excluido de búsquedas' : 'Excluded from searches' },
-                      { key: 'messagesBlocked', label: t.blockMessages, icon: '💬', description: lang === 'es' ? 'Sin acceso a mensajería' : 'No messaging access' }
+                      { key: 'profileHidden', label: t.hideProfile, icon: '👁️', description: t.notPubliclyVisible },
+                      { key: 'searchBlocked', label: t.blockSearch, icon: '🔍', description: t.excludedFromSearches },
+                      { key: 'messagesBlocked', label: t.blockMessages, icon: '💬', description: t.noMessagingAccess }
                     ].map((option) => (
                       <label
                         key={option.key}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Stamp } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface PublicStampBadgesProps {
     stamps: Stamp[];
@@ -14,6 +15,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
     showDetails = false
 }) => {
     const { lang } = useLanguage();
+    const t = useTranslations();
     const [selectedStamp, setSelectedStamp] = useState<Stamp | null>(null);
 
     const getStampIcon = (type: string) => {
@@ -158,7 +160,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-                        {lang === 'es' ? 'Verificaciones' : 'Verifications'}
+                        {t.stampBadges.verifications}
                     </h3>
                     <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
                         {uniqueStamps.length}
@@ -207,7 +209,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
-                                        {lang === 'es' ? 'Verificado' : 'Verified'}
+                                        {t.common.verified}
                                     </span>
                                 </div>
                             </div>
@@ -225,7 +227,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                         <div className="space-y-3 text-sm">
                             <div>
                                 <p className="text-gray-500 dark:text-dark-text-secondary">
-                                    {lang === 'es' ? 'Verificado el' : 'Verified on'}
+                                    {t.stampBadges.verifiedOn}
                                 </p>
                                 <p className="text-gray-900 dark:text-dark-text-primary font-medium">
                                     {selectedStamp.verified_at && formatDate(selectedStamp.verified_at)}
@@ -235,7 +237,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                             {selectedStamp.provider && (
                                 <div>
                                     <p className="text-gray-500 dark:text-dark-text-secondary">
-                                        {lang === 'es' ? 'Proveedor' : 'Provider'}
+                                        {t.stampBadges.provider}
                                     </p>
                                     <p className="text-gray-900 dark:text-dark-text-primary font-medium capitalize">
                                         {selectedStamp.provider}
@@ -246,7 +248,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                             {selectedStamp.expires_at && (
                                 <div>
                                     <p className="text-gray-500 dark:text-dark-text-secondary">
-                                        {lang === 'es' ? 'Válido hasta' : 'Valid until'}
+                                        {t.stampBadges.validUntil}
                                     </p>
                                     <p className="text-gray-900 dark:text-dark-text-primary font-medium">
                                         {formatDate(selectedStamp.expires_at)}
@@ -258,9 +260,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                         {/* Footer */}
                         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-dark-border">
                             <p className="text-xs text-gray-500 dark:text-dark-text-secondary text-center">
-                                {lang === 'es'
-                                    ? 'Verificación autenticada por YourCVPassport'
-                                    : 'Verification authenticated by YourCVPassport'}
+                                {t.stampBadges.authenticatedBy}
                             </p>
                         </div>
                     </div>

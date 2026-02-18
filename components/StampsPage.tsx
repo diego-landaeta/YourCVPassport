@@ -86,7 +86,7 @@ const StampsPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1639322537228-f710d846310a?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Verificación de Credenciales Blockchain' : 'Blockchain Credential Verification'}
+                                alt={t.stampsPage.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>

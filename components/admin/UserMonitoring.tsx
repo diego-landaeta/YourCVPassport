@@ -79,7 +79,13 @@ const UserMonitoring: React.FC = () => {
         '26-50': '26-50% Complete',
         '51-75': '51-75% Complete',
         '76-100': '76-100% Complete'
-      }
+      },
+      recentUsers: 'Recent Users',
+      noRecentUsers: 'No recent users',
+      noName: 'No name',
+      topSkills: 'Top Skills',
+      noSkillsRegistered: 'No skills registered',
+      users: 'users'
     },
     es: {
       title: 'Monitoreo y Analíticas de Usuarios',
@@ -104,7 +110,13 @@ const UserMonitoring: React.FC = () => {
         '26-50': '26-50% Completo',
         '51-75': '51-75% Completo',
         '76-100': '76-100% Completo'
-      }
+      },
+      recentUsers: 'Usuarios Recientes',
+      noRecentUsers: 'No hay usuarios recientes',
+      noName: 'Sin nombre',
+      topSkills: 'Habilidades Más Populares',
+      noSkillsRegistered: 'No hay habilidades registradas',
+      users: 'usuarios'
     }
   };
 
@@ -503,7 +515,7 @@ const UserMonitoring: React.FC = () => {
         <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-dark-border">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-              {lang === 'es' ? 'Usuarios Recientes' : 'Recent Users'}
+              {t.recentUsers}
             </h3>
             <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-cv-blue dark:text-blue-400 flex-shrink-0" />
           </div>
@@ -511,7 +523,7 @@ const UserMonitoring: React.FC = () => {
           {recentUsers.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {lang === 'es' ? 'No hay usuarios recientes' : 'No recent users'}
+                {t.noRecentUsers}
               </p>
             </div>
           ) : (
@@ -538,7 +550,7 @@ const UserMonitoring: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-dark-text-primary truncate">
-                      {user.full_name || (lang === 'es' ? 'Sin nombre' : 'No name')}
+                      {user.full_name || t.noName}
                     </p>
                     <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
                       {user.email}
@@ -559,7 +571,7 @@ const UserMonitoring: React.FC = () => {
         <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-dark-border">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
-              {lang === 'es' ? 'Habilidades Más Populares' : 'Top Skills'}
+              {t.topSkills}
             </h3>
             <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-cv-blue dark:text-blue-400 flex-shrink-0" />
           </div>
@@ -567,7 +579,7 @@ const UserMonitoring: React.FC = () => {
           {topSkills.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {lang === 'es' ? 'No hay habilidades registradas' : 'No skills registered'}
+                {t.noSkillsRegistered}
               </p>
             </div>
           ) : (
@@ -588,7 +600,7 @@ const UserMonitoring: React.FC = () => {
                         </span>
                       </div>
                       <span className="text-[10px] sm:text-xs font-semibold text-cv-blue dark:text-blue-400 flex-shrink-0">
-                        {skill.count} {lang === 'es' ? 'usuarios' : 'users'}
+                        {skill.count} {t.users}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">

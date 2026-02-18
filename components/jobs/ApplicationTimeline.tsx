@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { JobApplicationStatus } from '../../hooks/useJobApplications';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslations } from '../../hooks/useTranslations';
 
 interface TimelineStep {
   status: JobApplicationStatus;
@@ -47,6 +48,7 @@ const ApplicationTimeline: React.FC<ApplicationTimelineProps> = ({
   className = ''
 }) => {
   const { lang } = useLanguage();
+  const t = useTranslations();
 
   // Define the standard workflow steps
   const workflowSteps: TimelineStep[] = [
@@ -232,7 +234,7 @@ const ApplicationTimeline: React.FC<ApplicationTimelineProps> = ({
                 </h3>
                 {step.state === 'current' && updatedAt && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {lang === 'es' ? 'Actualizado: ' : 'Updated: '}
+                    {t.applicationTimeline.updated}
                     {new Date(updatedAt).toLocaleDateString(lang, {
                       month: 'short',
                       day: 'numeric',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Stamp, StampType, StampStatus, CreateStampRequest, StampsSummary } from '../../types';
 import StampsUploadModal from './StampsUploadModal';
 import StampsVerificationCodeModal from './StampsVerificationCodeModal';
@@ -48,6 +49,8 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
     const navigate = useNavigate();
     const { session } = useAuth();
     const t = useTranslations();
+    const { lang } = useLanguage();
+    const s = t.dashboard.stamps;
     const [stamps, setStamps] = useState<Stamp[]>([]);
     const [summary, setSummary] = useState<StampsSummary | null>(null);
     const [loading, setLoading] = useState(true);
@@ -97,7 +100,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
         const avail = availability.get(type);
         if (avail && !avail.can_request_now) {
             const daysRemaining = Math.ceil(avail.days_until_available || 0);
-            toast.error(`Debes esperar ${daysRemaining} día${daysRemaining !== 1 ? 's' : ''} más para solicitar otra verificación de ${getStampTypeName(type)}.`);
+            toast.error(s.waitMessage(daysRemaining, getStampTypeName(type)));
             return;
         }
 
@@ -190,48 +193,40 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                 return (
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-medium">
                         <CheckBadgeSolidIcon className="w-4 h-4" />
-                        Verificado
+                        {s.statusVerified}
                     </span>
                 );
             case 'PENDING':
                 return (
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full text-sm font-medium">
                         <ClockIcon className="w-4 h-4" />
-                        Pendiente
+                        {s.statusPending}
                     </span>
                 );
             case 'REJECTED':
                 return (
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-medium">
                         <XCircleIcon className="w-4 h-4" />
-                        Rechazado
+                        {s.statusRejected}
                     </span>
                 );
             case 'EXPIRED':
                 return (
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-sm font-medium">
                         <ExclamationTriangleIcon className="w-4 h-4" />
-                        Expirado
+                        {s.statusExpired}
                     </span>
                 );
         }
     };
 
     const getStampTypeName = (type: StampType): string => {
-        const names: Record<StampType, string> = {
-            'EMAIL': 'Email',
-            'IDENTITY': 'Identidad',
-            'EDUCATION': 'Educación',
-            'CERTIFICATION': 'Certificación',
-            'EMPLOYMENT': 'Empleo',
-            'SKILL': 'Habilidad',
-            'LANGUAGE': 'Idiomas'
-        };
-        return names[type];
+        const typeKey = type.toLowerCase() as keyof typeof s.types;
+        return s.types[typeKey] || type;
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
+        return new Date(dateString).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -283,11 +278,11 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
             await fetchSummary();
             onStampsUpdate?.();
             
-            toast.success('Verificación eliminada exitosamente');
+            toast.success(s.deleteSuccess);
             setShowDeleteModal(false);
             setStampToDelete(null);
         } catch (error: any) {
-            toast.error(`Error al eliminar la verificación: ${error.message || 'Error desconocido'}`);
+            toast.error(s.deleteError(error.message || 'Unknown error'));
         } finally {
             setIsDeleting(false);
         }
@@ -325,7 +320,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {summary?.verified_count || 0}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Verificadas</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{s.verified}</p>
                             </div>
                         </div>
                     </div>
@@ -339,7 +334,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {summary?.pending_count || 0}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{s.pending}</p>
                             </div>
                         </div>
                     </div>
@@ -353,7 +348,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {summary?.rejected_count || 0}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Rechazadas</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{s.rejected}</p>
                             </div>
                         </div>
                     </div>
@@ -367,7 +362,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {summary?.expired_count || 0}
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Expiradas</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{s.expired}</p>
                             </div>
                         </div>
                     </div>
@@ -398,18 +393,18 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                             {getStampDescription(stamp)}
                                         </p>
                                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <span>Solicitado: {formatDate(stamp.created_at)}</span>
+                                            <span>{s.requested} {formatDate(stamp.created_at)}</span>
                                             {stamp.verified_at && (
-                                                <span>Verificado: {formatDate(stamp.verified_at)}</span>
+                                                <span>{s.verifiedAt} {formatDate(stamp.verified_at)}</span>
                                             )}
                                             {stamp.expires_at && (
-                                                <span>Expira: {formatDate(stamp.expires_at)}</span>
+                                                <span>{s.expiresAt} {formatDate(stamp.expires_at)}</span>
                                             )}
                                         </div>
                                         {stamp.admin_notes && (
                                             <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                                                    <span className="font-medium">Nota del administrador:</span> {stamp.admin_notes}
+                                                    <span className="font-medium">{s.adminNote}</span> {stamp.admin_notes}
                                                 </p>
                                             </div>
                                         )}
@@ -421,7 +416,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                                     <button
                                         onClick={() => handleDeleteStamp(stamp.id)}
                                         className="ml-4 p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                        title="Eliminar verificación pendiente"
+                                        title={s.deletePendingTitle}
                                     >
                                         <XCircleIcon className="w-6 h-6" />
                                     </button>
@@ -437,7 +432,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                 <div className="flex items-center gap-3 mb-6">
                     <ShieldCheckIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                        Verificaciones Disponibles
+                        {s.availableTitle}
                     </h3>
                 </div>
 
@@ -446,72 +441,78 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                     <StampCard
                         type="IDENTITY"
                         icon={IdentificationIcon}
-                        title="Identidad"
-                        description="Verifica tu identidad con DNI o pasaporte"
+                        title={s.cards.identity.title}
+                        description={s.cards.identity.description}
                         requiresDocument={true}
                         onClick={() => handleStampRequest('IDENTITY', true)}
-                        hasStamp={stamps.some(s => s.type === 'IDENTITY' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'IDENTITY' && st.status === 'VERIFIED')}
                         availability={availability.get('IDENTITY')}
+                        translations={s}
                     />
 
                     {/* Education Stamp */}
                     <StampCard
                         type="EDUCATION"
                         icon={AcademicCapIcon}
-                        title="Educación"
-                        description="Verifica tus títulos académicos y diplomas"
+                        title={s.cards.education.title}
+                        description={s.cards.education.description}
                         requiresDocument={true}
                         onClick={() => handleStampRequest('EDUCATION', true)}
-                        hasStamp={stamps.some(s => s.type === 'EDUCATION' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'EDUCATION' && st.status === 'VERIFIED')}
                         availability={availability.get('EDUCATION')}
+                        translations={s}
                     />
 
                     {/* Language Stamp */}
                     <StampCard
                         type="LANGUAGE"
                         icon={LanguageIcon}
-                        title="Idiomas"
-                        description="Verifica certificados de idiomas (TOEFL, IELTS, DELE, DELF, etc.)"
+                        title={s.cards.language.title}
+                        description={s.cards.language.description}
                         requiresDocument={true}
                         onClick={() => handleStampRequest('LANGUAGE', true)}
-                        hasStamp={stamps.some(s => s.type === 'LANGUAGE' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'LANGUAGE' && st.status === 'VERIFIED')}
                         availability={availability.get('LANGUAGE')}
+                        translations={s}
                     />
 
                     {/* Email Stamp */}
                     <StampCard
                         type="EMAIL"
                         icon={EnvelopeIcon}
-                        title="Email"
-                        description="Verifica tu dirección de correo"
+                        title={s.cards.email.title}
+                        description={s.cards.email.description}
                         requiresDocument={false}
                         onClick={() => handleStampRequest('EMAIL', false)}
-                        hasStamp={stamps.some(s => s.type === 'EMAIL' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'EMAIL' && st.status === 'VERIFIED')}
                         availability={availability.get('EMAIL')}
+                        translations={s}
                     />
 
                     {/* Employment Stamp */}
                     <StampCard
                         type="EMPLOYMENT"
                         icon={BriefcaseIcon}
-                        title="Empleo"
-                        description="Verifica tu experiencia laboral"
+                        title={s.cards.employment.title}
+                        description={s.cards.employment.description}
                         requiresDocument={true}
                         onClick={() => handleStampRequest('EMPLOYMENT', true)}
-                        hasStamp={stamps.some(s => s.type === 'EMPLOYMENT' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'EMPLOYMENT' && st.status === 'VERIFIED')}
                         availability={availability.get('EMPLOYMENT')}
+                        translations={s}
                     />
 
                     {/* Certification Stamp */}
                     <StampCard
                         type="CERTIFICATION"
                         icon={CheckBadgeIcon}
-                        title="Certificaciones"
-                        description="Verifica tus certificaciones profesionales"
+                        title={s.cards.certification.title}
+                        description={s.cards.certification.description}
                         requiresDocument={true}
                         onClick={() => handleStampRequest('CERTIFICATION', true)}
-                        hasStamp={stamps.some(s => s.type === 'CERTIFICATION' && s.status === 'VERIFIED')}
+                        hasStamp={stamps.some(st => st.type === 'CERTIFICATION' && st.status === 'VERIFIED')}
                         availability={availability.get('CERTIFICATION')}
+                        translations={s}
                     />
                 </div>
 
@@ -520,7 +521,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">
-                                Verificaciones este mes:
+                                {s.monthlyUsage}
                             </span>
                             <span className="font-medium text-gray-900 dark:text-white">
                                 {usageStats.stamp_request.used} / {usageStats.stamp_request.limit === 'unlimited' ? '∞' : usageStats.stamp_request.limit}
@@ -528,7 +529,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         </div>
                         {usageStats.stamp_request.limit !== 'unlimited' && typeof usageStats.stamp_request.remaining === 'number' && usageStats.stamp_request.remaining <= 1 && (
                             <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                                ¡Quedan pocas verificaciones! <button onClick={handleUpgrade} className="underline hover:no-underline">Mejora tu plan</button> para obtener más.
+                                {s.fewRemaining} <button onClick={handleUpgrade} className="underline hover:no-underline">{s.upgradePlan}</button> {s.forMore}
                             </p>
                         )}
                     </div>
@@ -580,17 +581,17 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         setStampToDelete(null);
                     }
                 }}
-                title="Eliminar Verificación"
+                title={s.deleteTitle}
             >
                 <div className="p-6">
                     <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
                         <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
                     </div>
                     <h3 className="text-lg font-medium text-center text-gray-900 dark:text-white mb-2">
-                        ¿Estás seguro?
+                        {s.deleteConfirm}
                     </h3>
                     <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
-                        ¿Estás seguro de que deseas eliminar esta verificación pendiente? Esta acción no se puede deshacer.
+                        {s.deleteMessage}
                     </p>
                     <div className="flex gap-3 justify-center">
                         <button
@@ -601,7 +602,7 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                             disabled={isDeleting}
                             className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
                         >
-                            Cancelar
+                            {s.cancel}
                         </button>
                         <button
                             onClick={confirmDeleteStamp}
@@ -611,10 +612,10 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                             {isDeleting ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    Eliminando...
+                                    {s.deleting}
                                 </>
                             ) : (
-                                'Eliminar'
+                                s.delete
                             )}
                         </button>
                     </div>
@@ -643,6 +644,7 @@ interface StampCardProps {
     onClick: () => void;
     hasStamp: boolean;
     availability?: StampAvailability;
+    translations: any;
 }
 
 const StampCard: React.FC<StampCardProps> = ({
@@ -653,7 +655,8 @@ const StampCard: React.FC<StampCardProps> = ({
     requiresDocument,
     onClick,
     hasStamp,
-    availability
+    availability,
+    translations: s
 }) => {
     const isExternalVerification = type === 'EMAIL';
     const hasReachedMaxAttempts = availability && availability.remaining_attempts !== null && availability.remaining_attempts <= 0;
@@ -705,36 +708,36 @@ const StampCard: React.FC<StampCardProps> = ({
             {requiresDocument && (
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                     <CloudArrowUpIcon className="w-4 h-4" />
-                    <span>Requiere subir documento</span>
+                    <span>{s.requiresDocument}</span>
                 </div>
             )}
 
             {hasStamp ? (
                 <div className="mt-4 flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
                     <CheckCircleIcon className="w-5 h-5" />
-                    Verificado
+                    {s.statusVerified}
                 </div>
             ) : hasReachedMaxAttempts ? (
                 <div className="mt-4">
                     <div className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400 mb-2">
                         <ExclamationTriangleIcon className="w-5 h-5" />
-                        Límite alcanzado
+                        {s.limitReached}
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Has usado los 4 intentos disponibles
+                        {s.maxAttemptsUsed}
                     </p>
                 </div>
             ) : availability && !availability.can_request_now ? (
                 <div className="mt-4">
                     <div className="flex items-center gap-2 text-sm font-medium text-orange-600 dark:text-orange-400 mb-2">
                         <ClockIcon className="w-5 h-5" />
-                        Disponible en {daysRemaining} día{daysRemaining !== 1 ? 's' : ''}
+                        {s.availableIn(daysRemaining)}
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Puedes solicitar esta verificación cada 3 días
+                        {s.requestEvery3Days}
                         {isExternalVerification && availability?.remaining_attempts !== null && (
                             <span className="block mt-1">
-                                Intentos restantes: {availability.remaining_attempts}/4
+                                {s.attemptsRemaining(availability.remaining_attempts)}
                             </span>
                         )}
                     </p>
@@ -743,11 +746,11 @@ const StampCard: React.FC<StampCardProps> = ({
                 <div className="mt-4">
                     <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
                         <PlusIcon className="w-5 h-5" />
-                        Solicitar Verificación
+                        {s.requestVerification}
                     </div>
                     {isExternalVerification && availability?.remaining_attempts !== null && availability?.remaining_attempts !== undefined && (
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                            Intentos restantes: {availability.remaining_attempts}/4
+                            {s.attemptsRemaining(availability.remaining_attempts)}
                         </p>
                     )}
                 </div>

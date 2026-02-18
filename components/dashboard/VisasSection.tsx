@@ -255,7 +255,7 @@ const VisasSection: React.FC = () => {
     try {
       // Validate user permission
       if (!session?.user.id || visaData.profile_id !== session.user.id) {
-        toast.error('No tienes permisos para realizar esta acción');
+        toast.error(t.noPermission);
         return;
       }
 
@@ -282,7 +282,7 @@ const VisasSection: React.FC = () => {
       loadVisas();
       setIsFormOpen(false);
       setEditingVisa(undefined);
-    } catch (error) {toast.error('Error al guardar la visa');
+    } catch (error) {toast.error(t.saveError);
     }
   };
 
@@ -308,7 +308,7 @@ const VisasSection: React.FC = () => {
     try {
       // Validate user permission
       if (!session?.user.id) {
-        toast.error('No tienes permisos para realizar esta acción');
+        toast.error(t.noPermission);
         return;
       }
 
@@ -421,14 +421,13 @@ const VisasSection: React.FC = () => {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteConfirm.isOpen}
-        onClose={() => setDeleteConfirm({ isOpen: false, visaId: null })}
+        onCancel={() => setDeleteConfirm({ isOpen: false, visaId: null })}
         onConfirm={handleDeleteConfirm}
-        title="¿Eliminar Visa?"
-        message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta visa?"
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        variant="danger"
-        loading={deleting !== null}
+        title={t.deleteTitle}
+        message={t.deleteMessage}
+        confirmText={t.deleteButton}
+        cancelText={t.cancelButton}
+        type="danger"
       />
     </div>
   );

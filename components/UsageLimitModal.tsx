@@ -105,7 +105,7 @@ export function UsageLimitModal({
   limitInfo,
   onUpgrade,
 }: UsageLimitModalProps) {
-  const { language } = useLanguage();
+  const { lang: language } = useLanguage();
   const t = translations[language] || translations.en;
 
   if (!isOpen) return null;
@@ -235,7 +235,7 @@ export function UsageLimitWarning({
   onUpgrade,
   compact = false,
 }: UsageLimitWarningProps) {
-  const { language } = useLanguage();
+  const { lang: language } = useLanguage();
 
   if (!limitInfo || limitInfo.allowed) return null;
 

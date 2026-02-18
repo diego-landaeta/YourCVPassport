@@ -25,7 +25,6 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 
 const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, skills }) => {
     const t = useTranslations();
-    const { lang } = useLanguage();
 
     // Get avatar URL or generate initials
     const avatarUrl = profile.avatar_url || profile.photo_url || profile.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || 'User')}&background=2563eb&color=fff&size=200`;
@@ -127,7 +126,7 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                 {/* View Profile Button - Fixed at bottom */}
                 <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
                     <button className="w-full px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg group">
-                        <span>{lang === 'es' ? 'Ver Perfil' : 'View Profile'}</span>
+                        <span>{t.advancedTalentSearch.viewProfile}</span>
                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -154,7 +153,6 @@ interface FilterSectionProps {
 
 const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, onApplyFilters }) => {
     const t = useTranslations();
-    const { lang } = useLanguage();
     const { filters: filterLabels } = t.advancedTalentSearch;
 
     return (
@@ -197,7 +195,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
 
                 <div>
                      <label htmlFor="country" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
-                        {lang === 'es' ? 'País' : 'Country'}
+                        {filterLabels.countryLabel}
                      </label>
                      <select
                         id="country"
@@ -206,25 +204,25 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                         className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all appearance-none bg-white cursor-pointer text-sm"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
                      >
-                        <option value="">{lang === 'es' ? 'Todos los países' : 'All countries'}</option>
-                        <option value="ES">{lang === 'es' ? 'España' : 'Spain'}</option>
-                        <option value="MX">{lang === 'es' ? 'México' : 'Mexico'}</option>
+                        <option value="">{filterLabels.allCountries}</option>
+                        <option value="ES">{filterLabels.countries.ES}</option>
+                        <option value="MX">{filterLabels.countries.MX}</option>
                         <option value="AR">Argentina</option>
                         <option value="CO">Colombia</option>
                         <option value="CL">Chile</option>
-                        <option value="PE">{lang === 'es' ? 'Perú' : 'Peru'}</option>
-                        <option value="US">{lang === 'es' ? 'Estados Unidos' : 'United States'}</option>
-                        <option value="GB">{lang === 'es' ? 'Reino Unido' : 'United Kingdom'}</option>
-                        <option value="FR">{lang === 'es' ? 'Francia' : 'France'}</option>
-                        <option value="DE">{lang === 'es' ? 'Alemania' : 'Germany'}</option>
-                        <option value="IT">{lang === 'es' ? 'Italia' : 'Italy'}</option>
+                        <option value="PE">{filterLabels.countries.PE}</option>
+                        <option value="US">{filterLabels.countries.US}</option>
+                        <option value="GB">{filterLabels.countries.GB}</option>
+                        <option value="FR">{filterLabels.countries.FR}</option>
+                        <option value="DE">{filterLabels.countries.DE}</option>
+                        <option value="IT">{filterLabels.countries.IT}</option>
                         <option value="BR">Brasil</option>
                      </select>
                 </div>
 
                 <div>
                      <label htmlFor="location" className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
-                        {lang === 'es' ? 'Ubicación' : 'Location'}
+                        {filterLabels.locationLabel}
                      </label>
                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -243,7 +241,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ filters, onFilterChange, 
                         />
                      </div>
                     <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        {lang === 'es' ? 'Ciudad o región específica' : 'City or specific region'}
+                        {filterLabels.locationHint}
                     </p>
                 </div>
 
@@ -299,7 +297,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
         location: '',
         salaryMin: '',
         salaryMax: '',
-        experienceLevel: lang === 'es' ? 'Cualquiera' : 'Any'
+        experienceLevel: t.advancedTalentSearch.filters.experience.options[0]
     });
 
     // Load profiles from database
@@ -575,7 +573,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
                                 src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop"
-                                alt={lang === 'es' ? 'Búsqueda Avanzada de Talento' : 'Advanced Talent Search'}
+                                alt={pageData.heroImageAlt}
                                 position="center"
                             />
                         </AnimatedWrapper>
@@ -592,7 +590,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 {pageData.interfaceTitle}
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                                {lang === 'es' ? 'Encuentra el talento perfecto para tu equipo con filtros avanzados' : 'Find the perfect talent for your team with advanced filters'}
+                                {pageData.interfaceSubtitle}
                             </p>
                         </div>
                         
@@ -620,7 +618,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 {loading ? (
                                     <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-sm">
                                         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-cv-blue mb-4"></div>
-                                        <p className="text-gray-600 dark:text-gray-400">{lang === 'es' ? 'Cargando perfiles...' : 'Loading profiles...'}</p>
+                                        <p className="text-gray-600 dark:text-gray-400">{pageData.loadingProfiles}</p>
                                     </div>
                                 ) : filteredProfiles.length === 0 ? (
                                     <div className="text-center py-20 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-sm border-2 border-dashed border-gray-300 dark:border-gray-700">
@@ -633,10 +631,10 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                             </div>
                                         </div>
                                         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                                            No se encontraron perfiles
+                                            {pageData.noResultsTitle}
                                         </h3>
                                         <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                                            Intenta ajustar los filtros de búsqueda o ampliar tus criterios
+                                            {pageData.noResultsSubtitle}
                                         </p>
                                         <button
                                             onClick={() => {
@@ -647,13 +645,13 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     location: '',
                                                     salaryMin: '',
                                                     salaryMax: '',
-                                                    experienceLevel: 'Cualquiera'
+                                                    experienceLevel: pageData.filters.experience.options[0]
                                                 });
                                                 setSearchQuery('');
                                             }}
                                             className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                                         >
-                                            Limpiar Filtros
+                                            {pageData.clearFilters}
                                         </button>
                                     </div>
                                 ) : (
@@ -667,9 +665,9 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{lang === 'es' ? 'Resultados encontrados' : 'Results found'}</p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{pageData.resultsFound}</p>
                                                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                                        {filteredProfiles.length} {filteredProfiles.length === 1 ? (lang === 'es' ? 'perfil' : 'profile') : (lang === 'es' ? 'perfiles' : 'profiles')}
+                                                        {filteredProfiles.length} {filteredProfiles.length === 1 ? pageData.profileSingular : pageData.profilePlural}
                                                     </p>
                                                 </div>
                                             </div>
@@ -682,7 +680,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                         </svg>
                                                         <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-                                                            {lang === 'es' ? 'Traduciendo...' : 'Translating...'}
+                                                            {pageData.translating}
                                                         </span>
                                                     </div>
                                                 )}
@@ -693,7 +691,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                     </svg>
-                                                    {lang === 'es' ? 'Actualizar' : 'Refresh'}
+                                                    {pageData.refresh}
                                                 </button>
                                             </div>
                                         </div>
@@ -716,16 +714,13 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     onClick={() => setDisplayLimit(prev => prev + 12)}
                                                     className="px-8 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
                                                 >
-                                                    {lang === 'es' ? 'Ver Más' : 'Load More'}
+                                                    {pageData.loadMore}
                                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </button>
                                                 <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                                                    {lang === 'es'
-                                                        ? `Mostrando ${displayLimit} de ${filteredProfiles.length} perfiles`
-                                                        : `Showing ${displayLimit} of ${filteredProfiles.length} profiles`
-                                                    }
+                                                    {pageData.showingOf.replace('{current}', String(displayLimit)).replace('{total}', String(filteredProfiles.length))}
                                                 </p>
                                             </div>
                                         )}

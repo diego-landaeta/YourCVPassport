@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../contexts/ToastContext';
 import { supabase } from '../../supabase/client';
@@ -9,7 +8,6 @@ import type { CreateCompanyInput, CompanySize } from '../../types';
 
 const CompanyRegistrationPage: React.FC = () => {
   const { user, company, companyLoading } = useAuth();
-  const { lang } = useLanguage();
   const translations = useTranslations();
   const navigate = useNavigate();
   const toast = useToastContext();
@@ -73,14 +71,10 @@ const CompanyRegistrationPage: React.FC = () => {
 
     // If user has a company, redirect to dashboard
     if (company) {
-      toast.info(
-        lang === 'es'
-          ? 'Ya tienes una empresa registrada. Redirigiendo al dashboard...'
-          : 'You already have a registered company. Redirecting to dashboard...'
-      );
+      toast.info(t('company.registrationPage.alreadyRegistered'));
       navigate('/company/dashboard');
     }
-  }, [company, companyLoading, navigate, toast, lang]);
+  }, [company, companyLoading, navigate, toast]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -357,7 +351,7 @@ const CompanyRegistrationPage: React.FC = () => {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
-                {lang === 'es' ? 'Verificando estado...' : 'Verifying status...'}
+                {t('company.registrationPage.verifyingStatus')}
               </h2>
             </div>
           </div>
@@ -539,7 +533,7 @@ const CompanyRegistrationPage: React.FC = () => {
                     id="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    placeholder="e.g., Technology, Healthcare, Finance"
+                    placeholder={t('company.registrationPage.industryPlaceholder')}
                     className={getInputClasses('industry')}
                   />
                 </div>
@@ -555,7 +549,7 @@ const CompanyRegistrationPage: React.FC = () => {
                     onChange={handleInputChange}
                     className={getInputClasses('company_size')}
                   >
-                    <option value="">Select size</option>
+                    <option value="">{t('company.registrationPage.selectSize')}</option>
                     <option value="1-10">{t('company.registration.companySizeOptions.1-10')}</option>
                     <option value="11-50">{t('company.registration.companySizeOptions.11-50')}</option>
                     <option value="51-200">{t('company.registration.companySizeOptions.51-200')}</option>
@@ -683,7 +677,7 @@ const CompanyRegistrationPage: React.FC = () => {
                             onClick={() => setLogoFile(null)}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
                           >
-                            Remove
+                            {t('company.registrationPage.remove')}
                           </button>
                         </div>
                       ) : (
@@ -739,7 +733,7 @@ const CompanyRegistrationPage: React.FC = () => {
                             onClick={() => setTaxDocFile(null)}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
                           >
-                            Remove
+                            {t('company.registrationPage.remove')}
                           </button>
                         </div>
                       ) : (
@@ -798,7 +792,7 @@ const CompanyRegistrationPage: React.FC = () => {
                             onClick={() => setVerificationDocFile(null)}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
                           >
-                            Remove
+                            {t('company.registrationPage.remove')}
                           </button>
                         </div>
                       ) : (
