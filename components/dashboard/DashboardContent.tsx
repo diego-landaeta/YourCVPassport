@@ -38,6 +38,7 @@ const SuccessStorySubmission = lazy(() => import('./SuccessStorySubmission'));
 const OpportunitiesSection = lazy(() => import('./OpportunitiesSection'));
 const JobSearchSection = lazy(() => import('./JobSearchSection'));
 const MyApplicationsSection = lazy(() => import('./MyApplicationsSection'));
+const FeedSection = lazy(() => import('./feed/FeedSection'));
 import {
   IdentityFormData,
   ExperienceFormData,
@@ -1654,7 +1655,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                         ? 'text-red-900 dark:text-red-200'
                         : 'text-gray-900 dark:text-white'
                     }`}>
-                      {t.dashboard.export.monthlyLimit}
+                      {t.export.monthlyLimit}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
                       {planInfo.name}
@@ -1666,9 +1667,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                       : 'text-gray-600 dark:text-gray-400'
                   }`}>
                     {atsExportInfo.remaining === 0 ? (
-                      t.dashboard.export.limitReached
+                      t.export.limitReached
                     ) : (
-                      t.dashboard.export.remaining(atsExportInfo.remaining, atsExportInfo.limit)
+                      t.export.remaining(atsExportInfo.remaining as number, atsExportInfo.limit as number)
                     )}
                   </p>
                 </div>
@@ -1678,7 +1679,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   to="/pricing"
                   className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md"
                 >
-                  {t.dashboard.export.upgradePlan}
+                  {t.export.upgradePlan}
                 </Link>
               )}
             </div>
@@ -1697,14 +1698,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {t.dashboard.export.unlimitedExports}
+                    {t.export.unlimitedExports}
                   </span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${planInfo.badge}`}>
                     {planInfo.name}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {t.dashboard.export.unlimitedDescription}
+                  {t.export.unlimitedDescription}
                 </p>
               </div>
             </div>
@@ -1714,7 +1715,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.export.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {t.dashboard.export.sectionDescription}
+            {t.export.sectionDescription}
           </p>
         </div>
 
@@ -1728,14 +1729,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.pdf.title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {t.dashboard.export.pdf.description}
+              {t.export.pdf.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-                {t.dashboard.export.pdf.fullDesign}
+                {t.export.pdf.fullDesign}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-                {t.dashboard.export.pdf.printReady}
+                {t.export.pdf.printReady}
               </span>
             </div>
             <button
@@ -1751,7 +1752,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               {atsExportInfo && atsExportInfo.remaining === 0
-                ? t.dashboard.export.pdf.limitReached
+                ? t.export.pdf.limitReached
                 : t.export.pdf.button}
             </button>
           </div>
@@ -1765,14 +1766,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.json.title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {t.dashboard.export.json.description}
+              {t.export.json.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
-                {t.dashboard.export.json.dataBackup}
+                {t.export.json.dataBackup}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
-                {t.dashboard.export.json.portable}
+                {t.export.json.portable}
               </span>
             </div>
             <button
@@ -1810,17 +1811,17 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              {t.dashboard.export.ats.title}
+              {t.export.ats.title}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {t.dashboard.export.ats.description}
+              {t.export.ats.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
-                {t.dashboard.export.ats.compatible}
+                {t.export.ats.compatible}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
-                {t.dashboard.export.ats.templates}
+                {t.export.ats.templates}
               </span>
             </div>
             <button
@@ -1836,7 +1837,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              {t.dashboard.export.ats.button}
+              {t.export.ats.button}
             </button>
           </div> */}
 
@@ -1850,14 +1851,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t.export.publicLink}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {t.dashboard.export.publicLinkDescription}
+              {t.export.publicLinkDescription}
             </p>
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                {t.dashboard.export.easyShare}
+                {t.export.easyShare}
               </span>
               <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-                {t.dashboard.export.autoUpdate}
+                {t.export.autoUpdate}
               </span>
             </div>
             <button
@@ -1974,7 +1975,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                     onClick={() => setShowPDFExportModal(false)}
                     className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors"
                   >
-                    {t.dashboard.export.cancel}
+                    {t.export.cancel}
                   </button>
                   <button
                     onClick={async () => {
@@ -2040,10 +2041,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   </div>
 
                   <p className="text-gray-700 dark:text-gray-300 font-medium">
-                    {pdfProgress < 30 && t.dashboard.export.pdf.printDialog.preparing}
-                    {pdfProgress >= 30 && pdfProgress < 60 && t.dashboard.export.pdf.printDialog.capturing}
-                    {pdfProgress >= 60 && pdfProgress < 90 && t.dashboard.export.pdf.printDialog.generating}
-                    {pdfProgress >= 90 && t.dashboard.export.pdf.printDialog.downloading}
+                    {pdfProgress < 30 && t.export.pdf.printDialog.preparing}
+                    {pdfProgress >= 30 && pdfProgress < 60 && t.export.pdf.printDialog.capturing}
+                    {pdfProgress >= 60 && pdfProgress < 90 && t.export.pdf.printDialog.generating}
+                    {pdfProgress >= 90 && t.export.pdf.printDialog.downloading}
                   </p>
 
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -2199,7 +2200,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
         <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-green-100 dark:border-green-800">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t.share.title}</h2>
           <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-            {t.dashboard.share.sectionDescription}
+            {t.share.sectionDescription}
           </p>
         </div>
 
@@ -2485,6 +2486,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
           profileId={profile.id}
           defaultTab="recommended"
         />
+      </Suspense>
+    );
+  }
+
+  // Feed / Comunidad Section
+  if (activeSection === 'feed') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <FeedSection onSectionChange={onSectionChange} />
       </Suspense>
     );
   }

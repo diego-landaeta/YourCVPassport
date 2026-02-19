@@ -12,6 +12,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useDashboardTour } from '../../hooks/useDashboardTour';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import MobileFloatingPill from '../dashboard/MobileFloatingPill';
 import { calculateProfileCompleteness } from '../../utils/profileValidation';
 
 const DashboardPage: React.FC = () => {
@@ -234,9 +235,18 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
+      {/* Bottom Floating Pill — mobile only */}
+      <MobileFloatingPill
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        avatarUrl={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=3B82F6&color=fff&size=40`}
+        profileName={profile?.full_name}
+      />
+
       {/* Main Content */}
       <div className={`min-h-screen transition-all duration-300 lg:ml-64`}>
-        <div className="pt-20 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="pt-16 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-24 lg:pb-8">
           <DashboardContent
             activeSection={activeSection}
             onSectionChange={setActiveSection}

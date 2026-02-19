@@ -1,18 +1,22 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../contexts/AuthContext';
-import type { FeedPost, CreatePostInput } from '../types/feed';
+import { useTranslations } from './useTranslations';
+import type { FeedPost, CreatePostInput, ReactionType } from '../types/feed';
 
 const POSTS_PER_PAGE = 10;
 
 export const useFeed = () => {
   const { session } = useAuth();
+  const t = useTranslations();
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [postCooldown, setPostCooldown] = useState(false);
   const pageRef = useRef(0);
+  const hasFetchedRef = useRef(false);
 
   const fetchPosts = useCallback(async (page: number = 0, append: boolean = false) => {
     if (!session?.user.id) return;
@@ -33,7 +37,8 @@ export const useFeed = () => {
             id,
             full_name,
             headline,
-            avatar_url
+            avatar_url,
+            slug
           )
         `)
         .eq('is_hidden', false)
@@ -43,24 +48,89 @@ export const useFeed = () => {
 
       if (fetchError) throw fetchError;
 
-      // Fetch user's likes for these posts
+      // Fetch user's likes and reposts for these posts
       const postIds = postsData?.map(p => p.id) || [];
-      let userLikes: string[] = [];
+      let userReactions: Record<string, ReactionType> = {};
+      let userReposts: string[] = [];
+      let userBookmarks: string[] = [];
+      let userPollVotes: Record<string, number> = {};
+      let pollVoteCountsMap: Record<string, { option_index: number; count: number }[]> = {};
 
       if (postIds.length > 0) {
-        const { data: likesData } = await supabase
-          .from('feed_likes')
-          .select('post_id')
-          .eq('user_id', session.user.id)
-          .in('post_id', postIds);
+        // Core queries (likes + reposts) — these tables always exist
+        const [likesRes, repostsRes] = await Promise.all([
+          supabase
+            .from('feed_likes')
+            .select('post_id, reaction_type')
+            .eq('user_id', session.user.id)
+            .in('post_id', postIds),
+          supabase
+            .from('feed_shares')
+            .select('original_post_id')
+            .eq('shared_by', session.user.id)
+            .eq('share_type', 'REPOST')
+            .in('original_post_id', postIds),
+        ]);
 
-        userLikes = likesData?.map(l => l.post_id) || [];
+        // Bookmarks query — may fail if migration wasn't run yet
+        try {
+          const bookmarksRes = await supabase
+            .from('feed_bookmarks')
+            .select('post_id')
+            .eq('user_id', session.user.id)
+            .in('post_id', postIds);
+          userBookmarks = bookmarksRes.data?.map(b => b.post_id) || [];
+        } catch {
+          // Table may not exist yet — gracefully ignore
+        }
+
+        // Poll votes: fetch user's votes + aggregate counts for POLL posts
+        const pollPostIds = postsData?.filter(p => p.content_type === 'POLL').map(p => p.id) || [];
+
+        if (pollPostIds.length > 0) {
+          try {
+            const [myVotesRes, countsRes] = await Promise.all([
+              supabase
+                .from('feed_poll_votes')
+                .select('post_id, option_index')
+                .eq('user_id', session.user.id)
+                .in('post_id', pollPostIds),
+              supabase
+                .rpc('get_poll_vote_counts', { poll_post_ids: pollPostIds })
+            ]);
+
+            for (const v of myVotesRes.data || []) {
+              userPollVotes[v.post_id] = v.option_index;
+            }
+
+            // If RPC doesn't exist yet, fall back to empty
+            if (countsRes.data) {
+              for (const row of countsRes.data as { post_id: string; option_index: number; count: number }[]) {
+                if (!pollVoteCountsMap[row.post_id]) pollVoteCountsMap[row.post_id] = [];
+                pollVoteCountsMap[row.post_id].push({ option_index: row.option_index, count: row.count });
+              }
+            }
+          } catch {
+            // Poll tables may not exist yet — gracefully ignore
+          }
+        }
+
+        // Build a map of postId → reactionType
+        for (const l of likesRes.data || []) {
+          userReactions[l.post_id] = l.reaction_type as ReactionType;
+        }
+        userReposts = repostsRes.data?.map(r => r.original_post_id) || [];
       }
 
-      // Mark liked posts
+      // Mark liked / reposted / bookmarked posts with reaction type + poll data
       const processedPosts = postsData?.map(post => ({
         ...post,
-        hasLiked: userLikes.includes(post.id)
+        hasLiked: !!userReactions[post.id],
+        hasReposted: userReposts.includes(post.id),
+        hasBookmarked: userBookmarks.includes(post.id),
+        userReaction: userReactions[post.id] || null,
+        userPollVote: userPollVotes[post.id] ?? null,
+        pollVoteCounts: pollVoteCountsMap[post.id] || [],
       })) || [];
 
       setHasMore(processedPosts.length === POSTS_PER_PAGE);
@@ -72,7 +142,7 @@ export const useFeed = () => {
       }
     } catch (err) {
       console.error('Error fetching feed:', err);
-      setError('Error al cargar el feed');
+      setError(t.feed.errors.loadingFeed);
     } finally {
       setLoading(false);
     }
@@ -92,6 +162,7 @@ export const useFeed = () => {
 
   const createPost = useCallback(async (input: CreatePostInput) => {
     if (!session?.user.id) return;
+    if (postCooldown) throw new Error('rate_limited');
 
     try {
       setIsCreating(true);
@@ -106,6 +177,7 @@ export const useFeed = () => {
           image_urls: input.imageUrls || [],
           achievement_type: input.achievementType,
           achievement_data: input.achievementData || {},
+          metadata: input.metadata || {},
           visibility: input.visibility || 'PUBLIC'
         })
         .select(`
@@ -114,7 +186,8 @@ export const useFeed = () => {
             id,
             full_name,
             headline,
-            avatar_url
+            avatar_url,
+            slug
           )
         `)
         .single();
@@ -122,19 +195,25 @@ export const useFeed = () => {
       if (createError) throw createError;
 
       // Add to top of feed
-      setPosts(prev => [{ ...data, hasLiked: false }, ...prev]);
+      setPosts(prev => [{ ...data, hasLiked: false, hasReposted: false, hasBookmarked: false, userReaction: null }, ...prev]);
+
+      // Rate limit: 30s cooldown between posts
+      setPostCooldown(true);
+      setTimeout(() => setPostCooldown(false), 30000);
 
       return data;
     } catch (err) {
       console.error('Error creating post:', err);
-      setError('Error al crear publicacion');
-      throw err;
+      setError(t.feed.errors.creatingPost);
+      throw err; // Re-throw so the form knows the post failed and keeps content
     } finally {
       setIsCreating(false);
     }
   }, [session?.user.id]);
 
   useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
     fetchPosts(0);
   }, [fetchPosts]);
 
@@ -173,6 +252,7 @@ export const useFeed = () => {
     loadMore,
     createPost,
     refreshFeed,
-    isCreating
+    isCreating,
+    postCooldown
   };
 };

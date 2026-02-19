@@ -3,6 +3,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reaction picker animation */
+@keyframes reactionPopIn {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+  70% { transform: translate(-50%, 0) scale(1.05); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
 /* Global Styles */
 * {
   margin: 0;

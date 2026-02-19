@@ -23,10 +23,27 @@ export const feedService = {
     return urlData.publicUrl;
   },
 
-  // Upload multiple images
-  async uploadImages(files: File[], userId: string): Promise<string[]> {
-    const uploadPromises = files.map(file => this.uploadImage(file, userId));
-    return Promise.all(uploadPromises);
+  // Upload multiple images with aggregate progress callback
+  async uploadImages(
+    files: File[],
+    userId: string,
+    onProgress?: (percent: number) => void
+  ): Promise<string[]> {
+    if (!onProgress) {
+      const uploadPromises = files.map(file => this.uploadImage(file, userId));
+      return Promise.all(uploadPromises);
+    }
+
+    // Upload sequentially with per-file progress
+    const results: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      onProgress(Math.round((i / files.length) * 100));
+      const url = await this.uploadImage(files[i], userId);
+      results.push(url);
+    }
+
+    onProgress(100);
+    return results;
   },
 
   // Delete image from storage
@@ -107,56 +124,95 @@ export const feedService = {
     today.setHours(0, 0, 0, 0);
 
     const [
-      { count: totalPosts },
-      { count: totalLikes },
-      { count: totalComments },
-      { count: postsToday }
+      postsResult,
+      likesResult,
+      commentsResult,
+      todayResult
     ] = await Promise.all([
-      supabase.from('feed_posts').select('*', { count: 'exact', head: true }),
+      supabase.from('feed_posts').select('*', { count: 'exact', head: true }).eq('is_hidden', false),
       supabase.from('feed_likes').select('*', { count: 'exact', head: true }),
-      supabase.from('feed_comments').select('*', { count: 'exact', head: true }),
+      supabase.from('feed_comments').select('*', { count: 'exact', head: true }).eq('is_hidden', false),
       supabase.from('feed_posts').select('*', { count: 'exact', head: true })
+        .eq('is_hidden', false)
         .gte('created_at', today.toISOString())
     ]);
 
     return {
-      totalPosts: totalPosts || 0,
-      totalLikes: totalLikes || 0,
-      totalComments: totalComments || 0,
-      postsToday: postsToday || 0
+      totalPosts: postsResult.count || 0,
+      totalLikes: likesResult.count || 0,
+      totalComments: commentsResult.count || 0,
+      postsToday: todayResult.count || 0
     };
   },
 
-  // Generate achievement content
+  // Generate achievement content (bilingual)
   generateAchievementContent(
     type: string,
-    data: Record<string, unknown>
+    data: Record<string, unknown>,
+    lang: 'es' | 'en' = 'es'
   ): string {
-    switch (type) {
-      case 'profile_completed':
-        return '🎉 ¡He completado mi perfil profesional! Listo para nuevas oportunidades.';
-      case 'got_hired':
-        return `🚀 ¡Emocionante noticia! Acabo de unirme a ${data.company_name} como ${data.position}. ¡Gracias a todos por el apoyo!`;
-      case 'stamp_verified':
-        return `✅ Mi ${data.stamp_type} ha sido verificado. ¡Credenciales confirmadas!`;
-      case 'first_post':
-        return '👋 ¡Hola comunidad! Esta es mi primera publicacion en YourCVPassport.';
-      case 'milestone_experience':
-        return `🎯 ¡Hito alcanzado! ${data.years} años de experiencia profesional documentada.`;
-      case 'new_certification':
-        return `📜 ¡Nueva certificacion obtenida! ${data.certification_name}${data.issuer ? ` por ${data.issuer}` : ''}.`;
-      default:
-        return '🌟 ¡Nuevo logro desbloqueado!';
-    }
+    const messages: Record<string, { es: string; en: string }> = {
+      profile_completed: {
+        es: '🎉 ¡He completado mi perfil profesional! Listo para nuevas oportunidades.',
+        en: '🎉 I have completed my professional profile! Ready for new opportunities.'
+      },
+      got_hired: {
+        es: `🚀 ¡Emocionante noticia! Acabo de unirme a ${data.company_name} como ${data.position}. ¡Gracias a todos por el apoyo!`,
+        en: `🚀 Exciting news! I just joined ${data.company_name} as ${data.position}. Thank you all for the support!`
+      },
+      stamp_verified: {
+        es: `✅ Mi ${data.stamp_type} ha sido verificado. ¡Credenciales confirmadas!`,
+        en: `✅ My ${data.stamp_type} has been verified. Credentials confirmed!`
+      },
+      first_post: {
+        es: '👋 ¡Hola comunidad! Esta es mi primera publicación en YourCVPassport.',
+        en: '👋 Hello community! This is my first post on YourCVPassport.'
+      },
+      milestone_experience: {
+        es: `🎯 ¡Hito alcanzado! ${data.years} años de experiencia profesional documentada.`,
+        en: `🎯 Milestone reached! ${data.years} years of documented professional experience.`
+      },
+      new_certification: {
+        es: `📜 ¡Nueva certificación obtenida! ${data.certification_name}${data.issuer ? ` por ${data.issuer}` : ''}.`,
+        en: `📜 New certification obtained! ${data.certification_name}${data.issuer ? ` by ${data.issuer}` : ''}.`
+      }
+    };
+
+    return messages[type]?.[lang] ?? (lang === 'es' ? '🌟 ¡Nuevo logro desbloqueado!' : '🌟 New achievement unlocked!');
+  },
+
+  // Generate poll content (bilingual)
+  generatePollContent(
+    question: string,
+    options: string[],
+    lang: 'es' | 'en' = 'es'
+  ): string {
+    const numbered = options.map((o, i) => `${i + 1}. ${o}`).join('\n');
+    const prefix = lang === 'es' ? '📊 Encuesta' : '📊 Poll';
+    return `${prefix}: ${question}\n\n${numbered}`;
+  },
+
+  // Generate event content (bilingual)
+  generateEventContent(
+    title: string,
+    date: string,
+    time?: string,
+    location?: string,
+    lang: 'es' | 'en' = 'es'
+  ): string {
+    const parts = [`📅 ${title}`, `🗓️ ${date}${time ? ` · ${time}` : ''}`];
+    if (location) parts.push(`📍 ${location}`);
+    return parts.join('\n');
   },
 
   // Create achievement post
   async createAchievementPost(
     userId: string,
     achievementType: string,
-    achievementData: Record<string, unknown>
+    achievementData: Record<string, unknown>,
+    lang: 'es' | 'en' = 'es'
   ): Promise<FeedPost | null> {
-    const content = this.generateAchievementContent(achievementType, achievementData);
+    const content = this.generateAchievementContent(achievementType, achievementData, lang);
 
     const { data, error } = await supabase
       .from('feed_posts')

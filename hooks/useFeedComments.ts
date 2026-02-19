@@ -1,14 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../supabase/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslations } from './useTranslations';
 import type { FeedComment } from '../types/feed';
 
 export const useFeedComments = (postId: string) => {
   const { session } = useAuth();
+  const t = useTranslations();
   const [comments, setComments] = useState<FeedComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Keep a ref of current comments for optimistic rollbacks
+  const commentsRef = useRef<FeedComment[]>([]);
+  useEffect(() => { commentsRef.current = comments; }, [comments]);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -87,7 +93,7 @@ export const useFeedComments = (postId: string) => {
       }
     } catch (err) {
       console.error('Error fetching comments:', err);
-      setError('Error al cargar comentarios');
+      setError(t.feed.errors.loadingFeed);
     } finally {
       setLoading(false);
     }
@@ -120,21 +126,47 @@ export const useFeedComments = (postId: string) => {
 
       if (insertError) throw insertError;
 
-      // Refresh comments to get updated counts
-      await fetchComments();
+      // Insert into state without full refetch
+      const newComment: FeedComment = { ...data, hasLiked: false, replies: [] };
+
+      if (parentId) {
+        setComments(prev => prev.map(c =>
+          c.id === parentId
+            ? { ...c, replies: [...(c.replies || []), newComment], replies_count: c.replies_count + 1 }
+            : c
+        ));
+      } else {
+        setComments(prev => [...prev, newComment]);
+      }
 
       return data;
     } catch (err) {
       console.error('Error adding comment:', err);
-      setError('Error al agregar comentario');
+      setError(t.feed.errors.creatingPost);
       return null;
     } finally {
       setIsAdding(false);
     }
-  }, [session?.user.id, postId, fetchComments]);
+  }, [session?.user.id, postId]);
 
   const deleteComment = useCallback(async (commentId: string) => {
     if (!session?.user.id) return false;
+
+    // Snapshot for rollback
+    const snapshot = commentsRef.current;
+
+    // Optimistic removal
+    setComments(prev =>
+      prev
+        .filter(c => c.id !== commentId)
+        .map(c => ({
+          ...c,
+          replies: c.replies?.filter((r: FeedComment) => r.id !== commentId),
+          replies_count: c.replies?.some((r: FeedComment) => r.id === commentId)
+            ? c.replies_count - 1
+            : c.replies_count,
+        }))
+    );
 
     try {
       const { error } = await supabase
@@ -144,17 +176,30 @@ export const useFeedComments = (postId: string) => {
         .eq('author_id', session.user.id);
 
       if (error) throw error;
-
-      await fetchComments();
       return true;
     } catch (err) {
       console.error('Error deleting comment:', err);
+      setComments(snapshot); // Rollback
       return false;
     }
-  }, [session?.user.id, fetchComments]);
+  }, [session?.user.id]);
 
   const editComment = useCallback(async (commentId: string, newContent: string) => {
     if (!session?.user.id) return false;
+
+    // Snapshot for rollback
+    const snapshot = commentsRef.current;
+
+    // Optimistic update
+    setComments(prev => prev.map(c => {
+      if (c.id === commentId) return { ...c, content: newContent, is_edited: true };
+      return {
+        ...c,
+        replies: c.replies?.map((r: FeedComment) =>
+          r.id === commentId ? { ...r, content: newContent, is_edited: true } : r
+        ),
+      };
+    }));
 
     try {
       const { error } = await supabase
@@ -167,17 +212,46 @@ export const useFeedComments = (postId: string) => {
         .eq('author_id', session.user.id);
 
       if (error) throw error;
-
-      await fetchComments();
       return true;
     } catch (err) {
       console.error('Error editing comment:', err);
+      setComments(snapshot); // Rollback
       return false;
     }
-  }, [session?.user.id, fetchComments]);
+  }, [session?.user.id]);
 
   const toggleCommentLike = useCallback(async (commentId: string, currentlyLiked: boolean) => {
     if (!session?.user.id) return false;
+
+    // Snapshot for rollback
+    const snapshot = commentsRef.current;
+
+    // Optimistic update
+    setComments(prev => prev.map(comment => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          hasLiked: !currentlyLiked,
+          likes_count: currentlyLiked ? comment.likes_count - 1 : comment.likes_count + 1
+        };
+      }
+      if (comment.replies) {
+        return {
+          ...comment,
+          replies: comment.replies.map((reply: FeedComment) => {
+            if (reply.id === commentId) {
+              return {
+                ...reply,
+                hasLiked: !currentlyLiked,
+                likes_count: currentlyLiked ? reply.likes_count - 1 : reply.likes_count + 1
+              };
+            }
+            return reply;
+          })
+        };
+      }
+      return comment;
+    }));
 
     try {
       if (currentlyLiked) {
@@ -199,36 +273,10 @@ export const useFeedComments = (postId: string) => {
         if (error) throw error;
       }
 
-      // Update local state
-      setComments(prev => prev.map(comment => {
-        if (comment.id === commentId) {
-          return {
-            ...comment,
-            hasLiked: !currentlyLiked,
-            likes_count: currentlyLiked ? comment.likes_count - 1 : comment.likes_count + 1
-          };
-        }
-        if (comment.replies) {
-          return {
-            ...comment,
-            replies: comment.replies.map((reply: FeedComment) => {
-              if (reply.id === commentId) {
-                return {
-                  ...reply,
-                  hasLiked: !currentlyLiked,
-                  likes_count: currentlyLiked ? reply.likes_count - 1 : reply.likes_count + 1
-                };
-              }
-              return reply;
-            })
-          };
-        }
-        return comment;
-      }));
-
       return true;
     } catch (err) {
       console.error('Error toggling comment like:', err);
+      setComments(snapshot); // Rollback on failure
       return false;
     }
   }, [session?.user.id]);

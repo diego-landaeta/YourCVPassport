@@ -6,7 +6,26 @@ export type FeedContentType =
   | 'ACHIEVEMENT'
   | 'MILESTONE'
   | 'JOB_UPDATE'
-  | 'PROFILE_COMPLETE';
+  | 'PROFILE_COMPLETE'
+  | 'POLL'
+  | 'EVENT';
+
+export type PollDuration = '1d' | '3d' | '1w';
+
+export interface PollData {
+  question: string;
+  options: string[];
+  duration: PollDuration;
+  expires_at: string; // ISO date
+}
+
+export interface EventData {
+  title: string;
+  date: string; // ISO date
+  time?: string; // HH:mm
+  location?: string;
+  link?: string;
+}
 
 export type ReactionType = 'LIKE' | 'CELEBRATE' | 'SUPPORT' | 'LOVE' | 'INSIGHTFUL';
 
@@ -19,6 +38,7 @@ export interface FeedAuthor {
   full_name: string;
   headline?: string | null;
   avatar_url?: string | null;
+  slug?: string | null;
 }
 
 export interface FeedPost {
@@ -34,6 +54,7 @@ export interface FeedPost {
   likes_count: number;
   comments_count: number;
   shares_count: number;
+  views_count: number;
   visibility: FeedVisibility;
   is_pinned: boolean;
   is_edited: boolean;
@@ -42,6 +63,12 @@ export interface FeedPost {
   // Joined data
   author?: FeedAuthor;
   hasLiked?: boolean;
+  hasReposted?: boolean;
+  hasBookmarked?: boolean;
+  userReaction?: ReactionType | null;
+  // Poll-specific joined data
+  userPollVote?: number | null;
+  pollVoteCounts?: { option_index: number; count: number }[];
 }
 
 export interface FeedLike {
@@ -86,6 +113,7 @@ export interface CreatePostInput {
   imageUrls?: string[];
   achievementType?: string;
   achievementData?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   visibility?: FeedVisibility;
 }
 

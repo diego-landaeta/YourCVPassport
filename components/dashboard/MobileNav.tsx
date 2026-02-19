@@ -102,7 +102,6 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-      // No link - uses internal navigation
     },
     {
       id: 'postulaciones',
@@ -112,7 +111,6 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
         </svg>
       ),
-      // No link - uses internal navigation
     },
 
     // COMMUNICATIONS & NETWORKING
@@ -122,6 +120,17 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
       icon: (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+
+    // COMMUNITY FEED
+    {
+      id: 'feed',
+      label: menu.feed,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
         </svg>
       ),
     },
@@ -162,16 +171,10 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
   ].filter(item => item && item.id); // Filter out commented/undefined items
 
   // Determinar si las secciones deben estar bloqueadas
-  // ⚠️ CRÍTICO: Bloquear TODO HASTA que el usuario COMPLETE EL WIZARD (paso de finalización)
-  // El wizard se considera completo SOLO cuando:
-  // 1. El usuario tiene un template seleccionado (profile.template)
-  // 2. El usuario tiene un slug personalizado (profile.slug)
-  // Esto asegura que nuevos usuarios DEBEN completar el wizard antes de acceder al dashboard
   const wizardCompleted = profile?.template && profile?.slug;
   const shouldBlockSections = !wizardCompleted;
 
   const handleMenuClick = (item: any) => {
-    // Permitir SOLO "Mi Perfil" siempre (para que puedan acceder al wizard)
     if (item.id === 'mi-perfil') {
       if (item.link) {
         navigate(item.link);
@@ -183,14 +186,12 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
       return;
     }
 
-    // Bloquear TODO (incluido Dashboard) si el wizard no está completo
     if (shouldBlockSections) {
       setShowProfileAlert(true);
       setTimeout(() => setShowProfileAlert(false), 4000);
       return;
     }
 
-    // Permitir navegación normal SOLO si el wizard está completo
     if (item.link) {
       navigate(item.link);
       onToggle();
@@ -200,12 +201,64 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
     }
   };
 
+  /* ── Pill navigation handler ── */
+  const handlePillNav = (sectionId: string) => {
+    if (shouldBlockSections && sectionId !== 'mi-perfil') {
+      setShowProfileAlert(true);
+      setTimeout(() => setShowProfileAlert(false), 4000);
+      return;
+    }
+    onSectionChange(sectionId);
+  };
+
+  const avatarUrl =
+    profile?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      profile?.full_name || 'U'
+    )}&background=3B82F6&color=fff&size=40`;
+
+  /* ── Pill items config ── */
+  const pillItems = [
+    {
+      id: 'dashboard',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      ),
+    },
+    {
+      id: 'feed',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'vacantes',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'leads',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+        </svg>
+      ),
+      badge: unreadCount > 0,
+    },
+  ];
 
   return (
     <>
       {/* Profile Completion Alert */}
       {showProfileAlert && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slideInDown">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[60] animate-slideInDown">
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-4 rounded-xl shadow-xl min-w-[280px] max-w-[90vw] border border-blue-400">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -226,51 +279,75 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
         </div>
       )}
 
-      {/* Top Header Bar */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border flex items-center justify-between px-4 z-40">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-cv-blue flex items-center justify-center text-white font-bold overflow-hidden">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
-            ) : (
-              profile?.full_name?.charAt(0).toUpperCase() || 'U'
-            )}
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900 dark:text-white text-sm">
-              {profile?.full_name || menu.user}
-            </p>
-          </div>
-        </div>
+      {/* ── Top Header Bar — compact brand bar ── */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-dark-bg-secondary border-b border-gray-100 dark:border-dark-border flex items-center justify-between px-4 z-40">
+        <span className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">
+          CV<span className="text-cv-blue">Passport</span>
+        </span>
 
         <button
           data-tour="mobile-menu-toggle"
           onClick={onToggle}
           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors"
         >
-          <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          {isOpen ? (
+            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
         </button>
       </div>
 
-      {/* Overlay */}
+      {/* ── Overlay ── */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 mt-16"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           onClick={onToggle}
         />
       )}
 
-      {/* Slide-out Menu */}
+      {/* ── Slide-out Menu ── */}
       <div
         data-tour="mobile-menu"
-        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-72 bg-white dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-border transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-border transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <nav className="py-4 px-3 pb-8">
-          <ul className="space-y-1">
+        {/* Menu header with profile */}
+        <div className="px-4 pt-5 pb-4 border-b border-gray-100 dark:border-dark-border">
+          <div className="flex items-center gap-3">
+            <img
+              src={avatarUrl}
+              alt={profile?.full_name || 'User'}
+              className="w-11 h-11 rounded-full object-cover ring-2 ring-gray-100 dark:ring-dark-border"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                {profile?.full_name || menu.user}
+              </p>
+              {profile?.headline && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                  {profile.headline}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={onToggle}
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors"
+            >
+              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <nav className="py-2 px-3 pb-32">
+          <ul className="space-y-0.5">
             {allMenuItems.map((item) => {
               const isBlocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
               return (
@@ -278,48 +355,38 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
                   <button
                     data-tour={`mobile-${item.id}`}
                     onClick={() => handleMenuClick(item)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
                       isBlocked
-                        ? 'opacity-50 text-gray-400 dark:text-gray-600'
+                        ? 'opacity-40 text-gray-400 dark:text-gray-600'
                         : activeSection === item.id ||
                           (item.id === 'mi-perfil' && activeSection.startsWith('mi-perfil:'))
-                        ? 'bg-cv-blue text-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'
+                        ? 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue font-semibold'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'
                     }`}
                   >
                     <div className="relative">
                       {item.icon}
                       {item.id === 'leads' && unreadCount > 0 && !isBlocked && (
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-[10px] font-bold items-center justify-center">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        </span>
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-dark-bg-secondary" />
                       )}
                       {item.id === 'postulaciones' && activeApplicationsCount > 0 && !isBlocked && (
-                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500 text-white text-[10px] font-bold items-center justify-center">
-                            {activeApplicationsCount > 9 ? '9+' : activeApplicationsCount}
-                          </span>
-                        </span>
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white dark:border-dark-bg-secondary" />
                       )}
                     </div>
-                    <span className="font-medium flex-1 text-left">{item.label}</span>
+                    <span className="flex-1 text-left text-sm">{item.label}</span>
                     {isBlocked && (
-                      <svg className="w-4 h-4 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 ml-auto text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                     )}
                     {!isBlocked && item.id === 'leads' && unreadCount > 0 && (
-                      <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                        {unreadCount}
+                      <span className="ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[20px] text-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
                     {!isBlocked && item.id === 'postulaciones' && activeApplicationsCount > 0 && (
-                      <span className="ml-auto px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
-                        {activeApplicationsCount}
+                      <span className="ml-auto px-1.5 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[20px] text-center">
+                        {activeApplicationsCount > 9 ? '9+' : activeApplicationsCount}
                       </span>
                     )}
                   </button>
@@ -328,10 +395,10 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
             })}
           </ul>
 
-          <div className="px-3 py-4 mt-4 border-t border-gray-200 dark:border-dark-border space-y-3">
+          <div className="px-1 py-4 mt-3 border-t border-gray-100 dark:border-dark-border space-y-3">
             {/* Language Selector */}
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium uppercase tracking-wide">
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 font-semibold uppercase tracking-wider px-2">
                 {t.label}
               </p>
               <div className="flex gap-2">
@@ -367,7 +434,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
             <Link
               to="/"
               onClick={onToggle}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors text-sm font-medium"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors text-sm font-medium"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -386,10 +453,8 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
           </div>
         </nav>
       </div>
-
     </>
   );
 };
 
 export default MobileNav;
-
