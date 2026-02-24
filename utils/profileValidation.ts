@@ -49,71 +49,20 @@ export const calculateProfileCompleteness = (
   if (!profile) return 0;
 
   let completeness = 0;
-  const debug: string[] = [];
 
   // Campos críticos del perfil (60%)
-  if (profile.full_name?.trim()) {
-    completeness += 15;
-    debug.push('✅ Nombre: +15%');
-  } else {
-    debug.push('❌ Nombre: 0%');
-  }
-
-  if (profile.headline?.trim()) {
-    completeness += 15;
-    debug.push('✅ Título: +15%');
-  } else {
-    debug.push('❌ Título: 0%');
-  }
-
-  if (profile.summary?.trim()) {
-    completeness += 10;
-    debug.push('✅ Summary: +10%');
-  } else {
-    debug.push('❌ Summary: 0%');
-  }
-
-  if (profile.avatar_url) {
-    completeness += 10;
-    debug.push('✅ Avatar: +10%');
-  } else {
-    debug.push('❌ Avatar: 0%');
-  }
-
-  if (counts.experiences && counts.experiences > 0) {
-    completeness += 10;
-    debug.push(`✅ Experiencias (${counts.experiences}): +10%`);
-  } else {
-    debug.push('❌ Experiencias: 0%');
-  }
+  if (profile.full_name?.trim()) completeness += 15;
+  if (profile.headline?.trim()) completeness += 15;
+  if (profile.summary?.trim()) completeness += 10;
+  if (profile.avatar_url) completeness += 10;
+  if (counts.experiences && counts.experiences > 0) completeness += 10;
 
   // Campos importantes (40%)
-  if (counts.education && counts.education > 0) {
-    completeness += 15;
-    debug.push(`✅ Educación (${counts.education}): +15%`);
-  } else {
-    debug.push('❌ Educación: 0%');
-  }
-
-  if (counts.skills && counts.skills >= 3) {
-    completeness += 20;
-    debug.push(`✅ Skills (${counts.skills}): +20%`);
-  } else {
-    debug.push(`❌ Skills (${counts.skills || 0}): 0% (necesitas al menos 3)`);
-  }
-
-  if (counts.languages && counts.languages > 0) {
-    completeness += 5;
-    debug.push(`✅ Idiomas (${counts.languages}): +5%`);
-  } else {
-    debug.push('❌ Idiomas: 0%');
-  }
+  if (counts.education && counts.education > 0) completeness += 15;
+  if (counts.skills && counts.skills >= 3) completeness += 20;
+  if (counts.languages && counts.languages > 0) completeness += 5;
 
   // NOTA: Ubicación, teléfono, portfolio, template y slug NO suman (son opcionales)
-
-  console.log('📊 CÁLCULO DE COMPLETENESS:');
-  debug.forEach(line => console.log(line));
-  console.log(`🎯 TOTAL: ${completeness}%`);
 
   return Math.min(completeness, 100);
 };

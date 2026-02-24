@@ -175,7 +175,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
   }, []);
 
   const loadProfiles = useCallback(async (page: number = 1) => {
-    console.log('🚀 INICIO loadProfiles - Page:', page);
     try {
       setLoading(true);
 
@@ -257,13 +256,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           .order('name')
           .limit(5000);
 
-        console.log('🔍 Skills Query Result:', {
-          profileIds,
-          skillsData: allSkillsData,
-          skillsCount: allSkillsData?.length,
-          error: skillsError
-        });
-
         if (skillsError) {
           console.error('❌ Error loading skills:', skillsError);
         }
@@ -283,12 +275,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           ...profile,
           skills: skillsMap.get(profile.id) || []
         }));
-
-        console.log('📊 Skills Map:', Array.from(skillsMap.entries()).map(([id, skills]) => ({
-          profileId: id,
-          skillCount: skills.length,
-          skills: skills.map(s => s.name)
-        })));
 
         // Filter profiles by skill if skill filter is active
         if (skillFilter) {
@@ -380,8 +366,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
 
     const uniqueTexts = [...new Set(textsToTranslate)];
 
-    console.log(`[TalentSearch] Language: ${lang}, Spanish texts: ${textsInSpanish.length}, English texts: ${textsInEnglish.length}, To translate: ${uniqueTexts.length}`);
-
     if (uniqueTexts.length === 0) {
       lastTranslationLang.current = profilesKey;
       return;
@@ -390,7 +374,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
     const doTranslate = async () => {
       setIsTranslating(true);
       try {
-        console.log(`[TalentSearch] Translating ${uniqueTexts.length} texts: ${sourceLang} -> ${lang}`);
         const translations = await translateBatch(uniqueTexts, lang as TranslationLanguage, sourceLang);
         setProfileTranslations(prev => {
           const newMap = new Map(prev);
@@ -398,7 +381,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           return newMap;
         });
         lastTranslationLang.current = profilesKey;
-        console.log(`[TalentSearch] Translated ${translations.size} texts`);
       } catch (error) {
         console.error('[TalentSearch] Translation error:', error);
       } finally {
@@ -741,10 +723,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                         {/* Summary - Fixed height */}
                         <div className="mb-4" style={{ minHeight: '44px' }}>
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            {(() => {
-                              console.log(`[DEBUG] ${profile.full_name} | headline: ${profile.headline?.length}ch | summary: ${profile.summary?.length}ch`);
-                              return getTranslation(profile.summary) || '\u00A0';
-                            })()}
+                            {getTranslation(profile.summary) || '\u00A0'}
                           </p>
                         </div>
 

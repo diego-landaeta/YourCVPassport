@@ -256,8 +256,6 @@ export function useTranslatedProfile(
 
       try {
         // === STEP 1: Check profile-level cache in Supabase ===
-        console.log(`[useTranslatedProfile] Checking profile cache: ${profileId}, lang: ${lang}`);
-
         const cachedContent = await getCachedTranslation(
           profileId,
           lang as TranslationLanguage,
@@ -265,14 +263,11 @@ export function useTranslatedProfile(
         );
 
         if (cachedContent) {
-          console.log(`[useTranslatedProfile] CACHE HIT! Applying cached translation for ${profileId}`);
           const applied = applyCachedTranslations(profileData, cachedContent);
           setCachedFullProfile(applied);
           lastTranslationKey.current = translationKey;
           return; // Skip API translation entirely
         }
-
-        console.log(`[useTranslatedProfile] Cache miss, proceeding with API translation`);
 
         // === STEP 2: Normal translation flow (cache miss) ===
         setIsTranslating(true);
@@ -304,8 +299,6 @@ export function useTranslatedProfile(
 
         const uniqueTexts = [...new Set(textsToTranslate)];
 
-        console.log(`[useTranslatedProfile] Language: ${lang}, Spanish: ${textsInSpanish.length}, English: ${textsInEnglish.length}, To translate: ${uniqueTexts.length}`);
-
         if (uniqueTexts.length === 0) {
           // Clear previous translations to show original texts when returning to original language
           setApiTranslations(new Map());
@@ -322,7 +315,6 @@ export function useTranslatedProfile(
         const summaryInBatch = summaryText && trimmedTexts.includes(summaryText);
 
         if (summaryInBatch) {
-          console.log(`[useTranslatedProfile] PRIORITY: Summary found in batch (${summaryText.length} chars)`);
           // Move summary to front of the array
           const summaryIndex = trimmedTexts.indexOf(summaryText);
           if (summaryIndex > 0) {
@@ -330,8 +322,6 @@ export function useTranslatedProfile(
             trimmedTexts.unshift(summaryText);
           }
         }
-
-        console.log(`[useTranslatedProfile] Translating ${trimmedTexts.length} texts, summary included: ${summaryInBatch}`);
 
         // Set pending texts for skeleton display
         setPendingTexts(new Set(trimmedTexts));
@@ -365,31 +355,13 @@ export function useTranslatedProfile(
         // Clear pending texts when done
         setPendingTexts(new Set());
 
-        // Verify summary was translated
-        if (summaryText && summaryInBatch) {
-          const summaryTranslation = translations.get(summaryText);
-          if (summaryTranslation && summaryTranslation !== summaryText) {
-            console.log(`[useTranslatedProfile] SUCCESS: Summary translated to: "${summaryTranslation.substring(0, 80)}..."`);
-          } else {
-            console.error(`[useTranslatedProfile] FAILED: Summary NOT translated! Original: "${summaryText.substring(0, 50)}..."`);
-          }
-        }
-
         // Apply gender correction if translating to Spanish
         if (lang === 'es') {
           const gender = profileData.profile.gender || inferGenderFromName(profileData.profile.full_name);
           if (gender) {
-            console.log(`[useTranslatedProfile] Applying gender correction: ${gender}`);
             translations = correctGenderBatch(translations, gender);
           }
         }
-
-        let translatedCount = 0;
-        translations.forEach((trans, orig) => {
-          if (trans !== orig) translatedCount++;
-        });
-
-        console.log(`[useTranslatedProfile] Translated ${translatedCount}/${uniqueTexts.length} texts`);
 
         // === STEP 3: Save to profile-level cache for future users ===
         try {
@@ -406,7 +378,6 @@ export function useTranslatedProfile(
           ).catch(err => {
             console.warn('[useTranslatedProfile] Failed to save profile cache:', err);
           });
-          console.log(`[useTranslatedProfile] Profile cache saved for ${profileId} (${lang})`);
         } catch (cacheErr) {
           console.warn('[useTranslatedProfile] Error preparing cache save:', cacheErr);
         }

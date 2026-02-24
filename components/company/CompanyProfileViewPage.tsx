@@ -193,7 +193,6 @@ const CompanyProfileViewPage: React.FC = () => {
     // NOTE: PDF generation pending - Requires integration with pdf generation library
     // or server-side rendering. Will be implemented in future iteration.
     // For now, users can use the browser's print-to-PDF functionality.
-    console.log('Downloading CV for profile:', profileId);
     toast.info('PDF generation feature coming soon. Please use browser Print to PDF for now.');
   };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Testimonial } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -6,6 +6,15 @@ import { useLanguage } from '../../contexts/LanguageContext';
 const Testimonials: React.FC<{title?: string, description?: string, testimonials?: Testimonial[]}> = ({title, description, testimonials}) => {
   const t = useTranslations();
   const { lang } = useLanguage();
+
+  useEffect(() => {
+    const existing = document.querySelector('script[src*="opynio.com/widget"]');
+    if (existing) existing.remove();
+    const script = document.createElement('script');
+    script.src = 'https://web.opynio.com/widget.js';
+    script.async = true;
+    document.head.appendChild(script);
+  }, [lang]);
   const defaultTitle = t.testimonials.title;
   const defaultDescription = t.testimonials.subtitle;
 

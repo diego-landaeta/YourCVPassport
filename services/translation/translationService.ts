@@ -133,14 +133,7 @@ export async function translateBatch(
   const { cached: localCached, uncached: afterLocalCache } = getBatchFromCache(validTexts, detectedSource, targetLang);
   localCached.forEach((value, key) => results.set(key, value));
 
-  console.log('[TranslationService] Level 1 (localStorage):', {
-    total: validTexts.length,
-    cached: localCached.size,
-    uncached: afterLocalCache.length,
-  });
-
   if (afterLocalCache.length === 0) {
-    console.log('[TranslationService] All from localStorage cache');
     return results;
   }
 
@@ -154,18 +147,12 @@ export async function translateBatch(
       saveToCache(key, value, detectedSource, targetLang);
     });
 
-    console.log('[TranslationService] Level 2 (database):', {
-      cached: dbCached.size,
-      uncached: afterDbCache.length,
-    });
-
     textsToTranslate = afterDbCache;
   } catch (error) {
     console.warn('[TranslationService] DB cache check failed, continuing with API:', error);
   }
 
   if (textsToTranslate.length === 0) {
-    console.log('[TranslationService] All from cache (localStorage + DB)');
     return results;
   }
 
@@ -183,7 +170,6 @@ export async function translateBatch(
         console.warn('[TranslationService] Failed to save to DB cache:', err);
       });
 
-      console.log('[TranslationService] Translated via API:', translations.size);
       return results;
     } catch (error) {
       console.warn(`[TranslationService] ${provider.name} batch failed:`, error);

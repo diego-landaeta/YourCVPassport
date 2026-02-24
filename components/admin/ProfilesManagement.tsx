@@ -63,7 +63,6 @@ const ProfilesManagement: React.FC = () => {
         throw error;
       }
 
-      console.log('Loaded profiles:', data);
       setProfiles(data || []);
     } catch (err) {
       console.error('Exception loading profiles:', err);

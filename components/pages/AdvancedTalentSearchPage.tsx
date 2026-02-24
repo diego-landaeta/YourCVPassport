@@ -413,14 +413,11 @@ const AdvancedTalentSearchPage: React.FC = () => {
 
         const uniqueTexts = [...new Set(textsToTranslate)];
 
-        console.log(`[TalentSearch] Language: ${lang}, Spanish texts: ${textsInSpanish.length}, English texts: ${textsInEnglish.length}, To translate: ${uniqueTexts.length}`);
-
         if (uniqueTexts.length === 0) return;
 
         setIsTranslating(true);
 
         try {
-            console.log(`[TalentSearch] Translating ${uniqueTexts.length} texts: ${sourceLang} -> ${lang}...`);
             const translations = await translateBatch(uniqueTexts, lang as 'en' | 'es', sourceLang as 'en' | 'es');
 
             // Apply translations to profiles (headlines + skills)
@@ -457,7 +454,6 @@ const AdvancedTalentSearchPage: React.FC = () => {
             });
 
             setProfiles(translatedProfiles);
-            console.log(`[TalentSearch] Translation complete with gender correction`);
         } catch (error) {
             console.error('[TalentSearch] Translation error:', error);
             // Keep original profiles on error

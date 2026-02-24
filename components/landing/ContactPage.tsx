@@ -93,7 +93,6 @@ const ContactPage: React.FC = () => {
             if (error) {
                 // If table doesn't exist, fall back to console log and show success anyway
                 if (error.message.includes('relation') || error.message.includes('does not exist')) {
-                    console.log('Contact form submission:', formState);
                     setSubmitStatus('success');
                     setFormState({ name: '', email: '', inquiry: 'General Question', message: '' });
                 } else {

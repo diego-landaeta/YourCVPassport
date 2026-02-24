@@ -34,7 +34,7 @@ import { useTranslatedProfile } from '../../hooks/useTranslatedProfile';
 import { TranslationProgressIndicator } from '../TranslationProgressIndicator';
 
 
-const ProfileSearchPage: React.FC = () => {
+const ProfileViewPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { lang } = useLanguage();
     const { profile: currentUserProfile } = useAuth();
@@ -106,14 +106,6 @@ const ProfileSearchPage: React.FC = () => {
                     supabase.from('languages').select('*').eq('profile_id', profile.id).order('sort_order', { ascending: true }),
                     supabase.from('stamps').select('*').eq('profile_id', profile.id).eq('status', 'VERIFIED').order('verified_at', { ascending: false }),
                 ]);
-
-                // Debug: Check profile URLs
-                console.log('🔍 ProfileSearchPage - Loaded profile URLs:', {
-                    linkedin_url: profile.linkedin_url,
-                    github_url: profile.github_url,
-                    portfolio_url: profile.portfolio_url,
-                    show_connect_links: profile.show_connect_links
-                });
 
                 setProfileData({
                     profile,
@@ -530,4 +522,4 @@ const ProfileSearchPage: React.FC = () => {
     );
 };
 
-export default ProfileSearchPage;
+export default ProfileViewPage;

@@ -131,9 +131,6 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            console.log('✅ Stamps fetched:', data);
-            console.log('🔍 LANGUAGE stamps:', data?.filter(s => s.type === 'LANGUAGE'));
-            console.log('✓ Verified LANGUAGE stamps:', data?.filter(s => s.type === 'LANGUAGE' && s.status === 'VERIFIED'));
             setStamps(data || []);
         } catch (error) {
             console.error('❌ Error fetching stamps:', error);

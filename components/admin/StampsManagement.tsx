@@ -303,13 +303,6 @@ const StampsManagement: React.FC = () => {
       if (languagesRes.error) console.error('Languages error:', languagesRes.error);
       if (portfolioRes.error) console.error('Portfolio error:', portfolioRes.error);
 
-      // Log the data to see what we got
-      console.log('Portfolio data:', portfolioRes.data);
-      console.log('Languages data:', languagesRes.data);
-      console.log('Skills data:', skillsRes.data);
-      console.log('Experience data:', experienceRes.data);
-      console.log('Education data:', educationRes.data);
-
       // Combine all data
       const combinedProfile = {
         ...profileData,
@@ -320,7 +313,6 @@ const StampsManagement: React.FC = () => {
         portfolio: portfolioRes.data || []
       };
 
-      console.log('Combined profile:', combinedProfile);
       setSelectedUserProfile(combinedProfile);
     } catch (err: any) {
       error('Error al cargar el perfil del usuario');

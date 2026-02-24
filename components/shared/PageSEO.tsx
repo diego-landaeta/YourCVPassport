@@ -55,7 +55,6 @@ const PageSEO: React.FC<PageSEOProps> = ({
   return (
     <Helmet key={location.pathname}>
       {/* Basic Meta Tags */}
-      <html lang={lang} />
       <title>{fullTitle}</title>
       <meta name="description" content={metaDescription} />
       {keywords && <meta name="keywords" content={keywords} />}

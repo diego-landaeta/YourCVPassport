@@ -338,8 +338,6 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     setIsSaving(true);
 
     try {
-      console.log('🔵 Guardando template:', selectedTemplate, 'y slug:', customSlug, 'para usuario:', session.user.id);
-
       // ✅ Save template AND slug AND mark wizard as completed
       // This is where users create their URL for the first time and complete the onboarding wizard
       const { error } = await supabase
@@ -357,16 +355,12 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
         throw error;
       }
 
-      console.log('✅ Template y slug guardados exitosamente');
-
       // ✅ Verificar que realmente se guardó en la BD
       const { data: verifyData, error: verifyError } = await supabase
         .from('profiles')
         .select('template, slug')
         .eq('id', session.user.id)
         .single();
-
-      console.log('🔍 Verificando template y slug guardados:', verifyData);
 
       if (verifyError || !verifyData?.template || !verifyData?.slug) {
         console.error('❌ El template o slug NO se guardó correctamente:', verifyError);

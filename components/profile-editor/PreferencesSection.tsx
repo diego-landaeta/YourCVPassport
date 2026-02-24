@@ -157,10 +157,6 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
   }, [isDirty, onSave, getValues, toast, lang]);
 
   const onSubmit = async (data: PreferencesFormData) => {
-    console.log('🔵 PreferencesSection onSubmit called with data:', data);
-    console.log('🔵 Form errors:', errors);
-    console.log('🔵 isDirty:', isDirty);
-
     try {
       // Only save if there are actual changes
       if (isDirty) {
@@ -171,10 +167,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
       // ALWAYS advance to next section (even if no changes to save)
       // This allows users to skip preferences and go to finalization
       if (onNext) {
-        console.log('🔵 Calling onNext()');
         onNext();
-      } else {
-        console.log('❌ onNext is not defined');
       }
     } catch (error) {
       console.error('❌ Error saving preferences:', error);
@@ -186,10 +179,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
     }
   };
 
-  const onError = (formErrors: any) => {
-    console.log('❌ Form validation failed with errors:', formErrors);
-    console.log('❌ All form errors object:', errors);
-    console.log('❌ Current form values:', watch());
+  const onError = (_formErrors: any) => {
   };
 
   const handleLanguageChange = (newLang: 'en' | 'es') => {
@@ -489,10 +479,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
         <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             type="submit"
-            onClick={() => {
-              console.log('🔴 Button clicked - checking form errors:', errors);
-              console.log('🔴 Form values:', watch());
-            }}
+            onClick={() => {}}
             className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium flex items-center gap-2"
           >
             {translations.common?.next || 'Next'}

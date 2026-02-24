@@ -113,7 +113,6 @@ export const TemplateManagement: React.FC = () => {
           : config
       ));
 
-      console.log('✅ Template config updated');
     } catch (error) {
       console.error('Error updating template config:', error);
       alert('Error al actualizar la configuración de la plantilla');

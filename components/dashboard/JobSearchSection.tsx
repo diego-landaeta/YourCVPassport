@@ -104,7 +104,7 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
 
         {/* Tab Navigation */}
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-2 overflow-x-auto">
+          <nav className="-mb-px flex justify-center space-x-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -113,8 +113,9 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
+                  title={tab.label[lang]}
                   className={`
-                    group inline-flex items-center gap-2 px-4 py-3 border-b-2 font-medium text-sm transition-all whitespace-nowrap
+                    group inline-flex items-center justify-center px-5 py-3 border-b-2 font-medium text-sm transition-all
                     ${
                       isActive
                         ? 'border-cv-blue dark:border-cv-blue-light text-cv-blue dark:text-cv-blue-light'
@@ -132,7 +133,6 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
                       }
                     `}
                   />
-                  <span>{tab.label[lang]}</span>
                 </button>
               );
             })}

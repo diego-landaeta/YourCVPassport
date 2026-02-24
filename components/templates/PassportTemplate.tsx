@@ -43,19 +43,6 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Debug: Log profile URLs
-  console.log('🔍 PassportTemplate - Profile URLs:', {
-    profile_exists: !!profile,
-    linkedin_url: profile?.linkedin_url,
-    github_url: profile?.github_url,
-    portfolio_url: profile?.portfolio_url,
-    show_connect_links: profile?.show_connect_links,
-    linkedin_length: profile?.linkedin_url?.length,
-    github_length: profile?.github_url?.length,
-    portfolio_length: profile?.portfolio_url?.length,
-    hasAnyURL: profile && !!(profile.linkedin_url || profile.github_url || profile.portfolio_url)
-  });
-
   // Check if viewing own profile
   const isOwnProfile = user?.id === profile.id;
 

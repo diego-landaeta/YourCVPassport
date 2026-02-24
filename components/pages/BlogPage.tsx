@@ -75,13 +75,14 @@ const BlogPage: React.FC = () => {
 
     useEffect(() => {
         fetchPosts();
-    }, []);
+    }, [lang]);
 
     const fetchPosts = async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('blog_posts')
             .select('*')
+            .eq('lang', lang)
             .order('published_at', { ascending: false });
 
         if (error) {} else {setPosts(data as BlogPost[]);

@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Profile } from '../../types';
 import { normalizeUrl } from '../../utils/canonicalUrl';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SEOHeadProps {
   title?: string;
@@ -18,12 +19,14 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   title: propTitle,
   description: propDescription,
   profile,
-  currentLang = 'en',
+  currentLang: currentLangProp = 'en',
   canonicalUrl,
   keywords: propKeywords,
   profileSkills = [],
   profileExperience = []
 }) => {
+  const { lang: contextLang } = useLanguage();
+  const currentLang = contextLang || currentLangProp;
   const baseUrl = 'https://yourcvpassport.com';
 
   // Determine URL and Image

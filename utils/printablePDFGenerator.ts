@@ -23,8 +23,6 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
   const { profileSlug, profileId, onSuccess, onError } = options;
 
   try {
-    console.log('🖨️ Preparando CV para impresión...');
-
     // Obtener el contenedor de impresión
     const printMount = document.getElementById('print-mount');
     if (!printMount) {
@@ -33,7 +31,6 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
 
     // Construir URL del CV
     const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}`;
-    console.log(`📄 Cargando CV desde: ${cvUrl}`);
 
     // Crear iframe temporal para cargar el CV
     const iframe = document.createElement('iframe');
@@ -53,7 +50,6 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       iframe.onload = () => {
         clearTimeout(timeout);
         setTimeout(() => {
-          console.log('✅ CV cargado en iframe');
           resolve();
         }, 2000);
       };
@@ -81,11 +77,6 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       cvContainer = iframeDoc.body;
     }
 
-    console.log('📋 Clonando contenido del CV...');
-    console.log('📦 Contenedor encontrado:', cvContainer.className || cvContainer.tagName);
-    console.log('📦 Hijos del contenedor:', cvContainer.children.length);
-    console.log('📦 Primera etiqueta hija:', cvContainer.children[0]?.tagName);
-
     // Pre-cargar imágenes antes de clonar
     const images = iframeDoc.querySelectorAll('img');
     await Promise.all(
@@ -103,17 +94,8 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       })
     );
 
-    console.log('✅ Imágenes pre-cargadas');
-
     // Clonar el contenido del CV completo
     const cvClone = cvContainer.cloneNode(true) as HTMLElement;
-
-    // Debug: verificar qué contiene el clon
-    console.log('🔍 Contenido clonado:');
-    console.log('  - Tiene header?', cvClone.querySelector('header') ? 'SÍ' : 'NO');
-    console.log('  - Tiene img?', cvClone.querySelector('img') ? 'SÍ' : 'NO');
-    console.log('  - Tiene h1?', cvClone.querySelector('h1') ? 'SÍ' : 'NO');
-    console.log('  - Texto del h1:', cvClone.querySelector('h1')?.textContent || 'NO ENCONTRADO');
 
     // Agregar clases para evitar cortes de página
     const experienceItems = cvClone.querySelectorAll('[class*="experience"], [class*="trabajo"], div:has(> h3)');
@@ -310,24 +292,18 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
     // Agregar el CV clonado al contenedor de impresión
     printMount.appendChild(cvClone);
 
-    console.log('📄 Contenido listo para impresión');
-
     // Limpiar iframe
     document.body.removeChild(iframe);
-
-    console.log('✅ CV preparado para impresión');
 
     // Esperar un momento para que el DOM se actualice
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Abrir diálogo de impresión
-    console.log('🖨️ Abriendo diálogo de impresión...');
     window.print();
 
     // Limpiar después de cerrar el diálogo de impresión
     setTimeout(() => {
       printMount.innerHTML = '';
-      console.log('✅ Proceso completado');
 
       if (onSuccess) {
         onSuccess();

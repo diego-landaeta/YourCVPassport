@@ -73,6 +73,15 @@ const SuccessStoriesPage: React.FC = () => {
         loadStoriesFromDB();
     }, []);
 
+    useEffect(() => {
+        const existing = document.querySelector('script[src*="opynio.com/widget"]');
+        if (existing) existing.remove();
+        const script = document.createElement('script');
+        script.src = 'https://web.opynio.com/widget.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }, [lang]);
+
     const loadStoriesFromDB = async () => {
         try {
             setLoadingStories(true);
