@@ -1,11 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../supabase/client';
 import {
   XMarkIcon,
   LinkIcon,
   EnvelopeIcon,
   CheckIcon,
+  ArrowPathRoundedSquareIcon,
+  ChatBubbleLeftRightIcon,
+  UserGroupIcon,
+  ChevronDownIcon,
+  ShareIcon as ShareOutlineIcon,
 } from '@heroicons/react/24/outline';
+import { ArrowPathRoundedSquareIcon as ArrowPathSolid } from '@heroicons/react/24/solid';
+
+interface UserGroup {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -13,8 +27,19 @@ interface ShareModalProps {
   postUrl: string;
   shareText: string;
   authorName: string;
+  /** In-app actions (for post sharing) */
+  postId?: string;
+  currentUserId?: string;
+  hasReposted?: boolean;
+  onRepost?: () => Promise<void>;
+  /** Quote post or share to group — returns success bool */
+  onSharePost?: (comment: string, groupId?: string) => Promise<boolean>;
+  /** For sharing a group (not a post) */
+  groupSlug?: string;
+  groupName?: string;
 }
 
+/* ── External platform config ────────────────────────────── */
 const PLATFORMS = [
   {
     id: 'whatsapp',
@@ -62,9 +87,13 @@ const PLATFORMS = [
     hoverColor: 'hover:bg-gray-700 dark:hover:bg-gray-400',
     icon: <EnvelopeIcon className="w-5 h-5" />,
     getUrl: (url: string, text: string, author: string) =>
-      `mailto:?subject=${encodeURIComponent(`${author} on YourCVPassport`)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`,
+      `mailto:?subject=${encodeURIComponent(`${author} en YourCVPassport`)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`,
   },
 ] as const;
+
+/* ─────────────────────────────────────────────────────────── */
+
+type InAppMode = 'none' | 'quote' | 'group';
 
 const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
@@ -72,51 +101,101 @@ const ShareModal: React.FC<ShareModalProps> = ({
   postUrl,
   shareText,
   authorName,
+  postId,
+  currentUserId,
+  hasReposted,
+  onRepost,
+  onSharePost,
+  groupSlug,
+  groupName,
 }) => {
   const { lang } = useLanguage();
+  const { session } = useAuth();
+  const isEs = lang === 'es';
+
   const [copied, setCopied] = useState(false);
+  const [inAppMode, setInAppMode] = useState<InAppMode>('none');
+  const [quoteText, setQuoteText] = useState('');
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
+  const [groupsLoaded, setGroupsLoaded] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [groupDropdownOpen, setGroupDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [repostLoading, setRepostLoading] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
+  const isLoggedIn = !!currentUserId;
+  const isPost = !!postId;
+
+  /* ── Reset state on open/close ─────────────────────────── */
+  useEffect(() => {
+    if (isOpen) {
+      setCopied(false);
+      setInAppMode('none');
+      setQuoteText('');
+      setSelectedGroupId('');
+      setShareSuccess(false);
+      setGroupDropdownOpen(false);
+    }
+  }, [isOpen]);
+
+  /* ── Fetch user groups when group mode is activated ──────── */
+  useEffect(() => {
+    if (!isOpen || !session?.user.id || inAppMode !== 'group' || groupsLoaded) return;
+
+    const fetchGroups = async () => {
+      try {
+        const { data } = await supabase
+          .from('group_members')
+          .select('group:groups!group_id(id, name, slug)')
+          .eq('user_id', session.user.id)
+          .limit(30);
+        if (data) {
+          const groups: UserGroup[] = data
+            .map((d: any) => d.group)
+            .filter(Boolean);
+          setUserGroups(groups);
+          if (groups.length > 0) setSelectedGroupId(groups[0].id);
+        }
+      } catch { /* ignore */ }
+      setGroupsLoaded(true);
+    };
+
+    fetchGroups();
+  }, [isOpen, session?.user.id, inAppMode, groupsLoaded]);
+
+  /* ── Close on Escape ─────────────────────────────────────── */
   useEffect(() => {
     if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  // Lock body scroll
+  /* ── Lock body scroll ────────────────────────────────────── */
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
+    if (isOpen) document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
-  // Reset copied state on open
-  useEffect(() => {
-    if (isOpen) setCopied(false);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
+  /* ── Handlers ─────────────────────────────────────────────── */
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(postUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // fallback
-      const textarea = document.createElement('textarea');
-      textarea.value = postUrl;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
+      const ta = document.createElement('textarea');
+      ta.value = postUrl;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
       document.execCommand('copy');
-      document.body.removeChild(textarea);
+      document.body.removeChild(ta);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
@@ -127,6 +206,39 @@ const ShareModal: React.FC<ShareModalProps> = ({
     window.open(url, '_blank', 'noopener,noreferrer,width=600,height=500');
   };
 
+  const handleRepost = async () => {
+    if (!onRepost) return;
+    setRepostLoading(true);
+    await onRepost();
+    setRepostLoading(false);
+  };
+
+  const handleSubmitInApp = async () => {
+    if (!onSharePost) return;
+    if (inAppMode === 'quote' && !quoteText.trim()) return;
+    if (inAppMode === 'group' && !selectedGroupId) return;
+
+    setIsSubmitting(true);
+    const success = await onSharePost(
+      quoteText.trim(),
+      inAppMode === 'group' ? selectedGroupId : undefined
+    );
+    setIsSubmitting(false);
+
+    if (success) {
+      setShareSuccess(true);
+      setTimeout(() => {
+        setShareSuccess(false);
+        setInAppMode('none');
+        setQuoteText('');
+        onClose();
+      }, 1500);
+    }
+  };
+
+  const selectedGroup = userGroups.find((g) => g.id === selectedGroupId);
+
+  /* ─────────────────────────────────────────────────────────── */
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
@@ -142,8 +254,11 @@ const ShareModal: React.FC<ShareModalProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            {lang === 'es' ? 'Compartir publicación' : 'Share post'}
+          <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <ShareOutlineIcon className="w-4 h-4 text-gray-400" />
+            {groupSlug
+              ? (isEs ? 'Compartir grupo' : 'Share group')
+              : (isEs ? 'Compartir publicación' : 'Share post')}
           </h3>
           <button
             onClick={onClose}
@@ -153,8 +268,175 @@ const ShareModal: React.FC<ShareModalProps> = ({
           </button>
         </div>
 
-        {/* Social platforms */}
-        <div className="px-5 pb-4">
+        {/* ── IN-APP section: only for authenticated users on a post ── */}
+        {isPost && isLoggedIn && (
+          <>
+            <div className="px-5 pb-4">
+              <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5">
+                {isEs ? 'En YourCVPassport' : 'In YourCVPassport'}
+              </p>
+
+              {/* Success feedback */}
+              {shareSuccess ? (
+                <div className="flex items-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-green-700 dark:text-green-400 text-sm font-semibold">
+                  <CheckIcon className="w-5 h-5" />
+                  {isEs ? '¡Publicado en el feed!' : 'Posted to your feed!'}
+                </div>
+              ) : inAppMode === 'none' ? (
+                /* Action buttons */
+                <div className="flex gap-2">
+                  {/* Repost */}
+                  {onRepost && (
+                    <button
+                      onClick={handleRepost}
+                      disabled={repostLoading}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 flex-1 justify-center border ${
+                        hasReposted
+                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30'
+                          : 'border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'
+                      } disabled:opacity-50`}
+                    >
+                      {repostLoading ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : hasReposted ? (
+                        <ArrowPathSolid className="w-4 h-4" />
+                      ) : (
+                        <ArrowPathRoundedSquareIcon className="w-4 h-4" />
+                      )}
+                      <span className="hidden xs:inline">
+                        {hasReposted ? (isEs ? 'Republicado' : 'Reposted') : (isEs ? 'Republicar' : 'Repost')}
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Quote post */}
+                  {onSharePost && (
+                    <button
+                      onClick={() => setInAppMode('quote')}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all active:scale-95 flex-1 justify-center"
+                    >
+                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                      <span className="hidden xs:inline">{isEs ? 'Citar' : 'Quote'}</span>
+                    </button>
+                  )}
+
+                  {/* Share to group */}
+                  {onSharePost && (
+                    <button
+                      onClick={() => setInAppMode('group')}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all active:scale-95 flex-1 justify-center"
+                    >
+                      <UserGroupIcon className="w-4 h-4" />
+                      <span className="hidden xs:inline">{isEs ? 'Grupo' : 'Group'}</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                /* Inline compose (quote or group share) */
+                <div className="space-y-2">
+                  {/* Group selector */}
+                  {inAppMode === 'group' && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setGroupDropdownOpen((v) => !v)}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary text-sm"
+                      >
+                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                          <UserGroupIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="font-medium truncate">
+                            {!groupsLoaded
+                              ? (isEs ? 'Cargando...' : 'Loading...')
+                              : userGroups.length === 0
+                                ? (isEs ? 'No tienes grupos' : 'No groups yet')
+                                : selectedGroup?.name || (isEs ? 'Selecciona un grupo' : 'Select a group')}
+                          </span>
+                        </div>
+                        <ChevronDownIcon className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${groupDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {groupDropdownOpen && (
+                        <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-xl shadow-lg z-20 overflow-hidden max-h-44 overflow-y-auto">
+                          {userGroups.length === 0 ? (
+                            <p className="px-3 py-3 text-sm text-gray-400 text-center">
+                              {isEs ? 'Únete a un grupo primero' : 'Join a group first'}
+                            </p>
+                          ) : userGroups.map((g) => (
+                            <button
+                              key={g.id}
+                              onClick={() => { setSelectedGroupId(g.id); setGroupDropdownOpen(false); }}
+                              className={`w-full text-left px-3 py-2.5 text-sm font-medium transition-colors ${
+                                selectedGroupId === g.id
+                                  ? 'bg-cv-blue/10 text-cv-blue'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'
+                              }`}
+                            >
+                              {g.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Compose textarea */}
+                  <textarea
+                    value={quoteText}
+                    onChange={(e) => setQuoteText(e.target.value)}
+                    placeholder={
+                      inAppMode === 'quote'
+                        ? (isEs ? 'Escribe tu opinión sobre esta publicación...' : 'Write your thoughts about this post...')
+                        : (isEs ? 'Añade un mensaje (opcional)...' : 'Add a message (optional)...')
+                    }
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-bg-tertiary text-sm text-gray-700 dark:text-gray-300 resize-none focus:ring-2 focus:ring-cv-blue focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                    rows={3}
+                    maxLength={500}
+                    autoFocus
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">{quoteText.length}/500</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setInAppMode('none'); setQuoteText(''); }}
+                      className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-dark-border text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
+                    >
+                      {isEs ? 'Cancelar' : 'Cancel'}
+                    </button>
+                    <button
+                      onClick={handleSubmitInApp}
+                      disabled={
+                        isSubmitting ||
+                        (inAppMode === 'quote' && !quoteText.trim()) ||
+                        (inAppMode === 'group' && (!selectedGroupId || userGroups.length === 0))
+                      }
+                      className="flex-1 py-1.5 rounded-xl bg-cv-blue text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      {isSubmitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <ShareOutlineIcon className="w-4 h-4" />
+                          {inAppMode === 'group'
+                            ? (isEs ? 'Compartir en grupo' : 'Share to group')
+                            : (isEs ? 'Publicar cita' : 'Post quote')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mx-5 border-t border-gray-100 dark:border-dark-border/50 mb-0" />
+          </>
+        )}
+
+        {/* ── External platforms ──────────────────────────────── */}
+        <div className="px-5 py-4">
+          <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5">
+            {isEs ? 'Compartir en redes' : 'Share on social'}
+          </p>
           <div className="grid grid-cols-4 gap-3">
             {PLATFORMS.map((platform) => (
               <button
@@ -162,7 +444,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 onClick={() => handlePlatformClick(platform)}
                 className="flex flex-col items-center gap-2 group"
               >
-                <div className={`w-12 h-12 rounded-full ${platform.color} ${platform.hoverColor} text-white flex items-center justify-center transition-all group-hover:scale-110 group-active:scale-95 shadow-sm`}>
+                <div
+                  className={`w-12 h-12 rounded-full ${platform.color} ${platform.hoverColor} text-white flex items-center justify-center transition-all group-hover:scale-110 group-active:scale-95 shadow-sm`}
+                >
                   {platform.icon}
                 </div>
                 <span className="text-[11px] font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors leading-tight text-center">
@@ -176,7 +460,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
         {/* Divider */}
         <div className="mx-5 border-t border-gray-100 dark:border-dark-border/50" />
 
-        {/* Copy link */}
+        {/* ── Copy link ─────────────────────────────────────────── */}
         <div className="px-5 py-4">
           <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-dark-bg-tertiary rounded-xl px-3.5 py-2.5 border border-gray-200 dark:border-dark-border">
             <LinkIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -198,10 +482,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
               {copied ? (
                 <>
                   <CheckIcon className="w-3.5 h-3.5" />
-                  {lang === 'es' ? '¡Copiado!' : 'Copied!'}
+                  {isEs ? '¡Copiado!' : 'Copied!'}
                 </>
               ) : (
-                lang === 'es' ? 'Copiar' : 'Copy'
+                isEs ? 'Copiar' : 'Copy'
               )}
             </button>
           </div>

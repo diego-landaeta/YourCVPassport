@@ -8,6 +8,11 @@ import {
   CheckCircleIcon,
   XMarkIcon,
   MapPinIcon,
+  NoSymbolIcon,
+  ShieldExclamationIcon,
+  EyeSlashIcon,
+  XCircleIcon,
+  ChatBubbleBottomCenterTextIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslations } from '../../../hooks/useTranslations';
 
@@ -75,12 +80,12 @@ const PostOptionsMenu: React.FC<PostOptionsMenuProps> = memo(({
     }
   };
 
-  const reportReasons: { value: ReportReason; label: string; icon: string }[] = [
-    { value: 'spam', label: tr.spam, icon: '🚫' },
-    { value: 'harassment', label: tr.harassment, icon: '⚠️' },
-    { value: 'inappropriate', label: tr.inappropriate, icon: '🔞' },
-    { value: 'misinformation', label: tr.misinformation, icon: '❌' },
-    { value: 'other', label: tr.other, icon: '📝' },
+  const reportReasons: { value: ReportReason; label: string; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
+    { value: 'spam', label: tr.spam, icon: NoSymbolIcon },
+    { value: 'harassment', label: tr.harassment, icon: ShieldExclamationIcon },
+    { value: 'inappropriate', label: tr.inappropriate, icon: EyeSlashIcon },
+    { value: 'misinformation', label: tr.misinformation, icon: XCircleIcon },
+    { value: 'other', label: tr.other, icon: ChatBubbleBottomCenterTextIcon },
   ];
 
   return (
@@ -228,7 +233,7 @@ const PostOptionsMenu: React.FC<PostOptionsMenuProps> = memo(({
                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary border border-transparent'
                           }`}
                         >
-                          <span className="text-base">{reason.icon}</span>
+                          <reason.icon className={`w-4 h-4 flex-shrink-0 ${selectedReason === reason.value ? 'text-cv-blue' : 'text-gray-400 dark:text-gray-500'}`} />
                           {reason.label}
                         </button>
                       ))}

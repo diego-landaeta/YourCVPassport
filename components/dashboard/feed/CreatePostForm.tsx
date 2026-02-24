@@ -23,6 +23,7 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { feedService } from '../../../services/feedService';
 import type { Profile } from '../../../types';
 import type { FeedContentType, PollDuration } from '../../../types/feed';
+import { useGroups } from '../../../hooks/useGroups';
 
 /* ── Types ─────────────────────────────────────────────────── */
 type PostMode = 'TEXT' | 'IMAGE' | 'ACHIEVEMENT' | 'JOB_UPDATE' | 'MILESTONE' | 'POLL' | 'EVENT';
@@ -75,8 +76,10 @@ const FIELD_LABELS: Record<string, { es: string; en: string; placeholder_es: str
 const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSubmitting, cooldown }) => {
   const { lang } = useLanguage();
   const t = useTranslations();
+  const { myGroups } = useGroups();
   // Core state
   const [mode, setMode] = useState<PostMode>('TEXT');
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);       // remote URLs (for submission)
   const [previews, setPreviews] = useState<string[]>([]);   // display URLs (blob → remote)
@@ -107,9 +110,15 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
   // Event state
   const [eventTitle, setEventTitle] = useState('');
   const [eventDate, setEventDate] = useState('');
-  const [eventTime, setEventTime] = useState('');
+  const [eventTime, setEventTime] = useState('09:00');
   const [eventLocation, setEventLocation] = useState('');
   const [eventLink, setEventLink] = useState('');
+  // Calendar picker state
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarViewDate, setCalendarViewDate] = useState(() => new Date());
+
+  // Emoji picker state
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Mentions autocomplete state
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
@@ -396,6 +405,37 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
     }
   }, [mentionResults, mentionIndex, insertMention]);
 
+  /* ── Emoji insertion ────────────────────────────────────── */
+  const insertEmoji = useCallback((emoji: string) => {
+    const ta = textareaRef.current;
+    if (ta) {
+      const pos = ta.selectionStart;
+      const before = content.slice(0, pos);
+      const after = content.slice(pos);
+      setContent(before + emoji + after);
+      setTimeout(() => {
+        const newPos = pos + emoji.length;
+        ta.focus();
+        ta.setSelectionRange(newPos, newPos);
+      }, 0);
+    } else {
+      setContent(prev => prev + emoji);
+    }
+  }, [content]);
+
+  // Close emoji picker on click outside
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-emoji-picker]')) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showEmojiPicker]);
+
   /* ── Submit ──────────────────────────────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -411,7 +451,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
 
     setUploadError(null);
     try {
-      await onSubmit(finalContent, remoteUrls, contentType, achievementType, achievementData, metadata);
+      const metaWithGroup = selectedGroupId
+        ? { ...(metadata || {}), _group_id: selectedGroupId }
+        : metadata;
+      await onSubmit(finalContent, remoteUrls, contentType, achievementType, achievementData, metaWithGroup);
     } catch {
       // Show inline error and keep form content so the user can retry
       setUploadError(lang === 'es' ? 'Error al publicar. Inténtalo de nuevo.' : 'Error posting. Please try again.');
@@ -425,6 +468,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
     setUploadError(null);
     setIsFocused(false);
     setMode('TEXT');
+    setSelectedGroupId('');
     setSelectedTemplate(null);
     setTemplateFields({});
     setJobCompany('');
@@ -555,7 +599,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
       onSubmit={handleSubmit}
       className={`bg-white dark:bg-dark-bg-secondary rounded-2xl border shadow-sm transition-all duration-300 overflow-hidden ${
         isFocused
-          ? `${accent.ring} ring-2 shadow-md`
+          ? `${accent.ring} sm:ring-2 shadow-md`
           : 'border-gray-200 dark:border-dark-border hover:shadow-md'
       }`}
     >
@@ -1063,28 +1107,127 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
 
           {/* Date + Time row */}
           <div className="grid grid-cols-2 gap-2.5">
+
+            {/* ── Custom Calendar Picker ── */}
             <div>
               <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">
                 {lang === 'es' ? 'Fecha' : 'Date'} *
               </label>
-              <input
-                type="date"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
-              />
+              <div className="relative">
+                {/* Backdrop — closes calendar on outside click */}
+                {calendarOpen && (
+                  <div className="fixed inset-0 z-40" onClick={() => setCalendarOpen(false)} />
+                )}
+
+                {/* Trigger */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!calendarOpen && eventDate) setCalendarViewDate(new Date(eventDate + 'T00:00:00'));
+                    else setCalendarViewDate(new Date());
+                    setCalendarOpen(!calendarOpen);
+                  }}
+                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-left flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
+                >
+                  <CalendarDaysIcon className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                  <span className={eventDate ? 'text-gray-700 dark:text-white truncate' : 'text-gray-400'}>
+                    {eventDate
+                      ? new Date(eventDate + 'T00:00:00').toLocaleDateString(
+                          lang === 'es' ? 'es-ES' : 'en-US',
+                          { day: 'numeric', month: 'short', year: 'numeric' }
+                        )
+                      : (lang === 'es' ? 'Seleccionar' : 'Pick date')}
+                  </span>
+                </button>
+
+                {/* Calendar dropdown */}
+                {calendarOpen && (() => {
+                  const today = new Date(); today.setHours(0, 0, 0, 0);
+                  const year = calendarViewDate.getFullYear();
+                  const month = calendarViewDate.getMonth();
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                  const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // Mon first
+                  const monthNames = lang === 'es'
+                    ? ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+                    : ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                  const dayLabels = lang === 'es'
+                    ? ['L','M','X','J','V','S','D']
+                    : ['M','T','W','T','F','S','S'];
+                  const selDate = eventDate ? new Date(eventDate + 'T00:00:00') : null;
+
+                  const cells: React.ReactNode[] = [];
+                  for (let i = 0; i < firstDay; i++) cells.push(<div key={`e${i}`} />);
+                  for (let d = 1; d <= daysInMonth; d++) {
+                    const cellDate = new Date(year, month, d);
+                    const isPast = cellDate < today;
+                    const isSelected = selDate && cellDate.toDateString() === selDate.toDateString();
+                    const isToday = cellDate.toDateString() === today.toDateString();
+                    const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    cells.push(
+                      <button
+                        key={d} type="button" disabled={isPast}
+                        onClick={() => { setEventDate(ds); setCalendarOpen(false); }}
+                        className={`h-8 w-full rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center
+                          ${isPast ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : ''}
+                          ${isSelected ? 'bg-rose-500 text-white' : ''}
+                          ${isToday && !isSelected ? 'font-bold text-rose-500 ring-1 ring-inset ring-rose-400' : ''}
+                          ${!isPast && !isSelected ? 'hover:bg-rose-50 dark:hover:bg-rose-900/20 text-gray-700 dark:text-gray-300' : ''}
+                        `}
+                      >{d}</button>
+                    );
+                  }
+
+                  return (
+                    <div className="absolute top-full left-0 mt-1.5 z-50 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-2xl shadow-xl p-3 w-64">
+                      {/* Month nav */}
+                      <div className="flex items-center justify-between mb-2">
+                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <span className="text-sm font-semibold text-gray-800 dark:text-white">{monthNames[month]} {year}</span>
+                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                      </div>
+                      {/* Day headers */}
+                      <div className="grid grid-cols-7 mb-1">
+                        {dayLabels.map((dl, i) => <div key={i} className="text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 py-0.5">{dl}</div>)}
+                      </div>
+                      {/* Day grid */}
+                      <div className="grid grid-cols-7 gap-0.5">{cells}</div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
+
+            {/* ── Custom Time Picker ── */}
             <div>
               <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">
                 {lang === 'es' ? 'Hora' : 'Time'}
               </label>
-              <input
-                type="time"
-                value={eventTime}
-                onChange={(e) => setEventTime(e.target.value)}
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
-              />
+              <div className="flex items-center gap-1 px-2.5 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl focus-within:ring-2 focus-within:ring-rose-500/20 focus-within:border-rose-400 transition-all">
+                <ClockIcon className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                <select
+                  value={eventTime.split(':')[0] || '09'}
+                  onChange={(e) => setEventTime(`${e.target.value}:${eventTime.split(':')[1] || '00'}`)}
+                  className="flex-1 bg-transparent text-sm text-gray-700 dark:text-white focus:outline-none text-center cursor-pointer"
+                >
+                  {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+                <span className="text-gray-400 dark:text-gray-500 font-bold text-sm">:</span>
+                <select
+                  value={eventTime.split(':')[1] || '00'}
+                  onChange={(e) => setEventTime(`${eventTime.split(':')[0] || '09'}:${e.target.value}`)}
+                  className="flex-1 bg-transparent text-sm text-gray-700 dark:text-white focus:outline-none text-center cursor-pointer"
+                >
+                  {['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -1233,6 +1376,25 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
         disabled={previews.length >= 4 || isUploading}
       />
 
+      {/* ── Group selector ── */}
+      {isExpanded && myGroups.length > 0 && (
+        <div className="px-4 pb-1 sm:pl-[68px] flex items-center gap-2">
+          <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+            {lang === 'es' ? 'Publicar en:' : 'Post to:'}
+          </span>
+          <select
+            value={selectedGroupId}
+            onChange={e => setSelectedGroupId(e.target.value)}
+            className="text-xs px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-cv-blue"
+          >
+            <option value="">{lang === 'es' ? 'Feed general' : 'General feed'}</option>
+            {myGroups.map(g => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* ── Toolbar ── */}
       <div className={`px-4 py-3 sm:pl-[68px] transition-all ${
         isExpanded ? 'border-t border-gray-100 dark:border-dark-border' : ''
@@ -1312,13 +1474,37 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               <CalendarDaysIcon className="w-5 h-5" />
             </button>
 
-            <button
-              type="button"
-              title="Emoji"
-              className="hidden sm:flex items-center px-3 py-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-full transition-colors"
-            >
-              <FaceSmileIcon className="w-5 h-5" />
-            </button>
+            <div className="relative" data-emoji-picker>
+              <button
+                type="button"
+                title="Emoji"
+                onClick={() => { setShowEmojiPicker(prev => !prev); setIsFocused(true); }}
+                className={`hidden sm:flex items-center px-3 py-2 rounded-full transition-colors ${
+                  showEmojiPicker ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                }`}
+              >
+                <FaceSmileIcon className="w-5 h-5" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-full left-0 mb-2 z-50 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-xl shadow-xl p-2 w-[280px]">
+                  <div className="grid grid-cols-8 gap-0.5">
+                    {['😀','😂','🥹','😍','🤩','😎','🤔','😅',
+                      '👍','👏','🙌','💪','🔥','⭐','❤️','💯',
+                      '🎉','🚀','✅','💡','📌','🎯','💼','📈',
+                      '🏆','🎓','💻','🌟','👀','🤝','✨','💬'].map(emoji => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => { insertEmoji(emoji); setShowEmojiPicker(false); }}
+                        className="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: chars + cancel + submit */}
@@ -1350,9 +1536,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                   setPollDuration('3d');
                   setEventTitle('');
                   setEventDate('');
-                  setEventTime('');
+                  setEventTime('09:00');
                   setEventLocation('');
                   setEventLink('');
+                  setCalendarOpen(false);
+                  setCalendarViewDate(new Date());
                 }}
                 className="px-3 sm:px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-full transition-colors"
               >

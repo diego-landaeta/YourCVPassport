@@ -160,9 +160,14 @@ interface FeedPostProps {
   onHashtagClick?: (tag: string) => void;
   onPollVote?: (postId: string, optionIndex: number) => Promise<{ success: boolean }>;
   onNotify?: (targetUserId: string, type: 'reaction' | 'comment' | 'reply' | 'mention' | 'repost', postId?: string, commentId?: string) => void;
+  onAuthRequired?: () => void;
+  /** Navigate to in-app user profile instead of /cv/ external link */
+  onAuthorClick?: (userId: string) => void;
+  /** When true, disables reactions, comments and poll votes (channel read-only mode) */
+  readOnly?: boolean;
 }
 
-const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpdated, onHashtagClick, onPollVote, onNotify }) => {
+const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpdated, onHashtagClick, onPollVote, onNotify, onAuthRequired, onAuthorClick, readOnly }) => {
   const { lang } = useLanguage();
   const t = useTranslations();
   const tp = t.feed.post;
@@ -189,6 +194,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
   const longPressTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const longPressTriggered = useRef(false);
 
+  // Track reaction types the user added optimistically (vs types from server)
+  const originalTopReactions = useRef<ReactionType[]>(post.topReactions || []);
+  const userAddedTypes = useRef<Set<ReactionType>>(new Set());
+
   // View tracking
   const articleRef = useRef<HTMLElement>(null);
   const viewTracked = useRef(false);
@@ -205,6 +214,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     toggleBookmark,
     togglePin,
     reportPost,
+    sharePost,
     isLiking,
     isDeleting,
     isEditing: isSavingEdit,
@@ -231,28 +241,61 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
   /* ── Handlers ── */
 
   const handleReaction = useCallback(async (reactionType: ReactionType) => {
+    if (!currentUserId || readOnly) { onAuthRequired?.(); return; }
     setShowReactions(false);
 
-    // Optimistic update — snapshot previous state for rollback
     const snapshot = { ...localPost };
-    setLocalPost(prev => {
-      const currentReaction = prev.userReaction;
-      const isSame = currentReaction === reactionType;
-      return {
-        ...prev,
-        hasLiked: !isSame,
-        userReaction: isSame ? null : reactionType,
-        likes_count: isSame
-          ? prev.likes_count - 1
-          : (currentReaction ? prev.likes_count : prev.likes_count + 1),
-      };
-    });
+    const prevReaction = localPost.userReaction;
+    const isSame = prevReaction === reactionType;
+    const newReaction = isSame ? null : reactionType;
 
-    const result = await toggleReaction(post.id, reactionType, snapshot.userReaction || null);
+    // Build topReactions optimistically using tracked user additions.
+    // If topReactions is empty but likes_count > 0, seed data uses LIKE as implicit type.
+    const baseReactions = (localPost.topReactions?.length)
+      ? localPost.topReactions
+      : (localPost.likes_count > 0 ? ['LIKE' as ReactionType] : []);
+    const effectiveOriginal = originalTopReactions.current.length > 0
+      ? originalTopReactions.current
+      : (localPost.likes_count > 0 ? ['LIKE' as ReactionType] : []);
+
+    let newTopReactions = [...baseReactions];
+    if (isSame) {
+      // Removing — only remove if WE added this type (not from server/seed)
+      if (localPost.likes_count <= 1) {
+        newTopReactions = [];
+      } else if (userAddedTypes.current.has(reactionType)) {
+        newTopReactions = newTopReactions.filter(r => r !== reactionType);
+      }
+      userAddedTypes.current.delete(reactionType);
+    } else {
+      // Adding/switching — add new type if not already shown
+      if (newReaction && !newTopReactions.includes(newReaction)) {
+        newTopReactions.push(newReaction);
+        if (!effectiveOriginal.includes(newReaction)) {
+          userAddedTypes.current.add(newReaction);
+        }
+      }
+      // If switching, remove old type only if WE added it
+      if (prevReaction && userAddedTypes.current.has(prevReaction)) {
+        newTopReactions = newTopReactions.filter(r => r !== prevReaction);
+        userAddedTypes.current.delete(prevReaction);
+      }
+    }
+
+    setLocalPost(prev => ({
+      ...prev,
+      hasLiked: !isSame,
+      userReaction: newReaction,
+      likes_count: isSame
+        ? prev.likes_count - 1
+        : (prevReaction ? prev.likes_count : prev.likes_count + 1),
+      topReactions: newTopReactions,
+    }));
+
+    const result = await toggleReaction(post.id, reactionType, prevReaction || null);
     if (!result.success) {
       setLocalPost(snapshot);
-    } else if (!snapshot.userReaction && post.author_id) {
-      // Only notify on NEW reaction (not change/remove)
+    } else if (!prevReaction && post.author_id) {
       onNotify?.(post.author_id, 'reaction', post.id);
     }
   }, [post.id, post.author_id, localPost, toggleReaction, onNotify]);
@@ -306,6 +349,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
   };
 
   const handleRepost = async () => {
+    if (!currentUserId || readOnly) { onAuthRequired?.(); return; }
     if (isSharing) return;
     const result = await toggleRepost(post.id, localPost.hasReposted || false);
     if (result.success) {
@@ -322,7 +366,38 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     }
   };
 
+  /** Quote post or share to a group — called from the enhanced ShareModal */
+  const handleSharePost = async (comment: string, groupId?: string): Promise<boolean> => {
+    if (!currentUserId || readOnly) { onAuthRequired?.(); return false; }
+
+    const snapshot = {
+      content: post.content,
+      author_name: post.author?.full_name || '',
+      author_avatar: post.author?.avatar_url || null,
+      author_slug: post.author?.slug || null,
+      created_at: post.created_at,
+    };
+
+    const result = await sharePost(post.id, 'QUOTE', comment || undefined, snapshot);
+    if (result.success) {
+      setLocalPost(prev => ({ ...prev, shares_count: prev.shares_count + 1 }));
+      if (post.author_id) onNotify?.(post.author_id, 'repost', post.id);
+      // If sharing to a group, also create a post in that group
+      if (groupId) {
+        await supabase.from('feed_posts').insert({
+          author_id: currentUserId,
+          content: comment || post.content.slice(0, 200),
+          content_type: 'TEXT',
+          group_id: groupId,
+          metadata: { shared_from: post.id, quoted_snapshot: snapshot },
+        });
+      }
+    }
+    return result.success;
+  };
+
   const handleBookmark = async () => {
+    if (!currentUserId) { onAuthRequired?.(); return; }
     setIsBookmarkLoading(true);
     // Optimistic
     const prev = isBookmarked;
@@ -385,7 +460,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     if (translatedText) { setTranslatedText(null); return; }
     setIsTranslating(true);
     try {
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(post.content.slice(0, 500))}&langpair=${lang === 'es' ? 'es|en' : 'en|es'}`);
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(post.content.slice(0, 500))}&langpair=${lang === 'es' ? 'en|es' : 'es|en'}`);
       const data = await res.json();
       if (data?.responseData?.translatedText) {
         setTranslatedText(data.responseData.translatedText);
@@ -397,7 +472,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     }
   }, [post.content, lang, translatedText]);
 
-  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/feed/post/${post.id}`;
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/p/${post.id}`;
   const shareText = `${post.author?.full_name || ''}: ${post.content.slice(0, 120)}${post.content.length > 120 ? '...' : ''}`;
 
   const avatarUrl =
@@ -444,25 +519,40 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
           </div>
         )}
 
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           {/* ── Header ── */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex gap-3 min-w-0">
-              {profileLink ? (
+              {onAuthorClick && post.author?.id ? (
+                <button onClick={() => onAuthorClick(post.author!.id)} className="flex-shrink-0 group">
+                  <img
+                    src={avatarUrl}
+                    alt={post.author?.full_name || 'User'}
+                    className="w-12 h-12 rounded-full object-cover bg-gray-100 dark:bg-dark-bg-tertiary ring-2 ring-transparent group-hover:ring-cv-blue/30 transition-all"
+                  />
+                </button>
+              ) : profileLink ? (
                 <a href={profileLink} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group">
                   <img
                     src={avatarUrl}
                     alt={post.author?.full_name || 'User'}
-                    className="w-12 h-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-cv-blue/30 transition-all"
+                    className="w-12 h-12 rounded-full object-cover bg-gray-100 dark:bg-dark-bg-tertiary ring-2 ring-transparent group-hover:ring-cv-blue/30 transition-all"
                   />
                 </a>
               ) : (
-                <img src={avatarUrl} alt={post.author?.full_name || 'User'} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                <img src={avatarUrl} alt={post.author?.full_name || 'User'} className="w-12 h-12 rounded-full object-cover bg-gray-100 dark:bg-dark-bg-tertiary flex-shrink-0" />
               )}
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {profileLink ? (
+                  {onAuthorClick && post.author?.id ? (
+                    <button
+                      onClick={() => onAuthorClick(post.author!.id)}
+                      className="font-bold text-gray-900 dark:text-white hover:text-cv-blue transition-colors text-[15px] leading-tight text-left"
+                    >
+                      {post.author?.full_name || 'Usuario'}
+                    </button>
+                  ) : profileLink ? (
                     <a
                       href={profileLink}
                       target="_blank"
@@ -495,7 +585,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                   </p>
                 )}
 
-                <div className="flex items-center gap-1 mt-0.5">
+                <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                   <span className="text-[11px] text-gray-400 dark:text-gray-500">{timeAgo}</span>
                   {localPost.is_edited && (
                     <span className="text-[11px] text-gray-300 dark:text-gray-600 italic"> · {tp.edited}</span>
@@ -505,6 +595,14 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                     <GlobeAltIcon className="w-3 h-3" />
                     {tp.public}
                   </span>
+                  {post.group && (
+                    <>
+                      <span className="text-[11px] text-gray-300 dark:text-gray-600">·</span>
+                      <span className="text-[11px] font-semibold text-cv-blue/80 dark:text-cv-blue/70 truncate max-w-[140px]">
+                        {post.group.name}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -622,6 +720,43 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
             </div>
           )}
 
+          {/* ── Quote preview ── */}
+          {(() => {
+            const meta = post.metadata as { quoted_snapshot?: { content: string; author_name: string; author_avatar?: string | null; author_slug?: string | null; created_at?: string } } | null;
+            const snap = meta?.quoted_snapshot;
+            if (!snap) return null;
+            const snapAvatarUrl = snap.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(snap.author_name || 'U')}&background=3B82F6&color=fff`;
+            const snapProfileLink = snap.author_slug ? `/cv/${snap.author_slug}` : null;
+            return (
+              <div className="mb-4 border border-gray-200 dark:border-dark-border rounded-xl overflow-hidden bg-gray-50 dark:bg-dark-bg-tertiary p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  {snapProfileLink ? (
+                    <a href={snapProfileLink} target="_blank" rel="noopener noreferrer">
+                      <img src={snapAvatarUrl} alt={snap.author_name} className="w-6 h-6 rounded-full object-cover bg-gray-100 dark:bg-dark-bg-tertiary flex-shrink-0 hover:opacity-80 transition-opacity" />
+                    </a>
+                  ) : (
+                    <img src={snapAvatarUrl} alt={snap.author_name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                  )}
+                  {snapProfileLink ? (
+                    <a href={snapProfileLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-cv-blue transition-colors">
+                      {snap.author_name}
+                    </a>
+                  ) : (
+                    <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{snap.author_name}</span>
+                  )}
+                  {snap.created_at && (
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                      · {formatDistanceToNow(new Date(snap.created_at), { addSuffix: true, locale: lang === 'es' ? es : undefined })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 leading-relaxed whitespace-pre-wrap">
+                  {snap.content}
+                </p>
+              </div>
+            );
+          })()}
+
           {/* ── Link preview ── */}
           {(() => {
             const meta = post.metadata as { linkPreview?: { url: string; title?: string; description?: string; image?: string } } | null;
@@ -665,7 +800,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
             const getCount = (idx: number) => voteCounts.find(v => v.option_index === idx)?.count || 0;
 
             const handleVote = async (idx: number) => {
-              if (showResults || !onPollVote) return;
+              if (showResults || !onPollVote || readOnly) { if (readOnly) onAuthRequired?.(); return; }
               // Optimistic update
               setLocalPost(prev => ({
                 ...prev,
@@ -693,7 +828,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
             const timeLabel = isExpiredPoll
               ? (lang === 'es' ? 'Encuesta cerrada' : 'Poll closed')
               : daysLeft > 0
-                ? `${daysLeft}${lang === 'es' ? 'd restante' : 'd left'}`
+                ? `${daysLeft}${lang === 'es' ? 'd restantes' : 'd left'}`
                 : `${hoursLeft}${lang === 'es' ? 'h restante' : 'h left'}`;
 
             return (
@@ -757,9 +892,15 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
             if (!eventData) return null;
 
             const eventDateObj = new Date(eventData.date + 'T00:00:00');
+            // Guard against invalid dates
+            if (isNaN(eventDateObj.getTime())) return null;
             const isPast = eventDateObj < new Date();
             const monthStr = eventDateObj.toLocaleString(lang === 'es' ? 'es' : 'en', { month: 'short' }).toUpperCase();
             const dayNum = eventDateObj.getDate();
+            const formattedDate = eventDateObj.toLocaleDateString(
+              lang === 'es' ? 'es-ES' : 'en-US',
+              { day: 'numeric', month: 'short', year: 'numeric' }
+            );
 
             return (
               <div className={`mb-4 rounded-xl border ${isPast ? 'border-gray-200 dark:border-dark-border opacity-75' : 'border-rose-200 dark:border-rose-800/30'} overflow-hidden`}>
@@ -791,7 +932,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                     <div className="mt-1 space-y-0.5">
                       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                         <CalendarDaysIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                        {eventData.date}{eventData.time ? ` · ${eventData.time}` : ''}
+                        {formattedDate}{eventData.time ? ` · ${eventData.time}` : ''}
                       </p>
                       {eventData.location && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -823,17 +964,19 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
               {localPost.likes_count > 0 && (
                 <div className="flex items-center gap-1.5">
                   <div className="flex -space-x-1">
-                    {localPost.userReaction && localPost.userReaction !== 'LIKE' && (() => {
-                      const IconComp = ReactionIcons[localPost.userReaction];
+                    {(localPost.topReactions?.length ? localPost.topReactions : ['LIKE' as ReactionType]).map((rt, i) => {
+                      const IconComp = ReactionIcons[rt];
+                      const cfg = reactionMap[rt];
                       return (
-                        <span className={`w-[22px] h-[22px] rounded-full bg-gradient-to-br ${reactionMap[localPost.userReaction].gradient} ring-2 ring-white dark:ring-dark-bg-secondary flex items-center justify-center z-10 shadow-sm`}>
+                        <span
+                          key={rt}
+                          className={`w-[22px] h-[22px] rounded-full bg-gradient-to-br ${cfg.gradient} ring-2 ring-white dark:ring-dark-bg-secondary flex items-center justify-center shadow-sm`}
+                          style={{ zIndex: 10 - i }}
+                        >
                           <IconComp className="w-3 h-3 text-white" />
                         </span>
                       );
-                    })()}
-                    <span className="w-[22px] h-[22px] rounded-full bg-gradient-to-br from-blue-500 to-blue-600 ring-2 ring-white dark:ring-dark-bg-secondary flex items-center justify-center shadow-sm">
-                      <HandThumbUpSolidIcon className="w-3 h-3 text-white" />
-                    </span>
+                    })}
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 hover:text-cv-blue hover:underline cursor-pointer tabular-nums">
                     {localPost.likes_count}
@@ -875,10 +1018,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                 reactionsTimeout.current = setTimeout(() => setShowReactions(false), 400);
               }}
             >
-              {/* Reactions picker flyout */}
+              {/* Reactions picker flyout — all 5 reaction types */}
               {showReactions && (
                 <div
-                  className="absolute bottom-full left-1/2 mb-2 flex items-center gap-0.5 px-2 py-1.5 bg-white dark:bg-dark-bg-secondary rounded-full shadow-xl border border-gray-200 dark:border-dark-border z-50"
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 flex items-center gap-1 px-2.5 py-2 bg-white dark:bg-dark-bg-secondary rounded-full shadow-xl border border-gray-200 dark:border-dark-border z-50"
                   style={{
                     opacity: 0,
                     animation: 'reactionPopIn 200ms ease-out forwards',
@@ -920,9 +1063,8 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
 
               {/* Main like/reaction button — desktop: click=toggle, hover=picker / mobile: tap=toggle, long-press=picker */}
               <button
-                onClick={() => {
-                  // On desktop, handle click normally
-                  if (!('ontouchstart' in window)) {
+                onClick={(e) => {
+                  if ((e.nativeEvent as PointerEvent).pointerType !== 'touch') {
                     handleQuickLike();
                   }
                 }}
@@ -964,7 +1106,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
 
             {/* Comment */}
             <button
-              onClick={() => setShowComments(!showComments)}
+              onClick={() => { if (!currentUserId || readOnly) { onAuthRequired?.(); return; } setShowComments(!showComments); }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition-colors text-sm font-semibold mx-0.5 ${
                 showComments
                   ? 'text-cv-blue bg-blue-50 dark:bg-blue-900/20'
@@ -1025,6 +1167,9 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
               setLocalPost(prev => ({ ...prev, comments_count: prev.comments_count + 1 }));
               if (post.author_id) onNotify?.(post.author_id, 'comment', post.id);
             }}
+            onCountSync={(realCount) => {
+              setLocalPost(prev => prev.comments_count !== realCount ? { ...prev, comments_count: realCount } : prev);
+            }}
           />
         )}
       </article>
@@ -1036,6 +1181,11 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
         postUrl={shareUrl}
         shareText={shareText}
         authorName={post.author?.full_name || ''}
+        postId={post.id}
+        currentUserId={currentUserId}
+        hasReposted={localPost.hasReposted}
+        onRepost={handleRepost}
+        onSharePost={handleSharePost}
       />
 
       {/* Delete Confirmation Modal */}

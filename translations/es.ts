@@ -29,6 +29,7 @@ export const translations = {
         backToHome: 'Volver al Inicio',
         contactSupport: 'Contactar Soporte',
         loading: 'Cargando...',
+        saving: 'Guardando...',
         translating: 'Traduciendo...',
         save: 'Guardar',
         cancel: 'Cancelar',
@@ -1591,10 +1592,18 @@ export const translations = {
             templates: "Plantillas",
             jobSearch: "Oportunidades",
             myApplications: "Mis Aplicaciones",
-            feed: "Comunidad",
+            feed: "Feed",
+            grupos: "Grupos",
+            canales: "Canales",
+            notificaciones: "Notificaciones",
             companyDashboard: "Panel de Empresa",
             wizardAlertTitle: "Completa el wizard primero",
             wizardAlertDescription: "Debes completar el wizard de perfil (incluyendo el paso de Finalización) para acceder a todas las funcionalidades.",
+            sectionHome: "INICIO",
+            sectionProfile: "MI PERFIL",
+            sectionCommunity: "COMUNIDAD",
+            sectionCareer: "CARRERA",
+            sectionSettings: "CONFIGURACIÓN",
         },
         successStories: {
             title: "¡Comparte Tu Caso de Éxito!",
@@ -2291,6 +2300,7 @@ export const translations = {
             { name: 'Prensa/Kit de Medios', href: '#', id: 'nosotros/prensa' },
             { name: 'Contacto', href: '#', id: 'nosotros/contacto' },
         ]},
+        { name: 'Comunidad', href: '#', id: 'comunidad' },
         { name: 'Precios', href: '#', id: 'precios' },
     ],
     PRICING_PLANS: [
@@ -4500,22 +4510,6 @@ export const translations = {
                 applicationError: 'Error al enviar la aplicación'
             }
         },
-        talentCategories: {
-            pageTitle: 'Búsqueda de Talentos por Categorías - Empresa',
-            pageDescription: 'Explora talentos organizados por categorías profesionales',
-            backToDashboard: 'Volver al Panel Empresarial',
-            title: 'Búsqueda de Talentos por Categorías',
-            subtitle: 'Explora profesionales organizados por nicho, profesión y especialización',
-            viewTalents: 'Ver talentos',
-            howItWorksTitle: '¿Cómo funciona la búsqueda por categorías?',
-            howItWorksDescription: 'Los talentos se organizan automáticamente en categorías según las palabras clave encontradas en sus títulos profesionales y descripciones. Cada categoría agrupa perfiles relacionados para facilitar la búsqueda.',
-            nicheLabel: 'Nicho',
-            nicheDescription: 'Extraído del campo "headline" (descripción profesional)',
-            professionLabel: 'Profesión',
-            professionDescription: 'Extraído del campo "title" (título profesional)',
-            specializationLabel: 'Especialización',
-            specializationDescription: 'Búsqueda combinada en ambos campos'
-        },
         jobPostingsManagement: {
             title: 'Vacantes de Empleo',
             subtitle: 'Gestiona tus vacantes y rastrea las aplicaciones',
@@ -4705,7 +4699,7 @@ export const translations = {
         },
     },
     feed: {
-        title: 'Feed de Actividad',
+        title: 'Comunidad',
         subtitle: 'Comparte tus logros y conecta con otros profesionales',
         beta: 'Beta',
         createPost: {
@@ -4847,6 +4841,17 @@ export const translations = {
             noResultsHint: 'Intenta con otra búsqueda o filtro',
         },
         endOfFeed: 'Has llegado al final',
+        floatingPill: {
+            newPost: 'Nueva publicación',
+            goToTop: 'Ir al inicio',
+            bookmarks: 'Guardados',
+            refresh: 'Actualizar feed',
+            menu: 'Menú',
+        },
+        sidebar: {
+            viewMyCV: 'Ver mi CV',
+            savedPosts: 'Guardados',
+        },
         profileCard: {
             noHeadline: 'Sin titular aún',
             comments: 'Coments.',
@@ -4855,6 +4860,21 @@ export const translations = {
             ctaClicks: 'Clics CTA',
             viewProfile: 'Ver perfil completo',
             completeProfile: 'Completar perfil',
+            posts: 'Posts',
+            likes: 'Me gustas',
+        },
+        userProfile: {
+            backToFeed: 'Volver al Feed',
+            postsBy: 'Posts de',
+            viewFullCV: 'Ver CV completo',
+            noPosts: 'Aún no ha publicado',
+            memberSince: 'Miembro desde',
+            posts: 'posts',
+            likesReceived: 'likes recibidos',
+            commentsReceived: 'comentarios',
+            summary: 'Acerca de',
+            loading: 'Cargando perfil...',
+            notFound: 'Perfil no encontrado',
         },
         poll: {
             question: 'Pregunta',
@@ -4912,7 +4932,16 @@ export const translations = {
     },
     loadingMessages: {
         verifyingSession: 'Verificando sesión...',
-        verifyingAdminPermissions: 'Verificando permisos de administrador...'
+        verifyingAdminPermissions: 'Verificando permisos de administrador...',
+        loadingDashboard: 'Cargando dashboard',
+        gettingInfo: 'Obteniendo información',
+        processingData: 'Procesando datos',
+        finalizing: 'Finalizando',
+    },
+    slugEditor: {
+        waitDays: (n: number) => `Debes esperar ${n} día${n !== 1 ? 's' : ''} más para cambiar tu URL`,
+        nextAvailableDate: (date: string) => `Próxima fecha disponible: ${date}`,
+        helperText: 'Solo letras minúsculas, números y guiones. Mínimo 3 caracteres. Podrás cambiarla nuevamente en 90 días.',
     },
     matchScoreBadge: {
         excellent: 'Excelente',

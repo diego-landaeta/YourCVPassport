@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Header from './Header';
 import Footer from './Footer';
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { pathname } = useLocation();
-    // Language is now managed by localStorage in LanguageContext, no need to set it based on pathname
+    const { session } = useAuth();
 
     useEffect(() => {
         // Apply saved theme on initial load
@@ -17,7 +18,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }, []);
 
     // Routes that should not show Header/Footer (dashboard with its own navigation)
-    const hideHeaderFooter = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+    // Also hide for /comunidad and /feed when logged in (CommunityRoute renders full DashboardPage)
+    const isCommunityRoute = pathname === '/comunidad' || pathname === '/feed';
+    const hideHeaderFooter =
+        pathname === '/dashboard' ||
+        pathname.startsWith('/dashboard/') ||
+        (isCommunityRoute && !!session);
 
     return (
         <>

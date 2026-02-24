@@ -1,7 +1,7 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import Sidebar from '../dashboard/Sidebar';
 import MobileNav from '../dashboard/MobileNav';
@@ -12,29 +12,27 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useDashboardTour } from '../../hooks/useDashboardTour';
 import LoadingSpinner from '../shared/LoadingSpinner';
-import MobileFloatingPill from '../dashboard/MobileFloatingPill';
 import { calculateProfileCompleteness } from '../../utils/profileValidation';
 
 const DashboardPage: React.FC = () => {
+  // ⚠️ ALL hooks must be called before any conditional returns (React Rules of Hooks)
   const { profile, session, profileLoading } = useAuth();
   const { lang } = useLanguage();
   const t = useTranslations();
-
-  // Wait for profile to load ONLY on initial mount (when we don't have a profile yet)
-  // Don't show loading spinner during refetch (profile updates), as that would unmount everything
-  if (profileLoading && !profile) {
-    return <LoadingSpinner message={t.dashboard.loading} size="large" />;
-  }
-
-  // Admins are NOT users - redirect them to admin panel
-  if (profile?.role === 'admin') {
-    return <Navigate to="/admin" replace />;
-  }
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { hasTourBeenCompleted } = useDashboardTour(profile?.id);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('sidebar-collapsed') === 'true');
+  const toggleSidebarCollapsed = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar-collapsed', String(next));
+      return next;
+    });
+  }, []);
 
-  // Initialize state variables first
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string>('');
   const [profileCompleteness, setProfileCompleteness] = useState(0);
@@ -46,21 +44,53 @@ const DashboardPage: React.FC = () => {
   // Check wizard_completed field in database (set when user completes Finalization step)
   const getInitialSection = () => {
     const hasCompletedWizardInDB = profile?.wizard_completed === true;
-    const initialSection = hasCompletedWizardInDB ? 'dashboard' : 'mi-perfil';
+    if (!hasCompletedWizardInDB) return 'mi-perfil';
 
-    // DEBUG: Log initial section determination
-    console.log('🔍 DashboardPage - Initial Section:', {
-      profileExists: !!profile,
-      wizardCompleted: profile?.wizard_completed,
-      hasCompletedWizardInDB,
-      initialSection,
-    });
+    const searchParams = new URLSearchParams(location.search);
 
-    // Return 'dashboard' if wizard completed, otherwise 'mi-perfil'
-    return initialSection;
+    // If accessed via /comunidad or /feed route, open the community section
+    if (location.pathname === '/comunidad' || location.pathname === '/feed') {
+      // ?grupo= param → jump straight to grupos section
+      if (searchParams.get('grupo')) return 'grupos';
+      return 'feed';
+    }
+
+    return 'dashboard';
   };
 
   const [activeSection, setActiveSection] = useState<string>(getInitialSection());
+
+  // ── Browser history integration for back/forward button support ──
+  const isPopStateRef = useRef(false);
+
+  const changeSectionWithHistory = useCallback((section: string) => {
+    setActiveSection(prev => {
+      if (prev === section) return prev; // no-op
+      // Push current section so back button can return to it
+      window.history.pushState({ section }, '');
+      return section;
+    });
+  }, []);
+
+  // Set initial history state on mount
+  useEffect(() => {
+    const initial = getInitialSection();
+    window.history.replaceState({ section: initial }, '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Listen for popstate (browser back/forward, mouse back button)
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      const section = e.state?.section;
+      if (section) {
+        isPopStateRef.current = true;
+        setActiveSection(section);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const seoTitle = lang === 'es'
     ? 'Panel de Control'
@@ -186,7 +216,7 @@ const DashboardPage: React.FC = () => {
     const handleSectionChange = (event: CustomEvent) => {
       const { section } = event.detail;
       if (section) {
-        setActiveSection(section);
+        changeSectionWithHistory(section);
       }
     };
 
@@ -195,7 +225,35 @@ const DashboardPage: React.FC = () => {
     return () => {
       window.removeEventListener('change-dashboard-section' as any, handleSectionChange);
     };
-  }, []);
+  }, [changeSectionWithHistory]);
+
+  // Sync URL with community section:
+  // /comunidad (es) or /feed (en) when any community section is active, /dashboard otherwise.
+  // grupos, canales and notificaciones are sub-sections of /comunidad — don't redirect away from it.
+  useEffect(() => {
+    const communityPath = lang === 'es' ? '/comunidad' : '/feed';
+    const isCommunityPath = location.pathname === '/comunidad' || location.pathname === '/feed';
+    const COMMUNITY_SECTIONS = ['feed', 'grupos', 'canales', 'notificaciones', 'perfiles'];
+    const isCommunitySection = COMMUNITY_SECTIONS.includes(activeSection) || activeSection.startsWith('perfil-usuario:');
+
+    if (activeSection === 'feed' && !isCommunityPath) {
+      navigate(communityPath, { replace: true });
+    } else if (!isCommunitySection && isCommunityPath) {
+      // Use replaceState to avoid remounting DashboardPage (navigate() would unmount/remount
+      // the component because /dashboard and /comunidad are separate route configs,
+      // which resets activeSection back to 'dashboard').
+      window.history.replaceState({ section: activeSection }, '', '/dashboard');
+    }
+  }, [activeSection, lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Early returns AFTER all hooks ───────────────────────────────────────────
+
+  // Wait for profile to load ONLY on initial mount (when we don't have a profile yet)
+  // Don't show loading spinner during refetch (profile updates), as that would unmount everything
+  if (profileLoading && !profile) {
+    return <LoadingSpinner message={t.dashboard.loading} size="large" />;
+  }
+
 
   return (
     <>
@@ -210,13 +268,15 @@ const DashboardPage: React.FC = () => {
         <Sidebar
           profile={profile}
           activeSection={activeSection}
-          onSectionChange={setActiveSection}
+          onSectionChange={changeSectionWithHistory}
           experiences={experiences}
           education={education}
           skills={skills}
           languages={languages}
           profileCompleteness={profileCompleteness}
           tourCompleted={hasTourBeenCompleted}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebarCollapsed}
         />
       </div>
 
@@ -228,28 +288,20 @@ const DashboardPage: React.FC = () => {
         <MobileNav
           profile={profile}
           activeSection={activeSection}
-          onSectionChange={setActiveSection}
+          onSectionChange={changeSectionWithHistory}
           isOpen={isMobileMenuOpen}
           onToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           profileCompleteness={profileCompleteness}
         />
       </div>
 
-      {/* Bottom Floating Pill — mobile only */}
-      <MobileFloatingPill
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        avatarUrl={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=3B82F6&color=fff&size=40`}
-        profileName={profile?.full_name}
-      />
 
       {/* Main Content */}
-      <div className={`min-h-screen transition-all duration-300 lg:ml-64`}>
+      <div className={`min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         <div className="pt-16 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-24 lg:pb-8">
           <DashboardContent
             activeSection={activeSection}
-            onSectionChange={setActiveSection}
+            onSectionChange={changeSectionWithHistory}
             onSaveStatusChange={(message, timestamp) => {
               setSaveMessage(message);
               if (timestamp) setLastSaved(timestamp);

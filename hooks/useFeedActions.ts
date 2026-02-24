@@ -22,7 +22,7 @@ export const useFeedActions = () => {
     reactionType: ReactionType,
     currentReaction: ReactionType | null
   ) => {
-    if (!session?.user.id) return { success: false };
+    if (!session?.user.id || isLiking) return { success: false };
 
     try {
       setIsLiking(true);
@@ -36,25 +36,22 @@ export const useFeedActions = () => {
           .eq('user_id', session.user.id);
         if (error) throw error;
         return { success: true, newReaction: null, newLikedState: false };
-      } else if (currentReaction) {
-        // Case 2: Different reaction → update
-        const { error } = await supabase
+      } else {
+        // Case 2 & 3: New reaction or changing reaction → upsert
+        // Delete first (no-op if nothing exists), then insert
+        await supabase
           .from('feed_likes')
-          .update({ reaction_type: reactionType })
+          .delete()
           .eq('post_id', postId)
           .eq('user_id', session.user.id);
-        if (error) throw error;
-        return { success: true, newReaction: reactionType, newLikedState: true };
-      } else {
-        // Case 3: No reaction → insert
-        const { error } = await supabase
+        const { error: insError } = await supabase
           .from('feed_likes')
           .insert({
             post_id: postId,
             user_id: session.user.id,
             reaction_type: reactionType,
           });
-        if (error) throw error;
+        if (insError) throw insError;
         return { success: true, newReaction: reactionType, newLikedState: true };
       }
     } catch (err) {
@@ -63,7 +60,7 @@ export const useFeedActions = () => {
     } finally {
       setIsLiking(false);
     }
-  }, [session?.user.id]);
+  }, [session?.user.id, isLiking]);
 
   // Backward-compatible wrapper
   const toggleLike = useCallback(async (postId: string, currentlyLiked: boolean) => {
@@ -123,7 +120,14 @@ export const useFeedActions = () => {
   const sharePost = useCallback(async (
     originalPostId: string,
     shareType: 'REPOST' | 'QUOTE' = 'REPOST',
-    comment?: string
+    comment?: string,
+    originalSnapshot?: {
+      content: string;
+      author_name: string;
+      author_avatar: string | null;
+      author_slug: string | null;
+      created_at: string;
+    }
   ) => {
     if (!session?.user.id) return { success: false };
 
@@ -142,15 +146,18 @@ export const useFeedActions = () => {
 
       if (shareError) throw shareError;
 
-      // If QUOTE, create a new post with reference
+      // If QUOTE, create a new post with reference + snapshot for rendering
       if (shareType === 'QUOTE' && comment) {
+        const metadata: Record<string, unknown> = { shared_from: originalPostId };
+        if (originalSnapshot) metadata.quoted_snapshot = originalSnapshot;
+
         const { error: postError } = await supabase
           .from('feed_posts')
           .insert({
             author_id: session.user.id,
             content: comment,
             content_type: 'TEXT',
-            metadata: { shared_from: originalPostId }
+            metadata,
           });
 
         if (postError) throw postError;

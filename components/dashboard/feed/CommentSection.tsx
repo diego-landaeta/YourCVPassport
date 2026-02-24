@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTranslations } from '../../../hooks/useTranslations';
 import { useFeedComments } from '../../../hooks/useFeedComments';
@@ -12,12 +12,14 @@ interface CommentSectionProps {
   postId: string;
   currentUserId?: string;
   onCommentAdded?: () => void;
+  onCountSync?: (realCount: number) => void;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   postId,
   currentUserId,
   onCommentAdded,
+  onCountSync,
 }) => {
   const { profile } = useAuth();
   const t = useTranslations();
@@ -40,6 +42,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     toggleCommentLike,
     isAdding,
   } = useFeedComments(postId);
+
+  // Sync real comment count back to parent when loaded
+  useEffect(() => {
+    if (!loading && onCountSync) {
+      onCountSync(comments.length);
+    }
+  }, [loading, comments.length, onCountSync]);
 
   /* ── Handlers ── */
   const handleSubmit = async (e?: React.FormEvent) => {

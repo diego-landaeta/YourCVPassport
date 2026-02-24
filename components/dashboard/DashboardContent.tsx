@@ -39,6 +39,10 @@ const OpportunitiesSection = lazy(() => import('./OpportunitiesSection'));
 const JobSearchSection = lazy(() => import('./JobSearchSection'));
 const MyApplicationsSection = lazy(() => import('./MyApplicationsSection'));
 const FeedSection = lazy(() => import('./feed/FeedSection'));
+const NotificationsPage = lazy(() => import('./NotificationsPage'));
+const GroupsSection = lazy(() => import('./groups/GroupsSection'));
+const CommunityProfilesSection = lazy(() => import('./CommunityProfilesSection'));
+const UserFeedProfile = lazy(() => import('./feed/UserFeedProfile'));
 import {
   IdentityFormData,
   ExperienceFormData,
@@ -252,10 +256,10 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
           </svg>
           <div className="flex-1">
             <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
-              Debes esperar {daysRemaining} día{daysRemaining !== 1 ? 's' : ''} más para cambiar tu URL
+              {translations.slugEditor.waitDays(daysRemaining)}
             </p>
             <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
-              Próxima fecha disponible: {nextChangeDate}
+              {translations.slugEditor.nextAvailableDate(nextChangeDate)}
             </p>
           </div>
         </div>
@@ -272,14 +276,14 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Guardando...
+                {translations.common.saving}
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Guardar
+                {translations.common.save}
               </>
             )}
           </button>
@@ -288,7 +292,7 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
             disabled={isSaving}
             className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {translations.common.cancel}
           </button>
         </div>
       )}
@@ -296,7 +300,7 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
       {/* Helper Text */}
       {isEditing && canChange && (
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Solo letras minúsculas, números y guiones. Mínimo 3 caracteres. Podrás cambiarla nuevamente en 90 días.
+          {translations.slugEditor.helperText}
         </p>
       )}
     </div>
@@ -322,7 +326,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     certificationsCount: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [loadingMessage, setLoadingMessage] = useState('Cargando dashboard');
+  const [loadingMessage, setLoadingMessage] = useState('');
   const dashboardDataLoadedRef = useRef(false);
 
   const [showCardGallery, setShowCardGallery] = useState(false);
@@ -372,13 +376,15 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   useEffect(() => {
     if (!loading) return;
 
+    const lm = translations.loadingMessages;
     const messages = [
-      'Cargando dashboard',
-      'Obteniendo información',
-      'Procesando datos',
-      'Finalizando'
+      lm.loadingDashboard,
+      lm.gettingInfo,
+      lm.processingData,
+      lm.finalizing,
     ];
 
+    setLoadingMessage(messages[0]);
     let currentIndex = 0;
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % messages.length;
@@ -612,15 +618,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
       const portCount = results[8].status === 'fulfilled' ? results[8].value.count : 0;
       const certCount = results[9].status === 'fulfilled' ? results[9].value.count : 0;
 
-      console.log('📊 CONTEOS DASHBOARD:', {
-        experiences: expCount,
-        skills: skillsCount,
-        education: eduCount,
-        languages: langCount,
-        portfolio: portCount,
-        certifications: certCount,
-        stamps: stampsCount,
-      });
 
       if (results[6].status === 'rejected') {
         
@@ -2495,6 +2492,56 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
     return (
       <Suspense fallback={<SectionLoader />}>
         <FeedSection onSectionChange={onSectionChange} />
+      </Suspense>
+    );
+  }
+
+  // Notificaciones Section
+  if (activeSection === 'notificaciones') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <NotificationsPage />
+      </Suspense>
+    );
+  }
+
+  // Grupos / Comunidades Section
+  if (activeSection === 'grupos' || activeSection.startsWith('grupos:')) {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <GroupsSection mode="group" onSectionChange={onSectionChange} />
+      </Suspense>
+    );
+  }
+
+  // Canales Section
+  if (activeSection === 'canales' || activeSection.startsWith('canales:')) {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <GroupsSection mode="channel" onSectionChange={onSectionChange} />
+      </Suspense>
+    );
+  }
+
+  // User Feed Profile (in-app social profile)
+  if (activeSection.startsWith('perfil-usuario:')) {
+    const targetUserId = activeSection.split(':')[1];
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <UserFeedProfile
+          userId={targetUserId}
+          onBack={() => onSectionChange('feed')}
+          onSectionChange={onSectionChange}
+        />
+      </Suspense>
+    );
+  }
+
+  // Community Profiles Section
+  if (activeSection === 'perfiles') {
+    return (
+      <Suspense fallback={<SectionLoader />}>
+        <CommunityProfilesSection onSectionChange={onSectionChange} />
       </Suspense>
     );
   }

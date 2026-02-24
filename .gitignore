@@ -123,3 +123,6 @@ debug-*.html
 # Testing outputs
 test-results/
 playwright-report/
+
+# Windows null device artifact
+nul

@@ -2,7 +2,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
@@ -27,6 +27,8 @@ const LeadsPage = lazy(() => import('./components/dashboard/LeadsPage'));
 const BlogPage = lazy(() => import('./components/pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./components/pages/BlogPostPage'));
 const AIProductPage = lazy(() => import('./components/pages/AIProductPage'));
+const PublicFeedPage = lazy(() => import('./components/pages/PublicFeedPage'));
+const PostViewPage = lazy(() => import('./components/pages/PostViewPage'));
 
 // Authentication pages
 const AuthPage = lazy(() => import('./pages/auth/AuthPage'));
@@ -45,7 +47,7 @@ const CreditsManagementPage = lazy(() => import('./components/company/CreditsMan
 const SavedSearchesPage = lazy(() => import('./components/company/SavedSearchesPage'));
 const ExportsHistoryPage = lazy(() => import('./components/company/ExportsHistoryPage'));
 const CompanyTeamPage = lazy(() => import('./components/company/CompanyTeamPage'));
-const CompanySettingsPage = lazy(() => import('./components/company/CompanySettingsPage_NEW'));
+const CompanySettingsPage = lazy(() => import('./components/company/CompanySettingsPage'));
 const CompanyAnalyticsPage = lazy(() => import('./components/company/CompanyAnalyticsPage'));
 const CompanyMessagesPage = lazy(() => import('./components/company/CompanyMessagesPage'));
 const JobPostingsManagementPage = lazy(() => import('./components/company/JobPostingsManagementPage'));
@@ -61,6 +63,14 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Dev tools
 const TemplatePreviewCapture = lazy(() => import('./components/pages/TemplatePreviewCapture'));
+
+// Auth-aware community route: logged-in users see the full dashboard at /comunidad or /feed
+const CommunityRoute: React.FC = () => {
+  const { session, profileLoading } = useAuth();
+  if (profileLoading) return <LoadingSpinner />;
+  if (session) return <DashboardPage />;
+  return <PublicFeedPage />;
+};
 
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
@@ -99,6 +109,15 @@ const AppContent: React.FC = () => {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/search" element={<AdminTalentSearchPage />} />
           </Route>
+
+          {/* Community: full dashboard for logged-in users, public page otherwise */}
+          <Route path="/feed" element={<CommunityRoute />} />
+          <Route path="/comunidad" element={<CommunityRoute />} />
+
+          {/* Individual post view — public, noindex */}
+          <Route path="/feed/post/:id" element={<PostViewPage />} />
+          <Route path="/comunidad/post/:id" element={<PostViewPage />} />
+          <Route path="/p/:id" element={<PostViewPage />} />
 
           {/* Public Job Search */}
           <Route path="/jobs" element={<JobSearchPage />} />

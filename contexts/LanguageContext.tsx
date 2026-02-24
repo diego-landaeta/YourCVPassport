@@ -1,6 +1,7 @@
 // @refresh reset
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { routeConfig } from '../config/routeConfig';
 
 type Language = 'en' | 'es';
@@ -107,6 +108,9 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     return (
         <LanguageContext.Provider value={{ lang, setLang, setLangWithNav }}>
+            <Helmet>
+                <html lang={lang} />
+            </Helmet>
             {children}
         </LanguageContext.Provider>
     );

@@ -66,6 +66,10 @@ export interface FeedPost {
   hasReposted?: boolean;
   hasBookmarked?: boolean;
   userReaction?: ReactionType | null;
+  topReactions?: ReactionType[];
+  // Group context
+  group_id?: string | null;
+  group?: { id: string; name: string; metadata?: Record<string, unknown> } | null;
   // Poll-specific joined data
   userPollVote?: number | null;
   pollVoteCounts?: { option_index: number; count: number }[];
@@ -115,6 +119,7 @@ export interface CreatePostInput {
   achievementData?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
   visibility?: FeedVisibility;
+  group_id?: string;
 }
 
 export interface FeedFilters {
