@@ -1,0 +1,16 @@
+# Google Search Console Disavow File — yourcvpassport.com
+# Generated: 2026-02-23
+#
+# Instructions:
+# 1. Go to https://search.google.com/search-console/disavow-links
+# 2. Select property: yourcvpassport.com
+# 3. Upload this file
+#
+# These domains have been identified as spam/automated backlinks with no editorial value.
+# All anchors are classic spam patterns: "learn this here now", "upgrade SEO", "whitehat traffic".
+
+domain:seoagency.sale
+domain:quero.party
+domain:screenshots.wiki
+domain:sites.jake.eu
+domain:bye.fyi
