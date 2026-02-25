@@ -19,7 +19,7 @@ interface GroupDetailViewProps {
   onBack: () => void;
 }
 
-type GroupTab = 'posts' | 'members';
+// Members tab removed — sidebar covers it
 
 const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) => {
   const { lang } = useLanguage();
@@ -32,7 +32,7 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
   const { votePoll } = useFeedActions();
   const { sendNotification } = useNotifications();
 
-  const [activeTab, setActiveTab] = useState<GroupTab>('posts');
+  const [showAllMembers, setShowAllMembers] = useState(false);
   const [posts, setPosts] = useState<FeedPostType[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [membershipLoading, setMembershipLoading] = useState(false);
@@ -221,8 +221,20 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
   const accentColor = isChannel ? 'bg-purple-500 hover:bg-purple-600' : 'bg-cv-blue hover:bg-blue-700';
   const coverGradient = isChannel ? 'from-purple-600/80 to-violet-700/80' : 'from-cv-blue/70 to-blue-600/80';
 
+  // Find top posters from the loaded posts
+  const topPosters = (() => {
+    const counts: Record<string, { id: string; name: string; avatar: string | null; slug: string | null; count: number }> = {};
+    for (const p of posts) {
+      const a = p.author;
+      if (!a?.id) continue;
+      if (!counts[a.id]) counts[a.id] = { id: a.id, name: a.full_name || '?', avatar: a.avatar_url, slug: a.slug, count: 0 };
+      counts[a.id].count++;
+    }
+    return Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 5);
+  })();
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Back button */}
       <button
         onClick={onBack}
@@ -374,106 +386,218 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4">
-        {(['posts', 'members'] as GroupTab[]).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              activeTab === tab
-                ? (isChannel ? 'bg-purple-500 text-white' : 'bg-cv-blue text-white')
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {tab === 'posts' ? (isEs ? 'Publicaciones' : 'Posts') : (isEs ? 'Miembros' : 'Members')}
-          </button>
-        ))}
-      </div>
+      {/* 3-column layout: left sidebar | posts | right sidebar */}
+      <div className="flex gap-5">
 
-      {/* Tab content */}
-      {activeTab === 'posts' && (
-        <div className="space-y-4">
-          {isMember && session?.user.id && (
-            <CreatePostForm
-              profile={profile}
-              onSubmit={handleCreatePost}
-              isSubmitting={isCreating}
-              cooldown={postCooldown}
-            />
-          )}
-
-          {postsLoading ? (
-            <div className="flex justify-center py-10">
-              <div className="w-6 h-6 border-2 border-cv-blue border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-              <div className="text-4xl mb-3">📝</div>
-              <p className="font-semibold text-gray-700 dark:text-gray-300">
-                {isEs ? 'Sin publicaciones aún' : 'No posts yet'}
-              </p>
-              <p className="text-sm text-gray-400 mt-1">
-                {isEs ? '¡Sé el primero en publicar aquí!' : 'Be the first to post here!'}
-              </p>
-            </div>
-          ) : (
-            posts.map(post => (
-              <FeedPost
-                key={post.id}
-                post={post}
-                currentUserId={session?.user.id}
-                onPostUpdated={fetchGroupPosts}
-                onPollVote={channelReadOnly ? undefined : votePoll}
-                onNotify={sendNotification}
-                readOnly={channelReadOnly}
-                onAuthRequired={channelReadOnly ? handleChannelReadOnly : () => {}}
-              />
-            ))
-          )}
-        </div>
-      )}
-
-      {activeTab === 'members' && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {members.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
-              {isEs ? 'Sin miembros' : 'No members'}
-            </div>
-          ) : (
-            members.map((member) => (
-              <div key={member.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden flex-shrink-0 ${
-                  member.profile?.avatar_url ? '' : 'bg-gradient-to-br from-cv-blue to-blue-600'
-                }`}>
-                  {member.profile?.avatar_url ? (
-                    <img src={member.profile.avatar_url} alt={member.profile.full_name} className="w-full h-full object-cover" />
-                  ) : (
-                    member.profile?.full_name?.charAt(0) ?? '?'
-                  )}
+        {/* LEFT sidebar — hidden on mobile, visible on lg+ */}
+        <div className="hidden lg:block w-64 flex-shrink-0 space-y-4">
+          {/* About card */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sticky top-4">
+            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+              {isEs ? 'Acerca de' : 'About'}
+            </h3>
+            {group.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">{group.description}</p>
+            )}
+            <div className="flex gap-4 text-center py-2 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex-1">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{group.member_count}</div>
+                <div className="text-[10px] text-gray-400 uppercase tracking-wide">
+                  {isChannel ? (isEs ? 'Seguidores' : 'Followers') : (isEs ? 'Miembros' : 'Members')}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {member.profile?.full_name ?? 'Unknown'}
-                  </p>
-                  {member.profile?.headline && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{member.profile.headline}</p>
-                  )}
-                </div>
-                {member.role !== 'member' && (
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    member.role === 'owner'
-                      ? (isChannel ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400' : 'bg-cv-blue/10 text-cv-blue')
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+              </div>
+              <div className="flex-1">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{group.post_count}</div>
+                <div className="text-[10px] text-gray-400 uppercase tracking-wide">Posts</div>
+              </div>
+            </div>
+            {group.created_at && (
+              <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                {isEs ? 'Creado el' : 'Created'} {new Date(group.created_at).toLocaleDateString(isEs ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+            )}
+
+            {/* Owner / Admin info */}
+            {group.owner && (
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2">
+                  {isChannel ? (isEs ? 'Administrador' : 'Admin') : (isEs ? 'Creador' : 'Creator')}
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold overflow-hidden flex-shrink-0 ${
+                    group.owner.avatar_url ? '' : 'bg-gradient-to-br from-cv-blue to-blue-600'
                   }`}>
-                    {member.role === 'owner' ? 'Admin' : 'Mod'}
-                  </span>
+                    {group.owner.avatar_url ? (
+                      <img src={group.owner.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      group.owner.full_name?.charAt(0) ?? '?'
+                    )}
+                  </div>
+                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{group.owner.full_name}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Quick join/leave for sidebar too */}
+            {session?.user.id && !group.isOwner && (
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                {isMember ? (
+                  <button
+                    onClick={handleLeave}
+                    disabled={membershipLoading}
+                    className="w-full py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-xs text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 hover:border-red-300 transition-colors disabled:opacity-50"
+                  >
+                    {isChannel ? (isEs ? 'Dejar de seguir' : 'Unfollow') : (isEs ? 'Salir del grupo' : 'Leave group')}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleJoin}
+                    disabled={membershipLoading}
+                    className={`w-full py-2 rounded-lg text-white text-xs font-semibold transition-colors disabled:opacity-50 ${accentColor}`}
+                  >
+                    {isChannel ? (isEs ? 'Seguir' : 'Follow') : (isEs ? 'Unirse' : 'Join')}
+                  </button>
                 )}
               </div>
-            ))
-          )}
+            )}
+          </div>
         </div>
-      )}
+
+        {/* CENTER — Posts feed */}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-4">
+            {isMember && session?.user.id && (
+              <CreatePostForm
+                profile={profile}
+                onSubmit={handleCreatePost}
+                isSubmitting={isCreating}
+                cooldown={postCooldown}
+              />
+            )}
+
+            {postsLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="w-6 h-6 border-2 border-cv-blue border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+                <div className="text-4xl mb-3">📝</div>
+                <p className="font-semibold text-gray-700 dark:text-gray-300">
+                  {isEs ? 'Sin publicaciones aún' : 'No posts yet'}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {isEs ? '¡Sé el primero en publicar aquí!' : 'Be the first to post here!'}
+                </p>
+              </div>
+            ) : (
+              posts.map(post => (
+                <FeedPost
+                  key={post.id}
+                  post={post}
+                  currentUserId={session?.user.id}
+                  onPostUpdated={fetchGroupPosts}
+                  onPollVote={channelReadOnly ? undefined : votePoll}
+                  onNotify={sendNotification}
+                  readOnly={channelReadOnly}
+                  onAuthRequired={channelReadOnly ? handleChannelReadOnly : () => {}}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT sidebar — hidden on mobile, visible on lg+ */}
+        <div className="hidden lg:block w-64 flex-shrink-0 space-y-4">
+
+          {/* Members preview card */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 sticky top-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                {isChannel ? (isEs ? 'Seguidores' : 'Followers') : (isEs ? 'Miembros' : 'Members')}
+              </h3>
+              {members.length > 8 && (
+                <button
+                  onClick={() => setShowAllMembers(v => !v)}
+                  className="text-xs text-cv-blue hover:underline"
+                >
+                  {showAllMembers ? (isEs ? 'Ver menos' : 'Show less') : (isEs ? 'Ver todos' : 'See all')}
+                </button>
+              )}
+            </div>
+            {members.length === 0 ? (
+              <p className="text-xs text-gray-400">{isEs ? 'Sin miembros' : 'No members yet'}</p>
+            ) : (
+              <div className="space-y-2.5">
+                {(showAllMembers ? members : members.slice(0, 8)).map((member) => (
+                  <div key={member.id} className="flex items-center gap-2.5">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold overflow-hidden flex-shrink-0 ${
+                      member.profile?.avatar_url ? '' : 'bg-gradient-to-br from-cv-blue to-blue-600'
+                    }`}>
+                      {member.profile?.avatar_url ? (
+                        <img src={member.profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        member.profile?.full_name?.charAt(0) ?? '?'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {member.profile?.full_name ?? 'Unknown'}
+                      </p>
+                    </div>
+                    {member.role !== 'member' && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
+                        member.role === 'owner'
+                          ? (isChannel ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-500' : 'bg-cv-blue/10 text-cv-blue')
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-500'
+                      }`}>
+                        {member.role === 'owner' ? 'Admin' : 'Mod'}
+                      </span>
+                    )}
+                  </div>
+                ))}
+                {!showAllMembers && members.length > 8 && (
+                  <button
+                    onClick={() => setShowAllMembers(true)}
+                    className="text-xs text-gray-400 hover:text-cv-blue transition-colors"
+                  >
+                    +{members.length - 8} {isEs ? 'más' : 'more'}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Most active members (from posts) — hide for channels since only admins post */}
+          {!isChannel && topPosters.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+              <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                {isEs ? 'Más activos' : 'Most Active'}
+              </h3>
+              <div className="space-y-2.5">
+                {topPosters.map((poster, i) => (
+                  <div key={poster.id} className="flex items-center gap-2.5">
+                    <span className="text-[10px] font-bold text-gray-300 dark:text-gray-600 w-4 text-right">{i + 1}</span>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold overflow-hidden flex-shrink-0 ${
+                      poster.avatar ? '' : 'bg-gradient-to-br from-cv-blue to-blue-600'
+                    }`}>
+                      {poster.avatar ? (
+                        <img src={poster.avatar} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        poster.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{poster.name}</p>
+                    </div>
+                    <span className="text-[10px] text-gray-400 font-medium">{poster.count} {poster.count === 1 ? 'post' : 'posts'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 };

@@ -157,6 +157,7 @@ export interface Profile {
   headline: string;
   summary: string;
   avatar_url?: string | null;
+  banner_url?: string | null;
   role?: UserRole;
   plan?: SubscriptionPlan;
   template?: string | null;
@@ -198,6 +199,9 @@ export interface Profile {
   show_connect_links?: boolean | null;
   show_qr_code?: boolean | null;
   show_availability_badge?: boolean | null;
+
+  // Contact / Messaging
+  is_open_to_messages?: boolean | null;
 
   // Dashboard Tour
   dashboard_tour_completed?: boolean | null;

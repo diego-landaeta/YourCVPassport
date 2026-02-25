@@ -3482,6 +3482,9 @@ export const translations = {
         now: 'Ahora',
         contactMe: 'Contáctame',
         scheduleMeeting: 'Agendar Reunión',
+        messagingNotActivated: 'Este usuario no tiene activada la función de mensajes',
+        schedulingNotActivated: 'Este usuario no tiene activada la función de agendar reuniones',
+        featureInDevelopment: 'Funcionalidad en desarrollo',
         downloadCV: 'Descargar CV',
         sendMessage: 'Enviar Mensaje',
         certifications: 'Certificaciones',
@@ -3491,7 +3494,14 @@ export const translations = {
         verifiedProfile: 'Perfil Verificado',
         expires: 'Expira:',
         collaborations: 'Colaboraciones',
-        viewingOwnProfile: 'Este es tu perfil. Los visitantes veran los botones de contacto aqui.'
+        viewingOwnProfile: 'Este es tu perfil. Los visitantes veran los botones de contacto aqui.',
+        incompleteProfile: 'Perfil Incompleto',
+        incompleteProfileDesc: 'Este perfil aún no está disponible públicamente. El usuario necesita completar su información básica antes de compartir su CV.',
+        profileNotFound: 'Perfil No Encontrado',
+        profileNotComplete: 'Este perfil aún no está completo.',
+        backToHome: 'Volver al inicio',
+        adminChangeTemplate: 'Admin: Cambiar Plantilla',
+        adminTestView: 'Vista de prueba - no afecta el perfil del usuario'
     },
     languageNames: {
         'English': 'Inglés',

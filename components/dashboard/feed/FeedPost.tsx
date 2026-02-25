@@ -70,13 +70,40 @@ const REACTIONS: ReactionConfig[] = [
 
 const reactionMap = Object.fromEntries(REACTIONS.map(r => [r.type, r])) as Record<ReactionType, ReactionConfig>;
 
+/* ── Flag emoji → image (Windows doesn't render country flags) ── */
+const FLAG_RE = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
+const flagToCode = (flag: string): string =>
+  [...flag].map(cp => String.fromCharCode(cp.codePointAt(0)! - 0x1F1E6 + 65)).join('').toLowerCase();
+
+const renderFlags = (text: string, keyPrefix: string): React.ReactNode[] => {
+  const result: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  FLAG_RE.lastIndex = 0;
+  while ((match = FLAG_RE.exec(text)) !== null) {
+    if (match.index > lastIndex) result.push(text.slice(lastIndex, match.index));
+    const code = flagToCode(match[0]);
+    result.push(
+      <img
+        key={`${keyPrefix}-flag-${match.index}`}
+        src={`https://flagcdn.com/w40/${code}.png`}
+        alt={code.toUpperCase()}
+        className="inline-block w-5 h-4 object-cover rounded-sm align-text-bottom mx-0.5"
+      />
+    );
+    lastIndex = FLAG_RE.lastIndex;
+  }
+  if (lastIndex < text.length) result.push(text.slice(lastIndex));
+  return result.length > 0 ? result : [text];
+};
+
 /* ── Linkify URLs + Hashtags in text ── */
 const renderContent = (
   text: string,
   onHashtagClick?: (tag: string) => void
 ): React.ReactNode[] => {
   const parts = text.split(/(https?:\/\/[^\s<]+|#[a-zA-ZáéíóúñÁÉÍÓÚÑ0-9_]+|@[a-zA-Z0-9_-]+)/g);
-  return parts.map((part, i) => {
+  return parts.flatMap((part, i) => {
     if (/^https?:\/\//.test(part)) {
       return (
         <a
@@ -115,7 +142,8 @@ const renderContent = (
         </a>
       );
     }
-    return part;
+    // For plain text segments, render flag emojis as images
+    return renderFlags(part, String(i));
   });
 };
 

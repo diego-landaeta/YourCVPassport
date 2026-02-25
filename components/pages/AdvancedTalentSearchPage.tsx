@@ -38,7 +38,6 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
         <Link
             to={`/cv/${profile.slug || profile.id}`}
             className="group relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 dark:hover:shadow-blue-500/10 hover:-translate-y-1 overflow-hidden block flex flex-col"
-            style={{ height: '340px' }}
         >
             {/* Card Content */}
             <div className="p-6 flex flex-col h-full">
@@ -328,6 +327,8 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 .eq('wizard_completed', true)
                 .not('slug', 'is', null)
                 .not('template', 'is', null)
+                // Exclude admin/staff profiles
+                .neq('role', 'admin')
                 .order('plan', { ascending: false, nullsFirst: false })
                 .order('created_at', { ascending: false })
                 .limit(50);

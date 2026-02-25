@@ -3490,6 +3490,9 @@ export const translations = {
         now: 'Now',
         contactMe: 'Contact Me',
         scheduleMeeting: 'Schedule Meeting',
+        messagingNotActivated: 'This user has not activated the messaging feature',
+        schedulingNotActivated: 'This user has not activated the scheduling feature',
+        featureInDevelopment: 'Feature in development',
         downloadCV: 'Download CV',
         sendMessage: 'Send Message',
         certifications: 'Certifications',
@@ -3499,7 +3502,14 @@ export const translations = {
         verifiedProfile: 'Verified Profile',
         expires: 'Expires:',
         collaborations: 'Collaborations',
-        viewingOwnProfile: 'This is your profile. Visitors will see the contact buttons here.'
+        viewingOwnProfile: 'This is your profile. Visitors will see the contact buttons here.',
+        incompleteProfile: 'Incomplete Profile',
+        incompleteProfileDesc: 'This profile is not yet publicly available. The user needs to complete their basic information before sharing their CV.',
+        profileNotFound: 'Profile Not Found',
+        profileNotComplete: 'This profile is not yet complete.',
+        backToHome: 'Back to Home',
+        adminChangeTemplate: 'Admin: Change Template',
+        adminTestView: 'Test view - does not affect the user\'s profile'
     },
     languageNames: {
         'English': 'English',

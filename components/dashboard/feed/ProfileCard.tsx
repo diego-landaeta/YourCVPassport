@@ -61,7 +61,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     : '0.0';
 
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm hover:shadow-md transition-shadow duration-300">
       {/* Collapsed header */}
       {collapsed ? (
         <button
@@ -84,8 +84,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       ) : (
         <>
           {/* Banner — compact */}
-          <div className="h-16 bg-gradient-to-r from-cv-blue via-indigo-500 to-purple-600 relative">
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+          <div className="h-16 bg-gradient-to-br from-slate-800 via-slate-700 to-gray-800 dark:from-slate-900 dark:via-gray-800 dark:to-slate-900 relative rounded-t-2xl overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
             <button
               onClick={() => setCollapsed(true)}
               className="absolute top-1.5 right-1.5 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors"

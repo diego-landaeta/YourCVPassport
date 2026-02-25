@@ -81,6 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (id === 'mi-perfil') return activeSection === id || activeSection.startsWith('mi-perfil:');
     if (id === 'grupos') return activeSection === id || activeSection.startsWith('grupos:');
     if (id === 'canales') return activeSection === id || activeSection.startsWith('canales:');
+    if (id === 'leads') return activeSection === id || activeSection.startsWith('leads:') || activeSection === 'messages' || activeSection.startsWith('messages:');
     return activeSection === id;
   };
 
@@ -148,6 +149,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           id: 'notificaciones',
           label: (menu as any).notificaciones || (lang === 'es' ? 'Notificaciones' : 'Notifications'),
           icon: <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>,
+        },
+        {
+          id: 'leads',
+          label: lang === 'es' ? 'Mensajes' : 'Messages',
+          icon: <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
         },
       ],
     },
@@ -252,7 +258,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`fixed left-0 top-0 h-screen bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col transition-all duration-300 overflow-visible ${collapsed ? 'w-16' : 'w-64'}`} data-tour="sidebar">
+    <div className={`fixed left-0 top-0 h-screen z-50 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col transition-all duration-300 overflow-visible ${collapsed ? 'w-16' : 'w-64'}`} data-tour="sidebar">
       {/* Profile Completion Alert */}
       {showProfileAlert && (
         <div className={`fixed top-20 ${collapsed ? 'left-20' : 'left-72'} z-50 animate-slideInRight`}>

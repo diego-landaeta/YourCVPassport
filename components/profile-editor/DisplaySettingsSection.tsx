@@ -2,14 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const DisplaySettingsSection: React.FC = () => {
   const { profile, refetchProfile } = useAuth();
   const t = useTranslations();
+  const { lang } = useLanguage();
+  const isEs = lang === 'es';
   const [settings, setSettings] = useState({
     show_connect_links: profile?.show_connect_links ?? true,
     show_verified_credentials: profile?.show_verified_credentials ?? true,
     show_availability_badge: profile?.show_availability_badge ?? true,
+    is_open_to_messages: profile?.is_open_to_messages ?? true,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -20,6 +24,7 @@ const DisplaySettingsSection: React.FC = () => {
         show_connect_links: profile.show_connect_links ?? true,
         show_verified_credentials: profile.show_verified_credentials ?? true,
         show_availability_badge: profile.show_availability_badge ?? true,
+        is_open_to_messages: profile.is_open_to_messages ?? true,
       });
     }
   }, [profile]);
@@ -85,6 +90,19 @@ const DisplaySettingsSection: React.FC = () => {
         </svg>
       ),
       recommended: false,
+    },
+    {
+      key: 'is_open_to_messages' as const,
+      title: isEs ? 'Mensajes directos' : 'Direct messages',
+      description: isEs
+        ? 'Permite que otros usuarios te envíen mensajes directos desde tu perfil. Desactívalo si no deseas recibir contactos.'
+        : 'Allow other users to send you direct messages from your profile. Disable if you don\'t want to receive contacts.',
+      icon: (
+        <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+      recommended: true,
     },
   ];
 

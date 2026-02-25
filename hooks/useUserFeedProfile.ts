@@ -10,6 +10,7 @@ interface UserProfileData {
   full_name: string;
   headline: string | null;
   avatar_url: string | null;
+  banner_url: string | null;
   slug: string | null;
   summary: string | null;
   country_code: string | null;
@@ -80,7 +81,7 @@ export const useUserFeedProfile = (userId: string) => {
       setPosts([]);
       resolvedIdRef.current = null;
 
-      const profileFields = 'id, full_name, headline, avatar_url, slug, summary, country_code, created_at';
+      const profileFields = 'id, full_name, headline, avatar_url, banner_url, slug, summary, country_code, created_at';
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
 
       let profileRes = isUUID

@@ -53,15 +53,13 @@ const CommunityProfilesSection: React.FC<{
         statsMap[row.author_id].likes_received += row.likes_count || 0;
       }
 
-      // Sort by post count desc, then get a page of author IDs
+      // Sort by post count desc
       const sortedAuthors = Object.entries(statsMap)
         .sort((a, b) => b[1].post_count - a[1].post_count);
 
-      // Apply search filter if needed — we'll filter after fetching profiles
-      // First get all unique author IDs for this page range
-      const pagedAuthorIds = sortedAuthors
-        .slice(from, from + MEMBERS_PER_PAGE + 10) // fetch a few extra for search filtering
-        .map(([id]) => id);
+      // Slice exactly the page we need
+      const pageSlice = sortedAuthors.slice(from, from + MEMBERS_PER_PAGE);
+      const pagedAuthorIds = pageSlice.map(([id]) => id);
 
       if (pagedAuthorIds.length === 0) {
         if (!append) setMembers([]);
@@ -70,7 +68,7 @@ const CommunityProfilesSection: React.FC<{
         return;
       }
 
-      // Fetch profiles for these authors
+      // Fetch profiles for this page's authors
       let profileQuery = supabase
         .from('profiles')
         .select('id, full_name, headline, avatar_url, slug')
@@ -82,14 +80,14 @@ const CommunityProfilesSection: React.FC<{
 
       const { data: profilesData } = await profileQuery;
 
-      // Merge profile data with stats, maintain sort order
+      // Merge profile data with stats, maintain sort order from pageSlice
       const profileMap = new Map((profilesData ?? []).map(p => [p.id, p]));
-      const results: CommunityMember[] = [];
+      const paged: CommunityMember[] = [];
 
-      for (const [authorId, stats] of sortedAuthors) {
+      for (const [authorId, stats] of pageSlice) {
         const profile = profileMap.get(authorId);
         if (!profile) continue;
-        results.push({
+        paged.push({
           id: profile.id,
           full_name: profile.full_name || '',
           headline: profile.headline,
@@ -100,8 +98,7 @@ const CommunityProfilesSection: React.FC<{
         });
       }
 
-      const paged = results.slice(from, from + MEMBERS_PER_PAGE);
-      setHasMore(paged.length === MEMBERS_PER_PAGE);
+      setHasMore(pageSlice.length === MEMBERS_PER_PAGE);
 
       if (append) {
         setMembers(prev => [...prev, ...paged.filter(r => !prev.some(p => p.id === r.id))]);
@@ -183,12 +180,10 @@ const CommunityProfilesSection: React.FC<{
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {members.map(m => (
-              <a
+              <button
                 key={m.id}
-                href={`/cv/${m.slug ?? m.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border p-5 hover:shadow-lg hover:border-cv-blue/30 transition-all group"
+                onClick={() => onSectionChange?.(`perfil-usuario:${m.id}`)}
+                className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border p-5 hover:shadow-lg hover:border-cv-blue/30 transition-all group text-left"
               >
                 <div className="flex flex-col items-center text-center">
                   {m.avatar_url ? (
@@ -222,7 +217,7 @@ const CommunityProfilesSection: React.FC<{
                     </div>
                   </div>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
 

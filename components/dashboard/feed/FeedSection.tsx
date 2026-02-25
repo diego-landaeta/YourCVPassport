@@ -515,7 +515,7 @@ const FeedHeader: React.FC<{
   return (
     <header className="hidden sm:block sticky top-0 z-40 bg-white/95 dark:bg-dark-bg-primary/95 backdrop-blur-md border-b border-gray-200/70 dark:border-dark-border shadow-sm">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           {/* Row 1: Search | Actions */}
           <div className="flex items-center gap-3 h-[52px]">
             {/* Brand */}
@@ -808,7 +808,7 @@ const FeedSection: React.FC<FeedSectionProps> = ({ onSectionChange }) => {
   };
 
   return (
-    <div className="min-h-screen -mt-6 -mx-4 sm:-mx-6 lg:-mx-8 pb-6 sm:pb-0">
+    <div className="min-h-screen -mt-6 pb-6 sm:pb-0">
       {/* Sticky header */}
       <FeedHeader
         searchQuery={searchQuery}
@@ -827,10 +827,10 @@ const FeedSection: React.FC<FeedSectionProps> = ({ onSectionChange }) => {
           lg      → center (1fr) + right sidebar (296px)
           xl      → left sidebar (240px) + center (1fr) + right sidebar (296px)
       */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_296px] xl:grid-cols-[240px_minmax(0,1fr)_296px] gap-4 sm:gap-6 items-start">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_296px] xl:grid-cols-[240px_minmax(0,1fr)_296px] gap-4 sm:gap-6 items-start">
 
         {/* ── Left sidebar (xl only) ── */}
-        <aside className="hidden xl:flex flex-col gap-4 sticky top-24 max-h-[calc(100vh-6.5rem)] overflow-y-auto overflow-x-hidden scrollbar-thin">
+        <aside className="hidden xl:flex flex-col gap-4 sticky top-24 max-h-[calc(100vh-6.5rem)] overflow-y-auto overflow-x-hidden scrollbar-hide">
           <FeedNavCard
             onBookmarks={handleBookmarksClick}
             onMyPosts={() => { setShowMyPosts(prev => !prev); setShowBookmarks(false); setShowFollowing(false); }}
@@ -965,7 +965,7 @@ const FeedSection: React.FC<FeedSectionProps> = ({ onSectionChange }) => {
         </div>
 
         {/* ── Right sidebar (lg+) ── */}
-        <aside className="hidden lg:flex flex-col gap-4 sticky top-24 max-h-[calc(100vh-6.5rem)] overflow-y-auto overflow-x-hidden scrollbar-thin">
+        <aside className="hidden lg:flex flex-col gap-4 sticky top-24 max-h-[calc(100vh-6.5rem)] overflow-y-auto overflow-x-hidden scrollbar-hide">
           {profile && (
             <ProfileCard
               profile={profile}

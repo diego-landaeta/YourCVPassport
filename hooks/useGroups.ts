@@ -45,13 +45,18 @@ export const useGroups = () => {
         }
 
         // Suggested: public groups the user has NOT joined
-        const { data: suggested } = await supabase
+        let suggestedQuery = supabase
           .from('groups')
           .select('*')
           .eq('is_private', false)
-          .not('id', 'in', `(${memberGroupIds.join(',') || 'null'})`)
           .order('member_count', { ascending: false })
           .limit(30);
+
+        if (memberGroupIds.length > 0) {
+          suggestedQuery = suggestedQuery.not('id', 'in', `(${memberGroupIds.join(',')})`);
+        }
+
+        const { data: suggested } = await suggestedQuery;
 
         setSuggestedGroups(
           (suggested ?? []).map(g => ({ ...g, isMember: false, isOwner: false }))
@@ -100,7 +105,7 @@ export const useGroupDetail = (groupId: string | null) => {
       try {
         const { data: groupData } = await supabase
           .from('groups')
-          .select('*')
+          .select('*, owner:profiles!owner_id(full_name, avatar_url, slug)')
           .eq('id', groupId)
           .single();
 

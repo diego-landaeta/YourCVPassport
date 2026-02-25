@@ -107,7 +107,7 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
       </div>
 
       {/* Avatar */}
-      <div className="px-4 -mt-7 mb-2 flex items-end justify-between">
+      <div className="px-4 -mt-7 mb-2 flex items-end justify-between relative z-10">
         <div
           className={`w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg overflow-hidden border-2 border-white dark:border-gray-900 ${
             group.avatar_url ? '' : `bg-gradient-to-br ${isChannel ? 'from-purple-500 to-violet-600' : 'from-cv-blue to-blue-600'}`

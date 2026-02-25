@@ -32,17 +32,24 @@ import SEOHead from '../shared/SEOHead';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslatedProfile } from '../../hooks/useTranslatedProfile';
 import { TranslationProgressIndicator } from '../TranslationProgressIndicator';
+import { useTranslations } from '../../hooks/useTranslations';
 
 
 const ProfileViewPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { lang } = useLanguage();
+    const t = useTranslations();
     const { profile: currentUserProfile } = useAuth();
     const [profileData, setProfileData] = useState<FullProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showContactMenu, setShowContactMenu] = useState(false);
     const [showProfessionalLinks, setShowProfessionalLinks] = useState(false);
+    const [showContactForm, setShowContactForm] = useState(false);
+    const [contactSubject, setContactSubject] = useState('');
+    const [contactMessage, setContactMessage] = useState('');
+    const [contactSending, setContactSending] = useState(false);
+    const [contactSent, setContactSent] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
     // Check if current user is admin
@@ -92,7 +99,7 @@ const ProfileViewPage: React.FC = () => {
 
                 // Verificar si el perfil está completo antes de mostrarlo
                 if (!profile.full_name || !profile.headline || !profile.summary) {
-                    throw new Error("Este perfil aún no está completo.");
+                    throw new Error("PROFILE_NOT_COMPLETE");
                 }
 
                 const [
@@ -213,12 +220,12 @@ const ProfileViewPage: React.FC = () => {
     }
 
     if (error) {
-        const isIncompleteProfile = error.includes("no está completo");
+        const isIncompleteProfile = error === "PROFILE_NOT_COMPLETE";
 
         return (
             <>
                 <Helmet>
-                    <title>404 - {isIncompleteProfile ? 'Perfil Incompleto' : 'Perfil No Encontrado'} | YourCVPassport</title>
+                    <title>404 - {isIncompleteProfile ? t.cvSections.incompleteProfile : t.cvSections.profileNotFound} | YourCVPassport</title>
                     <meta name="robots" content="noindex, nofollow" />
                     <meta name="prerender-status-code" content="404" />
                 </Helmet>
@@ -231,26 +238,26 @@ const ProfileViewPage: React.FC = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
                                 </div>
-                                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Perfil Incompleto</h1>
+                                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t.cvSections.incompleteProfile}</h1>
                                 <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
-                                    Este perfil aún no está disponible públicamente. El usuario necesita completar su información básica antes de compartir su CV.
+                                    {t.cvSections.incompleteProfileDesc}
                                 </p>
                                 <Link
                                     to="/"
                                     className="inline-block px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
                                 >
-                                    Volver al inicio
+                                    {t.cvSections.backToHome}
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <h1 className="text-3xl font-bold text-red-600 mb-4">Perfil No Encontrado</h1>
+                                <h1 className="text-3xl font-bold text-red-600 mb-4">{t.cvSections.profileNotFound}</h1>
                                 <p className="text-gray-600 dark:text-dark-text-secondary mb-6">{error}</p>
                                 <Link
                                     to="/"
                                     className="inline-block px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
                                 >
-                                    Volver al inicio
+                                    {t.cvSections.backToHome}
                                 </Link>
                             </>
                         )}
@@ -306,7 +313,7 @@ const ProfileViewPage: React.FC = () => {
                 {isAdmin && profileData && (
                     <div className="no-print fixed top-24 right-8 z-50 bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg border border-gray-200 dark:border-dark-border p-4">
                         <label htmlFor="template-selector" className="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-2">
-                            🛡️ Admin: Cambiar Plantilla
+                            🛡️ {t.cvSections.adminChangeTemplate}
                         </label>
                         <select
                             id="template-selector"
@@ -330,7 +337,7 @@ const ProfileViewPage: React.FC = () => {
                             </optgroup>
                         </select>
                         <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary">
-                            Vista de prueba - no afecta el perfil del usuario
+                            {t.cvSections.adminTestView}
                         </p>
                     </div>
                 )}
@@ -375,28 +382,142 @@ const ProfileViewPage: React.FC = () => {
 
                             {/* Content */}
                             <div className="p-5 space-y-2.5 overflow-y-auto flex-1">
-                                {/* Contact via App - PRINCIPAL */}
-                                <button
-                                    onClick={() => {
-                                        setShowContactMenu(true);
-                                        setShowContactMenu(false);
-                                        setShowProfessionalLinks(false);
-                                    }}
-                                    className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-xl transition-all text-left group border-2 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg hover:scale-[1.02] duration-200"
-                                >
-                                    <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all shadow-md flex-shrink-0">
-                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                {/* Contact via App */}
+                                {profileData.profile.is_open_to_messages === false ? (
+                                    <div className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 opacity-60">
+                                        <div className="w-11 h-11 bg-gray-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-gray-500 dark:text-gray-400 text-sm">
+                                                {lang === 'es' ? 'Mensajes cerrados' : 'Messages closed'}
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                {lang === 'es' ? 'Este usuario ha desactivado los mensajes directos' : 'This user has disabled direct messages'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : !showContactForm ? (
+                                    <button
+                                        onClick={() => setShowContactForm(true)}
+                                        className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-xl transition-all text-left group border-2 border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg hover:scale-[1.02] duration-200"
+                                    >
+                                        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all shadow-md flex-shrink-0">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                                {lang === 'es' ? 'Enviar mensaje' : 'Send a message'}
+                                            </p>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                {lang === 'es' ? 'Contacta directamente por la app' : 'Contact directly via the app'}
+                                            </p>
+                                        </div>
+                                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
+                                    </button>
+                                ) : contactSent ? (
+                                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
+                                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <p className="font-semibold text-green-800 dark:text-green-200 text-sm">
+                                            {lang === 'es' ? '¡Mensaje enviado!' : 'Message sent!'}
+                                        </p>
+                                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            {lang === 'es' ? 'Recibirás una respuesta en tu bandeja de mensajes' : "You'll receive a reply in your messages inbox"}
+                                        </p>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-gray-900 dark:text-white text-sm">Contact via App</p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">Send a message directly</p>
+                                ) : (
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-4 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                                {lang === 'es' ? 'Enviar mensaje' : 'Send a message'}
+                                            </p>
+                                            <button onClick={() => setShowContactForm(false)} className="text-gray-400 hover:text-gray-600">
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={contactSubject}
+                                            onChange={(e) => setContactSubject(e.target.value)}
+                                            placeholder={lang === 'es' ? 'Asunto (opcional)' : 'Subject (optional)'}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                        />
+                                        <textarea
+                                            value={contactMessage}
+                                            onChange={(e) => setContactMessage(e.target.value)}
+                                            placeholder={lang === 'es' ? 'Escribe tu mensaje...' : 'Write your message...'}
+                                            rows={3}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                                        />
+                                        <button
+                                            onClick={async () => {
+                                                if (!contactMessage.trim()) return;
+                                                setContactSending(true);
+                                                try {
+                                                    const senderName = currentUserProfile?.full_name || (lang === 'es' ? 'Visitante' : 'Visitor');
+                                                    const senderEmail = currentUserProfile?.email || '';
+                                                    const { data: lead, error: leadErr } = await supabase
+                                                        .from('leads')
+                                                        .insert({
+                                                            sender_id: currentUserProfile?.id || null,
+                                                            sender_name: senderName,
+                                                            sender_email: senderEmail,
+                                                            recipient_id: profileData!.profile.id,
+                                                            recipient_name: profileData!.profile.full_name,
+                                                            subject: contactSubject || `${lang === 'es' ? 'Mensaje de' : 'Message from'} ${senderName}`,
+                                                            message: contactMessage,
+                                                            lead_type: 'contact',
+                                                            source: 'cv_page',
+                                                            status: 'NEW',
+                                                        })
+                                                        .select('id')
+                                                        .single();
+
+                                                    if (leadErr) throw leadErr;
+
+                                                    if (lead) {
+                                                        await supabase.from('messages').insert({
+                                                            lead_id: lead.id,
+                                                            sender_id: currentUserProfile?.id || null,
+                                                            sender_name: senderName,
+                                                            content: contactMessage,
+                                                        });
+                                                    }
+                                                    setContactSent(true);
+                                                } catch (err) {
+                                                    console.error('Contact error:', err);
+                                                } finally {
+                                                    setContactSending(false);
+                                                }
+                                            }}
+                                            disabled={!contactMessage.trim() || contactSending}
+                                            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {contactSending ? (
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                                    </svg>
+                                                    {lang === 'es' ? 'Enviar' : 'Send'}
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
+                                )}
 
                                 {/* Professional Links - Dropdown Button */}
                                 {(profileData.profile.linkedin_url || profileData.profile.github_url || profileData.profile.portfolio_url) && (

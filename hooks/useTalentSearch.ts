@@ -78,7 +78,9 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
         // IMPORTANT: Only show profiles that have completed the wizard and have a slug
         .eq('wizard_completed', true)
         .not('slug', 'is', null)
-        .not('template', 'is', null);
+        .not('template', 'is', null)
+        // Exclude admin/staff profiles
+        .neq('role', 'admin');
 
       // Apply keyword search (full-text search on multiple fields)
       if (filters.keywords) {

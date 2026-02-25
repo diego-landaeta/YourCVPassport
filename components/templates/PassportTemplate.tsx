@@ -100,18 +100,26 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                 </div>
               )}
 
-              {/* Premium Action Buttons - Only show if NOT viewing own profile */}
+              {/* Premium Action Buttons - Only show if NOT own profile */}
               {!isOwnProfile && (
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start print:hidden">
                   <button
-                    onClick={() => toast.info('Funcionalidad en desarrollo')}
+                    onClick={() => toast.info(
+                      profile.is_open_to_messages === false
+                        ? t.cvSections.messagingNotActivated
+                        : t.cvSections.featureInDevelopment
+                    )}
                     className="group relative inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
                   >
                     <EnvelopeIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
                     <span>{t.cvSections.contactMe}</span>
                   </button>
                   <button
-                    onClick={() => toast.info('Funcionalidad en desarrollo')}
+                    onClick={() => toast.info(
+                      profile.is_open_to_messages === false
+                        ? t.cvSections.schedulingNotActivated
+                        : t.cvSections.featureInDevelopment
+                    )}
                     className="inline-flex items-center gap-2 px-7 py-3 bg-white dark:bg-dark-bg-tertiary border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg cursor-pointer"
                   >
                     <CalendarIcon className="w-5 h-5" />
@@ -124,7 +132,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
               {isOwnProfile && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl px-6 py-3 text-center">
                   <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                    👋 Este es tu perfil. Los visitantes verán los botones de contacto aquí.
+                    👋 {t.cvSections.viewingOwnProfile}
                   </p>
                 </div>
               )}

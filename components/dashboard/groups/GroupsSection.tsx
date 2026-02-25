@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useGroups, useGroupActions } from '../../../hooks/useGroups';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useToastContext } from '../../../contexts/ToastContext';
 import { Group } from '../../../types/groups';
 import GroupCard from './GroupCard';
 import GroupDetailView from './GroupDetailView';
@@ -19,6 +20,7 @@ interface GroupsSectionProps {
 const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSectionChange }) => {
   const { lang } = useLanguage();
   const { session, profile } = useAuth();
+  const toast = useToastContext();
   const location = useLocation();
   const navigate = useNavigate();
   const isEs = lang === 'es';
@@ -52,6 +54,9 @@ const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSection
   const [showPremiumBanner, setShowPremiumBanner] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [view, setView] = useState<'browse' | 'my'>('browse');
+  // Optimistic UI: track groups that were just joined/left locally
+  const [justJoined, setJustJoined] = useState<Set<string>>(new Set());
+  const [justLeft, setJustLeft] = useState<Set<string>>(new Set());
 
   const handleCreateClick = useCallback(() => {
     if (isPremium) {
@@ -64,16 +69,29 @@ const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSection
   const handleJoin = useCallback(async (groupId: string) => {
     if (!session?.user.id) return;
     setActionLoading(groupId);
-    await joinGroup(groupId);
-    await refresh();
+    const ok = await joinGroup(groupId);
+    if (ok) {
+      setJustJoined(prev => new Set(prev).add(groupId));
+      setJustLeft(prev => { const s = new Set(prev); s.delete(groupId); return s; });
+      toast.success(isChannel
+        ? (isEs ? '¡Ahora sigues este canal!' : 'You are now following this channel!')
+        : (isEs ? '¡Te has unido al grupo!' : 'You joined the group!')
+      );
+    }
     setActionLoading(null);
-  }, [session?.user.id, joinGroup, refresh]);
+    // Background refresh for accurate counts
+    refresh();
+  }, [session?.user.id, joinGroup, refresh, toast, isEs, isChannel]);
 
   const handleLeave = useCallback(async (groupId: string) => {
     setActionLoading(groupId);
-    await leaveGroup(groupId);
-    await refresh();
+    const ok = await leaveGroup(groupId);
+    if (ok) {
+      setJustLeft(prev => new Set(prev).add(groupId));
+      setJustJoined(prev => { const s = new Set(prev); s.delete(groupId); return s; });
+    }
     setActionLoading(null);
+    refresh();
   }, [leaveGroup, refresh]);
 
   const handleCreated = useCallback((group: Group) => {
@@ -91,7 +109,19 @@ const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSection
     );
   }
 
-  const displayGroups = view === 'my' ? myGroups : suggestedGroups;
+  // Apply optimistic join/leave state
+  const applyOptimistic = (groups: Group[]): Group[] =>
+    groups.map(g => {
+      if (justJoined.has(g.id)) return { ...g, isMember: true };
+      if (justLeft.has(g.id)) return { ...g, isMember: false };
+      return g;
+    });
+
+  const optimisticMy = applyOptimistic([...myGroups, ...suggestedGroups.filter(g => justJoined.has(g.id))]);
+  const optimisticSuggested = applyOptimistic(suggestedGroups.filter(g => !justJoined.has(g.id)));
+  const displayGroups = view === 'my'
+    ? optimisticMy.filter(g => g.isMember)
+    : optimisticSuggested.filter(g => !g.isMember);
 
   const title = isChannel
     ? (isEs ? 'Canales' : 'Channels')

@@ -26,8 +26,6 @@ import {
   FireIcon,
   UserPlusIcon,
   UserMinusIcon,
-  UserGroupIcon,
-  MegaphoneIcon,
   ChartBarIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
@@ -38,12 +36,7 @@ interface UserFeedProfileProps {
   onSectionChange?: (section: string) => void;
 }
 
-const LEVEL_COLORS: Record<string, string> = {
-  expert: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800/40',
-  advanced: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800/40',
-  intermediate: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800/40',
-  beginner: 'bg-gray-100 text-gray-600 dark:bg-gray-800/50 dark:text-gray-400 border-gray-200 dark:border-gray-700/40',
-};
+const SKILL_CLASS = 'bg-cv-blue/10 text-cv-blue dark:bg-cv-blue/20 dark:text-blue-300 border-cv-blue/20 dark:border-cv-blue/30';
 
 const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSectionChange }) => {
   const { profile, posts, stats, extras, loading, postsLoading, hasMore, loadMore, refreshPosts } = useUserFeedProfile(userId);
@@ -117,7 +110,7 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
         <div className="animate-pulse space-y-4 max-w-2xl mx-auto xl:max-w-none">
           <div className="h-8 w-32 bg-gray-200 dark:bg-dark-border rounded-lg" />
           <div className="rounded-2xl overflow-hidden">
-            <div className="h-32 bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900" />
+            <div className="h-32 bg-gradient-to-br from-slate-300 to-gray-300 dark:from-slate-800 dark:to-gray-800" />
             <div className="bg-white dark:bg-dark-bg-secondary p-5 space-y-3">
               <div className="flex items-end gap-4 -mt-12">
                 <div className="w-20 h-20 bg-gray-200 dark:bg-dark-border rounded-full border-4 border-white dark:border-dark-bg-secondary" />
@@ -213,11 +206,10 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
       </div>
       <div className="flex flex-wrap gap-1.5">
         {extras.skills.map(skill => {
-          const colorClass = LEVEL_COLORS[skill.level?.toLowerCase() || ''] || LEVEL_COLORS.beginner;
           return (
             <span
               key={skill.id}
-              className={`inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors ${colorClass}`}
+              className={`inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors ${SKILL_CLASS}`}
             >
               {skill.name}
             </span>
@@ -286,43 +278,6 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
     </div>
   ) : null;
 
-  // ── Groups Card ──
-  const GroupsCard = extras.groups.length > 0 ? (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border p-4 shadow-sm">
-      <div className="flex items-center gap-1.5 mb-3">
-        <UserGroupIcon className="w-4 h-4 text-cv-blue" />
-        <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-          {isEs ? 'Grupos' : 'Groups'}
-        </h3>
-      </div>
-      <div className="space-y-2">
-        {extras.groups.map(group => {
-          const isGroupChannel = group.metadata?.type === 'channel';
-          return (
-            <button
-              key={group.id}
-              onClick={() => onSectionChange?.(isGroupChannel ? 'canales' : 'grupos')}
-              className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors text-left"
-            >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isGroupChannel ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-blue-50 dark:bg-blue-900/20'}`}>
-                {isGroupChannel
-                  ? <MegaphoneIcon className="w-4 h-4 text-purple-500" />
-                  : <UserGroupIcon className="w-4 h-4 text-cv-blue" />
-                }
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{group.name}</p>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                  {group.member_count} {isEs ? 'miembros' : 'members'}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  ) : null;
-
   // ── View CV Card ──
   const ViewCVCard = profile.slug ? (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-100 dark:to-white rounded-2xl p-4 shadow-sm">
@@ -372,20 +327,23 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
 
           {/* ═══ Profile Hero Card ═══ */}
           <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border overflow-hidden shadow-sm mb-4">
-            {/* Banner with mesh gradient */}
+            {/* Banner */}
             <div className="h-28 sm:h-32 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-cv-blue via-indigo-500 to-purple-600" />
-              <div className="absolute inset-0 opacity-30" style={{
-                backgroundImage: `radial-gradient(at 20% 50%, rgba(99,102,241,0.8) 0, transparent 50%),
-                                  radial-gradient(at 80% 20%, rgba(168,85,247,0.6) 0, transparent 50%),
-                                  radial-gradient(at 50% 80%, rgba(59,130,246,0.5) 0, transparent 50%)`,
-              }} />
-              <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)',
-                backgroundSize: '24px 24px',
-              }} />
-              <div className="absolute top-3 right-8 w-16 h-16 rounded-full bg-white/10 blur-sm" />
-              <div className="absolute bottom-2 left-12 w-10 h-10 rounded-full bg-white/10 blur-sm" />
+              {profile.banner_url ? (
+                <img
+                  src={profile.banner_url}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-gray-800 dark:from-slate-900 dark:via-gray-800 dark:to-slate-900" />
+                  <div className="absolute inset-0 opacity-[0.07]" style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+                    backgroundSize: '20px 20px',
+                  }} />
+                </>
+              )}
             </div>
 
             <div className="px-5 sm:px-6 pb-5 relative">
@@ -578,11 +536,10 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {extras.skills.map(skill => {
-                      const colorClass = LEVEL_COLORS[skill.level?.toLowerCase() || ''] || LEVEL_COLORS.beginner;
                       return (
                         <span
                           key={skill.id}
-                          className={`inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors ${colorClass}`}
+                          className={`inline-flex items-center px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors ${SKILL_CLASS}`}
                         >
                           {skill.name}
                         </span>
@@ -607,12 +564,7 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
             </div>
           </div>
 
-          {/* ═══ Groups Card (mobile/tablet inline) ═══ */}
-          {extras.groups.length > 0 && (
-            <div className="xl:hidden mb-4">
-              {GroupsCard}
-            </div>
-          )}
+          {/* Groups card removed — private info */}
 
           {/* ═══ Create Post (own profile only) ═══ */}
           {isOwnProfile && authProfile && (
@@ -690,7 +642,6 @@ const UserFeedProfile: React.FC<UserFeedProfileProps> = ({ userId, onBack, onSec
         {/* ═══ RIGHT SIDEBAR (desktop only) ═══ */}
         <aside className="hidden xl:block space-y-4 self-start sticky top-4">
           {SkillsCard}
-          {GroupsCard}
           {ViewCVCard}
         </aside>
       </div>

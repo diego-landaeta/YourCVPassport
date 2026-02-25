@@ -298,7 +298,11 @@ const DashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <div className={`min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
-        <div className="pt-16 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-24 lg:pb-8">
+        <div className={`pt-16 lg:pt-8 pb-24 lg:pb-8 ${
+          activeSection === 'feed' || activeSection.startsWith('perfil-usuario:')
+            ? 'px-0'
+            : 'px-4 sm:px-6 lg:px-8'
+        }`}>
           <DashboardContent
             activeSection={activeSection}
             onSectionChange={changeSectionWithHistory}
