@@ -156,4 +156,11 @@ export const templates: TemplateData[] = [
         isPro: true,
         category: 'CV',
     },
+    {
+        id: 'psychology-professional',
+        name: { es: 'Psicología Profesional', en: 'Psychology Professional' },
+        previewImg: '/images/templates/psychology-professional.png',
+        isPro: true,
+        category: 'CV',
+    },
 ];

@@ -24,6 +24,7 @@ const standardTemplateComponents: Record<string, any> = {
   'classic-sidebar': lazy(() => import('./ClassicSidebarTemplate')),
   'coral-pink': lazy(() => import('./CoralPinkTemplate')),
   'urban': lazy(() => import('./UrbanTemplate')),
+  'psychology-professional': lazy(() => import('./PsychologyProfessionalTemplate')),
 };
 
 interface StandardTemplateLoaderProps {

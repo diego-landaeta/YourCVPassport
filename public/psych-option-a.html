@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440">
+  <title>Neurona — CV Tatiana Ferrari | YourCVPassport</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark: #1B2838;
+      --dark-subtle: #1F2D3D;
+      --dark-card: #243447;
+      --teal: #0D9488;
+      --teal-light: #2DD4BF;
+      --gold: #D4A574;
+      --gold-light: #E8C9A0;
+      --accent-gradient: linear-gradient(135deg, #0D9488, #D4A574);
+      --text-light: #F1F5F9;
+      --text-light-muted: #94A3B8;
+      --text-dark: #1A1A2E;
+      --text-secondary: #4A5568;
+      --text-muted: #8896A6;
+      --bg-white: #FFFFFF;
+      --bg-sidebar: #F8FAFB;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0F1923;
+      min-height: 100vh;
+      padding: 40px 0;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--bg-white);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    /* ===================== HEADER ===================== */
+    .header {
+      position: relative;
+      background: var(--dark);
+      padding: 56px 56px 48px;
+      overflow: hidden;
+    }
+
+    /* SVG neuron pattern */
+    .header .neuron-pattern {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .header-inner {
+      position: relative;
+      display: flex;
+      gap: 36px;
+      align-items: flex-start;
+      z-index: 2;
+    }
+
+    .avatar-wrap { position: relative; flex-shrink: 0; }
+    .avatar {
+      width: 150px; height: 150px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 3px rgba(255,255,255,0.1);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .psi-badge {
+      position: absolute; bottom: -8px; right: -8px;
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--gold), #C49060);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--dark);
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 30px; font-weight: 400;
+      box-shadow: 0 4px 16px rgba(212,165,116,0.5), 0 0 0 3px var(--dark);
+    }
+
+    .header-info { flex: 1; padding-top: 4px; }
+    .header-info h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 42px; font-weight: 400;
+      color: var(--text-light);
+      letter-spacing: -0.5px; line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .header-info .headline {
+      font-size: 15px; font-weight: 400;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.5; margin-bottom: 14px;
+    }
+    .location-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-light-muted); font-weight: 400;
+      margin-bottom: 16px;
+    }
+    .location-row svg { color: var(--teal-light); }
+
+    .stamps { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stamp {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 14px; border-radius: 9999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+    }
+    .stamp-green { background: rgba(45,212,191,0.15); color: #5EEAD4; }
+    .stamp-blue { background: rgba(96,165,250,0.15); color: #93C5FD; }
+    .stamp-purple { background: rgba(192,132,252,0.15); color: #C4B5FD; }
+    .stamp svg { width: 12px; height: 12px; }
+
+    .contact-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .contact-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-light-muted);
+    }
+    .contact-item svg { color: var(--gold); width: 14px; height: 14px; }
+
+    .accent-bar {
+      height: 4px;
+      background: var(--accent-gradient);
+    }
+
+    /* ===================== BODY ===================== */
+    .body-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 600px;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: var(--dark-subtle);
+      padding: 40px 28px;
+      color: var(--text-light);
+    }
+
+    .sidebar-section { margin-bottom: 32px; }
+    .sidebar-section:last-child { margin-bottom: 0; }
+    .sidebar-title {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: var(--gold);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-title::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    /* Skills bars */
+    .skill-item { margin-bottom: 14px; }
+    .skill-label {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px;
+    }
+    .skill-name { font-size: 12px; font-weight: 600; color: var(--text-light); }
+    .skill-level-text { font-size: 10px; font-weight: 700; color: var(--text-light-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .skill-bar {
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px; overflow: hidden;
+    }
+    .skill-bar-fill {
+      height: 100%; border-radius: 3px;
+      background: var(--accent-gradient);
+      transition: width 0.6s ease;
+    }
+
+    /* Language circles */
+    .lang-item {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 14px;
+    }
+    .lang-circle-wrap {
+      position: relative;
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+    }
+    .lang-circle-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.08);
+      stroke-width: 4;
+    }
+    .lang-circle-fill {
+      fill: none;
+      stroke: url(#langGradient);
+      stroke-width: 4;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 0.8s ease;
+    }
+    .lang-percent {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px; font-weight: 800;
+      color: var(--text-light);
+    }
+    .lang-info .lang-name { font-size: 13px; font-weight: 600; color: var(--text-light); }
+    .lang-info .lang-level { font-size: 11px; color: var(--text-light-muted); }
+
+    /* Certifications sidebar */
+    .cert-card {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 14px;
+      background: var(--dark-card);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .cert-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-gradient);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .cert-icon svg { color: var(--dark); }
+    .cert-name { font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 3px; }
+    .cert-issuer { font-size: 10px; color: var(--text-light-muted); }
+    .cert-verified {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; margin-top: 4px;
+      background: rgba(45,212,191,0.15);
+      color: var(--teal-light);
+      border-radius: 9999px; font-size: 9px; font-weight: 800;
+    }
+
+    /* ===================== MAIN CONTENT ===================== */
+    .main-content {
+      padding: 44px 48px;
+    }
+
+    .section { margin-bottom: 44px; }
+    .section:last-child { margin-bottom: 0; }
+
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 22px;
+    }
+    .section-icon {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-icon.psi {
+      background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(212,165,116,0.1));
+      color: var(--teal);
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+    }
+    .section-icon.work { background: rgba(99,102,241,0.07); }
+    .section-icon.edu { background: rgba(16,185,129,0.07); }
+    .section-icon.services { background: rgba(212,165,116,0.1); }
+    .section-icon.teach { background: rgba(139,92,246,0.07); }
+    .section-title {
+      font-size: 13px; font-weight: 800;
+      color: var(--text-dark);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .summary {
+      color: var(--text-secondary);
+      line-height: 1.85; font-size: 14px;
+      padding-left: 56px;
+      border-left: 3px solid transparent;
+      border-image: var(--accent-gradient) 1;
+      padding-left: 20px;
+      margin-left: 56px;
+    }
+
+    /* Experience cards */
+    .exp-card {
+      background: var(--bg-white);
+      border: 1px solid #EDF2F7;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .exp-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--accent-gradient);
+    }
+    .exp-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .exp-header {
+      display: flex; justify-content: space-between;
+      align-items: baseline; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 6px;
+    }
+    .exp-title { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+    .exp-date {
+      font-size: 11px; font-weight: 700;
+      padding: 4px 14px; border-radius: 9999px;
+      background: var(--accent-gradient);
+      color: white; white-space: nowrap;
+    }
+    .exp-company { font-size: 13px; font-weight: 600; color: var(--teal); margin-bottom: 8px; }
+    .exp-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .exp-achievements { list-style: none; margin-top: 12px; }
+    .exp-achievements li {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12px; color: var(--text-secondary);
+      margin-bottom: 6px; padding: 8px 12px;
+      background: rgba(13,148,136,0.04);
+      border-radius: var(--radius-sm);
+    }
+    .exp-achievements li svg { flex-shrink: 0; margin-top: 1px; color: var(--teal); }
+
+    /* Education */
+    .edu-list { display: flex; flex-direction: column; gap: 12px; }
+    .edu-card {
+      display: flex; gap: 16px;
+      padding: 18px 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(13,148,136,0.03), rgba(212,165,116,0.03));
+      border: 1px solid rgba(13,148,136,0.1);
+      transition: all 0.2s;
+    }
+    .edu-card:hover { border-color: rgba(13,148,136,0.25); box-shadow: 0 2px 12px rgba(13,148,136,0.06); }
+    .edu-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-gradient);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .edu-icon svg { color: white; }
+    .edu-degree { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+    .edu-school { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .edu-year { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Services */
+    .services-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .service-card {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid #EDF2F7;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .service-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent-gradient);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .service-card:hover { border-color: var(--teal); }
+    .service-card:hover::after { opacity: 1; }
+    .service-name { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .service-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* Teaching */
+    .teach-card {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(139,92,246,0.04), rgba(212,165,116,0.04));
+      border: 1px solid rgba(139,92,246,0.1);
+      margin-bottom: 12px;
+    }
+    .teach-name { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .teach-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .teach-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .teach-tag {
+      padding: 4px 12px; border-radius: 9999px;
+      font-size: 10px; font-weight: 700;
+      background: var(--accent-gradient);
+      color: white;
+    }
+
+    /* FOOTER */
+    .footer {
+      border-top: 1px solid #EDF2F7;
+      padding: 20px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--dark);
+    }
+    .footer-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--text-light-muted);
+    }
+    .footer-psi {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px; color: var(--gold);
+    }
+    .footer-email { font-size: 11px; color: var(--text-light-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- SVG gradient definitions for language circles -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="langGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0D9488"/>
+        <stop offset="100%" stop-color="#D4A574"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="page">
+    <!-- HEADER -->
+    <header class="header">
+      <!-- Neuron pattern SVG -->
+      <svg class="neuron-pattern" viewBox="0 0 980 260" preserveAspectRatio="xMidYMid slice">
+        <!-- Synaptic connections -->
+        <line x1="120" y1="40" x2="250" y2="90" stroke="#0D9488" stroke-width="1"/>
+        <line x1="250" y1="90" x2="380" y2="50" stroke="#0D9488" stroke-width="0.8"/>
+        <line x1="380" y1="50" x2="520" y2="120" stroke="#D4A574" stroke-width="0.8"/>
+        <line x1="520" y1="120" x2="650" y2="70" stroke="#0D9488" stroke-width="1"/>
+        <line x1="650" y1="70" x2="780" y2="130" stroke="#D4A574" stroke-width="0.8"/>
+        <line x1="780" y1="130" x2="900" y2="80" stroke="#0D9488" stroke-width="0.6"/>
+        <line x1="250" y1="90" x2="300" y2="180" stroke="#D4A574" stroke-width="0.6"/>
+        <line x1="300" y1="180" x2="450" y2="200" stroke="#0D9488" stroke-width="0.8"/>
+        <line x1="450" y1="200" x2="520" y2="120" stroke="#D4A574" stroke-width="0.6"/>
+        <line x1="520" y1="120" x2="600" y2="210" stroke="#0D9488" stroke-width="0.8"/>
+        <line x1="600" y1="210" x2="750" y2="220" stroke="#D4A574" stroke-width="0.6"/>
+        <line x1="750" y1="220" x2="780" y2="130" stroke="#0D9488" stroke-width="0.8"/>
+        <line x1="80" y1="150" x2="120" y2="40" stroke="#D4A574" stroke-width="0.6"/>
+        <line x1="80" y1="150" x2="250" y2="90" stroke="#0D9488" stroke-width="0.5"/>
+        <line x1="300" y1="180" x2="200" y2="230" stroke="#0D9488" stroke-width="0.5"/>
+        <line x1="650" y1="70" x2="700" y2="30" stroke="#D4A574" stroke-width="0.5"/>
+        <line x1="900" y1="80" x2="940" y2="180" stroke="#0D9488" stroke-width="0.5"/>
+        <line x1="940" y1="180" x2="750" y2="220" stroke="#D4A574" stroke-width="0.5"/>
+        <!-- Neuron nodes -->
+        <circle cx="120" cy="40" r="5" fill="#0D9488"/>
+        <circle cx="120" cy="40" r="10" fill="#0D9488" opacity="0.2"/>
+        <circle cx="250" cy="90" r="6" fill="#D4A574"/>
+        <circle cx="250" cy="90" r="12" fill="#D4A574" opacity="0.15"/>
+        <circle cx="380" cy="50" r="4" fill="#0D9488"/>
+        <circle cx="380" cy="50" r="8" fill="#0D9488" opacity="0.2"/>
+        <circle cx="520" cy="120" r="7" fill="#D4A574"/>
+        <circle cx="520" cy="120" r="14" fill="#D4A574" opacity="0.15"/>
+        <circle cx="650" cy="70" r="5" fill="#0D9488"/>
+        <circle cx="650" cy="70" r="10" fill="#0D9488" opacity="0.2"/>
+        <circle cx="780" cy="130" r="6" fill="#D4A574"/>
+        <circle cx="780" cy="130" r="12" fill="#D4A574" opacity="0.15"/>
+        <circle cx="900" cy="80" r="4" fill="#0D9488"/>
+        <circle cx="300" cy="180" r="5" fill="#0D9488"/>
+        <circle cx="300" cy="180" r="10" fill="#0D9488" opacity="0.2"/>
+        <circle cx="450" cy="200" r="4" fill="#D4A574"/>
+        <circle cx="600" cy="210" r="5" fill="#0D9488"/>
+        <circle cx="750" cy="220" r="4" fill="#D4A574"/>
+        <circle cx="80" cy="150" r="4" fill="#D4A574"/>
+        <circle cx="200" cy="230" r="3" fill="#0D9488"/>
+        <circle cx="700" cy="30" r="3" fill="#0D9488"/>
+        <circle cx="940" cy="180" r="4" fill="#D4A574"/>
+      </svg>
+
+      <div class="header-inner">
+        <div class="avatar-wrap">
+          <div class="avatar"><img src="https://psikoaprende.com/wp-content/uploads/2025/10/tatiana-ferrari-e1761650705176.webp" alt="Tatiana Ferrari" /></div>
+          <div class="psi-badge">&Psi;</div>
+        </div>
+        <div class="header-info">
+          <h1>Tatiana Ferrari</h1>
+          <p class="headline">Psic&oacute;loga Sanitaria | Especialista en Terapia de Pareja y Familia | Multiling&uuml;e</p>
+          <div class="location-row">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Palma de Mallorca, Espa&ntilde;a <span style="font-size:18px;margin-left:2px;">&#x1F1EA;&#x1F1F8;</span>
+          </div>
+          <div class="stamps">
+            <span class="stamp stamp-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Colegiada B-03375</span>
+            <span class="stamp stamp-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Educaci&oacute;n Verificada</span>
+            <span class="stamp stamp-purple"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Email Verificado</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>tatiana.ferrari@psikoaprende.com</span>
+            <span class="contact-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>+34 600 000 000</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="accent-bar"></div>
+
+    <!-- BODY -->
+    <div class="body-grid">
+      <!-- SIDEBAR (dark) -->
+      <aside class="sidebar">
+        <!-- Skills -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Especialidades</h3>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Terapia de Pareja</span><span class="skill-level-text">Expert</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:95%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Mediaci&oacute;n Familiar</span><span class="skill-level-text">Expert</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:92%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Coord. de Parentalidad</span><span class="skill-level-text">Expert</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:90%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Violencia de G&eacute;nero</span><span class="skill-level-text">Avanzado</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:82%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Terapia Cognitivo-Conductual</span><span class="skill-level-text">Avanzado</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:80%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Yoga Terap&eacute;utico</span><span class="skill-level-text">Avanzado</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:78%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Coaching</span><span class="skill-level-text">Intermedio</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:60%"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label"><span class="skill-name">Psicomotricidad</span><span class="skill-level-text">Intermedio</span></div>
+            <div class="skill-bar"><div class="skill-bar-fill" style="width:55%"></div></div>
+          </div>
+        </div>
+
+        <!-- Languages with circles -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Idiomas</h3>
+
+          <div class="lang-item">
+            <div class="lang-circle-wrap">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <circle class="lang-circle-bg" cx="24" cy="24" r="20"/>
+                <circle class="lang-circle-fill" cx="24" cy="24" r="20"
+                  stroke-dasharray="125.66" stroke-dashoffset="0"/>
+              </svg>
+              <span class="lang-percent">100</span>
+            </div>
+            <div class="lang-info">
+              <div class="lang-name">Italiano</div>
+              <div class="lang-level">Nativo</div>
+            </div>
+          </div>
+
+          <div class="lang-item">
+            <div class="lang-circle-wrap">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <circle class="lang-circle-bg" cx="24" cy="24" r="20"/>
+                <circle class="lang-circle-fill" cx="24" cy="24" r="20"
+                  stroke-dasharray="125.66" stroke-dashoffset="6.28"/>
+              </svg>
+              <span class="lang-percent">95</span>
+            </div>
+            <div class="lang-info">
+              <div class="lang-name">Espa&ntilde;ol</div>
+              <div class="lang-level">C2</div>
+            </div>
+          </div>
+
+          <div class="lang-item">
+            <div class="lang-circle-wrap">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <circle class="lang-circle-bg" cx="24" cy="24" r="20"/>
+                <circle class="lang-circle-fill" cx="24" cy="24" r="20"
+                  stroke-dasharray="125.66" stroke-dashoffset="18.85"/>
+              </svg>
+              <span class="lang-percent">85</span>
+            </div>
+            <div class="lang-info">
+              <div class="lang-name">Ingl&eacute;s</div>
+              <div class="lang-level">C1</div>
+            </div>
+          </div>
+
+          <div class="lang-item">
+            <div class="lang-circle-wrap">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <circle class="lang-circle-bg" cx="24" cy="24" r="20"/>
+                <circle class="lang-circle-fill" cx="24" cy="24" r="20"
+                  stroke-dasharray="125.66" stroke-dashoffset="37.7"/>
+              </svg>
+              <span class="lang-percent">70</span>
+            </div>
+            <div class="lang-info">
+              <div class="lang-name">Catal&aacute;n</div>
+              <div class="lang-level">B2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Certificaciones</h3>
+          <div class="cert-card">
+            <div class="cert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <div>
+              <div class="cert-name">EMDR &mdash; Nivel Avanzado</div>
+              <div class="cert-issuer">EMDR Espa&ntilde;a &bull; Jun 2019</div>
+              <div class="cert-verified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Verificada</div>
+            </div>
+          </div>
+          <div class="cert-card">
+            <div class="cert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <div>
+              <div class="cert-name">Yoga Terap&eacute;utico</div>
+              <div class="cert-issuer">Yoga Alliance &bull; Mar 2016</div>
+            </div>
+          </div>
+          <div class="cert-card">
+            <div class="cert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+            <div>
+              <div class="cert-name">Certificaci&oacute;n en Coaching</div>
+              <div class="cert-issuer">ALIMENTA Barcelona &bull; Sep 2014</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- Profile Summary -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon psi">&Psi;</div>
+            <h2 class="section-title">Perfil Profesional</h2>
+          </div>
+          <p class="summary">Psic&oacute;loga Sanitaria con m&aacute;s de 20 a&ntilde;os de trayectoria multicultural. Formada en Italia y Espa&ntilde;a, combina psicoterapia cl&iacute;nica, mediaci&oacute;n familiar y coordinaci&oacute;n de parentalidad. Especialista en intervenci&oacute;n con mujeres, adolescentes y familias en conflicto, con amplia experiencia en violencia de g&eacute;nero. Ofrece atenci&oacute;n en cuatro idiomas.</p>
+        </section>
+
+        <!-- Experience -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon work"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div>
+            <h2 class="section-title">Experiencia Cl&iacute;nica</h2>
+          </div>
+
+          <div class="exp-card">
+            <div class="exp-header"><span class="exp-title">Psic&oacute;loga Sanitaria</span><span class="exp-date">2018 &ndash; Presente</span></div>
+            <div class="exp-company">Cl&iacute;nica Bonaire Salud &mdash; Palma de Mallorca</div>
+            <div class="exp-desc">Intervenci&oacute;n cl&iacute;nica presencial con adultos, adolescentes y familias. Coordinaci&oacute;n parental y mediaci&oacute;n familiar en casos de alta conflictividad.</div>
+            <ul class="exp-achievements">
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Coordinaci&oacute;n de m&aacute;s de 80 casos de mediaci&oacute;n familiar</li>
+              <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Especializaci&oacute;n en intervenci&oacute;n con v&iacute;ctimas de violencia de g&eacute;nero</li>
+            </ul>
+          </div>
+
+          <div class="exp-card">
+            <div class="exp-header"><span class="exp-title">Psic&oacute;loga Online &mdash; Consulta Internacional</span><span class="exp-date">2015 &ndash; Presente</span></div>
+            <div class="exp-company">Consulta Privada</div>
+            <div class="exp-desc">Atenci&oacute;n terap&eacute;utica online en espa&ntilde;ol, italiano e ingl&eacute;s. Especializaci&oacute;n en terapia de pareja y v&iacute;nculos afectivos con pacientes en Europa y Latinoam&eacute;rica.</div>
+          </div>
+
+          <div class="exp-card">
+            <div class="exp-header"><span class="exp-title">Psic&oacute;loga y Mediadora Familiar</span><span class="exp-date">2010 &ndash; 2015</span></div>
+            <div class="exp-company">Pr&aacute;ctica Privada &mdash; Barcelona</div>
+            <div class="exp-desc">Terapia individual y familiar. Atenci&oacute;n a v&iacute;ctimas de violencia de g&eacute;nero. Gesti&oacute;n de conflictos familiares con adolescentes.</div>
+          </div>
+        </section>
+
+        <!-- Education -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon edu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></div>
+            <h2 class="section-title">Formaci&oacute;n Acad&eacute;mica</h2>
+          </div>
+          <div class="edu-list">
+            <div class="edu-card">
+              <div class="edu-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></div>
+              <div><div class="edu-degree">Licenciatura en Psicolog&iacute;a Cl&iacute;nica</div><div class="edu-school">Universidad de Florencia, Italia</div><div class="edu-year">1999 &ndash; 2003</div></div>
+            </div>
+            <div class="edu-card">
+              <div class="edu-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></div>
+              <div><div class="edu-degree">M&aacute;ster en Psicolog&iacute;a y Psicoterapia Cl&iacute;nica</div><div class="edu-school">Universidad Aut&oacute;noma de Barcelona</div><div class="edu-year">2008 &ndash; 2010</div></div>
+            </div>
+            <div class="edu-card">
+              <div class="edu-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></div>
+              <div><div class="edu-degree">Experta Universitaria en Coordinaci&oacute;n Parental</div><div class="edu-school">Universidad Complutense de Madrid</div><div class="edu-year">2023</div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Services -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon services"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4A574" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <h2 class="section-title">Servicios</h2>
+          </div>
+          <div class="services-grid">
+            <div class="service-card"><div class="service-name">Terapia de Pareja</div><div class="service-desc">Presencial y online</div></div>
+            <div class="service-card"><div class="service-name">Terapia Individual</div><div class="service-desc">Adultos y adolescentes</div></div>
+            <div class="service-card"><div class="service-name">Mediaci&oacute;n Familiar</div><div class="service-desc">Conflictos de alta intensidad</div></div>
+            <div class="service-card"><div class="service-name">Coordinaci&oacute;n de Parentalidad</div><div class="service-desc">Post-separaci&oacute;n</div></div>
+          </div>
+        </section>
+
+        <!-- Teaching -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon teach"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></svg></div>
+            <h2 class="section-title">Docencia</h2>
+          </div>
+          <div class="teach-card">
+            <div class="teach-name">M&aacute;ster en Terapia de Pareja y V&iacute;nculos Afectivos</div>
+            <div class="teach-desc">12 meses, 10 m&oacute;dulos &mdash; PsikoAprende</div>
+            <div class="teach-tags"><span class="teach-tag">Terapia de Pareja</span><span class="teach-tag">V&iacute;nculos</span><span class="teach-tag">Online</span></div>
+          </div>
+          <div class="teach-card">
+            <div class="teach-name">Curso de Terapia de Pareja</div>
+            <div class="teach-desc">2 meses, 8 m&oacute;dulos &mdash; PsikoAprende</div>
+            <div class="teach-tags"><span class="teach-tag">Terapia de Pareja</span><span class="teach-tag">Intensivo</span></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-brand"><span class="footer-psi">&Psi;</span>Perfil profesional generado en <strong style="color:#CBD5E1;margin-left:4px;">YourCVPassport</strong></div>
+      <span class="footer-email">tatiana.ferrari@psikoaprende.com</span>
+    </footer>
+  </div>
+</body>
+</html>
