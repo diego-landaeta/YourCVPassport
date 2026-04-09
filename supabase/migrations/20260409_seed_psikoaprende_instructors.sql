@@ -50,7 +50,7 @@ ON CONFLICT (id) DO NOTHING;
 -- 1. Tatiana Ferrari
 UPDATE profiles SET
   full_name = 'Tatiana Ferrari',
-  headline = 'Psicóloga Sanitaria | Especialista en Terapia de Pareja y Familia | Multilingüe (IT/ES/EN/CAT)',
+  headline = 'Psicóloga Sanitaria · Terapia de Pareja y Mediación Familiar',
   summary = 'Psicóloga Sanitaria con más de 20 años de trayectoria profesional multicultural, formada en Italia y España. Especializada en terapia de pareja, mediación familiar y coordinación de parentalidad, con amplia experiencia clínica en intervención con mujeres, adolescentes y familias en contextos de alta conflictividad y violencia de género. Combina psicoterapia clínica presencial en Palma de Mallorca con consulta online internacional, ofreciendo atención terapéutica en italiano, español, inglés y catalán. Docente en PsikoAprende del Máster en Terapia de Pareja y Vínculos Afectivos.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -66,7 +66,7 @@ WHERE id = p1;
 -- 2. Rocío Roblas
 UPDATE profiles SET
   full_name = 'Rocío Roblas',
-  headline = 'Psicóloga Sanitaria | Experta en ACT, DBT y Terapias de Tercera Generación | +10 años de experiencia',
+  headline = 'Psicóloga Sanitaria · Terapias de Tercera Generación (ACT, DBT)',
   summary = 'Psicóloga Sanitaria con más de 10 años de experiencia multidisciplinar, especializada en terapias de tercera generación (ACT, DBT). Coordinadora técnica en un Centro de Atención Infantil Temprana y evaluadora psicológica para Cuerpos de Seguridad del Estado y Bomberos. Formación avanzada en EMDR, trauma y apego, neuropsicología infantil y psicología forense. Combina práctica clínica privada — presencial en Sevilla y online — con gestión del talento en plataformas digitales de salud mental. Docente en PsikoAprende del Máster en ACT y Mindfulness y de diplomados en terapias de tercera generación.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -82,7 +82,7 @@ WHERE id = p2;
 -- 3. Mireia Jareño Moraga
 UPDATE profiles SET
   full_name = 'Mireia Jareño Moraga',
-  headline = 'Psicóloga Sanitaria | Especialista en TCA, Trauma y Terapia Dialéctico-Conductual | 3 Másteres',
+  headline = 'Psicóloga Sanitaria · Especialista en TCA y Terapia Dialéctico-Conductual',
   summary = 'Psicóloga Sanitaria con triple formación de máster en Psicología General Sanitaria (Universidad Europea), Intervención Psicológica y Salud Mental (UDIMA) e Intervención Psicológica en Ámbitos Sociales (Universidad de Valencia). Especializada en trastornos de la conducta alimentaria, trauma, regulación emocional y terapia dialéctico-conductual. Experiencia profesional en protección infantil con menores en acogimiento familiar, intervención con víctimas de violencia de género y atención a poblaciones en riesgo de exclusión social. Ofrece psicoterapia online con enfoque integrativo basado en evidencia. Docente en PsikoAprende de cursos en TDC, TCA, mediación con adolescentes y psicología deportiva.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -99,7 +99,7 @@ WHERE id = p3;
 -- 4. Melisa Freitas
 UPDATE profiles SET
   full_name = 'Melisa Freitas',
-  headline = 'Psicóloga Clínica | Especialista en Neurodiversidad, Inclusión y Psicosomática',
+  headline = 'Psicóloga Clínica · Neurodiversidad, Inclusión Educativa y Psicosomática',
   summary = 'Psicóloga clínica graduada de la Universidad del Salvador (Argentina) con formación docente universitaria y especialización en psicosomática. Trayectoria profesional en inclusión educativa y neurodiversidad: coordinación de integraciones escolares para menores con TGD, autismo y problemas conductuales, elaboración de adaptaciones curriculares y trabajo en instituciones de educación especial. En práctica clínica privada, aborda regulación emocional, autoestima, trauma y relaciones interpersonales en población adulta. Administradora certificada de psicotécnicos laborales (Test Zulliger, RedBa). Docente en PsikoAprende de cursos sobre intervención en abuso narcisista, autoestima, inclusión y neurodiversidad, e intervención en enfermedades crónicas.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -115,7 +115,7 @@ WHERE id = p4;
 -- 5. Mayori Armero
 UPDATE profiles SET
   full_name = 'Mayori Armero',
-  headline = 'Psicóloga Sanitaria | Neurotecnología e IA en Salud Mental | Práctica Internacional España-Países Bajos',
+  headline = 'Psicóloga Sanitaria · Neurotecnología e IA Aplicada a Salud Mental',
   summary = 'Psicóloga Sanitaria con triple formación de máster en Psicología General Sanitaria (Universidad Europea), Sexología y Terapia Sexual, y Psicología Clínica y Técnicas de Intervención Terapéutica (EUDES Universitas). Perfil profesional innovador especializado en neurotecnología aplicada a la salud mental: neurofeedback, biofeedback, estimulación transcraneal por corriente directa (tDCS) e inteligencia artificial. Práctica clínica internacional entre España y Países Bajos, con experiencia en intervención con víctimas de violencia de género, mediación intercultural y psicología forense. Colaboradora de Stichting Nuestra Casa (Países Bajos) en atención psicosocial a comunidad hispanohablante. Habilitada en Terapia de Realidad Virtual (Amelia Virtual Care). Docente en PsikoAprende de cursos en neurofeedback, biofeedback, tDCS, IA aplicada a salud mental y peritaje forense.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -131,7 +131,7 @@ WHERE id = p5;
 -- 6. Mariana García Bordones
 UPDATE profiles SET
   full_name = 'Mariana García Bordones',
-  headline = 'Psicóloga Clínica y Danzaterapeuta | +15 años en Danza Profesional | Terapia a través del Movimiento',
+  headline = 'Psicóloga Clínica · Danza Movimiento Terapia (DMT)',
   summary = 'Psicóloga clínica licenciada por la Universidad Arturo Michelena (Venezuela) y bailarina profesional con más de 15 años de formación continua en danza contemporánea y expresión corporal. Perfil profesional que integra psicología clínica con Danza Movimiento Terapia (DMT), formada por la Asociación Venezolana de DMT, Centro Alma de Caracas y María Cristina Lopes (Brasil). Ex-bailarina principal de la Compañía Valencia Danza Contemporánea con reconocimientos en festivales nacionales (Mención Plata en categoría profesional). Fundadora de la Escuela de Danza Sueño Contemporáneo en Venezuela. Actualmente profesora de danza terapéutica y yoga en instituciones educativas de Galicia, España, con experiencia clínica en atención a niños, adultos y gestantes mediante TCC y DMT. Docente en PsikoAprende del Curso de Terapia a través del Movimiento y la Danza.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -147,7 +147,7 @@ WHERE id = p6;
 -- 7. María Trinidad Arenas Jara
 UPDATE profiles SET
   full_name = 'María Trinidad Arenas Jara',
-  headline = 'Psicóloga Clínica | Especialista en Salud Mental Severa, Psicoanálisis y Psicología Forense | +12 años',
+  headline = 'Psicóloga Clínica · Salud Mental Severa y Psicoterapia Psicoanalítica',
   summary = 'Psicóloga clínica con más de 12 años de experiencia en instituciones de referencia y práctica privada. Licenciada por la Universidad Complutense de Madrid con especialidad clínica, Máster en Psicoterapia Psicoanalítica (UCM) y Máster en Psicología Jurídica (Universidad Internacional de Valencia). Especializada en salud mental severa, patología dual, psicosis y trastornos límite de personalidad, con formación avanzada junto a referentes como Fernando Colina, José Ramón Ubieto y Diego Figuera. Trayectoria en Fundación Manantial liderando proyectos piloto de innovación social y medición de modelos de intervención. Autora de publicaciones en la Revista del Centro Psicoanalítico de Madrid, ponente en congresos nacionales de rehabilitación psicosocial y supervisora clínica. Docente en PsikoAprende del Curso de Psicología Forense para Violencia de Género.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
@@ -163,7 +163,7 @@ WHERE id = p7;
 -- 8. Jennifer Lampre
 UPDATE profiles SET
   full_name = 'Jennifer Lampre',
-  headline = 'Psicóloga Sanitaria | Experta en EMDR, Trauma e Inteligencia Emocional Infanto-Juvenil | +10 años',
+  headline = 'Psicóloga Sanitaria · EMDR y Trauma Infanto-Juvenil',
   summary = 'Psicóloga Sanitaria con más de 10 años de experiencia en práctica clínica privada y hospitalaria. Licenciada por la Universidad de Oviedo con formación de máster en Práctica Clínica en Salud Mental (AEPCCC), Psicología Infantil y Adolescente, y Coaching e Inteligencia Emocional Infantil y Adolescente (ESNECA). Certificada en EMDR Nivel I y II por el Instituto Español EMDR (acreditado por EMDR Europa), con formación avanzada en trauma complejo. Experiencia profesional en el Centro Penitenciario de Villabona con programas de intervención con agresores en violencia de género. Actualmente combina práctica clínica en Buencoco-Unobravo con docencia en el Máster de Práctica Clínica de la AEPCCC. Docente en PsikoAprende del Curso de Experto en Inteligencia Emocional.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
