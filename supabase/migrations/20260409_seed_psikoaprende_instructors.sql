@@ -255,6 +255,15 @@ UPDATE profiles SET
 WHERE id = p13;
 
 -- ═══════════════════════════════════════════════════════════════════════
+-- CLEANUP: Delete existing data to make script re-runnable
+-- ═══════════════════════════════════════════════════════════════════════
+DELETE FROM portfolio_items WHERE profile_id IN (p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);
+DELETE FROM skills WHERE profile_id IN (p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);
+DELETE FROM languages WHERE profile_id IN (p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);
+DELETE FROM education WHERE profile_id IN (p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);
+DELETE FROM experiences WHERE profile_id IN (p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);
+
+-- ═══════════════════════════════════════════════════════════════════════
 -- STAGE 3: EXPERIENCES
 -- ═══════════════════════════════════════════════════════════════════════
 
