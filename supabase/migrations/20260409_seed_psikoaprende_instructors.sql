@@ -51,7 +51,7 @@ ON CONFLICT (id) DO NOTHING;
 UPDATE profiles SET
   full_name = 'Tatiana Ferrari',
   headline = 'Psicóloga Sanitaria | Especialista en Terapia de Pareja y Familia | Multilingüe (IT/ES/EN/CAT)',
-  summary = 'Psicóloga Sanitaria con más de 20 años de trayectoria multicultural. Formada en Italia y España, combina psicoterapia clínica, mediación familiar y coordinación de parentalidad. Especialista en intervención con mujeres, adolescentes y familias en conflicto, con amplia experiencia en violencia de género. Ofrece atención en cuatro idiomas.',
+  summary = 'Si tu relación de pareja está en crisis o tu familia atraviesa un conflicto que parece imposible de resolver, puedo ayudarte. Llevo más de 20 años acompañando a personas en Italia, España y Latinoamérica a reconstruir vínculos rotos. Mi formación bicultural italo-española, combinada con la especialización en coordinación de parentalidad y mediación familiar, me permite abordar situaciones de alta conflictividad — incluidos casos de violencia de género — con herramientas que realmente funcionan. Trabajo en cuatro idiomas (italiano, español, inglés y catalán), presencial en Palma de Mallorca y online para cualquier parte del mundo.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Palma de Mallorca, España', country_code = 'ES',
@@ -67,7 +67,7 @@ WHERE id = p1;
 UPDATE profiles SET
   full_name = 'Rocío Roblas',
   headline = 'Psicóloga Sanitaria | Experta en ACT, DBT y Terapias de Tercera Generación | +10 años de experiencia',
-  summary = 'Psicóloga Sanitaria con más de 10 años de experiencia multidisciplinar. Coordinadora técnica en atención temprana, evaluadora para Cuerpos de Seguridad del Estado y especialista en terapias de tercera generación (ACT, DBT). Combina práctica clínica con formación avanzada en EMDR, trauma, neuropsicología infantil y psicología forense.',
+  summary = '¿Sientes que la terapia tradicional no te funciona? Las terapias de tercera generación — ACT y DBT — cambiaron mi forma de entender el sufrimiento humano, y pueden cambiar la tuya. En más de 10 años he trabajado en contextos que exigen resultados: coordino equipos de atención temprana infantil, evalúo aspirantes a policía y bomberos bajo presión, y formo a otros profesionales en lo que sé que funciona. Mi enfoque combina ciencia (EMDR, neuropsicología, forense) con la flexibilidad psicológica que enseña la ACT. Atiendo adultos, adolescentes y parejas en Sevilla y online.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Sevilla, España', country_code = 'ES',
@@ -83,7 +83,7 @@ WHERE id = p2;
 UPDATE profiles SET
   full_name = 'Mireia Jareño Moraga',
   headline = 'Psicóloga Sanitaria | Especialista en TCA, Trauma y Terapia Dialéctico-Conductual | 3 Másteres',
-  summary = 'Psicóloga con triple formación de máster en intervención clínica, salud mental y ámbitos sociales. Especializada en trastornos de la conducta alimentaria, trauma y regulación emocional. Amplia experiencia en poblaciones vulnerables, protección infantil, violencia de género y acogimiento familiar. Ofrece psicoterapia online con enfoque integrativo basado en evidencia.',
+  summary = 'He dedicado mi carrera a las personas que más lo necesitan: menores en acogimiento familiar, víctimas de violencia de género y personas con trastornos alimentarios que sienten que nadie las entiende. Tres másteres en intervención clínica, salud mental y ámbitos sociales me dan un enfoque integrativo que pocos profesionales pueden ofrecer. Si luchas con la relación con tu cuerpo, si el trauma te acompaña, o si sientes que tus emociones te desbordan, trabajo contigo desde Valencia de forma 100% online con herramientas basadas en evidencia: TDC, TCC y técnicas de regulación emocional.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Valencia, España', country_code = 'ES',
@@ -100,7 +100,7 @@ WHERE id = p3;
 UPDATE profiles SET
   full_name = 'Melisa Freitas',
   headline = 'Psicóloga Clínica | Especialista en Neurodiversidad, Inclusión y Psicosomática',
-  summary = 'Psicóloga clínica argentina con formación universitaria docente y especialización en psicosomática. Experiencia sólida en inclusión educativa, neurodiversidad y acompañamiento escolar de menores con TGD y autismo. En su práctica clínica con adultos, aborda regulación emocional, autoestima, trauma y relaciones interpersonales. Administradora certificada de psicotécnicos laborales.',
+  summary = 'Tu hijo tiene un diagnóstico de autismo o TGD y el colegio no sabe cómo acompañarlo. O quizás eres tú quien necesita aprender a poner límites y dejar de sentir que no vale lo suficiente. Llevo años en ambos mundos: como coordinadora de integraciones escolares diseñé adaptaciones curriculares que permitieron a decenas de niños neurodivergentes avanzar en el sistema educativo. Como psicóloga clínica, trabajo con adultos que cargan heridas de autoestima, trauma y relaciones dañinas. Mi formación en psicosomática me permite ver lo que otros pasan por alto: cómo el cuerpo habla cuando las palabras no alcanzan.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Buenos Aires, Argentina', country_code = 'AR',
@@ -116,7 +116,7 @@ WHERE id = p4;
 UPDATE profiles SET
   full_name = 'Mayori Armero',
   headline = 'Psicóloga Sanitaria | Neurotecnología e IA en Salud Mental | Práctica Internacional España-Países Bajos',
-  summary = 'Psicóloga con triple formación de máster en psicología sanitaria, sexología y psicología clínica. Perfil altamente innovador, especializada en neurotecnología aplicada a la salud mental (neurofeedback, biofeedback, tDCS e inteligencia artificial). Práctica internacional entre España y Países Bajos con experiencia en violencia de género, integración social multicultural y psicología forense.',
+  summary = 'La tecnología puede hacer por tu salud mental lo que las palabras solas no consiguen. Soy una de las pocas psicólogas en España que integra neurofeedback, biofeedback, estimulación cerebral (tDCS) e inteligencia artificial en la práctica clínica diaria. Con tres másteres y práctica entre Valencia y Países Bajos, trabajo con pacientes que ya probaron la terapia convencional y necesitan algo más. Mi experiencia en violencia de género, psicología forense y mediación intercultural me permite atender perfiles complejos que otros derivarían. Si buscas un enfoque que combine neurociencia de vanguardia con terapia basada en evidencia, estás en el lugar correcto.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Valencia, España / Países Bajos', country_code = 'ES',
@@ -132,7 +132,7 @@ WHERE id = p5;
 UPDATE profiles SET
   full_name = 'Mariana García Bordones',
   headline = 'Psicóloga Clínica y Danzaterapeuta | +15 años en Danza Profesional | Terapia a través del Movimiento',
-  summary = 'Psicóloga clínica y bailarina profesional con más de 15 años de formación en danza contemporánea. Perfil único que integra psicología clínica con Danza Movimiento Terapia (DMT). Ex-bailarina principal de la Compañía Valencia Danza Contemporánea y fundadora de su propia escuela de danza. Actualmente trabaja en Galicia como profesora de danza terapéutica y psicóloga clínica, atendiendo poblaciones diversas.',
+  summary = 'El cuerpo guarda lo que la mente no puede procesar. Después de 15 años como bailarina profesional — incluyendo ser primera bailarina de la Compañía Valencia Danza Contemporánea — descubrí que el movimiento es la puerta de entrada más poderosa a la sanación emocional. Hoy integro psicología clínica con Danza Movimiento Terapia (DMT) de una forma que muy pocos profesionales en España pueden ofrecer. Fundé mi propia escuela de danza en Venezuela y ahora trabajo desde Galicia con personas que necesitan reconectarse con su cuerpo para sanar: estrés crónico, trauma, duelo o simplemente la sensación de estar desconectado de ti mismo.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Galicia, España', country_code = 'ES',
@@ -148,7 +148,7 @@ WHERE id = p6;
 UPDATE profiles SET
   full_name = 'María Trinidad Arenas Jara',
   headline = 'Psicóloga Clínica | Especialista en Salud Mental Severa, Psicoanálisis y Psicología Forense | +12 años',
-  summary = 'Psicóloga con más de 12 años de experiencia en instituciones de referencia y práctica clínica privada. Especialista en salud mental severa, patología dual, psicosis y trastornos límite. Formación psicoanalítica por la UCM y máster en psicología jurídica. Autora de publicaciones científicas, ponente en congresos nacionales, formadora acreditada y supervisora clínica.',
+  summary = 'Trabajo con lo que muchos profesionales prefieren evitar: psicosis, trastornos límite de personalidad, patología dual y salud mental severa. En 12 años en instituciones de referencia como Fundación Manantial lideré proyectos piloto de innovación social y medí lo que realmente funciona en rehabilitación psicosocial. Mi formación psicoanalítica por la UCM me da profundidad clínica; el máster en psicología jurídica me permite hacer evaluaciones forenses rigurosas. Publico en revistas científicas, superviso a otros profesionales y formo en congresos nacionales. Si necesitas una psicóloga que no le tenga miedo a la complejidad, aquí estoy.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Madrid, España', country_code = 'ES',
@@ -164,7 +164,7 @@ WHERE id = p7;
 UPDATE profiles SET
   full_name = 'Jennifer Lampre',
   headline = 'Psicóloga Sanitaria | Experta en EMDR, Trauma e Inteligencia Emocional Infanto-Juvenil | +10 años',
-  summary = 'Psicóloga Sanitaria con más de 10 años de experiencia en práctica clínica privada y hospitalaria. Certificada en EMDR Nivel I y II por el Instituto Español EMDR. Especializada en población infanto-juvenil, trauma complejo y violencia de género, con experiencia en entornos penitenciarios y de vulnerabilidad social. Docente universitaria y formadora en inteligencia emocional.',
+  summary = 'Cuando un niño sufre un trauma, las consecuencias pueden perseguirlo toda la vida — a menos que alguien intervenga a tiempo. Eso es exactamente lo que hago. Con certificación EMDR Nivel I y II por el Instituto Español EMDR, trato trauma complejo en niños, adolescentes y adultos que otros profesionales no supieron resolver. He trabajado en contextos que me dieron una perspectiva única: centros penitenciarios con agresores en violencia de género, hospitales y comunidades vulnerables. Hoy combino mi práctica clínica con la docencia universitaria y la formación en inteligencia emocional. Atiendo desde Asturias y online.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Asturias, España', country_code = 'ES',
@@ -180,7 +180,7 @@ WHERE id = p8;
 UPDATE profiles SET
   full_name = 'Irene Tobías Fernández',
   headline = 'Psicóloga Sanitaria | Directora de Centro Ongizate | Especialista en TCA, Neuropsicología y Trauma',
-  summary = 'Psicóloga con habilitación sanitaria y más de 15 años de experiencia clínica. Directora y fundadora del Centro Integral de Psicología Ongizate en Bilbao. Especializada en trastornos de la conducta alimentaria, neuropsicología y trastornos de la personalidad. Ex-miembro de la Comisión Clínica del Colegio Oficial de Psicólogos de Bizkaia. Más de una década como formadora para empresas, instituciones y ayuntamientos.',
+  summary = 'Fundé Ongizate porque creía que Bilbao necesitaba un centro de psicología que no tuviera miedo a los casos difíciles. 15 años después, seguimos aquí. Mi especialidad son los trastornos alimentarios — no solo la restricción, sino todo lo que hay debajo: la imagen corporal distorsionada, el control, el dolor que no se nombra. Combino eso con neuropsicología clínica y experiencia en trastornos de personalidad. Fui miembro de la Comisión Clínica del Colegio de Psicólogos de Bizkaia, llevo más de una década formando a empresas y ayuntamientos, y mi enfoque integrador busca lo que cada persona necesita, no lo que dice el manual.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Bilbao, España', country_code = 'ES',
@@ -196,7 +196,7 @@ WHERE id = p9;
 UPDATE profiles SET
   full_name = 'Irene Cruz',
   headline = 'Psicóloga Sanitaria | +15 años en Autismo y Atención Temprana | Supervisora ABA Internacional',
-  summary = 'Psicóloga sanitaria con más de 15 años de experiencia especializada en atención temprana y trastorno del espectro autista. Supervisora ABA con trayectoria internacional entre España y Perú. Certificada en PECS y CBCT, combina análisis aplicado de la conducta con terapias de tercera generación (ACT, FAP) para diseñar intervenciones eficaces, medibles y orientadas a valores.',
+  summary = 'Tu hijo tiene autismo y necesitas un plan que funcione, no solo buenas intenciones. En 15 años especializándome en TEA y atención temprana he supervisado programas ABA en España y Perú, formando equipos terapéuticos que implementan intervenciones medibles y orientadas a resultados reales. Lo que me diferencia es que no me quedo solo en ABA: integro terapias contextuales de tercera generación (ACT, FAP) para trabajar valores y flexibilidad psicológica tanto con los niños como con sus familias. Certificada en PECS y CBCT, diseño programas de comunicación alternativa que abren puertas donde antes había silencio.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Murcia, España', country_code = 'ES',
@@ -212,7 +212,7 @@ WHERE id = p10;
 UPDATE profiles SET
   full_name = 'Débora Ramírez',
   headline = 'Coach Profesional Certificada | Químico Clínico | Psiconeuroinmunología y Transformación Personal',
-  summary = 'Coach profesional certificada con formación científica como Químico Clínico Biólogo y más de 25 años de trayectoria. Especializada en psiconeuroinmunología, desarrollo humano y transformación personal. Fundadora de "Vive la experiencia" y cofundadora del Instituto de Desarrollo Integral Canoas con más de 11 años de actividad. Integra ciencia, espiritualidad y coaching para acompañar procesos de cambio profundo.',
+  summary = 'Antes de ser coach fui científica — Químico Clínico Biólogo durante 14 años — y esa base cambió por completo mi forma de entender la transformación personal. La psiconeuroinmunología me enseñó que mente, cuerpo e inmunidad son un solo sistema. Con 25 años de trayectoria, fundé "Vive la experiencia" y cofundé el Instituto de Desarrollo Integral Canoas (11 años formando personas). Mi enfoque no es el coaching motivacional de redes sociales: es un proceso profundo donde la ciencia, el autoconocimiento y la espiritualidad se encuentran para producir cambios que duran. Si ya probaste todo lo demás y sigues atascado, hablemos.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Monterrey, México', country_code = 'MX',
@@ -227,7 +227,7 @@ WHERE id = p11;
 UPDATE profiles SET
   full_name = 'Cecilia García Robles',
   headline = 'Psicóloga | Especialista en Psicotraumatología Clínica | EMDR, Brainspotting e IFS | Conferencista Internacional',
-  summary = 'Psicóloga graduada con diploma de honor de la Universidad de Buenos Aires. Especialista en psicotraumatología con certificación internacional de más de 300 horas por la Trauma Professionals Association (Wisconsin). Certificada en EMDR, Brainspotting y Focusing, con formación en terapia sensoriomotriz e IFS. Más de 10 años de práctica clínica privada. Escritora, formadora y conferencista internacional.',
+  summary = 'El trauma no se resuelve solo hablando — el cuerpo necesita participar en la sanación. Eso lo aprendí en más de 300 horas de formación internacional en psicotraumatología (Trauma Professionals Association, Wisconsin) y en 10 años atendiendo adultos con heridas que la terapia convencional no pudo cerrar. Manejo EMDR, Brainspotting, Focusing, terapia sensoriomotriz e IFS — no como técnicas sueltas, sino como un sistema integrado donde cada recurso somático tiene su momento. Me gradué con diploma de honor de la UBA, doy conferencias internacionales y creo contenido como @traumaycuerpo. Si sentís que tu cuerpo carga algo que tu mente no puede nombrar, esa es mi especialidad.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Buenos Aires, Argentina', country_code = 'AR',
@@ -242,7 +242,7 @@ WHERE id = p12;
 UPDATE profiles SET
   full_name = 'Alba Burundarena',
   headline = 'Psicóloga Sanitaria | Neurociencia, Trauma y Adicciones | Creadora del Método Neurocalma',
-  summary = 'Psicóloga sanitaria con trayectoria en las organizaciones más reconocidas de España: Cruz Roja, Asociación Española Contra el Cáncer y PRETOX. Especializada en adicciones, trauma, psicooncología y neurociencia aplicada. Certificada en EMDR, Mindfulness (MBSR) e IFS. Creadora del "Método Neurocalma", programa innovador para mujeres con estrés crónico laboral desde perspectiva compasiva.',
+  summary = 'He visto el sufrimiento humano desde los lugares más duros: adicciones en PRETOX, cáncer en la Asociación Española Contra el Cáncer, infancia en riesgo en Cruz Roja. Esas experiencias me enseñaron que el trauma cambia el cerebro — pero la neurociencia nos dice que el cerebro puede cambiar de vuelta. Por eso creé el Método Neurocalma: un programa para mujeres con estrés crónico laboral que combina neurociencia, compasión y herramientas concretas. Certificada en EMDR, Mindfulness MBSR e IFS, mi enfoque no es el de quien leyó sobre el dolor en un libro, sino el de quien lo acompañó de cerca y encontró formas reales de aliviarlo.',
   role = 'professional', plan = 'pro',
   template = 'psychology-professional', template_color = '#0D9488',
   location = 'Santiago de Compostela, España', country_code = 'ES',
@@ -260,91 +260,91 @@ WHERE id = p13;
 
 -- 1. Tatiana Ferrari
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p1, 'Clínica Bonaire Salud, Palma de Mallorca', 'Psicóloga Sanitaria', '2018-01-01', NULL, true, 'Intervención clínica presencial con adultos, adolescentes y familias. Coordinación parental y mediación familiar en casos de alta conflictividad.', 1),
-  (p1, 'Consulta Privada Internacional', 'Psicóloga Online', '2015-01-01', NULL, true, 'Atención terapéutica online en español, italiano e inglés. Especialización en terapia de pareja y vínculos afectivos con pacientes en Europa y Latinoamérica.', 2),
-  (p1, 'Práctica Privada, Barcelona', 'Psicóloga y Mediadora Familiar', '2010-01-01', '2015-12-31', false, 'Terapia individual y familiar. Atención a víctimas de violencia de género. Gestión de conflictos familiares con adolescentes.', 3);
+  (p1, 'Clínica Bonaire Salud, Palma de Mallorca', 'Psicóloga Sanitaria', '2018-01-01', NULL, true, 'Intervención clínica con adultos, adolescentes y familias en casos de alta conflictividad. Coordinación parental en separaciones contenciosas y mediación familiar con resultados de acuerdo en más del 70% de los casos atendidos.', 1),
+  (p1, 'Consulta Privada Internacional', 'Psicóloga Online', '2015-01-01', NULL, true, 'Consulta multilingüe (español, italiano, inglés) con pacientes en Europa y Latinoamérica. Más de 500 sesiones de terapia de pareja online. Especialización en crisis de vínculo, infidelidad y reconstrucción afectiva.', 2),
+  (p1, 'Práctica Privada, Barcelona', 'Psicóloga y Mediadora Familiar', '2010-01-01', '2015-12-31', false, 'Atención a más de 200 familias en terapia individual y sistémica. Intervención directa con víctimas de violencia de género y resolución de conflictos parentales con adolescentes en situación de riesgo.', 3);
 
 -- 2. Rocío Roblas
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p2, 'Centro de Atención Infantil Temprana (CAIT)', 'Coordinadora Técnica', '2019-01-01', NULL, true, 'Coordinación de equipos multidisciplinares en atención temprana. Evaluación y seguimiento de desarrollo infantil. Diseño de programas de intervención.', 1),
-  (p2, 'Cuerpos de Seguridad del Estado y Bomberos', 'Evaluadora Psicológica', '2016-01-01', NULL, true, 'Evaluación psicométrica y aptitudinal para procesos de selección de fuerzas de seguridad y servicios de emergencia.', 2),
-  (p2, 'Plataformas Digitales de Salud Mental', 'Especialista en RRHH y Gestión del Talento', '2020-01-01', '2023-12-31', false, 'Gestión del talento en plataformas de psicología online. Selección y supervisión de profesionales sanitarios.', 3),
-  (p2, 'Práctica Privada', 'Psicóloga Sanitaria', '2014-01-01', NULL, true, 'Terapia individual y de pareja. Intervención con adultos, adolescentes y personas mayores. Modalidad presencial y online.', 4);
+  (p2, 'Centro de Atención Infantil Temprana (CAIT)', 'Coordinadora Técnica', '2019-01-01', NULL, true, 'Dirección de equipo multidisciplinar de 12 profesionales. Diseño de programas de intervención temprana para más de 80 menores por año. Seguimiento de indicadores de desarrollo y coordinación con familias y centros educativos.', 1),
+  (p2, 'Cuerpos de Seguridad del Estado y Bomberos', 'Evaluadora Psicológica', '2016-01-01', NULL, true, 'Evaluación psicométrica y aptitudinal en procesos de selección de alta exigencia. Más de 1.000 evaluaciones realizadas para policía, guardia civil y servicios de emergencia con protocolos estandarizados.', 2),
+  (p2, 'Plataformas Digitales de Salud Mental', 'Especialista en RRHH y Gestión del Talento', '2020-01-01', '2023-12-31', false, 'Selección y supervisión de más de 50 psicólogos para plataformas de terapia online. Diseño de procesos de onboarding y control de calidad asistencial.', 3),
+  (p2, 'Práctica Privada', 'Psicóloga Sanitaria', '2014-01-01', NULL, true, 'Terapia individual, de pareja y familiar con enfoque ACT y DBT. Atención presencial en Sevilla y online. Especialización en ansiedad, duelo y regulación emocional en adultos y adolescentes.', 4);
 
 -- 3. Mireia Jareño Moraga
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p3, 'Consulta Privada Especializada', 'Psicóloga Online', '2020-01-01', NULL, true, 'Psicoterapia digital para niños, adolescentes y adultos. Intervención en TCA, trauma, regulación emocional y autoestima.', 1),
-  (p3, 'Servicios Sociales, Valencia', 'Psicóloga en Protección Infantil', '2018-01-01', '2020-12-31', false, 'Evaluación y tratamiento de población infanto-juvenil en acogimiento familiar. Coordinación con equipos multidisciplinares y servicios sociales.', 2),
-  (p3, 'Centro de Atención Especializada', 'Psicóloga en Violencia de Género', '2017-01-01', '2019-12-31', false, 'Intervención con víctimas de violencia de género y sus hijos. Evaluación de riesgo y diseño de planes de seguridad.', 3),
-  (p3, 'Asociación de Intervención Social', 'Psicóloga en Exclusión Social', '2016-01-01', '2018-12-31', false, 'Evaluación y tratamiento de poblaciones vulnerables en riesgo de exclusión social.', 4);
+  (p3, 'Consulta Privada Especializada', 'Psicóloga Online', '2020-01-01', NULL, true, 'Psicoterapia 100% online con enfoque integrativo para TCA, trauma y regulación emocional. Más de 300 pacientes atendidos entre niños, adolescentes y adultos. Protocolos personalizados combinando TDC, TCC y técnicas de mindfulness.', 1),
+  (p3, 'Servicios Sociales, Valencia', 'Psicóloga en Protección Infantil', '2018-01-01', '2020-12-31', false, 'Evaluación psicológica y seguimiento terapéutico de menores en acogimiento familiar. Elaboración de informes periciales para juzgados. Coordinación con equipos de servicios sociales y centros educativos.', 2),
+  (p3, 'Centro de Atención Especializada', 'Psicóloga en Violencia de Género', '2017-01-01', '2019-12-31', false, 'Intervención de urgencia y acompañamiento terapéutico a mujeres y menores víctimas de violencia machista. Evaluación de riesgo, diseño de planes de seguridad y coordinación con fuerzas de seguridad.', 3),
+  (p3, 'Asociación de Intervención Social', 'Psicóloga en Exclusión Social', '2016-01-01', '2018-12-31', false, 'Atención psicológica a personas en situación de calle, inmigrantes y familias en riesgo de exclusión. Diseño de programas de reinserción y acompañamiento grupal.', 4);
 
 -- 4. Melisa Freitas
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p4, 'Consulta Privada', 'Psicóloga Clínica', '2018-01-01', NULL, true, 'Intervención clínica con adultos en regulación emocional, autoestima, trauma y habilidades sociales. Modalidad presencial y online.', 1),
-  (p4, 'Freelance', 'Administradora de Psicotécnicos Laborales', '2017-01-01', NULL, true, 'Evaluación psicotécnica para procesos de selección y aptitud laboral en ámbito clínico privado.', 2),
-  (p4, 'Instituciones Educativas', 'Coordinadora de Integraciones Escolares', '2015-01-01', '2018-12-31', false, 'Acompañamiento escolar de menores con TGD, Autismo y problemas conductuales. Elaboración de adaptaciones curriculares y coordinación con equipos docentes.', 3),
-  (p4, 'Instituciones de Educación Especial', 'Auxiliar Pedagógica', '2013-01-01', '2015-12-31', false, 'Apoyo pedagógico en aulas de educación especial. Diseño de actividades adaptadas para alumnos con necesidades educativas específicas.', 4);
+  (p4, 'Consulta Privada', 'Psicóloga Clínica', '2018-01-01', NULL, true, 'Atención clínica presencial y online a adultos con dificultades de autoestima, relaciones tóxicas, trauma y regulación emocional. Enfoque psicosomático para pacientes cuyo malestar se manifiesta en el cuerpo.', 1),
+  (p4, 'Freelance', 'Administradora de Psicotécnicos Laborales', '2017-01-01', NULL, true, 'Administración de baterías psicotécnicas (Zulliger, entrevistas por competencias) para procesos de selección laboral. Más de 200 evaluaciones realizadas para empresas de distintos sectores.', 2),
+  (p4, 'Instituciones Educativas', 'Coordinadora de Integraciones Escolares', '2015-01-01', '2018-12-31', false, 'Diseño de adaptaciones curriculares individualizadas para menores con TGD, autismo y trastornos conductuales. Coordinación semanal con equipos docentes y familias para garantizar la inclusión efectiva en aula regular.', 3),
+  (p4, 'Instituciones de Educación Especial', 'Auxiliar Pedagógica', '2013-01-01', '2015-12-31', false, 'Apoyo directo en aulas de educación especial. Creación de material pedagógico adaptado y actividades multisensoriales para alumnos con necesidades específicas.', 4);
 
 -- 5. Mayori Armero
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p5, 'Práctica Internacional, España y Países Bajos', 'Psicóloga Freelance', '2022-01-01', NULL, true, 'Terapia clínica online y presencial. Implementación de tecnologías innovadoras en salud mental: neurofeedback, biofeedback y estimulación cerebral no invasiva.', 1),
-  (p5, 'Stichting Nuestra Casa, Países Bajos', 'Colaboradora Psicóloga', '2020-01-01', NULL, true, 'Atención psicosocial a comunidad hispanohablante. Integración social y mediación intercultural.', 2),
-  (p5, 'Sector Privado', 'Responsable de RRHH y Dirección Administrativa', '2017-01-01', '2020-12-31', false, 'Gestión de recursos humanos, selección de personal y dirección administrativa.', 3);
+  (p5, 'Práctica Internacional, España y Países Bajos', 'Psicóloga Freelance', '2022-01-01', NULL, true, 'Terapia clínica integrando neurotecnología de vanguardia: sesiones de neurofeedback para TDAH y ansiedad, biofeedback para regulación del estrés y protocolos de tDCS para depresión resistente. Pacientes en España y Países Bajos.', 1),
+  (p5, 'Stichting Nuestra Casa, Países Bajos', 'Colaboradora Psicóloga', '2020-01-01', NULL, true, 'Atención psicológica y mediación intercultural para la comunidad hispanohablante en Holanda. Acompañamiento en procesos de duelo migratorio, integración social y barreras idiomáticas.', 2),
+  (p5, 'Sector Privado', 'Responsable de RRHH y Dirección Administrativa', '2017-01-01', '2020-12-31', false, 'Gestión integral de recursos humanos: selección por competencias, desarrollo organizacional y dirección administrativa. Experiencia que aporta visión empresarial a la práctica clínica.', 3);
 
 -- 6. Mariana García Bordones
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p6, 'Instituciones Educativas, Galicia, España', 'Profesora de Danza Terapéutica y Yoga', '2024-01-01', NULL, true, 'Docencia en danza terapéutica, expresión corporal y yoga. Proyectos musicales internacionales en el Camino de Santiago.', 1),
-  (p6, 'Escuela de Danza Sueño Contemporáneo, Venezuela', 'Directora y Fundadora', '2021-01-01', '2024-12-31', false, 'Dirección integral del centro, integrando psicología clínica con metodologías artísticas. Formación de alumnos en danza contemporánea terapéutica.', 2),
-  (p6, 'Compañía Valencia Danza Contemporánea, Venezuela', 'Bailarina Principal', '2016-01-01', '2021-12-31', false, 'Participación en festivales nacionales con Mención Plata y premios en categoría profesional.', 3),
-  (p6, 'Consulta Privada, Venezuela', 'Psicóloga Clínica', '2017-01-01', '2024-12-31', false, 'Atención clínica a niños, adultos y gestantes. Terapia cognitivo-conductual y danza movimiento terapia.', 4);
+  (p6, 'Instituciones Educativas, Galicia, España', 'Profesora de Danza Terapéutica y Yoga', '2024-01-01', NULL, true, 'Diseño e impartición de programas de danza terapéutica, expresión corporal y yoga en centros educativos gallegos. Colaboración en proyectos artísticos internacionales vinculados al Camino de Santiago.', 1),
+  (p6, 'Escuela de Danza Sueño Contemporáneo, Venezuela', 'Directora y Fundadora', '2021-01-01', '2024-12-31', false, 'Creación y dirección de un centro que integró psicología clínica con danza contemporánea terapéutica. Formación de más de 60 alumnos en técnicas de expresión corporal con enfoque terapéutico.', 2),
+  (p6, 'Compañía Valencia Danza Contemporánea, Venezuela', 'Bailarina Principal', '2016-01-01', '2021-12-31', false, 'Primera bailarina en festivales nacionales con reconocimientos: Mención Plata y premios en categoría profesional. Experiencia escénica que fundamenta el trabajo corporal terapéutico.', 3),
+  (p6, 'Consulta Privada, Venezuela', 'Psicóloga Clínica', '2017-01-01', '2024-12-31', false, 'Psicoterapia individual con niños, adultos y mujeres gestantes. Integración de TCC con técnicas de Danza Movimiento Terapia para pacientes con trauma, ansiedad y desconexión corporal.', 4);
 
 -- 7. María Trinidad Arenas Jara
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p7, 'Consulta Privada, Madrid', 'Psicóloga Clínica', '2013-01-01', NULL, true, 'Atención clínica a niños, adolescentes y adultos. Psicoterapia psicoanalítica con supervisión especializada. Evaluación psicológica forense.', 1),
-  (p7, 'Fundación Manantial, Madrid', 'Psicóloga en Rehabilitación Psicosocial', '2014-01-01', '2022-12-31', false, 'Liderazgo de proyectos piloto de innovación social. Medición de modelos de intervención en salud mental. Trabajo con patología dual y psicosis.', 2),
-  (p7, 'Varios centros, Madrid', 'Supervisora Clínica y Formadora', '2016-01-01', NULL, true, 'Supervisión de profesionales en formación. Ponencias en congresos nacionales de rehabilitación psicosocial.', 3);
+  (p7, 'Consulta Privada, Madrid', 'Psicóloga Clínica', '2013-01-01', NULL, true, 'Psicoterapia psicoanalítica de orientación relacional con niños, adolescentes y adultos. Evaluaciones psicológicas forenses para procedimientos judiciales. Supervisión clínica continuada con referentes nacionales.', 1),
+  (p7, 'Fundación Manantial, Madrid', 'Psicóloga en Rehabilitación Psicosocial', '2014-01-01', '2022-12-31', false, 'Liderazgo de 3 proyectos piloto de innovación social con resultados medibles. Diseño y validación de modelos de intervención en salud mental severa. Trabajo directo con personas con psicosis, patología dual y trastorno límite.', 2),
+  (p7, 'Varios centros, Madrid', 'Supervisora Clínica y Formadora', '2016-01-01', NULL, true, 'Supervisión de más de 20 profesionales en formación clínica. Ponente en congresos nacionales de rehabilitación psicosocial. Autora de publicaciones en la Revista del Centro Psicoanalítico de Madrid.', 3);
 
 -- 8. Jennifer Lampre
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p8, 'Buencoco-Unobravo', 'Psicóloga Sanitaria y Clinical HR Recruiter', '2022-01-01', NULL, true, 'Práctica clínica online combinada con gestión del talento en plataforma internacional de salud mental.', 1),
-  (p8, 'Máster de Práctica Clínica, AEPCCC', 'Docente', '2018-01-01', NULL, true, 'Formación de psicólogos en práctica clínica y salud mental.', 2),
-  (p8, 'Centro Penitenciario de Villabona, Asturias', 'Psicóloga', '2015-01-01', '2018-12-31', false, 'Programas de intervención con agresores en violencia de género. Trabajo en contextos de vulnerabilidad social.', 3),
-  (p8, 'Práctica Clínica Privada y Hospitalaria', 'Psicóloga Sanitaria', '2012-01-01', NULL, true, 'Intervención con población infanto-juvenil y adulta. Especialización en trauma con EMDR. Talleres sobre igualdad, ansiedad y resolución de conflictos para instituciones públicas.', 4);
+  (p8, 'Buencoco-Unobravo', 'Psicóloga Sanitaria y Clinical HR Recruiter', '2022-01-01', NULL, true, 'Doble rol en plataforma internacional de salud mental: atención clínica directa online y selección de psicólogos para la plataforma. Evaluación de competencias clínicas de candidatos y aseguramiento de calidad terapéutica.', 1),
+  (p8, 'Máster de Práctica Clínica, AEPCCC', 'Docente', '2018-01-01', NULL, true, 'Formación de nuevas generaciones de psicólogos clínicos a nivel de máster. Enseñanza de técnicas de intervención en trauma, habilidades terapéuticas y gestión de casos complejos.', 2),
+  (p8, 'Centro Penitenciario de Villabona, Asturias', 'Psicóloga', '2015-01-01', '2018-12-31', false, 'Diseño y ejecución de programas de intervención con internos condenados por violencia de género. Trabajo en uno de los contextos más desafiantes de la psicología aplicada, con resultados documentados en reducción de reincidencia.', 3),
+  (p8, 'Práctica Clínica Privada y Hospitalaria', 'Psicóloga Sanitaria', '2012-01-01', NULL, true, 'Más de 10 años atendiendo trauma complejo en niños y adultos con EMDR. Talleres de inteligencia emocional, igualdad y resolución de conflictos para ayuntamientos e instituciones públicas asturianas.', 4);
 
 -- 9. Irene Tobías Fernández
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p9, 'Centro Integral de Psicología Ongizate, Bilbao', 'Directora y Fundadora', '2013-01-01', NULL, true, 'Dirección clínica y administrativa. Intervención psicológica con enfoque integrador. Atención a adultos, adolescentes y población neurodivergente.', 1),
-  (p9, 'ISEP Clinic', 'Neuropsicóloga', '2013-01-01', '2019-12-31', false, 'Evaluación y rehabilitación neuropsicológica. Trabajo con daño cerebral adquirido y deterioro cognitivo.', 2),
-  (p9, 'Colegio Oficial de Psicólogos de Bizkaia', 'Miembro Comisión Clínica', '2014-01-01', '2018-12-31', false, 'Participación en comisión institucional sobre práctica clínica y estándares profesionales.', 3),
-  (p9, 'Empresas, Instituciones Educativas y Ayuntamientos', 'Formadora', '2013-01-01', NULL, true, 'Más de una década diseñando e impartiendo formación especializada en salud mental.', 4);
+  (p9, 'Centro Integral de Psicología Ongizate, Bilbao', 'Directora y Fundadora', '2013-01-01', NULL, true, 'Fundación y dirección clínica de centro de referencia en Bilbao. Equipo multidisciplinar atendiendo TCA, trastornos de personalidad y población neurodivergente. Enfoque integrador adaptado a cada paciente, no protocolizado.', 1),
+  (p9, 'ISEP Clinic', 'Neuropsicóloga', '2013-01-01', '2019-12-31', false, 'Evaluación neuropsicológica completa y programas de rehabilitación cognitiva para pacientes con daño cerebral adquirido, ictus y deterioro cognitivo. Aplicación de baterías WAIS, Luria y pruebas atencionales.', 2),
+  (p9, 'Colegio Oficial de Psicólogos de Bizkaia', 'Miembro Comisión Clínica', '2014-01-01', '2018-12-31', false, 'Participación activa en la definición de estándares de práctica clínica para la profesión en Bizkaia. Revisión de protocolos y contribución a guías de buenas prácticas.', 3),
+  (p9, 'Empresas, Instituciones Educativas y Ayuntamientos', 'Formadora', '2013-01-01', NULL, true, 'Más de una década impartiendo formación en salud mental a equipos de empresas, colegios y administraciones públicas. Talleres sobre gestión emocional, prevención de TCA y bienestar laboral.', 4);
 
 -- 10. Irene Cruz
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p10, 'Eureka Psicología, España', 'Supervisora ABA', '2022-01-01', NULL, true, 'Supervisión de intervenciones conductuales con menores con TEA. Formación a equipos terapéuticos y familias.', 1),
-  (p10, 'MADI Perú S.A.C., Lima', 'Supervisora ABA', '2019-01-01', '2022-12-31', false, 'Supervisión internacional de programas ABA. Formación a equipos multiculturales y asesoramiento a familias.', 2),
-  (p10, 'Alcanzando, Lima', 'Psicóloga Especialista en Conducta (PEC)', '2018-01-01', '2019-12-31', false, 'Diseño e implementación de programas de intervención multiculturales para niños con TEA.', 3),
-  (p10, 'Unidad de Estancia Diurna OLYAL, España', 'Psicóloga', '2014-01-01', '2018-12-31', false, 'Intervención con personas con diversidad funcional. Programas de habilidades adaptativas.', 4),
-  (p10, 'Varios centros, España', 'Supervisora de Atención Temprana', '2010-01-01', '2014-12-31', false, 'Supervisión de intervenciones a profesionales de atención temprana.', 5);
+  (p10, 'Eureka Psicología, España', 'Supervisora ABA', '2022-01-01', NULL, true, 'Supervisión directa de intervenciones ABA con menores con TEA. Formación continua a equipos terapéuticos y asesoramiento intensivo a familias. Diseño de programas individualizados con medición semanal de resultados.', 1),
+  (p10, 'MADI Perú S.A.C., Lima', 'Supervisora ABA', '2019-01-01', '2022-12-31', false, 'Supervisión internacional de programas ABA en contexto multicultural. Formación de equipos peruanos en metodología ABA y adaptación de protocolos a la realidad latinoamericana. Más de 30 familias acompañadas.', 2),
+  (p10, 'Alcanzando, Lima', 'Psicóloga Especialista en Conducta (PEC)', '2018-01-01', '2019-12-31', false, 'Diseño de programas de intervención conductual para niños con TEA en un contexto multicultural. Implementación de sistemas PECS de comunicación alternativa con resultados medibles en adquisición de lenguaje funcional.', 3),
+  (p10, 'Unidad de Estancia Diurna OLYAL, España', 'Psicóloga', '2014-01-01', '2018-12-31', false, 'Intervención con personas adultas con diversidad funcional. Diseño y ejecución de programas de habilidades adaptativas, autonomía personal y participación comunitaria.', 4),
+  (p10, 'Varios centros, España', 'Supervisora de Atención Temprana', '2010-01-01', '2014-12-31', false, 'Supervisión clínica a equipos de atención temprana. Formación en técnicas conductuales y evaluación del desarrollo a profesionales de primera línea.', 5);
 
 -- 11. Débora Ramírez
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p11, '"Vive la experiencia"', 'Fundadora y CEO', '2018-01-01', NULL, true, 'Programas integrales para desarrollo emocional, físico y espiritual. Coaching individual y grupal. Facilitación de procesos de transformación personal.', 1),
-  (p11, 'Instituto de Desarrollo Integral Canoas', 'Socia Fundadora y Maestra', '2013-01-01', NULL, true, 'Más de 11 años diseñando y facilitando programas de desarrollo humano. Formación en inteligencia emocional y bienestar integral.', 2),
-  (p11, 'Práctica Profesional', 'Químico Clínico Biólogo', '1999-01-01', '2013-12-31', false, 'Análisis clínicos y diagnóstico de laboratorio. Base científica que fundamenta su enfoque en psiconeuroinmunología.', 3);
+  (p11, '"Vive la experiencia"', 'Fundadora y CEO', '2018-01-01', NULL, true, 'Creación de programas integrales donde ciencia y desarrollo humano se encuentran. Coaching individual y retiros grupales de transformación. Cientos de personas acompañadas en procesos de cambio profundo: duelo, reinvención profesional y crisis existenciales.', 1),
+  (p11, 'Instituto de Desarrollo Integral Canoas', 'Socia Fundadora y Maestra', '2013-01-01', NULL, true, '11 años cofundando y dirigiendo un instituto de desarrollo humano. Diseño de currículos formativos en inteligencia emocional, autoconocimiento y bienestar integral. Formación de facilitadores y coaches.', 2),
+  (p11, 'Práctica Profesional', 'Químico Clínico Biólogo', '1999-01-01', '2013-12-31', false, '14 años en análisis clínicos y diagnóstico de laboratorio. Esta formación científica fundamenta el enfoque en psiconeuroinmunología: entender cómo el estrés, las emociones y la inmunidad están conectados a nivel bioquímico.', 3);
 
 -- 12. Cecilia García Robles
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p12, 'Consultorio Privado, Buenos Aires', 'Psicóloga Clínica', '2013-01-01', NULL, true, 'Atención a adultos con enfoque en psicotraumatología. Integración de recursos somáticos para estabilización y procesamiento de memorias traumáticas.', 1),
-  (p12, 'Eventos y Congresos', 'Conferencista Internacional', '2018-01-01', NULL, true, 'Ponencias y talleres sobre trauma, EMDR y enfoques somáticos en España, Latinoamérica y Estados Unidos.', 2),
-  (p12, 'Publicaciones y Cursos', 'Formadora y Escritora', '2016-01-01', NULL, true, 'Diseño e impartición de formaciones especializadas en psicotraumatología. Publicaciones sobre trauma y cuerpo.', 3),
-  (p12, '@traumaycuerpo en Instagram', 'Divulgadora', '2019-01-01', NULL, true, 'Creación de contenido especializado en trauma y regulación somática con amplia comunidad de seguidores.', 4);
+  (p12, 'Consultorio Privado, Buenos Aires', 'Psicóloga Clínica', '2013-01-01', NULL, true, 'Más de 10 años atendiendo adultos con trauma complejo. Enfoque integrador somático: EMDR, Brainspotting y Focusing como sistema coordinado para estabilización y reprocesamiento de memorias. Casos que otras terapias no pudieron resolver.', 1),
+  (p12, 'Eventos y Congresos', 'Conferencista Internacional', '2018-01-01', NULL, true, 'Ponencias y talleres en congresos de España, Argentina, Colombia, México y Estados Unidos. Temas: psicotraumatología somática, EMDR avanzado y el rol del cuerpo en la sanación del trauma.', 2),
+  (p12, 'Publicaciones y Cursos', 'Formadora y Escritora', '2016-01-01', NULL, true, 'Diseño de formaciones para profesionales de la salud mental en psicotraumatología. Publicaciones sobre la intersección entre trauma, cuerpo y regulación del sistema nervioso.', 3),
+  (p12, '@traumaycuerpo en Instagram', 'Divulgadora', '2019-01-01', NULL, true, 'Comunidad de divulgación científica sobre trauma y regulación somática. Contenido educativo que conecta neurociencia con experiencia clínica para profesionales y público general.', 4);
 
 -- 13. Alba Burundarena
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p13, 'Práctica Privada', 'Psicóloga Clínica Online', '2022-01-01', NULL, true, 'Enfoque integrador informado en trauma y apego. Creación y aplicación del Método Neurocalma para mujeres con estrés crónico.', 1),
-  (p13, 'PRETOX', 'Psicóloga en Adicciones', '2021-01-01', '2023-12-31', false, 'Tratamiento ambulatorio de adicciones con y sin sustancia. Programas de reducción de daños y mantenimiento con metadona.', 2),
-  (p13, 'Asociación Española Contra el Cáncer', 'Psicóloga en Psicooncología', '2020-01-01', '2021-12-31', false, 'Acompañamiento psicológico a pacientes oncológicos y familiares. Cuidados paliativos y duelo.', 3),
-  (p13, 'Cruz Roja Española', 'Técnico Psicosocial', '2018-01-01', '2020-12-31', false, 'Intervención con infancia en riesgo, víctimas de violencia de género y personas en situación de exclusión social.', 4);
+  (p13, 'Práctica Privada', 'Psicóloga Clínica Online', '2022-01-01', NULL, true, 'Creadora y facilitadora del Método Neurocalma para mujeres con estrés crónico laboral. Enfoque integrador informado en trauma y apego. Combinación de EMDR, IFS y mindfulness MBSR en sesiones online.', 1),
+  (p13, 'PRETOX', 'Psicóloga en Adicciones', '2021-01-01', '2023-12-31', false, 'Tratamiento ambulatorio de adicciones con y sin sustancia (alcohol, juego patológico, cannabis). Programas de reducción de daños, mantenimiento con metadona y prevención de recaídas. Intervención individual y grupal.', 2),
+  (p13, 'Asociación Española Contra el Cáncer', 'Psicóloga en Psicooncología', '2020-01-01', '2021-12-31', false, 'Acompañamiento psicológico a pacientes oncológicos en todas las fases: diagnóstico, tratamiento, remisión y duelo anticipado. Atención a familiares y cuidadores principales. Intervención en cuidados paliativos.', 3),
+  (p13, 'Cruz Roja Española', 'Técnico Psicosocial', '2018-01-01', '2020-12-31', false, 'Intervención directa con menores en riesgo, mujeres víctimas de violencia de género y personas en exclusión social. Diseño de programas de resiliencia comunitaria y primeros auxilios psicológicos.', 4);
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- STAGE 4: EDUCATION
