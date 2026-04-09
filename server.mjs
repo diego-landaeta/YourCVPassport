@@ -214,6 +214,153 @@ app.delete('/api/admin/users/:userId', async (req, res) => {
   }
 });
 
+// ===== SITEMAP DINÁMICO =====
+// Se regenera en cada request - siempre incluye los últimos posts/CVs/jobs publicados
+// Cache de 1 hora para no sobrecargar Supabase
+
+let sitemapCache = { xml: null, timestamp: 0 };
+const SITEMAP_CACHE_TTL = 60 * 60 * 1000; // 1 hora
+
+const SITEMAP_EN_TO_ES = {
+  '/': '/',
+  '/pricing': '/precios',
+  '/product/overview': '/producto/resumen',
+  '/product/stamps': '/producto/sellos',
+  '/product/ats': '/producto/ats',
+  '/product/domain': '/producto/dominio',
+  '/product/analytics': '/producto/analiticas',
+  '/product/ai': '/producto/ia',
+  '/professionals/how': '/profesionales/como-funciona',
+  '/professionals/templates': '/profesionales/plantillas',
+  '/professionals/help': '/profesionales/ayuda',
+  '/companies/search': '/empresas/busqueda',
+  '/companies/plans': '/empresas/planes',
+  '/companies/integrations': '/empresas/integraciones',
+  '/companies/security': '/empresas/seguridad',
+  '/resources/blog': '/recursos/blog',
+  '/resources/library': '/recursos/biblioteca',
+  '/resources/success-stories': '/recursos/exito',
+  '/resources/status': '/recursos/estado',
+  '/about': '/nosotros',
+  '/about/mission': '/nosotros/mision',
+  '/about/press': '/nosotros/prensa',
+  '/about/contact': '/nosotros/contacto',
+  '/jobs': '/empleos',
+};
+
+function getEsPath(enPath) {
+  if (SITEMAP_EN_TO_ES[enPath]) return SITEMAP_EN_TO_ES[enPath];
+  if (enPath.startsWith('/resources/blog/')) return enPath.replace('/resources/blog/', '/recursos/blog/');
+  if (enPath.startsWith('/jobs/')) return enPath.replace('/jobs/', '/empleos/');
+  return null;
+}
+
+function sitemapEntry(path, lastmod, priority, changefreq) {
+  const base = 'https://yourcvpassport.com';
+  const esPath = getEsPath(path);
+  let hreflang = `    <xhtml:link rel="alternate" hreflang="en" href="${base}${path}" />\n`;
+  if (esPath) hreflang += `    <xhtml:link rel="alternate" hreflang="es" href="${base}${esPath}" />\n`;
+  hreflang += `    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${path}" />`;
+  return `  <url>\n    <loc>${base}${path}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n${hreflang}\n  </url>`;
+}
+
+async function generateDynamicSitemap() {
+  const now = new Date().toISOString().split('T')[0];
+  const entries = [];
+
+  // Static pages
+  const staticPages = [
+    ['/', '1.0', 'daily'], ['/pricing', '1.0', 'weekly'],
+    ['/product/overview', '0.9', 'weekly'], ['/product/stamps', '0.9', 'weekly'],
+    ['/product/ats', '0.9', 'weekly'], ['/product/domain', '0.9', 'weekly'],
+    ['/product/analytics', '0.9', 'weekly'], ['/product/ai', '0.9', 'weekly'],
+    ['/professionals/how', '0.9', 'weekly'], ['/professionals/templates', '0.9', 'weekly'],
+    ['/professionals/help', '0.8', 'weekly'],
+    ['/companies/search', '0.9', 'weekly'], ['/companies/plans', '0.9', 'weekly'],
+    ['/companies/integrations', '0.8', 'weekly'], ['/companies/security', '0.8', 'monthly'],
+    ['/resources/blog', '0.9', 'daily'], ['/resources/library', '0.8', 'weekly'],
+    ['/resources/success-stories', '0.7', 'monthly'], ['/resources/status', '0.6', 'daily'],
+    ['/about', '0.7', 'monthly'], ['/about/mission', '0.6', 'monthly'],
+    ['/about/press', '0.6', 'monthly'], ['/about/contact', '0.8', 'monthly'],
+    ['/jobs', '0.9', 'daily'],
+  ];
+  for (const [path, priority, freq] of staticPages) {
+    entries.push(sitemapEntry(path, now, priority, freq));
+  }
+
+  // Blog posts (only published, published_at <= now)
+  try {
+    const { data: posts } = await supabase
+      .from('blog_posts')
+      .select('slug, updated_at, published_at')
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false });
+    if (posts) {
+      for (const p of posts) {
+        const lastmod = (p.updated_at || p.published_at || now).split('T')[0];
+        entries.push(sitemapEntry(`/resources/blog/${p.slug}`, lastmod, '0.7', 'monthly'));
+      }
+    }
+  } catch (e) { console.error('[Sitemap] Blog error:', e.message); }
+
+  // CV profiles (active, not hidden, complete)
+  try {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('slug, updated_at')
+      .eq('is_active', true)
+      .eq('profile_hidden', false)
+      .not('full_name', 'is', null)
+      .not('headline', 'is', null)
+      .not('slug', 'is', null)
+      .order('updated_at', { ascending: false });
+    if (profiles) {
+      for (const p of profiles) {
+        const lastmod = (p.updated_at || now).split('T')[0];
+        entries.push(sitemapEntry(`/cv/${p.slug}`, lastmod, '0.6', 'weekly'));
+      }
+    }
+  } catch (e) { console.error('[Sitemap] Profiles error:', e.message); }
+
+  // Job postings
+  try {
+    const { data: jobs } = await supabase
+      .from('job_postings')
+      .select('slug, updated_at, published_at')
+      .eq('status', 'PUBLISHED')
+      .order('published_at', { ascending: false });
+    if (jobs) {
+      for (const j of jobs) {
+        const lastmod = (j.updated_at || j.published_at || now).split('T')[0];
+        entries.push(sitemapEntry(`/jobs/${j.slug}`, lastmod, '0.7', 'weekly'));
+      }
+    }
+  } catch (e) { console.error('[Sitemap] Jobs error:', e.message); }
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>`;
+}
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (sitemapCache.xml && (now - sitemapCache.timestamp) < SITEMAP_CACHE_TTL) {
+      console.log('[Sitemap] Serving from cache');
+      res.set('Content-Type', 'application/xml');
+      return res.send(sitemapCache.xml);
+    }
+
+    console.log('[Sitemap] Generating fresh sitemap...');
+    const xml = await generateDynamicSitemap();
+    sitemapCache = { xml, timestamp: now };
+    res.set('Content-Type', 'application/xml');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(xml);
+  } catch (error) {
+    console.error('[Sitemap] Error:', error.message);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
 // Servir archivos estáticos
 app.use(express.static('dist'));
 

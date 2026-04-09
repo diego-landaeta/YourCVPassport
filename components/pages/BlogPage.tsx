@@ -79,14 +79,30 @@ const BlogPage: React.FC = () => {
 
     const fetchPosts = async () => {
         setLoading(true);
+        const now = new Date();
+
+        // Fetch from Supabase
         const { data, error } = await supabase
             .from('blog_posts')
             .select('*')
             .eq('lang', lang)
+            .lte('published_at', now.toISOString())
             .order('published_at', { ascending: false });
 
-        if (error) {} else {setPosts(data as BlogPost[]);
-        }
+        let allPosts = (data || []) as BlogPost[];
+
+        // Merge static blog posts (from individual .ts files)
+        try {
+            const { getPublishedPosts } = await import('../../content/posts');
+            const staticPosts = getPublishedPosts(lang) as unknown as BlogPost[];
+            const existingSlugs = new Set(allPosts.map(p => p.slug));
+            const newStatic = staticPosts.filter(p => !existingSlugs.has(p.slug));
+            allPosts = [...allPosts, ...newStatic].sort(
+                (a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+            );
+        } catch (e) { /* static posts not available */ }
+
+        setPosts(allPosts);
         setLoading(false);
     };
 

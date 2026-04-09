@@ -1,186 +1,700 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>https://www.yourcvpassport.com/login</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/signup</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/overview</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/stamps</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/ats</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/domain</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/analytics</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product/ai</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/product</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/professionals/how</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/professionals/templates</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/professionals/help</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/professionals</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/companies/search</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/companies/plans</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/companies/integrations</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/companies/security</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/companies</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/resources/blog</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/resources/library</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/resources/success</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/resources/status</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/resources</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/about</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/about/mission</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/about/press</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/about/contact</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/pricing</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/profiles</loc>
-    <lastmod>2026-02-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.yourcvpassport.com/</loc>
-    <lastmod>2026-02-13</lastmod>
+    <loc>https://yourcvpassport.com/</loc>
+    <lastmod>2026-04-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/pricing</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/pricing" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/precios" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/pricing" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/overview</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/overview" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/resumen" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/overview" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/stamps</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/stamps" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/sellos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/stamps" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/ats</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/ats" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/ats" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/ats" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/domain</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/domain" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/dominio" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/domain" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/analytics</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/analytics" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/analiticas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/analytics" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product/ai</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product/ai" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto/ia" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product/ai" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/product</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/product" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/producto" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/product" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/professionals/how</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/professionals/how" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/profesionales/como-funciona" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/professionals/how" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/professionals/templates</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/professionals/templates" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/profesionales/plantillas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/professionals/templates" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/professionals/help</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/professionals/help" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/profesionales/ayuda" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/professionals/help" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/professionals</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/professionals" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/profesionales" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/professionals" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/companies/search</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/search" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empresas/busqueda" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/companies/search" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/companies/plans</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/plans" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empresas/planes" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/companies/plans" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/companies/integrations</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/integrations" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empresas/integraciones" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/companies/integrations" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/companies/security</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/security" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empresas/seguridad" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/companies/security" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/companies</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empresas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/companies" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources/blog</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources/blog" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos/blog" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources/blog" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources/library</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources/library" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos/biblioteca" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources/library" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources/success</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources/success" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos/exito" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources/success" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources/status</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources/status" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos/estado" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources/status" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/about</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/about" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/nosotros" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/about" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/about/mission</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/about/mission" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/nosotros/mision" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/about/mission" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/about/press</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/about/press" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/nosotros/prensa" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/about/press" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/about/contact</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/about/contact" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/nosotros/contacto" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/about/contact" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/jobs</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/jobs" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/empleos" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/jobs" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/resources/blog/como-crear-cv-profesional-2025</loc>
+    <lastmod>2025-12-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/resources/blog/como-crear-cv-profesional-2025" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/recursos/blog/como-crear-cv-profesional-2025" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/resources/blog/como-crear-cv-profesional-2025" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/tatiana-ferrari</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/tatiana-ferrari" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/tatiana-ferrari" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/alba-burundarena</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/alba-burundarena" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/alba-burundarena" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/mariana-garcia</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/mariana-garcia" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/mariana-garcia" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/maria-trinidad-arenas</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/maria-trinidad-arenas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/maria-trinidad-arenas" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/jennifer-lampre</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/jennifer-lampre" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/jennifer-lampre" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/irene-tobias</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/irene-tobias" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/irene-tobias" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/rocio-roblas</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/rocio-roblas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/rocio-roblas" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/mireia-jareno</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/mireia-jareno" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/mireia-jareno" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/melisa-freitas</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/melisa-freitas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/melisa-freitas" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/mayori-armero</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/mayori-armero" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/mayori-armero" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/debora-ramirez</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/debora-ramirez" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/debora-ramirez" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/cecilia-garcia-robles</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/cecilia-garcia-robles" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/cecilia-garcia-robles" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/irene-cruz</loc>
+    <lastmod>2026-04-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/irene-cruz" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/irene-cruz" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/marcus-williams</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/marcus-williams" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/marcus-williams" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/amanda-rodriguez</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/amanda-rodriguez" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/amanda-rodriguez" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/thomas-rivera</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/thomas-rivera" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/thomas-rivera" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/david-chen</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/david-chen" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/david-chen" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/michael-thompson</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/michael-thompson" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/michael-thompson" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/priya-sharma</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/priya-sharma" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/priya-sharma" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/lisa-morrison</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/lisa-morrison" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/lisa-morrison" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/angela-roberts</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/angela-roberts" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/angela-roberts" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/nicole-taylor</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/nicole-taylor" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/nicole-taylor" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/rebecca-anderson</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/rebecca-anderson" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/rebecca-anderson" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/robert-kim</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/robert-kim" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/robert-kim" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/sarah-bennett</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/sarah-bennett" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/sarah-bennett" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/james-wilson</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/james-wilson" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/james-wilson" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/brian-cooper</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/brian-cooper" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/brian-cooper" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/daniel-foster</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/daniel-foster" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/daniel-foster" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/mark-davidson</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/mark-davidson" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/mark-davidson" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/steven-mitchell</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/steven-mitchell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/steven-mitchell" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/kevin-park</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/kevin-park" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/kevin-park" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/jessica-porter</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/jessica-porter" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/jessica-porter" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/alex-martinez</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/alex-martinez" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/alex-martinez" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/christopher-barnes</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/christopher-barnes" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/christopher-barnes" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/linda-zhang</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/linda-zhang" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/linda-zhang" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/robert-green</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/robert-green" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/robert-green" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/karen-white</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/karen-white" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/karen-white" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/paul-henderson</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/paul-henderson" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/paul-henderson" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/catherine-adams</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/catherine-adams" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/catherine-adams" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/maria-gonzalez</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/maria-gonzalez" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/maria-gonzalez" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/elizabeth-morgan</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/elizabeth-morgan" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/elizabeth-morgan" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/richard-hamilton</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/richard-hamilton" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/richard-hamilton" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/janet-lee</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/janet-lee" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/janet-lee" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/margaret-sullivan</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/margaret-sullivan" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/margaret-sullivan" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/michelle-chang</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/michelle-chang" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/michelle-chang" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/jennifer-martinez</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/jennifer-martinez" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/jennifer-martinez" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/emily-harper</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/emily-harper" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/emily-harper" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/rachel-stevens</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/rachel-stevens" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/rachel-stevens" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/laura-martinez-vidal</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/laura-martinez-vidal" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/laura-martinez-vidal" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/diana-russell</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/diana-russell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/diana-russell" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/javier-torres-gimeno</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/javier-torres-gimeno" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/javier-torres-gimeno" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/patricia-coleman</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/patricia-coleman" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/patricia-coleman" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/marta-ruiz-serrano</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/marta-ruiz-serrano" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/marta-ruiz-serrano" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/cv/support-yourcvpassport-com</loc>
+    <lastmod>2026-02-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cv/support-yourcvpassport-com" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cv/support-yourcvpassport-com" />
   </url>
 </urlset>

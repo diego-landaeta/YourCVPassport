@@ -30,20 +30,9 @@ La aplicación estará disponible en `http://localhost:5173`
 
 ---
 
-## 📚 Documentación Completa
+## Documentacion
 
-**👉 [Ver DOCUMENTATION.md](DOCUMENTATION.md) para la documentación completa del proyecto**
-
-La documentación incluye:
-- ✅ Guía de instalación detallada
-- ✅ Arquitectura y estructura del proyecto
-- ✅ Base de datos y migraciones
-- ✅ Todas las características y funcionalidades
-- ✅ Sistema de diseño y componentes UI
-- ✅ Guías técnicas de implementación
-- ✅ Seguridad y mejores prácticas
-- ✅ Testing y performance
-- ✅ Deployment y producción
+**[Ver DOCS.md](DOCS.md)** - Documentacion tecnica consolidada (nginx, migraciones, emails, SEO, testing, scripts SQL)
 
 ---
 
@@ -80,10 +69,9 @@ La documentación incluye:
 
 ---
 
-## 📁 Archivos Importantes
+## Archivos Importantes
 
-- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Documentación completa del proyecto
-- **[cronologia.md](cronologia.md)** - SQL completo de la base de datos
+- **[DOCS.md](DOCS.md)** - Documentacion tecnica consolidada
 - **[package.json](package.json)** - Dependencias y scripts
 
 ---

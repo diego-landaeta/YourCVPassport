@@ -40,6 +40,24 @@ const BlogPostPage: React.FC = () => {
 
     const fetchPost = async () => {
         setLoading(true);
+
+        // 1. Try static blog posts first (individual .ts files)
+        try {
+            const { getPostBySlug, getPublishedPosts } = await import('../../content/posts');
+            const staticPost = await getPostBySlug(slug!);
+            if (staticPost) {
+                setPost(staticPost as unknown as BlogPost);
+                const related = getPublishedPosts(staticPost.lang)
+                    .filter(p => p.category === staticPost.category && p.slug !== slug)
+                    .slice(0, 3)
+                    .map(p => ({ ...p, content: '' } as unknown as BlogPost));
+                setRelatedPosts(related);
+                setLoading(false);
+                return;
+            }
+        } catch (e) { /* static posts not available */ }
+
+        // 2. Fallback to Supabase
         const { data, error } = await supabase
             .from('blog_posts')
             .select('*')

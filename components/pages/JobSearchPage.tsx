@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import PageSEO from '../shared/PageSEO';
 
 interface JobPosting {
   id: string;
@@ -191,6 +192,13 @@ const JobSearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cv-light-gray dark:bg-dark-bg-primary">
+      <PageSEO
+        title="Job Search - Find Your Next Opportunity"
+        description="Browse verified job opportunities from top companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile."
+        keywords="job search, job opportunities, remote jobs, verified employers, career opportunities"
+        lang={lang}
+        canonical="https://yourcvpassport.com/jobs"
+      />
       {/* Hero Section */}
       <section className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">

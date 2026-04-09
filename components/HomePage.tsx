@@ -21,8 +21,9 @@ const HomePage: React.FC = () => {
   return (
     <>
       <PageSEO
-        title={hp.seo.title}
-        description={hp.seo.description}
+        title="Professional CV Platform with Verification"
+        description="Create, verify, and share your professional CV. AI-powered builder, 20+ templates, ATS export, and digital verification stamps."
+        keywords="CV, resume, professional profile, verified CV, CV builder, ATS resume"
         lang={lang}
         canonical="https://yourcvpassport.com/"
       />

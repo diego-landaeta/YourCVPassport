@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import toast from 'react-hot-toast';
+import PageSEO from '../shared/PageSEO';
 import {
   BuildingOfficeIcon,
   MapPinIcon,
@@ -305,6 +306,13 @@ const JobDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSEO
+        title={job.title ? `${job.title} at ${job.company.name}` : 'Job Details'}
+        description={job.description ? job.description.substring(0, 155) + '...' : 'View job details and apply with your verified CV profile on YourCVPassport.'}
+        keywords={`${job.title || 'job'}, ${job.company.name || ''}, ${job.location_city || ''}, ${job.employment_type || ''}, job opening`.replace(/, ,/g, ',')}
+        lang={language}
+        canonical={`https://yourcvpassport.com/jobs/${slug}`}
+      />
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
