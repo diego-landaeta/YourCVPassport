@@ -7,41 +7,24 @@
 
 DO $$
 DECLARE
-  p1  CONSTANT UUID := 'a0b1c2d3-0001-4000-8000-100000000001';
-  p2  CONSTANT UUID := 'a0b1c2d3-0002-4000-8000-100000000002';
-  p3  CONSTANT UUID := 'a0b1c2d3-0003-4000-8000-100000000003';
-  p4  CONSTANT UUID := 'a0b1c2d3-0004-4000-8000-100000000004';
-  p5  CONSTANT UUID := 'a0b1c2d3-0005-4000-8000-100000000005';
-  p6  CONSTANT UUID := 'a0b1c2d3-0006-4000-8000-100000000006';
-  p7  CONSTANT UUID := 'a0b1c2d3-0007-4000-8000-100000000007';
-  p8  CONSTANT UUID := 'a0b1c2d3-0008-4000-8000-100000000008';
-  p9  CONSTANT UUID := 'a0b1c2d3-0009-4000-8000-100000000009';
-  p10 CONSTANT UUID := 'a0b1c2d3-0010-4000-8000-100000000010';
-  p11 CONSTANT UUID := 'a0b1c2d3-0011-4000-8000-100000000011';
-  p12 CONSTANT UUID := 'a0b1c2d3-0012-4000-8000-100000000012';
-  p13 CONSTANT UUID := 'a0b1c2d3-0013-4000-8000-100000000013';
+  p1  CONSTANT UUID := '02f14661-a8d7-42b6-8dff-59322f2f3d3d';  -- Tatiana Ferrari
+  p2  CONSTANT UUID := '8387b584-7218-48fe-8672-d5c9111e9bcc';  -- Rocío Roblas
+  p3  CONSTANT UUID := '1447e1aa-7743-4124-bfcc-2a1a2cac9dc2';  -- Mireia Jareño
+  p4  CONSTANT UUID := 'fa5ebc3d-a430-42f3-974a-e380599a0d35';  -- Melisa Freitas
+  p5  CONSTANT UUID := '0b8b0885-eaa8-45ba-a9b4-4ef48b7f3401';  -- Mayori Armero
+  p6  CONSTANT UUID := '8d4aae7a-fbf9-44c1-a32c-4a9c0808d7a8';  -- Mariana García
+  p7  CONSTANT UUID := 'ecddab23-b41a-4264-a4aa-63f4b132b24b';  -- Trinidad Arenas
+  p8  CONSTANT UUID := '7d03b04c-675e-49ea-a426-902e3bb594c7';  -- Jennifer Lampre
+  p9  CONSTANT UUID := '9fdecfe7-c12e-44e7-a688-5d336a3e1ac2';  -- Irene Tobías
+  p10 CONSTANT UUID := '426c26bf-ad68-40cc-b864-b35f72479484';  -- Irene Cruz
+  p11 CONSTANT UUID := '1ed261f0-56f5-4e1e-8d47-51d4b84b29bc';  -- Débora Ramírez
+  p12 CONSTANT UUID := '9f7673e3-d52f-4751-be39-65236a0dccdd';  -- Cecilia García
+  p13 CONSTANT UUID := '89007b00-aa9d-44bf-8cc3-3faf69f42ca9';  -- Alba Burundarena
 
 BEGIN
 
--- ═══════════════════════════════════════════════════════════════════════
--- STAGE 1: AUTH.USERS
--- ═══════════════════════════════════════════════════════════════════════
-
-INSERT INTO auth.users (instance_id, id, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, aud, role) VALUES
-  ('00000000-0000-0000-0000-000000000000', p1,  'tatiana.ferrari@psikoaprende.com',    crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Tatiana Ferrari"}'::jsonb,             NOW() - INTERVAL '200 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p2,  'rocio.roblas@psikoaprende.com',       crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Rocío Roblas"}'::jsonb,                NOW() - INTERVAL '195 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p3,  'mireia.jareno@psikoaprende.com',      crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Mireia Jareño Moraga"}'::jsonb,        NOW() - INTERVAL '190 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p4,  'melisa.freitas@psikoaprende.com',     crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Melisa Freitas"}'::jsonb,              NOW() - INTERVAL '185 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p5,  'mayori.armero@psikoaprende.com',      crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Mayori Armero"}'::jsonb,               NOW() - INTERVAL '180 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p6,  'mariana.garcia@psikoaprende.com',     crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Mariana García Bordones"}'::jsonb,     NOW() - INTERVAL '175 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p7,  'trinidad.arenas@psikoaprende.com',    crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"María Trinidad Arenas Jara"}'::jsonb,  NOW() - INTERVAL '170 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p8,  'jennifer.lampre@psikoaprende.com',    crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Jennifer Lampre"}'::jsonb,             NOW() - INTERVAL '165 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p9,  'irene.tobias@psikoaprende.com',       crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Irene Tobías Fernández"}'::jsonb,      NOW() - INTERVAL '160 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p10, 'irene.cruz@psikoaprende.com',         crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Irene Cruz"}'::jsonb,                  NOW() - INTERVAL '155 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p11, 'debora.ramirez@psikoaprende.com',     crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Débora Ramírez"}'::jsonb,              NOW() - INTERVAL '150 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p12, 'cecilia.garcia@psikoaprende.com',     crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Cecilia García Robles"}'::jsonb,       NOW() - INTERVAL '145 days', NOW(), 'authenticated', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000000', p13, 'alba.burundarena@psikoaprende.com',   crypt('PsikoDemo2026!', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{"full_name":"Alba Burundarena"}'::jsonb,            NOW() - INTERVAL '140 days', NOW(), 'authenticated', 'authenticated')
-ON CONFLICT (id) DO NOTHING;
+-- STAGE 1: AUTH.USERS — Created manually via Supabase Dashboard
+-- Users already exist, skip to profile updates.
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- STAGE 2: PROFILES
@@ -53,7 +36,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria y Mediadora Familiar',
   summary = 'Especialista en intervención con parejas, familias y mujeres en contextos de alta conflictividad, con más de 20 años de trayectoria multicultural entre Italia y España. Licenciada en Psicología Clínica por la Universidad de Florencia y con Máster en Psicología y Psicoterapia Clínica por la Universidad Autónoma de Barcelona, su formación bicultural le permite abordar las dinámicas de pareja y familia desde una perspectiva amplia e integradora. Actualmente ejerce como psicóloga sanitaria en Clínica Bonaire Salud (Palma de Mallorca) y atiende pacientes de Europa y Latinoamérica de forma online en cuatro idiomas: italiano, español, inglés y catalán. Su especialización en coordinación de parentalidad (Experta Universitaria por la UCM), mediación familiar y violencia de género se complementa con certificaciones en coaching, yoga terapéutico para personas con necesidades especiales y psicomotricidad. En PsikoAprende dirige el Máster en Terapia de Pareja y Vínculos Afectivos y el Curso de Terapia de Pareja.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Palma de Mallorca, España', country_code = 'ES',
   slug = 'tatiana-ferrari', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -69,7 +52,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria y Coordinadora de Atención Temprana',
   summary = 'Especialista en terapias de tercera generación con más de 10 años de experiencia clínica que abarca desde la neuropsicología geriátrica hasta el desarrollo infantil temprano, integrando evaluación psicométrica, intervención terapéutica y coordinación de equipos multidisciplinares. Como coordinadora técnica de un Centro de Atención Infantil Temprana (CAIT), dirige equipos y diseña programas de intervención para la detección y tratamiento precoz del desarrollo infantil. Paralelamente, evalúa candidatos a Cuerpos de Seguridad del Estado y Bomberos y mantiene su práctica privada en Sevilla y online, donde aplica terapia de aceptación y compromiso (ACT), terapia dialéctico-conductual (DBT) y EMDR. Su formación en psicología jurídica, forense y penitenciaria complementa un perfil versátil con experiencia adicional en gestión del talento en plataformas digitales de salud mental. En PsikoAprende imparte el Máster en ACT y Mindfulness, diplomados en ACT y en Terapias de Tercera Generación, y cursos sobre diseño de programas educativos inclusivos e intervención en las heridas de la infancia.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Sevilla, España', country_code = 'ES',
   slug = 'rocio-roblas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -85,7 +68,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria Especialista en Trastornos Alimentarios',
   summary = 'Especialista en intervención multidisciplinar para trastornos de la conducta alimentaria, trauma psicológico y regulación emocional, con triple formación de máster en Psicología General Sanitaria, Intervención Psicológica y Salud Mental, e Intervención Psicológica en Ámbitos Sociales. Su trayectoria clínica incluye trabajo con poblaciones de alta vulnerabilidad: menores en acogimiento familiar dentro del sistema de protección infantil, mujeres y niños víctimas de violencia de género, y personas en riesgo de exclusión social. Esta experiencia directa con el sufrimiento humano en sus formas más complejas fundamenta un enfoque terapéutico integrativo basado en evidencia que aplica en su consulta online, donde atiende niños, adolescentes y adultos con dificultades de autoestima, estrés postraumático, problemas en la relación con el cuerpo y la alimentación, y desregulación emocional. En PsikoAprende imparte formación en terapia dialéctico-conductual, trastornos alimentarios, mediación con adolescentes, psicología deportiva y primera consulta psicológica.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Valencia, España', country_code = 'ES',
   slug = 'mireia-jareno', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -102,7 +85,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Clínica Especialista en Neurodiversidad e Inclusión',
   summary = 'Especialista en neurodiversidad e inclusión educativa con formación docente universitaria y especialización en psicosomática. Durante años coordinó integraciones escolares para menores con TGD, autismo y problemas conductuales, diseñando adaptaciones curriculares individualizadas y trabajando codo a codo con equipos docentes y familias en instituciones de educación especial. Esa experiencia directa con la neurodiversidad infantil complementa su práctica clínica privada con adultos, donde aborda regulación emocional, autoestima, trauma y relaciones interpersonales desde un enfoque psicosomático que atiende tanto al cuerpo como a la mente. También administra evaluaciones psicotécnicas laborales certificadas (Test Zulliger, RedBa) para procesos de selección. En PsikoAprende forma a otros profesionales en intervención clínica en abuso narcisista, autoestima, inclusión y neurodiversidad, e intervención psicológica en enfermedades crónicas.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Buenos Aires, Argentina', country_code = 'AR',
   slug = 'melisa-freitas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -118,7 +101,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria Especialista en Neurotecnología Clínica',
   summary = 'Especialista en neurotecnología aplicada a la salud mental, con triple formación de máster en psicología sanitaria, sexología y psicología clínica. Su práctica integra herramientas que van más allá de la terapia conversacional: neurofeedback, biofeedback, estimulación transcraneal por corriente directa (tDCS), terapia de realidad virtual (habilitada por Amelia Virtual Care) e inteligencia artificial aplicada al diagnóstico y tratamiento. Con práctica clínica internacional entre España y Países Bajos, aporta una perspectiva multicultural forjada en la atención psicosocial a comunidad hispanohablante en Holanda (Stichting Nuestra Casa) y en intervención con víctimas de violencia de género. Su formación en psicología criminal, psiquiatría forense y mediación intercultural completa un perfil profesional orientado a la innovación en salud mental. En PsikoAprende imparte formación en neurofeedback, biofeedback, neuromodulación cerebral, inteligencia artificial en salud mental y peritaje psicológico forense.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Valencia, España / Países Bajos', country_code = 'ES',
   slug = 'mayori-armero', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -134,7 +117,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Clínica y Danzaterapeuta',
   summary = 'Especialista en la integración de psicología clínica con el movimiento corporal como herramienta terapéutica. Con más de 15 años de formación en danza contemporánea y expresión corporal, su carrera fusiona dos disciplinas que rara vez se encuentran: fue bailarina principal de la Compañía Valencia Danza Contemporánea — obteniendo Mención Plata en festivales nacionales en categoría profesional — y simultáneamente se licenció en Psicología Clínica por la Universidad Arturo Michelena (Venezuela). Se formó en Danza Movimiento Terapia (DMT) con la Asociación Venezolana de DMT, Centro Alma de Caracas y María Cristina Lopes (Brasil), y fundó su propia Escuela de Danza Sueño Contemporáneo. Actualmente ejerce desde Galicia como profesora de danza terapéutica y yoga, y atiende en consulta clínica a niños, adultos y gestantes combinando terapia cognitivo-conductual con DMT. En PsikoAprende imparte el Curso de Terapia a través del Movimiento y la Danza.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Galicia, España', country_code = 'ES',
   slug = 'mariana-garcia', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -150,7 +133,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Clínica y Supervisora en Rehabilitación Psicosocial',
   summary = 'Especialista en salud mental severa con más de 12 años de experiencia en instituciones de referencia y práctica clínica privada. Su trabajo se centra en los cuadros más complejos de la psicología: psicosis, trastornos límite de personalidad, patología dual y psicotraumatología, abordados desde una formación psicoanalítica sólida (Máster en Psicoterapia Psicoanalítica por la UCM) enriquecida con formación directa junto a referentes como Fernando Colina, José Ramón Ubieto y Diego Figuera. En Fundación Manantial lideró proyectos piloto de innovación social y midió la eficacia de modelos de intervención en rehabilitación psicosocial. Su Máster en Psicología Jurídica le permite realizar evaluaciones forenses rigurosas. Autora de publicaciones en la Revista del Centro Psicoanalítico de Madrid, ponente en congresos nacionales y supervisora clínica de profesionales en formación. En PsikoAprende imparte el Curso de Psicología Forense para Violencia de Género.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Madrid, España', country_code = 'ES',
   slug = 'maria-trinidad-arenas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -166,7 +149,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria Especialista en EMDR y Trauma Complejo',
   summary = 'Especialista en trauma complejo e intervención infanto-juvenil con más de 10 años de experiencia clínica privada y hospitalaria. Certificada en EMDR Nivel I y II por el Instituto Español EMDR (acreditado por EMDR Europa), con formación avanzada en herramientas específicas para trauma complejo, incluyendo técnicas de integración cerebral (COPPA). Su trayectoria incluye contextos de alta exigencia profesional como el Centro Penitenciario de Villabona, donde desarrolló programas de intervención con agresores en violencia de género, y práctica hospitalaria con población infantil y adulta. Actualmente combina atención clínica online en la plataforma internacional Buencoco-Unobravo con docencia en el Máster de Práctica Clínica de la AEPCCC, donde forma a nuevos psicólogos clínicos. También imparte talleres sobre igualdad, ansiedad y resolución de conflictos para instituciones públicas. En PsikoAprende dirige el Curso de Experto en Inteligencia Emocional.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Asturias, España', country_code = 'ES',
   slug = 'jennifer-lampre', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -182,7 +165,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria y Directora del Centro Ongizate',
   summary = 'Especialista en trastornos de la conducta alimentaria, neuropsicología clínica y trastornos de la personalidad, con más de 15 años de experiencia clínica. Fundó y dirige el Centro Integral de Psicología Ongizate en Bilbao, donde atiende adultos, adolescentes y población neurodivergente con un enfoque integrador que adapta la intervención a cada persona. Su formación en psiconutrición y TCA (Norte Salud en Nutrición), trastornos de personalidad (SEMPyP) y neuropsicología (Máster por la UOC) le permite abordar cuadros complejos donde imagen corporal, alimentación, cognición y personalidad se entrelazan. Ex-miembro de la Comisión Clínica del Colegio Oficial de Psicólogos de Bizkaia, actualmente se forma en intervención en trauma con EMDR (SEMPyP, 2024-2026). Lleva más de una década diseñando e impartiendo formación especializada para empresas, instituciones educativas y ayuntamientos. En PsikoAprende dirige el Diplomado en Psicología de la Imagen Corporal y Prevención de Trastornos Alimentarios y el Curso de Neurobiología del Trauma y Recuperación.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Bilbao, España', country_code = 'ES',
   slug = 'irene-tobias', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -198,7 +181,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria y Supervisora ABA',
   summary = 'Especialista en atención temprana y trastorno del espectro autista con más de 15 años de experiencia y trayectoria internacional entre España y Perú. Como supervisora ABA ha formado equipos terapéuticos y asesorado a familias en Eureka Psicología (España), MADI Perú S.A.C. y Alcanzando (Lima), adaptando programas conductuales a contextos culturales diversos. Certificada en PECS (Picture Exchange Communication System) y CBCT (Cognitively-Based Compassion Training), su enfoque integra el análisis aplicado de la conducta con terapias contextuales de tercera generación (ACT, FAP), lo que permite diseñar intervenciones que no solo son eficaces y medibles, sino que están orientadas a los valores de cada familia. Con Máster en Intervención ABA en Autismo (ABA España) y Especialización en Terapias Contextuales (Universidad de Almería), también cuenta con experiencia en diversidad funcional y habilidades adaptativas en adultos. En PsikoAprende imparte el Curso de Terapias de 3.ª Generación.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Murcia, España', country_code = 'ES',
   slug = 'irene-cruz', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -214,7 +197,7 @@ UPDATE profiles SET
   headline = 'Coach Profesional Certificada en Psiconeuroinmunología',
   summary = 'Especialista en transformación personal con un recorrido poco convencional: 14 años como Químico Clínico Biólogo (Universidad de Montemorelos) antes de dedicarse profesionalmente al coaching y el desarrollo humano. Esa formación científica es la base de su enfoque en psiconeuroinmunología (Regenera University), donde la conexión entre mente, emociones e inmunidad deja de ser metáfora para convertirse en bioquímica aplicable. Coach Profesional Certificada por Myalo Coaching con especialización en espiritualidad, fundó "Vive la experiencia" y cofundó el Instituto de Desarrollo Integral Canoas, donde lleva más de 11 años facilitando programas de desarrollo humano, inteligencia emocional y bienestar integral. Su formación complementaria en medicina funcional, trauma y teoría polivagal, y descodificación biológica de enfermedad le permite acompañar procesos de cambio profundo. En PsikoAprende dirige el Diplomado en Coaching de Propósito y Transformación Personal y el Curso de Coaching de Propósito.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Monterrey, México', country_code = 'MX',
   slug = 'debora-ramirez', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -229,7 +212,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Especialista en Psicotraumatología Clínica',
   summary = 'Especialista en psicotraumatología clínica con certificación internacional de más de 300 horas por la Trauma Professionals Association (Wisconsin) y Newman Institute. Graduada con diploma de honor de la Universidad de Buenos Aires y con posgrado en psicoanálisis freudiano-lacaniano, su práctica clínica de más de 10 años integra múltiples enfoques somáticos para el procesamiento del trauma: EMDR, Brainspotting, Focusing, terapia sensoriomotriz e Internal Family Systems (IFS), junto con los modelos TIST y Finding Solid Ground. Su trabajo se centra en la perspectiva compasiva de la psicotraumatología, utilizando recursos somáticos para estabilizar y reprocesar memorias traumáticas en adultos. Conferencista internacional con participación en eventos en España, Latinoamérica y Estados Unidos, y creadora de contenido especializado en trauma y regulación somática como @traumaycuerpo. En PsikoAprende dirige el Diplomado en Psicotraumatología Clínica.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Buenos Aires, Argentina', country_code = 'AR',
   slug = 'cecilia-garcia-robles', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
@@ -244,7 +227,7 @@ UPDATE profiles SET
   headline = 'Psicóloga Sanitaria Especialista en Adicciones y Neurociencia',
   summary = 'Especialista en adicciones, psicooncología y neurociencia aplicada al trauma, con trayectoria profesional forjada en tres de las organizaciones más reconocidas de España: Cruz Roja Española, donde intervino con infancia en riesgo y víctimas de violencia de género; Asociación Española Contra el Cáncer, acompañando a pacientes oncológicos y sus familias en cuidados paliativos y duelo; y PRETOX, tratando adicciones con y sin sustancia mediante programas de reducción de daños. Experta en Adicciones por el Colegio Oficial de Psicología de Madrid (más de 200 horas), certificada en EMDR y Experta en Mindfulness MBSR (Apir España), con formación en Internal Family Systems (IFS), perspectiva somática y epigenética. Esa experiencia directa con el sufrimiento en sus formas más intensas la llevó a crear el Método Neurocalma, un programa especializado para mujeres con estrés crónico laboral que combina neurociencia y perspectiva compasiva. En PsikoAprende dirige el Diplomado en Neurociencia Aplicada al Trauma y la Plasticidad Cerebral.',
   role = 'professional', plan = 'pro',
-  template = 'psychology-professional', template_color = '#0D9488',
+  template = 'passport', template_color = '#0D9488',
   location = 'Santiago de Compostela, España', country_code = 'ES',
   slug = 'alba-burundarena', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
