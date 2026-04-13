@@ -114,15 +114,15 @@ Psicóloga Sanitaria con más de 10 años de experiencia multidisciplinar. Coord
 - Francés — A2
 
 ### Portfolio / Docencia
-- Máster en Terapia de Aceptación y Compromiso (ACT) y Mindfulness (12 meses) — PsikoAprende
-- Diplomado en Terapia de Aceptación y Compromiso (ACT) (6 meses) — PsikoAprende
-- Diplomado en Terapias de Tercera Generación y DBT (6 meses) — PsikoAprende
-- Curso de Diseño de Programas Educativos Inclusivos (2 meses) — PsikoAprende
-- Curso sobre Intervención en las 7 Heridas de la Infancia (2 meses) — PsikoAprende
+- Máster en Terapia de Aceptación y Compromiso (ACT) y Mindfulness (10 módulos, 12 meses) — PsikoAprende
+- Diplomado en Terapia de Aceptación y Compromiso (ACT) (12 módulos, 6 meses) — PsikoAprende
+- Diplomado en Terapias de Tercera Generación y DBT (10 módulos, 6 meses) — PsikoAprende
+- Curso de Diseño de Programas Educativos Inclusivos (8 módulos, 2 meses) — PsikoAprende
+- Curso sobre Intervención en las 7 Heridas de la Infancia (8 módulos, 2 meses) — PsikoAprende
 
 ### Contacto
 - Instagram: @rocioroblas_psicologa
-- LinkedIn: linkedin.com/in/rocioroblas
+- LinkedIn: linkedin.com/in/rocío-roblas-28498561
 
 ---
 
@@ -171,12 +171,12 @@ Psicóloga con triple formación de máster en intervención clínica, salud men
 - Inglés — B2
 
 ### Portfolio / Docencia
-- Terapia Dialéctico-Conductual (TDC) — PsikoAprende
-- Mediación en conflictos con adolescentes — PsikoAprende
-- Tratamiento de la autoestima — PsikoAprende
-- Psicología en el Deporte — PsikoAprende
-- Mi Primera Consulta Psicológica — PsikoAprende
-- Especialista en Trastornos de la Conducta Alimentaria — PsikoAprende
+- Curso de Terapia Dialéctico-Conductual (TDC) (8 módulos, 2 meses) — PsikoAprende
+- Curso de Mediación en Conflictos con Adolescentes (6 módulos, 2 meses) — PsikoAprende
+- Curso de Tratamiento de la Autoestima (6 módulos, 2 meses) — PsikoAprende
+- Curso de Psicología en el Deporte (6 módulos, 2 meses) — PsikoAprende
+- Curso Mi Primera Consulta Psicológica (4 módulos, 1 mes) — PsikoAprende
+- Diplomado de Especialista en Trastornos de la Conducta Alimentaria (10 módulos, 6 meses) — PsikoAprende
 
 ### Contacto
 - Instagram: @mjm.psicologa
@@ -215,6 +215,10 @@ Psicóloga clínica argentina con formación universitaria docente y especializa
 - Administración de Psicotécnicos — RedBa (2017)
 - Test Zulliger — Consultora Soluciones MEM (2018)
 
+### Certificaciones
+- Administración de Psicotécnicos — RedBa (2017)
+- Test Zulliger — Certificación de aplicación — Consultora Soluciones MEM (2018)
+
 ### Skills
 - Inclusión Educativa — Expert
 - Neurodiversidad — Expert
@@ -231,10 +235,10 @@ Psicóloga clínica argentina con formación universitaria docente y especializa
 - Inglés — B1
 
 ### Portfolio / Docencia
-- Intervención clínica en abuso narcisista: guía terapéutica para psicólogos — PsikoAprende
-- Aprender a Poner Límites y Aumentar tu Autoestima — PsikoAprende
-- Inclusión y Neurodiversidad — PsikoAprende
-- Intervención Psicológica en Enfermedades Crónicas — PsikoAprende
+- Intervención clínica en abuso narcisista: guía terapéutica para psicólogos (6 módulos, 1 mes) — PsikoAprende
+- Aprender a Poner Límites y Aumentar tu Autoestima (6 módulos, 1 mes) — PsikoAprende
+- Inclusión y Neurodiversidad (9 módulos, 2 meses) — PsikoAprende
+- Intervención Psicológica en Enfermedades Crónicas (8 módulos, 2 meses) — PsikoAprende
 
 ### Contacto
 - Instagram: @elconsultoriodemel
@@ -293,16 +297,16 @@ Psicóloga con triple formación de máster en psicología sanitaria, sexología
 - Neerlandés — A2
 
 ### Portfolio / Docencia
-- Curso Avanzado en Peritaje y Contraperitaje Psicológico Forense — PsikoAprende
-- Curso en Neuromodulación Cerebral — PsikoAprende
-- Curso de Neurofeedback y Biofeedback para Profesionales Sanitarios (híbrido) — PsikoAprende
-- Diplomado en tDCS Clínica y Aplicaciones Terapéuticas Avanzadas — PsikoAprende
-- Curso de Inteligencia Artificial Aplicada a la Salud Mental — PsikoAprende
-- Curso de Neurofeedback y Biofeedback en la Práctica Clínica — PsikoAprende
+- Curso Avanzado en Peritaje y Contraperitaje Psicológico Forense (6 módulos, 1 mes) — PsikoAprende
+- Curso en Neuromodulación Cerebral (12 módulos, 2 meses) — PsikoAprende
+- Curso de Neurofeedback y Biofeedback para Profesionales Sanitarios (10 módulos, 2 meses, híbrido) — PsikoAprende
+- Diplomado en tDCS Clínica y Aplicaciones Terapéuticas Avanzadas (14 módulos, 6 meses) — PsikoAprende
+- Curso de Inteligencia Artificial Aplicada a la Salud Mental (8 módulos, 2 meses) — PsikoAprende
+- Curso de Neurofeedback y Biofeedback en la Práctica Clínica (9 módulos, 2 meses) — PsikoAprende
 
 ### Contacto
 - Instagram: @mayoriarmero_psicologa
-- LinkedIn: linkedin.com/in/mayoriarmero
+- LinkedIn: linkedin.com/in/mayopsicologia
 
 ---
 
@@ -392,6 +396,12 @@ Psicóloga con más de 12 años de experiencia en instituciones de referencia y 
 - Máster en Psicología Jurídica — Universidad Internacional de Valencia (2021 - 2022)
 - Formación avanzada con Fernando Colina, José Ramón Ubieto y Diego Figuera
 
+### Certificaciones
+- Habilitación Sanitaria — Certificación oficial para ejercicio de actividad sanitaria
+- Formación Avanzada en Psicosis y Salud Mental Severa — Fernando Colina
+- Formación Avanzada en Clínica Psicoanalítica y Lazo Social — José Ramón Ubieto
+- Formación Avanzada en Psicoterapia Institucional — Diego Figuera
+
 ### Skills
 - Salud Mental Severa — Expert
 - Psicoterapia Psicoanalítica — Expert
@@ -471,7 +481,7 @@ Psicóloga Sanitaria con más de 10 años de experiencia en práctica clínica p
 
 ### Contacto
 - Instagram: @jenniferlampre_psicologa
-- LinkedIn: jenniferlamprepsicologos.com
+- Web: jenniferlamprepsicologos.com
 
 ---
 
@@ -680,6 +690,7 @@ Psicóloga graduada con diploma de honor de la Universidad de Buenos Aires. Espe
 - Especialista en Psicotraumatología — Trauma Professionals Association (Wisconsin) y Newman Institute (+300 horas)
 
 ### Certificaciones
+- Certified Psychotraumatologist (CPT-I, CPT-II, CPT-III) — Trauma Professionals Association (Wisconsin)
 - EMDR — Certificación internacional
 - Brainspotting — Certificación internacional
 - Focusing — Certificación internacional
@@ -745,7 +756,9 @@ Psicóloga sanitaria con trayectoria en las organizaciones más reconocidas de E
 - Internal Family Systems (IFS) — Formación
 - Perspectiva somática y epigenética — Formación
 - Psicooncología, duelo, trauma y estrés postraumático — Especialización
-- Monitor de tiempo libre y mediación familiar
+- Mediación Familiar
+- Apoyo Psicológico de Emergencia
+- Monitor de Tiempo Libre
 
 ### Skills
 - Adicciones (con y sin sustancia) — Expert

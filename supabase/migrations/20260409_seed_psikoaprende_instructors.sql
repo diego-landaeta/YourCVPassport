@@ -40,7 +40,8 @@ UPDATE profiles SET
   location = 'Palma de Mallorca, España', country_code = 'ES',
   slug = 'tatiana-ferrari', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. B-03375 (Baleares)',
+  meta_title = 'Tatiana Ferrari - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria especializada en terapia de pareja, mediación familiar y coordinación de parentalidad. Más de 20 años de experiencia multicultural entre Italia y España. Atención en 4 idiomas.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/10/tatiana-ferrari-e1761650705176.webp',
   linkedin_url = 'https://linkedin.com/in/tatiana-ferrari-0a820a242',
   phone = '+34 671 230 841'
@@ -56,9 +57,10 @@ UPDATE profiles SET
   location = 'Sevilla, España', country_code = 'ES',
   slug = 'rocio-roblas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. AN09917 (Andalucía)',
+  meta_title = 'Rocío Roblas - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria especializada en ACT, DBT y atención temprana. Coordinadora técnica en CAIT y evaluadora para Cuerpos de Seguridad del Estado. Más de 10 años de experiencia en Sevilla.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/10/rocio_psiko.webp',
-  linkedin_url = 'https://linkedin.com/in/rocioroblas',
+  linkedin_url = 'https://linkedin.com/in/rocío-roblas-28498561',
   phone = '+34 654 312 078'
 WHERE id = p2;
 
@@ -72,7 +74,8 @@ UPDATE profiles SET
   location = 'Valencia, España', country_code = 'ES',
   slug = 'mireia-jareno', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. CV18374 (Valencia)',
+  meta_title = 'Mireia Jareño Moraga - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria con triple máster, especializada en trastornos alimentarios, trauma y regulación emocional. Experiencia en protección infantil y violencia de género. Valencia.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2026/03/png-mireia-jareno-psicologa.webp',
   linkedin_url = 'https://linkedin.com/in/mireia-jareño-moraga-4bb66817b',
   portfolio_url = 'https://mireiapsicologaonline.com',
@@ -89,7 +92,8 @@ UPDATE profiles SET
   location = 'Buenos Aires, Argentina', country_code = 'AR',
   slug = 'melisa-freitas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'M.N. 66977 (Argentina)',
+  meta_title = 'Melisa Freitas - Psicóloga Clínica',
+  meta_description = 'Psicóloga clínica especializada en neurodiversidad, inclusión educativa y psicosomática. Formación docente universitaria y experiencia en integración escolar. Buenos Aires, Argentina.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2026/03/Melisa-Freitas-PsikoAprende-2-1.webp',
   linkedin_url = 'https://linkedin.com/in/melisafreitas',
   phone = '+54 11 4523 8190'
@@ -105,9 +109,10 @@ UPDATE profiles SET
   location = 'Valencia, España / Países Bajos', country_code = 'ES',
   slug = 'mayori-armero', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. CV-17696',
+  meta_title = 'Mayori Armero - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria especializada en neurotecnología clínica: neurofeedback, biofeedback, tDCS e inteligencia artificial en salud mental. Práctica internacional entre España y Países Bajos.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/11/Mayori-Armero-e1762299836818.webp',
-  linkedin_url = 'https://linkedin.com/in/mayoriarmero',
+  linkedin_url = 'https://linkedin.com/in/mayopsicologia',
   phone = '+34 693 578 214'
 WHERE id = p5;
 
@@ -121,7 +126,8 @@ UPDATE profiles SET
   location = 'Galicia, España', country_code = 'ES',
   slug = 'mariana-garcia', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'FPV: 14.229 (Venezuela)',
+  meta_title = 'Mariana García Bordones - Psicóloga Clínica',
+  meta_description = 'Psicóloga clínica y danzaterapeuta con más de 15 años en danza contemporánea. Especialista en Danza Movimiento Terapia, terapia cognitivo-conductual y expresión corporal. Galicia.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/11/mariana_garcia_psikoo.webp',
   linkedin_url = 'https://linkedin.com/in/mariana-garcia-bordones-192336397',
   phone = '+34 612 345 987'
@@ -137,7 +143,8 @@ UPDATE profiles SET
   location = 'Madrid, España', country_code = 'ES',
   slug = 'maria-trinidad-arenas', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. 26600M (Madrid)',
+  meta_title = 'María Trinidad Arenas Jara - Psicóloga Clínica',
+  meta_description = 'Psicóloga clínica con más de 12 años en salud mental severa, psicoanálisis y psicología forense. Supervisora clínica y autora de publicaciones científicas. Madrid.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/10/maria_trinidad-pk.webp',
   linkedin_url = 'https://linkedin.com/in/mtrinidadarenas',
   phone = '+34 641 892 306'
@@ -153,7 +160,8 @@ UPDATE profiles SET
   location = 'Asturias, España', country_code = 'ES',
   slug = 'jennifer-lampre', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. O-02260 (Asturias)',
+  meta_title = 'Jennifer Lampre - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria certificada en EMDR Nivel I y II, especializada en trauma complejo e intervención infanto-juvenil. Más de 10 años de experiencia clínica y hospitalaria. Asturias.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/11/Jennifer-Lampre-Psiko.webp',
   portfolio_url = 'https://jenniferlamprepsicologos.com',
   phone = '+34 685 124 397'
@@ -169,7 +177,8 @@ UPDATE profiles SET
   location = 'Bilbao, España', country_code = 'ES',
   slug = 'irene-tobias', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. BI03674 (Bizkaia)',
+  meta_title = 'Irene Tobías Fernández - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria y directora del Centro Ongizate en Bilbao. Especialista en trastornos alimentarios, neuropsicología y trastornos de personalidad. Más de 15 años de experiencia.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/11/Irene-Tobias-Psiko-Aprende-e1763634683306.webp',
   linkedin_url = 'https://linkedin.com/in/irenetobias',
   phone = '+34 672 893 145'
@@ -185,7 +194,8 @@ UPDATE profiles SET
   location = 'Murcia, España', country_code = 'ES',
   slug = 'irene-cruz', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. MU 04825 (Murcia)',
+  meta_title = 'Irene Cruz - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria y supervisora ABA con más de 15 años en autismo y atención temprana. Trayectoria internacional entre España y Perú. Certificada en PECS y CBCT. Murcia.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/11/Irene-Cruz-Psiko-e1762771640981.webp',
   linkedin_url = 'https://linkedin.com/in/irenecruzpsicologa',
   phone = '+34 698 234 571'
@@ -201,6 +211,8 @@ UPDATE profiles SET
   location = 'Monterrey, México', country_code = 'MX',
   slug = 'debora-ramirez', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
+  meta_title = 'Débora Ramírez - Coach Profesional',
+  meta_description = 'Coach profesional certificada en psiconeuroinmunología y transformación personal. Más de 25 años de trayectoria integrando ciencia y desarrollo humano. Monterrey, México.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/10/debora_ramirez_psiko_aprende.webp',
   linkedin_url = 'https://linkedin.com/in/deboraramirezn',
   phone = '+52 81 2345 6789'
@@ -216,7 +228,8 @@ UPDATE profiles SET
   location = 'Buenos Aires, Argentina', country_code = 'AR',
   slug = 'cecilia-garcia-robles', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. 51305 (Argentina)',
+  meta_title = 'Cecilia García Robles - Psicóloga',
+  meta_description = 'Psicóloga especialista en psicotraumatología clínica con certificación internacional de +300 horas. EMDR, Brainspotting, IFS. Conferencista internacional. Buenos Aires.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/09/Cecilia-Garcia-Robles-Psikoaprende.webp',
   phone = '+54 11 6234 8901'
 WHERE id = p12;
@@ -231,7 +244,8 @@ UPDATE profiles SET
   location = 'Santiago de Compostela, España', country_code = 'ES',
   slug = 'alba-burundarena', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
-  meta_title = 'Col. G-6047 (Galicia)',
+  meta_title = 'Alba Burundarena - Psicóloga Sanitaria',
+  meta_description = 'Psicóloga sanitaria especializada en adicciones, psicooncología y neurociencia aplicada al trauma. Creadora del Método Neurocalma. Cruz Roja, AECC, PRETOX. Santiago de Compostela.',
   avatar_url = 'https://psikoaprende.com/wp-content/uploads/2025/10/Alba-Burundarena-Psiko-Aprende.png',
   linkedin_url = 'https://linkedin.com/in/albaburundarena',
   phone = '+34 678 912 453'
@@ -344,88 +358,88 @@ INSERT INTO experiences (profile_id, company_name, position, start_date, end_dat
 
 -- 1. Tatiana Ferrari
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p1, 'Universidad de Florencia, Italia', 'Licenciatura', 'Psicología Clínica', '1999-09-01', '2003-06-30', 1),
-  (p1, 'Italia', 'Diplomatura', 'Educación Especial', '2004-01-01', '2004-12-31', 2),
-  (p1, 'Universidad Autónoma de Barcelona', 'Máster', 'Psicología y Psicoterapia Clínica', '2008-09-01', '2010-06-30', 3),
-  (p1, 'Universidad Complutense de Madrid', 'Experta Universitaria', 'Coordinación Parental', '2023-01-01', '2023-12-31', 4);
+  (p1, 'Universidad de Florencia, Italia', 'Licenciatura en Psicología Clínica', 'Psicología Clínica', '1999-09-01', '2003-06-30', 1),
+  (p1, 'Italia', 'Diplomatura en Educación Especial', 'Educación Especial', '2004-01-01', '2004-12-31', 2),
+  (p1, 'Universidad Autónoma de Barcelona', 'Máster en Psicología y Psicoterapia Clínica', 'Psicología y Psicoterapia Clínica', '2008-09-01', '2010-06-30', 3),
+  (p1, 'Universidad Complutense de Madrid', 'Experta Universitaria en Coordinación Parental', 'Coordinación Parental', '2023-01-01', '2023-12-31', 4);
 
 -- 2. Rocío Roblas
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p2, 'Universidad de Sevilla', 'Licenciatura', 'Psicología', '2008-09-01', '2012-06-30', 1),
-  (p2, 'Universidad de Sevilla', 'Experto', 'Psicología Jurídica, Forense y Penitenciaria', '2014-01-01', '2014-12-31', 2),
-  (p2, 'Universidad Internacional de Valencia', 'Máster', 'Psicología General Sanitaria', '2016-09-01', '2018-06-30', 3),
-  (p2, 'Universidad de Nebrija', 'Experto', 'Atención Temprana', '2019-01-01', '2019-12-31', 4);
+  (p2, 'Universidad de Sevilla', 'Licenciatura en Psicología', 'Psicología', '2008-09-01', '2012-06-30', 1),
+  (p2, 'Universidad de Sevilla', 'Experto en Psicología Jurídica, Forense y Penitenciaria', 'Psicología Jurídica, Forense y Penitenciaria', '2014-01-01', '2014-12-31', 2),
+  (p2, 'Universidad Internacional de Valencia', 'Máster en Psicología General Sanitaria', 'Psicología General Sanitaria', '2016-09-01', '2018-06-30', 3),
+  (p2, 'Universidad de Nebrija', 'Experto en Atención Temprana', 'Atención Temprana', '2019-01-01', '2019-12-31', 4);
 
 -- 3. Mireia Jareño
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p3, 'Universidad de Valencia', 'Grado', 'Psicología', '2012-09-01', '2016-06-30', 1),
-  (p3, 'Universidad Europea', 'Máster', 'Psicología General Sanitaria', '2017-01-01', '2017-12-31', 2),
-  (p3, 'UDIMA', 'Máster', 'Actualización en Intervención Psicológica y Salud Mental', '2019-01-01', '2019-12-31', 3),
-  (p3, 'Universidad de Valencia', 'Máster', 'Intervención Psicológica en Ámbitos Sociales', '2020-01-01', '2020-12-31', 4);
+  (p3, 'Universidad de Valencia', 'Grado en Psicología', 'Psicología', '2012-09-01', '2016-06-30', 1),
+  (p3, 'Universidad Europea', 'Máster en Psicología General Sanitaria', 'Psicología General Sanitaria', '2017-01-01', '2017-12-31', 2),
+  (p3, 'UDIMA', 'Máster en Intervención Psicológica y Salud Mental', 'Intervención Psicológica y Salud Mental', '2019-01-01', '2019-12-31', 3),
+  (p3, 'Universidad de Valencia', 'Máster en Intervención Psicológica en Ámbitos Sociales', 'Intervención Psicológica en Ámbitos Sociales', '2020-01-01', '2020-12-31', 4);
 
 -- 4. Melisa Freitas
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p4, 'Universidad del Salvador, Argentina', 'Grado', 'Psicología', '2010-03-01', '2015-12-31', 1),
-  (p4, 'USAL', 'Profesorado Universitario', 'Psicología', '2016-01-01', '2016-12-31', 2),
-  (p4, 'Formación especializada', 'Especialización', 'Psicosomática', '2017-01-01', '2017-12-31', 3);
+  (p4, 'Universidad del Salvador, Argentina', 'Grado en Psicología', 'Psicología', '2010-03-01', '2015-12-31', 1),
+  (p4, 'USAL', 'Profesorado Universitario en Psicología', 'Psicología', '2016-01-01', '2016-12-31', 2),
+  (p4, 'Formación especializada', 'Especialización en Psicosomática', 'Psicosomática', '2017-01-01', '2017-12-31', 3);
 
 -- 5. Mayori Armero
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p5, 'Universidad Europea Miguel de Cervantes', 'Grado', 'Psicología de la Salud (Mención Intervención Clínica)', '2018-09-01', '2022-06-30', 1),
-  (p5, 'Universidad Europea', 'Máster', 'Psicología General Sanitaria', '2023-01-01', '2023-12-31', 2),
-  (p5, 'Formación especializada', 'Máster', 'Sexología y Terapia Sexual', '2023-01-01', '2023-12-31', 3),
-  (p5, 'EUDES Universitas', 'Máster', 'Psicología Clínica y Técnicas de Intervención Terapéutica', '2024-01-01', '2024-12-31', 4);
+  (p5, 'Universidad Europea Miguel de Cervantes', 'Grado en Psicología de la Salud', 'Psicología de la Salud (Mención Intervención Clínica)', '2018-09-01', '2022-06-30', 1),
+  (p5, 'Universidad Europea', 'Máster en Psicología General Sanitaria', 'Psicología General Sanitaria', '2023-01-01', '2023-12-31', 2),
+  (p5, 'Formación especializada', 'Máster en Sexología y Terapia Sexual', 'Sexología y Terapia Sexual', '2023-01-01', '2023-12-31', 3),
+  (p5, 'EUDES Universitas', 'Máster en Psicología Clínica e Intervención Terapéutica', 'Psicología Clínica y Técnicas de Intervención Terapéutica', '2024-01-01', '2024-12-31', 4);
 
 -- 6. Mariana García Bordones
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p6, 'Universidad Arturo Michelena, Venezuela', 'Licenciatura', 'Psicología Clínica', '2013-01-01', '2017-12-31', 1),
-  (p6, 'Escuela de Danza del Estado Carabobo', 'Formación', 'Danza Contemporánea y Expresión Corporal', '2008-01-01', '2017-12-31', 2),
-  (p6, 'EducaPsicología / Centro de Formación Integral Venezuela', 'Especialización', 'Terapia Cognitivo-Conductual', '2020-01-01', '2020-12-31', 3),
-  (p6, 'Asociación Venezolana de DMT y Centro Alma de Caracas', 'Formación', 'Danza Movimiento Terapia (DMT)', '2019-01-01', '2020-12-31', 4);
+  (p6, 'Universidad Arturo Michelena, Venezuela', 'Licenciatura en Psicología Clínica', 'Psicología Clínica', '2013-01-01', '2017-12-31', 1),
+  (p6, 'Escuela de Danza del Estado Carabobo', 'Formación en Danza Contemporánea y Expresión Corporal', 'Danza Contemporánea y Expresión Corporal', '2008-01-01', '2017-12-31', 2),
+  (p6, 'EducaPsicología / Centro de Formación Integral Venezuela', 'Especialización en Terapia Cognitivo-Conductual', 'Terapia Cognitivo-Conductual', '2020-01-01', '2020-12-31', 3),
+  (p6, 'Asociación Venezolana de DMT y Centro Alma de Caracas', 'Formación en Danza Movimiento Terapia (DMT)', 'Danza Movimiento Terapia (DMT)', '2019-01-01', '2020-12-31', 4);
 
 -- 7. María Trinidad Arenas Jara
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p7, 'Universidad Complutense de Madrid', 'Licenciatura', 'Psicología (especialidad clínica)', '2008-09-01', '2012-06-30', 1),
-  (p7, 'Universidad Complutense de Madrid', 'Máster', 'Psicoterapia Psicoanalítica', '2012-09-01', '2014-06-30', 2),
-  (p7, 'Universidad Internacional de Valencia', 'Máster', 'Psicología Jurídica', '2021-09-01', '2022-06-30', 3);
+  (p7, 'Universidad Complutense de Madrid', 'Licenciatura en Psicología Clínica', 'Psicología (especialidad clínica)', '2008-09-01', '2012-06-30', 1),
+  (p7, 'Universidad Complutense de Madrid', 'Máster en Psicoterapia Psicoanalítica', 'Psicoterapia Psicoanalítica', '2012-09-01', '2014-06-30', 2),
+  (p7, 'Universidad Internacional de Valencia', 'Máster en Psicología Jurídica', 'Psicología Jurídica', '2021-09-01', '2022-06-30', 3);
 
 -- 8. Jennifer Lampre
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p8, 'Universidad de Oviedo', 'Licenciatura', 'Psicología', '2005-09-01', '2009-06-30', 1),
-  (p8, 'AEPCCC', 'Máster', 'Práctica Clínica en Salud Mental', '2009-09-01', '2011-06-30', 2),
-  (p8, 'Formación especializada', 'Máster', 'Psicología Infantil y Adolescente', '2013-01-01', '2013-12-31', 3),
-  (p8, 'ESNECA', 'Máster', 'Coaching e Inteligencia Emocional Infantil y Adolescente', '2022-01-01', '2022-12-31', 4);
+  (p8, 'Universidad de Oviedo', 'Licenciatura en Psicología', 'Psicología', '2005-09-01', '2009-06-30', 1),
+  (p8, 'AEPCCC', 'Máster en Práctica Clínica en Salud Mental', 'Práctica Clínica en Salud Mental', '2009-09-01', '2011-06-30', 2),
+  (p8, 'Formación especializada', 'Máster en Psicología Infantil y Adolescente', 'Psicología Infantil y Adolescente', '2013-01-01', '2013-12-31', 3),
+  (p8, 'ESNECA', 'Máster en Coaching e Inteligencia Emocional Infantil', 'Coaching e Inteligencia Emocional Infantil y Adolescente', '2022-01-01', '2022-12-31', 4);
 
 -- 9. Irene Tobías Fernández
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p9, 'Universidad de Deusto', 'Licenciatura', 'Psicología Clínica', '2005-09-01', '2009-06-30', 1),
-  (p9, 'ISEP', 'Máster', 'Psicología Clínica Infanto-Juvenil', '2010-09-01', '2012-06-30', 2),
-  (p9, 'UOC', 'Máster', 'Neuropsicología', '2016-09-01', '2018-06-30', 3);
+  (p9, 'Universidad de Deusto', 'Licenciatura en Psicología Clínica', 'Psicología Clínica', '2005-09-01', '2009-06-30', 1),
+  (p9, 'ISEP', 'Máster en Psicología Clínica Infanto-Juvenil', 'Psicología Clínica Infanto-Juvenil', '2010-09-01', '2012-06-30', 2),
+  (p9, 'UOC', 'Máster en Neuropsicología', 'Neuropsicología', '2016-09-01', '2018-06-30', 3);
 
 -- 10. Irene Cruz
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p10, 'Universidad de Almería', 'Licenciatura', 'Psicología', '2014-09-01', '2018-06-30', 1),
-  (p10, 'Universidad de Almería', 'Máster', 'Psicología General Sanitaria', '2018-09-01', '2019-06-30', 2),
-  (p10, 'ABA España', 'Máster', 'Intervención ABA en Autismo y otros Trastornos del Desarrollo', '2021-01-01', '2021-12-31', 3),
-  (p10, 'Universidad de Almería', 'Especialización', 'Terapias Contextuales', '2020-01-01', '2020-12-31', 4);
+  (p10, 'Universidad de Almería', 'Licenciatura en Psicología', 'Psicología', '2014-09-01', '2018-06-30', 1),
+  (p10, 'Universidad de Almería', 'Máster en Psicología General Sanitaria', 'Psicología General Sanitaria', '2018-09-01', '2019-06-30', 2),
+  (p10, 'ABA España', 'Máster en Intervención ABA en Autismo', 'Intervención ABA en Autismo y otros Trastornos del Desarrollo', '2021-01-01', '2021-12-31', 3),
+  (p10, 'Universidad de Almería', 'Especialización en Terapias Contextuales', 'Terapias Contextuales', '2020-01-01', '2020-12-31', 4);
 
 -- 11. Débora Ramírez
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p11, 'Universidad de Montemorelos', 'Licenciatura', 'Químico Clínico Biólogo', '1995-09-01', '1999-06-30', 1),
-  (p11, 'Universidad Iberoamericana', 'Formación', 'Educación Holística y Desarrollo Humano', '2014-01-01', '2014-12-31', 2),
-  (p11, 'Myalo Coaching', 'Certificación', 'Coach Profesional', '2019-01-01', '2019-12-31', 3),
-  (p11, 'Regenera University', 'Especialización', 'Psiconeuroinmunología', '2024-01-01', '2024-12-31', 4);
+  (p11, 'Universidad de Montemorelos', 'Licenciatura en Químico Clínico Biólogo', 'Químico Clínico Biólogo', '1995-09-01', '1999-06-30', 1),
+  (p11, 'Universidad Iberoamericana', 'Formación en Educación Holística y Desarrollo Humano', 'Educación Holística y Desarrollo Humano', '2014-01-01', '2014-12-31', 2),
+  (p11, 'Myalo Coaching', 'Certificación como Coach Profesional', 'Coach Profesional', '2019-01-01', '2019-12-31', 3),
+  (p11, 'Regenera University', 'Especialización en Psiconeuroinmunología', 'Psiconeuroinmunología', '2024-01-01', '2024-12-31', 4);
 
 -- 12. Cecilia García Robles
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p12, 'Universidad de Buenos Aires', 'Licenciatura (diploma de honor)', 'Psicología', '2006-03-01', '2010-12-31', 1),
-  (p12, 'Clínica de adultos', 'Posgrado', 'Psicoanálisis Freudiano-Lacaniano', '2011-01-01', '2013-12-31', 2),
-  (p12, 'Trauma Professionals Association (Wisconsin) y Newman Institute', 'Especialista (+300 horas)', 'Psicotraumatología', '2015-01-01', '2017-12-31', 3);
+  (p12, 'Universidad de Buenos Aires', 'Licenciatura en Psicología (diploma de honor)', 'Psicología', '2006-03-01', '2010-12-31', 1),
+  (p12, 'Clínica de adultos', 'Posgrado en Psicoanálisis Freudiano-Lacaniano', 'Psicoanálisis Freudiano-Lacaniano', '2011-01-01', '2013-12-31', 2),
+  (p12, 'Trauma Professionals Association (Wisconsin) y Newman Institute', 'Especialista en Psicotraumatología (+300 horas)', 'Psicotraumatología', '2015-01-01', '2017-12-31', 3);
 
 -- 13. Alba Burundarena
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p13, 'Universidade de Santiago de Compostela', 'Grado', 'Psicología', '2011-09-01', '2015-06-30', 1),
-  (p13, 'UNED', 'Máster', 'Psicología General Sanitaria', '2016-09-01', '2018-06-30', 2);
+  (p13, 'Universidade de Santiago de Compostela', 'Grado en Psicología', 'Psicología', '2011-09-01', '2015-06-30', 1),
+  (p13, 'UNED', 'Máster en Psicología General Sanitaria', 'Psicología General Sanitaria', '2016-09-01', '2018-06-30', 2);
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- STAGE 5: SKILLS
@@ -551,36 +565,36 @@ INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) V
 
 -- 2. Rocío Roblas
 INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) VALUES
-  (p2, 'Máster en Terapia de Aceptación y Compromiso (ACT) y Mindfulness', '12 meses — PsikoAprende', 'OTHER', 1),
-  (p2, 'Diplomado en Terapia de Aceptación y Compromiso (ACT)', '6 meses — PsikoAprende', 'OTHER', 2),
-  (p2, 'Diplomado en Terapias de Tercera Generación y DBT', '6 meses — PsikoAprende', 'OTHER', 3),
-  (p2, 'Curso de Diseño de Programas Educativos Inclusivos', '2 meses — PsikoAprende', 'OTHER', 4),
-  (p2, 'Curso sobre Intervención en las 7 Heridas de la Infancia', '2 meses — PsikoAprende', 'OTHER', 5);
+  (p2, 'Máster en Terapia de Aceptación y Compromiso (ACT) y Mindfulness', '10 módulos, 12 meses — PsikoAprende', 'OTHER', 1),
+  (p2, 'Diplomado en Terapia de Aceptación y Compromiso (ACT)', '12 módulos, 6 meses — PsikoAprende', 'OTHER', 2),
+  (p2, 'Diplomado en Terapias de Tercera Generación y DBT', '10 módulos, 6 meses — PsikoAprende', 'OTHER', 3),
+  (p2, 'Curso de Diseño de Programas Educativos Inclusivos', '8 módulos, 2 meses — PsikoAprende', 'OTHER', 4),
+  (p2, 'Curso sobre Intervención en las 7 Heridas de la Infancia', '8 módulos, 2 meses — PsikoAprende', 'OTHER', 5);
 
 -- 3. Mireia Jareño
 INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) VALUES
-  (p3, 'Terapia Dialéctico-Conductual (TDC)', 'PsikoAprende', 'OTHER', 1),
-  (p3, 'Mediación en conflictos con adolescentes', 'PsikoAprende', 'OTHER', 2),
-  (p3, 'Tratamiento de la autoestima', 'PsikoAprende', 'OTHER', 3),
-  (p3, 'Psicología en el Deporte', 'PsikoAprende', 'OTHER', 4),
-  (p3, 'Mi Primera Consulta Psicológica', 'PsikoAprende', 'OTHER', 5),
-  (p3, 'Especialista en Trastornos de la Conducta Alimentaria', 'PsikoAprende', 'OTHER', 6);
+  (p3, 'Curso de Terapia Dialéctico-Conductual (TDC)', '8 módulos, 2 meses — PsikoAprende', 'OTHER', 1),
+  (p3, 'Curso de Mediación en Conflictos con Adolescentes', '6 módulos, 2 meses — PsikoAprende', 'OTHER', 2),
+  (p3, 'Curso de Tratamiento de la Autoestima', '6 módulos, 2 meses — PsikoAprende', 'OTHER', 3),
+  (p3, 'Curso de Psicología en el Deporte', '6 módulos, 2 meses — PsikoAprende', 'OTHER', 4),
+  (p3, 'Curso Mi Primera Consulta Psicológica', '4 módulos, 1 mes — PsikoAprende', 'OTHER', 5),
+  (p3, 'Diplomado de Especialista en Trastornos de la Conducta Alimentaria', '10 módulos, 6 meses — PsikoAprende', 'OTHER', 6);
 
 -- 4. Melisa Freitas
 INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) VALUES
-  (p4, 'Intervención clínica en abuso narcisista: guía terapéutica para psicólogos', 'PsikoAprende', 'OTHER', 1),
-  (p4, 'Aprender a Poner Límites y Aumentar tu Autoestima', 'PsikoAprende', 'OTHER', 2),
-  (p4, 'Inclusión y Neurodiversidad', 'PsikoAprende', 'OTHER', 3),
-  (p4, 'Intervención Psicológica en Enfermedades Crónicas', 'PsikoAprende', 'OTHER', 4);
+  (p4, 'Intervención clínica en abuso narcisista: guía terapéutica para psicólogos', '6 módulos, 1 mes — PsikoAprende', 'OTHER', 1),
+  (p4, 'Aprender a Poner Límites y Aumentar tu Autoestima', '6 módulos, 1 mes — PsikoAprende', 'OTHER', 2),
+  (p4, 'Inclusión y Neurodiversidad', '9 módulos, 2 meses — PsikoAprende', 'OTHER', 3),
+  (p4, 'Intervención Psicológica en Enfermedades Crónicas', '8 módulos, 2 meses — PsikoAprende', 'OTHER', 4);
 
 -- 5. Mayori Armero
 INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) VALUES
-  (p5, 'Curso Avanzado en Peritaje y Contraperitaje Psicológico Forense', 'PsikoAprende', 'OTHER', 1),
-  (p5, 'Curso en Neuromodulación Cerebral', 'PsikoAprende', 'OTHER', 2),
-  (p5, 'Curso de Neurofeedback y Biofeedback para Profesionales Sanitarios', 'Híbrido — PsikoAprende', 'OTHER', 3),
-  (p5, 'Diplomado en tDCS Clínica y Aplicaciones Terapéuticas Avanzadas', 'PsikoAprende', 'OTHER', 4),
-  (p5, 'Curso de Inteligencia Artificial Aplicada a la Salud Mental', 'PsikoAprende', 'OTHER', 5),
-  (p5, 'Curso de Neurofeedback y Biofeedback en la Práctica Clínica', 'PsikoAprende', 'OTHER', 6);
+  (p5, 'Curso Avanzado en Peritaje y Contraperitaje Psicológico Forense', '6 módulos, 1 mes — PsikoAprende', 'OTHER', 1),
+  (p5, 'Curso en Neuromodulación Cerebral', '12 módulos, 2 meses — PsikoAprende', 'OTHER', 2),
+  (p5, 'Curso de Neurofeedback y Biofeedback para Profesionales Sanitarios', '10 módulos, 2 meses, híbrido — PsikoAprende', 'OTHER', 3),
+  (p5, 'Diplomado en tDCS Clínica y Aplicaciones Terapéuticas Avanzadas', '14 módulos, 6 meses — PsikoAprende', 'OTHER', 4),
+  (p5, 'Curso de Inteligencia Artificial Aplicada a la Salud Mental', '8 módulos, 2 meses — PsikoAprende', 'OTHER', 5),
+  (p5, 'Curso de Neurofeedback y Biofeedback en la Práctica Clínica', '9 módulos, 2 meses — PsikoAprende', 'OTHER', 6);
 
 -- 6. Mariana García Bordones
 INSERT INTO portfolio_items (profile_id, title, description, type, sort_order) VALUES
@@ -637,6 +651,11 @@ INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
   (p2, 'Neuropsicología Infantil — Formación avanzada', NULL, 'CERTIFICATION', 13),
   (p2, 'Psicología Forense — Certificación práctica', NULL, 'CERTIFICATION', 14);
 
+-- 4. Melisa Freitas
+INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
+  (p4, 'Administración de Psicotécnicos', 'RedBa', 'CERTIFICATION', 10),
+  (p4, 'Test Zulliger — Certificación de aplicación', 'Consultora Soluciones MEM', 'CERTIFICATION', 11);
+
 -- 5. Mayori Armero
 INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
   (p5, 'Intervención con Víctimas de Violencia de Género', 'Universidad Antonio de Nebrija', 'CERTIFICATION', 10),
@@ -650,6 +669,13 @@ INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
 INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
   (p6, 'Ashtanga Yoga Nivel I', NULL, 'CERTIFICATION', 10),
   (p6, 'Acroyoga', NULL, 'CERTIFICATION', 11);
+
+-- 7. María Trinidad Arenas Jara
+INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
+  (p7, 'Habilitación Sanitaria — Certificación oficial para ejercicio de actividad sanitaria', NULL, 'CERTIFICATION', 10),
+  (p7, 'Formación Avanzada en Psicosis y Salud Mental Severa', 'Fernando Colina', 'CERTIFICATION', 11),
+  (p7, 'Formación Avanzada en Clínica Psicoanalítica y Lazo Social', 'José Ramón Ubieto', 'CERTIFICATION', 12),
+  (p7, 'Formación Avanzada en Psicoterapia Institucional', 'Diego Figuera', 'CERTIFICATION', 13);
 
 -- 8. Jennifer Lampre
 INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
@@ -679,6 +705,7 @@ INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
 
 -- 12. Cecilia García Robles
 INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
+  (p12, 'Certified Psychotraumatologist (CPT-I, CPT-II, CPT-III)', 'Trauma Professionals Association (Wisconsin)', 'CERTIFICATION', 9),
   (p12, 'EMDR — Certificación internacional', NULL, 'CERTIFICATION', 10),
   (p12, 'Brainspotting — Certificación internacional', NULL, 'CERTIFICATION', 11),
   (p12, 'Focusing — Certificación internacional', NULL, 'CERTIFICATION', 12),
@@ -694,7 +721,10 @@ INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
   (p13, 'Experta en Mindfulness (MBSR)', 'Apir España', 'CERTIFICATION', 12),
   (p13, 'Internal Family Systems (IFS)', NULL, 'CERTIFICATION', 13),
   (p13, 'Perspectiva somática y epigenética', NULL, 'CERTIFICATION', 14),
-  (p13, 'Psicooncología, duelo, trauma y estrés postraumático', NULL, 'CERTIFICATION', 15);
+  (p13, 'Psicooncología, duelo, trauma y estrés postraumático', NULL, 'CERTIFICATION', 15),
+  (p13, 'Mediación Familiar', NULL, 'CERTIFICATION', 16),
+  (p13, 'Apoyo Psicológico de Emergencia', NULL, 'CERTIFICATION', 17),
+  (p13, 'Monitor de Tiempo Libre', NULL, 'CERTIFICATION', 18);
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- DONE

@@ -52,45 +52,41 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   if (profile) {
     title = propTitle || profile.meta_title || `${profile.full_name} - ${profile.headline} | YourCVPassport`;
 
-    // Build a rich, profile-specific description
-    if (!propDescription && !profile.meta_description) {
-      // Create description from profile data
+    // Build description: prefer explicit meta_description, then auto-generate from profile data
+    if (propDescription) {
+      description = propDescription;
+    } else if (profile.meta_description) {
+      description = profile.meta_description;
+    } else {
+      // Auto-generate from profile data
       let descParts: string[] = [];
 
-      // Add headline
       if (profile.headline) {
         descParts.push(profile.headline);
       }
 
-      // Add location if available
       if (profile.location) {
-        descParts.push(`Based in ${profile.location}`);
+        descParts.push(currentLang === 'es' ? `Ubicación: ${profile.location}` : `Based in ${profile.location}`);
       }
 
-      // Add summary if available (truncated to fit within 160 chars total)
       if (profile.summary && profile.summary.length > 0) {
-        const remainingChars = 160 - descParts.join('. ').length - 3; // -3 for ". " separator
+        const remainingChars = 160 - descParts.join('. ').length - 3;
         if (remainingChars > 50) {
-          const summarySnippet = profile.summary.substring(0, remainingChars).trim();
-          descParts.push(summarySnippet);
+          descParts.push(profile.summary.substring(0, remainingChars).trim());
         }
       }
 
       description = descParts.join('. ');
 
-      // Ensure we don't exceed 160 characters
       if (description.length > 160) {
         description = description.substring(0, 157) + '...';
       }
 
-      // Fallback if we couldn't build a good description
       if (!description || description.length < 20) {
-        description = `Professional profile of ${profile.full_name}. ${profile.headline}`;
+        description = currentLang === 'es'
+          ? `Perfil profesional de ${profile.full_name}. ${profile.headline}`
+          : `Professional profile of ${profile.full_name}. ${profile.headline}`;
       }
-    } else {
-      description = propDescription || profile.meta_description ||
-        profile.summary?.substring(0, 160) ||
-        `Professional profile of ${profile.full_name}. ${profile.headline}`;
     }
 
     // Ensure description doesn't end abruptly
@@ -146,9 +142,9 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       profile.github_url,
       profile.portfolio_url
     ].filter(Boolean),
-    knowsAbout: [], // Will be populated with skills
-    alumniOf: [], // Will be populated with education
-    hasCredential: [] // Will be populated with certifications
+    knowsAbout: profileSkills.length > 0 ? profileSkills : undefined,
+    alumniOf: undefined,
+    hasCredential: undefined
   } : null;
 
   // Alternate language URLs
@@ -160,8 +156,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     es: `${baseUrl}/es?lang=es`
   };
 
-  // Generate unique key to force updates
-  const helmetKey = profile ? `profile-${profile.slug || profile.id}` : 'default';
+  // Generate unique key to force updates (include lang to re-render on language change)
+  const helmetKey = profile ? `profile-${profile.slug || profile.id}-${currentLang}` : `default-${currentLang}`;
 
   return (
     <Helmet key={helmetKey}>
