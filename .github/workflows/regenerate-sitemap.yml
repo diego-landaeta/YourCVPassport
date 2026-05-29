@@ -30,9 +30,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: |
-          echo "DEBUG url_len=${#VITE_SUPABASE_URL} url_first8=${VITE_SUPABASE_URL:0:8} url_last8=${VITE_SUPABASE_URL: -8} key_len=${#VITE_SUPABASE_ANON_KEY}"
-          node scripts/generate-sitemap.mjs
+        run: node scripts/generate-sitemap.mjs
 
       - name: Commit if changed
         run: |
