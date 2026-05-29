@@ -1,223 +1,172 @@
 declare const Deno: any;
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import blogPosts from './blog-posts-data.json' with { type: 'json' };
 
-// Base URL of your website
-const BASE_URL = 'https://www.yourcvpassport.com';
+const BASE_URL = 'https://yourcvpassport.com';
 
-// Define your static routes here, mirroring routeConfig.ts for server-side generation.
-const pathMappings = [
-  // Static pages not in routeConfig
-  { en: '', es: '' },
-  { en: 'login', es: 'login' },
-  { en: 'signup', es: 'signup' },
-  
-  // Dynamic pages from routeConfig.ts
-  { en: 'product/overview', es: 'producto/resumen' },
-  { en: 'product/stamps', es: 'producto/sellos' },
-  { en: 'product/ats', es: 'producto/ats' },
-  { en: 'product/domain', es: 'producto/dominio' },
-  { en: 'product/analytics', es: 'producto/analiticas' },
-  { en: 'product/ai', es: 'producto/ia' },
-  { en: 'companies/search', es: 'empresas/busqueda' },
-  { en: 'about', es: 'nosotros' },
-  { en: 'about/mission', es: 'nosotros/mision' },
-  { en: 'about/press', es: 'nosotros/prensa' },
-  { en: 'about/contact', es: 'nosotros/contacto' },
-  { en: 'professionals/how', es: 'profesionales/como-funciona' },
-  { en: 'professionals/templates', es: 'profesionales/plantillas' },
-  { en: 'pricing', es: 'precios' },
-  { en: 'professionals/help', es: 'profesionales/ayuda' },
-  { en: 'companies/plans', es: 'empresas/planes' },
-  { en: 'companies/integrations', es: 'empresas/integraciones' },
-  { en: 'companies/security', es: 'empresas/seguridad' },
-  { en: 'resources/blog', es: 'recursos/blog' },
-  { en: 'resources/library', es: 'recursos/biblioteca' },
-  { en: 'resources/success', es: 'recursos/exito' },
-  { en: 'resources/status', es: 'recursos/estado' },
-  { en: 'profiles', es: 'perfiles' },
-];
-
-// Popular category combinations for SEO pages
-const POPULAR_COUNTRIES = ['spain', 'mexico', 'argentina', 'colombia', 'chile', 'us', 'gb'];
-const POPULAR_CITIES = {
-  spain: ['madrid', 'barcelona', 'valencia', 'seville'],
-  mexico: ['mexico-city', 'guadalajara', 'monterrey'],
-  us: ['new-york', 'san-francisco', 'austin'],
-  gb: ['london', 'manchester', 'edinburgh'],
+const EN_TO_ES: Record<string, string> = {
+  '/': '/',
+  '/pricing': '/precios',
+  '/product/overview': '/producto/resumen',
+  '/product/stamps': '/producto/sellos',
+  '/product/ats': '/producto/ats',
+  '/product/domain': '/producto/dominio',
+  '/product/analytics': '/producto/analiticas',
+  '/product/ai': '/producto/ia',
+  '/product': '/producto',
+  '/professionals/how': '/profesionales/como-funciona',
+  '/professionals/templates': '/profesionales/plantillas',
+  '/professionals/help': '/profesionales/ayuda',
+  '/professionals': '/profesionales',
+  '/companies/search': '/empresas/busqueda',
+  '/companies/plans': '/empresas/planes',
+  '/companies/integrations': '/empresas/integraciones',
+  '/companies/security': '/empresas/seguridad',
+  '/companies': '/empresas',
+  '/resources/blog': '/recursos/blog',
+  '/resources/library': '/recursos/biblioteca',
+  '/resources/success': '/recursos/exito',
+  '/resources/status': '/recursos/estado',
+  '/resources': '/recursos',
+  '/about': '/nosotros',
+  '/about/mission': '/nosotros/mision',
+  '/about/press': '/nosotros/prensa',
+  '/about/contact': '/nosotros/contacto',
+  '/jobs': '/empleos',
 };
-const POPULAR_ROLES = [
-  'frontend-developer',
-  'backend-developer',
-  'fullstack-developer',
-  'ui-designer',
-  'ux-designer',
-  'product-manager',
-  'data-scientist',
-  'devops-engineer',
-  'mobile-developer',
-  'software-engineer',
-];
-const POPULAR_SKILLS = [
-  'react',
-  'javascript',
-  'python',
-  'typescript',
-  'nodejs',
-  'java',
-  'aws',
-  'docker',
-  'kubernetes',
+
+const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string }> = [
+  { path: '/', priority: '1.0', changefreq: 'daily' },
+  { path: '/pricing', priority: '1.0', changefreq: 'weekly' },
+  { path: '/product/overview', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product/stamps', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product/ats', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product/domain', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product/analytics', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product/ai', priority: '0.9', changefreq: 'weekly' },
+  { path: '/product', priority: '0.9', changefreq: 'weekly' },
+  { path: '/professionals/how', priority: '0.9', changefreq: 'weekly' },
+  { path: '/professionals/templates', priority: '0.9', changefreq: 'weekly' },
+  { path: '/professionals/help', priority: '0.8', changefreq: 'weekly' },
+  { path: '/professionals', priority: '0.9', changefreq: 'weekly' },
+  { path: '/companies/search', priority: '0.9', changefreq: 'weekly' },
+  { path: '/companies/plans', priority: '0.9', changefreq: 'weekly' },
+  { path: '/companies/integrations', priority: '0.8', changefreq: 'weekly' },
+  { path: '/companies/security', priority: '0.8', changefreq: 'monthly' },
+  { path: '/companies', priority: '0.9', changefreq: 'weekly' },
+  { path: '/resources/blog', priority: '0.7', changefreq: 'daily' },
+  { path: '/resources/library', priority: '0.8', changefreq: 'weekly' },
+  { path: '/resources/success', priority: '0.7', changefreq: 'monthly' },
+  { path: '/resources/status', priority: '0.6', changefreq: 'daily' },
+  { path: '/resources', priority: '0.7', changefreq: 'weekly' },
+  { path: '/about', priority: '0.7', changefreq: 'monthly' },
+  { path: '/about/mission', priority: '0.6', changefreq: 'monthly' },
+  { path: '/about/press', priority: '0.6', changefreq: 'monthly' },
+  { path: '/about/contact', priority: '0.8', changefreq: 'monthly' },
+  { path: '/jobs', priority: '0.9', changefreq: 'daily' },
 ];
 
-async function generateSitemap() {
-  // Generate URLs for static pages with language alternates
-  const staticUrls = pathMappings.map(({ en, es }) => {
-    const enUrl = `${BASE_URL}/${en}`.replace(/\/$/, ''); // Remove trailing slash for root
-    const esUrl = `${BASE_URL}/es/${es}`.replace(/\/es\/*$/, '/es'); // Handle root ES path
+function getSpanishPath(enPath: string): string | null {
+  if (EN_TO_ES[enPath]) return EN_TO_ES[enPath];
+  if (enPath.startsWith('/resources/blog/')) return enPath.replace('/resources/blog/', '/recursos/blog/');
+  if (enPath.startsWith('/jobs/')) return enPath.replace('/jobs/', '/empleos/');
+  return null;
+}
 
-    return `
-  <url>
-    <loc>${enUrl}</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="${esUrl}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>
-  </url>
-  <url>
-    <loc>${esUrl}</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>
-    <xhtml:link rel="alternate" hreflang="es" href="${esUrl}"/>
+function buildHreflang(enPath: string): string {
+  const enUrl = `${BASE_URL}${enPath}`;
+  const esPath = getSpanishPath(enPath);
+  let out = `    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}" />\n`;
+  if (esPath) {
+    out += `    <xhtml:link rel="alternate" hreflang="es" href="${BASE_URL}${esPath}" />\n`;
+  }
+  out += `    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrl}" />`;
+  return out;
+}
+
+function urlEntry(path: string, lastmod: string, priority: string, changefreq: string): string {
+  return `  <url>
+    <loc>${BASE_URL}${path}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+${buildHreflang(path)}
   </url>`;
-  }).join('');
-  
-  // Generate URLs for dynamic profile pages
-  let profileUrls = '';
-  try {
-    // IMPORTANT: Make sure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set as environment variables in your Supabase project.
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` } } }
-    );
+}
 
-    const { data: profiles, error } = await supabaseClient
-      .from('profiles')
-      .select('slug')
-      .not('slug', 'is', null);
+async function generateSitemap(): Promise<string> {
+  const now = new Date().toISOString().split('T')[0];
+  const entries: string[] = [];
 
-    if (error) {
-      throw error;
-    }
-
-    if (profiles) {
-      profileUrls = profiles.map(profile => `
-  <url>
-    <loc>${BASE_URL}/cv/${profile.slug}</loc>
-  </url>`).join('');
-    }
-  } catch (err) {
-    
-    // Continue without profile URLs if the database call fails
+  for (const r of STATIC_ROUTES) {
+    entries.push(urlEntry(r.path, now, r.priority, r.changefreq));
   }
 
-  // Generate URLs for profile category pages (SEO optimized)
-  const categoryUrls: string[] = [];
+  for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
+    const lastmod = post.published_at.split('T')[0];
+    entries.push(urlEntry(`/resources/blog/${post.slug}`, lastmod, '0.7', 'monthly'));
+  }
 
-  // Country-only pages
-  POPULAR_COUNTRIES.forEach(country => {
-    categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/profiles/${country}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-    categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/perfiles/${country}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-  });
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
 
-  // Country + City combinations
-  Object.entries(POPULAR_CITIES).forEach(([country, cities]) => {
-    cities.forEach(city => {
-      categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/profiles/${country}/${city}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>`);
-      categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/perfiles/${country}/${city}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>`);
-    });
-  });
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('slug, updated_at')
+      .eq('is_active', true)
+      .eq('profile_hidden', false)
+      .not('full_name', 'is', null)
+      .not('headline', 'is', null)
+      .not('slug', 'is', null)
+      .order('updated_at', { ascending: false });
 
-  // Role-only pages
-  POPULAR_ROLES.forEach(role => {
-    categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/profiles/${role}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-    categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/perfiles/${role}</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>`);
-  });
-
-  // Country + Role combinations (top countries only)
-  const topCountries = ['spain', 'mexico', 'us'];
-  topCountries.forEach(country => {
-    POPULAR_ROLES.slice(0, 5).forEach(role => {
-      categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/profiles/${country}/${role}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`);
-    });
-  });
-
-  // Country + City + Role combinations (most popular only)
-  [
-    { country: 'spain', city: 'madrid', role: 'frontend-developer' },
-    { country: 'spain', city: 'barcelona', role: 'backend-developer' },
-    { country: 'spain', city: 'valencia', role: 'ui-designer' },
-    { country: 'mexico', city: 'mexico-city', role: 'fullstack-developer' },
-    { country: 'us', city: 'new-york', role: 'software-engineer' },
-    { country: 'us', city: 'san-francisco', role: 'product-manager' },
-  ].forEach(({ country, city, role }) => {
-    categoryUrls.push(`
-  <url>
-    <loc>${BASE_URL}/profiles/${country}/${city}/${role}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`);
-  });
-
-  const categoryUrlsString = categoryUrls.join('');
+    if (!error && profiles) {
+      for (const p of profiles) {
+        const lastmod = (p.updated_at || new Date().toISOString()).split('T')[0];
+        entries.push(urlEntry(`/cv/${p.slug}`, lastmod, '0.6', 'weekly'));
+      }
+    }
+  } catch (_err) {
+    // Continue without CV profiles if the DB query fails — better a partial sitemap than none.
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">${staticUrls}${profileUrls}${categoryUrlsString}
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+${entries.join('\n')}
 </urlset>`;
 }
 
-serve(async (_req) => {
+let cache: { xml: string | null; ts: number } = { xml: null, ts: 0 };
+const TTL_MS = 60 * 60 * 1000;
+
+serve(async (_req: Request) => {
   try {
-    const sitemap = await generateSitemap();
-    return new Response(sitemap, {
-      headers: { 'Content-Type': 'application/xml' },
+    const now = Date.now();
+    if (cache.xml && now - cache.ts < TTL_MS) {
+      return new Response(cache.xml, {
+        headers: {
+          'Content-Type': 'application/xml',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+    const xml = await generateSitemap();
+    cache = { xml, ts: now };
+    return new Response(xml, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600',
+      },
     });
-  } catch (err) {
-    
+  } catch (_err) {
     return new Response('Error generating sitemap', { status: 500 });
   }
 });
