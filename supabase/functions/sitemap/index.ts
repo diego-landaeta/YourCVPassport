@@ -85,24 +85,25 @@ function buildHreflang(enPath: string): string {
   return out;
 }
 
-function urlEntry(path: string, lastmod: string, priority: string, changefreq: string): string {
+function urlEntry(path: string, lastmod: string | null, priority: string, changefreq: string): string {
+  const lastmodLine = lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : '';
   return `  <url>
     <loc>${BASE_URL}${path}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
+${lastmodLine}    <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
 ${buildHreflang(path)}
   </url>`;
 }
 
 async function generateSitemap(): Promise<string> {
-  const now = new Date().toISOString().split('T')[0];
   const entries: string[] = [];
 
+  // Static pages — no lastmod (we don't know when their content really changed)
   for (const r of STATIC_ROUTES) {
-    entries.push(urlEntry(r.path, now, r.priority, r.changefreq));
+    entries.push(urlEntry(r.path, null, r.priority, r.changefreq));
   }
 
+  // Blog posts — lastmod = published_at
   for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
     const lastmod = post.published_at.split('T')[0];
     entries.push(urlEntry(`/resources/blog/${post.slug}`, lastmod, '0.7', 'monthly'));
@@ -124,9 +125,10 @@ async function generateSitemap(): Promise<string> {
       .not('slug', 'is', null)
       .order('updated_at', { ascending: false });
 
+    // CV profiles — lastmod = profiles.updated_at
     if (!error && profiles) {
       for (const p of profiles) {
-        const lastmod = (p.updated_at || new Date().toISOString()).split('T')[0];
+        const lastmod = p.updated_at ? p.updated_at.split('T')[0] : null;
         entries.push(urlEntry(`/cv/${p.slug}`, lastmod, '0.6', 'weekly'));
       }
     }
