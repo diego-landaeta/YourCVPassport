@@ -74,39 +74,34 @@ function getSpanishPath(enPath: string): string | null {
   return null;
 }
 
-function buildHreflang(enPath: string): string {
-  const enUrl = `${BASE_URL}${enPath}`;
-  const esPath = getSpanishPath(enPath);
-  let out = `    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}" />\n`;
-  if (esPath) {
-    out += `    <xhtml:link rel="alternate" hreflang="es" href="${BASE_URL}${esPath}" />\n`;
-  }
-  out += `    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrl}" />`;
-  return out;
-}
+type Entry = { path: string; lastmod: string; priority: string; changefreq: string };
 
-function urlEntry(path: string, lastmod: string | null, priority: string, changefreq: string): string {
-  const lastmodLine = lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : '';
+function renderEntry(e: Entry): string {
   return `  <url>
-    <loc>${BASE_URL}${path}</loc>
-${lastmodLine}    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-${buildHreflang(path)}
+    <loc>${BASE_URL}${e.path}</loc>
+    <lastmod>${e.lastmod}</lastmod>
+    <changefreq>${e.changefreq}</changefreq>
+    <priority>${e.priority}</priority>
   </url>`;
 }
 
 async function generateSitemap(): Promise<string> {
-  const entries: string[] = [];
+  const today = new Date().toISOString().split('T')[0];
+  const entries: Entry[] = [];
 
-  // Static pages — no lastmod (we don't know when their content really changed)
+  // Static pages (EN + ES variants as separate entries)
   for (const r of STATIC_ROUTES) {
-    entries.push(urlEntry(r.path, null, r.priority, r.changefreq));
+    entries.push({ path: r.path, lastmod: today, priority: r.priority, changefreq: r.changefreq });
+    const esPath = getSpanishPath(r.path);
+    if (esPath && esPath !== r.path) {
+      entries.push({ path: esPath, lastmod: today, priority: r.priority, changefreq: r.changefreq });
+    }
   }
 
-  // Blog posts — lastmod = published_at
+  // Blog posts
   for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
     const lastmod = post.published_at.split('T')[0];
-    entries.push(urlEntry(`/resources/blog/${post.slug}`, lastmod, '0.7', 'monthly'));
+    entries.push({ path: `/resources/blog/${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
   }
 
   try {
@@ -125,24 +120,27 @@ async function generateSitemap(): Promise<string> {
       .not('slug', 'is', null)
       .order('updated_at', { ascending: false });
 
-    // CV profiles — lastmod = profiles.updated_at
     if (!error && profiles) {
       for (const p of profiles) {
-        const lastmod = p.updated_at ? p.updated_at.split('T')[0] : null;
-        entries.push(urlEntry(`/cv/${p.slug}`, lastmod, '0.6', 'weekly'));
+        const lastmod = p.updated_at ? p.updated_at.split('T')[0] : today;
+        entries.push({ path: `/cv/${p.slug}`, lastmod, priority: '0.6', changefreq: 'weekly' });
       }
     }
   } catch (_err) {
-    // Continue without CV profiles if the DB query fails — better a partial sitemap than none.
+    // Continue without CV profiles if the DB query fails.
   }
 
+  // Sort: by priority desc, then by path asc — high-value URLs first
+  entries.sort((a, b) => {
+    const diff = parseFloat(b.priority) - parseFloat(a.priority);
+    return diff !== 0 ? diff : a.path.localeCompare(b.path);
+  });
+
+  const rendered = entries.map(renderEntry);
+
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-${entries.join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${rendered.join('\n')}
 </urlset>`;
 }
 
