@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { getPageCanonicalUrl, normalizeUrl, getCanonicalPath, getHreflangUrls } from '../../utils/canonicalUrl';
@@ -39,18 +39,6 @@ const PageSEO: React.FC<PageSEOProps> = ({
   const metaDescription = description.length > 160
     ? description.substring(0, 157) + '...'
     : description;
-
-  // Force update on route change
-  useEffect(() => {
-    // Directly update document title as a fallback to ensure it updates immediately
-    document.title = fullTitle;
-
-    // Update description meta tag
-    const metaDescTag = document.querySelector('meta[name="description"]');
-    if (metaDescTag) {
-      metaDescTag.setAttribute('content', metaDescription);
-    }
-  }, [location.pathname, fullTitle, metaDescription]);
 
   return (
     <Helmet key={location.pathname}>

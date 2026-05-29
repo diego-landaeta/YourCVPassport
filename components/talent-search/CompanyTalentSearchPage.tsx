@@ -739,20 +739,21 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                           )}
                         </div>
 
-                        {/* Skills - Fixed height */}
-                        <div className="mb-4" style={{ minHeight: '72px', maxHeight: '72px', overflow: 'hidden' }}>
+                        {/* Skills - Min height so cards stay aligned, but content can expand without clipping */}
+                        <div className="mb-4" style={{ minHeight: '72px' }}>
                           {skills && skills.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {skills.slice(0, 3).map((skill, idx) => (
                                 <span
                                   key={skill.id || idx}
-                                  className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+                                  className="inline-flex items-center px-3 py-1.5 max-w-full bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+                                  title={getTranslation(skill.name)}
                                 >
-                                  {getTranslation(skill.name)}
+                                  <span className="truncate">{getTranslation(skill.name)}</span>
                                 </span>
                               ))}
                               {skills.length > 3 && (
-                                <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-600 shadow-sm">
+                                <span className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-full border border-gray-200 dark:border-gray-600 shadow-sm flex-shrink-0">
                                   +{skills.length - 3}
                                 </span>
                               )}

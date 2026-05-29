@@ -70,8 +70,10 @@ async function generateProfileHTML(slug) {
     console.log(`   Description: ${metaTags.description}`);
     console.log(`   Keywords: ${metaTags.keywords.substring(0, 80)}...`);
 
-    // Read base index.html
-    const indexPath = path.resolve(__dirname, '../index.html');
+    // Read base index.html from dist (the built one with bundled JS/CSS), not the source
+    const distIndexPath = path.resolve(__dirname, '../dist/index.html');
+    const sourceIndexPath = path.resolve(__dirname, '../index.html');
+    const indexPath = fs.existsSync(distIndexPath) ? distIndexPath : sourceIndexPath;
     let html = fs.readFileSync(indexPath, 'utf-8');
 
     // Replace meta tags
@@ -259,7 +261,8 @@ async function generateAllProfiles() {
   const { data: profiles, error } = await supabase
     .from('profiles')
     .select('slug, full_name, headline')
-    .eq('cv_visibility', 'public')
+    .eq('is_active', true)
+    .eq('profile_hidden', false)
     .not('slug', 'is', null)
     .not('full_name', 'is', null)
     .not('headline', 'is', null);

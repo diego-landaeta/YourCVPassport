@@ -98,7 +98,7 @@ Sistema completo de traducciones en `/translations`
 ## 📞 Soporte
 
 - 📧 **Email:** support@yourcvpassport.com
-- 📚 **Documentación:** [DOCUMENTATION.md](DOCUMENTATION.md)
+- 📚 **Documentación:** [DOCS.md](DOCS.md)
 - 🐛 **Issues:** GitHub Issues
 
 ---

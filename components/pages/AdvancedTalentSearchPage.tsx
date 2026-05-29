@@ -93,16 +93,17 @@ const ProfileCard: React.FC<{ profile: any; skills: string[] }> = ({ profile, sk
                     )}
                 </div>
 
-                {/* Skills - Fixed height */}
-                <div className="mb-4" style={{ minHeight: '72px', maxHeight: '72px', overflow: 'hidden' }}>
+                {/* Skills - Min height so cards stay aligned, but content can expand without clipping */}
+                <div className="mb-4" style={{ minHeight: '72px' }}>
                     {skills && skills.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                             {skills.slice(0, 2).map((skill, idx) => (
                                 <span
                                     key={idx}
-                                    className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+                                    className="inline-flex items-center px-3 py-1.5 max-w-full bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-200 text-xs font-semibold rounded-full border border-blue-200/50 dark:border-blue-700/50 shadow-sm"
+                                    title={skill}
                                 >
-                                    {skill}
+                                    <span className="truncate">{skill}</span>
                                 </span>
                             ))}
                             {skills.length > 2 && (
@@ -330,10 +331,26 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 // Exclude admin/staff profiles
                 .neq('role', 'admin')
                 .order('plan', { ascending: false, nullsFirst: false })
-                .order('created_at', { ascending: false })
-                .limit(50);
+                .order('id', { ascending: true })
+                .limit(500);
 
             if (profilesError) throw profilesError;
+
+            // Deterministic per-day shuffle within each plan tier so the order
+            // isn't temporal but stays consistent during the same day.
+            if (profilesData && profilesData.length > 0) {
+                const daySeed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+                const hash = (s: string) => {
+                    let h = daySeed;
+                    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+                    return h >>> 0;
+                };
+                profilesData.sort((a, b) => {
+                    const planDiff = (b.plan === a.plan) ? 0 : ((b.plan || '') > (a.plan || '') ? 1 : -1);
+                    if (planDiff !== 0) return planDiff;
+                    return hash(a.id) - hash(b.id);
+                });
+            }
 
             // Get skills for ALL profiles in ONE query (optimized)
             const skillsMap: { [key: string]: string[] } = {};

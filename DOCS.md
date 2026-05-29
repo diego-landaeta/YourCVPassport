@@ -12,7 +12,6 @@
 4. [Sistema de Emails](#sistema-de-emails)
 5. [SEO y Blog](#seo-y-blog)
 6. [Testing](#testing)
-7. [Scripts SQL](#scripts-sql)
 
 ---
 
@@ -179,7 +178,7 @@ await supabase.functions.invoke('send-email', {
 
 ### Enlazado Interno
 - Max 3 enlaces internos por articulo
-- 6 topic clusters (ver `seo/internal-links-map.md` para detalle)
+- 6 topic clusters
 - Cross-links EN<->ES en articulos con version bilingue
 
 ### Backlinks (Partner Sites)
@@ -221,34 +220,3 @@ npm test tests/edge-functions/verification.spec.ts  # Especifico
 - `utilities.spec.ts` - Analytics, AI optimization, sitemap
 
 **Requiere:** `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`
-
----
-
-## Scripts SQL
-
-Carpeta: `scripts/sql/` (12 activos, 168 archivados)
-
-### Scripts Principales
-
-| Script | Uso |
-|--------|-----|
-| `check-tutors-missing-photos.sql` | Ver tutores sin foto |
-| `validate-all-tutors-content-consistency.sql` | Validar calidad |
-| `CREATE-michelle-chang-LIMPIO.sql` | Crear tutor Michelle Chang |
-| `CREATE-nicole-taylor-LIMPIO.sql` | Crear tutor Nicole Taylor |
-| `DELETE-michelle-chang-y-nicole-taylor.sql` | Limpiar ambos perfiles |
-| `fix-headlines-cortos.sql` | Extender headlines cortos |
-| `update-tutor-photo.sql` | Template para actualizar fotos |
-| `delete-test-job-postings.sql` | Eliminar job postings de prueba |
-
-### Buenas Practicas
-1. Hacer backup antes de UPDATE/DELETE
-2. Verificar UUIDs en `TUTORS-UUID-EMAIL-MAPPING.md`
-3. Confirmar entorno (dev/staging/prod)
-4. Ejecutar script de validacion despues
-
-### UUIDs Criticos
-| Nombre | Email | UUID |
-|--------|-------|------|
-| Michelle Chang | michelle.chang@iseih.edu | `7fe0c1a6-39ed-46ad-9388-116a3a0fb429` |
-| Nicole Taylor | nicole.taylor@iseih.edu | `1b90b431-de09-4b75-af6a-c94975b68746` |
