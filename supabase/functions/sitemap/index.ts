@@ -87,22 +87,26 @@ function renderEntry(e: Entry): string {
 
 async function generateSitemap(): Promise<string> {
   const today = new Date().toISOString().split('T')[0];
-  const entries: Entry[] = [];
+  const staticEntries: Entry[] = [];
+  const blogEntries: Entry[] = [];
+  const cvEntries: Entry[] = [];
 
-  // Static pages (EN + ES variants as separate entries)
+  // Static pages — keep declared order so jerarchy reads naturally (home → pricing → product → ...).
+  // Each EN entry is followed immediately by its ES counterpart when one exists.
   for (const r of STATIC_ROUTES) {
-    entries.push({ path: r.path, lastmod: today, priority: r.priority, changefreq: r.changefreq });
+    staticEntries.push({ path: r.path, lastmod: today, priority: r.priority, changefreq: r.changefreq });
     const esPath = getSpanishPath(r.path);
     if (esPath && esPath !== r.path) {
-      entries.push({ path: esPath, lastmod: today, priority: r.priority, changefreq: r.changefreq });
+      staticEntries.push({ path: esPath, lastmod: today, priority: r.priority, changefreq: r.changefreq });
     }
   }
 
-  // Blog posts
+  // Blog posts — alphabetical by slug
   for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
     const lastmod = post.published_at.split('T')[0];
-    entries.push({ path: `/resources/blog/${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
+    blogEntries.push({ path: `/resources/blog/${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
   }
+  blogEntries.sort((a, b) => a.path.localeCompare(b.path));
 
   try {
     const supabase = createClient(
@@ -117,29 +121,22 @@ async function generateSitemap(): Promise<string> {
       .eq('profile_hidden', false)
       .not('full_name', 'is', null)
       .not('headline', 'is', null)
-      .not('slug', 'is', null)
-      .order('updated_at', { ascending: false });
+      .not('slug', 'is', null);
 
     if (!error && profiles) {
       for (const p of profiles) {
         const lastmod = p.updated_at ? p.updated_at.split('T')[0] : today;
-        entries.push({ path: `/cv/${p.slug}`, lastmod, priority: '0.6', changefreq: 'weekly' });
+        cvEntries.push({ path: `/cv/${p.slug}`, lastmod, priority: '0.6', changefreq: 'weekly' });
       }
+      cvEntries.sort((a, b) => a.path.localeCompare(b.path));
     }
   } catch (_err) {
     // Continue without CV profiles if the DB query fails.
   }
 
-  // Sort: by priority desc, then by path asc — high-value URLs first
-  entries.sort((a, b) => {
-    const diff = parseFloat(b.priority) - parseFloat(a.priority);
-    return diff !== 0 ? diff : a.path.localeCompare(b.path);
-  });
-
-  const rendered = entries.map(renderEntry);
+  const rendered = [...staticEntries, ...blogEntries, ...cvEntries].map(renderEntry);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${rendered.join('\n')}
 </urlset>`;
