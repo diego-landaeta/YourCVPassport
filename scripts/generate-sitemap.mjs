@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -139,9 +139,45 @@ function generateHreflang(enPath) {
 }
 
 /**
- * Fetch published blog posts from Supabase
+ * Read static blog posts from content/posts/index.ts.
+ * Posts live as TS files (not in Supabase). We extract slug + published_at
+ * pairs with a regex over the allPostsMeta block — robust against any
+ * stray characters inside titles/summaries that would break strict JSON.
  */
-async function fetchBlogPosts() {
+function readStaticBlogPosts() {
+  try {
+    const indexPath = join(__dirname, '..', 'content', 'posts', 'index.ts');
+    const source = readFileSync(indexPath, 'utf-8');
+
+    const metaStart = source.indexOf('allPostsMeta:');
+    if (metaStart === -1) {
+      console.warn('[Sitemap] allPostsMeta not found in content/posts/index.ts');
+      return [];
+    }
+    const block = source.slice(metaStart);
+
+    const re = /"slug":\s*"([^"]+)"[\s\S]*?"published_at":\s*"([^"]+)"/g;
+    const now = new Date();
+    const out = [];
+    let m;
+    while ((m = re.exec(block)) !== null) {
+      const slug = m[1];
+      const publishedAt = m[2];
+      if (!slug || !publishedAt) continue;
+      if (new Date(publishedAt) > now) continue;
+      out.push({ slug, lastmod: publishedAt.split('T')[0] });
+    }
+    return out;
+  } catch (err) {
+    console.error('[Sitemap] Error reading static blog posts:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Fetch published blog posts from Supabase (legacy/fallback table)
+ */
+async function fetchSupabaseBlogPosts() {
   if (!supabase) return [];
 
   try {
@@ -157,15 +193,32 @@ async function fetchBlogPosts() {
     }
 
     return (data || []).map(post => ({
-      path: `/resources/blog/${post.slug}`,
-      priority: '0.7',
-      changefreq: 'monthly',
+      slug: post.slug,
       lastmod: (post.updated_at || post.published_at || new Date().toISOString()).split('T')[0],
     }));
   } catch (err) {
     console.error('[Sitemap] Error fetching blog posts:', err.message);
     return [];
   }
+}
+
+/**
+ * Combine static + Supabase blog posts, dedup by slug (static wins).
+ */
+async function fetchBlogPosts() {
+  const staticPosts = readStaticBlogPosts();
+  const dbPosts = await fetchSupabaseBlogPosts();
+
+  const bySlug = new Map();
+  for (const p of dbPosts) bySlug.set(p.slug, p);
+  for (const p of staticPosts) bySlug.set(p.slug, p); // static overrides
+
+  return Array.from(bySlug.values()).map(p => ({
+    path: `/resources/blog/${p.slug}`,
+    priority: '0.7',
+    changefreq: 'monthly',
+    lastmod: p.lastmod,
+  }));
 }
 
 /**
