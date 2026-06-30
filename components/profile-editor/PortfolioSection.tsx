@@ -5,6 +5,7 @@ import { LegacyPortfolioItemFormData, ProjectFormData, CertificationFormData, Co
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useEditorTargetId } from '../../contexts/EditorTargetContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useConfirmDialog } from '../ConfirmDialog';
@@ -169,6 +170,8 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const { profile } = useAuth();
+  const editorTargetId = useEditorTargetId();
+  const targetProfileId = editorTargetId || profile?.id;
   const toast = useToastContext();
   const { confirm, Dialog } = useConfirmDialog();
 
@@ -234,12 +237,12 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = ({ initialData = [], o
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !profile) return;
+    if (!file || !targetProfileId) return;
 
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${targetProfileId}-${Date.now()}.${fileExt}`;
       const filePath = `portfolio/${fileName}`;
 
       const { error: uploadError } = await supabase.storage.from('profile-assets').upload(filePath, file);

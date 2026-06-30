@@ -5,6 +5,7 @@ import { SkillFormData } from '../../schemas/profileSchemas';
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
+import { useEditorTargetId } from '../../contexts/EditorTargetContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -493,6 +494,9 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
   const modals = translations.dashboard.modals;
   const t = translations.profileEditor.skills;
   const { session } = useAuth();
+  const editorTargetId = useEditorTargetId();
+  // Perfil objetivo para lecturas directas: el gestionado o el del propio usuario.
+  const skillsProfileId = editorTargetId || session?.user.id;
   const { lang } = useLanguage();
   const toast = useToastContext();
 
@@ -524,23 +528,23 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
 
   // Load skills from database
   const loadSkills = React.useCallback(async () => {
-    if (!session?.user.id) return;const { data, error } = await supabase
+    if (!skillsProfileId) return;const { data, error } = await supabase
       .from('skills')
       .select('*')
-      .eq('profile_id', session.user.id)
+      .eq('profile_id', skillsProfileId)
       .order('created_at', { ascending: true });
 
     if (error) {} else {setSkills(data || []);
     }
-  }, [session?.user.id]);
+  }, [skillsProfileId]);
 
   // Load experiences for AI suggestions
   React.useEffect(() => {
     const loadExperiences = async () => {
-      if (!session?.user.id) return;const { data, error } = await supabase
+      if (!skillsProfileId) return;const { data, error } = await supabase
         .from('experiences')
         .select('position, company_name, description')
-        .eq('profile_id', session.user.id)
+        .eq('profile_id', skillsProfileId)
         .order('start_date', { ascending: false });
 
       if (error) {} else {// Map position to title for compatibility with AISkillsSuggestion
@@ -554,7 +558,7 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
     };
 
     loadExperiences();
-  }, [session]);
+  }, [skillsProfileId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),

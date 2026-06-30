@@ -6,6 +6,7 @@ import { IdentityFormData } from '../../schemas/profileSchemas';
 import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useEditorTargetId } from '../../contexts/EditorTargetContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -29,6 +30,9 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
   const t = translations.dashboard.identity;
   const { profile, session, refetchProfile } = useAuth();
   const toast = useToastContext();
+  // Perfil objetivo: el gestionado (si lo hay) o el propio del usuario.
+  const editorTargetId = useEditorTargetId();
+  const targetProfileId = editorTargetId || initialData?.id || profile?.id;
 
   // Get schema with translated error messages
   const { identitySchema } = useMemo(() => getProfileSchemas(translations), [translations]);
@@ -170,7 +174,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
     try {
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${targetProfileId}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('profile-assets')
@@ -197,7 +201,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', profile.id);
+        .eq('id', targetProfileId);
 
       if (updateError) {
         setUploadError('Error al guardar la foto en tu perfil');

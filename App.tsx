@@ -38,6 +38,11 @@ const CallbackPage = lazy(() => import('./pages/auth/CallbackPage'));
 const ConfirmPage = lazy(() => import('./pages/auth/ConfirmPage'));
 
 
+// Manager pages (rol profile_manager: gestiona varios perfiles)
+const ManagerProtectedRoute = lazy(() => import('./components/manager/ManagerProtectedRoute'));
+const ManagerDashboard = lazy(() => import('./components/manager/ManagerDashboard'));
+const ManagedProfileEditor = lazy(() => import('./components/manager/ManagedProfileEditor'));
+
 // Company pages
 const CompanyRegistrationPage = lazy(() => import('./components/company/CompanyRegistrationPage'));
 const CompanyDashboardPage = lazy(() => import('./components/company/CompanyDashboardPage'));
@@ -108,6 +113,12 @@ const AppContent: React.FC = () => {
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/search" element={<AdminTalentSearchPage />} />
+          </Route>
+
+          {/* Manager routes (rol profile_manager: gestiona varios perfiles) */}
+          <Route element={<ManagerProtectedRoute />}>
+            <Route path="/manager" element={<ManagerDashboard />} />
+            <Route path="/manager/edit/:profileId" element={<ManagedProfileEditor />} />
           </Route>
 
           {/* Community: full dashboard for logged-in users, public page otherwise */}

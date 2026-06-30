@@ -53,6 +53,12 @@ Disallow: /admin
 Disallow: /admin/
 
 # ==========================================
+# BLOCK MANAGER AREA (REQUIRES LOGIN)
+# ==========================================
+Disallow: /manager
+Disallow: /manager/
+
+# ==========================================
 # BLOCK COMPANY AREA (REQUIRES LOGIN)
 # ==========================================
 Disallow: /company/dashboard

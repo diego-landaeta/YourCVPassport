@@ -353,6 +353,11 @@ const Header: React.FC = () => {
                               <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Admin Panel</Link>
                               <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
                             </>
+                          ) : profile?.role === 'profile_manager' ? (
+                            <>
+                              <Link to="/manager" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-blue-600 dark:text-cv-blue-light hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Perfiles gestionados</Link>
+                              <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
+                            </>
                           ) : (
                             <>
                               <Link to={dashboardPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Dashboard</Link>
@@ -462,6 +467,15 @@ const Header: React.FC = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
                         Admin Panel
+                      </Link>
+                      <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
+                        {t.header.logout}
+                      </button>
+                    </>
+                  ) : profile?.role === 'profile_manager' ? (
+                    <>
+                      <Link to="/manager" onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-cv-blue text-white hover:bg-cv-blue-dark transition-colors text-sm font-medium">
+                        Perfiles gestionados
                       </Link>
                       <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
                         {t.header.logout}

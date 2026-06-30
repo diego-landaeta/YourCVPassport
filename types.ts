@@ -142,7 +142,7 @@ export interface ContactCardItem {
 }
 
 // Type definitions for user roles and plans
-export type UserRole = 'professional' | 'employer' | 'admin';
+export type UserRole = 'professional' | 'employer' | 'admin' | 'profile_manager';
 export type SubscriptionPlan = 'free' | 'basic' | 'pro' | 'enterprise';
 export type RemotePreference = 'REMOTE' | 'HYBRID' | 'ONSITE' | 'FLEXIBLE';
 export type JobSeekingStatus = 'OPEN' | 'PASSIVE' | 'NOT_LOOKING';
@@ -211,6 +211,10 @@ export interface Profile {
 
   // Wizard Completion
   wizard_completed?: boolean | null;
+
+  // Managed profiles: auth.uid() del profile_manager que gestiona este perfil.
+  // NULL = perfil de usuario normal. Sólo lo rellena el gestor al crear perfiles.
+  managed_by?: string | null;
 
   // Timestamps
   created_at?: string;
