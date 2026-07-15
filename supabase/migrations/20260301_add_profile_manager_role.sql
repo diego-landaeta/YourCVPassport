@@ -135,3 +135,9 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+-- 7. Default valido para profiles.plan -----------------------------------------
+--    El default anterior ('Free') viola profiles_plan_check, lo que rompe
+--    cualquier INSERT que no fije plan (incl. la edge function admin-create-
+--    managed-profile). Se corrige a 'free' (valor aceptado por el check).
+ALTER TABLE public.profiles ALTER COLUMN plan SET DEFAULT 'free';

@@ -105,6 +105,7 @@ serve(async (req: Request) => {
         email: contact_email?.trim() || null,
         headline: headline?.trim() || null,
         role: 'professional',
+        plan: 'free', // explicito: el default de la columna ('Free') viola profiles_plan_check
         managed_by: callerId,
       })
       .select('id, full_name, email, headline, slug, managed_by, role, created_at')
