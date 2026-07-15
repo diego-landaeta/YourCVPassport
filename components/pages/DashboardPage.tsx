@@ -254,6 +254,11 @@ const DashboardPage: React.FC = () => {
     return <LoadingSpinner message={t.dashboard.loading} size="large" />;
   }
 
+  // Los gestores (profile_manager) no usan el dashboard/CV personal: van a su panel.
+  if (profile?.role === 'profile_manager') {
+    return <Navigate to="/manager" replace />;
+  }
+
 
   return (
     <>

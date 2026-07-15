@@ -105,3 +105,33 @@ BEGIN
     END IF;
   END LOOP;
 END $$;
+
+-- 6. Permitir el rol en el trigger normalizador de role ------------------------
+--    Existe un trigger BEFORE INSERT/UPDATE (normalize_profile_role) que pone a
+--    NULL cualquier role no reconocido. Sin esto, asignar 'profile_manager'
+--    resulta en role = NULL silenciosamente.
+CREATE OR REPLACE FUNCTION public.normalize_profile_role()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+    IF NEW.role IS NULL THEN
+      NEW.role := NULL;
+    ELSE
+      CASE lower(trim(NEW.role))
+        WHEN 'professional'    THEN NEW.role := 'professional';
+        WHEN 'pro'             THEN NEW.role := 'professional';
+        WHEN 'employer'        THEN NEW.role := 'employer';
+        WHEN 'admin'           THEN NEW.role := 'admin';
+        WHEN 'administrator'   THEN NEW.role := 'admin';
+        WHEN 'profile_manager' THEN NEW.role := 'profile_manager';
+        WHEN 'manager'         THEN NEW.role := 'profile_manager';
+        ELSE
+          NEW.role := NULL;
+      END CASE;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
