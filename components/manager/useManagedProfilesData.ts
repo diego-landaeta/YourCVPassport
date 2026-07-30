@@ -58,10 +58,16 @@ const TABLAS: Array<[keyof ProfileContent, string]> = [
   ['portfolio', 'portfolio_items'],
 ];
 
+export interface Visita {
+  profile_id: string;
+  viewed_at: string;
+}
+
 export function useManagedProfilesData() {
   const { session } = useAuth();
   const [profiles, setProfiles] = useState<ManagedProfileRow[]>([]);
   const [content, setContent] = useState<Record<string, ProfileContent>>({});
+  const [views, setViews] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -88,6 +94,17 @@ export function useManagedProfilesData() {
 
       // Cinco consultas en paralelo pidiendo solo profile_id: es la forma barata
       // de conocer el volumen de cada CV sin traerse su contenido entero.
+      // Visitas registradas. Legibles desde 2026-07-30, cuando se añadio la
+      // politica RLS que da SELECT al gestor sobre los perfiles que administra:
+      // antes RLS filtraba el 100% de las filas y PostgREST devolvia 200 con
+      // lista vacia, indistinguible de "no hay datos".
+      supabase
+        .from('analytics_views')
+        .select('profile_id, viewed_at')
+        .in('profile_id', ids)
+        .order('viewed_at', { ascending: true })
+        .then(({ data, error: verr }) => setViews(verr ? [] : ((data || []) as Visita[])));
+
       const results = await Promise.all(
         TABLAS.map(([, tabla]) => supabase.from(tabla).select('profile_id').in('profile_id', ids)),
       );
@@ -113,5 +130,5 @@ export function useManagedProfilesData() {
     load();
   }, [load]);
 
-  return { profiles, content, loading, error, reload: load };
+  return { profiles, content, views, loading, error, reload: load };
 }

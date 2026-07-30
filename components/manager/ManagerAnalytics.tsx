@@ -1,22 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
-  CheckCircleIcon,
+  EyeIcon,
+  PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import {
@@ -26,28 +24,23 @@ import {
   type ProfileContent,
 } from './useManagedProfilesData';
 
-// Analitica GLOBAL del conjunto de perfiles gestionados. La individual vive en
-// /manager/analiticas/:profileId, accesible desde cada tarjeta del listado.
+// Analitica global del conjunto de perfiles gestionados.
 //
-// Mide CONTENIDO, no trafico: analytics_views / analytics_clicks / analytics_leads
-// estan a 0 filas y visitar una ficha publica no registra nada.
+// Se construye sobre las VISITAS, que es el unico dato con variacion real. La
+// version anterior graficaba agregados de contenido y reparto de plantillas,
+// pero con perfiles casi identicos eso producia un donut de un solo trozo al
+// 100% y barras sueltas: superficie de grafico sin informacion.
 
-const COLORES = ['#2563EB', '#8B5CF6', '#10B981', '#F59E0B', '#F43F5E'];
 const REQUISITOS = 7;
 
-const Tarjeta: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = '',
-}) => (
-  <div
-    className={`rounded-xl bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border p-5 ${className}`}
-  >
+const Tarjeta: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`rounded-xl bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border p-5 ${className}`}>
     {children}
   </div>
 );
 
 const ManagerAnalytics: React.FC = () => {
-  const { profiles, content, loading, error, reload } = useManagedProfilesData();
+  const { profiles, content, views, loading, error, reload } = useManagedProfilesData();
   const navigate = useNavigate();
 
   if (loading) return <LoadingSpinner message="Calculando analíticas..." />;
@@ -55,17 +48,14 @@ const ManagerAnalytics: React.FC = () => {
   if (error) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div
-          role="alert"
-          className="text-center py-16 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20"
-        >
+        <div role="alert" className="text-center py-16 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
           <ExclamationTriangleIcon className="w-12 h-12 mx-auto text-red-400 dark:text-red-500 mb-3" aria-hidden="true" />
-          <p className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
+          <p className="font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
             No se pudieron cargar las analíticas
           </p>
           <button
             onClick={reload}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cv-blue text-white font-medium hover:bg-cv-blue-dark focus:outline-none focus:ring-2 focus:ring-cv-blue focus:ring-offset-2 dark:focus:ring-offset-dark-bg-primary transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cv-blue text-white font-medium hover:bg-cv-blue-dark focus:outline-none focus:ring-2 focus:ring-cv-blue transition-colors"
           >
             <ArrowPathIcon className="w-5 h-5" aria-hidden="true" />
             Reintentar
@@ -87,49 +77,47 @@ const ManagerAnalytics: React.FC = () => {
     );
   }
 
-  const suma = (k: keyof ProfileContent) =>
-    profiles.reduce((acc, p) => acc + (content[p.id]?.[k] ?? 0), 0);
+  // ---- visitas -------------------------------------------------------------
+  const porPerfil = new Map<string, number>();
+  for (const v of views) porPerfil.set(v.profile_id, (porPerfil.get(v.profile_id) || 0) + 1);
 
-  const publicados = profiles.filter((p) => p.slug).length;
-  const listos = profiles.filter((p) => missingToPublish(p, content[p.id]).length === 0).length;
+  const ranking = profiles
+    .map((p) => ({ p, visitas: porPerfil.get(p.id) || 0 }))
+    .sort((a, b) => b.visitas - a.visitas);
 
-  const datosContenido = [
-    { nombre: 'Experiencias', valor: suma('experiences') },
-    { nombre: 'Formación', valor: suma('education') },
-    { nombre: 'Habilidades', valor: suma('skills') },
-    { nombre: 'Idiomas', valor: suma('languages') },
-    { nombre: 'Portfolio', valor: suma('portfolio') },
-  ];
+  const maxVisitas = Math.max(...ranking.map((r) => r.visitas), 1);
+  const conVisitas = ranking.filter((r) => r.visitas > 0).length;
 
-  // Reparto por completitud: cuantos perfiles estan a 7/7, 6/7, etc.
-  const porCompletitud = new Map<number, number>();
-  for (const p of profiles) {
-    const cumplidos = REQUISITOS - missingToPublish(p, content[p.id]).length;
-    porCompletitud.set(cumplidos, (porCompletitud.get(cumplidos) || 0) + 1);
+  // Serie diaria completa: sin rellenar los huecos, dos visitas separadas por
+  // una semana se dibujarian como dias consecutivos y la grafica mentiria.
+  const porDia = new Map<string, number>();
+  for (const v of views) {
+    const dia = v.viewed_at.slice(0, 10);
+    porDia.set(dia, (porDia.get(dia) || 0) + 1);
   }
-  const datosCompletitud = [...porCompletitud.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([n, cuantos]) => ({ nombre: `${n}/${REQUISITOS}`, valor: cuantos, completo: n === REQUISITOS }));
-
-  // Reparto por plantilla (la seccion propia se retiro; el dato sigue siendo util).
-  const porPlantilla = new Map<string, number>();
-  for (const p of profiles) {
-    const t = p.template || 'Sin plantilla';
-    porPlantilla.set(t, (porPlantilla.get(t) || 0) + 1);
-  }
-  const datosPlantilla = [...porPlantilla.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([nombre, valor]) => ({ nombre, valor }));
-
-  // Requisito que mas se incumple: dice donde esta el cuello de botella real.
-  const fallosPorRequisito = new Map<string, number>();
-  for (const p of profiles) {
-    for (const f of missingToPublish(p, content[p.id])) {
-      const clave = f.includes('habilidad') ? 'habilidades' : f;
-      fallosPorRequisito.set(clave, (fallosPorRequisito.get(clave) || 0) + 1);
+  const serie: Array<{ dia: string; etiqueta: string; visitas: number }> = [];
+  if (views.length > 0) {
+    const inicio = new Date(views[0].viewed_at.slice(0, 10));
+    const fin = new Date();
+    for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
+      const clave = d.toISOString().slice(0, 10);
+      serie.push({
+        dia: clave,
+        etiqueta: `${d.getDate()}/${d.getMonth() + 1}`,
+        visitas: porDia.get(clave) || 0,
+      });
     }
   }
-  const cuellos = [...fallosPorRequisito.entries()].sort((a, b) => b[1] - a[1]);
+
+  // ---- estado de publicacion ----------------------------------------------
+  const bloqueados = profiles
+    .map((p) => ({ p, falta: missingToPublish(p, content[p.id] ?? EMPTY_CONTENT) }))
+    .filter((x) => x.falta.length > 0);
+
+  const suma = (k: keyof ProfileContent) =>
+    profiles.reduce((acc, p) => acc + (content[p.id]?.[k] ?? 0), 0);
+  const elementos = (['experiences', 'education', 'skills', 'languages', 'portfolio'] as const)
+    .reduce((a, k) => a + suma(k), 0);
 
   const ejeStyle = { fontSize: 11, fill: 'currentColor' };
 
@@ -149,13 +137,12 @@ const ManagerAnalytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Cifras cabecera */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {([
-          ['Perfiles', total, 'text-gray-900 dark:text-dark-text-primary'],
-          ['Publicados', publicados, 'text-cv-green'],
-          ['Listos para publicar', listos, listos === total ? 'text-cv-green' : 'text-amber-600 dark:text-amber-400'],
-          ['Elementos totales', datosContenido.reduce((a, d) => a + d.valor, 0), 'text-gray-900 dark:text-dark-text-primary'],
+          ['Visitas totales', views.length, 'text-cv-blue dark:text-cv-blue-light'],
+          ['Tutores visitados', `${conVisitas} de ${total}`, 'text-gray-900 dark:text-dark-text-primary'],
+          ['Listos para publicar', `${total - bloqueados.length} de ${total}`, bloqueados.length ? 'text-amber-600 dark:text-amber-400' : 'text-cv-green'],
+          ['Elementos de CV', elementos, 'text-gray-900 dark:text-dark-text-primary'],
         ] as const).map(([etiqueta, valor, color]) => (
           <Tarjeta key={etiqueta}>
             <p className={`text-3xl font-bold leading-none ${color}`}>{valor}</p>
@@ -164,149 +151,114 @@ const ManagerAnalytics: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {/* Volumen de contenido agregado */}
-        <Tarjeta>
+      {views.length > 0 ? (
+        <Tarjeta className="mb-4">
           <h2 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
-            Contenido acumulado
+            Visitas por día
           </h2>
           <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-4">
-            Suma de los {total} perfiles.
+            Desde la primera visita registrada.
           </p>
           <div className="h-56 text-gray-500 dark:text-dark-text-secondary">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={datosContenido} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+              <AreaChart data={serie} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradVisitas" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} vertical={false} />
-                <XAxis dataKey="nombre" tick={ejeStyle} axisLine={false} tickLine={false} />
-                <YAxis tick={ejeStyle} axisLine={false} tickLine={false} allowDecimals={false} />
+                <XAxis dataKey="etiqueta" tick={ejeStyle} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={24} />
+                <YAxis tick={ejeStyle} axisLine={false} tickLine={false} allowDecimals={false} width={32} />
                 <Tooltip
-                  cursor={{ fill: 'currentColor', opacity: 0.06 }}
+                  cursor={{ stroke: '#2563EB', strokeWidth: 1, opacity: 0.4 }}
                   contentStyle={{ borderRadius: 8, border: '1px solid rgba(128,128,128,.3)', fontSize: 12 }}
+                  labelFormatter={(l) => `Día ${l}`}
+                  formatter={(v: number) => [v, 'visitas']}
                 />
-                <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
-                  {datosContenido.map((_, i) => (
-                    <Cell key={i} fill={COLORES[i % COLORES.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Area type="monotone" dataKey="visitas" stroke="#2563EB" strokeWidth={2} fill="url(#gradVisitas)" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </Tarjeta>
-
-        {/* Reparto por completitud */}
-        <Tarjeta>
-          <h2 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
-            Requisitos cumplidos
-          </h2>
-          <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-4">
-            Cuántos perfiles hay en cada nivel. {REQUISITOS}/{REQUISITOS} es publicable.
-          </p>
-          <div className="h-56 text-gray-500 dark:text-dark-text-secondary">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={datosCompletitud} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.15} vertical={false} />
-                <XAxis dataKey="nombre" tick={ejeStyle} axisLine={false} tickLine={false} />
-                <YAxis tick={ejeStyle} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  cursor={{ fill: 'currentColor', opacity: 0.06 }}
-                  contentStyle={{ borderRadius: 8, border: '1px solid rgba(128,128,128,.3)', fontSize: 12 }}
-                />
-                <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
-                  {datosCompletitud.map((d, i) => (
-                    <Cell key={i} fill={d.completo ? '#10B981' : '#F59E0B'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+      ) : (
+        <Tarjeta className="mb-4">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-dark-text-secondary py-6 justify-center">
+            <EyeIcon className="w-5 h-5" aria-hidden="true" />
+            Todavía no hay visitas registradas en las fichas públicas.
           </div>
         </Tarjeta>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Cuellos de botella */}
         <Tarjeta>
           <h2 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
-            Qué bloquea la publicación
+            Tutores más visitados
           </h2>
           <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-4">
-            Requisito incumplido, y en cuántos perfiles.
+            Pulsa para ver el detalle de un tutor.
           </p>
-          {cuellos.length === 0 ? (
-            <div className="flex items-center gap-2 text-sm text-cv-green py-4">
-              <CheckCircleIcon className="w-5 h-5" aria-hidden="true" />
+          <ul className="space-y-2">
+            {ranking.slice(0, 8).map(({ p, visitas }) => (
+              <li key={p.id}>
+                <button
+                  onClick={() => navigate(`/manager/analiticas/${p.id}`)}
+                  className="w-full flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary focus:outline-none focus:ring-2 focus:ring-cv-blue transition-colors"
+                >
+                  <span className="w-28 shrink-0 text-xs text-left text-gray-700 dark:text-dark-text-secondary truncate">
+                    {p.full_name}
+                  </span>
+                  <span className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-dark-bg-tertiary overflow-hidden">
+                    <span
+                      className={`block h-full rounded-full ${visitas > 0 ? 'bg-cv-blue' : ''}`}
+                      style={{ width: `${(visitas / maxVisitas) * 100}%` }}
+                    />
+                  </span>
+                  <span className="w-6 text-right text-xs font-semibold text-gray-900 dark:text-dark-text-primary">
+                    {visitas}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Tarjeta>
+
+        <Tarjeta>
+          <h2 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
+            Pendientes de completar
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-4">
+            No cumplen los {REQUISITOS} requisitos para publicarse.
+          </p>
+          {bloqueados.length === 0 ? (
+            <p className="text-sm text-cv-green py-4">
               Los {total} perfiles cumplen todos los requisitos.
-            </div>
+            </p>
           ) : (
-            <ul className="space-y-2.5">
-              {cuellos.map(([nombre, n]) => (
-                <li key={nombre} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-xs text-gray-600 dark:text-dark-text-secondary capitalize">
-                    {nombre}
-                  </span>
-                  <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-dark-bg-tertiary overflow-hidden">
-                    <div className="h-full rounded-full bg-amber-500" style={{ width: `${(n / total) * 100}%` }} />
-                  </div>
-                  <span className="w-16 text-right text-xs font-semibold text-gray-700 dark:text-dark-text-primary">
-                    {n} de {total}
-                  </span>
+            <ul className="space-y-2">
+              {bloqueados.map(({ p, falta }) => (
+                <li key={p.id}>
+                  <button
+                    onClick={() => navigate(`/manager/edit/${p.id}`)}
+                    className="w-full flex items-center justify-between gap-3 text-left px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 focus:outline-none focus:ring-2 focus:ring-cv-blue transition-colors group"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-gray-900 dark:text-dark-text-primary truncate">
+                        {p.full_name}
+                      </span>
+                      <span className="block text-xs text-amber-700 dark:text-amber-400">
+                        Falta: {falta.join(', ')}
+                      </span>
+                    </span>
+                    <PencilSquareIcon className="w-4 h-4 shrink-0 text-gray-400 group-hover:text-cv-blue" aria-hidden="true" />
+                  </button>
                 </li>
               ))}
             </ul>
           )}
         </Tarjeta>
-
-        {/* Reparto por plantilla */}
-        <Tarjeta>
-          <h2 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
-            Plantillas en uso
-          </h2>
-          <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-2">
-            Cómo se reparten los {total} perfiles.
-          </p>
-          <div className="h-48 text-gray-500 dark:text-dark-text-secondary">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={datosPlantilla}
-                  dataKey="valor"
-                  nameKey="nombre"
-                  innerRadius={45}
-                  outerRadius={70}
-                  paddingAngle={2}
-                >
-                  {datosPlantilla.map((_, i) => (
-                    <Cell key={i} fill={COLORES[i % COLORES.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: '1px solid rgba(128,128,128,.3)', fontSize: 12 }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <ul className="mt-2 space-y-1">
-            {datosPlantilla.map((d, i) => (
-              <li key={d.nombre} className="flex items-center gap-2 text-xs">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ background: COLORES[i % COLORES.length] }}
-                  aria-hidden="true"
-                />
-                <span className="capitalize text-gray-700 dark:text-dark-text-secondary flex-1 truncate">
-                  {d.nombre}
-                </span>
-                <span className="font-semibold text-gray-900 dark:text-dark-text-primary">{d.valor}</span>
-              </li>
-            ))}
-          </ul>
-        </Tarjeta>
       </div>
-
-      <p className="mt-6 text-xs text-gray-400 dark:text-dark-text-tertiary">
-        Para el detalle de un tutor concreto, usa el botón de analítica en su tarjeta
-        del listado de perfiles. Las visitas a fichas públicas no se muestran porque
-        el registro de analítica no está capturando datos.
-      </p>
     </div>
   );
 };

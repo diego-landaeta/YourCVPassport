@@ -30,7 +30,7 @@ const REQUISITOS = 7;
 
 const ManagerProfileAnalytics: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
-  const { profiles, content, loading, error } = useManagedProfilesData();
+  const { profiles, content, views, loading, error } = useManagedProfilesData();
   const navigate = useNavigate();
 
   if (loading) return <LoadingSpinner message="Cargando analítica..." />;
@@ -139,6 +139,37 @@ const ManagerProfileAnalytics: React.FC = () => {
         </div>
       </div>
 
+      {/* Visitas a su ficha publica */}
+      {(() => {
+        const suyas = views.filter((v) => v.profile_id === p.id);
+        const mediaResto = otros.length
+          ? Math.round((views.filter((v) => v.profile_id !== p.id).length / otros.length) * 10) / 10
+          : 0;
+        const ultima = suyas.length ? suyas[suyas.length - 1].viewed_at.slice(0, 10) : null;
+        return (
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="rounded-xl bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border p-4">
+              <p className="text-2xl font-bold leading-none text-cv-blue dark:text-cv-blue-light">
+                {suyas.length}
+              </p>
+              <p className="mt-1.5 text-xs text-gray-500 dark:text-dark-text-secondary">Visitas</p>
+            </div>
+            <div className="rounded-xl bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border p-4">
+              <p className="text-2xl font-bold leading-none text-gray-900 dark:text-dark-text-primary">
+                {mediaResto}
+              </p>
+              <p className="mt-1.5 text-xs text-gray-500 dark:text-dark-text-secondary">Media del resto</p>
+            </div>
+            <div className="rounded-xl bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border p-4">
+              <p className="text-sm font-semibold leading-none text-gray-900 dark:text-dark-text-primary pt-1.5">
+                {ultima ?? '—'}
+              </p>
+              <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary">Última visita</p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Estado de publicacion */}
       <div
         className={`rounded-xl border p-5 mb-4 ${
@@ -226,10 +257,6 @@ const ManagerProfileAnalytics: React.FC = () => {
         </ul>
       </div>
 
-      <p className="mt-6 text-xs text-gray-400 dark:text-dark-text-tertiary">
-        Las visitas a la ficha pública no se muestran porque el registro de analítica
-        no está capturando datos.
-      </p>
     </div>
   );
 };
