@@ -3696,11 +3696,16 @@ export const translations = {
     profileWizard: {
         completeYourProfile: 'Completa tu perfil',
         toCreateCv: 'Para crear tu CV profesional, necesitas completar:',
-        navigateToSections: 'Navega a las secciones correspondientes usando los iconos de arriba',
+        navigateToSections: 'Pulsa en cualquiera de los puntos para ir directamente a arreglarlo',
         premiumFeature: 'Funcionalidad Premium',
         premiumAiDescription: 'Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium. Tu plan actual es Free.',
         viewPlans: 'Ver Planes',
         improveWithAi: 'Mejorar con IA',
+        stepCounter: 'Paso {n} de {total}',
+        optional: 'Opcional',
+        optionalHint: 'Este paso es opcional: puedes saltarlo y publicar tu CV igualmente.',
+        missingHere: 'Te falta en este paso',
+        goToFix: 'Ir',
     },
     preferencesToasts: {
         completePreferences: 'Por favor, completa tus preferencias laborales para continuar',

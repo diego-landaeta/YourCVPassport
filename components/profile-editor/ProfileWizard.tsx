@@ -68,9 +68,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   const stepRef = React.useRef<any>(null);
   const [showPremiumToast, setShowPremiumToast] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
-  const [missingSteps, setMissingSteps] = useState<string[]>([]);
   const [preferencesCompletedInSession, setPreferencesCompletedInSession] = useState(false);
 
 
@@ -80,59 +78,72 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   // Ya no usamos localStorage porque debe persistir entre dispositivos y navegadores
   const hasCompletedWizard = profile?.wizard_completed === true;
 
-  // Check if all required steps are completed
-  const checkRequiredSteps = (isCurrentlyLeavingPreferences = false) => {
-    const missing = [];
-    const details: string[] = [];
+  // ---------------------------------------------------------------------------
+  // FUENTE UNICA DE COMPLETITUD
+  //
+  // Antes habia dos criterios distintos y divergian: el check verde del stepper
+  // pintaba Identidad como completa con solo nombre+email, mientras la puerta de
+  // finalizacion exigia ademas titular, resumen y foto. El usuario recorria los
+  // ocho pasos en verde y era rechazado al final. Ahora ambos leen de aqui, asi
+  // que no pueden volver a contradecirse.
+  //
+  // `required`   : bloquea la finalizacion.
+  // `missing`    : lo que falta, en lenguaje del usuario. Vacio = cumplido.
+  // `hasContent` : si el paso tiene algo. Solo para marcar en verde los opcionales.
+  // ---------------------------------------------------------------------------
+  const hasPreferences = Boolean(
+    profile?.job_seeking_status ||
+    profile?.availability ||
+    profile?.salary_min ||
+    profile?.salary_max ||
+    profile?.remote_preference ||
+    profile?.willing_to_relocate ||
+    (profile?.preferred_locations && profile.preferred_locations.length > 0) ||
+    (profile?.job_type && profile.job_type.length > 0)
+  );
 
-    // Validar Identidad - CAMPOS OBLIGATORIOS
-    const identityIssues = [];
-    if (!profile?.full_name) identityIssues.push(t.wizardValidation.fullName);
-    if (!profile?.email) identityIssues.push(t.wizardValidation.email);
-    if (!profile?.headline) identityIssues.push(t.wizardValidation.headline);
-    if (!profile?.summary) identityIssues.push(t.wizardValidation.summary);
-    if (!profile?.avatar_url) identityIssues.push(t.wizardValidation.photo);
-
-    if (identityIssues.length > 0) {
-      missing.push(t.wizardSteps.identity);
-      details.push(...identityIssues.map(item => `• ${item} (${t.wizardSteps.identity})`));
-    }
-
-    // Validar Experiencia - AL MENOS 1
-    if (!experiences || experiences.length === 0) {
-      missing.push(t.wizardSteps.experience);
-      details.push(`• ${t.wizardValidation.atLeastOneExperience}`);
-    }
-
-    // Validar Habilidades - AL MENOS 3
-    if (!skills || skills.length < 3) {
-      missing.push(t.wizardSteps.skills);
-      details.push(`• ${t.wizardValidation.atLeastThreeSkills} (${t.wizardValidation.youHave} ${skills?.length || 0})`);
-    }
-
-    // Validar Preferencias - Debe completarse en esta sesión (pero los campos son opcionales)
-    // Si estamos actualmente saliendo del paso de preferences, considerarlo como completado
-    if (!preferencesCompletedInSession && !isCurrentlyLeavingPreferences) {
-      missing.push(t.wizardSteps.preferences);
-      details.push(`• ${t.wizardValidation.visitPreferences} (${t.wizardSteps.preferences})`);
-    }
-
-    return { sections: missing, details };
+  const stepRules: Record<string, { required: boolean; missing: string[]; hasContent: boolean }> = {
+    identity: {
+      required: true,
+      missing: [
+        !profile?.full_name && t.wizardValidation.fullName,
+        !profile?.email && t.wizardValidation.email,
+        !profile?.headline && t.wizardValidation.headline,
+        !profile?.summary && t.wizardValidation.summary,
+        !profile?.avatar_url && t.wizardValidation.photo,
+      ].filter(Boolean) as string[],
+      hasContent: Boolean(profile?.full_name || profile?.email),
+    },
+    experience: {
+      required: true,
+      missing: !experiences || experiences.length === 0 ? [t.wizardValidation.atLeastOneExperience] : [],
+      hasContent: (experiences?.length ?? 0) > 0,
+    },
+    education: { required: false, missing: [], hasContent: (education?.length ?? 0) > 0 },
+    skills: {
+      required: true,
+      missing:
+        !skills || skills.length < 3
+          ? [`${t.wizardValidation.atLeastThreeSkills} (${t.wizardValidation.youHave} ${skills?.length || 0})`]
+          : [],
+      hasContent: (skills?.length ?? 0) > 0,
+    },
+    languages: { required: false, missing: [], hasContent: (languages?.length ?? 0) > 0 },
+    portfolio: { required: false, missing: [], hasContent: (portfolio?.length ?? 0) > 0 },
+    // Preferencias ya no bloquea. Antes exigia "haber visitado el paso" mediante
+    // un flag de sesion que se perdia al recargar, y sus campos son opcionales:
+    // era un requisito fantasma imposible de deducir desde la interfaz.
+    preferences: { required: false, missing: [], hasContent: hasPreferences || preferencesCompletedInSession },
+    finalization: { required: false, missing: [], hasContent: Boolean(profile?.template && profile?.slug) },
   };
 
   // Validate before allowing access to finalization step
-  const canAccessFinalization = (isCurrentlyLeavingPreferences = false) => {
+  const canAccessFinalization = () => {
     if (hasCompletedWizard) return false; // Already completed wizard
 
-    const validation = checkRequiredSteps(isCurrentlyLeavingPreferences);
-
-    // Si hay validaciones pendientes, mostrar advertencia
-    if (validation.details.length > 0) {
-      setMissingSteps(validation.details);
+    const blocking = Object.values(stepRules).some(r => r.required && r.missing.length > 0);
+    if (blocking) {
       setShowIncompleteWarning(true);
-      setTimeout(() => {
-        setShowIncompleteWarning(false);
-      }, 10000); // 10 segundos
       return false;
     }
 
@@ -153,7 +164,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
       // If next step is finalization, validate first
       // IMPORTANT: If we're leaving preferences step, consider it as already completed for validation
       if (isNextStepFinalization) {
-        const canAccess = canAccessFinalization(isLeavingPreferences);
+        const canAccess = canAccessFinalization();
         if (!canAccess) {
           return; // Validation failed, warning shown
         }
@@ -228,6 +239,14 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   // Check if user has premium plan (lowercase: 'pro', 'premium', 'enterprise')
   const isPremiumUser = profile?.plan && ['pro', 'premium', 'enterprise'].includes(profile.plan.toLowerCase());
 
+  // En un perfil gestionado, `profile.plan` es el del PERFIL EDITADO, no el del
+  // gestor que lo esta editando. Los perfiles gestionados se crean siempre con
+  // plan 'free' y no tienen login propio, asi que la comprobacion de premium
+  // fallaba siempre y el gestor recibia un "pasate a Pro" que le invitaba a
+  // mejorar el plan de otra persona. Mientras la IA siga gateada por plan del
+  // perfil, en modo gestionado no se ofrece.
+  const isManagedProfile = Boolean(profile?.managed_by);
+
   const handleAIClick = () => {
     // Check if user has premium access
     if (!isPremiumUser) {
@@ -272,70 +291,32 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     }
   }, []);
 
-  // Initialize and update completed steps based on content
-  useEffect(() => {
-    const stepsWithContent: number[] = [];
+  // Estado de cada paso, derivado de stepRules. Ya no es useState + useEffect con
+  // veinte dependencias: al calcularse en el render no puede quedar desincronizado
+  // de la puerta de finalizacion, que lee exactamente las mismas reglas.
+  //
+  // Obligatorio -> verde solo si NO le falta nada.
+  // Opcional    -> verde si tiene contenido; neutro si esta vacio (no bloquea).
+  const completedSteps = steps.reduce<number[]>((acc, step, index) => {
+    const rule = stepRules[step.id];
+    if (!rule) return acc;
+    const done = rule.required ? rule.missing.length === 0 : rule.hasContent;
+    if (done) acc.push(index);
+    return acc;
+  }, []);
 
-    // Check each step for content
-    if (profile?.full_name && profile?.email) {
-      stepsWithContent.push(0); // identity
-    }
-    if (experiences && experiences.length > 0) {
-      stepsWithContent.push(1); // experience
-    }
-    if (education && education.length > 0) {
-      stepsWithContent.push(2); // education
-    }
-    if (skills && skills.length > 0) {
-      stepsWithContent.push(3); // skills
-    }
-    if (languages && languages.length > 0) {
-      stepsWithContent.push(4); // languages
-    }
-    if (portfolio && portfolio.length > 0) {
-      stepsWithContent.push(5); // portfolio
-    }
-    // Preferences is completed if user has at least one preference saved
-    const hasPreferences = profile?.job_seeking_status ||
-                          profile?.availability ||
-                          profile?.salary_min ||
-                          profile?.salary_max ||
-                          profile?.remote_preference ||
-                          profile?.willing_to_relocate ||
-                          (profile?.preferred_locations && profile.preferred_locations.length > 0) ||
-                          (profile?.job_type && profile.job_type.length > 0);
+  // Lo que falta para poder publicar, con el paso al que pertenece cada item para
+  // que el aviso pueda llevar al usuario directamente alli.
+  const missingItems = steps.flatMap((step, index) => {
+    const rule = stepRules[step.id];
+    if (!rule?.required) return [];
+    return rule.missing.map(label => ({ label, stepIndex: index, stepTitle: step.title }));
+  });
 
-    if (hasPreferences || preferencesCompletedInSession) {
-      stepsWithContent.push(6); // preferences
-    }
-    // Finalization step is only completed when user has selected template and slug
-    // Only track if finalization step exists (when wizard not completed)
-    if (!hasCompletedWizard && profile?.template && profile?.slug) {
-      stepsWithContent.push(7); // finalization
-    }
-
-    setCompletedSteps(stepsWithContent);
-  }, [
-    profile?.full_name,
-    profile?.email,
-    profile?.job_seeking_status,
-    profile?.availability,
-    profile?.salary_min,
-    profile?.salary_max,
-    profile?.remote_preference,
-    profile?.willing_to_relocate,
-    profile?.preferred_locations?.length,
-    profile?.job_type?.length,
-    profile?.template,
-    profile?.slug,
-    experiences?.length,
-    education?.length,
-    skills?.length,
-    languages?.length,
-    portfolio?.length,
-    hasCompletedWizard,
-    preferencesCompletedInSession
-  ]);
+  // Lo que falta en el paso que se esta viendo ahora mismo, para avisar in situ en
+  // vez de acumular el diagnostico hasta el final del recorrido.
+  const currentStepMissing = stepRules[steps[currentStep]?.id]?.missing ?? [];
+  const isCurrentStepOptional = stepRules[steps[currentStep]?.id]?.required === false;
 
   // Reset currentStep if it's out of bounds (happens when wizard completes and finalization step is removed)
   useEffect(() => {
@@ -355,12 +336,23 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
             const Icon = step.icon;
             const isActive = index === currentStep;
             const isCompleted = completedSteps.includes(index);
+            const rule = stepRules[step.id];
+            // Obligatorio y sin cumplir: se marca en ambar. Antes era gris, igual
+            // que un paso opcional vacio, asi que nada distinguia "te falta esto
+            // para publicar" de "esto puedes saltartelo".
+            const needsAttention = Boolean(rule?.required && rule.missing.length > 0);
 
             return (
               <div key={step.id} className="flex items-center flex-shrink-0">
                 <div
                   className={`flex flex-col items-center cursor-pointer group transition-all ${
-                    isActive ? 'text-cv-blue' : isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                    isActive
+                      ? 'text-cv-blue'
+                      : isCompleted
+                        ? 'text-green-600'
+                        : needsAttention
+                          ? 'text-amber-600 dark:text-amber-500'
+                          : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
                   onClick={async () => {
                     // Check if trying to access finalization step
@@ -375,8 +367,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                         return; // Error already shown by PreferencesSection
                       }
 
-                      // Validar con Preferences marcado como completado
-                      const canAccess = canAccessFinalization(true);
+                      const canAccess = canAccessFinalization();
                       if (!canAccess) {
                         return; // Validation failed, warning already shown
                       }
@@ -388,16 +379,24 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   }}
                 >
                   <div className={`
-                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
+                    relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
                     group-hover:scale-110 group-hover:shadow-md
                     ${isActive
                       ? 'border-cv-blue bg-blue-50 dark:bg-blue-900/20'
                       : isCompleted
                         ? 'border-green-600 bg-green-50 dark:bg-green-900/20 group-hover:border-green-700'
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
+                        : needsAttention
+                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 group-hover:border-amber-600'
+                          : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
                     }
                   `}>
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    {needsAttention && (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-dark-bg-secondary"
+                        title={rule.missing.join(' · ')}
+                      />
+                    )}
                   </div>
                   <span className={`text-[10px] sm:text-xs font-medium mt-1 sm:mt-2 max-w-[50px] sm:max-w-none text-center truncate ${isActive ? '' : 'hidden sm:block'}`}>{step.title}</span>
                 </div>
@@ -408,6 +407,49 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Contexto del paso actual.
+          En movil el stepper solo muestra iconos (los titulos van ocultos salvo el
+          activo), asi que sin esto el usuario no sabe donde esta ni cuanto queda.
+          Tambien es donde se dice si el paso es opcional y que le falta, in situ,
+          en lugar de acumular el diagnostico hasta el final del recorrido. */}
+      <div className="-mt-4 mb-6 px-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
+          <span className="text-gray-500 dark:text-gray-400">
+            {t.profileWizard.stepCounter
+              .replace('{n}', String(currentStep + 1))
+              .replace('{total}', String(steps.length))}
+          </span>
+          <span className="font-semibold text-gray-900 dark:text-white">{steps[currentStep]?.title}</span>
+          {isCurrentStepOptional && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+              {t.profileWizard.optional}
+            </span>
+          )}
+        </div>
+
+        {currentStepMissing.length > 0 && (
+          <div className="mt-3 mx-auto max-w-xl rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400 mb-1.5">
+              {t.profileWizard.missingHere}
+            </p>
+            <ul className="space-y-1">
+              {currentStepMissing.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {isCurrentStepOptional && currentStepMissing.length === 0 && (
+          <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
+            {t.profileWizard.optionalHint}
+          </p>
+        )}
       </div>
 
       {/* Incomplete Warning Toast */}
@@ -437,12 +479,30 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   {t.profileWizard.toCreateCv}
                 </p>
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                  <ul className="space-y-2">
-                    {missingSteps.map((step, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
-                        <span className="text-red-500 mt-0.5">•</span>
-                        <span className="flex-1">{step}</span>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2">
+                  <ul className="space-y-1">
+                    {missingItems.map((item, idx) => (
+                      <li key={idx}>
+                        {/* Cada item lleva a su paso. Antes era texto plano y el
+                            usuario tenia que deducir a que icono corresponder. */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowIncompleteWarning(false);
+                            setCurrentStep(item.stepIndex);
+                            window.scrollTo(0, 0);
+                          }}
+                          className="w-full flex items-start gap-2 text-left text-sm text-gray-800 dark:text-gray-200 rounded-md px-2 py-1.5 hover:bg-white dark:hover:bg-gray-800 hover:text-cv-blue dark:hover:text-blue-400 transition-colors group/item"
+                        >
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                          <span className="flex-1">
+                            {item.label}
+                            <span className="text-gray-400 dark:text-gray-500"> · {item.stepTitle}</span>
+                          </span>
+                          <span className="opacity-0 group-hover/item:opacity-100 transition-opacity text-xs font-medium flex-shrink-0 mt-0.5">
+                            {t.profileWizard.goToFix}
+                          </span>
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -511,7 +571,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
       {/* AI Optimization Floating Button - Fixed bottom right */}
       {/* Show button based on current section's AI support */}
-      {steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
+      {!isManagedProfile && steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
         (currentStep === 1 && experiences.length > 0) || // Experience has AI
         (currentStep === 2 && education.length > 0) || // Education has AI
         currentStep === 3) && ( // Skills has AI
