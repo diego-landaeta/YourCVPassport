@@ -17,7 +17,6 @@ import Modal from '../shared/Modal';
 // Lazy load heavy components for better performance
 
 const TemplateSelector = lazy(() => import('../profile-editor/TemplateSelector'));
-const OnboardingWizard = lazy(() => import('../OnboardingWizard'));
 const AIQuestionnaireAssistant = lazy(() => import('../AIQuestionnaireAssistant'));
 
 const ProfileWizard = lazy(() => import('../profile-editor/ProfileWizard')); // New Wizard Component
