@@ -18,6 +18,14 @@ const plan = JSON.parse(readFileSync(join(root, 'content', 'blog-300-plan.json')
 const postsDir = join(root, 'content', 'posts');
 mkdirSync(postsDir, { recursive: true });
 
+// Autor de los posts generados. Vive en una constante porque antes estaba escrito
+// a mano solo en los archivos individuales y se olvido en el bloque de metadatos
+// del listado: `allPostsMeta` se declara como Omit<BlogPostData,'content'>, que
+// exige author_name, y las 300 entradas salian sin el. Resultado: 300 errores de
+// TypeScript desde el 2026-04-09 que dejaron `tsc --noEmit` inservible como red.
+// Con una sola fuente, los dos sitios no pueden volver a divergir.
+const AUTHOR_NAME = 'YourCVPassport Team';
+
 // ── Unsplash images ──
 const pools = {
   career: ['photo-1521791136064-7986c2920216','photo-1507679799987-c73779587ccf','photo-1573497019940-1c28c88b4f3e','photo-1560472355-536de3962603','photo-1553877522-43269d4ea984','photo-1486312338219-ce68d2c6f44d','photo-1454165804606-c3d57bc86b40','photo-1450101499163-c8848c66ca85'],
@@ -220,7 +228,7 @@ const post: BlogPostData = {
   summary: ${JSON.stringify(post.meta_description)},
   content: \`${escaped}\`,
   image_url: ${JSON.stringify(imageUrl)},
-  author_name: 'YourCVPassport Team',
+  author_name: ${JSON.stringify(AUTHOR_NAME)},
   category: ${JSON.stringify(category)},
   is_featured: ${post.priority === 'high' && i % 20 === 0},
   published_at: ${JSON.stringify(pubDate.toISOString())},
@@ -294,6 +302,7 @@ const metaEntries = plan.map((post, i) => {
     slug: post.slug,
     summary: post.meta_description,
     image_url: `${img(post.cluster, i)}?w=1200&h=630&fit=crop&q=80`,
+    author_name: AUTHOR_NAME,
     category: clusterCategory[post.cluster] || post.cluster,
     is_featured: post.priority === 'high' && i % 20 === 0,
     published_at: pubDate.toISOString(),
