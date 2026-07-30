@@ -126,3 +126,6 @@ playwright-report/
 
 # Windows null device artifact
 nul
+
+# Playwright MCP screenshots
+.playwright-mcp/
