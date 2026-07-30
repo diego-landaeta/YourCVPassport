@@ -161,8 +161,12 @@ const ProfileViewPage: React.FC = () => {
     const renderTemplate = () => {
         if (!displayData) return null;
         const color = displayData.profile.template_color;
-        // If admin and selected a template, use that; otherwise use profile's default
-        const templateToRender = isAdmin && selectedTemplate ? selectedTemplate : displayData.profile.template;
+        // If admin and selected a template, use that; otherwise use profile's default.
+        // El fallback a 'passport' es necesario: los perfiles gestionados creados
+        // antes de que la Edge Function fijara la plantilla tienen template = NULL,
+        // y el .startsWith() de abajo lanzaria TypeError sobre ellos.
+        const templateToRender =
+            (isAdmin && selectedTemplate ? selectedTemplate : displayData.profile.template) || 'passport';
 
         // Check if it's an admin template
         if (templateToRender.startsWith('admin-')) {

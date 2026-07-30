@@ -106,9 +106,17 @@ serve(async (req: Request) => {
         headline: headline?.trim() || null,
         role: 'professional',
         plan: 'free', // explicito: el default de la columna ('Free') viola profiles_plan_check
+        // Plantilla por defecto de los perfiles gestionados: la misma que usan los
+        // 19 directores ISEIE y los 13 perfiles de PsikoAprende. Se fija aqui y no
+        // como DEFAULT de la columna a proposito: `template IS NULL` es el centinela
+        // que varias migraciones usan para detectar wizards sin completar, y un
+        // default en la tabla lo romperia para las altas normales.
+        // Ademas evita que la ficha publica quede sin plantilla: ProfileViewPage
+        // hace templateToRender.startsWith(...) y con NULL lanzaria TypeError.
+        template: 'passport',
         managed_by: callerId,
       })
-      .select('id, full_name, email, headline, slug, managed_by, role, created_at')
+      .select('id, full_name, email, headline, slug, template, managed_by, role, created_at')
       .single()
 
     if (insertError || !newProfile) {
