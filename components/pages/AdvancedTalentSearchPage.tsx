@@ -358,20 +358,39 @@ const AdvancedTalentSearchPage: React.FC = () => {
             if (profilesData && profilesData.length > 0) {
                 const profileIds = profilesData.map(p => p.id);
 
-                // Load ALL skills for all profiles in a SINGLE query
-                // Use a higher limit to ensure we get all skills (Supabase default is 1000)
-                const { data: allSkillsData, error: skillsError } = await supabase
-                    .from('skills')
-                    .select('profile_id, name')
-                    .in('profile_id', profileIds)
-                    .limit(5000);
+                // Se pagina en bloques de 1000.
+                //
+                // Antes se pedia .limit(5000) creyendo que subia el tope, pero el
+                // limite de 1000 filas lo impone el servidor (PostgREST max-rows) y
+                // el cliente no puede superarlo: devolvia exactamente 1000 filas
+                // SIN error. Con 1079 filas en la tabla, 79 se perdian en silencio
+                // y 6 perfiles aparecian en la busqueda sin ninguna habilidad.
+                const TAMANO_BLOQUE = 1000;
+                const allSkillsData: Array<{ profile_id: string; name: string }> = [];
+                let desde = 0;
 
-                if (skillsError) {
-                    console.error('Error loading skills:', skillsError);
+                while (true) {
+                    const { data: bloque, error: skillsError } = await supabase
+                        .from('skills')
+                        .select('profile_id, name')
+                        .in('profile_id', profileIds)
+                        .range(desde, desde + TAMANO_BLOQUE - 1);
+
+                    if (skillsError) {
+                        console.error('Error loading skills:', skillsError);
+                        break;
+                    }
+                    if (!bloque || bloque.length === 0) break;
+
+                    allSkillsData.push(...bloque);
+
+                    // Bloque incompleto: no quedan mas filas.
+                    if (bloque.length < TAMANO_BLOQUE) break;
+                    desde += TAMANO_BLOQUE;
                 }
 
                 // Group skills by profile_id (keep original names, translate later via API)
-                allSkillsData?.forEach(skill => {
+                allSkillsData.forEach(skill => {
                     if (!skillsMap[skill.profile_id]) {
                         skillsMap[skill.profile_id] = [];
                     }

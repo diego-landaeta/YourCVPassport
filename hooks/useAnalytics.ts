@@ -19,14 +19,12 @@ async function isOwnProfile(profileId: string): Promise<boolean> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
 
-    // Obtener el perfil para verificar si pertenece al usuario actual
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('user_id')
-      .eq('id', profileId)
-      .single();
-
-    return profile?.user_id === user.id;
+    // profiles.id ES el id de auth: no existe columna user_id. La consulta que
+    // habia aqui pedia profiles.select('user_id'), devolvia 400 en cada carga de
+    // ficha publica, el catch se lo tragaba y esta funcion daba siempre false.
+    // Efecto: las visitas del propio dueño se contaban como visitas reales.
+    // Ademas se ahorra una consulta por visita.
+    return profileId === user.id;
   } catch {
     return false;
   }
