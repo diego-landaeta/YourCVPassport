@@ -40,6 +40,10 @@ const ConfirmPage = lazy(() => import('./pages/auth/ConfirmPage'));
 
 // Manager pages (rol profile_manager: gestiona varios perfiles)
 const ManagerProtectedRoute = lazy(() => import('./components/manager/ManagerProtectedRoute'));
+const ManagerLayout = lazy(() => import('./components/manager/ManagerLayout'));
+const ManagerAnalytics = lazy(() => import('./components/manager/ManagerAnalytics'));
+const ManagerProfileAnalytics = lazy(() => import('./components/manager/ManagerProfileAnalytics'));
+const ManagerBatchReview = lazy(() => import('./components/manager/ManagerBatchReview'));
 const ManagerDashboard = lazy(() => import('./components/manager/ManagerDashboard'));
 const ManagedProfileEditor = lazy(() => import('./components/manager/ManagedProfileEditor'));
 
@@ -117,8 +121,13 @@ const AppContent: React.FC = () => {
 
           {/* Manager routes (rol profile_manager: gestiona varios perfiles) */}
           <Route element={<ManagerProtectedRoute />}>
-            <Route path="/manager" element={<ManagerDashboard />} />
-            <Route path="/manager/edit/:profileId" element={<ManagedProfileEditor />} />
+            <Route element={<ManagerLayout />}>
+              <Route path="/manager" element={<ManagerDashboard />} />
+              <Route path="/manager/analiticas" element={<ManagerAnalytics />} />
+              <Route path="/manager/analiticas/:profileId" element={<ManagerProfileAnalytics />} />
+              <Route path="/manager/revision" element={<ManagerBatchReview />} />
+              <Route path="/manager/edit/:profileId" element={<ManagedProfileEditor />} />
+            </Route>
           </Route>
 
           {/* Community: full dashboard for logged-in users, public page otherwise */}

@@ -23,6 +23,11 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const hideHeaderFooter =
         pathname === '/dashboard' ||
         pathname.startsWith('/dashboard/') ||
+        // El panel de gestor trae su propio sidebar (ManagerLayout): es una
+        // herramienta de trabajo, no una pagina publica, y la cabecera de
+        // marketing ahi solo estorba.
+        pathname === '/manager' ||
+        pathname.startsWith('/manager/') ||
         (isCommunityRoute && !!session);
 
     return (
