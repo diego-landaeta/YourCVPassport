@@ -96,18 +96,58 @@ ${payload.industry ? `Industry: ${payload.industry}` : ''}
 Suggested skills (comma-separated):`,
   };
 
-  // TODO: Replace with actual AI API call
-  // Example for Gemini (2025 - using gemini-2.5-flash):
-  // const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     contents: [{ parts: [{ text: prompts[payload.type] }] }],
-  //   }),
-  // });
+  const prompt = prompts[payload.type];
+  if (!prompt) {
+    throw new Error(`Unsupported optimization type: ${payload.type}`);
+  }
 
-  // For now, return a placeholder
-  return `[AI Optimized] ${payload.text}`;
+  // Timeout propio: sin esto, una respuesta lenta del proveedor mantiene viva la
+  // invocacion hasta el limite de la plataforma y el usuario se queda mirando.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+
+  let response: Response;
+  try {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1024,
+          },
+        }),
+        signal: controller.signal,
+      },
+    );
+  } catch (err) {
+    clearTimeout(timeout);
+    if ((err as Error).name === 'AbortError') {
+      throw new Error('AI request timed out');
+    }
+    throw err;
+  }
+  clearTimeout(timeout);
+
+  if (!response.ok) {
+    // El cuerpo del error del proveedor puede incluir la API key reflejada en la
+    // URL; se registra solo el status para no filtrarla a los logs de la funcion.
+    throw new Error(`AI provider returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  const output = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (typeof output !== 'string' || !output.trim()) {
+    // Respuesta vacia por filtros de seguridad o por corte de tokens.
+    const reason = data?.candidates?.[0]?.finishReason ?? 'unknown';
+    throw new Error(`AI returned no usable text (finishReason: ${reason})`);
+  }
+
+  return output.trim();
 }
 
 serve(async (req: Request) => {
