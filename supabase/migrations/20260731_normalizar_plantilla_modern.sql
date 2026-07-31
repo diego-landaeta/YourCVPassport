@@ -32,22 +32,32 @@
 --   buscado: alinearlos con los demas.
 --
 -- ALCANCE
---   Solo perfiles con managed_by no nulo. Los 3 perfiles con 'modern' que NO
---   son gestionados pertenecen a otros usuarios y quedan fuera a proposito:
---   cambiar como se ve la ficha de alguien sin que lo pida es otra decision.
---   Siguen afectados por el mismo fallo de renderizado.
+--   Todos los perfiles con template = 'modern', en dos pasos:
+--
+--     1. Los 19 gestionados. Estos SI tienen ficha publica y su aspecto cambia:
+--        pasan de ClassicTemplate (donde caian por el default) a
+--        PassportTemplate. Es el cambio buscado.
+--
+--     2. Los 3 restantes (diego, inforobler, admin@dev.com). Ninguno tiene
+--        slug, asi que no tienen ficha publica y el cambio no es visible para
+--        nadie. Se normalizan para no dejar el valor huerfano en la tabla.
+--
+--   El color no se toca: los 22 gestionados ya tenian #0052FF, el mismo que los
+--   otros 3 gestionados que ya estaban en passport. Solo difería la plantilla.
+--
+-- RESULTADO
+--   Antes:  passport 74 / modern 22 / classic 2
+--   Despues: passport 99 / classic 2
 --
 -- ROLLBACK
---   UPDATE public.profiles SET template = 'modern'
---   WHERE managed_by IS NOT NULL AND template = 'passport';
---   (solo valido inmediatamente despues, antes de crear perfiles nuevos)
+--   No hay forma de distinguir despues cuales eran 'modern', asi que el
+--   rollback exacto requiere la lista de ids. Antes de aplicar eran los 19
+--   gestionados mas diego, inforobler y admin@dev.com.
 -- ============================================================================
 
 UPDATE public.profiles
 SET template = 'passport'
-WHERE managed_by IS NOT NULL
-  AND template = 'modern';
+WHERE template = 'modern';
 
 -- Comprobacion: deberia devolver 0 filas.
--- SELECT count(*) FROM public.profiles
---  WHERE managed_by IS NOT NULL AND template = 'modern';
+-- SELECT count(*) FROM public.profiles WHERE template = 'modern';
