@@ -22,6 +22,22 @@ import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 
+// Identificadores de plantilla guardados en perfiles antiguos que ya no
+// corresponden a ninguna opcion de este paso. Sin traducirlos, al abrir la
+// finalizacion no aparece ninguna tarjeta seleccionada y no hay forma de saber
+// que plantilla tiene aplicada el perfil.
+//
+// 'modern' es el caso real: 22 perfiles lo tienen guardado, y como el switch de
+// ProfileViewPage no lo contempla, caian al default y se renderizaban con
+// ClassicTemplate, no con la plantilla que su nombre sugiere.
+const PLANTILLAS_HEREDADAS: Record<string, string> = {
+  modern: 'passport',
+  creative: 'creative-bold',
+};
+
+const normalizarPlantilla = (id?: string | null): string =>
+  (id && PLANTILLAS_HEREDADAS[id]) || id || 'passport';
+
 interface FinalizationStepProps {
   onComplete: () => void;
   currentTemplate?: string;
@@ -40,7 +56,7 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
 
   // Use profile.slug if available, otherwise use the prop
   const existingSlug = profile?.slug || currentSlug;
-  const existingTemplate = profile?.template || currentTemplate;
+  const existingTemplate = normalizarPlantilla(profile?.template || currentTemplate);
 
   const [selectedTemplate, setSelectedTemplate] = useState(existingTemplate);
   const [customSlug, setCustomSlug] = useState(existingSlug || '');
@@ -145,6 +161,9 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
   //   ... auto-generation code removed ...
   // }, []);
 
+  const plantillaActual = profile?.template || null;
+  const esHeredada = Boolean(plantillaActual && PLANTILLAS_HEREDADAS[plantillaActual]);
+
   const templates = [
     {
       id: 'passport',
@@ -175,7 +194,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
       darkBgGradient: 'dark:from-gray-900/20 dark:to-slate-900/20',
     },
     {
-      id: 'creative',
+      // Antes era 'creative', un id que NO reconoce ni el switch de
+      // ProfileViewPage ni StandardTemplateLoader: los perfiles guardados asi
+      // caian al default y se renderizaban con otra plantilla distinta a la
+      // elegida. 'creative-bold' es el id real de la que se previsualiza aqui.
+      id: 'creative-bold',
       name: translations.profileEditor.finalization.templates.creative.name,
       description: translations.profileEditor.finalization.templates.creative.description,
       previewImage: '/images/templates/creative-bold.png',
@@ -247,7 +270,7 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
         return <PassportTemplate data={profileData} />;
       case 'classic':
         return <ClassicTemplate data={profileData} />;
-      case 'creative':
+      case 'creative-bold':
         return <CreativeBoldTemplate data={profileData} />;
       default:
         return <PassportTemplate data={profileData} />;
@@ -427,6 +450,24 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           {translations.profileEditor.finalization.chooseDesign}
         </p>
+
+        {/* Que plantilla tiene aplicada ahora mismo. Sin esto, al editar un
+            perfil ya creado no habia forma de saberlo: solo se veian tres
+            tarjetas y, si el valor guardado era heredado, ninguna marcada. */}
+        {plantillaActual && (
+          <p className="text-xs text-gray-500 dark:text-dark-text-tertiary mb-4 -mt-2">
+            Plantilla aplicada:{' '}
+            <span className="font-semibold text-gray-700 dark:text-dark-text-secondary">
+              {templates.find((t) => t.id === existingTemplate)?.name ?? existingTemplate}
+            </span>
+            {esHeredada && (
+              <span className="ml-1 text-amber-600 dark:text-amber-400">
+                (guardada como &quot;{plantillaActual}&quot;, un valor antiguo; al guardar se
+                actualizará)
+              </span>
+            )}
+          </p>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {templates.map((template) => (
