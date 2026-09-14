@@ -351,7 +351,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
 
             {/* Modal Body - Scrollable Preview */}
             <div className="overflow-y-auto max-h-[calc(90vh-80px)] bg-gray-100 p-8">
-              <div className="max-w-4xl mx-auto bg-white shadow-xl">
+              <div className="cv-template max-w-4xl mx-auto bg-white shadow-xl">
                 {getTemplateComponent(previewTemplate)}
               </div>
             </div>

@@ -600,7 +600,7 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
 
             {/* Modal Body - Scrollable Preview */}
             <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900 p-8 rounded-b-xl">
-              <div className="max-w-4xl mx-auto bg-white shadow-xl">
+              <div className="cv-template max-w-4xl mx-auto bg-white shadow-xl">
                 {getTemplateComponent(previewTemplate)}
               </div>
             </div>

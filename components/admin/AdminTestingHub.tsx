@@ -754,7 +754,7 @@ const AdminTestingHub: React.FC = () => {
                 <div className={previewTheme === 'dark' ? 'dark' : ''}>
                   <div
                     ref={cvRef}
-                    className="bg-white dark:bg-gray-800 shadow-2xl mx-auto"
+                    className="cv-template bg-white dark:bg-gray-800 shadow-2xl mx-auto"
                     style={{
                       width: '210mm',
                       minHeight: '297mm',

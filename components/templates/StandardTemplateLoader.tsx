@@ -41,7 +41,7 @@ export const StandardTemplateLoader: React.FC<StandardTemplateLoaderProps> = ({ 
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-start p-8 print:p-0 print:bg-white">
-      <div className="w-full max-w-[210mm] min-h-[297mm] bg-white shadow-lg print:shadow-none print:max-w-full">
+      <div className="cv-template w-full max-w-[210mm] min-h-[297mm] bg-white shadow-lg print:shadow-none print:max-w-full">
         <Suspense fallback={<div className="p-8 text-center">Cargando plantilla...</div>}>
           <TemplateComponent data={data} />
         </Suspense>

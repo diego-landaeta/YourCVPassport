@@ -278,3 +278,42 @@ button, a, input, textarea, select {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* ---------------------------------------------------------------------------
+   Texto de las plantillas de CV: justificado por defecto.
+
+   Se envuelve en :where() a proposito: eso deja la especificidad en 0, asi que
+   cualquier utilidad de Tailwind que ya fije alineacion (text-center,
+   text-left, text-right...) sigue ganando sin necesidad de excepciones.
+   Los parrafos de una sola linea no se ven afectados por justify, asi que la
+   regla solo cambia lo que interesa: los bloques largos (Sobre Mi,
+   descripciones de experiencia, educacion, proyectos...).
+   hyphens: auto evita los rios de espacio en columnas estrechas; funciona
+   porque LanguageContext mantiene document.documentElement.lang actualizado.
+--------------------------------------------------------------------------- */
+:where(.cv-template) :where(p, li, blockquote) {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* Si el contenedor ya centra o alinea a la derecha (cabeceras, tarjetas de
+   skills, CTAs...), el parrafo hereda esa alineacion en vez de justificarse.
+   Tambien en :where() para no pelear con utilidades mas especificas. */
+:where(.cv-template) :where(.text-center, .text-right, .text-end) :where(p, li, blockquote) {
+  text-align: inherit;
+  hyphens: manual;
+}
+
+/* El justificado es para el cuerpo del CV, no para titulares ni metadatos:
+   un titular a text-2xl+ o una linea de metadatos a text-xs en la columna
+   estrecha se parten con huecos enormes entre palabras. Se quedan fuera y
+   heredan la alineacion de su contenedor. */
+:where(.cv-template) :where(
+  p.text-xs,
+  p.text-2xl, p.text-3xl, p.text-4xl, p.text-5xl, p.text-6xl, p.text-7xl
+) {
+  text-align: inherit;
+  hyphens: manual;
+}
