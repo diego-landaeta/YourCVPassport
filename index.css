@@ -306,14 +306,17 @@ button, a, input, textarea, select {
   hyphens: manual;
 }
 
-/* El justificado es para el cuerpo del CV, no para titulares ni metadatos:
-   un titular a text-2xl+ o una linea de metadatos a text-xs en la columna
-   estrecha se parten con huecos enormes entre palabras. Se quedan fuera y
-   heredan la alineacion de su contenedor. */
-:where(.cv-template) :where(
-  p.text-xs,
-  p.text-2xl, p.text-3xl, p.text-4xl, p.text-5xl, p.text-6xl, p.text-7xl
-) {
-  text-align: inherit;
-  hyphens: manual;
+/* Caso "text-center md:text-left" (la cabecera del perfil): centrado en movil
+   y alineado a la izquierda en escritorio. En movil manda el centrado de la
+   regla anterior; a partir de md el contenedor ya no centra, asi que el texto
+   vuelve a justificarse. El breakpoint es el md/lg de Tailwind (768px). */
+@media (min-width: 768px) {
+  :where(.cv-template) :where([class*="md:text-left"], [class*="lg:text-left"]) :where(p, li, blockquote) {
+    text-align: justify;
+    hyphens: auto;
+  }
 }
+
+/* Sin excepciones por tamano de letra: se justifica todo el texto del CV,
+   metadatos y titulares incluidos. La unica alineacion que sigue mandando es
+   la que el propio markup declara (text-center / text-right), arriba. */
