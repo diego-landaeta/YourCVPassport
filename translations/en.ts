@@ -3488,6 +3488,8 @@ export const translations = {
         present: 'Present',
         ongoing: 'Ongoing',
         now: 'Now',
+        availability: 'Availability',
+        openToOpportunities: 'Open to opportunities',
         contactMe: 'Contact Me',
         scheduleMeeting: 'Schedule Meeting',
         messagingNotActivated: 'This user has not activated the messaging feature',

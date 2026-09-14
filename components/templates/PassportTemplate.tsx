@@ -242,7 +242,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
             {profile.job_seeking_status === 'OPEN' && (
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 shadow-lg border-2 border-green-200 dark:border-green-800">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Availability
+                  {t.cvSections.availability}
                 </h3>
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -250,7 +250,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                     <div className="absolute inset-0 w-4 h-4 bg-green-500 rounded-full animate-ping"></div>
                   </div>
                   <span className="text-gray-800 dark:text-gray-200 font-semibold">
-                    Open to opportunities
+                    {t.cvSections.openToOpportunities}
                   </span>
                 </div>
               </div>
