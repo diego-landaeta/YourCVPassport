@@ -142,7 +142,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
       </header>
 
       {/* Main Content with Premium Cards */}
-      <div className="max-w-6xl mx-auto px-6 pb-10">
+      <div className="max-w-6xl mx-auto px-6 pt-10 lg:pt-14 pb-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-8">
