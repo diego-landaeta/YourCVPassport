@@ -259,6 +259,13 @@ const DashboardPage: React.FC = () => {
     return <Navigate to="/manager" replace />;
   }
 
+  // El admin no tiene uso social ni perfil propio (ni asistente): va directo a su panel.
+  // Las rutas ya lo redirigen antes (ProtectedRoute y NoAdminSocialRoute en App.tsx);
+  // esto es la red de seguridad si DashboardPage se monta desde otra ruta.
+  if (profile?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
 
   return (
     <>

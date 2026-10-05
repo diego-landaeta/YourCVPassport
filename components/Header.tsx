@@ -303,6 +303,14 @@ const Header: React.FC = () => {
   const profileEditPath = `/profile/edit`;
   const publicProfilePath = profile?.slug ? `/cv/${profile.slug}` : profileEditPath;
 
+  // El admin no tiene uso social ni perfil propio: su menú de cuenta solo lleva al panel
+  // de administración y a cerrar sesión, y no ve el enlace "Comunidad" de la navegación.
+  const isAdmin = profile?.role === 'admin';
+  const adminPanelLabel = t.dashboard.menu.adminPanel;
+  const navLinks = isAdmin
+    ? t.NAV_LINKS.filter((item) => item.id !== 'comunidad' && item.id !== 'feed')
+    : t.NAV_LINKS;
+
   return (
     <>
     <header className="bg-white/80 dark:bg-dark-bg-primary/95 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:shadow-lg dark:shadow-dark-bg-primary/50 border-b border-transparent dark:border-dark-border">
@@ -314,7 +322,7 @@ const Header: React.FC = () => {
             </Link>
           </div>
           <nav className="hidden lg:flex items-center space-x-0.5 flex-1 justify-center">
-            {t.NAV_LINKS.map((item) => (
+            {navLinks.map((item) => (
               <DesktopNavLink key={item.name} item={item} />
             ))}
           </nav>
@@ -323,7 +331,7 @@ const Header: React.FC = () => {
              <LanguageSwitcher />
             {session ? (
               <div ref={userMenuRef} className="relative">
-                  <button onClick={() => setUserMenuOpen(!isUserMenuOpen)} className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light dark:focus:ring-offset-dark-bg-primary">
+                  <button onClick={() => setUserMenuOpen(!isUserMenuOpen)} aria-label={lang === 'es' ? 'Menú de cuenta' : 'Account menu'} aria-expanded={isUserMenuOpen} className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light dark:focus:ring-offset-dark-bg-primary">
                       {profile?.avatar_url ? (
                           <img src={profile.avatar_url} alt="Profile" className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent dark:ring-dark-border" />
                       ) : (
@@ -335,7 +343,7 @@ const Header: React.FC = () => {
                   {isUserMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-bg-secondary rounded-md shadow-lg dark:shadow-2xl ring-1 ring-black ring-opacity-5 dark:ring-dark-border-light z-20 py-1 border border-transparent dark:border-dark-border">
                           {/* Company credit badge */}
-                          {isCompanyUser && company && company.status === 'APPROVED' && (
+                          {!isAdmin && isCompanyUser && company && company.status === 'APPROVED' && (
                             <>
                               <div className="px-4 py-2 border-b border-gray-200 dark:border-dark-border">
                                 <div className="flex items-center justify-between">
@@ -348,9 +356,9 @@ const Header: React.FC = () => {
                               </Link>
                             </>
                           )}
-                          {profile?.role === 'admin' ? (
+                          {isAdmin ? (
                             <>
-                              <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Admin Panel</Link>
+                              <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{adminPanelLabel}</Link>
                               <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
                             </>
                           ) : profile?.role === 'profile_manager' ? (
@@ -448,7 +456,7 @@ const Header: React.FC = () => {
 
             {/* Items de navegación con iconos */}
             <div className="flex-1 py-3 overflow-y-auto">
-              {t.NAV_LINKS.map((item) => (
+              {navLinks.map((item) => (
                 <NavMenuItem key={item.name} item={item} onClick={closeMobileMenu} />
               ))}
             </div>
@@ -478,7 +486,7 @@ const Header: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{profile.full_name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{profile.headline}</p>
-                        {isCompanyUser && company && company.status === 'APPROVED' && (
+                        {!isAdmin && isCompanyUser && company && company.status === 'APPROVED' && (
                           <p className="text-xs text-cv-blue dark:text-cv-blue-light font-semibold mt-1">
                             {company.credit_balance} credits
                           </p>
@@ -486,13 +494,13 @@ const Header: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  {profile?.role === 'admin' ? (
+                  {isAdmin ? (
                     <>
                       <Link to={adminPath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors text-sm font-medium">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
-                        Admin Panel
+                        {adminPanelLabel}
                       </Link>
                       <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
                         {t.header.logout}

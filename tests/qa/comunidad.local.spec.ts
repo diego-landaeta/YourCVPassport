@@ -356,21 +356,14 @@ test.describe('#10 Visitas al perfil (sin datos inventados)', () => {
 });
 
 // ───────────────────────────── #13 Acceso admin ─────────────────────────────
+// El admin no usa el dashboard personal: /dashboard le lleva directo a /admin (ver
+// tests/qa/u02-admin-redireccion.local.spec.ts). El sidebar ya no tiene "Panel admin".
 test.describe('#13 Acceso al panel admin desde el dashboard', () => {
-  test('admin (incluso con asistente sin completar) ve "Panel admin" y navega a /admin', async ({ page }, testInfo) => {
+  test('admin (incluso con asistente sin completar) entra en /dashboard y acaba en /admin sin ver el asistente', async ({ page }) => {
     await boot(page, '/dashboard', { role: 'admin', wizardCompleted: false });
-    if (isMobile(testInfo)) {
-      await page.locator('[data-tour="mobile-menu-toggle"]').click();
-      const link = page.locator('[data-tour="mobile-menu"]').getByRole('button', { name: 'Panel admin' });
-      await expect(link).toBeVisible({ timeout: 60000 });
-      await link.click();
-    } else {
-      const link = page.getByRole('button', { name: 'Panel admin' });
-      await expect(link).toBeVisible({ timeout: 60000 });
-      await link.focus();
-      await page.keyboard.press('Enter');
-    }
-    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin$/, { timeout: 60000 });
+    await expect(page.locator('[data-tour="sidebar"]')).toHaveCount(0);
+    await expect(page.locator('[data-tour="mobile-menu-toggle"]')).toHaveCount(0);
   });
 
   test('usuario normal no ve "Panel admin"', async ({ page }, testInfo) => {
@@ -384,6 +377,7 @@ test.describe('#13 Acceso al panel admin desde el dashboard', () => {
       await expect(page.locator('[data-section-btn="ajustes"]')).toBeVisible({ timeout: 60000 });
       await expect(page.getByRole('button', { name: 'Panel admin' })).toHaveCount(0);
     }
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 });
 
@@ -480,18 +474,12 @@ test.describe('Capturas de evidencia', () => {
       await page.emulateMedia({ colorScheme: theme });
       await page.addInitScript((t) => localStorage.setItem('theme', t), theme);
 
-      await boot(page, '/dashboard', { role: 'admin', createdDaysAgo: 3, viewsIso: [] });
+      await boot(page, '/dashboard', { createdDaysAgo: 3, viewsIso: [] });
       const chart = page.locator('[data-tour="chart"]');
       await expect(chart).toBeVisible({ timeout: 60000 });
       await chart.screenshot({ path: `${dir}/10-visitas-vacio-calendario-${tag}.png` });
       await chart.locator('button[title]').nth(1).click();
       await chart.screenshot({ path: `${dir}/10-visitas-vacio-semana-${tag}.png` });
-      if (isMobile(testInfo)) {
-        await page.locator('[data-tour="mobile-menu-toggle"]').click();
-        await page.locator('[data-tour="mobile-menu"]').screenshot({ path: `${dir}/13-menu-movil-admin-${tag}.png` });
-      } else {
-        await page.locator('[data-tour="sidebar"]').screenshot({ path: `${dir}/13-sidebar-admin-${tag}.png` });
-      }
 
       const page2 = await page.context().newPage();
       await setupMocks(page2);

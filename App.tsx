@@ -1,6 +1,6 @@
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -82,6 +82,26 @@ const CommunityRoute: React.FC = () => {
   return <PublicFeedPage />;
 };
 
+// El admin no tiene uso social: /comunidad, /feed y las vistas de publicaciones le
+// llevan a su panel. Al resto (y a visitantes sin sesión) no les cambia nada.
+const NoAdminSocialRoute: React.FC = () => {
+  const { session, profile, profileLoading } = useAuth();
+  // Con sesión y rol aún desconocido se muestra la carga (como CommunityRoute) para
+  // que el admin no vea un instante la comunidad o la publicación.
+  if (session && profileLoading && !profile) return <LoadingSpinner />;
+  if (session && profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <Outlet />;
+};
+
+// /dashboard/<lo-que-sea> no existe: 404 para todos salvo el admin, que va a su panel.
+// Mientras el rol es desconocido se muestra la carga para no enseñar el 404 al admin.
+const DashboardFallbackRoute: React.FC = () => {
+  const { session, profile, profileLoading } = useAuth();
+  if (session && profileLoading && !profile) return <LoadingSpinner />;
+  if (session && profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <NotFoundPage />;
+};
+
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
     // The useLanguage hook will ensure the correct content is rendered based on the URL prefix.
@@ -114,6 +134,7 @@ const AppContent: React.FC = () => {
             <Route path="/dashboard/visas/:id/edit" element={<VisaFormPage />} />
             <Route path="/dashboard/leads" element={<LeadsPage />} />
           </Route>
+          <Route path="/dashboard/*" element={<DashboardFallbackRoute />} />
 
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
@@ -131,14 +152,16 @@ const AppContent: React.FC = () => {
             </Route>
           </Route>
 
-          {/* Community: full dashboard for logged-in users, public page otherwise */}
-          <Route path="/feed" element={<CommunityRoute />} />
-          <Route path="/comunidad" element={<CommunityRoute />} />
+          <Route element={<NoAdminSocialRoute />}>
+            {/* Community: full dashboard for logged-in users, public page otherwise */}
+            <Route path="/feed" element={<CommunityRoute />} />
+            <Route path="/comunidad" element={<CommunityRoute />} />
 
-          {/* Individual post view — public, noindex */}
-          <Route path="/feed/post/:id" element={<PostViewPage />} />
-          <Route path="/comunidad/post/:id" element={<PostViewPage />} />
-          <Route path="/p/:id" element={<PostViewPage />} />
+            {/* Individual post view — public, noindex */}
+            <Route path="/feed/post/:id" element={<PostViewPage />} />
+            <Route path="/comunidad/post/:id" element={<PostViewPage />} />
+            <Route path="/p/:id" element={<PostViewPage />} />
+          </Route>
 
           {/* Public Job Search */}
           <Route path="/jobs" element={<JobSearchPage />} />
