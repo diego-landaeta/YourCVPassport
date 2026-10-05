@@ -1,150 +1,78 @@
 // Supabase Edge Function: verify-email-code
 // Verifies email verification code
+//
+// Seguridad (auditoría 2026-10-05, U4): ver _shared/stampVerification.ts.
+//   - JWT obligatorio (desplegar SIN --no-verify-jwt). `userId` del body solo si
+//     es el propio perfil, uno gestionado por el llamante o si es admin.
+//   - Se compara el HMAC del código en tiempo constante; máximo 5 intentos por
+//     código (gastados de forma atómica) y caducidad de 15 minutos.
+//   - Rate limit (Upstash, fail open): 5/min por usuario llamante y por IP.
+//
+// Contrato:
+//   POST { code, userId? } -> 200 { success, message, stampId }
+//   400 INVALID_INPUT / CODE_EXPIRED / TOO_MANY_ATTEMPTS / INVALID_CODE
+//   (+ attemptsRemaining), 401 UNAUTHORIZED, 403 FORBIDDEN,
+//   404 NO_PENDING_VERIFICATION, 409 CONCURRENT_ATTEMPT, 429 RATE_LIMITED,
+//   500 INTERNAL_ERROR.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getCorsHeaders } from '../_shared/cors.ts'
+import { enforceRateLimit, getClientIp } from '../_shared/ratelimit.ts'
+import {
+  CODE_RE,
+  HttpError,
+  authenticate,
+  createAdminClient,
+  errorResponse,
+  jsonResponse,
+  readJsonBody,
+  resolveTargetProfile,
+  verifyStampCode,
+} from '../_shared/stampVerification.ts'
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req)
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface VerifyRequest {
-  code: string
-  userId: string
-}
-
-serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { code, userId }: VerifyRequest = await req.json()
-
-    if (!code || !userId) {
-      throw new Error('Code and userId are required')
+    if (req.method !== 'POST') {
+      throw new HttpError(405, 'METHOD_NOT_ALLOWED', 'Method not allowed')
     }
 
-    // Create Supabase client
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const supabase = createAdminClient()
 
-    // Find pending email stamp for user
-    const { data: stamp, error: stampError } = await supabase
-      .from('stamps')
-      .select('*')
-      .eq('profile_id', userId)
-      .eq('type', 'EMAIL')
-      .eq('status', 'PENDING')
-      .single()
+    // Identidad: siempre del JWT
+    const caller = await authenticate(req, supabase)
 
-    if (stampError || !stamp) {
-      return new Response(
-        JSON.stringify({
-          error: 'No pending email verification found',
-          code: 'NO_PENDING_VERIFICATION'
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+    const ip = getClientIp(req)
+    const limited = await enforceRateLimit('auth', [
+      `stamp-verify:user:${caller.id}`,
+      ...(ip ? [`stamp-verify:ip:${ip}`] : []),
+    ], corsHeaders)
+    if (limited) return limited
+
+    const payload = await readJsonBody(req)
+    const code = typeof payload.code === 'string' ? payload.code.trim() : ''
+    if (!CODE_RE.test(code)) {
+      throw new HttpError(400, 'INVALID_INPUT', 'A 6-digit code is required')
     }
 
-    const evidence = stamp.evidence as any
+    const userId = await resolveTargetProfile(supabase, caller.id, payload.userId)
 
-    // Check if code has expired
-    if (evidence.expires_at && new Date(evidence.expires_at) < new Date()) {
-      await supabase
-        .from('stamps')
-        .update({ status: 'EXPIRED' })
-        .eq('id', stamp.id)
-
-      return new Response(
-        JSON.stringify({
-          error: 'Verification code has expired. Please request a new one.',
-          code: 'CODE_EXPIRED'
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Check attempts (max 5)
-    const attempts = evidence.attempts || 0
-    if (attempts >= 5) {
-      await supabase
-        .from('stamps')
-        .update({ status: 'REJECTED' })
-        .eq('id', stamp.id)
-
-      return new Response(
-        JSON.stringify({
-          error: 'Too many incorrect attempts. Please request a new code.',
-          code: 'TOO_MANY_ATTEMPTS'
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Verify code
-    if (evidence.verification_code !== code) {
-      // Increment attempts
-      await supabase
-        .from('stamps')
-        .update({
-          evidence: {
-            ...evidence,
-            attempts: attempts + 1
-          }
-        })
-        .eq('id', stamp.id)
-
-      return new Response(
-        JSON.stringify({
-          error: 'Invalid verification code',
-          code: 'INVALID_CODE',
-          attemptsRemaining: 5 - (attempts + 1)
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
-    }
-
-    // Code is correct - mark as verified
-    const { error: updateError } = await supabase
-      .from('stamps')
-      .update({
-        status: 'VERIFIED',
-        verified_at: new Date().toISOString(),
-        evidence: {
-          email: evidence.email,
-          verified: true
-        }
-      })
-      .eq('id', stamp.id)
-
-    if (updateError) throw updateError
+    const stamp = await verifyStampCode(supabase, userId, 'EMAIL', code)
 
     // Update profile verified_credentials
     const { data: profile } = await supabase
       .from('profiles')
       .select('verified_credentials')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
-    const verifiedCredentials = profile?.verified_credentials || []
+    const verifiedCredentials: string[] = Array.isArray(profile?.verified_credentials) ? profile.verified_credentials : []
     if (!verifiedCredentials.includes('email')) {
       await supabase
         .from('profiles')
@@ -154,28 +82,13 @@ serve(async (req) => {
         .eq('id', userId)
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Email verified successfully',
-        stampId: stamp.id
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+    return jsonResponse(200, {
+      success: true,
+      message: 'Email verified successfully',
+      stampId: stamp.id
+    }, corsHeaders)
 
   } catch (error) {
-    
-    return new Response(
-      JSON.stringify({
-        error: error.message || 'An error occurred',
-        code: 'INTERNAL_ERROR'
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+    return errorResponse(error, corsHeaders, 'verify-email-code')
   }
 })

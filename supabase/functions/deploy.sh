@@ -5,6 +5,12 @@
 # ============================================================================
 # Description: Deploy all verification edge functions to Supabase
 # Usage: ./deploy.sh
+#
+# Verificación de JWT en el gateway (auditoría 2026-10-05, U4):
+# send-verification-email, verify-email-code, send-verification-sms,
+# verify-phone-code y company-registration-email exigen sesión y se despliegan
+# SIN --no-verify-jwt. send-magic-link y send-password-reset son públicas por
+# diseño (login / recuperación) y lo mantienen.
 # ============================================================================
 
 echo "🚀 Deploying Supabase Edge Functions..."
@@ -26,7 +32,7 @@ fi
 
 # Deploy send-verification-email
 echo "📧 Deploying send-verification-email..."
-supabase functions deploy send-verification-email --no-verify-jwt
+supabase functions deploy send-verification-email
 if [ $? -eq 0 ]; then
     echo "✅ send-verification-email deployed successfully"
 else
@@ -37,7 +43,7 @@ echo ""
 
 # Deploy verify-email-code
 echo "✉️  Deploying verify-email-code..."
-supabase functions deploy verify-email-code --no-verify-jwt
+supabase functions deploy verify-email-code
 if [ $? -eq 0 ]; then
     echo "✅ verify-email-code deployed successfully"
 else
@@ -48,7 +54,7 @@ echo ""
 
 # Deploy send-verification-sms
 echo "📱 Deploying send-verification-sms..."
-supabase functions deploy send-verification-sms --no-verify-jwt
+supabase functions deploy send-verification-sms
 if [ $? -eq 0 ]; then
     echo "✅ send-verification-sms deployed successfully"
 else
@@ -59,7 +65,7 @@ echo ""
 
 # Deploy verify-phone-code
 echo "🔢 Deploying verify-phone-code..."
-supabase functions deploy verify-phone-code --no-verify-jwt
+supabase functions deploy verify-phone-code
 if [ $? -eq 0 ]; then
     echo "✅ verify-phone-code deployed successfully"
 else
@@ -114,7 +120,7 @@ echo ""
 
 # Deploy company-registration-email
 echo "🏢 Deploying company-registration-email..."
-supabase functions deploy company-registration-email --no-verify-jwt
+supabase functions deploy company-registration-email
 if [ $? -eq 0 ]; then
     echo "✅ company-registration-email deployed successfully"
 else

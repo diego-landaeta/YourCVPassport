@@ -1,69 +1,145 @@
+// Supabase Edge Function: company-registration-email
+//
+// Seguridad (auditoría 2026-10-05, U4). Antes: sin autenticación, CORS '*' y
+// companyId del body -> cualquiera podía mandar correos de "empresa aprobada /
+// rechazada" a cualquier empresa. Ahora:
+//   - JWT obligatorio (desplegar SIN --no-verify-jwt) y el llamante tiene que ser
+//     admin (profiles.role, comprobado en servidor con service role; mismo
+//     criterio que current_user_is_admin). Única llamada legítima:
+//     components/admin/CompanyManagementSection.tsx tras approve_company /
+//     reject_company.
+//   - companyId UUID, type 'approved' | 'rejected' y la empresa tiene que estar
+//     ya en ese estado (APPROVED / REJECTED): no se puede mandar un "aprobada" a
+//     una empresa pendiente o rechazada.
+//   - Los datos de la empresa (nombre, email, CIF, motivo) se escapan antes de
+//     entrar en el HTML.
+//   - CORS con _shared/cors.ts; errores { success: false, error, code } sin
+//     detalles internos.
+//
+// Contrato: POST { companyId, type } -> 200 { success, message, emailId }
+//   400 INVALID_INPUT | 401 UNAUTHORIZED | 403 FORBIDDEN | 404 NOT_FOUND |
+//   409 INVALID_STATE | 500 INTERNAL_ERROR
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const APP_URL = Deno.env.get('APP_URL') || 'https://yourcvpassport.com'
 
-interface EmailRequest {
-  companyId: string
-  type: 'approved' | 'rejected'
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const EXPECTED_STATUS: Record<string, string> = { approved: 'APPROVED', rejected: 'REJECTED' }
+
+class HttpError extends Error {
+  status: number
+  code: string
+  constructor(status: number, code: string, message: string) {
+    super(message)
+    this.status = status
+    this.code = code
+  }
 }
 
-serve(async (req) => {
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+// Copia de la empresa con los textos escapados (los usa la plantilla HTML).
+function escapeCompany(row: Record<string, unknown>): Record<string, any> {
+  const out: Record<string, any> = {}
+  for (const [k, v] of Object.entries(row)) out[k] = typeof v === 'string' ? escapeHtml(v) : v
+  return out
+}
+
+serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req)
+  const json = (status: number, body: Record<string, unknown>) =>
+    new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
   // Handle CORS
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      },
-    })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { companyId, type }: EmailRequest = await req.json()
+    if (req.method !== 'POST') {
+      throw new HttpError(405, 'METHOD_NOT_ALLOWED', 'Method not allowed')
+    }
 
-    if (!companyId || !type) {
-      throw new Error('Missing required parameters: companyId and type')
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+
+    // 1. Llamante: JWT válido y role admin
+    const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim()
+    if (!token) throw new HttpError(401, 'UNAUTHORIZED', 'Missing authorization')
+    const { data: callerData, error: callerError } = await supabase.auth.getUser(token)
+    const callerId: string | undefined = callerData?.user?.id
+    if (callerError || !callerId) throw new HttpError(401, 'UNAUTHORIZED', 'Invalid or expired session')
+
+    const { data: callerProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', callerId)
+      .maybeSingle()
+    if (typeof callerProfile?.role !== 'string' || callerProfile.role.toLowerCase() !== 'admin') {
+      throw new HttpError(403, 'FORBIDDEN', 'Admin role required')
+    }
+
+    // 2. Entrada
+    let payload: any
+    try {
+      payload = await req.json()
+    } catch {
+      throw new HttpError(400, 'INVALID_INPUT', 'Invalid JSON body')
+    }
+    const companyId = payload?.companyId
+    const type = payload?.type
+    if (typeof companyId !== 'string' || !UUID_RE.test(companyId)) {
+      throw new HttpError(400, 'INVALID_INPUT', 'Invalid companyId')
+    }
+    if (type !== 'approved' && type !== 'rejected') {
+      throw new HttpError(400, 'INVALID_INPUT', 'Invalid type')
     }
 
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY not configured')
     }
 
-    // Create Supabase client
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
-
     // Get company details
-    const { data: company, error: companyError } = await supabase
+    const { data: rawCompany, error: companyError } = await supabase
       .from('companies')
       .select('*, company_users!inner(user_id)')
       .eq('id', companyId)
-      .single()
+      .maybeSingle()
 
-    if (companyError) {
-      console.error('Error fetching company:', companyError)
-      throw new Error(`Failed to fetch company: ${companyError.message}`)
+    if (companyError) throw companyError
+    if (!rawCompany) throw new HttpError(404, 'NOT_FOUND', 'Company not found')
+
+    // 3. Solo se notifica el estado que ya tiene la empresa
+    if (String(rawCompany.status ?? '').toUpperCase() !== EXPECTED_STATUS[type]) {
+      throw new HttpError(409, 'INVALID_STATE', 'Company status does not match the notification type')
     }
 
-    if (!company) {
-      throw new Error('Company not found')
-    }
+    const company = escapeCompany(rawCompany)
 
     // Get primary contact user email
-    const userId = company.company_users[0]?.user_id
+    const userId = rawCompany.company_users?.[0]?.user_id
     if (!userId) {
-      throw new Error('No user associated with company')
+      throw new HttpError(404, 'NOT_FOUND', 'No user associated with company')
     }
 
     const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId)
 
     if (userError || !user?.email) {
-      console.error('Error fetching user:', userError)
-      throw new Error('Failed to fetch user email')
+      throw new Error(`Failed to fetch user email: ${userError?.message ?? 'no email'}`)
     }
 
     const userEmail = user.email
@@ -226,41 +302,20 @@ serve(async (req) => {
     const resendData = await resendResponse.json()
 
     if (!resendResponse.ok) {
-      console.error('Resend API error:', resendData)
-      throw new Error(`Resend API error: ${JSON.stringify(resendData)}`)
+      console.error('[company-registration-email] Resend API error:', resendResponse.status, JSON.stringify(resendData))
+      throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send email')
     }
 
-    console.log('Email sent successfully:', resendData)
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: `${type} email sent successfully`,
-        emailId: resendData.id,
-        recipient: userEmail,
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      }
-    )
+    return json(200, {
+      success: true,
+      message: `${type} email sent successfully`,
+      emailId: resendData.id,
+    })
   } catch (error: any) {
-    console.error('Error in company-registration-email function:', error)
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Internal server error',
-      }),
-      {
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      }
-    )
+    if (error instanceof HttpError) {
+      return json(error.status, { success: false, error: error.message, code: error.code })
+    }
+    console.error('[company-registration-email] error interno:', error?.message)
+    return json(500, { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' })
   }
 })
