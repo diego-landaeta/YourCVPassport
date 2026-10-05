@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import {
   BriefcaseIcon,
@@ -60,6 +61,7 @@ interface JobApplication {
 
 const JobApplicationsPage: React.FC = () => {
   const { user } = useAuth();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
 
   const [applications, setApplications] = useState<JobApplication[]>([]);
@@ -202,7 +204,12 @@ const JobApplicationsPage: React.FC = () => {
       setShowDetailsModal(false);
       loadCompanyAndApplications();
     } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar el estado');
+      // 42501: el servidor no reconoce a la sesión como miembro (OWNER/ADMIN/MEMBER) de la empresa
+      toast.error(error?.code === '42501'
+        ? (lang === 'es'
+          ? 'No tienes permiso para cambiar candidaturas de esta empresa.'
+          : 'You are not allowed to update applications for this company.')
+        : (error.message || 'Error al actualizar el estado'));
     } finally {
       setUpdatingStatus(false);
     }

@@ -128,8 +128,11 @@ const JobDetailPage: React.FC = () => {
 
       setJob(transformedJob);
 
-      // Track view (non-blocking, ignore errors)
-      void (async () => { try { await supabase.from("job_posting_views").insert({ job_posting_id: job.id, profile_id: user?.id || null }); await supabase.rpc("increment", { row_id: job.id, table_name: "job_postings", column_name: "views_count" }); } catch { /* Ignore tracking errors */ } })()
+      // Registrar la visita (sin bloquear, se ignoran errores). Una sola RPC
+      // inserta en job_posting_views y suma views_count; el perfil lo pone el
+      // servidor (auth.uid(), NULL si es anónimo). Antes se insertaba aquí y se
+      // llamaba a `increment`, RPC genérica que no está en las migraciones.
+      void (async () => { try { await supabase.rpc('track_job_posting_view', { p_job_posting_id: job.id }); } catch { /* Ignore tracking errors */ } })()
 
       // Load questions
       const { data: questionsData } = await supabase

@@ -6,6 +6,7 @@ import { supabase } from '../../supabase/client';
 import { PUBLIC_PROFILE_COLUMNS } from '../../lib/publicProfileColumns';
 import type { Company, CompanyUser, Profile } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   LockClosedIcon,
   EnvelopeIcon,
@@ -30,6 +31,13 @@ const CompanyProfileViewPage: React.FC = () => {
   const translations = useTranslations();
   const navigate = useNavigate();
   const toast = useToastContext();
+  const { lang } = useLanguage();
+
+  // Las RPC de créditos validan en el servidor que p_user_id es la sesión y
+  // que pertenece a la empresa; si no, responden 42501 (PostgREST 403).
+  const forbiddenMessage = lang === 'es'
+    ? 'No tienes permiso para hacer esto en nombre de esta empresa. Vuelve a iniciar sesión.'
+    : 'You are not allowed to do this on behalf of this company. Please sign in again.';
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -158,7 +166,7 @@ const CompanyProfileViewPage: React.FC = () => {
       window.location.reload();
     } catch (error: any) {
       console.error('Error unlocking profile:', error);
-      toast.error(error.message || t('company.profile.unlockError') || 'Error al desbloquear perfil');
+      toast.error(error?.code === '42501' ? forbiddenMessage : (error.message || t('company.profile.unlockError') || 'Error al desbloquear perfil'));
     } finally {
       setLoading(false);
     }
@@ -249,7 +257,7 @@ const CompanyProfileViewPage: React.FC = () => {
       setHasContacted(true);
     } catch (error: any) {
       console.error('Error sending contact:', error);
-      toast.error(error.message || 'Error al enviar mensaje');
+      toast.error(error?.code === '42501' ? forbiddenMessage : (error.message || 'Error al enviar mensaje'));
     } finally {
       setSendingContact(false);
     }

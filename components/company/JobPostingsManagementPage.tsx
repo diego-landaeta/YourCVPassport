@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 
@@ -27,6 +28,7 @@ interface JobPosting {
 
 const JobPostingsManagementPage: React.FC = () => {
   const t = useTranslations();
+  const { lang } = useLanguage();
   const translations = t.company.jobPostingsManagement;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -149,7 +151,12 @@ const JobPostingsManagementPage: React.FC = () => {
       fetchCompanyAndJobPostings();
     } catch (error: any) {
       console.error('Error publishing job:', error);
-      if (error.message.includes('Insufficient credits')) {
+      if (error?.code === '42501') {
+        // El servidor valida que la sesión es miembro (OWNER/ADMIN/MEMBER) de la empresa
+        toast.error(lang === 'es'
+          ? 'No tienes permiso para publicar ofertas de esta empresa.'
+          : 'You are not allowed to publish job postings for this company.');
+      } else if (error?.message?.includes('Insufficient credits')) {
         toast.error(translations.toasts.insufficientCredits);
         navigate('/company/credits');
       } else {
