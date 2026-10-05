@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <!-- lang="es" es el idioma por defecto; LanguageContext lo actualiza en el primer render -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#3B82F6" />
+
+    <!-- Conexiones anticipadas a los orígenes que la app usa en la primera carga -->
+    <link rel="preconnect" href="https://djehzlzombqrzzuchcef.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://djehzlzombqrzzuchcef.supabase.co" />
+    <link rel="preconnect" href="https://flagcdn.com" />
+    <link rel="dns-prefetch" href="https://flagcdn.com" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
     <!-- Default meta tags - These will be replaced by react-helmet-async for specific pages -->
     <title>YourCVPassport - Professional CV Platform</title>
     <meta name="description" content="YourCVPassport - Create, verify and share your professional CV." />
@@ -29,8 +41,8 @@
     <!-- Robots -->
     <meta name="robots" content="index, follow" />
 
-    <!-- Opynio Widget v6.0 - horizontal-carousel -->
-    <script src="https://web.opynio.com/widget.js" async></script>
+    <!-- El widget de Opynio (https://web.opynio.com/widget.js) lo inyectan bajo demanda
+         Testimonials.tsx y SuccessStoriesPage.tsx: no se carga globalmente en todas las páginas -->
 </head>
   <body>
     <div id="root"></div>
