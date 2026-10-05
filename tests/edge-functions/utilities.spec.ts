@@ -4,9 +4,11 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, requireLiveEdgeProject } from './test-config';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+// Edge Functions reales (track-analytics escribe datos): solo con RUN_LIVE_EDGE_TESTS=1
+// y un proyecto de pruebas.
+requireLiveEdgeProject();
 
 test.describe('Track Analytics Function', () => {
   test('track-analytics - should handle event tracking', async ({ request }) => {
@@ -70,7 +72,8 @@ test.describe('AI Optimize Description Function', () => {
       },
     });
 
-    expect([400, 500]).toContain(response.status());
+    // Sin JWT la funcion responde 401 antes de validar el body.
+    expect([400, 401, 500]).toContain(response.status());
   });
 });
 
@@ -98,14 +101,18 @@ test.describe('Send Lead Notification Function', () => {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_ANON_KEY,
       },
+      // Campos que espera la funcion (lead_id, profile_id, sender_*). El profile_id no
+      // existe: responde 404 sin enviar ningun correo.
       data: {
-        name: 'Test User',
-        email: 'test@example.com',
+        lead_id: '00000000-0000-4000-8000-000000000000',
+        profile_id: '00000000-0000-4000-8000-000000000000',
+        sender_name: 'Test User',
+        sender_email: 'test@example.com',
         message: 'Test message',
       },
     });
 
-    expect([200, 400, 500]).toContain(response.status());
+    expect([200, 400, 404, 500]).toContain(response.status());
   });
 
   test('send-lead-notification - should require email parameter', async ({ request }) => {
@@ -115,7 +122,10 @@ test.describe('Send Lead Notification Function', () => {
         'apikey': SUPABASE_ANON_KEY,
       },
       data: {
-        name: 'Test User',
+        lead_id: '00000000-0000-4000-8000-000000000000',
+        profile_id: '00000000-0000-4000-8000-000000000000',
+        sender_name: 'Test User',
+        message: 'Test message',
       },
     });
 

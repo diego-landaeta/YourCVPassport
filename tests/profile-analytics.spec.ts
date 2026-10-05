@@ -1,8 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './qa/helpers/supabaseMock';
+
+// Pagina publica de producto con Supabase mockeado: sin sesion y sin salir a la red.
+test.use(SAFE_CONTEXT_OPTIONS);
+
+test.beforeEach(async ({ context }) => {
+  await installInitState(context, { sessionProfile: null, language: 'es' });
+  await mockSupabase(context, { profiles: [] });
+});
 
 test.describe('Profile Analytics Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/product/analytics');
+    await page.goto('/product/analytics', { waitUntil: 'domcontentloaded' });
   });
 
   test('should load the page correctly', async ({ page }) => {
@@ -36,7 +45,9 @@ test.describe('Profile Analytics Page', () => {
   });
 
   test('should have a call to action', async ({ page }) => {
-    const ctaButton = page.getByRole('button', { name: /Get Started|Empezar|Sign Up|Registrarse/i });
+    // CTA final de la pagina (finalCtaButton en translations/*.ts): abre el registro.
+    const ctaButton = page.getByRole('button', { name: /Desbloquear Mis Analíticas|Unlock My Analytics/i });
+    await ctaButton.scrollIntoViewIfNeeded();
     await expect(ctaButton).toBeVisible();
   });
 });
