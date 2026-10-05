@@ -4,11 +4,24 @@
 # Supabase Edge Functions Deployment Script
 # ============================================================================
 # Description: Deploy all verification edge functions to Supabase
-# Usage: ./deploy.sh
+# Usage:
+#   export BREVO_API_KEY=...             # API key v3 de Brevo (nunca en el repo)
+#   export SENDER_EMAIL=no-reply@yourcvpassport.com   # opcional; si no se exporta no se toca el secreto
+#   ./deploy.sh
+#
+# Los correos salen por Brevo (_shared/email.ts); ver EMAIL.md.
 # ============================================================================
 
 echo "🚀 Deploying Supabase Edge Functions..."
 echo ""
+
+# Correo: BREVO_API_KEY es obligatoria (sin imprimir su valor)
+if [ -z "${BREVO_API_KEY:-}" ]; then
+    echo "❌ Error: falta la variable de entorno BREVO_API_KEY"
+    echo "Defínela antes de ejecutar el script:"
+    echo "  export BREVO_API_KEY=<tu API key de Brevo>"
+    exit 1
+fi
 
 # Check if supabase CLI is installed
 if ! command -v supabase &> /dev/null; then
@@ -23,6 +36,27 @@ if ! supabase projects list &> /dev/null; then
     echo "Run: supabase login"
     exit 1
 fi
+
+# Secretos de correo antes de desplegar, para que las funciones nuevas ya los
+# usen. Por fichero temporal (permisos 600): los valores no aparecen en la lista
+# de procesos ni en el historial del shell. SENDER_EMAIL solo se escribe si se
+# ha exportado, para no pisar un remitente ya guardado en Supabase.
+echo "📝 Setting email secrets (BREVO_API_KEY${SENDER_EMAIL:+, SENDER_EMAIL})..."
+env_file="$(mktemp)"
+chmod 600 "$env_file"
+trap 'rm -f "$env_file"' EXIT
+{
+    printf 'BREVO_API_KEY=%s\n' "$BREVO_API_KEY"
+    if [ -n "${SENDER_EMAIL:-}" ]; then
+        printf 'SENDER_EMAIL=%s\n' "$SENDER_EMAIL"
+    fi
+} > "$env_file"
+if ! supabase secrets set --env-file "$env_file" > /dev/null; then
+    echo "❌ Failed to set email secrets"
+    exit 1
+fi
+echo "✅ Email secrets set"
+echo ""
 
 # Deploy send-verification-email
 echo "📧 Deploying send-verification-email..."
@@ -126,7 +160,6 @@ echo ""
 echo "🎉 All functions deployed successfully!"
 echo ""
 echo "⚠️  IMPORTANT: Don't forget to set environment variables in Supabase Dashboard:"
-echo "   - RESEND_API_KEY"
 echo "   - TWILIO_ACCOUNT_SID"
 echo "   - TWILIO_AUTH_TOKEN"
 echo "   - TWILIO_PHONE_NUMBER"

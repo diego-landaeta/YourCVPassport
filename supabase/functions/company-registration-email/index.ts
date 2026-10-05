@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { isEmailConfigured, sendEmail } from '../_shared/email.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const APP_URL = Deno.env.get('APP_URL') || 'https://yourcvpassport.com'
@@ -30,8 +30,8 @@ serve(async (req) => {
       throw new Error('Missing required parameters: companyId and type')
     }
 
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY not configured')
+    if (!isEmailConfigured()) {
+      throw new Error('BREVO_API_KEY not configured')
     }
 
     // Create Supabase client
@@ -208,35 +208,26 @@ serve(async (req) => {
       `
     }
 
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'YourCVPassport <noreply@yourcvpassport.com>',
-        to: [userEmail],
-        subject: emailSubject,
-        html: emailHtml,
-      }),
+    // Envío por Brevo (_shared/email.ts)
+    const emailResult = await sendEmail({
+      to: userEmail,
+      subject: emailSubject,
+      html: emailHtml,
+      tags: [type === 'approved' ? 'company-approved' : 'company-rejected'],
     })
 
-    const resendData = await resendResponse.json()
-
-    if (!resendResponse.ok) {
-      console.error('Resend API error:', resendData)
-      throw new Error(`Resend API error: ${JSON.stringify(resendData)}`)
+    if (!emailResult.ok) {
+      console.error('Email send failed:', emailResult.code, emailResult.status, emailResult.detail)
+      throw new Error(`Email send failed: ${emailResult.code}`)
     }
 
-    console.log('Email sent successfully:', resendData)
+    console.log('Email sent successfully:', emailResult.messageId)
 
     return new Response(
       JSON.stringify({
         success: true,
         message: `${type} email sent successfully`,
-        emailId: resendData.id,
+        emailId: emailResult.messageId,
         recipient: userEmail,
       }),
       {

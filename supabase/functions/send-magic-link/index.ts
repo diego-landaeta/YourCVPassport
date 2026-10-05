@@ -1,10 +1,10 @@
 // Supabase Edge Function: send-magic-link
-// Sends magic link for passwordless authentication using Resend
+// Sends magic link for passwordless authentication via Brevo (_shared/email.ts)
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/email.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
@@ -67,20 +67,12 @@ serve(async (req: Request) => {
       userName = profile?.full_name || userName
     }
 
-    const senderEmail = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
-
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`
-      },
-      body: JSON.stringify({
-        from: `YourCVPassport <${senderEmail}>`,
-        to: email,
-        subject: 'Tu enlace de acceso a YourCVPassport',
-        html: `
+    // Envío por Brevo (_shared/email.ts)
+    const emailResult = await sendEmail({
+      to: email,
+      subject: 'Tu enlace de acceso a YourCVPassport',
+      tags: ['magic-link'],
+      html: `
           <!DOCTYPE html>
           <html>
             <head>
@@ -147,22 +139,18 @@ serve(async (req: Request) => {
             </body>
           </html>
         `
-      })
     })
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json()
-      
-      throw new Error(`Resend error: ${JSON.stringify(error)}`)
+    if (!emailResult.ok) {
+      console.error('[send-magic-link] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
+      throw new Error(`Email send failed: ${emailResult.code}`)
     }
-
-    const resendData = await resendResponse.json()
 
     return new Response(
       JSON.stringify({
         success: true,
         message: 'Magic link sent successfully',
-        emailId: resendData.id
+        emailId: emailResult.messageId
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

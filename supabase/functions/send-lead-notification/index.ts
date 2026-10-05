@@ -1,8 +1,8 @@
 declare const Deno: any;
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { isValidSingleEmail, sendEmail } from '../_shared/email.ts';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -187,36 +187,27 @@ ${message}
 </html>
     `;
 
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'YourCVPassport <notifications@yourcvpassport.com>',
-        to: [profile.email],
-        reply_to: sender_email,
-        subject: emailSubject,
-        html: emailHtml,
-      }),
+    // Envío por Brevo (_shared/email.ts). "Responder" va al visitante que escribió,
+    // solo si su email es una única dirección válida (si no, se envía sin replyTo
+    // en lugar de perder la notificación).
+    const emailResult = await sendEmail({
+      to: profile.email,
+      replyTo: isValidSingleEmail(sender_email) ? sender_email : undefined,
+      subject: emailSubject,
+      html: emailHtml,
+      tags: ['lead-notification'],
     });
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.text();
-      
-      throw new Error(`Failed to send email: ${error}`);
+    if (!emailResult.ok) {
+      console.error('[send-lead-notification] email send failed:', emailResult.code, emailResult.status, emailResult.detail);
+      throw new Error(`Failed to send email: ${emailResult.code}`);
     }
-
-    const resendData = await resendResponse.json();
-    
 
     return new Response(
       JSON.stringify({
         success: true,
         message: 'Lead notification sent successfully',
-        email_id: resendData.id
+        email_id: emailResult.messageId
       }),
       {
         status: 200,
