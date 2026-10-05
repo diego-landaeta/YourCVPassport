@@ -11,7 +11,14 @@ import { FaceSmileIcon, GifIcon } from '@heroicons/react/24/outline';
 interface CommentSectionProps {
   postId: string;
   currentUserId?: string;
-  onCommentAdded?: () => void;
+  /**
+   * Aviso de comentario publicado (p. ej. para notificar al autor del post).
+   * NO debe usarse para sumar al contador: `onCountSync` ya informa del número
+   * real de comentarios de primer nivel, que es lo que cuenta `comments_count`
+   * (las respuestas no cuentan; ver trigger update_post_comments_count).
+   */
+  onCommentAdded?: (info: { isReply: boolean }) => void;
+  /** Número real de comentarios de primer nivel visibles, tras cargar y tras cada cambio. */
   onCountSync?: (realCount: number) => void;
 }
 
@@ -57,7 +64,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     const result = await addComment(newComment.trim());
     if (result) {
       setNewComment('');
-      onCommentAdded?.();
+      onCommentAdded?.({ isReply: false });
     }
   };
 
@@ -72,14 +79,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (isAdding) return;
     const result = await addComment(`GIF:${gifUrl}`);
     if (result) {
-      onCommentAdded?.();
+      onCommentAdded?.({ isReply: false });
     }
   };
 
   // Called by CommentItem — parentId is always the top-level thread root
+  // Las respuestas no suman al contador del post (antes se sumaba +1 y no cuadraba con el trigger).
   const handleReply = async (content: string, parentId: string) => {
-    await addComment(content, parentId);
-    onCommentAdded?.();
+    const result = await addComment(content, parentId);
+    if (result) onCommentAdded?.({ isReply: true });
   };
 
   const handleLike = (commentId: string, currentlyLiked: boolean) => {

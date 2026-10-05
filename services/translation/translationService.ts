@@ -1,4 +1,5 @@
 import { TranslationProvider, TranslationLanguage } from './providers/types';
+import { edgeFunctionProvider } from './providers/edgeFunctionProvider';
 import { serverProvider } from './providers/serverProvider';
 import { googleTranslateProvider } from './providers/googleTranslateProvider';
 import { myMemoryProvider } from './providers/myMemoryProvider';
@@ -10,14 +11,18 @@ import {
 } from './cache/translationCache';
 import {
   getBatchFromDbCache,
-  saveBatchToDbCache,
 } from './cache/dbTextCache';
 
 // Providers in order of preference:
-// 1. Server API (uses google-translate-api-x) - works in localhost with Express
-// 2. Google Translate (unofficial gtx endpoint, CORS enabled) - works in production
-// 3. MyMemory as fallback (has rate limits: 10000 words/day with email)
+// 1. Edge Function `translate-texts` - traduce en el servidor y es la ÚNICA vía
+//    que escribe en la caché compartida `text_translations` (service role)
+// 2. Server API (uses google-translate-api-x) - works in localhost with Express
+// 3. Google Translate (unofficial gtx endpoint, CORS enabled) - works in production
+// 4. MyMemory as fallback (has rate limits: 10000 words/day with email)
+// Los proveedores 2-4 solo cachean en localStorage: el navegador ya no puede
+// escribir en `text_translations` (evita el envenenamiento de la caché).
 const providers: TranslationProvider[] = [
+  edgeFunctionProvider,
   serverProvider,
   googleTranslateProvider,
   myMemoryProvider,
@@ -164,11 +169,8 @@ export async function translateBatch(
       // Add to results
       translations.forEach((value, key) => results.set(key, value));
 
-      // Save to both caches
+      // Caché local. La caché compartida (BD) la escribe solo la Edge Function.
       saveBatchToCache(translations, detectedSource, targetLang);
-      saveBatchToDbCache(translations, detectedSource, targetLang).catch(err => {
-        console.warn('[TranslationService] Failed to save to DB cache:', err);
-      });
 
       return results;
     } catch (error) {

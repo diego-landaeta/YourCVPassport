@@ -86,12 +86,13 @@ const CompanyTeamPage: React.FC = () => {
     try {
       setInviting(true);
 
-      // Check if user exists
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', inviteEmail.toLowerCase())
-        .single();
+      // Check if user exists. El email es privado: se busca con una RPC que solo
+      // responde a OWNER/ADMIN de la empresa y devuelve únicamente el id.
+      const { data: foundId, error: userError } = await supabase.rpc('company_find_user_by_email', {
+        p_company_id: company.id,
+        p_email: inviteEmail.toLowerCase(),
+      });
+      const userData = foundId ? { id: foundId as string } : null;
 
       if (userError || !userData) {
         toast.error(t('company.team.userNotFound') || 'User not found. They must be registered on the platform first.');

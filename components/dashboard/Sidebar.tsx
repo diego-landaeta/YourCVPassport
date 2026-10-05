@@ -44,11 +44,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Wizard lock
   const wizardCompleted = profile?.wizard_completed === true;
+  const isAdmin = profile?.role === 'admin';
   const shouldBlockSections = !wizardCompleted;
 
   const [showProfileAlert, setShowProfileAlert] = React.useState(false);
 
   const handleMenuClick = (item: any) => {
+    // Entradas que no dependen del asistente de perfil (p. ej. "Panel admin")
+    if (item.alwaysEnabled && item.link) {
+      navigate(item.link);
+      return;
+    }
+
     if (item.id === 'mi-perfil') {
       if (item.link) {
         navigate(item.link);
@@ -180,6 +187,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       items: [
+        // Acceso al panel de administración: solo para admins y sin bloqueo del asistente
+        ...(isAdmin ? [{
+          id: 'admin',
+          label: menu.adminPanel,
+          icon: <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>,
+          link: '/admin',
+          alwaysEnabled: true,
+        }] : []),
         {
           id: 'ajustes',
           label: menu.settings,
@@ -191,7 +206,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // ── Collapsed item renderer ──
   const renderCollapsedItem = (item: any) => {
-    const blocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
+    const blocked = shouldBlockSections && !item.alwaysEnabled && item.id !== 'dashboard' && item.id !== 'mi-perfil';
     const active = isActive(item.id);
 
     return (
@@ -201,6 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           data-section-btn={item.id}
           data-tour={`sidebar-${item.id}`}
           title={item.label}
+          aria-label={item.label}
           className={`w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
             blocked
               ? 'opacity-30 text-gray-400 dark:text-gray-600 cursor-not-allowed'
@@ -222,7 +238,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // ── Expanded item renderer ──
   const renderItem = (item: any) => {
-    const blocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
+    const blocked = shouldBlockSections && !item.alwaysEnabled && item.id !== 'dashboard' && item.id !== 'mi-perfil';
     const active = isActive(item.id);
 
     return (

@@ -170,8 +170,9 @@ app.delete('/api/admin/users/:userId', async (req, res) => {
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
 
-    // Verificar que el usuario es admin
-    const { data: adminProfile, error: profileError } = await supabase
+    // Verificar que el usuario es admin. Con service_role: el cliente anon solo
+    // ve perfiles publicados, y el del admin puede no estarlo.
+    const { data: adminProfile, error: profileError } = await (supabaseAdmin || supabase)
       .from('profiles')
       .select('role')
       .eq('id', user.id)

@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **buscar empleo mientras trab
 
 Esta guía completa sobre **buscar empleo mientras trabajas** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![buscar empleo mientras trabajas](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre buscar empleo mientras trabajas}
+![buscar empleo mientras trabajas](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Guía completa sobre buscar empleo mientras trabajas}
 
 ## 1. Razones para buscar mientras trabajas
 2. Actualizar CV y LinkedIn discretamente
@@ -78,7 +78,7 @@ Para destacar en **buscar empleo mientras trabajas** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de buscar empleo mientras trabajas](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de buscar empleo mientras trabajas}
+![Aspectos avanzados de buscar empleo mientras trabajas](https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80){caption:Aspectos avanzados de buscar empleo mientras trabajas}
 
 ## Aspectos avanzados de buscar empleo mientras trabajas
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **buscar empleo mi
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de buscar empleo mientras trabajas](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de buscar empleo mientras trabajas}
+![Aspectos avanzados de buscar empleo mientras trabajas](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de buscar empleo mientras trabajas}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de buscar empleo mientras trabajas para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **buscar empleo mientras trabajas** no es solo una ventaja competitiva �
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1565688534245-05d6b5be184a?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Entrevista y Empleo",
   is_featured: false,

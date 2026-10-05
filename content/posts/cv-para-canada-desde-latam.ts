@@ -271,7 +271,7 @@ Cuando hablamos de **CV emigrar Canada LATAM** en el contexto de aspectos avanza
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV emigrar Canada LATAM](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV emigrar Canada LATAM}
+![Aspectos avanzados de CV emigrar Canada LATAM](https://images.unsplash.com/photo-1517400508447-f8dd518b86db?w=800&q=80){caption:Aspectos avanzados de CV emigrar Canada LATAM}
 
 ## Cómo YourCVPassport te ayuda con CV emigrar Canada LATAM
 

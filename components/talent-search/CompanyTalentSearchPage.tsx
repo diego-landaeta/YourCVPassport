@@ -8,6 +8,7 @@ import type { Company, CompanyUser, Stamp } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import type { TalentSearchPageProps } from './types';
 import { CountryBadge } from '../shared/CountrySelector';
+import Pagination from '../ui/Pagination';
 import { sortProfilesByPriority } from '../../utils/profileSorting';
 import { translateBatch, detectSourceLanguage, TranslationLanguage } from '../../services/translation';
 import {
@@ -22,8 +23,6 @@ import {
   XMarkIcon,
   StarIcon,
   ClockIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid';
 import { isPremiumProfile, getVerifiedStampsCount } from '../../utils/profileSorting';
@@ -35,7 +34,8 @@ interface Profile {
   location?: string;
   country_code?: string;
   avatar_url?: string;
-  plan?: string;
+  /** Pública (columna generada). El plan exacto es privado. */
+  is_premium?: boolean;
   handle?: string;
   slug?: string;
   availability?: string;
@@ -186,14 +186,8 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
       let query = supabase
         .from('profiles')
         .select(`
-          id, full_name, headline, location, country_code, avatar_url, plan, handle, slug,
-          availability, remote_preference, role, summary,
-          stamps (
-            id,
-            type,
-            status,
-            verified_at
-          )
+          id, full_name, headline, location, country_code, avatar_url, is_premium, handle, slug,
+          availability, remote_preference, role, summary
         `, { count: 'exact' })
         .not('full_name', 'is', null)
         .not('headline', 'is', null)
@@ -270,9 +264,25 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           skillsMap.get(skill.profile_id)!.push({ id: skill.id, name: skill.name });
         });
 
+        // Sellos verificados desde la vista pública (sin evidence). `stamps` ya
+        // no es legible para terceros.
+        const { data: stampsData, error: stampsError } = await supabase
+          .from('public_stamps')
+          .select('id, profile_id, type, status, verified_at')
+          .in('profile_id', profileIds);
+        if (stampsError) {
+          console.error('❌ Error loading stamps:', stampsError);
+        }
+        const stampsMap = new Map<string, any[]>();
+        (stampsData || []).forEach((s: any) => {
+          if (!stampsMap.has(s.profile_id)) stampsMap.set(s.profile_id, []);
+          stampsMap.get(s.profile_id)!.push(s);
+        });
+
         // Attach all skills to profiles
         profilesWithSkills = profilesData.map(profile => ({
           ...profile,
+          stamps: stampsMap.get(profile.id) || [],
           skills: skillsMap.get(profile.id) || []
         }));
 
@@ -446,8 +456,6 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
 
   // Pagination controls
   const totalPages = Math.ceil(totalProfiles / PROFILES_PER_PAGE);
-  const canGoPrevious = currentPage > 1;
-  const canGoNext = currentPage < totalPages;
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -785,88 +793,11 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                 </div>
 
                 {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => goToPage(currentPage - 1)}
-                      disabled={!canGoPrevious}
-                      className={`p-2 rounded-lg border transition-all ${
-                        canGoPrevious
-                          ? 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                      }`}
-                    >
-                      <ChevronLeftIcon className="w-5 h-5" />
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {/* First page */}
-                      {currentPage > 3 && (
-                        <>
-                          <button
-                            onClick={() => goToPage(1)}
-                            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
-                          >
-                            1
-                          </button>
-                          {currentPage > 4 && <span className="text-gray-400">...</span>}
-                        </>
-                      )}
-
-                      {/* Previous pages */}
-                      {currentPage > 1 && (
-                        <button
-                          onClick={() => goToPage(currentPage - 1)}
-                          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
-                        >
-                          {currentPage - 1}
-                        </button>
-                      )}
-
-                      {/* Current page */}
-                      <button
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold border border-blue-600"
-                      >
-                        {currentPage}
-                      </button>
-
-                      {/* Next pages */}
-                      {currentPage < totalPages && (
-                        <button
-                          onClick={() => goToPage(currentPage + 1)}
-                          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
-                        >
-                          {currentPage + 1}
-                        </button>
-                      )}
-
-                      {/* Last page */}
-                      {currentPage < totalPages - 2 && (
-                        <>
-                          {currentPage < totalPages - 3 && <span className="text-gray-400">...</span>}
-                          <button
-                            onClick={() => goToPage(totalPages)}
-                            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all"
-                          >
-                            {totalPages}
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => goToPage(currentPage + 1)}
-                      disabled={!canGoNext}
-                      className={`p-2 rounded-lg border transition-all ${
-                        canGoNext
-                          ? 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          : 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                      }`}
-                    >
-                      <ChevronRightIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                />
               </>
             )}
 

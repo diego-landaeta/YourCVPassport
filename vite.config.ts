@@ -21,10 +21,10 @@ export default defineConfig(({ mode }) => {
         react(),
         translationPlugin(), // API de traduccion server-side en desarrollo
       ],
+      // No inyectar aqui claves de terceros: todo lo que va en `define` acaba en el
+      // bundle publico. La clave de Gemini vive solo en la Edge Function ai-cv-assistant.
       define: {
         'process.env.NODE_ENV': JSON.stringify(mode),
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {

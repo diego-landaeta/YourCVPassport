@@ -105,13 +105,15 @@ const JobApplicationsPage: React.FC = () => {
 
       setCompanyId(companyUser.company_id);
 
-      // Build query
+      // Build query. Del candidato solo se piden columnas públicas de profiles:
+      // email y teléfono son privados (migración 20261006_cerrar_columnas_privadas_profiles_stamps.sql);
+      // cv_url y profile_picture_url no existen en profiles.
       let query = supabase
         .from('job_applications')
         .select(`
           *,
           job_posting:job_postings(id, title, slug, department, employment_type, location_city, location_country),
-          profile:profiles(id, full_name, headline, location, email, phone, cv_url, slug, profile_picture_url)
+          profile:profiles(id, full_name, headline, location, slug, avatar_url)
         `)
         .eq('company_id', companyUser.company_id)
         .order('created_at', { ascending: false });

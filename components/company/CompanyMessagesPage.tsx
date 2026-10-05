@@ -101,7 +101,7 @@ const CompanyMessagesPage: React.FC = () => {
         .from('company_conversations')
         .select(`
           *,
-          profile:profiles(*)
+          profile:profiles(id, full_name, avatar_url, title, headline, slug)
         `)
         .eq('company_id', company.id)
         .order('last_message_at', { ascending: false, nullsFirst: false })

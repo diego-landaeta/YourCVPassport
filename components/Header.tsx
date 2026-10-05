@@ -375,7 +375,33 @@ const Header: React.FC = () => {
               </>
             )}
           </div>
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-1">
+            {/* Cambio rápido de idioma en móvil. Antes era un botón flotante abajo a la
+                derecha que tapaba contenido (títulos, botones de registro). */}
+            <button
+              type="button"
+              onClick={() => setLangWithNav(lang === 'es' ? 'en' : 'es')}
+              aria-label={lang === 'es' ? 'Switch to English' : 'Cambiar a español'}
+              className="inline-flex items-center justify-center w-11 h-11 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light transition-colors touch-manipulation"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <span className="block w-6 h-6 rounded-full overflow-hidden border border-gray-200 dark:border-dark-border shadow-sm" aria-hidden="true">
+                {lang === 'es' ? (
+                  <svg viewBox="0 0 512 512" className="w-full h-full">
+                    <rect fill="#AA151B" width="512" height="512"/>
+                    <rect fill="#F1BF00" y="128" width="512" height="256"/>
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 512 512" className="w-full h-full">
+                    <rect fill="#012169" width="512" height="512"/>
+                    <path fill="#FFF" d="M512 0v64L322 256l190 187v69h-67L254 324 68 512H0v-68l186-187L0 74V0h62l192 188L440 0z"/>
+                    <path fill="#C8102E" d="M184 324l11 34L42 512H0v-3l184-185zm124-12l54 8 150 147v45L308 312zM512 0L320 196l-4-44L466 0h46zM0 1l193 189-59-8L0 49V1z"/>
+                    <path fill="#FFF" d="M176 0v512h160V0H176zM0 176v160h512V176H0z"/>
+                    <path fill="#C8102E" d="M0 208v96h512v-96H0zM208 0v512h96V0h-96z"/>
+                  </svg>
+                )}
+              </span>
+            </button>
             {!isMobileMenuOpen && (
               <button
                 onClick={() => setMobileMenuOpen(true)}
@@ -521,32 +547,6 @@ const Header: React.FC = () => {
         </>
       )}
 
-    {/* Indicador de idioma flotante global - solo en móvil */}
-    <div className="lg:hidden fixed bottom-5 right-4 z-[50] pointer-events-none">
-      <button
-        onClick={() => {
-          const newLang = lang === 'es' ? 'en' : 'es';
-          setLangWithNav(newLang);
-        }}
-        className="pointer-events-auto w-9 h-9 rounded-full shadow-lg active:scale-90 transition-transform touch-manipulation overflow-hidden border-2 border-white dark:border-gray-700 bg-gray-100"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
-      >
-        {lang === 'es' ? (
-          <svg viewBox="0 0 512 512" className="w-full h-full">
-            <rect fill="#AA151B" width="512" height="512"/>
-            <rect fill="#F1BF00" y="128" width="512" height="256"/>
-          </svg>
-        ) : (
-          <svg viewBox="0 0 512 512" className="w-full h-full">
-            <rect fill="#012169" width="512" height="512"/>
-            <path fill="#FFF" d="M512 0v64L322 256l190 187v69h-67L254 324 68 512H0v-68l186-187L0 74V0h62l192 188L440 0z"/>
-            <path fill="#C8102E" d="M184 324l11 34L42 512H0v-3l184-185zm124-12l54 8 150 147v45L308 312zM512 0L320 196l-4-44L466 0h46zM0 1l193 189-59-8L0 49V1z"/>
-            <path fill="#FFF" d="M176 0v512h160V0H176zM0 176v160h512V176H0z"/>
-            <path fill="#C8102E" d="M0 208v96h512v-96H0zM208 0v512h96V0h-96z"/>
-          </svg>
-        )}
-      </button>
-    </div>
     </>
   );
 };

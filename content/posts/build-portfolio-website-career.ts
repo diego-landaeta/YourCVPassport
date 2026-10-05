@@ -271,7 +271,7 @@ When discussing **portfolio website career** in the context of advanced aspects 
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of portfolio website career](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Advanced aspects of portfolio website career}
+![Advanced aspects of portfolio website career](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of portfolio website career}
 
 ## How YourCVPassport helps you with portfolio website career
 

@@ -10,7 +10,19 @@ export default {
     "./contexts/**/*.{js,ts,jsx,tsx}",
     "./hooks/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
+  // Equivale a darkMode: 'class' (`.dark` en un ancestro activa las variantes dark:)
+  // pero permite forzar tema claro en un subarbol con la clase `cv-force-light`
+  // (vista previa del CV en el Testing Hub, lienzo de plantillas, exportaciones).
+  //
+  // Tailwind 3.4 genera en modo 'class' el selector `&:is(${selector} *)`. El valor
+  // de abajo "cierra" ese :is() e inyecta la exclusion, y queda:
+  //   .dark\:x:is(.dark *):not(:where(.cv-force-light, .cv-force-light *)):where(html *)
+  // - :not(:where(...)) y :where(html *) no suman especificidad: pesa lo mismo que antes.
+  // - Se usa 'class' y NO ['variant', ...] a proposito: solo con 'class' Tailwind 3.4
+  //   conserva el orden legacy (reglas dark: ANTES que sm:/md:/lg:). Con 'variant'
+  //   las dark: pasan detras de las responsive y cambia la cascada de todo el sitio.
+  // Verificado con tests/qa/admin.local.spec.ts (#19). Revisar al migrar a Tailwind 4.
+  darkMode: ['class', '.dark *):not(:where(.cv-force-light, .cv-force-light *)):where(html'],
   theme: {
     extend: {
       colors: {

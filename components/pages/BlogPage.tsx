@@ -5,7 +5,8 @@ import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { handleBlogImageError } from '../../utils/blogImageFallback';
 
 interface BlogPost {
     id: number;
@@ -30,16 +31,20 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
     );
 };
 
-const ArticleCard: React.FC<{ post: BlogPost; basePath: string }> = ({ post, basePath }) => {
-    const navigate = useNavigate();
+// Identificador interno del filtro "todas las categorias" (la etiqueta visible sale de traducciones).
+const ALL_CATEGORIES = '__all__';
+// Tarjetas por tanda en la cuadricula ("Cargar mas").
+const PAGE_SIZE = 12;
 
+const ArticleCard: React.FC<{ post: BlogPost; basePath: string }> = ({ post, basePath }) => {
     return (
-        <div
-            onClick={() => navigate(`${basePath}/${post.slug}`)}
-            className="bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer"
+        <Link
+            to={`${basePath}/${post.slug}`}
+            data-testid="blog-card"
+            className="flex flex-col bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary"
         >
         <div className="relative">
-            <img src={post.image_url} alt={post.title} className="w-full h-56 object-cover" />
+            <img src={post.image_url} alt="" loading="lazy" decoding="async" onError={handleBlogImageError} className="w-full h-56 object-cover bg-gray-100 dark:bg-dark-bg-tertiary" />
             <div className="absolute top-4 left-4 bg-cv-blue/80 text-white text-xs font-bold px-3 py-1 rounded-full">{post.category}</div>
         </div>
         <div className="p-6 flex flex-col flex-grow">
@@ -52,19 +57,20 @@ const ArticleCard: React.FC<{ post: BlogPost; basePath: string }> = ({ post, bas
                 <p className="text-xs">{new Date(post.published_at).toLocaleDateString()}</p>
             </div>
         </div>
-    </div>
+    </Link>
     );
 };
 
 const BlogPage: React.FC = () => {
     const { openModal } = useAuth();
-    const navigate = useNavigate();
     const location = useLocation();
     const t = useTranslations();
     const pageData = t.blogPage;
-    const [activeCategory, setActiveCategory] = useState('Todo');
+    const [activeCategory, setActiveCategory] = useState(ALL_CATEGORIES);
     const [searchTerm, setSearchTerm] = useState('');
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const [email, setEmail] = useState('');
+    const [newsletterMailto, setNewsletterMailto] = useState('');
     const { lang } = useLanguage();
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -119,7 +125,7 @@ const BlogPage: React.FC = () => {
         : 'blog, career, professional development, job search, CV, optimization, recruitment, advice, resources, YourCVPassport';
 
     const categories = useMemo(() => {
-        const uniqueCategories = ['Todo', ...Array.from(new Set(posts.map(p => p.category).filter(Boolean)))];
+        const uniqueCategories = [ALL_CATEGORIES, ...Array.from(new Set(posts.map(p => p.category).filter(Boolean)))];
         return uniqueCategories;
     }, [posts]);
 
@@ -128,19 +134,40 @@ const BlogPage: React.FC = () => {
 
     const filteredPosts = useMemo(() => {
         return posts
-            .filter(post => activeCategory === 'Todo' || post.category === activeCategory)
+            .filter(post => activeCategory === ALL_CATEGORIES || post.category === activeCategory)
             .filter(post =>
                 post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 post.summary?.toLowerCase().includes(searchTerm.toLowerCase())
             );
     }, [activeCategory, searchTerm, posts]);
 
+    // Al cambiar de idioma, categoria o busqueda se vuelve a la primera tanda.
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [activeCategory, searchTerm, lang]);
+
+    // Las categorias dependen del idioma: si la activa ya no existe, se vuelve a "Todos".
+    useEffect(() => {
+        if (activeCategory !== ALL_CATEGORIES && !categories.includes(activeCategory)) {
+            setActiveCategory(ALL_CATEGORIES);
+        }
+    }, [categories, activeCategory]);
+
+    const visiblePosts = useMemo(() => filteredPosts.slice(0, visibleCount), [filteredPosts, visibleCount]);
+    const formatCount = (template: string) => template
+        .replace('{shown}', String(visiblePosts.length))
+        .replace('{total}', String(filteredPosts.length));
+
+    // PENDIENTE: no existe endpoint de boletin (Brevo u otro) en el repo. Hasta que exista,
+    // no se finge un alta: se prepara un correo (mailto) y el usuario decide enviarlo.
+    // Se muestra como enlace explicito en lugar de navegar solo (evita salir de la pagina).
     const handleSubscribe = (e: React.FormEvent) => {
         e.preventDefault();
-        if (email) {
-            alert(`${pageData.sidebar.newsletter.alert}, ${email}!`);
-            setEmail('');
-        }
+        if (!email) return;
+        const newsletter = pageData.sidebar.newsletter;
+        const subject = encodeURIComponent(newsletter.mailSubject);
+        const body = encodeURIComponent(`${newsletter.mailBody} ${email}`);
+        setNewsletterMailto(`mailto:${newsletter.mailTo}?subject=${subject}&body=${body}`);
     };
 
     return (
@@ -170,7 +197,7 @@ const BlogPage: React.FC = () => {
                 </div>
             ) : posts.length === 0 ? (
                 <div className="text-center py-20">
-                    <p className="text-gray-600 dark:text-dark-text-secondary">No hay artículos disponibles</p>
+                    <p className="text-gray-600 dark:text-dark-text-secondary">{pageData.noPosts}</p>
                 </div>
             ) : (
                 <>
@@ -178,11 +205,12 @@ const BlogPage: React.FC = () => {
                     {featuredPost && (
                         <section className="py-12 px-4">
                             <AnimatedWrapper>
-                                <div
-                                    onClick={() => navigate(`${blogBasePath}/${featuredPost.slug}`)}
-                                    className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 items-center bg-white dark:bg-dark-bg-primary p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
+                                <Link
+                                    to={`${blogBasePath}/${featuredPost.slug}`}
+                                    data-testid="blog-featured"
+                                    className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 items-center bg-white dark:bg-dark-bg-primary p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary"
                                 >
-                                    <img src={featuredPost.image_url} alt={featuredPost.title} className="w-full h-full object-cover rounded-lg" />
+                                    <img src={featuredPost.image_url} alt="" onError={handleBlogImageError} className="w-full h-full object-cover rounded-lg bg-gray-100 dark:bg-dark-bg-tertiary" />
                                     <div>
                                         <p className="text-cv-blue font-semibold">{pageData.featured.label}</p>
                                         <h2 className="mt-2 text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary hover:text-cv-blue transition-colors">{featuredPost.title}</h2>
@@ -194,7 +222,7 @@ const BlogPage: React.FC = () => {
                                             <p className="text-sm">{new Date(featuredPost.published_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             </AnimatedWrapper>
                         </section>
                     )}
@@ -205,28 +233,31 @@ const BlogPage: React.FC = () => {
                     {/* Filters and Search */}
                     <AnimatedWrapper>
                         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
-                            <div className="flex-grow flex justify-center md:justify-start flex-wrap gap-2">
+                            <div role="group" aria-label={pageData.categoriesLabel} className="flex-grow flex justify-center md:justify-start flex-wrap gap-2">
                                {categories.map(category => (
                                     <button
                                         key={category}
+                                        type="button"
                                         onClick={() => setActiveCategory(category)}
-                                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 ${
+                                        aria-pressed={activeCategory === category}
+                                        className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary ${
                                             activeCategory === category 
                                             ? 'bg-cv-blue text-white shadow-md' 
                                             : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-dark-text-primary hover:bg-gray-200 dark:hover:bg-dark-bg-tertiary'
                                         }`}
                                     >
-                                        {category}
+                                        {category === ALL_CATEGORIES ? pageData.allCategories : category}
                                     </button>
                                 ))}
                             </div>
                              <div className="relative w-full md:w-auto">
                                 <input
                                     type="search"
+                                    aria-label={pageData.searchLabel}
                                     placeholder={pageData.searchPlaceholder}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full md:w-64 p-3 pr-10 border-2 border-gray-200 dark:border-dark-border rounded-lg shadow-sm focus:ring-cv-blue focus:border-cv-blue"
+                                    className="w-full md:w-64 p-3 pr-10 border-2 border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-primary text-gray-800 dark:text-dark-text-primary rounded-lg shadow-sm focus:ring-cv-blue focus:border-cv-blue"
                                 />
                                 <div className="absolute top-1/2 right-3 -translate-y-1/2"><svg className="w-5 h-5 text-gray-400 dark:text-dark-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
                             </div>
@@ -236,12 +267,32 @@ const BlogPage: React.FC = () => {
                     {/* Articles Grid & Sidebar */}
                     <div className="grid lg:grid-cols-12 gap-12">
                         {/* Articles */}
-                        <div className="lg:col-span-8">
-                            <AnimatedWrapper>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    {filteredPosts.map(post => <ArticleCard key={post.id} post={post} basePath={blogBasePath} />)}
-                                </div>
-                            </AnimatedWrapper>
+                        {/* La cuadricula NO va dentro de AnimatedWrapper: con decenas de tarjetas mide
+                            miles de px y el umbral de visibilidad (10 %) no se alcanzaba nunca. */}
+                        <div className="lg:col-span-8 min-w-0">
+                            {filteredPosts.length === 0 ? (
+                                <p className="text-center py-12 text-gray-600 dark:text-dark-text-secondary">{pageData.noResults}</p>
+                            ) : (
+                                <>
+                                    <div className="grid md:grid-cols-2 gap-8" data-testid="blog-grid">
+                                        {visiblePosts.map(post => <ArticleCard key={post.id} post={post} basePath={blogBasePath} />)}
+                                    </div>
+                                    <div className="mt-10 flex flex-col items-center gap-4">
+                                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary" role="status" aria-live="polite">
+                                            {formatCount(pageData.showingCount)}
+                                        </p>
+                                        {visiblePosts.length < filteredPosts.length && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
+                                                className="px-6 py-3 rounded-lg font-semibold bg-cv-blue text-white shadow-md hover:bg-cv-blue-dark transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary"
+                                            >
+                                                {pageData.loadMore}
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
+                            )}
                         </div>
                         
                         {/* Sidebar */}
@@ -273,15 +324,29 @@ const BlogPage: React.FC = () => {
                                         <form onSubmit={handleSubscribe} className="mt-6">
                                             <input 
                                                 type="email" 
+                                                aria-label={pageData.sidebar.newsletter.placeholder}
                                                 placeholder={pageData.sidebar.newsletter.placeholder}
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
-                                                className="w-full p-3 rounded-md text-gray-800 dark:text-dark-text-primary" />
-                                            <button type="submit" className="mt-4 w-full bg-white dark:bg-dark-bg-primary text-cv-blue font-bold py-3 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary dark:bg-dark-bg-secondary transition-colors">
+                                                className="w-full p-3 rounded-md bg-white dark:bg-dark-bg-primary text-gray-800 dark:text-dark-text-primary" />
+                                            <button type="submit" className="mt-4 w-full bg-white dark:bg-dark-bg-primary text-cv-blue dark:text-cv-blue-light font-bold py-3 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
                                                 {pageData.sidebar.newsletter.button}
                                             </button>
                                         </form>
+                                        <div className="mt-3 text-sm text-white" role="status" aria-live="polite">
+                                            {newsletterMailto && (
+                                                <>
+                                                    <p>{pageData.sidebar.newsletter.notice} {pageData.sidebar.newsletter.mailTo}</p>
+                                                    <a
+                                                        href={newsletterMailto}
+                                                        className="mt-3 inline-block font-semibold underline underline-offset-2 hover:no-underline rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                                    >
+                                                        {pageData.sidebar.newsletter.openMail}
+                                                    </a>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </AnimatedWrapper>

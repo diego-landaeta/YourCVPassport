@@ -63,7 +63,7 @@ const CustomDomainPage: React.FC = () => {
                         </AnimatedWrapper>
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
-                                src="https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&h=600&fit=crop"
+                                src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&h=600&fit=crop"
                                 alt={t.customDomain.heroImageAlt}
                                 position="center"
                             />

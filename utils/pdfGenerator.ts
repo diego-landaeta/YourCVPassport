@@ -15,11 +15,181 @@ interface PDFGeneratorOptions {
 }
 
 /**
+ * Viewport del iframe oculto donde se renderiza el CV.
+ * Antes medía 1200 × 8000 px: dentro del iframe `100vh` valía 8000 px, así que el
+ * `min-h-screen` de las plantillas y el `minHeight: 100vh` del contenedor estiraban
+ * la captura a 8000 px y el PDF salía siempre con 5 páginas, casi todas vacías (#11).
+ * Ahora usamos un viewport de escritorio normal y anulamos esas alturas mínimas en el clon.
+ */
+const PDF_VIEWPORT_WIDTH = 1200;
+const PDF_VIEWPORT_HEIGHT = 1200;
+
+/**
+ * Límites del canvas de html2canvas.
+ * - Safari/iOS no pinta canvas de más de 16.777.216 px de área (4096²): devuelve un canvas
+ *   vacío o lanza error. Con `scale: 3` un CV de 1200 × 4000 px pedía 43 MP.
+ * - Chrome y Firefox no admiten lados de más de 32.767 px.
+ * Calculamos el `scale` para quedar por debajo de ambos límites con margen. Con un CV
+ * corto se mantiene la nitidez anterior (scale 3, o casi); uno largo baja a ~1,7-2,
+ * que siguen siendo ~250-290 ppp sobre los 210 mm del A4.
+ */
+const MAX_CANVAS_PIXELS = 16_000_000;
+const MAX_CANVAS_SIDE = 32_000;
+const MAX_CAPTURE_SCALE = 3;
+
+/** A4 en mm. */
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+
+/**
+ * Si al trocear la captura en páginas A4 la última porción ocupa menos de este
+ * porcentaje de una página (restos de redondeo, el padding final o el pie), no se crea
+ * una página más: la imagen se reduce ligeramente (como mucho un 5 %) para que quepa
+ * en las páginas anteriores, sin perder contenido.
+ */
+const LAST_PAGE_TOLERANCE = 0.05;
+
+/** Escala de captura según el tamaño en px CSS del contenido. */
+export function computeCaptureScale(widthPx: number, heightPx: number): number {
+  const w = Math.max(1, widthPx);
+  const h = Math.max(1, heightPx);
+  return Math.min(
+    MAX_CAPTURE_SCALE,
+    Math.sqrt(MAX_CANVAS_PIXELS / (w * h)),
+    MAX_CANVAS_SIDE / h,
+    MAX_CANVAS_SIDE / w,
+  );
+}
+
+export interface PdfPageLayout {
+  /** Número de páginas A4. */
+  pages: number;
+  /** Ancho y alto (mm) con los que se dibuja la imagen completa en cada página. */
+  drawWidth: number;
+  drawHeight: number;
+  /** Desplazamiento horizontal (mm) para centrar la imagen si se ha reducido. */
+  offsetX: number;
+}
+
+/**
+ * Reparte una captura de `canvasWidth × canvasHeight` px en páginas A4:
+ * pages = ceil(alto real / alto de página), sin página extra por restos < 5 %.
+ */
+export function computePdfLayout(canvasWidth: number, canvasHeight: number): PdfPageLayout {
+  const imgHeight = (canvasHeight * A4_WIDTH_MM) / canvasWidth;
+  let pages = Math.max(1, Math.ceil(imgHeight / A4_HEIGHT_MM - 1e-6));
+  const lastSlice = imgHeight - (pages - 1) * A4_HEIGHT_MM;
+
+  if (pages > 1 && lastSlice < A4_HEIGHT_MM * LAST_PAGE_TOLERANCE) {
+    pages -= 1;
+    const fit = (pages * A4_HEIGHT_MM) / imgHeight;
+    const drawWidth = A4_WIDTH_MM * fit;
+    return { pages, drawWidth, drawHeight: imgHeight * fit, offsetX: (A4_WIDTH_MM - drawWidth) / 2 };
+  }
+  return { pages, drawWidth: A4_WIDTH_MM, drawHeight: imgHeight, offsetX: 0 };
+}
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/** Espera a que la página del CV pinte la plantilla (los datos llegan después del onload). */
+async function waitForCvTemplate(doc: Document, timeoutMs: number): Promise<Element | null> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const el = doc.querySelector('.cv-template');
+    if (el && el.childElementCount > 0) return el;
+    await wait(250);
+  }
+  return doc.querySelector('.cv-template');
+}
+
+/**
+ * Fuerza la carga de las imágenes `loading="lazy"`: con un iframe de altura normal,
+ * las que quedan bajo el pliegue no se descargarían y saldrían sin tamaño en el PDF.
+ */
+async function loadLazyImages(doc: Document, timeoutMs: number): Promise<void> {
+  const images = Array.from(doc.querySelectorAll('img'));
+  images.forEach((img) => {
+    if (img.loading === 'lazy') img.loading = 'eager';
+  });
+  await Promise.all(
+    images.map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const done = () => resolve();
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+        setTimeout(done, timeoutMs);
+      });
+    })
+  );
+}
+
+/** Alturas mínimas ligadas al viewport o al A4: `min-h-screen`, `md:min-h-screen`, `min-h-[70vh]`, `min-h-[297mm]`… */
+const VIEWPORT_MIN_HEIGHT_CLASS = /(^|\s)([\w-]+:)*min-h-(screen|svh|dvh|lvh|\[[^\]]+\])(?=\s|$)/;
+
+/**
+ * Anula en el clon las alturas mínimas que dependen del viewport.
+ * Tiene que ser un estilo en línea: html2canvas vuelve a clonar el documento en un
+ * iframe con `windowHeight = fullHeight`, y ahí cualquier `100vh` volvería a crecer.
+ */
+function neutralizeViewportMinHeights(root: HTMLElement): void {
+  root.style.minHeight = '0';
+  root.querySelectorAll<HTMLElement>('*').forEach((el) => {
+    const cls = el.getAttribute('class') || '';
+    if (VIEWPORT_MIN_HEIGHT_CLASS.test(cls) || /vh|mm/.test(el.style.minHeight || '')) {
+      el.style.minHeight = '0';
+    }
+  });
+}
+
+/** Aire que se deja bajo el último contenido al recortar el fondo sobrante (px CSS). */
+const CONTENT_BOTTOM_MARGIN_PX = 32;
+
+/**
+ * Posición (px CSS, relativa a `root`) del borde inferior del último contenido visible:
+ * texto, imágenes/iconos y cajas con fondo o borde (tarjetas, chips…). Se ignoran las
+ * cajas que ocupan más de media plantilla, que son fondos de página o columnas.
+ */
+function measureContentBottom(root: HTMLElement): number {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  const rootRect = root.getBoundingClientRect();
+  const largeBox = rootRect.height * 0.5;
+  let bottom = rootRect.top;
+
+  const range = doc.createRange();
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!node.textContent || !node.textContent.trim()) continue;
+    range.selectNodeContents(node);
+    const r = range.getBoundingClientRect();
+    if (r.height > 0 && r.width > 0) bottom = Math.max(bottom, r.bottom);
+  }
+
+  root.querySelectorAll('*').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (!r.height || !r.width) return;
+    if (/^(img|svg|video|canvas|picture|iframe)$/i.test(el.tagName)) {
+      bottom = Math.max(bottom, r.bottom);
+      return;
+    }
+    if (r.height >= largeBox || !view) return;
+    const cs = view.getComputedStyle(el);
+    const hasBackground = cs.backgroundImage !== 'none' || !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor);
+    const hasBorder = parseFloat(cs.borderBottomWidth) > 0 && cs.borderBottomStyle !== 'none';
+    if (hasBackground || hasBorder) bottom = Math.max(bottom, r.bottom);
+  });
+
+  return bottom - rootRect.top;
+}
+
+/**
  * Generate PDF from CV by loading it in a hidden iframe and capturing with html2canvas
  * Downloads the PDF file directly
  */
 export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void> {
   const { profileSlug, profileId, fileName, onProgress, onSuccess, onError } = options;
+  let iframe: HTMLIFrameElement | null = null;
 
   try {
     // Dynamic imports to reduce bundle size
@@ -31,36 +201,46 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     if (onProgress) onProgress(10);
 
     // Construct CV URL
-    const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}`;
+    const profilePath = `/cv/${profileSlug || profileId}`;
+    const cvUrl = `${window.location.origin}${profilePath}`;
 
     if (onProgress) onProgress(20);
 
     // Create hidden iframe to load the CV
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.left = '-9999px';
-    iframe.style.top = '-9999px';
-    iframe.style.width = '1200px';
-    iframe.style.height = '8000px'; // Increased height to ensure full content loads
-    iframe.style.overflow = 'visible';
-    document.body.appendChild(iframe);
+    const frame = document.createElement('iframe');
+    iframe = frame;
+    frame.style.position = 'fixed';
+    frame.style.left = '-9999px';
+    frame.style.top = '-9999px';
+    frame.style.width = `${PDF_VIEWPORT_WIDTH}px`;
+    frame.style.height = `${PDF_VIEWPORT_HEIGHT}px`;
+    frame.style.overflow = 'visible';
+    frame.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(frame);
 
     // Load CV in iframe
     await new Promise<void>((resolve, reject) => {
-      iframe.onload = () => {
+      frame.onload = () => {
         setTimeout(() => resolve(), 3000); // Increased wait time for all content to render
       };
-      iframe.onerror = () => reject(new Error('Failed to load CV'));
-      iframe.src = cvUrl;
+      frame.onerror = () => reject(new Error('Failed to load CV'));
+      frame.src = cvUrl;
     });
 
     if (onProgress) onProgress(40);
 
     // Get iframe document
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    const iframeDoc = frame.contentDocument || frame.contentWindow?.document;
     if (!iframeDoc) {
       throw new Error('Cannot access iframe content');
     }
+
+    // Find the CV template container (without header/footer navigation)
+    const cvContainer = await waitForCvTemplate(iframeDoc, 15000);
+    if (!cvContainer) {
+      throw new Error('CV template container not found');
+    }
+    await loadLazyImages(iframeDoc, 8000);
 
     // Force light theme by removing dark mode classes
     const html = iframeDoc.documentElement;
@@ -73,12 +253,6 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     allElements.forEach((el: any) => {
       el.classList.remove('dark');
     });
-
-    // Find the CV template container (without header/footer navigation)
-    const cvContainer = iframeDoc.querySelector('.cv-template');
-    if (!cvContainer) {
-      throw new Error('CV template container not found');
-    }
 
     // Force the CV container to show ALL content (remove any height restrictions)
     const cvElement = cvContainer as HTMLElement;
@@ -102,18 +276,26 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     });
 
     // Wait for styles to settle after removing dark classes
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await wait(500);
 
-    // Create a wrapper to include CV and footer
+    // Create a wrapper to include CV and footer.
+    // Sin minHeight: su alto tiene que ser exactamente el del contenido (#11).
     const wrapper = iframeDoc.createElement('div');
     wrapper.style.backgroundColor = '#ffffff';
     wrapper.style.padding = '0';
     wrapper.style.margin = '0';
     wrapper.style.width = '100%';
-    wrapper.style.minHeight = '100vh';
 
     // Clone CV content FIRST
     const cvClone = cvContainer.cloneNode(true) as HTMLElement;
+
+    // Alturas mínimas ligadas al viewport (min-h-screen, min-h-[70vh], min-h-[297mm]…)
+    neutralizeViewportMinHeights(cvClone);
+
+    // UI interactiva que las plantillas ya marcan como no imprimible (`print:hidden`):
+    // los botones "Contáctame / Agendar Reunión" (ProfileContactButtons y
+    // PassportTemplate) y el aviso de perfil propio. En un PDF no se pueden pulsar.
+    cvClone.querySelectorAll('.print\\:hidden, .no-print').forEach((el) => el.remove());
 
     // FIX: html2canvas has issues with bg-clip-text and text-transparent
     // It renders the background gradient as a solid block or makes text invisible.
@@ -143,41 +325,32 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
           div.remove();
         }
       });
-
-      // Add contact information directly in the header
-      const profileUrl = `${window.location.origin}/cv/${profileSlug || profileId}`;
-      const contactInfo = iframeDoc.createElement('div');
-      contactInfo.style.marginTop = '16px';
-      contactInfo.style.padding = '12px 16px';
-      contactInfo.style.backgroundColor = '#f0f9ff';
-      contactInfo.style.border = '1px solid #bfdbfe';
-      contactInfo.style.borderRadius = '8px';
-      contactInfo.style.fontSize = '13px';
-      contactInfo.style.color = '#1e40af';
-      contactInfo.style.textAlign = 'center';
-      contactInfo.innerHTML = `
-        <strong style="font-size: 13px; display: block; margin-bottom: 4px;">📧 Contact Information</strong>
-        <span style="color: #64748b; font-size: 12px;">Visit: <a href="${profileUrl}" style="color: #2563eb; font-weight: 600; text-decoration: none;">${profileUrl}</a></span>
-      `;
-
-      // Find the main content div inside header and append contact info
-      const headerContent = header.querySelector('div.max-w-6xl') || header.querySelector('div.relative');
-      if (headerContent) {
-        headerContent.appendChild(contactInfo);
-      }
     });
 
     wrapper.appendChild(cvClone);
 
-    // Add footer with "Powered by YourCVPassport"
+    // Pie: "Powered by YourCVPassport" y la dirección del CV online.
+    // Antes la URL iba en una caja "Contact Information" incrustada en la cabecera de
+    // la plantilla; ahora es una línea discreta en el pie. Se construye con
+    // textContent porque el slug viene de la base de datos.
     const footer = iframeDoc.createElement('div');
     footer.style.textAlign = 'center';
     footer.style.padding = '16px';
     footer.style.fontSize = '11px';
+    footer.style.lineHeight = '1.6';
     footer.style.color = '#666666';
     footer.style.backgroundColor = '#f9fafb';
     footer.style.borderTop = '1px solid #e5e7eb';
-    footer.innerHTML = 'Powered by <strong style="color: #2563eb;">YourCVPassport</strong>';
+    const poweredBy = iframeDoc.createElement('div');
+    poweredBy.append('Powered by ');
+    const brand = iframeDoc.createElement('strong');
+    brand.style.color = '#2563eb';
+    brand.textContent = 'YourCVPassport';
+    poweredBy.appendChild(brand);
+    const profileLine = iframeDoc.createElement('div');
+    profileLine.textContent = `${window.location.host}${profilePath}`;
+    footer.appendChild(poweredBy);
+    footer.appendChild(profileLine);
     wrapper.appendChild(footer);
 
     // Clear body and add only our wrapper
@@ -187,24 +360,39 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     if (onProgress) onProgress(50);
 
     // Wait a bit more for styles to apply
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await wait(500);
 
-    // Force wrapper to have full height for complete capture
-    const fullHeight = wrapper.scrollHeight;
+    // Número de páginas según el contenido real: si solo el padding/fondo final de la
+    // plantilla y el pie obligan a abrir otra página, se recorta ese fondo sobrante
+    // para que el pie cierre la última página con contenido (ninguna página vacía).
+    const fullWidth = wrapper.scrollWidth || PDF_VIEWPORT_WIDTH;
+    const pagePx = (fullWidth * A4_HEIGHT_MM) / A4_WIDTH_MM;
+    const footerHeight = footer.getBoundingClientRect().height;
+    const cloneHeight = cvClone.getBoundingClientRect().height;
+    const contentBottom = Math.min(cloneHeight, measureContentBottom(cvClone) + CONTENT_BOTTOM_MARGIN_PX);
+    const pagesNeeded = Math.max(1, Math.ceil((contentBottom + footerHeight) / pagePx - 1e-6));
+    const maxCloneHeight = Math.floor(pagesNeeded * pagePx - footerHeight);
+    if (cloneHeight > maxCloneHeight && maxCloneHeight >= contentBottom) {
+      cvClone.style.height = `${maxCloneHeight}px`;
+      cvClone.style.overflow = 'hidden';
+    }
+
+    // Alto real del contenido (ya sin alturas mínimas de viewport)
+    const fullHeight = Math.ceil(wrapper.scrollHeight);
     wrapper.style.height = `${fullHeight}px`;
 
     // Wait for layout to settle
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await wait(300);
 
     // Generate canvas from wrapper element with optimized settings for FULL content
     const canvas = await html2canvas(wrapper, {
-      scale: 3, // Higher quality (increased from 2)
+      scale: computeCaptureScale(fullWidth, fullHeight), // Nitidez máxima sin pasar del límite de canvas de Safari/iOS
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      windowWidth: 1200,
+      windowWidth: PDF_VIEWPORT_WIDTH,
       windowHeight: fullHeight, // Use full height
-      width: wrapper.scrollWidth,
+      width: fullWidth,
       height: fullHeight, // Capture full height
       x: 0,
       y: 0,
@@ -218,13 +406,11 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
 
     if (onProgress) onProgress(70);
 
-    // Calculate dimensions for A4
-    const pageWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
+    if (!canvas.width || !canvas.height) {
+      throw new Error('Empty canvas');
+    }
 
-    // Calculate image dimensions maintaining aspect ratio
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    const layout = computePdfLayout(canvas.width, canvas.height);
 
     // Create PDF with better compression settings
     const pdf = new jsPDF({
@@ -238,23 +424,12 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     // Convert canvas to image with maximum quality
     const imgData = canvas.toDataURL('image/jpeg', 0.95); // Use JPEG with high quality for smaller file size
 
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // Add first page
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-    heightLeft -= pageHeight;
-
-    // Add additional pages if content is longer than one page
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight; // Move up by the remaining height
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
+    // Cada página muestra la misma imagen desplazada una altura de página hacia arriba
+    // (jsPDF la incrusta una sola vez y la reutiliza en todas las páginas).
+    for (let page = 0; page < layout.pages; page++) {
+      if (page > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', layout.offsetX, -page * A4_HEIGHT_MM, layout.drawWidth, layout.drawHeight, undefined, 'FAST');
     }
-
-    // Cleanup
-    document.body.removeChild(iframe);
 
     if (onProgress) onProgress(90);
 
@@ -272,9 +447,14 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     }
 
   } catch (error) {
-    
+
     if (onError) {
       onError(error instanceof Error ? error : new Error('Unknown error'));
+    }
+  } finally {
+    // Cleanup: quitar el iframe también si algo falla a mitad
+    if (iframe && iframe.parentNode) {
+      iframe.parentNode.removeChild(iframe);
     }
   }
 }

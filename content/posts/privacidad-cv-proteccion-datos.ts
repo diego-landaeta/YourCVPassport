@@ -218,7 +218,7 @@ Para destacar en **privacidad CV proteccion datos** dentro de esta área, aplica
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de privacidad CV proteccion datos](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de privacidad CV proteccion datos}
+![Aspectos avanzados de privacidad CV proteccion datos](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de privacidad CV proteccion datos}
 
 ## Aspectos avanzados de privacidad CV proteccion datos
 

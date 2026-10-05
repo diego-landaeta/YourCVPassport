@@ -3,6 +3,7 @@ import { supabase } from '../supabase/client';
 import type { Profile, Skill, Stamp } from '../types';
 import type { SearchFilters } from './useTalentFilters';
 import { sortProfilesByPriority } from '../utils/profileSorting';
+import { PUBLIC_PROFILE_COLUMNS } from '../lib/publicProfileColumns';
 
 export interface ProfileWithSkills extends Profile {
   skills?: Skill[];
@@ -47,8 +48,10 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
       // Build base query - include stamps for priority sorting
       let query = supabase
         .from('profiles')
+        // Columnas públicas de profiles (select('*') daría 42501). Los sellos se
+        // leen después de la vista public_stamps (stamps no es legible para terceros).
         .select(`
-          *,
+          ${PUBLIC_PROFILE_COLUMNS},
           skills (
             id,
             name,
@@ -61,12 +64,6 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
             start_date,
             end_date,
             is_current
-          ),
-          stamps (
-            id,
-            type,
-            status,
-            verified_at
           )
         `, { count: 'exact' })
         .eq('is_public', true)
@@ -131,8 +128,19 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
 
       if (queryError) throw queryError;
 
+      const ids = (data || []).map((p: any) => p.id);
+      const { data: stampsData } = ids.length
+        ? await supabase.from('public_stamps').select('id, profile_id, type, status, verified_at').in('profile_id', ids)
+        : { data: [] as any[] };
+      const stampsByProfile = new Map<string, any[]>();
+      (stampsData || []).forEach((st: any) => {
+        if (!stampsByProfile.has(st.profile_id)) stampsByProfile.set(st.profile_id, []);
+        stampsByProfile.get(st.profile_id)!.push(st);
+      });
+
       // Process profiles
-      let processedProfiles = (data || []).map((profile: any) => {
+      let processedProfiles = (data || []).map((row: any) => {
+        const profile = { ...row, stamps: stampsByProfile.get(row.id) || [] };
         const experiences = profile.experiences || [];
         const years = calculateExperienceYears(experiences);
 

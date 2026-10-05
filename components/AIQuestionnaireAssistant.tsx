@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
@@ -50,10 +49,6 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
 
   const { dialogState, showAlert, closeDialog, handleConfirm, handleCancel } = useCustomDialog();
 
-  // @ts-ignore
-  const apiKey = import.meta.env?.VITE_GOOGLE_AI_API_KEY || '';
-  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
-
   // Datos del formulario
   const [formData, setFormData] = useState({
     full_name: '',
@@ -91,7 +86,8 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
     try {
       setIsLoadingProfile(true);
       const [profileRes, expRes, eduRes, skillsRes, langsRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        // Perfil propio completo (email, teléfono): vista profiles_full
+        supabase.from('profiles_full').select('*').eq('id', user.id).single(),
         supabase.from('experiences').select('*').eq('profile_id', user.id),
         supabase.from('education').select('*').eq('profile_id', user.id),
         supabase.from('skills').select('*').eq('profile_id', user.id),

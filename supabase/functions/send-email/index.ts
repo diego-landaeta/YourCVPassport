@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 
@@ -703,20 +703,132 @@ function getStatusNextSteps(status: string): string {
   return nextSteps[status] || '';
 }
 
-serve(async (req) => {
-  try {
-    const { to, template, data } = await req.json() as EmailRequest;
+// ---------------------------------------------------------------------------
+// Seguridad (auditoría 2026-10-05, A4)
+// ---------------------------------------------------------------------------
+// Antes: cualquiera con la anon key (pública) podía mandar correos con las
+// plantillas de la marca, desde noreply@yourcvpassport.com, a cualquier
+// destinatario y con `data` interpolado en el HTML (phishing / spam).
+//
+// Única llamada legítima: public.send_email_notification() (Postgres, SECURITY
+// DEFINER, desde triggers y RPC internas), que manda
+//   Authorization: Bearer <service_role key>
+// Por eso ahora:
+//   - Solo se acepta la service_role key (comparada con SUPABASE_SERVICE_ROLE_KEY
+//     o, si no coincide literalmente, verificada contra la API admin de Auth).
+//     Un JWT de usuario o la anon key -> 401/403.
+//   - `to`: un único email válido; `template`: solo las plantillas conocidas;
+//     `data`: objeto plano. Cuerpo máximo 64 KB.
+//   - Todos los textos de `data` se escapan antes de meterlos en el HTML.
+//   - CORS con la lista blanca de _shared/cors.ts (no se llama desde navegador).
+// Contrato sin cambios para el llamador legítimo: POST {to, template, data}.
+// Desplegar con verificación de JWT activada (sin --no-verify-jwt).
 
-    if (!templates[template]) {
-      return new Response(JSON.stringify({ error: 'Invalid template' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
+const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const MAX_BODY_BYTES = 64 * 1024;
+const EMAIL_RE = /^[^\s@<>()[\]\,;:"]+@[^\s@<>()[\]\,;:"]+\.[^\s@<>()[\]\,;:"]{2,}$/;
+
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const x = enc.encode(a);
+  const y = enc.encode(b);
+  let diff = x.length ^ y.length;
+  const n = Math.max(x.length, y.length);
+  for (let i = 0; i < n; i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
+}
+
+// ¿Es la service_role key? 1) igual a la del entorno; 2) si no, solo una clave
+// de servicio puede listar usuarios en la API admin de Auth (cubre rotaciones o
+// claves sb_secret_ distintas de la inyectada).
+async function isServiceRole(token: string): Promise<boolean> {
+  if (!token) return false;
+  if (SERVICE_ROLE_KEY && timingSafeEqual(token, SERVICE_ROLE_KEY)) return true;
+  if (!SUPABASE_URL) return false;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=1`, {
+      headers: { apikey: token, Authorization: `Bearer ${token}` },
+    });
+    await res.body?.cancel();
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Escapa recursivamente todos los textos (mantiene números, booleanos, arrays).
+function escapeData(value: unknown): unknown {
+  if (typeof value === 'string') return escapeHtml(value);
+  if (Array.isArray(value)) return value.map(escapeData);
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = escapeData(v);
+    return out;
+  }
+  return value;
+}
+
+// El asunto es texto plano (no HTML): solo se quitan saltos de línea.
+function plainData(value: unknown): unknown {
+  if (typeof value === 'string') return value.replace(/[\r\n]+/g, ' ');
+  if (Array.isArray(value)) return value.map(plainData);
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = plainData(v);
+    return out;
+  }
+  return value;
+}
+
+serve(async (req) => {
+  const cors = getCorsHeaders(req);
+  const json = (status: number, body: unknown) =>
+    new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (req.method !== 'POST') return json(405, { error: 'Method not allowed' });
+
+  // 1. Solo service_role
+  const auth = req.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+  if (!token) return json(401, { error: 'Unauthorized' });
+  if (!(await isServiceRole(token))) return json(403, { error: 'Forbidden' });
+
+  try {
+    // 2. Validar el cuerpo
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return json(413, { error: 'Payload too large' });
+    let body: Partial<EmailRequest>;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return json(400, { error: 'Invalid JSON' });
+    }
+    const { to, template, data } = body;
+
+    if (typeof to !== 'string' || to.length > 254 || !EMAIL_RE.test(to)) {
+      return json(400, { error: 'Invalid recipient' });
+    }
+    if (typeof template !== 'string' || !Object.prototype.hasOwnProperty.call(templates, template)) {
+      return json(400, { error: 'Invalid template' });
+    }
+    if (data !== undefined && (data === null || typeof data !== 'object' || Array.isArray(data))) {
+      return json(400, { error: 'Invalid data' });
     }
 
-    const emailTemplate = templates[template];
-    const subject = emailTemplate.subject(data);
-    const html = emailTemplate.html(data);
+    const emailTemplate = templates[template as keyof typeof templates];
+    const subject = emailTemplate.subject(plainData(data ?? {}) as any);
+    const html = emailTemplate.html(escapeData(data ?? {}) as any);
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -738,15 +850,9 @@ serve(async (req) => {
       throw new Error(result.message || 'Failed to send email');
     }
 
-    return new Response(JSON.stringify({ success: true, id: result.id }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json(200, { success: true, id: result.id });
   } catch (error) {
     console.error('Error sending email:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json(500, { error: 'Failed to send email' });
   }
 });

@@ -37,7 +37,8 @@ async function generateProfileHTML(slug) {
     // Fetch profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
+      // Columnas explícitas: con la anon key, select('*') da 42501 (columnas privadas)
+      .select('id, slug, full_name, headline, summary, location, avatar_url, meta_title, meta_description')
       .eq('slug', slug)
       .single();
 

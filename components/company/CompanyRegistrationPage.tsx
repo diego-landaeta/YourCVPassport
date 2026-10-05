@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../contexts/ToastContext';
 import { supabase } from '../../supabase/client';
+import { COMPANY_DOCUMENTS_BUCKET, COMPANY_LOGOS_BUCKET } from '../../lib/companyDocuments';
 import type { CreateCompanyInput, CompanySize } from '../../types';
 
 const CompanyRegistrationPage: React.FC = () => {
@@ -129,14 +130,28 @@ const CompanyRegistrationPage: React.FC = () => {
     }
   };
 
-  const uploadFile = async (file: File, path: string): Promise<string | null> => {
+  /**
+   * Sube un archivo del registro.
+   * - 'logos': bucket público `company-logos`, carpeta <uid>/; devuelve la URL pública.
+   * - 'tax-documents' / 'verification-documents': bucket PRIVADO
+   *   `company-documents`, carpeta <tipo>/<uid>/; devuelve la RUTA (no una URL):
+   *   el panel de admin la abre con una URL firmada (createSignedUrl).
+   * Ver supabase/migrations/20261005_privatizar_company_documents.sql.
+   */
+  const uploadFile = async (
+    file: File,
+    kind: 'logos' | 'tax-documents' | 'verification-documents',
+  ): Promise<string | null> => {
     try {
+      if (!user) return null;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-      const filePath = `${path}/${fileName}`;
+      const isLogo = kind === 'logos';
+      const bucket = isLogo ? COMPANY_LOGOS_BUCKET : COMPANY_DOCUMENTS_BUCKET;
+      const filePath = isLogo ? `${user.id}/${fileName}` : `${kind}/${user.id}/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
-        .from('company-documents')
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
         .upload(filePath, file);
 
       if (uploadError) {
@@ -144,9 +159,10 @@ const CompanyRegistrationPage: React.FC = () => {
         return null;
       }
 
-      // Get public URL
+      if (!isLogo) return filePath;
+
       const { data: urlData } = supabase.storage
-        .from('company-documents')
+        .from(bucket)
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;

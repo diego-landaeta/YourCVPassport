@@ -11,6 +11,8 @@ import { Group } from '../../../types/groups';
 import type { FeedPost as FeedPostType } from '../../../types/feed';
 import FeedPost from '../feed/FeedPost';
 import CreatePostForm from '../feed/CreatePostForm';
+import AutoTranslationNotice from '../feed/AutoTranslationNotice';
+import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 import { CameraIcon, PencilIcon } from '@heroicons/react/24/solid';
 import { MegaphoneIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
@@ -186,6 +188,11 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
     if (avatarInputRef.current) avatarInputRef.current.value = '';
   };
 
+  // Nombre y descripción del grupo en el idioma de la interfaz (traducción automática)
+  const groupTranslation = useAutoTranslation([group?.name, group?.description]);
+  const shownGroupName = groupTranslation.texts[0] || group?.name || '';
+  const shownGroupDescription = groupTranslation.texts[1] || group?.description || '';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -344,10 +351,11 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
 
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{group.name}</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{shownGroupName}</h2>
               {group.description && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{group.description}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{shownGroupDescription}</p>
               )}
+              <AutoTranslationNotice state={groupTranslation} className="mt-1" />
               <div className="flex items-center gap-3 mt-2">
                 <span className="text-xs text-gray-400">
                   <span className="font-semibold text-gray-600 dark:text-gray-300">{group.member_count}</span> {isEs ? 'miembros' : 'members'}
@@ -397,7 +405,7 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
               {isEs ? 'Acerca de' : 'About'}
             </h3>
             {group.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">{group.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">{shownGroupDescription}</p>
             )}
             <div className="flex gap-4 text-center py-2 border-t border-gray-100 dark:border-gray-800">
               <div className="flex-1">

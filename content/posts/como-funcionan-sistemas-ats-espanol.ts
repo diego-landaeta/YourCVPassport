@@ -218,7 +218,7 @@ Para destacar en **como funcionan sistemas ATS** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de como funcionan sistemas ATS](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de como funcionan sistemas ATS}
+![Aspectos avanzados de como funcionan sistemas ATS](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Aspectos avanzados de como funcionan sistemas ATS}
 
 ## Aspectos avanzados de como funcionan sistemas ATS
 

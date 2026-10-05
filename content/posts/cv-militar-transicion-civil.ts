@@ -271,7 +271,7 @@ Cuando hablamos de **CV militar transicion civil** en el contexto de aspectos av
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV militar transicion civil](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV militar transicion civil}
+![Aspectos avanzados de CV militar transicion civil](https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80){caption:Aspectos avanzados de CV militar transicion civil}
 
 ## Cómo YourCVPassport te ayuda con CV militar transicion civil
 

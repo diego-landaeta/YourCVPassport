@@ -151,6 +151,9 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 
     try {
       const newSuggestions: OptimizationSuggestion[] = [];
+      // Ultimo error devuelto por la IA (plan, limite, red...) para mostrarlo si
+      // no se genera ninguna sugerencia, en lugar de un mensaje generico.
+      let lastAIError: string | null = null;
 
       for (const item of items) {
         if (!item.description || item.description.trim().length === 0) continue;
@@ -178,6 +181,8 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
               optimizedAchievements: response.data.achievements,
               status: 'pending',
             });
+          } else if (response.error) {
+            lastAIError = response.error;
           }
           continue; // Skip the generic processing below
         } else {
@@ -199,11 +204,13 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
             optimizedText: response.data,
             status: 'pending',
           });
+        } else if (response.error) {
+          lastAIError = response.error;
         }
       }
 
       if (newSuggestions.length === 0) {
-        setError(aiTO.noSuggestionsGenerated);
+        setError(lastAIError || aiTO.noSuggestionsGenerated);
       } else {
         setSuggestions(newSuggestions);
       }
@@ -407,7 +414,7 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+        <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
           <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
         </div>
       )}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
 import { Profile, Company, CompanyUser } from '../types';
+import { invokeAuthFunction } from '../utils/authFunctionErrors';
 
 type AuthMode = 'login' | 'signup';
 
@@ -107,8 +108,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       setProfileLoading(true);
       try {
+        // Perfil propio con todas sus columnas (email, plan...): vista profiles_full.
+        // `profiles` solo deja leer columnas públicas (privilegios por columna).
         let { data, error } = await supabase
-          .from('profiles')
+          .from('profiles_full')
           .select('*')
           .eq('id', user.id)
           .limit(1)
@@ -116,7 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // If profile doesn't exist (e.g., user signed up before trigger was in place), create one.
         if (error && error.code === 'PGRST116') {
-          const { data: newProfile, error: insertError } = await supabase
+          // Sin .select() tras el insert: el RETURNING pediría columnas privadas de profiles.
+          const { error: insertError } = await supabase
             .from('profiles')
             .insert({
               id: user.id,
@@ -124,12 +128,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: user.email,
               // ❌ REMOVED: slug assignment - users must create their URL in Display Settings after completing wizard
               // Previously: slug: user.id, which auto-assigned a UUID and broke the intended workflow
-            })
-            .select()
-            .single();
+            });
 
           if (insertError) {
             throw insertError;
+          }
+          const { data: newProfile, error: reloadError } = await supabase
+            .from('profiles_full')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          if (reloadError) {
+            throw reloadError;
           }
           data = newProfile;
         } else if (error) {
@@ -284,37 +294,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, password: string, userData: { full_name: string }) => {
     try {
-      // Use Edge Function to create user and send custom confirmation email via Resend
-      const { data: funcData, error: funcError } = await supabase.functions.invoke('signup', {
-        body: {
-          email,
-          password,
-          full_name: userData.full_name,
-          redirectTo: `${window.location.origin}/confirm`
-        }
+      // Use Edge Function to create user and send custom confirmation email via Resend.
+      // invokeAuthFunction aplica timeout (20 s) y devuelve un AuthFunctionError con
+      // `code` (EMAIL_ALREADY_REGISTERED, WEAK_PASSWORD, EMAIL_SEND_FAILED, TIMEOUT...).
+      const { data: funcData, error: funcError } = await invokeAuthFunction('signup', {
+        email: email.trim().toLowerCase(),
+        password,
+        full_name: userData.full_name,
+        redirectTo: `${window.location.origin}/confirm`
       });
 
       if (funcError) {
-        let errorMessage = funcError.message;
-        // Try to parse the response body if available
-        if (funcError instanceof Error && 'context' in funcError) {
-          try {
-            const response = (funcError as any).context as Response;
-            if (response && typeof response.json === 'function') {
-              const errorBody = await response.json();
-              if (errorBody && errorBody.error) {
-                errorMessage = errorBody.error;
-              }
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-        return { data: { user: null, session: null }, error: new Error(errorMessage) };
-      }
-
-      if (funcData?.error) {
-        return { data: { user: null, session: null }, error: new Error(funcData.error) };
+        console.error('[signup] Edge Function error:', funcError.code, funcError.status, funcError.message);
+        return { data: { user: null, session: null }, error: funcError };
       }
 
       // Return structure mimicking supabase.auth.signUp
@@ -398,34 +390,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      // Use Edge Function to bypass Supabase Auth rate limits and use custom email template
-      const { data, error } = await supabase.functions.invoke('send-password-reset', {
-        body: { 
-          email,
-          redirectTo: `${window.location.origin}/recovery`
-        }
+      // Use Edge Function to bypass Supabase Auth rate limits and use custom email template.
+      // Errores normalizados con `code` (EMAIL_SEND_FAILED, TIMEOUT, NETWORK_ERROR...).
+      const { error } = await invokeAuthFunction('send-password-reset', {
+        email: email.trim().toLowerCase(),
+        redirectTo: `${window.location.origin}/recovery`
       });
 
       if (error) {
-        let errorMessage = error.message;
-        if (error instanceof Error && 'context' in error) {
-          try {
-            const response = (error as any).context as Response;
-            if (response && typeof response.json === 'function') {
-              const errorBody = await response.json();
-              if (errorBody && errorBody.error) {
-                errorMessage = errorBody.error;
-              }
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-        return { error: new Error(errorMessage) };
-      }
-
-      if (data?.error) {
-        return { error: new Error(data.error) };
+        console.error('[send-password-reset] Edge Function error:', error.code, error.status, error.message);
+        return { error };
       }
 
       return { error: null };

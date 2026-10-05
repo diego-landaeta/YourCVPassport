@@ -4,10 +4,10 @@ import { ChangelogEntry, Template, MilestoneItem } from '../types';
 const transparencyIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" }), React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" }));
 const trustIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" }));
 const innovationIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" }));
-const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factFoundedIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" }));
 const factUsersIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" }));
-const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factTeamIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 21a6 6 0 006-5.197M15 21a6 6 0 00-3-5.197" }));
 const contactSupportIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9 12l2 2 4-4M5 12H3m4 4l-2 2m14-4l2 2m-2-14l2-2m-14 2l-2-2" }));
 const contactSalesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" }));
@@ -747,7 +747,10 @@ export const translations = {
             email: "Email",
             message: "Message",
             submit: "Send Inquiry",
-            alert: "Thank you for your inquiry! Our press team will get back to you soon."
+            alert: "Thank you for your inquiry! Our press team will get back to you soon.",
+            mailSubject: "Press inquiry",
+            mailNotice: "Your inquiry is ready. Open it in your email app to send it to",
+            openMail: "Open in my email"
         }
     },
     contactPage: {
@@ -952,6 +955,11 @@ export const translations = {
             calendarView: "Calendar view",
             less: "Less",
             more: "More",
+            emptyWeekTitle: "No visits in the last 7 days yet",
+            emptyMonthTitle: "No visits this month",
+            emptyHint: "Share your profile link on LinkedIn, in your email signature or in your applications to start getting visits.",
+            emptyCta: "View my public profile",
+            beforeAccount: "before your account was created",
             days: {
                 mon: "Mon",
                 tue: "Tue",
@@ -1564,6 +1572,12 @@ export const translations = {
                 networkError: "Network error. Please check your connection",
                 unknownError: "An error occurred. Please try again",
                 serverError: "An unexpected error occurred. Please try again later.",
+                // Errores de las Edge Functions signup / send-password-reset (códigos en utils/authFunctionErrors.ts)
+                invalidInput: "Please check your details: the email or password is not valid",
+                signupEmailSendFailed: "We couldn't send you the confirmation email, so your account was not created. Please try again in a few minutes or sign up with Google.",
+                signupTimeout: "The server is taking too long to respond. Check your inbox (your account may have been created) or try again in a few minutes.",
+                recoveryEmailSendFailed: "We couldn't send the password reset email. Please try again in a few minutes.",
+                recoveryTimeout: "The server is taking too long to respond. Please try again in a few minutes.",
             },
             success: {
                 signUpSuccess: "Account created successfully!",
@@ -1605,6 +1619,7 @@ export const translations = {
             canales: "Channels",
             notificaciones: "Notifications",
             companyDashboard: "Company Dashboard",
+            adminPanel: "Admin panel",
             wizardAlertTitle: "Complete the wizard first",
             wizardAlertDescription: "You must complete the profile wizard (including the Finalization step) to access all features.",
             sectionHome: "HOME",
@@ -3059,6 +3074,13 @@ export const translations = {
             label: "Featured Article"
         },
         searchPlaceholder: "Search articles...",
+        searchLabel: "Search articles",
+        categoriesLabel: "Filter by category",
+        allCategories: "All",
+        noPosts: "No articles available",
+        noResults: "No articles match your search.",
+        showingCount: "Showing {shown} of {total} articles",
+        loadMore: "Load more articles",
         sidebar: {
             popular: {
                 title: "Popular Articles"
@@ -3068,7 +3090,12 @@ export const translations = {
                 subtitle: "Get the latest career tips in your inbox.",
                 placeholder: "Your email address",
                 button: "Subscribe",
-                alert: "Successfully subscribed with"
+                alert: "Successfully subscribed with",
+                mailTo: "support@yourcvpassport.com",
+                mailSubject: "Newsletter subscription",
+                mailBody: "I would like to subscribe to the YourCVPassport newsletter with this email:",
+                notice: "Automatic sign-up is not available yet. To subscribe, send us the prepared email at",
+                openMail: "Open email"
             }
         },
         finalCta: {
@@ -3078,6 +3105,72 @@ export const translations = {
         }
     }
     ,
+    breadcrumbs: {
+        ariaLabel: "Breadcrumb",
+        home: "Home",
+        // Short labels per route (ES and EN paths) from config/routeConfig.ts; NAV_LINKS is not
+        // reused because menu texts are long or contain "/" (e.g. "Press/Media Kit").
+        labels: {
+            "product": "Product",
+            "producto": "Product",
+            "product/overview": "Overview",
+            "producto/resumen": "Overview",
+            "product/stamps": "Verified profiles",
+            "producto/sellos": "Verified profiles",
+            "product/ats": "ATS export",
+            "producto/ats": "ATS export",
+            "product/domain": "Custom domain",
+            "producto/dominio": "Custom domain",
+            "product/analytics": "Profile analytics",
+            "producto/analiticas": "Profile analytics",
+            "product/ai": "AI for CVs and cover letters",
+            "producto/ia": "AI for CVs and cover letters",
+            "companies": "Companies",
+            "empresas": "Companies",
+            "companies/search": "Talent search",
+            "empresas/busqueda": "Talent search",
+            "companies/plans": "Company plan",
+            "empresas/planes": "Company plan",
+            "companies/integrations": "ATS integrations",
+            "empresas/integraciones": "ATS integrations",
+            "companies/security": "Security and compliance",
+            "empresas/seguridad": "Security and compliance",
+            "about": "About us",
+            "nosotros": "About us",
+            "about/mission": "Mission and values",
+            "nosotros/mision": "Mission and values",
+            "about/press": "Press and media kit",
+            "nosotros/prensa": "Press and media kit",
+            "about/contact": "Contact",
+            "nosotros/contacto": "Contact",
+            "professionals": "Professionals",
+            "profesionales": "Professionals",
+            "professionals/how": "How it works",
+            "profesionales/como-funciona": "How it works",
+            "professionals/templates": "Templates and examples",
+            "profesionales/plantillas": "Templates and examples",
+            "professionals/help": "Help center",
+            "profesionales/ayuda": "Help center",
+            "pricing": "Pricing",
+            "precios": "Pricing",
+            "resources": "Resources",
+            "recursos": "Resources",
+            "resources/blog": "Blog",
+            "recursos/blog": "Blog",
+            "resources/library": "Template library",
+            "recursos/biblioteca": "Template library",
+            "resources/success-stories": "Success stories",
+            "recursos/exito": "Success stories",
+            "resources/status": "System status",
+            "recursos/estado": "System status",
+            "profiles": "Profiles",
+            "perfiles": "Profiles",
+            "terms": "Terms and conditions",
+            "terminos": "Terms and conditions",
+            "privacy": "Privacy policy",
+            "privacidad": "Privacy policy"
+        }
+    },
     onboardingWizard: {
         step: "Step",
         of: "of",
@@ -4799,6 +4892,16 @@ export const translations = {
         title: 'Community',
         subtitle: 'Share your achievements and connect with other professionals',
         beta: 'Beta',
+        autoTranslation: {
+            translating: 'Translating…',
+            translatedFrom: {
+                en: 'Automatically translated from English',
+                es: 'Automatically translated from Spanish',
+            },
+            translatedShort: 'Translated',
+            seeOriginal: 'See original',
+            seeTranslation: 'See translation',
+        },
         createPost: {
             placeholder: 'What\'s on your mind?',
             publish: 'Publish',

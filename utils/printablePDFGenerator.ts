@@ -8,6 +8,22 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 
+/** Clase del body mientras se imprime desde #print-mount (ver src/print-styles.css). */
+const PRINTING_CLASS = 'printing-cv';
+
+/** Si el navegador nunca emite `afterprint`, se limpia igualmente pasado este tiempo. */
+const PRINT_CLEANUP_FALLBACK_MS = 60_000;
+
+/** Deja la página como estaba: sin modo impresión, #print-mount vacío y sin los estilos copiados del iframe. */
+function cleanupPrintMode(): void {
+  document.body.classList.remove(PRINTING_CLASS);
+  const printMount = document.getElementById('print-mount');
+  if (printMount) {
+    printMount.innerHTML = '';
+  }
+  document.head.querySelectorAll('[data-from-iframe]').forEach((el) => el.remove());
+}
+
 interface PrintablePDFOptions {
   profileSlug: string;
   profileId: string;
@@ -69,8 +85,15 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
     }
 
     // Buscar el contenedor del CV
-    // Primero intentar con .cv-template, si no existe usar body completo
+    // Los datos del perfil llegan después del onload: esperar (hasta 15 s) a que la
+    // plantilla esté pintada en vez de fiarse solo de la espera fija de 2 s.
+    // Si no aparece, usar el body completo
+    const waitStart = Date.now();
     let cvContainer = iframeDoc.querySelector('.cv-template');
+    while ((!cvContainer || cvContainer.childElementCount === 0) && Date.now() - waitStart < 15000) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      cvContainer = iframeDoc.querySelector('.cv-template');
+    }
 
     if (!cvContainer) {
       console.warn('⚠️ .cv-template no encontrado, usando body completo');
@@ -298,26 +321,44 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
     // Esperar un momento para que el DOM se actualice
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Abrir diálogo de impresión
-    window.print();
-
-    // Limpiar después de cerrar el diálogo de impresión
-    setTimeout(() => {
-      printMount.innerHTML = '';
-
+    // Solo mientras dure esta impresión, el CSS de impresión oculta #root y muestra
+    // #print-mount (src/print-styles.css). La limpieza va en afterprint: en Chrome y
+    // Firefox window.print() bloquea hasta cerrar el diálogo, pero en Safari/iOS vuelve
+    // enseguida y limpiar con un temporizador corto imprimiría la página vacía.
+    let cleanedUp = false;
+    const stopListening = () => {
+      cleanedUp = true;
+      window.removeEventListener('afterprint', finish);
+      clearTimeout(fallbackTimer);
+    };
+    const finish = () => {
+      if (cleanedUp) return;
+      stopListening();
+      cleanupPrintMode();
       if (onSuccess) {
         onSuccess();
       }
-    }, 1000);
+    };
+    window.addEventListener('afterprint', finish);
+    // Red de seguridad si el navegador no emite afterprint
+    const fallbackTimer = setTimeout(finish, PRINT_CLEANUP_FALLBACK_MS);
+
+    document.body.classList.add(PRINTING_CLASS);
+
+    // Abrir diálogo de impresión
+    try {
+      window.print();
+    } catch (printError) {
+      // El catch de abajo limpia y avisa con onError (sin onSuccess)
+      stopListening();
+      throw printError;
+    }
 
   } catch (error) {
     console.error('❌ Error generando PDF imprimible:', error);
 
     // Limpiar en caso de error
-    const printMount = document.getElementById('print-mount');
-    if (printMount) {
-      printMount.innerHTML = '';
-    }
+    cleanupPrintMode();
 
     if (onError) {
       onError(error instanceof Error ? error : new Error('Error desconocido'));

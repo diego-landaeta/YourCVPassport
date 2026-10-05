@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **usar IA personal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de usar IA personalizar CV](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de usar IA personalizar CV}
+![Aspectos avanzados de usar IA personalizar CV](https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80){caption:Aspectos avanzados de usar IA personalizar CV}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de usar IA personalizar CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.

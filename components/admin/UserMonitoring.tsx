@@ -139,7 +139,7 @@ const UserMonitoring: React.FC = () => {
 
       // Get ALL profile data in ONE query for efficiency (excluding admins)
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_full') // admin: email es privado
         .select('id, full_name, email, created_at, updated_at, avatar_url, role')
         .neq('role', 'admin');
 

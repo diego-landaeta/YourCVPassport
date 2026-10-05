@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
+import { companyDocumentPath, getCompanyDocumentSignedUrl } from '../../lib/companyDocuments';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -36,6 +37,19 @@ const CompanyManagementSection: React.FC = () => {
   const [approvalNotes, setApprovalNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [documentToView, setDocumentToView] = useState<string | null>(null);
+  const [documentIsPdf, setDocumentIsPdf] = useState(false);
+
+  // company-documents es privado: se abre con una URL firmada (1 h). Acepta la
+  // ruta guardada por el registro nuevo y las URLs públicas antiguas.
+  const openDocument = async (stored: string) => {
+    const signed = await getCompanyDocumentSignedUrl(stored);
+    if (!signed) {
+      toast.error('No se pudo abrir el documento');
+      return;
+    }
+    setDocumentIsPdf((companyDocumentPath(stored) || '').toLowerCase().endsWith('.pdf'));
+    setDocumentToView(signed);
+  };
 
   // Stats
   const [stats, setStats] = useState({
@@ -582,7 +596,7 @@ const CompanyManagementSection: React.FC = () => {
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Tax Document (CIF/NIF)</p>
                           {selectedCompany.tax_document_url ? (
                             <button
-                              onClick={() => setDocumentToView(selectedCompany.tax_document_url!)}
+                              onClick={() => openDocument(selectedCompany.tax_document_url!)}
                               className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
                             >
                               <EyeIcon className="h-4 w-4 mr-1" />
@@ -597,7 +611,7 @@ const CompanyManagementSection: React.FC = () => {
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Business License</p>
                           {selectedCompany.verification_document_url ? (
                             <button
-                              onClick={() => setDocumentToView(selectedCompany.verification_document_url!)}
+                              onClick={() => openDocument(selectedCompany.verification_document_url!)}
                               className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
                             >
                               <EyeIcon className="h-4 w-4 mr-1" />
@@ -735,7 +749,7 @@ const CompanyManagementSection: React.FC = () => {
                   </button>
                 </div>
                 <div className="mt-4">
-                  {documentToView.endsWith('.pdf') ? (
+                  {documentIsPdf ? (
                     <div className="text-center py-8">
                       <p className="text-gray-600 mb-4">PDF Preview</p>
                       <a

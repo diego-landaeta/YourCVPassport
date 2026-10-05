@@ -55,7 +55,8 @@ test.describe('AI Optimize Description Function', () => {
       },
     });
 
-    expect([200, 400, 500]).toContain(response.status());
+    // 401: ai-optimize-description exige JWT desde el endurecimiento de seguridad.
+    expect([200, 400, 401, 500]).toContain(response.status());
   });
 
   test('ai-optimize-description - should require description parameter', async ({ request }) => {

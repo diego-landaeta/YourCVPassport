@@ -5,6 +5,7 @@ import { getAnalyticsStats } from '../../hooks/useAnalytics';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
+import { AI_FEATURES_ENABLED } from '../../lib/ai';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 import { canChangeSlug, getNextSlugChangeDate, updateSlugWithValidation } from '../../utils/slugValidation';
@@ -340,9 +341,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const [showExportLimitModal, setShowExportLimitModal] = useState(false);
   const [exportLimitInfo, setExportLimitInfo] = useState<FeatureLimitCheck | null>(null);
 
-  // Check if AI is available
-  // @ts-ignore
-  const isAIAvailable = Boolean(import.meta.env?.VITE_GOOGLE_AI_API_KEY);
+  // La IA se sirve desde la Edge Function ai-cv-assistant (sin clave en el cliente).
+  const isAIAvailable = AI_FEATURES_ENABLED;
 
   // Check if AI is available
 

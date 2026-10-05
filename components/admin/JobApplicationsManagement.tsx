@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
+import { fetchPrivateProfileFields } from '../../lib/privateProfileFields';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
   DocumentTextIcon,
@@ -148,14 +149,18 @@ const JobApplicationsManagement: React.FC = () => {
             )
           ),
           profiles (
-            full_name,
-            email,
-            phone
+            full_name
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      // email y phone son privados: se leen de profiles_full (admin)
+      const contacts = await fetchPrivateProfileFields<{ email: string | null; phone: string | null }>(
+        (apps || []).map((app: any) => app.profile_id),
+        'email, phone',
+      );
 
       // Format data
       const formattedApps = apps?.map(app => ({
@@ -163,8 +168,8 @@ const JobApplicationsManagement: React.FC = () => {
         job_title: app.job_postings?.title || 'Unknown Job',
         company_name: app.job_postings?.companies?.company_name || 'Unknown Company',
         applicant_name: app.profiles?.full_name || 'Unknown User',
-        applicant_email: app.profiles?.email || '',
-        applicant_phone: app.profiles?.phone || ''
+        applicant_email: contacts.get(app.profile_id)?.email || '',
+        applicant_phone: contacts.get(app.profile_id)?.phone || ''
       })) || [];
 
       setApplications(formattedApps);

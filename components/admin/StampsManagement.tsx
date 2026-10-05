@@ -98,7 +98,7 @@ const StampsManagement: React.FC = () => {
         .from('stamps')
         .select(`
           *,
-          profiles:profile_id(id, full_name, email, avatar_url)
+          profiles:profile_id(id, full_name, avatar_url)
         `)
         .order('created_at', { ascending: false });
 
@@ -110,8 +110,23 @@ const StampsManagement: React.FC = () => {
 
       if (error) throw error;
 
+      // El email es privado: no se puede pedir en el embed de `profiles`. Se lee
+      // de la vista profiles_full (admin) y se añade a cada sello.
+      const profileIds = Array.from(new Set((data || []).map((s: any) => s.profile_id).filter(Boolean)));
+      const emailById = new Map<string, string | null>();
+      if (profileIds.length > 0) {
+        const { data: emails } = await supabase
+          .from('profiles_full')
+          .select('id, email')
+          .in('id', profileIds);
+        (emails || []).forEach((p: any) => emailById.set(p.id, p.email ?? null));
+      }
+      const withEmails = (data || []).map((s: any) => (
+        s.profiles ? { ...s, profiles: { ...s.profiles, email: emailById.get(s.profile_id) ?? null } } : s
+      ));
+
       // Filter out PENDING EMAIL stamps (they should only show when VERIFIED)
-      let filteredData = (data || []).filter(stamp => {
+      let filteredData = withEmails.filter(stamp => {
         if (stamp.type === 'EMAIL' && stamp.status === 'PENDING') {
           return false;
         }
@@ -138,7 +153,7 @@ const StampsManagement: React.FC = () => {
       // Calculate stats and get users without stamps
       const [stampsResponse, profilesResponse] = await Promise.all([
         supabase.from('stamps').select('status, profile_id'),
-        supabase.from('profiles').select('id, full_name, email, avatar_url, created_at')
+        supabase.from('profiles_full').select('id, full_name, email, avatar_url, created_at')
       ]);
 
       if (stampsResponse.data && profilesResponse.data) {
@@ -280,7 +295,7 @@ const StampsManagement: React.FC = () => {
     try {
       // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
+        .from('profiles_full') // admin: perfil completo
         .select('*')
         .eq('id', profileId)
         .single();

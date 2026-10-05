@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Argenti
 
 Esta guía completa sobre **CV para trabajar en Argentina** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV para trabajar en Argentina](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Guía completa sobre CV para trabajar en Argentina}
+![CV para trabajar en Argentina](https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80){caption:Guía completa sobre CV para trabajar en Argentina}
 
 ## 1. Mercado laboral argentino 2026
 2. Formato de CV preferido
@@ -78,7 +78,7 @@ Para destacar en **CV para trabajar en Argentina** dentro de esta área, aplica 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
+![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
 
 ## Aspectos avanzados de CV para trabajar en Argentina
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
+![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1521295121783-8a321d551ad2?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV para trabajar en Argentina para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -218,7 +218,7 @@ Para destacar en **CV para trabajar en Argentina** dentro de esta área, aplica 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
+![Aspectos avanzados de CV para trabajar en Argentina](https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Argentina}
 
 ## Aspectos avanzados de CV para trabajar en Argentina
 
@@ -292,7 +292,7 @@ Dominar **CV para trabajar en Argentina** no es solo una ventaja competitiva —
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "CV por País",
   is_featured: false,

@@ -44,6 +44,20 @@ const AuthScreen: React.FC = () => {
     return hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
   };
 
+  // Traduce el `code` de la Edge Function `signup` (ver utils/authFunctionErrors.ts).
+  const signupErrorMessage = (err: { code?: string } | null | undefined): string => {
+    switch (err?.code) {
+      case 'EMAIL_ALREADY_REGISTERED': return t.errors.emailAlreadyExists;
+      case 'WEAK_PASSWORD': return t.errors.weakPassword;
+      case 'INVALID_INPUT': return t.errors.invalidInput;
+      case 'EMAIL_SEND_FAILED': return t.errors.signupEmailSendFailed;
+      case 'RATE_LIMITED': return t.errors.tooManyRequests;
+      case 'TIMEOUT': return t.errors.signupTimeout;
+      case 'NETWORK_ERROR': return t.errors.networkError;
+      default: return t.errors.serverError;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -115,14 +129,10 @@ const AuthScreen: React.FC = () => {
         });
 
         if (authError) {
-          if (authError.message?.includes('already registered')) {
-            setError(t.errors.emailAlreadyExists);
-          } else if (authError.message?.includes('Password')) {
-            setError(t.errors.passwordTooShort); // Fallback to passwordTooShort if weakPassword missing
-            // Show the actual error message from the server/edge function
-            const errorMsg = authError.message || t.errors.serverError;
-            setError(errorMsg);
-          }
+          // Todo error del alta se muestra (formulario + toast); antes casi todos se tragaban.
+          const msg = signupErrorMessage(authError);
+          setError(msg);
+          toast.error(msg, 8000);
           setIsLoading(false);
           return;
         }
@@ -155,7 +165,7 @@ const AuthScreen: React.FC = () => {
 
       {/* Error & Success Messages */}
       {error && (
-        <div className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
+        <div role="alert" className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
           <p className="text-xs text-red-700 dark:text-red-400">{error}</p>
         </div>
       )}

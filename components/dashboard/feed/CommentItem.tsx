@@ -13,6 +13,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { FeedComment } from '../../../types/feed';
+import AutoTranslationNotice from './AutoTranslationNotice';
+import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 
 interface CommentItemProps {
   comment: FeedComment;
@@ -53,6 +55,11 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
   const editInputRef = useRef<HTMLTextAreaElement>(null);
 
   const isOwner = currentUserId === comment.author_id;
+
+  // Traducción automática del comentario (no aplica a GIFs)
+  const isGif = comment.content.startsWith('GIF:');
+  const commentTranslation = useAutoTranslation([comment.content], { enabled: !isGif });
+  const shownCommentContent = commentTranslation.texts[0] || comment.content;
 
   const timeAgo = formatDistanceToNow(new Date(comment.created_at), {
     addSuffix: true,
@@ -189,9 +196,12 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                 />
               </div>
             ) : (
-              <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed mt-0.5">
-                {comment.content}
-              </p>
+              <>
+                <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed mt-0.5">
+                  {shownCommentContent}
+                </p>
+                <AutoTranslationNotice state={commentTranslation} compact className="mt-1" />
+              </>
             )}
           </div>
         )}

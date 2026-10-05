@@ -20,11 +20,14 @@ export {
 export {
   getCachedTranslation,
   saveCachedTranslation,
+  requestProfileTranslation,
   deleteCachedTranslation,
   generateContentHash,
   applyCachedTranslations,
   extractTranslatedContent,
 } from './cache/databaseCache';
+
+export type { ProfileTranslationRequestResult } from './cache/databaseCache';
 
 export {
   getFromDbCache,

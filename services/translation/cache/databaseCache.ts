@@ -178,41 +178,74 @@ export async function getCachedTranslation(
   }
 }
 
+export interface ProfileTranslationRequestResult {
+  ok: boolean;
+  /** Solo si ok: 'partial' = traducido pero NO cacheado (algún texto falló) */
+  status: 'cached' | 'stored' | 'nothing_to_translate' | 'partial' | null;
+  /** Solo si !ok: código HTTP de la función (404 perfil no público, 429 rate limit...) */
+  httpStatus: number | null;
+  retryAfterSeconds: number | null;
+}
+
+const PROFILE_TRANSLATION_FUNCTION = 'translate-profile';
+
+/**
+ * Pide a la Edge Function `translate-profile` que traduzca el perfil y lo
+ * guarde en la caché compartida `profile_translations`.
+ *
+ * El navegador ya NO escribe en esa tabla
+ * (supabase/migrations/20261005_cerrar_escritura_profile_translations.sql):
+ * la función recibe solo el id y el idioma, lee el perfil público y traduce
+ * ella misma. Si falla (no desplegada, 429, perfil no público...), no pasa
+ * nada: el perfil se sigue viendo con la traducción hecha en el navegador.
+ */
+export async function requestProfileTranslation(
+  profileId: string,
+  targetLanguage: TranslationLanguage
+): Promise<ProfileTranslationRequestResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke(PROFILE_TRANSLATION_FUNCTION, {
+      body: { profileId, targetLanguage },
+    });
+
+    if (error) {
+      const response = (error as { context?: unknown }).context;
+      const httpStatus = response instanceof Response ? response.status : null;
+      const retryAfter = response instanceof Response ? Number(response.headers.get('Retry-After')) : NaN;
+      return {
+        ok: false,
+        status: null,
+        httpStatus,
+        retryAfterSeconds: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null,
+      };
+    }
+
+    const status = (data as { status?: string } | null)?.status;
+    if (status === 'cached' || status === 'stored' || status === 'nothing_to_translate' || status === 'partial') {
+      return { ok: true, status, httpStatus: 200, retryAfterSeconds: null };
+    }
+    return { ok: false, status: null, httpStatus: null, retryAfterSeconds: null };
+  } catch (err) {
+    console.warn('[DatabaseCache] translate-profile no disponible:', err);
+    return { ok: false, status: null, httpStatus: null, retryAfterSeconds: null };
+  }
+}
+
 /**
  * Save translation to database cache
+ *
+ * Firma conservada por compatibilidad: `translatedContent` y `contentHash` ya
+ * NO se envían (el cliente nunca aporta el texto traducido). Solo se pide a la
+ * Edge Function que genere y guarde la traducción del perfil.
  */
 export async function saveCachedTranslation(
   profileId: string,
   targetLanguage: TranslationLanguage,
-  translatedContent: TranslatedProfileContent,
-  contentHash: string
+  _translatedContent?: TranslatedProfileContent,
+  _contentHash?: string
 ): Promise<boolean> {
-  try {
-    console.log('[DatabaseCache] Saving to cache:', { profileId, targetLanguage, contentHash });
-
-    const { error } = await supabase
-      .from('profile_translations')
-      .upsert({
-        profile_id: profileId,
-        target_language: targetLanguage,
-        translated_content: translatedContent,
-        source_content_hash: contentHash,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'profile_id,target_language',
-      });
-
-    if (error) {
-      console.error('[DatabaseCache] Error saving cache:', error);
-      return false;
-    }
-
-    console.log('[DatabaseCache] Cache saved successfully');
-    return true;
-  } catch (err) {
-    console.error('[DatabaseCache] Error saving:', err);
-    return false;
-  }
+  const result = await requestProfileTranslation(profileId, targetLanguage);
+  return result.ok && result.status !== 'partial';
 }
 
 /**
@@ -362,22 +395,19 @@ export function applyCachedTranslations(
 
 /**
  * Delete cached translation (useful when profile is updated)
+ *
+ * Solo admins: va por la RPC admin_delete_profile_translations (el navegador
+ * no tiene permiso de DELETE sobre profile_translations).
  */
 export async function deleteCachedTranslation(
   profileId: string,
   targetLanguage?: TranslationLanguage
 ): Promise<boolean> {
   try {
-    let query = supabase
-      .from('profile_translations')
-      .delete()
-      .eq('profile_id', profileId);
-
-    if (targetLanguage) {
-      query = query.eq('target_language', targetLanguage);
-    }
-
-    const { error } = await query;
+    const { error } = await supabase.rpc('admin_delete_profile_translations', {
+      p_profile_id: profileId,
+      p_target_language: targetLanguage ?? null,
+    });
 
     if (error) {
       console.error('[DatabaseCache] Error deleting cache:', error);

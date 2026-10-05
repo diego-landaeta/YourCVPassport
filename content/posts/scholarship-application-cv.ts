@@ -271,7 +271,7 @@ When discussing **scholarship application CV** in the context of advanced aspect
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of scholarship application CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of scholarship application CV}
+![Advanced aspects of scholarship application CV](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Advanced aspects of scholarship application CV}
 
 ## How YourCVPassport helps you with scholarship application CV
 

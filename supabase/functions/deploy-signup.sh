@@ -3,9 +3,41 @@
 # ============================================================================
 # Deploy Signup Edge Function
 # ============================================================================
+#
+# Este script NO contiene secretos: los lee de variables de entorno.
+#
+# Uso (los valores salen de tu gestor de contraseñas / Dashboard de Resend):
+#   export RESEND_API_KEY=...            # API key de Resend (rotada)
+#   export SENDER_EMAIL=no-reply@yourcvpassport.com
+#   ./deploy-signup.sh
+#
+# SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY NO se configuran aquí: Supabase las
+# inyecta automáticamente en todas las Edge Functions (y la CLI no permite
+# `secrets set` de nombres con prefijo SUPABASE_).
+#
+# Opcional: CORS_EXTRA_ORIGINS (orígenes extra separados por comas, p. ej. un
+# staging) para supabase/functions/_shared/cors.ts.
+
+set -u
 
 echo "🚀 Deploying signup Edge Function..."
 echo ""
+
+# Check required environment variables (sin imprimir sus valores)
+missing=0
+for var in RESEND_API_KEY SENDER_EMAIL; do
+    if [ -z "${!var:-}" ]; then
+        echo "❌ Error: falta la variable de entorno $var"
+        missing=1
+    fi
+done
+if [ "$missing" -ne 0 ]; then
+    echo ""
+    echo "Defínelas antes de ejecutar el script, por ejemplo:"
+    echo "  export RESEND_API_KEY=<tu API key de Resend>"
+    echo "  export SENDER_EMAIL=no-reply@yourcvpassport.com"
+    exit 1
+fi
 
 # Check if supabase CLI is installed
 if ! command -v supabase &> /dev/null; then
@@ -21,6 +53,28 @@ if ! supabase projects list &> /dev/null; then
     exit 1
 fi
 
+# Set secrets first so the new deployment already uses them.
+# Se pasan por un fichero temporal (permisos 600) para que los valores no
+# aparezcan en la lista de procesos ni en el historial del shell.
+echo "📝 Setting secrets (RESEND_API_KEY, SENDER_EMAIL)..."
+env_file="$(mktemp)"
+chmod 600 "$env_file"
+trap 'rm -f "$env_file"' EXIT
+{
+    printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
+    printf 'SENDER_EMAIL=%s\n' "$SENDER_EMAIL"
+    if [ -n "${CORS_EXTRA_ORIGINS:-}" ]; then
+        printf 'CORS_EXTRA_ORIGINS=%s\n' "$CORS_EXTRA_ORIGINS"
+    fi
+} > "$env_file"
+
+if ! supabase secrets set --env-file "$env_file" > /dev/null; then
+    echo "❌ Failed to set secrets"
+    exit 1
+fi
+echo "✅ Secrets set"
+echo ""
+
 # Deploy signup function
 echo "👤 Deploying signup..."
 supabase functions deploy signup --no-verify-jwt
@@ -31,26 +85,6 @@ else
     echo "❌ Failed to deploy signup"
     exit 1
 fi
-
-echo ""
-echo "📝 Setting environment variables..."
-echo ""
-
-# Set environment variables for the function
-# IMPORTANTE: Estas variables deben estar configuradas en tu Dashboard de Supabase
-# Ve a: Project Settings > Edge Functions > Manage secrets
-
-echo "Setting RESEND_API_KEY..."
-supabase secrets set RESEND_API_KEY=re_Ancd1uP3_2VPxp32mKewFD61LvVPPny61
-
-echo "Setting SENDER_EMAIL..."
-supabase secrets set SENDER_EMAIL=no-reply@yourcvpassport.com
-
-echo "Setting SUPABASE_URL..."
-supabase secrets set SUPABASE_URL=https://djehzlzombqrzzuchcef.supabase.co
-
-echo "Setting SUPABASE_SERVICE_ROLE_KEY..."
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWh6bHpvbWJxcnp6dWNoY2VmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDYwMDY0NCwiZXhwIjoyMDc2MTc2NjQ0fQ.hOg6MReR79s7UmrTtTa05etDbF3kdbDC3fjb5ndoLwg
 
 echo ""
 echo "🎉 Signup function deployed and configured!"

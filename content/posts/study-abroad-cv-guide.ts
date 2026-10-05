@@ -218,7 +218,7 @@ To excel in **study abroad on CV** within this area, apply these proven strategi
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of study abroad on CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of study abroad on CV}
+![Advanced aspects of study abroad on CV](https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80){caption:Advanced aspects of study abroad on CV}
 
 ## Advanced aspects of study abroad on CV
 

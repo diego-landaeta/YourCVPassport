@@ -1,7 +1,10 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
 import { useLanguage } from '../../contexts/LanguageContext';
+import Pagination from '../ui/Pagination';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { buildIlikeOrFilter, combineOrGroups } from '../../utils/postgrestSearch';
 import {
   ShieldCheckIcon,
   MagnifyingGlassIcon,
@@ -21,9 +24,12 @@ interface UserProfile {
   id: string;
   email: string;
   full_name: string;
-  role: 'user' | 'admin' | 'company';
+  // Valores de profiles_role_check (20260301_add_profile_manager_role.sql).
+  // NULL lo puede dejar el trigger normalizador: se trata como 'professional'.
+  role: 'professional' | 'employer' | 'profile_manager' | 'admin' | null;
   is_active: boolean;
-  profile_quality_score: number;
+  plan?: 'free' | 'basic' | 'pro' | 'enterprise' | null;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
   last_login?: string;
@@ -39,14 +45,36 @@ interface UserProfile {
 }
 
 type FilterStatus = 'all' | 'active' | 'suspended';
-type FilterRole = 'all' | 'user' | 'company' | 'admin';
+type FilterRole = 'all' | 'professional' | 'employer' | 'profile_manager' | 'admin';
+
+const PAGE_SIZE = 25;
+
+// Solo las columnas que usa la vista (antes select('*') de toda la tabla).
+// No se piden photo_url/profile_photo_url: no consta que existan en BD y una
+// columna inexistente haria fallar la consulta entera (400).
+const USER_COLUMNS =
+  'id,full_name,email,role,is_active,plan,slug,headline,location,avatar_url,created_at,updated_at,suspension_reason,suspended_until,profile_hidden,search_blocked,messages_blocked';
+
+const PLAN_STYLES: Record<string, string> = {
+  free: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  basic: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  pro: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+  enterprise: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+};
+
+const PLAN_LABELS: Record<string, string> = { free: 'Free', basic: 'Basic', pro: 'Pro', enterprise: 'Enterprise' };
 
 const UserModeration: React.FC = () => {
   const { lang } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [stats, setStats] = useState({ total: 0, active: 0, suspended: 0 });
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, 350);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [filterRole, setFilterRole] = useState<FilterRole>('all');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -72,8 +100,9 @@ const UserModeration: React.FC = () => {
       all: 'All',
       active: 'Active',
       suspended: 'Suspended',
-      user: 'User',
-      company: 'Company',
+      professional: 'Professional',
+      employer: 'Employer',
+      profile_manager: 'Profile manager',
       admin: 'Admin',
       totalUsers: 'Total Users',
       activeUsers: 'Active',
@@ -133,7 +162,11 @@ const UserModeration: React.FC = () => {
       noMessagingAccess: 'No messaging access',
       lastActivity: 'Last activity',
       location: 'Location',
-      plan: 'Plan'
+      plan: 'Plan',
+      loadError: 'Could not load users.',
+      retry: 'Retry',
+      showing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total}`,
+      updating: 'Updating…'
     },
     es: {
       title: 'Moderación de Usuarios',
@@ -144,8 +177,9 @@ const UserModeration: React.FC = () => {
       all: 'Todos',
       active: 'Activos',
       suspended: 'Suspendidos',
-      user: 'Usuario',
-      company: 'Empresa',
+      professional: 'Profesional',
+      employer: 'Empresa',
+      profile_manager: 'Gestor de perfiles',
       admin: 'Administrador',
       totalUsers: 'Total Usuarios',
       activeUsers: 'Activos',
@@ -205,73 +239,112 @@ const UserModeration: React.FC = () => {
       noMessagingAccess: 'Sin acceso a mensajería',
       lastActivity: 'Última actividad',
       location: 'Ubicación',
-      plan: 'Plan'
+      plan: 'Plan',
+      loadError: 'No se pudieron cargar los usuarios.',
+      retry: 'Reintentar',
+      showing: (from: number, to: number, total: number) => `Mostrando ${from}–${to} de ${total}`,
+      updating: 'Actualizando…'
     }
   };
 
   const t = translations[lang];
 
-  useEffect(() => {
-    loadUsers();
+  // Filtros que se aplican en el servidor. Al cambiar, se vuelve a la pagina 1.
+  const filtersKey = `${filterStatus}|${filterRole}|${debouncedSearch.trim()}`;
+  const lastFiltersKey = useRef(filtersKey);
+  const requestId = useRef(0);
+
+  // Tarjetas de totales: consultas head:true (solo cuentan, no descargan filas).
+  const loadStats = useCallback(async () => {
+    const base = () => supabase.from('profiles').select('id', { count: 'exact', head: true });
+    const [{ count: total }, { count: suspended }] = await Promise.all([
+      base(),
+      base().eq('is_active', false),
+    ]);
+    // is_active NULL cuenta como activo (igual que en la tabla).
+    setStats({ total: total || 0, active: Math.max((total || 0) - (suspended || 0), 0), suspended: suspended || 0 });
   }, []);
 
-  useEffect(() => {
-    filterUsers();
-  }, [searchQuery, filterStatus, filterRole, users]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
+    const id = ++requestId.current;
+    setFetching(true);
+    setLoadError(false);
     try {
-      setLoading(true);
+      const from = (page - 1) * PAGE_SIZE;
+      let query = supabase
+        .from('profiles_full') // email, plan y moderación son privados
+        .select(USER_COLUMNS, { count: 'exact' });
 
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      if (filterStatus === 'active') {
+        // NOT (is_active IS FALSE): incluye true y NULL
+        query = query.not('is_active', 'is', false);
+      } else if (filterStatus === 'suspended') {
+        query = query.eq('is_active', false);
+      }
+
+      if (filterRole !== 'all' && filterRole !== 'professional') {
+        query = query.eq('role', filterRole);
+      }
+      const orFilter = combineOrGroups([
+        // 'professional' incluye role NULL (lo puede dejar el trigger normalizador)
+        filterRole === 'professional' ? 'role.eq.professional,role.is.null' : null,
+        buildIlikeOrFilter(['full_name', 'email'], debouncedSearch),
+      ]);
+      if (orFilter) query = query.or(orFilter);
+
+      // Orden estable: created_at puede repetirse, se desempata por id.
+      const { data: profiles, error, count } = await query
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
 
       if (error) throw error;
+      if (id !== requestId.current) return; // respuesta obsoleta
 
-      // Format data with additional fields
-      const formattedUsers = profiles?.map(profile => ({
+      setUsers((profiles || []).map(profile => ({
         ...profile,
         is_active: profile.is_active ?? true,
         last_login: profile.updated_at // TODO: Get real last login from activity logs
-      })) || [];
-
-      setUsers(formattedUsers);
-      setFilteredUsers(formattedUsers);
+      })));
+      setTotalCount(count || 0);
     } catch (error) {
+      if (id !== requestId.current) return;
       console.error('Error loading users:', error);
+      setLoadError(true);
     } finally {
-      setLoading(false);
+      if (id === requestId.current) {
+        setFetching(false);
+        setLoading(false);
+      }
     }
-  };
+  }, [page, filterStatus, filterRole, debouncedSearch]);
 
-  const filterUsers = () => {
-    let filtered = [...users];
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      loadUsers(),
+      loadStats().catch(err => console.error('Error loading user stats:', err)),
+    ]);
+  }, [loadUsers, loadStats]);
 
-    // Filter by status
-    if (filterStatus === 'active') {
-      filtered = filtered.filter(u => u.is_active);
-    } else if (filterStatus === 'suspended') {
-      filtered = filtered.filter(u => !u.is_active);
+  useEffect(() => {
+    loadStats().catch(err => console.error('Error loading user stats:', err));
+  }, [loadStats]);
+
+  useEffect(() => {
+    if (lastFiltersKey.current !== filtersKey) {
+      lastFiltersKey.current = filtersKey;
+      if (page !== 1) {
+        setPage(1); // el efecto se repite con la pagina 1
+        return;
+      }
     }
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadUsers, filtersKey]);
 
-    // Filter by role
-    if (filterRole !== 'all') {
-      filtered = filtered.filter(u => u.role === filterRole);
-    }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(u =>
-        u.full_name?.toLowerCase().includes(query) ||
-        u.email?.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredUsers(filtered);
-  };
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const rangeFrom = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeTo = Math.min(page * PAGE_SIZE, totalCount);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -328,7 +401,7 @@ const UserModeration: React.FC = () => {
         return;
       }
 
-      await loadUsers();
+      await refresh();
       setShowDetailModal(false);
       setSuspensionReason(undefined);
       setSuspensionDuration('permanent');
@@ -363,7 +436,7 @@ const UserModeration: React.FC = () => {
         return;
       }
 
-      await loadUsers();
+      await refresh();
       setShowDetailModal(false);
       setSelectedUser(null);
       showToast(t.userActivated, 'success');
@@ -372,28 +445,27 @@ const UserModeration: React.FC = () => {
     }
   };
 
-  const stats = {
-    total: users.length,
-    active: users.filter(u => u.is_active).length,
-    suspended: users.filter(u => !u.is_active).length
-  };
-
   const getStatusColor = (isActive: boolean) => {
     return isActive
       ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
       : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role: string | null) => {
     switch (role) {
       case 'admin':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-      case 'company':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
+      case 'employer':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'profile_manager':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+      default: // 'professional' o NULL
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
+
+  const roleLabel = (role: string | null) => t[(role || 'professional') as 'professional'] || role;
+  const planKey = (plan?: string | null) => (plan && PLAN_STYLES[plan] ? plan : 'free');
 
   if (loading) {
     return (
@@ -494,8 +566,9 @@ const UserModeration: React.FC = () => {
               className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-cv-blue focus:border-transparent"
             >
               <option value="all">{t.all}</option>
-              <option value="user">{t.user}</option>
-              <option value="company">{t.company}</option>
+              <option value="professional">{t.professional}</option>
+              <option value="employer">{t.employer}</option>
+              <option value="profile_manager">{t.profile_manager}</option>
               <option value="admin">{t.admin}</option>
             </select>
           </div>
@@ -503,8 +576,24 @@ const UserModeration: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden">
-        {filteredUsers.length === 0 ? (
+      <div
+        className={`bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden transition-opacity ${fetching ? 'opacity-60' : ''}`}
+        aria-busy={fetching}
+        data-testid="users-table"
+      >
+        {loadError ? (
+          <div className="text-center py-12" role="alert">
+            <ExclamationTriangleIcon className="h-12 w-12 text-red-500 dark:text-red-400 mx-auto mb-4" />
+            <p className="text-gray-700 dark:text-dark-text-secondary mb-4">{t.loadError}</p>
+            <button
+              type="button"
+              onClick={() => loadUsers()}
+              className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {t.retry}
+            </button>
+          </div>
+        ) : users.length === 0 ? (
           <div className="text-center py-12">
             <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-dark-text-secondary">{t.noResults}</p>
@@ -532,15 +621,15 @@ const UserModeration: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-dark-border">
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors">
                     <td className="px-3 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <div className="flex-shrink-0 h-9 w-9">
-                          {(user as any).photo_url || (user as any).avatar_url || (user as any).profile_photo_url ? (
+                          {(user as any).avatar_url || (user as any).photo_url ? (
                             <img
                               className="h-9 w-9 rounded-full object-cover border border-gray-200 dark:border-gray-600"
-                              src={(user as any).photo_url || (user as any).avatar_url || (user as any).profile_photo_url || ''}
+                              src={(user as any).avatar_url || (user as any).photo_url || ''}
                               alt={user.full_name || 'User'}
                               onError={(e) => {
                                 const img = e.target as HTMLImageElement;
@@ -594,12 +683,8 @@ const UserModeration: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' :
-                        user.role === 'company' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                      }`}>
-                        Free
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${PLAN_STYLES[planKey(user.plan)]}`}>
+                        {PLAN_LABELS[planKey(user.plan)]}
                       </span>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap text-center">
@@ -649,6 +734,21 @@ const UserModeration: React.FC = () => {
         )}
       </div>
 
+      {/* Paginacion (servidor) */}
+      {!loadError && totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm text-gray-600 dark:text-dark-text-secondary" aria-live="polite">
+            {fetching ? t.updating : t.showing(rangeFrom, rangeTo, totalCount)}
+          </p>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            className="flex flex-wrap items-center justify-center gap-2"
+          />
+        </div>
+      )}
+
       {/* Detail Modal */}
       {showDetailModal && selectedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -675,9 +775,9 @@ const UserModeration: React.FC = () => {
             <div className="p-6 space-y-6">
               {/* Profile Header with Avatar */}
               <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-dark-border">
-                {selectedUser.photo_url ? (
+                {selectedUser.avatar_url || selectedUser.photo_url ? (
                   <img
-                    src={selectedUser.photo_url}
+                    src={selectedUser.avatar_url || selectedUser.photo_url}
                     alt={selectedUser.full_name}
                     className="w-16 h-16 rounded-full object-cover"
                   />
@@ -730,14 +830,18 @@ const UserModeration: React.FC = () => {
                       </a>
                     </div>
                   )}
-                  {selectedUser.role && selectedUser.role !== 'user' && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 dark:text-dark-text-secondary">{t.role}:</span>
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(selectedUser.role)}`}>
-                        {t[selectedUser.role as keyof typeof t]}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 dark:text-dark-text-secondary">{t.role}:</span>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(selectedUser.role)}`}>
+                      {roleLabel(selectedUser.role)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 dark:text-dark-text-secondary">{t.plan}:</span>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${PLAN_STYLES[planKey(selectedUser.plan)]}`}>
+                      {PLAN_LABELS[planKey(selectedUser.plan)]}
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 dark:text-dark-text-secondary">{t.status}:</span>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedUser.is_active)}`}>

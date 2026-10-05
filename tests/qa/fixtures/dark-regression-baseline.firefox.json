@@ -1,0 +1,2250 @@
+{
+ "header": [
+  {
+   "key": "0:header:bg-white/80 dark:bg-dark-bg-primary/95 backdrop-blur-md sticky top-0 z-50 shadow",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(15, 20, 25, 0.95)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "1:a:text-xl lg:text-2xl font-bold text-cv-blue dark:text-cv-blue-light whitespace-no",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "2:button:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "3:button:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "4:button:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "5:button:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "6:button:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "7:a:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "8:a:text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "9:button:p-2 rounded-full bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "10:button:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white dark:bg-dark-bg-se",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "11:button:text-sm font-medium text-gray-600 dark:text-dark-text-secondary hover:text-cv-bl",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "12:button:bg-cv-blue dark:bg-cv-blue text-white px-4 py-2 rounded-md text-sm font-medium h",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(37, 99, 235)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "13:button:inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-d",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  }
+ ],
+ "home": [
+  {
+   "key": "0:section:bg-cv-light-gray dark:bg-dark-bg-primary",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "1:h1:text-4xl md:text-6xl font-extrabold text-gray-800 dark:text-dark-text-primary le",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "2:span:text-cv-blue dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "3:p:mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600 dark:text-dark-text-seco",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "4:button:w-full sm:w-auto bg-cv-blue dark:bg-cv-blue text-white px-8 py-3 rounded-lg text",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(37, 99, 235)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "5:button:w-full sm:w-auto bg-white dark:bg-dark-bg-secondary text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(96, 165, 250)",
+   "bgImage": "none"
+  },
+  {
+   "key": "6:section:py-20 bg-white dark:bg-dark-bg-primary",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "7:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "8:p:mt-4 text-lg text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "9:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "10:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "11:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "12:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "13:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "14:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "15:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "16:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "17:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "18:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "19:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "20:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "21:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "22:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "23:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "24:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "25:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "26:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "27:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "28:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "29:div:bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-100 dark:border-da",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "30:div:flex items-center justify-center h-16 w-16 rounded-full bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "31:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "32:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "33:section:py-20 bg-cv-light-gray dark:bg-dark-bg-primary",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "34:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "35:p:mt-4 text-lg text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "36:div:flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "37:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "38:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "39:div:flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "40:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "41:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "42:div:flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-cv-blue dark:bg-cv-bl",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(96, 165, 250)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "43:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "44:p:mt-2 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "45:p:mt-3 text-sm text-gray-500 dark:text-dark-text-tertiary",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "46:section:bg-cv-light-gray dark:bg-dark-bg-secondary py-20",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "47:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "48:p:mt-4 text-lg text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "49:div:bg-cv-light-gray dark:bg-dark-bg-secondary text-cv-dark-gray dark:text-dark-text",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "50:p:text-lg mb-6 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "51:section:bg-white dark:bg-dark-bg-primary py-20",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "52:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "53:p:mt-4 text-lg text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "54:span:font-semibold text-cv-blue dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "55:div:w-14 h-8 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full peer peer-checked:aft",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(61, 66, 74)",
+   "bgImage": "none"
+  },
+  {
+   "key": "56:span:font-semibold text-gray-500 dark:text-dark-text-tertiary",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "57:div:border rounded-lg p-8 flex flex-col border-gray-200 dark:border-dark-border bg-w",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "58:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "59:span:text-5xl font-extrabold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "60:span:ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "61:p:mt-5 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "62:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "63:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "64:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "65:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "66:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "67:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "68:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "69:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "70:button:mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "71:div:border rounded-lg p-8 flex flex-col border-cv-blue dark:border-cv-blue-light sca",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(96, 165, 250)",
+   "bgImage": "none"
+  },
+  {
+   "key": "72:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "73:span:text-5xl font-extrabold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "74:span:ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "75:p:mt-5 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "76:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "77:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "78:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "79:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "80:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "81:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "82:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "83:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "84:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "85:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "86:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "87:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "88:button:mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(37, 99, 235)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "89:div:border rounded-lg p-8 flex flex-col border-gray-200 dark:border-dark-border bg-w",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "90:h3:text-xl font-semibold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "91:span:text-5xl font-extrabold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "92:span:ml-1 text-xl font-semibold text-gray-500 dark:text-dark-text-tertiary",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "93:p:mt-5 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "94:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "95:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "96:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "97:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "98:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "99:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "100:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "101:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "102:svg:h-6 w-6 text-status-success dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "103:p:ml-3 text-gray-700 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "104:a:mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "105:a:inline-block bg-cv-light-gray dark:bg-dark-bg-secondary text-gray-800 dark:text-",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "106:section:bg-gray-900 dark:bg-dark-bg-primary text-white py-20 border-y border-transparent",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "107:h2:text-3xl md:text-4xl font-bold text-white dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "108:p:mt-4 text-lg text-gray-300 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "109:a:mt-8 inline-block bg-cv-blue dark:bg-cv-blue text-white px-8 py-3 rounded-lg tex",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(37, 99, 235)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "110:svg:w-48 h-48 text-cv-blue dark:text-cv-blue-light",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "111:section:bg-white dark:bg-dark-bg-primary py-20",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "112:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "113:p:mt-4 text-lg text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "114:div:mt-12 max-w-3xl mx-auto bg-cv-light-gray dark:bg-dark-bg-secondary p-8 rounded-x",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "115:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "116:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "117:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "118:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "119:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "120:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "121:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "122:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "123:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "124:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "125:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "126:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "127:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "128:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "129:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "130:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "131:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "132:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "133:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "134:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "135:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "136:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "137:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "138:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "139:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "140:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "141:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "142:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "143:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "144:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "145:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "146:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "147:div:border-b border-gray-200 dark:border-dark-border py-6",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "148:button:w-full flex justify-between items-start text-left text-gray-400 dark:text-dark-t",
+   "color": "rgb(107, 114, 128)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "149:span:text-lg font-medium text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "150:svg:h-6 w-6 transform transition-transform duration-200 text-cv-blue dark:text-cv-bl",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "151:section:bg-cv-light-gray dark:bg-dark-bg-secondary border-y border-gray-100 dark:border-",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "152:h2:text-3xl md:text-4xl font-bold text-gray-800 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "153:p:mt-4 text-lg leading-6 text-gray-600 dark:text-dark-text-secondary",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "154:button:mt-8 w-full inline-flex items-center justify-center px-8 py-3 border border-tran",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(37, 99, 235)",
+   "border": "rgba(0, 0, 0, 0)",
+   "bgImage": "none"
+  }
+ ],
+ "adminDashboard": [
+  {
+   "key": "0:div:min-h-screen bg-white dark:bg-dark-bg-primary",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(15, 20, 25)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "1:header:bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-bor",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "2:h1:text-2xl font-bold text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "3:p:text-gray-600 dark:text-dark-text-secondary text-sm mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "4:div:bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "5:div:p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "6:svg:h-5 w-5 text-gray-700 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "7:h2:text-lg font-semibold text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "8:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "9:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "10:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "11:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "12:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "13:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "14:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "15:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "16:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "17:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "18:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "19:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "20:div:bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "21:div:p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "22:svg:h-5 w-5 text-gray-700 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "23:h2:text-lg font-semibold text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "24:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "25:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg relative",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "26:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "27:h3:font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "28:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "29:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "30:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "31:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg relative",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "32:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "33:h3:font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "34:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "35:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "36:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "37:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "38:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "39:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "40:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "41:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "42:div:bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "43:div:p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "44:svg:h-5 w-5 text-gray-700 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "45:h2:text-lg font-semibold text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "46:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "47:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "48:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "49:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "50:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "51:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "52:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "53:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "54:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "55:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "56:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "57:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "58:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "59:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "60:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "61:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "62:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "63:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "64:div:bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(26, 31, 38)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "65:div:p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "66:svg:h-5 w-5 text-gray-700 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "67:h2:text-lg font-semibold text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "68:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "69:div:p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(88, 28, 135, 0.3)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "70:svg:h-6 w-6 text-purple-600 dark:text-purple-400",
+   "color": "rgb(192, 132, 252)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "71:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "72:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "73:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "74:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "75:div:p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(88, 28, 135, 0.3)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "76:svg:h-6 w-6 text-purple-600 dark:text-purple-400",
+   "color": "rgb(192, 132, 252)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "77:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "78:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "79:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "80:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "81:div:p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(120, 53, 15, 0.3)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "82:svg:h-6 w-6 text-amber-600 dark:text-amber-400",
+   "color": "rgb(251, 191, 36)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "83:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "84:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "85:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "86:button:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "87:div:p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(30, 58, 138, 0.3)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "88:svg:h-6 w-6 text-blue-600 dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "89:h3:font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "90:span:px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purp",
+   "color": "rgb(192, 132, 252)",
+   "bg": "rgba(88, 28, 135, 0.3)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "91:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "92:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "93:a:w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gr",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(45, 49, 57)",
+   "bgImage": "none"
+  },
+  {
+   "key": "94:div:p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(37, 99, 235, 0.2)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "95:svg:h-6 w-6 text-cv-blue dark:text-blue-400",
+   "color": "rgb(96, 165, 250)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "96:h3:font-medium text-gray-900 dark:text-dark-text-primary",
+   "color": "rgb(230, 232, 235)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "97:p:text-sm text-gray-600 dark:text-dark-text-secondary mt-1",
+   "color": "rgb(155, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "98:svg:w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  }
+ ],
+ "cvTemplateDark": [
+  {
+   "key": "0:div:cv-template bg-white dark:bg-gray-800 shadow-2xl mx-auto",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(31, 41, 55)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "1:div:max-w-5xl mx-auto my-12 bg-gradient-to-br from-white to-gray-50 dark:from-dark-b",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right bottom, rgb(26, 31, 38), rgb(15, 20, 25))"
+  },
+  {
+   "key": "2:header:text-center border-b-2 border-gray-200 dark:border-gray-700 pb-10 mb-12",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "none"
+  },
+  {
+   "key": "3:div:w-32 h-32 rounded-full mx-auto mb-6 shadow-xl ring-4 ring-white dark:ring-dark-b",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "4:h1:text-5xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white mb-4 tra",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "5:div:w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-md border-2 border-gray-",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(31, 41, 55)",
+   "border": "rgb(75, 85, 99)",
+   "bgImage": "none"
+  },
+  {
+   "key": "6:span:text-sm font-medium text-gray-700 dark:text-gray-300",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "7:button:inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-dark-bg-tertiary bor",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(75, 85, 99)",
+   "bgImage": "none"
+  },
+  {
+   "key": "8:section:bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl tra",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "9:h2:text-xl font-serif font-bold text-gray-900 dark:text-white",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "10:p:text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-serif",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "11:section:bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl tra",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "12:h2:text-xl font-serif font-bold text-gray-900 dark:text-white mb-6",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "13:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "14:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "15:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "16:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "17:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "18:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "19:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "20:span:text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg hover:-tr",
+   "color": "rgb(59, 130, 246)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.063))"
+  },
+  {
+   "key": "21:section:bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl tra",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "22:h2:text-3xl font-serif font-bold text-gray-900 dark:text-white",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "23:div:relative pl-8 pb-8 border-l-2 border-gray-200 dark:border-gray-700 last:border-l",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "none"
+  },
+  {
+   "key": "24:div:absolute left-0 top-1.5 w-4 h-4 rounded-full ring-4 ring-white dark:ring-dark-bg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(59, 130, 246)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "25:div:bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-terti",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right bottom, rgb(31, 41, 55), rgb(39, 44, 53))"
+  },
+  {
+   "key": "26:h3:text-xl font-serif font-bold text-gray-900 dark:text-white mb-2",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "27:p:text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "28:p:text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "29:div:relative pl-8 pb-8 border-l-2 border-gray-200 dark:border-gray-700 last:border-l",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "none"
+  },
+  {
+   "key": "30:div:absolute left-0 top-1.5 w-4 h-4 rounded-full ring-4 ring-white dark:ring-dark-bg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(59, 130, 246)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "31:div:bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-terti",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right bottom, rgb(31, 41, 55), rgb(39, 44, 53))"
+  },
+  {
+   "key": "32:h3:text-xl font-serif font-bold text-gray-900 dark:text-white mb-2",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "33:p:text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "34:p:text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "35:div:relative pl-8 pb-8 border-l-2 border-gray-200 dark:border-gray-700 last:border-l",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(55, 65, 81)",
+   "bgImage": "none"
+  },
+  {
+   "key": "36:div:absolute left-0 top-1.5 w-4 h-4 rounded-full ring-4 ring-white dark:ring-dark-bg",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(59, 130, 246)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "37:div:bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-terti",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right bottom, rgb(31, 41, 55), rgb(39, 44, 53))"
+  },
+  {
+   "key": "38:h3:text-xl font-serif font-bold text-gray-900 dark:text-white mb-2",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "39:p:text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "40:p:text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "41:section:bg-white dark:bg-dark-bg-tertiary rounded-2xl p-8 shadow-xl hover:shadow-2xl tra",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgb(39, 44, 53)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "42:h2:text-3xl font-serif font-bold text-gray-900 dark:text-white",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "43:div:flex gap-5 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-dark-bg-prima",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right, rgb(15, 20, 25), rgb(31, 41, 55))"
+  },
+  {
+   "key": "44:h3:text-lg font-serif font-bold text-gray-900 dark:text-white mb-1",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "45:p:font-semibold text-gray-700 dark:text-gray-300",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "46:p:text-sm text-gray-500 dark:text-gray-400 mt-1",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "47:p:mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wra",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "48:div:flex gap-5 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-dark-bg-prima",
+   "color": "rgb(251, 251, 254)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "linear-gradient(to right, rgb(15, 20, 25), rgb(31, 41, 55))"
+  },
+  {
+   "key": "49:h3:text-lg font-serif font-bold text-gray-900 dark:text-white mb-1",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "50:p:font-semibold text-gray-700 dark:text-gray-300",
+   "color": "rgb(209, 213, 219)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  },
+  {
+   "key": "51:p:text-sm text-gray-500 dark:text-gray-400 mt-1",
+   "color": "rgb(156, 163, 175)",
+   "bg": "rgba(0, 0, 0, 0)",
+   "border": "rgb(229, 231, 235)",
+   "bgImage": "none"
+  }
+ ]
+}

@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **plantilla CV profesor** se 
 
 Esta guía completa sobre **plantilla CV profesor** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV profesor](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre plantilla CV profesor}
+![plantilla CV profesor](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Guía completa sobre plantilla CV profesor}
 
 ## 1. CV especializado para profesores
 2. Secciones: titulacion, materias, metodologias
@@ -78,7 +78,7 @@ Para destacar en **plantilla CV profesor** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV profesor](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de plantilla CV profesor}
+![Aspectos avanzados de plantilla CV profesor](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Aspectos avanzados de plantilla CV profesor}
 
 ## Aspectos avanzados de plantilla CV profesor
 
@@ -292,7 +292,7 @@ Dominar **plantilla CV profesor** no es solo una ventaja competitiva — es una 
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Guías Profesionales",
   is_featured: false,

@@ -271,7 +271,7 @@ When discussing **CV PDF vs DOCX** in the context of advanced aspects of cv pdf 
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of CV PDF vs DOCX](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of CV PDF vs DOCX}
+![Advanced aspects of CV PDF vs DOCX](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Advanced aspects of CV PDF vs DOCX}
 
 ## How YourCVPassport helps you with CV PDF vs DOCX
 

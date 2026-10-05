@@ -4,10 +4,10 @@ import { ChangelogEntry, Template, MilestoneItem } from '../types';
 const transparencyIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" }), React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" }));
 const trustIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" }));
 const innovationIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" }));
-const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factFoundedIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" }));
 const factUsersIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" }));
-const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factTeamIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 21a6 6 0 006-5.197M15 21a6 6 0 00-3-5.197" }));
 const contactSupportIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9 12l2 2 4-4M5 12H3m4 4l-2 2m14-4l2 2m-2-14l2-2m-14 2l-2-2" }));
 const contactSalesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" }));
@@ -819,7 +819,10 @@ export const translations = {
             email: "Correo Electrónico",
             message: "Mensaje",
             submit: "Enviar Consulta",
-            alert: "¡Gracias por tu consulta! Nuestro equipo de prensa se pondrá en contacto contigo pronto."
+            alert: "¡Gracias por tu consulta! Nuestro equipo de prensa se pondrá en contacto contigo pronto.",
+            mailSubject: "Consulta de prensa",
+            mailNotice: "Tu consulta está preparada. Ábrela en tu aplicación de correo para enviarla a",
+            openMail: "Abrir en mi correo"
         }
     },
     contactPage: {
@@ -1027,6 +1030,11 @@ export const translations = {
             total: "Total",
             less: "Menos",
             more: "Más",
+            emptyWeekTitle: "Aún no hay visitas en los últimos 7 días",
+            emptyMonthTitle: "Sin visitas este mes",
+            emptyHint: "Comparte el enlace de tu perfil en LinkedIn, tu firma de correo o tus candidaturas para empezar a recibir visitas.",
+            emptyCta: "Ver mi perfil público",
+            beforeAccount: "antes de crear tu cuenta",
             days: {
                 mon: "Lun",
                 tue: "Mar",
@@ -1556,9 +1564,17 @@ export const translations = {
                 sessionExpired: "Tu sesión ha expirado. Por favor inicia sesión nuevamente",
                 unauthorized: "No autorizado. Por favor inicia sesión",
                 tooManyAttempts: "Demasiados intentos. Por favor intenta más tarde",
+                // Errores de las Edge Functions signup / send-password-reset (códigos en utils/authFunctionErrors.ts)
+                tooManyRequests: "Demasiadas solicitudes. Por favor intenta más tarde",
+                invalidInput: "Revisa los datos: el correo o la contraseña no son válidos",
+                signupEmailSendFailed: "No hemos podido enviarte el correo de confirmación, así que la cuenta no se ha creado. Inténtalo de nuevo en unos minutos o regístrate con Google.",
+                signupTimeout: "El servidor está tardando demasiado en responder. Revisa tu correo (puede que la cuenta se haya creado) o inténtalo de nuevo en unos minutos.",
+                recoveryEmailSendFailed: "No hemos podido enviar el correo de recuperación. Inténtalo de nuevo en unos minutos.",
+                recoveryTimeout: "El servidor está tardando demasiado en responder. Inténtalo de nuevo en unos minutos.",
             },
             success: {
                 loginSuccess: "¡Inicio de sesión exitoso!",
+                signUpSuccess: "¡Cuenta creada! Revisa tu correo para confirmarla",
                 signupSuccess: "¡Cuenta creada exitosamente! Por favor revisa tu correo para confirmar",
                 magicLinkSent: "¡Enlace mágico enviado! Revisa tu correo",
                 passwordResetSent: "¡Instrucciones de recuperación enviadas! Revisa tu correo",
@@ -1597,6 +1613,7 @@ export const translations = {
             canales: "Canales",
             notificaciones: "Notificaciones",
             companyDashboard: "Panel de Empresa",
+            adminPanel: "Panel admin",
             wizardAlertTitle: "Completa el wizard primero",
             wizardAlertDescription: "Debes completar el wizard de perfil (incluyendo el paso de Finalización) para acceder a todas las funcionalidades.",
             sectionHome: "INICIO",
@@ -3051,6 +3068,13 @@ export const translations = {
             label: "Artículo Destacado"
         },
         searchPlaceholder: "Buscar artículos...",
+        searchLabel: "Buscar artículos",
+        categoriesLabel: "Filtrar por categoría",
+        allCategories: "Todos",
+        noPosts: "No hay artículos disponibles",
+        noResults: "No hay artículos que coincidan con tu búsqueda.",
+        showingCount: "Mostrando {shown} de {total} artículos",
+        loadMore: "Cargar más artículos",
         sidebar: {
             popular: {
                 title: "Artículos Populares"
@@ -3060,7 +3084,12 @@ export const translations = {
                 subtitle: "Recibe los últimos consejos profesionales en tu bandeja de entrada.",
                 placeholder: "Tu dirección de correo",
                 button: "Suscribirse",
-                alert: "Suscrito con éxito con"
+                alert: "Suscrito con éxito con",
+                mailTo: "support@yourcvpassport.com",
+                mailSubject: "Suscripción al boletín",
+                mailBody: "Quiero suscribirme al boletín de YourCVPassport con este correo:",
+                notice: "Aún no tenemos alta automática. Para suscribirte, envíanos el correo ya preparado a",
+                openMail: "Abrir correo"
             }
         },
         finalCta: {
@@ -3070,6 +3099,72 @@ export const translations = {
         }
     }
     ,
+    breadcrumbs: {
+        ariaLabel: "Ruta de navegación",
+        home: "Inicio",
+        // Etiquetas cortas por ruta (ES y EN) de config/routeConfig.ts; no se reutiliza
+        // NAV_LINKS porque sus textos de menu son largos o llevan "/" (p. ej. "Prensa/Kit de Medios").
+        labels: {
+            "product": "Producto",
+            "producto": "Producto",
+            "product/overview": "Resumen",
+            "producto/resumen": "Resumen",
+            "product/stamps": "Perfiles verificados",
+            "producto/sellos": "Perfiles verificados",
+            "product/ats": "Exportación ATS",
+            "producto/ats": "Exportación ATS",
+            "product/domain": "Dominio personalizado",
+            "producto/dominio": "Dominio personalizado",
+            "product/analytics": "Analíticas de perfil",
+            "producto/analiticas": "Analíticas de perfil",
+            "product/ai": "IA para CV y cartas",
+            "producto/ia": "IA para CV y cartas",
+            "companies": "Empresas",
+            "empresas": "Empresas",
+            "companies/search": "Búsqueda de talento",
+            "empresas/busqueda": "Búsqueda de talento",
+            "companies/plans": "Plan para empresas",
+            "empresas/planes": "Plan para empresas",
+            "companies/integrations": "Integraciones ATS",
+            "empresas/integraciones": "Integraciones ATS",
+            "companies/security": "Seguridad y cumplimiento",
+            "empresas/seguridad": "Seguridad y cumplimiento",
+            "about": "Nosotros",
+            "nosotros": "Nosotros",
+            "about/mission": "Misión y valores",
+            "nosotros/mision": "Misión y valores",
+            "about/press": "Prensa y kit de medios",
+            "nosotros/prensa": "Prensa y kit de medios",
+            "about/contact": "Contacto",
+            "nosotros/contacto": "Contacto",
+            "professionals": "Profesionales",
+            "profesionales": "Profesionales",
+            "professionals/how": "Cómo funciona",
+            "profesionales/como-funciona": "Cómo funciona",
+            "professionals/templates": "Plantillas y ejemplos",
+            "profesionales/plantillas": "Plantillas y ejemplos",
+            "professionals/help": "Centro de ayuda",
+            "profesionales/ayuda": "Centro de ayuda",
+            "pricing": "Precios",
+            "precios": "Precios",
+            "resources": "Recursos",
+            "recursos": "Recursos",
+            "resources/blog": "Blog",
+            "recursos/blog": "Blog",
+            "resources/library": "Biblioteca de plantillas",
+            "recursos/biblioteca": "Biblioteca de plantillas",
+            "resources/success-stories": "Casos de éxito",
+            "recursos/exito": "Casos de éxito",
+            "resources/status": "Estado del sistema",
+            "recursos/estado": "Estado del sistema",
+            "profiles": "Perfiles",
+            "perfiles": "Perfiles",
+            "terms": "Términos y condiciones",
+            "terminos": "Términos y condiciones",
+            "privacy": "Política de privacidad",
+            "privacidad": "Política de privacidad"
+        }
+    },
     onboardingWizard: {
         step: "Paso",
         of: "de",
@@ -4719,6 +4814,16 @@ export const translations = {
         title: 'Comunidad',
         subtitle: 'Comparte tus logros y conecta con otros profesionales',
         beta: 'Beta',
+        autoTranslation: {
+            translating: 'Traduciendo…',
+            translatedFrom: {
+                en: 'Traducido automáticamente del inglés',
+                es: 'Traducido automáticamente del español',
+            },
+            translatedShort: 'Traducido',
+            seeOriginal: 'Ver original',
+            seeTranslation: 'Ver traducción',
+        },
         createPost: {
             placeholder: '¿Qué tienes en mente?',
             publish: 'Publicar',

@@ -218,7 +218,7 @@ Para destacar en **trabajo remoto LATAM CV** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de trabajo remoto LATAM CV](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de trabajo remoto LATAM CV}
+![Aspectos avanzados de trabajo remoto LATAM CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de trabajo remoto LATAM CV}
 
 ## Aspectos avanzados de trabajo remoto LATAM CV
 
@@ -271,7 +271,7 @@ Cuando hablamos de **trabajo remoto LATAM CV** en el contexto de aspectos avanza
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de trabajo remoto LATAM CV](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de trabajo remoto LATAM CV}
+![Aspectos avanzados de trabajo remoto LATAM CV](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Aspectos avanzados de trabajo remoto LATAM CV}
 
 ## Cómo YourCVPassport te ayuda con trabajo remoto LATAM CV
 

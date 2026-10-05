@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **crear perfil profesional on
 
 Esta guía completa sobre **crear perfil profesional online** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![crear perfil profesional online](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Guía completa sobre crear perfil profesional online}
+![crear perfil profesional online](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Guía completa sobre crear perfil profesional online}
 
 ## 1. Por que necesitas presencia online
 2. Dominio vs plataformas
@@ -78,7 +78,7 @@ Para destacar en **crear perfil profesional online** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de crear perfil profesional online](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de crear perfil profesional online}
+![Aspectos avanzados de crear perfil profesional online](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Aspectos avanzados de crear perfil profesional online}
 
 ## Aspectos avanzados de crear perfil profesional online
 
@@ -292,7 +292,7 @@ Dominar **crear perfil profesional online** no es solo una ventaja competitiva �
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "ATS y Tecnología",
   is_featured: false,

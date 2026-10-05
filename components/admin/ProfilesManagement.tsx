@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase/client';
+import Pagination from '../ui/Pagination';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { buildIlikeOrFilter, combineOrGroups } from '../../utils/postgrestSearch';
 import { Link } from 'react-router-dom';
 import { CountryBadge } from '../shared/CountrySelector';
 import AlertModal from '../shared/AlertModal';
@@ -21,12 +24,49 @@ interface Profile {
   created_at: string;
   updated_at: string;
   photo_url?: string;
+  avatar_url?: string;
 }
+
+const PAGE_SIZE = 25;
+
+// Solo las columnas que usa la vista y el modal de edicion (antes select('*')).
+// No se piden photo_url/profile_photo_url: no consta que existan en BD y una
+// columna inexistente haria fallar la consulta entera (400).
+const PROFILE_COLUMNS =
+  'id,full_name,email,headline,country_code,location,plan,role,slug,created_at,updated_at,avatar_url';
+
+const PLANS = ['free', 'basic', 'pro', 'enterprise'] as const;
+type PlanCounts = Record<(typeof PLANS)[number], number>;
+
+const LOCAL_TEXT = {
+  es: {
+    showing: (from: number, to: number, total: number) => `Mostrando ${from}–${to} de ${total}`,
+    updating: 'Actualizando…',
+    loadError: 'No se pudieron cargar los perfiles.',
+    retry: 'Reintentar',
+    noResults: 'No se encontraron perfiles con estos filtros.',
+    roles: { professional: 'Profesional', employer: 'Empresa', profile_manager: 'Gestor de perfiles', admin: 'Administrador' },
+  },
+  en: {
+    showing: (from: number, to: number, total: number) => `Showing ${from}–${to} of ${total}`,
+    updating: 'Updating…',
+    loadError: 'Could not load profiles.',
+    retry: 'Retry',
+    noResults: 'No profiles match these filters.',
+    roles: { professional: 'Professional', employer: 'Employer', profile_manager: 'Profile manager', admin: 'Admin' },
+  },
+};
 
 const ProfilesManagement: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [planCounts, setPlanCounts] = useState<PlanCounts>({ free: 0, basic: 0, pro: 0, enterprise: 0 });
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, 350);
   const [filterPlan, setFilterPlan] = useState<string>('all');
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -45,31 +85,93 @@ const ProfilesManagement: React.FC = () => {
   const { dialogState, showAlert, showConfirm, closeDialog, handleConfirm, handleCancel } = useCustomDialog();
   const { getUserFeatures, setUserFeature, grantEnterprisePlan } = useEnterpriseAdmin();
   const { lang } = useLanguage();
+  const lt = LOCAL_TEXT[lang === 'en' ? 'en' : 'es'];
 
-  useEffect(() => {
-    loadProfiles();
+  // Filtros en servidor; al cambiar se vuelve a la pagina 1.
+  const filtersKey = `${filterPlan}|${debouncedSearch.trim()}`;
+  const lastFiltersKey = useRef(filtersKey);
+  const requestId = useRef(0);
+
+  // Tarjetas por plan: consultas head:true (solo cuentan, no descargan filas).
+  const loadPlanCounts = useCallback(async () => {
+    const count = (plan: string) => {
+      // plan es privado: el panel de admin lee de la vista profiles_full
+      const q = supabase.from('profiles_full').select('id', { count: 'exact', head: true });
+      // Sin plan cuenta como Free (igual que la tabla y el selector).
+      return plan === 'free' ? q.or('plan.is.null,plan.eq.free') : q.eq('plan', plan);
+    };
+    const results = await Promise.all(PLANS.map(count));
+    const next = { free: 0, basic: 0, pro: 0, enterprise: 0 } as PlanCounts;
+    PLANS.forEach((plan, i) => { next[plan] = results[i].count || 0; });
+    setPlanCounts(next);
   }, []);
 
-  const loadProfiles = async () => {
+  const loadProfiles = useCallback(async () => {
+    const id = ++requestId.current;
+    setFetching(true);
+    setLoadError(false);
     try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false});
+      const from = (page - 1) * PAGE_SIZE;
+      let query = supabase
+        .from('profiles_full') // email y plan son privados
+        .select(PROFILE_COLUMNS, { count: 'exact' });
 
-      if (error) {
-        console.error('Error loading profiles:', error);
-        throw error;
+      if (filterPlan !== 'all' && filterPlan !== 'free') {
+        query = query.eq('plan', filterPlan);
       }
+      const orFilter = combineOrGroups([
+        filterPlan === 'free' ? 'plan.is.null,plan.eq.free' : null,
+        buildIlikeOrFilter(['full_name', 'email', 'headline'], debouncedSearch),
+      ]);
+      if (orFilter) query = query.or(orFilter);
 
-      setProfiles(data || []);
+      // Orden estable: created_at puede repetirse, se desempata por id.
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) throw error;
+      if (id !== requestId.current) return; // respuesta obsoleta
+
+      setProfiles((data as Profile[]) || []);
+      setTotalCount(count || 0);
     } catch (err) {
+      if (id !== requestId.current) return;
       console.error('Exception loading profiles:', err);
+      setLoadError(true);
     } finally {
-      setLoading(false);
+      if (id === requestId.current) {
+        setFetching(false);
+        setLoading(false);
+      }
     }
-  };
+  }, [page, filterPlan, debouncedSearch]);
+
+  const refresh = useCallback(() => {
+    loadProfiles();
+    loadPlanCounts().catch(err => console.error('Error loading plan counts:', err));
+  }, [loadProfiles, loadPlanCounts]);
+
+  useEffect(() => {
+    loadPlanCounts().catch(err => console.error('Error loading plan counts:', err));
+  }, [loadPlanCounts]);
+
+  useEffect(() => {
+    if (lastFiltersKey.current !== filtersKey) {
+      lastFiltersKey.current = filtersKey;
+      if (page !== 1) {
+        setPage(1); // el efecto se repite con la pagina 1
+        return;
+      }
+    }
+    loadProfiles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadProfiles, filtersKey]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const rangeFrom = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeTo = Math.min(page * PAGE_SIZE, totalCount);
 
   const handleUpdateProfile = async (profileId: string, updates: Partial<Profile>, showSuccessMessage: boolean = true) => {
     try {
@@ -115,6 +217,9 @@ const ProfilesManagement: React.FC = () => {
       setProfiles(prev => prev.map(p =>
         p.id === profileId ? { ...p, ...updates } : p
       ));
+      if (updates.plan !== undefined) {
+        loadPlanCounts().catch(err => console.error('Error loading plan counts:', err));
+      }
 
       if (showSuccessMessage) {
         showAlert({
@@ -132,7 +237,7 @@ const ProfilesManagement: React.FC = () => {
         type: 'error'
       });
       // Reload to ensure consistency if error
-      loadProfiles();
+      refresh();
     }
   };
 
@@ -187,7 +292,7 @@ const ProfilesManagement: React.FC = () => {
         message: 'Perfil eliminado correctamente',
         type: 'success'
       });
-      loadProfiles();
+      refresh();
     } catch (err: any) {
       showAlert({
         title: 'Error',
@@ -381,7 +486,7 @@ const ProfilesManagement: React.FC = () => {
         message: 'Usuario actualizado a Enterprise con todas las funcionalidades',
         type: 'success'
       });
-      loadProfiles();
+      refresh();
       const features = await getUserFeatures(enterpriseProfile.id);
       setUserFeatures(features);
     } catch (err: any) {
@@ -392,17 +497,6 @@ const ProfilesManagement: React.FC = () => {
       });
     }
   };
-
-  const filteredProfiles = profiles.filter(profile => {
-    const matchesSearch =
-      profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.headline?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesPlan = filterPlan === 'all' || profile.plan === filterPlan;
-
-    return matchesSearch && matchesPlan;
-  });
 
   if (loading) {
     return (
@@ -421,11 +515,11 @@ const ProfilesManagement: React.FC = () => {
             Gestión de Perfiles
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {filteredProfiles.length} perfiles encontrados
+            {totalCount} {lang === 'en' ? 'profiles found' : 'perfiles encontrados'}
           </p>
         </div>
         <button
-          onClick={loadProfiles}
+          onClick={refresh}
           className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Recargar
@@ -436,25 +530,25 @@ const ProfilesManagement: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {profiles.filter(p => !p.plan || p.plan === 'free').length}
+            {planCounts.free}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Free</div>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {profiles.filter(p => p.plan === 'basic').length}
+            {planCounts.basic}
           </div>
           <div className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wide">Basic</div>
         </div>
         <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
           <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-            {profiles.filter(p => p.plan === 'pro').length}
+            {planCounts.pro}
           </div>
           <div className="text-xs text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">Pro</div>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {profiles.filter(p => p.plan === 'enterprise').length}
+            {planCounts.enterprise}
           </div>
           <div className="text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wide">Enterprise</div>
         </div>
@@ -495,7 +589,27 @@ const ProfilesManagement: React.FC = () => {
       </div>
 
       {/* Profiles Table */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md">
+      <div
+        className={`bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md transition-opacity ${fetching ? 'opacity-60' : ''}`}
+        aria-busy={fetching}
+        data-testid="profiles-table"
+      >
+        {loadError ? (
+          <div className="text-center py-12" role="alert">
+            <p className="text-gray-700 dark:text-dark-text-secondary mb-4">{lt.loadError}</p>
+            <button
+              type="button"
+              onClick={refresh}
+              className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {lt.retry}
+            </button>
+          </div>
+        ) : profiles.length === 0 ? (
+          <div className="text-center py-12 text-gray-600 dark:text-dark-text-secondary">
+            {lt.noResults}
+          </div>
+        ) : (
         <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-dark-bg-tertiary">
             <tr>
@@ -523,15 +637,15 @@ const ProfilesManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredProfiles.map((profile) => (
+            {profiles.map((profile) => (
               <tr key={profile.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors">
                 <td className="px-3 py-2" style={{ maxWidth: '280px' }}>
                   <div className="flex items-center gap-2">
                     <div className="flex-shrink-0 h-8 w-8">
-                      {(profile as any).photo_url || (profile as any).avatar_url || (profile as any).profile_photo_url ? (
+                      {(profile as any).avatar_url || (profile as any).photo_url ? (
                         <img
                           className="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-600"
-                          src={(profile as any).photo_url || (profile as any).avatar_url || (profile as any).profile_photo_url || ''}
+                          src={(profile as any).avatar_url || (profile as any).photo_url || ''}
                           alt={profile.full_name || 'User'}
                           onError={(e) => {
                             const img = e.target as HTMLImageElement;
@@ -725,7 +839,23 @@ const ProfilesManagement: React.FC = () => {
             ))}
             </tbody>
           </table>
+        )}
       </div>
+
+      {/* Paginacion (servidor) */}
+      {!loadError && totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm text-gray-600 dark:text-dark-text-secondary" aria-live="polite">
+            {fetching ? lt.updating : lt.showing(rangeFrom, rangeTo, totalCount)}
+          </p>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            className="flex flex-wrap items-center justify-center gap-2"
+          />
+        </div>
+      )}
 
       {/* Edit Modal */}
       {showEditModal && selectedProfile && (
@@ -843,12 +973,15 @@ const ProfilesManagement: React.FC = () => {
                     Rol
                   </label>
                   <select
-                    value={selectedProfile.role || 'user'}
+                    value={selectedProfile.role || 'professional'}
                     onChange={(e) => setSelectedProfile({ ...selectedProfile, role: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
+                    {/* Valores de profiles_role_check; 'user' no existe en BD. */}
+                    <option value="professional">{lt.roles.professional}</option>
+                    <option value="employer">{lt.roles.employer}</option>
+                    <option value="profile_manager">{lt.roles.profile_manager}</option>
+                    <option value="admin">{lt.roles.admin}</option>
                   </select>
                 </div>
 

@@ -330,8 +330,10 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       const response = await optimizeHeadline(currentHeadline, session.user.id);
 
       if (response.success && response.data) {
-        setValue('headline', response.data, { shouldDirty: true });
-        toast.success('Headline optimizado con IA');
+        // optimizeHeadline devuelve 3 variantes: se ofrecen en el modal en lugar de
+        // escribir el array directamente en el campo.
+        setAiHeadlineVariants(response.data);
+        setShowHeadlineModal(true);
       } else {
         toast.error(response.error || 'Error al optimizar el headline');
       }

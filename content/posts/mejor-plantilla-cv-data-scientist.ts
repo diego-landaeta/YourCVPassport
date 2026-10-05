@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **plantilla CV cientifico de 
 
 Esta guía completa sobre **plantilla CV cientifico de datos** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV cientifico de datos](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre plantilla CV cientifico de datos}
+![plantilla CV cientifico de datos](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Guía completa sobre plantilla CV cientifico de datos}
 
 ## 1. CV especializado para data scientists
 2. Secciones: modelos, frameworks, publicaciones
@@ -78,7 +78,7 @@ Para destacar en **plantilla CV cientifico de datos** dentro de esta área, apli
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV cientifico de datos](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de plantilla CV cientifico de datos}
+![Aspectos avanzados de plantilla CV cientifico de datos](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Aspectos avanzados de plantilla CV cientifico de datos}
 
 ## Aspectos avanzados de plantilla CV cientifico de datos
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV cie
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de plantilla CV cientifico de datos](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de plantilla CV cientifico de datos}
+![Aspectos avanzados de plantilla CV cientifico de datos](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Aspectos avanzados de plantilla CV cientifico de datos}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV cientifico de datos para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **plantilla CV cientifico de datos** no es solo una ventaja competitiva 
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Guías Profesionales",
   is_featured: false,

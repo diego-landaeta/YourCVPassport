@@ -137,7 +137,8 @@ const ATSIntegrationsPage: React.FC = () => {
 
             {/* API Documentation Preview */}
             <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                {/* [&>*]:min-w-0: sin esto el bloque de código ensancha la columna y en móvil la página desborda */}
+                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center [&>*]:min-w-0">
                     <AnimatedWrapper>
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.api.title}</h2>

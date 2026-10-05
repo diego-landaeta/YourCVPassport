@@ -10,6 +10,7 @@ import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
 import { routeConfig } from './config/routeConfig';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import Breadcrumbs from './components/shared/Breadcrumbs';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
@@ -104,7 +105,7 @@ const AppContent: React.FC = () => {
           <Route path="/confirm" element={<ConfirmPage />} />
 
           {/* Product pages */}
-          <Route path="/product/ai" element={<AIProductPage />} />
+          <Route path="/product/ai" element={<><Breadcrumbs /><AIProductPage /></>} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -164,7 +165,9 @@ const AppContent: React.FC = () => {
             <Route path="/company/jobs/applications" element={<JobApplicationsPage />} />
           </Route>
 
-          {/* Dynamically generated routes from routeConfig */}
+          {/* Dynamically generated routes from routeConfig.
+              Breadcrumbs se pinta una sola vez aqui para todas las paginas de marketing
+              (devuelve null en rutas internas como dev/*). */}
           {uniqueRoutes.map((route) => {
             const Component = route.component;
             const routeProps = route.props || {};
@@ -172,7 +175,7 @@ const AppContent: React.FC = () => {
               <React.Fragment key={route.path}>
                 <Route
                   path={`/${route.path}`}
-                  element={<Component {...routeProps} />}
+                  element={<><Breadcrumbs /><Component {...routeProps} /></>}
                 />
               </React.Fragment>
             );

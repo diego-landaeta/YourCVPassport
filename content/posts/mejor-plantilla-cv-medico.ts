@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **plantilla CV medico** se ha
 
 Esta guía completa sobre **plantilla CV medico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV medico](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre plantilla CV medico}
+![plantilla CV medico](https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80){caption:Guía completa sobre plantilla CV medico}
 
 ## 1. CV especializado para medicos
 2. Secciones: residencia, especialidades, publicaciones
@@ -78,7 +78,7 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
 
 ## Aspectos avanzados de plantilla CV medico
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV med
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV medico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **plantilla CV medico** no es solo una ventaja competitiva — es una ne
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Guías Profesionales",
   is_featured: false,

@@ -271,7 +271,7 @@ Cuando hablamos de **plantilla CV marketing digital** en el contexto de aspectos
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV marketing digital](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de plantilla CV marketing digital}
+![Aspectos avanzados de plantilla CV marketing digital](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Aspectos avanzados de plantilla CV marketing digital}
 
 ## Cómo YourCVPassport te ayuda con plantilla CV marketing digital
 
