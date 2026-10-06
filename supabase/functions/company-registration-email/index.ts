@@ -23,8 +23,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders } from '../_shared/cors.ts'
+import { isEmailConfigured, sendEmail } from '../_shared/email.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const APP_URL = Deno.env.get('APP_URL') || 'https://yourcvpassport.com'
@@ -109,8 +109,9 @@ serve(async (req: Request) => {
       throw new HttpError(400, 'INVALID_INPUT', 'Invalid type')
     }
 
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY not configured')
+    // Antes de tocar la BD: sin BREVO_API_KEY no se podría mandar el correo.
+    if (!isEmailConfigured()) {
+      throw new Error('Email provider not configured')
     }
 
     // Get company details
@@ -284,32 +285,23 @@ serve(async (req: Request) => {
       `
     }
 
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'YourCVPassport <noreply@yourcvpassport.com>',
-        to: [userEmail],
-        subject: emailSubject,
-        html: emailHtml,
-      }),
+    // Envío vía Brevo (_shared/email.ts)
+    const emailResult = await sendEmail({
+      to: userEmail,
+      subject: emailSubject,
+      html: emailHtml,
+      tags: [type === 'approved' ? 'company-approved' : 'company-rejected'],
     })
 
-    const resendData = await resendResponse.json()
-
-    if (!resendResponse.ok) {
-      console.error('[company-registration-email] Resend API error:', resendResponse.status, JSON.stringify(resendData))
+    if (!emailResult.ok) {
+      console.error('[company-registration-email] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
       throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send email')
     }
 
     return json(200, {
       success: true,
       message: `${type} email sent successfully`,
-      emailId: resendData.id,
+      emailId: emailResult.messageId,
     })
   } catch (error: any) {
     if (error instanceof HttpError) {

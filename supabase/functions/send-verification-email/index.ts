@@ -1,5 +1,5 @@
 // Supabase Edge Function: send-verification-email
-// Sends email verification code using Resend
+// Sends email verification code via Brevo (_shared/email.ts)
 //
 // Seguridad (auditoría 2026-10-05, U4): ver _shared/stampVerification.ts.
 //   - JWT obligatorio (desplegar SIN --no-verify-jwt). La identidad sale del
@@ -35,8 +35,7 @@ import {
   readJsonBody,
   resolveTargetProfile,
 } from '../_shared/stampVerification.ts'
-
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+import { isEmailConfigured, sendEmail } from '../_shared/email.ts'
 
 const CODE_TTL_MS = 15 * 60 * 1000
 // Mismo criterio que el modal (acepta p. ej. o'connor@...). El email solo va en
@@ -97,14 +96,10 @@ serve(async (req: Request) => {
       throw new HttpError(429, 'RATE_LIMIT_EXCEEDED', 'Rate limit exceeded. Please wait before requesting another code.')
     }
 
-    if (!RESEND_API_KEY) {
+    // Antes de crear el sello: sin BREVO_API_KEY no se podría mandar el código.
+    if (!isEmailConfigured()) {
       throw new Error('Server configuration error: Missing email provider key')
     }
-
-    // Get sender email from env or use default
-    // Note: onboarding@resend.dev only works for testing if sending to the registered admin email
-    const SENDER_EMAIL = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
-    const SENDER_NAME = 'YourCVPassport'
 
     // Código de 6 dígitos con CSPRNG; en BD solo se guarda su HMAC
     const verificationCode = generateCode()
@@ -138,7 +133,7 @@ serve(async (req: Request) => {
           type: 'EMAIL',
           status: 'PENDING',
           evidence,
-          provider: 'resend'
+          provider: 'brevo'
         })
         .select('id')
         .single()
@@ -166,17 +161,11 @@ serve(async (req: Request) => {
 
     const userName = escapeHtml(profile?.full_name || 'Usuario')
 
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`
-      },
-      body: JSON.stringify({
-        from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
+    // Envío vía Brevo (_shared/email.ts)
+    const emailResult = await sendEmail({
         to: email,
         subject: 'Verifica tu email - YourCVPassport',
+        tags: ['verification-code'],
         html: `
           <!DOCTYPE html>
           <html>
@@ -226,22 +215,18 @@ serve(async (req: Request) => {
             </body>
           </html>
         `
-      })
     })
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json()
-      
-      throw new Error(`Resend error: ${JSON.stringify(error)}`)
+    if (!emailResult.ok) {
+      console.error('[send-verification-email] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
+      throw new Error(`Email send failed: ${emailResult.code}`)
     }
-
-    const resendData = await resendResponse.json()
 
     return jsonResponse(200, {
       success: true,
       message: 'Verification code sent successfully',
       stampId,
-      emailId: resendData.id
+      emailId: emailResult.messageId
     }, corsHeaders)
 
   } catch (error) {

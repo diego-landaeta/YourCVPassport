@@ -6,10 +6,12 @@
 #
 # Este script NO contiene secretos: los lee de variables de entorno.
 #
-# Uso (los valores salen de tu gestor de contraseñas / Dashboard de Resend):
-#   export RESEND_API_KEY=...            # API key de Resend (rotada)
-#   export SENDER_EMAIL=no-reply@yourcvpassport.com
+# Uso (los valores salen de tu gestor de contraseñas / Brevo > SMTP & API > API keys):
+#   export BREVO_API_KEY=...             # API key v3 de Brevo (nunca en el repo)
+#   export SENDER_EMAIL=no-reply@yourcvpassport.com   # opcional; si no se exporta no se toca el secreto
 #   ./deploy-signup.sh
+#
+# El dominio de SENDER_EMAIL tiene que estar autenticado en Brevo (ver EMAIL.md).
 #
 # SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY NO se configuran aquí: Supabase las
 # inyecta automáticamente en todas las Edge Functions (y la CLI no permite
@@ -24,18 +26,12 @@ echo "🚀 Deploying signup Edge Function..."
 echo ""
 
 # Check required environment variables (sin imprimir sus valores)
-missing=0
-for var in RESEND_API_KEY SENDER_EMAIL; do
-    if [ -z "${!var:-}" ]; then
-        echo "❌ Error: falta la variable de entorno $var"
-        missing=1
-    fi
-done
-if [ "$missing" -ne 0 ]; then
+if [ -z "${BREVO_API_KEY:-}" ]; then
+    echo "❌ Error: falta la variable de entorno BREVO_API_KEY"
     echo ""
-    echo "Defínelas antes de ejecutar el script, por ejemplo:"
-    echo "  export RESEND_API_KEY=<tu API key de Resend>"
-    echo "  export SENDER_EMAIL=no-reply@yourcvpassport.com"
+    echo "Defínela antes de ejecutar el script, por ejemplo:"
+    echo "  export BREVO_API_KEY=<tu API key de Brevo>"
+    echo "  export SENDER_EMAIL=no-reply@yourcvpassport.com   # opcional"
     exit 1
 fi
 
@@ -56,13 +52,17 @@ fi
 # Set secrets first so the new deployment already uses them.
 # Se pasan por un fichero temporal (permisos 600) para que los valores no
 # aparezcan en la lista de procesos ni en el historial del shell.
-echo "📝 Setting secrets (RESEND_API_KEY, SENDER_EMAIL)..."
+# SENDER_EMAIL solo se escribe si se ha exportado: así no se pisa un remitente
+# ya guardado en Supabase (sin secreto, el código usa no-reply@yourcvpassport.com).
+echo "📝 Setting secrets (BREVO_API_KEY${SENDER_EMAIL:+, SENDER_EMAIL})..."
 env_file="$(mktemp)"
 chmod 600 "$env_file"
 trap 'rm -f "$env_file"' EXIT
 {
-    printf 'RESEND_API_KEY=%s\n' "$RESEND_API_KEY"
-    printf 'SENDER_EMAIL=%s\n' "$SENDER_EMAIL"
+    printf 'BREVO_API_KEY=%s\n' "$BREVO_API_KEY"
+    if [ -n "${SENDER_EMAIL:-}" ]; then
+        printf 'SENDER_EMAIL=%s\n' "$SENDER_EMAIL"
+    fi
     if [ -n "${CORS_EXTRA_ORIGINS:-}" ]; then
         printf 'CORS_EXTRA_ORIGINS=%s\n' "$CORS_EXTRA_ORIGINS"
     fi

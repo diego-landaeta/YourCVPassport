@@ -1,7 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getCorsHeaders } from '../_shared/cors.ts';
-
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
+import { sendEmail } from '../_shared/email.ts';
 
 interface EmailRequest {
   to: string;
@@ -830,27 +829,14 @@ serve(async (req) => {
     const subject = emailTemplate.subject(plainData(data ?? {}) as any);
     const html = emailTemplate.html(escapeData(data ?? {}) as any);
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'YourCVPassport <noreply@yourcvpassport.com>',
-        to: [to],
-        subject: subject,
-        html: html,
-      }),
-    });
+    // Envío por Brevo (_shared/email.ts)
+    const result = await sendEmail({ to, subject, html, tags: [template] });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to send email');
+    if (!result.ok) {
+      throw new Error(`${result.code} ${result.status} ${result.detail}`);
     }
 
-    return json(200, { success: true, id: result.id });
+    return json(200, { success: true, id: result.messageId });
   } catch (error) {
     console.error('Error sending email:', error);
     return json(500, { error: 'Failed to send email' });

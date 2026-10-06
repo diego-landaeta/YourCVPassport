@@ -1,12 +1,12 @@
 // Supabase Edge Function: signup
-// Handles user registration and sends confirmation email via Resend
+// Handles user registration and sends confirmation email via Brevo (_shared/email.ts)
 //
 // Contrato de errores (la UI los traduce en utils/authFunctionErrors.ts):
 //   400 INVALID_INPUT            cuerpo inválido, email mal formado o sin password
 //   400 WEAK_PASSWORD            password que no cumple la política
 //   409 EMAIL_ALREADY_REGISTERED el email ya tiene cuenta
 //   429 RATE_LIMITED             demasiadas altas desde la misma IP (Upstash) o GoTrue limita la petición
-//   502 EMAIL_SEND_FAILED        Resend no envió el correo (se borra el usuario: rollback)
+//   502 EMAIL_SEND_FAILED        Brevo no envió el correo (se borra el usuario: rollback)
 //   500 INTERNAL_ERROR           cualquier otro fallo
 //
 // Éxito: 200 { success, message }. No se devuelve el objeto `user` de GoTrue
@@ -20,14 +20,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { enforceRateLimit, getClientIp } from '../_shared/ratelimit.ts'
+import { sendEmail } from '../_shared/email.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-// Resend tiene que contestar antes de esto para que la función responda dentro
-// del timeout de 20 s del frontend (arranque en frío + createUser + generateLink).
-const RESEND_TIMEOUT_MS = 10000
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface SignupRequest {
@@ -167,23 +164,14 @@ serve(async (req: Request) => {
 
     const confirmationLink = confirmData.properties.action_link
     const userName = escapeHtml(full_name || email.split('@')[0])
-    const senderEmail = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
 
-    // Send email via Resend (con timeout: un fetch colgado también es EMAIL_SEND_FAILED)
-    let resendResponse: Response
-    try {
-      resendResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RESEND_API_KEY}`
-        },
-        body: JSON.stringify({
-          from: `YourCVPassport <${senderEmail}>`,
-          to: email,
-          subject: '¡Bienvenido a YourCVPassport! Confirma tu email',
-          html: `
+    // Envío por Brevo (_shared/email.ts, timeout de 10 s: un envío colgado
+    // también es EMAIL_SEND_FAILED).
+    const emailResult = await sendEmail({
+      to: email,
+      subject: '¡Bienvenido a YourCVPassport! Confirma tu email',
+      tags: ['signup'],
+      html: `
             <!DOCTYPE html>
             <html>
               <head>
@@ -246,28 +234,18 @@ serve(async (req: Request) => {
               </body>
             </html>
           `
-        })
-      })
-    } catch (fetchError: any) {
-      // Timeout o fallo de red hacia Resend
-      console.error('[signup] Resend fetch failed:', fetchError?.name, fetchError?.message)
-      await rollbackUser()
-      throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send confirmation email')
-    }
+    })
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json().catch(() => ({}))
-      // Típico: 403 "domain is not verified" si falta el DNS de Resend.
-      console.error('[signup] Resend error:', resendResponse.status, JSON.stringify(error))
+    if (!emailResult.ok) {
+      // Sin BREVO_API_KEY, timeout, o Brevo rechaza el envío (key mala, dominio
+      // sin autenticar...). El detalle no lleva secretos ni destinatario.
+      console.error('[signup] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
 
       // Rollback: Delete the user if email sending fails
       await rollbackUser()
 
       throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send confirmation email')
     }
-
-    // Se consume el cuerpo para liberar la conexión; el id de Resend ya no se devuelve.
-    await resendResponse.text().catch(() => '')
 
     return new Response(
       JSON.stringify({

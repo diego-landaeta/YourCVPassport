@@ -1,12 +1,12 @@
 // Supabase Edge Function: send-password-reset
-// Sends password reset email using Resend
+// Sends password reset email via Brevo (_shared/email.ts)
 //
 // Contrato de errores (la UI los traduce en utils/authFunctionErrors.ts):
 //   200                    siempre que el email sea válido, exista o no la cuenta (anti-enumeración)
 //   400 INVALID_INPUT      cuerpo inválido o email mal formado
 //   429 RATE_LIMITED       demasiadas peticiones desde la IP o hacia el mismo email
 //                          (Upstash), o GoTrue limita la petición
-//   502 EMAIL_SEND_FAILED  Resend no envió el correo
+//   502 EMAIL_SEND_FAILED  Brevo no envió el correo
 //   500 INTERNAL_ERROR     cualquier otro fallo
 //
 // Rate limit (Upstash, fail open si no está configurado):
@@ -23,12 +23,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts'
+import { sendEmail } from '../_shared/email.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const RESEND_TIMEOUT_MS = 10000
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const GENERIC_SUCCESS_MESSAGE = 'If an account exists with this email, you will receive a password reset link.'
 
@@ -148,23 +147,13 @@ serve(async (req: Request) => {
 
     const userName = escapeHtml(profile?.full_name || email.split('@')[0])
 
-    const senderEmail = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
-
-    // Send email via Resend (con timeout: un fetch colgado también es EMAIL_SEND_FAILED)
-    let resendResponse: Response
-    try {
-      resendResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${RESEND_API_KEY}`
-        },
-        body: JSON.stringify({
-          from: `YourCVPassport <${senderEmail}>`,
-          to: email,
-          subject: 'Recupera tu contraseña - YourCVPassport',
-          html: `
+    // Envío por Brevo (_shared/email.ts, timeout de 10 s: un envío colgado
+    // también es EMAIL_SEND_FAILED).
+    const emailResult = await sendEmail({
+      to: email,
+      subject: 'Recupera tu contraseña - YourCVPassport',
+      tags: ['password-reset'],
+      html: `
             <!DOCTYPE html>
             <html>
               <head>
@@ -220,18 +209,12 @@ serve(async (req: Request) => {
               </body>
             </html>
           `
-        })
-      })
-    } catch (fetchError: any) {
-      // Timeout o fallo de red hacia Resend
-      console.error('[send-password-reset] Resend fetch failed:', fetchError?.name, fetchError?.message)
-      throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send password reset email')
-    }
+    })
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json().catch(() => ({}))
-      // Típico: 403 "domain is not verified" si falta el DNS de Resend.
-      console.error('[send-password-reset] Resend error:', resendResponse.status, JSON.stringify(error))
+    if (!emailResult.ok) {
+      // Sin BREVO_API_KEY, timeout, o Brevo rechaza el envío (key mala, dominio
+      // sin autenticar...). El detalle no lleva secretos ni destinatario.
+      console.error('[send-password-reset] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
       throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send password reset email')
     }
 
