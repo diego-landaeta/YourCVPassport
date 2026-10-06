@@ -4,6 +4,8 @@ import { EnvelopeIcon, LinkIcon, BriefcaseIcon, AcademicCapIcon } from '@heroico
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail, safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface ElegantMinimalTemplateProps {
     data: FullProfileData;
@@ -14,6 +16,9 @@ const ElegantMinimalTemplate: React.FC<ElegantMinimalTemplateProps> = ({ data, c
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#8B5CF6'; // Default to violet-500
     const t = useTranslations();
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -49,19 +54,19 @@ const ElegantMinimalTemplate: React.FC<ElegantMinimalTemplateProps> = ({ data, c
                 </p>
                 {profile.country_code && (
                     <div className="flex items-center justify-center gap-2 mb-8">
-                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                     </div>
                 )}
                 <div className="flex justify-center gap-8 flex-wrap text-base text-gray-600 dark:text-gray-400">
-                    {profile.meta_description && (
-                        <a href={`mailto:${profile.meta_description}`} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    {email && (
+                        <a href={`mailto:${email}`} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <EnvelopeIcon className="w-5 h-5" />
-                            <span>{profile.meta_description}</span>
+                            <span>{email}</span>
                         </a>
                     )}
-                    <span>•</span>
-                    {profile.linkedin_url && (
-                        <a href={profile.linkedin_url} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    {email && linkedinUrl && <span>•</span>}
+                    {linkedinUrl && (
+                        <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <LinkIcon className="w-5 h-5" />
                             <span>LinkedIn</span>
                         </a>
@@ -167,7 +172,7 @@ const ElegantMinimalTemplate: React.FC<ElegantMinimalTemplateProps> = ({ data, c
                                 </svg>
                             </div>
                             <h2 className="text-sm font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-300">
-                                {t.cvSections?.certifications || 'Certificaciones'}
+                                {t.cvSections.certifications}
                             </h2>
                         </div>
                         <div className="space-y-8">
@@ -177,7 +182,7 @@ const ElegantMinimalTemplate: React.FC<ElegantMinimalTemplateProps> = ({ data, c
                                         <div className="inline-block px-5 py-2 rounded-xl shadow-md" style={{ background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}10)` }}>
                                             <p className="font-bold text-sm" style={{ color: accentColor }}>
                                                 {cert.issue_date}
-                                                {cert.expiry_date && <><br/>Exp: {cert.expiry_date}</>}
+                                                {cert.expiry_date && <><br/>{L.expiresShort} {cert.expiry_date}</>}
                                             </p>
                                         </div>
                                     </div>

@@ -4,6 +4,8 @@ import { EnvelopeIcon, PhoneIcon, LinkIcon, BriefcaseIcon, AcademicCapIcon } fro
 import { CountryBadge } from '../shared/CountrySelector';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useTemplateLabels } from './templateLabels';
+import { safeExternalUrl, publicContactEmail, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface ClassicSidebarTemplateProps {
     data: FullProfileData;
@@ -15,6 +17,9 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
     const accentColor = color || '#1E293B'; // Default to slate-800
     const { lang } = useLanguage();
     const t = useTranslations();
+    const { L } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     const formatDate = (dateString: string) => {
         const formatted = new Date(dateString).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short' });
@@ -47,7 +52,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                 </p>
                 {profile.country_code && (
                     <div className="flex items-center justify-center gap-2 mb-8">
-                        <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                        <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                     </div>
                 )}
 
@@ -55,15 +60,15 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                     <section className="bg-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-5">
                             <EnvelopeIcon className="w-6 h-6 text-blue-300" />
-                            <h2 className="text-lg font-bold uppercase tracking-wider text-blue-300">Contact</h2>
+                            <h2 className="text-lg font-bold uppercase tracking-wider text-blue-300">{t.cvSections.contact}</h2>
                         </div>
                         <div className="space-y-4 text-sm">
-                            {profile.meta_description && (
+                            {email && (
                                 <div className="flex items-start gap-3">
                                     <EnvelopeIcon className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-gray-400 text-xs mb-1">Email</p>
-                                        <p className="break-all">{profile.meta_description}</p>
+                                        <p className="text-gray-400 text-xs mb-1">{t.cvSections.email}</p>
+                                        <p className="break-all">{email}</p>
                                     </div>
                                 </div>
                             )}
@@ -71,18 +76,18 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                                 <div className="flex items-start gap-3">
                                     <PhoneIcon className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-gray-400 text-xs mb-1">Phone</p>
+                                        <p className="text-gray-400 text-xs mb-1">{t.cvSections.phone}</p>
                                         <p>{profile.phone}</p>
                                     </div>
                                 </div>
                             )}
-                            {profile.linkedin_url && (
+                            {linkedinUrl && (
                                 <div className="flex items-start gap-3">
                                     <LinkIcon className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                     <div>
                                         <p className="text-gray-400 text-xs mb-1">LinkedIn</p>
-                                        <a href={profile.linkedin_url} className="hover:text-blue-300 transition-colors break-all">
-                                            View Profile
+                                        <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="hover:text-blue-300 transition-colors break-all">
+                                            {L.viewProfile}
                                         </a>
                                     </div>
                                 </div>
@@ -92,7 +97,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                     <section className="bg-slate-700/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-5">
                             <BriefcaseIcon className="w-6 h-6 text-blue-300" />
-                            <h2 className="text-lg font-bold uppercase tracking-wider text-blue-300">Skills</h2>
+                            <h2 className="text-lg font-bold uppercase tracking-wider text-blue-300">{t.cvSections.skills}</h2>
                         </div>
                         <div className="space-y-5">
                             {skills.map(skill => (
@@ -124,7 +129,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                             <BriefcaseIcon className="w-6 h-6 text-white" />
                         </div>
                         <h2 className="text-4xl font-bold text-gray-900 dark:text-white relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-20 after:h-1 after:bg-blue-500 after:rounded-full">
-                            About Me
+                            {L.aboutMe}
                         </h2>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
@@ -138,7 +143,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                             <BriefcaseIcon className="w-6 h-6 text-white" />
                         </div>
                         <h2 className="text-4xl font-bold text-gray-900 dark:text-white relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-20 after:h-1 after:bg-purple-500 after:rounded-full">
-                            Experience
+                            {t.cvSections.experience}
                         </h2>
                     </div>
                     <div className="space-y-10">
@@ -172,7 +177,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                             <AcademicCapIcon className="w-6 h-6 text-white" />
                         </div>
                         <h2 className="text-4xl font-bold text-gray-900 dark:text-white relative pb-3 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-20 after:h-1 after:bg-green-500 after:rounded-full">
-                            Education
+                            {t.cvSections.education}
                         </h2>
                     </div>
                      <div className="space-y-6">
@@ -189,7 +194,7 @@ const ClassicSidebarTemplate: React.FC<ClassicSidebarTemplateProps> = ({ data, c
                                         {edu.institution_name}
                                     </p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : 'Ongoing'}
+                                        {formatDate(edu.start_date)} - {edu.end_date ? formatDate(edu.end_date) : L.ongoing}
                                     </p>
                                 </div>
                             </div>

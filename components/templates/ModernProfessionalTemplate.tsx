@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface ModernProfessionalTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,8 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#2563EB'; // Professional blue
     const t = useTranslations();
+    const { lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -35,7 +39,7 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                         <p className="text-lg font-light opacity-90 mb-4 text-center">{profile.headline}</p>
                         {profile.country_code && (
                             <div className="flex items-center justify-center gap-2 mb-6">
-                                <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                                <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                             </div>
                         )}
 
@@ -43,19 +47,24 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                         <div className="mb-8">
                             <h2 className="text-xl font-bold mb-4 uppercase tracking-wider border-b border-white/30 pb-2">{t.cvSections.contact}</h2>
                             <div className="space-y-2 text-sm">
-                                <p className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                                    </svg>
-                                    <span className="break-all">{profile.meta_description || 'N/A'}</span>
-                                </p>
-                                <p className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                                    </svg>
-                                    <span>{t.cvSections.location}</span>
-                                </p>
+                                {/* Antes: 'N/A' y la etiqueta "Ubicación" en lugar de los datos */}
+                                {email && (
+                                    <p className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                                        </svg>
+                                        <span className="break-all">{email}</span>
+                                    </p>
+                                )}
+                                {profile.location && (
+                                    <p className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                                        </svg>
+                                        <span>{profile.location}</span>
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -89,7 +98,7 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                         {certifications.length > 0 && (
                             <div>
                                 <h2 className="text-xl font-bold mb-4 uppercase tracking-wider border-b border-white/30 pb-2">
-                                    {t.cvSections?.certifications || 'Certificaciones'}
+                                    {t.cvSections.certifications}
                                 </h2>
                                 <div className="space-y-4">
                                     {certifications.map((cert, index) => (

@@ -5,6 +5,9 @@ import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useAuth } from '../../contexts/AuthContext';
 import { CTATracker } from './CTATracker';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useTemplateLabels } from './templateLabels';
+import { safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 import { ChatBubbleLeftRightIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 interface UrbanTemplateProps {
@@ -26,10 +29,16 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
 
     const t = useTranslations();
     const { user } = useAuth();
+    const toast = useToastContext();
+    const { L, lang } = useTemplateLabels();
 
+    // Antes llamaba a un setIsContactModalOpen inexistente (ReferenceError al pulsar).
+    // Mismo comportamiento que ProfileContactButtons mientras no haya modal de contacto.
     const handleContactClick = () => {
-        setIsContactModalOpen(true);
+        toast.info(t.cvSections.featureInDevelopment);
     };
+
+    const nameParts = (profile.full_name || '').split(' ');
 
     // Helper function to render barcode-like pattern
     const BarcodePattern = () => (
@@ -50,34 +59,42 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                 <div className="w-full max-w-4xl flex flex-col gap-6 sm:gap-8 print:max-w-full print:p-8">
 
                 {/* "Sticker" Header */}
-                <header className="bg-black text-white p-6 sm:p-8 transform -rotate-1 shadow-[10px_10px_0px_0px_#ff0000] border-4 border-black relative print:shadow-[10px_10px_0px_0px_#ff0000]">
-                    <div className="absolute top-0 right-0 bg-yellow-400 text-black font-black text-xs px-2 py-1 border-l-4 border-b-4 border-black print:bg-yellow-400 print:text-black print:border-black">
-                        HELLO_MY_NAME_IS
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-                        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white border-4 border-black flex-shrink-0 overflow-hidden flex items-center justify-center rounded-full print:bg-white print:border-black">
-                            {profile.avatar_url ? (
-                                <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="text-3xl sm:text-4xl font-black text-black">N/A</span>
-                            )}
-                        </div>
-                        <div className="text-center sm:text-left flex-1">
-                            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-none mb-2 uppercase">
-                                {profile.full_name.split(' ')[0]}
-                                <span className="text-transparent bg-clip-text bg-white/20 block sm:inline sm:ml-4 print:text-transparent">
-                                    {profile.full_name.split(' ').slice(1).join(' ')}
-                                </span>
-                            </h1>
-                            <div className="bg-red-600 text-white inline-block px-3 sm:px-4 py-1 font-bold text-lg sm:text-xl uppercase tracking-widest transform skew-x-12 border-2 border-white print:bg-red-600 print:text-white print:border-white">
-                                {profile.headline}
+                {/* El fondo negro va en un div interior y no en <header>: el generador de PDF
+                    fuerza fondo blanco en los <header> (texto blanco invisible) y borra sus dos
+                    primeros div absolutos; por eso la pegatina va al final. */}
+                <header>
+                    <div className="bg-black text-white p-6 sm:p-8 transform -rotate-1 shadow-[10px_10px_0px_0px_#ff0000] border-4 border-black relative print:shadow-[10px_10px_0px_0px_#ff0000]">
+                        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white border-4 border-black flex-shrink-0 overflow-hidden flex items-center justify-center rounded-full print:bg-white print:border-black">
+                                {profile.avatar_url ? (
+                                    <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-3xl sm:text-4xl font-black text-black">
+                                        {nameParts.map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                                    </span>
+                                )}
                             </div>
-                            {profile.country_code && (
-                                <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 print:hidden">
-                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={profile.language || 'es'} />
+                            <div className="text-center sm:text-left flex-1">
+                                <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-none mb-2 uppercase">
+                                    {nameParts[0]}
+                                    {/* Antes: text-transparent + bg-clip-text; al imprimir (print:text-transparent)
+                                        y en el PDF los apellidos quedaban invisibles. */}
+                                    <span className="text-white/40 block sm:inline sm:ml-4">
+                                        {nameParts.slice(1).join(' ')}
+                                    </span>
+                                </h1>
+                                <div className="bg-red-600 text-white inline-block px-3 sm:px-4 py-1 font-bold text-lg sm:text-xl uppercase tracking-widest transform skew-x-12 border-2 border-white print:bg-red-600 print:text-white print:border-white">
+                                    {profile.headline}
                                 </div>
-                            )}
+                                {profile.country_code && (
+                                    <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 print:hidden">
+                                        <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="absolute top-0 right-0 bg-yellow-400 text-black font-black text-xs px-2 py-1 border-l-4 border-b-4 border-black print:bg-yellow-400 print:text-black print:border-black">
+                            {L.helloMyNameIs}
                         </div>
                     </div>
                 </header>
@@ -114,7 +131,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Bio "Ticket" */}
                         {profile.summary && (
                             <section className="bg-white dark:bg-gray-800 border-4 border-black p-5 sm:p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.1)] print:bg-white print:shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]">
-                                <h3 className="font-black text-2xl sm:text-3xl uppercase mb-4 underline decoration-4 decoration-yellow-400 underline-offset-4 dark:text-white print:text-black print:decoration-yellow-400">Manifesto</h3>
+                                <h3 className="font-black text-2xl sm:text-3xl uppercase mb-4 underline decoration-4 decoration-yellow-400 underline-offset-4 dark:text-white print:text-black print:decoration-yellow-400">{L.manifesto}</h3>
                                 <p className="text-base sm:text-lg font-bold leading-tight uppercase text-zinc-800 dark:text-gray-300 whitespace-pre-wrap print:text-zinc-800">
                                     {profile.summary}
                                 </p>
@@ -124,7 +141,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Experience "List" */}
                         {experiences.length > 0 && (
                             <section>
-                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform rotate-2 dark:bg-white dark:text-black print:bg-black print:text-white">Track Record</h3>
+                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform rotate-2 dark:bg-white dark:text-black print:bg-black print:text-white">{L.trackRecord}</h3>
                                 <div className="space-y-4 sm:space-y-6">
                                     {experiences.map(exp => (
                                         <div key={exp.id} className="border-b-4 border-black dark:border-white pb-4 print:border-black">
@@ -149,7 +166,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Projects */}
                         {portfolio.length > 0 && (
                             <section>
-                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform -rotate-1 dark:bg-white dark:text-black print:bg-black print:text-white">Drops</h3>
+                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform -rotate-1 dark:bg-white dark:text-black print:bg-black print:text-white">{L.drops}</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {portfolio.map(proj => (
                                         <div key={proj.id} className="bg-black dark:bg-white text-white dark:text-black p-4 relative group hover:bg-red-600 dark:hover:bg-red-600 dark:hover:text-white transition-colors cursor-default print:bg-black print:text-white">
@@ -157,14 +174,13 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                                             {proj.description && (
                                                 <div className="text-xs font-mono">{proj.description}</div>
                                             )}
-                                            {proj.url && (
+                                            {safeExternalUrl(proj.url) && (
                                                 <a
-                                                    href={proj.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    href={safeExternalUrl(proj.url)!}
+                                                    {...EXTERNAL_LINK_PROPS}
                                                     className="text-xs mt-2 inline-block hover:underline"
                                                 >
-                                                    {t.cvSections.viewProject || 'VIEW'} →
+                                                    {L.view} →
                                                 </a>
                                             )}
                                         </div>
@@ -176,11 +192,11 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Certifications */}
                         {certifications.length > 0 && (
                             <section>
-                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform rotate-1 dark:bg-white dark:text-black print:bg-black print:text-white">Credentials</h3>
+                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform rotate-1 dark:bg-white dark:text-black print:bg-black print:text-white">{L.credentials}</h3>
                                 <div className="space-y-3">
                                     {certifications.map(cert => (
                                         <div key={cert.id} className="bg-white dark:bg-gray-800 border-2 border-black dark:border-white p-4 print:bg-white print:border-black">
-                                            <div className="font-black text-base sm:text-lg dark:text-white print:text-black">{cert.name}</div>
+                                            <div className="font-black text-base sm:text-lg dark:text-white print:text-black">{cert.title || cert.name}</div>
                                             <div className="text-xs sm:text-sm text-zinc-600 dark:text-gray-400 uppercase font-bold print:text-zinc-600">{cert.issuer}</div>
                                             <div className="text-xs text-red-600 dark:text-red-400 mt-1 print:text-red-600">
                                                 {new Date(cert.issue_date).getFullYear()}
@@ -194,7 +210,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Recommendations */}
                         {recommendations.length > 0 && (
                             <section>
-                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform -rotate-2 dark:bg-white dark:text-black print:bg-black print:text-white">Testimonials</h3>
+                                <h3 className="bg-black text-white inline-block px-4 sm:px-6 py-2 font-black text-xl sm:text-2xl uppercase mb-4 sm:mb-6 transform -rotate-2 dark:bg-white dark:text-black print:bg-black print:text-white">{L.testimonials}</h3>
                                 <div className="space-y-4">
                                     {recommendations.map(rec => (
                                         <div key={rec.id} className="bg-white dark:bg-gray-800 border-4 border-black dark:border-white p-4 sm:p-5 relative print:bg-white print:border-black">
@@ -246,7 +262,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Skills "Tags" */}
                         {skills.length > 0 && (
                             <div className="bg-yellow-400 dark:bg-yellow-500 border-4 border-black dark:border-white p-5 sm:p-6 print:bg-yellow-400 print:border-black">
-                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 border-b-4 border-black dark:border-white pb-2 dark:text-black print:text-black print:border-black">Arsenal</h3>
+                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 border-b-4 border-black dark:border-white pb-2 dark:text-black print:text-black print:border-black">{L.arsenal}</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {skills.map(s => (
                                         <span
@@ -263,7 +279,7 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Education */}
                         {education.length > 0 && (
                             <div>
-                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 bg-red-600 text-white inline-block px-2 dark:bg-red-500 print:bg-red-600 print:text-white">Education</h3>
+                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 bg-red-600 text-white inline-block px-2 dark:bg-red-500 print:bg-red-600 print:text-white">{t.cvSections.education}</h3>
                                 <div className="space-y-4">
                                     {education.map(edu => (
                                         <div key={edu.id} className="bg-black dark:bg-white text-white dark:text-black p-4 print:bg-black print:text-white">
@@ -284,15 +300,15 @@ const UrbanTemplate: React.FC<UrbanTemplateProps> = ({ data }) => {
                         {/* Languages */}
                         {languages.length > 0 && (
                             <div>
-                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 bg-black dark:bg-white text-white dark:text-black inline-block px-2 print:bg-black print:text-white">Languages</h3>
+                                <h3 className="font-black text-lg sm:text-xl uppercase mb-4 bg-black dark:bg-white text-white dark:text-black inline-block px-2 print:bg-black print:text-white">{t.cvSections.languages}</h3>
                                 <div className="space-y-2">
-                                    {languages.map(lang => (
+                                    {languages.map(language => (
                                         <div
-                                            key={lang.id}
+                                            key={language.id}
                                             className="bg-white dark:bg-gray-800 border-2 border-black dark:border-white p-3 flex justify-between items-center print:bg-white print:border-black"
                                         >
-                                            <span className="font-black text-sm dark:text-white print:text-black">{lang.name}</span>
-                                            <span className="text-xs bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-bold print:bg-black print:text-white">{lang.level}</span>
+                                            <span className="font-black text-sm dark:text-white print:text-black">{language.name}</span>
+                                            <span className="text-xs bg-black dark:bg-white text-white dark:text-black px-2 py-1 font-bold print:bg-black print:text-white">{language.level}</span>
                                         </div>
                                     ))}
                                 </div>

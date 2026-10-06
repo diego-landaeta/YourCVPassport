@@ -4,6 +4,8 @@ import { EnvelopeIcon, LinkIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail, safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface ModernMinimalistTemplateProps {
     data: FullProfileData;
@@ -14,6 +16,9 @@ const ModernMinimalistTemplate: React.FC<ModernMinimalistTemplateProps> = ({ dat
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#60A5FA'; // Default to blue-400
     const t = useTranslations();
+    const { lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -49,18 +54,18 @@ const ModernMinimalistTemplate: React.FC<ModernMinimalistTemplateProps> = ({ dat
                             <p className="text-2xl text-gray-600 dark:text-gray-400 font-light mb-4">{profile.headline}</p>
                             {profile.country_code && (
                                 <div className="flex items-center gap-2 mb-4">
-                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                                 </div>
                             )}
                             <div className="flex flex-wrap gap-5 text-sm text-gray-600 dark:text-gray-400">
-                                {profile.meta_description && (
-                                    <a href={`mailto:${profile.meta_description}`} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white">
+                                {email && (
+                                    <a href={`mailto:${email}`} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white">
                                         <EnvelopeIcon className="w-4 h-4" style={{ color: accentColor }} />
-                                        <span>{profile.meta_description}</span>
+                                        <span>{email}</span>
                                     </a>
                                 )}
-                                {profile.linkedin_url && (
-                                    <a href={profile.linkedin_url} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white">
+                                {linkedinUrl && (
+                                    <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-white">
                                         <LinkIcon className="w-4 h-4" style={{ color: accentColor }} />
                                         <span>LinkedIn</span>
                                     </a>
@@ -141,7 +146,7 @@ const ModernMinimalistTemplate: React.FC<ModernMinimalistTemplateProps> = ({ dat
                         <div className="flex items-center gap-3 mb-8">
                             <div className="h-8 w-1 rounded-full" style={{ backgroundColor: accentColor }}></div>
                             <h2 className="text-2xl font-light text-gray-900 dark:text-white">
-                                {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                {t.cvSections.certifications}
                             </h2>
                         </div>
                         <div className="space-y-6 pl-6">
