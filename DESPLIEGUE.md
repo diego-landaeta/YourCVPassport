@@ -42,6 +42,19 @@ en variables `VITE_*`.
       que da Brevo en Senders & IP → Domains). Sin esto los correos van a spam.
 - [ ] Brevo: crear la lista del boletín y las plantillas de doble opt-in.
 
+### Supabase Auth (que ningún correo ni enlace muestre "Supabase")
+
+- [ ] Authentication → URL Configuration: `Site URL` = `https://yourcvpassport.com`;
+      `Redirect URLs` con `https://yourcvpassport.com/**` y `https://www.yourcvpassport.com/**`.
+- [ ] Authentication → SMTP Settings: SMTP de Brevo, remitente
+      `YourCVPassport <no-reply@yourcvpassport.com>` (cubre los correos que envía
+      Supabase por su cuenta: cambio de email, invitaciones desde el dashboard).
+- [ ] Authentication → Email Templates (Confirm signup, Invite, Magic Link, Change Email,
+      Reset Password): enlazar a `{{ .SiteURL }}/<ruta>?token_hash={{ .TokenHash }}&type=<tipo>`
+      en vez de `{{ .ConfirmationURL }}` (rutas `/confirm`, `/recovery`, `/callback`).
+- [ ] Desplegar las funciones de correo (sección 3) a la vez o después del frontend
+      (sección 4): el frontend actual no entiende los enlaces `?token_hash=`.
+
 ## 2. Migraciones de la fase 1 (aditivas, compatibles con el frontend actual)
 
 En el SQL editor, en este orden:

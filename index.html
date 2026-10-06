@@ -45,7 +45,32 @@
          Testimonials.tsx y SuccessStoriesPage.tsx: no se carga globalmente en todas las páginas -->
 </head>
   <body>
-    <div id="root"></div>
+    <!--
+      Contenido estático para quien no ejecuta JavaScript (robots, revisión de marca de
+      Google OAuth): qué es la app y enlaces a privacidad y términos. React lo sustituye
+      al montar la aplicación (createRoot reemplaza el contenido de #root).
+    -->
+    <div id="root">
+      <main id="static-home" style="max-width:720px;margin:48px auto;padding:0 16px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#1F2937;line-height:1.6">
+        <h1 style="color:#2563EB;font-size:28px;margin:0 0 12px">YourCVPassport</h1>
+        <p><strong>Tu CV profesional verificado: destaca y avanza en tu carrera.</strong>
+          YourCVPassport es una plataforma para crear un CV online, verificar tus credenciales
+          (correo, teléfono, formación y experiencia) y compartir tu perfil profesional con empresas.</p>
+        <p lang="en"><strong>Your verified professional passport.</strong>
+          YourCVPassport lets professionals build an online CV, verify their credentials and share
+          their profile with companies.</p>
+        <p>Si inicias sesión con Google, solo usamos tu nombre, tu correo y tu foto de perfil para
+          crear tu cuenta. / If you sign in with Google, we only use your name, email address and
+          profile picture to create your account.</p>
+        <nav aria-label="Legal">
+          <a href="/privacidad">Política de privacidad</a> ·
+          <a href="/terminos">Términos y condiciones</a> ·
+          <a href="/privacy">Privacy Policy</a> ·
+          <a href="/terms">Terms of Service</a> ·
+          <a href="/nosotros/contacto">Contacto</a>
+        </nav>
+      </main>
+    </div>
     <!-- Contenedor para impresión/PDF (oculto en pantalla, visible solo al imprimir) -->
     <div id="print-mount"></div>
     <script type="module" src="/index.tsx"></script>
