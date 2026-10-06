@@ -23,7 +23,7 @@ interface CompanyWithUsers extends Company {
 
 const CompanyManagementSection: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const toast = useToastContext();
 
   const [companies, setCompanies] = useState<CompanyWithUsers[]>([]);
@@ -276,6 +276,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'ALL' ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
           }`}
           onClick={() => setFilter('ALL')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'ALL'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('ALL'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -297,6 +301,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'PENDING' ? 'ring-2 ring-yellow-500 dark:ring-yellow-400' : ''
           }`}
           onClick={() => setFilter('PENDING')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'PENDING'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('PENDING'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -318,6 +326,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'APPROVED' ? 'ring-2 ring-green-500 dark:ring-green-400' : ''
           }`}
           onClick={() => setFilter('APPROVED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'APPROVED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('APPROVED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -339,6 +351,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'REJECTED' ? 'ring-2 ring-red-500 dark:ring-red-400' : ''
           }`}
           onClick={() => setFilter('REJECTED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'REJECTED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('REJECTED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -360,6 +376,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'SUSPENDED' ? 'ring-2 ring-orange-500 dark:ring-orange-400' : ''
           }`}
           onClick={() => setFilter('SUSPENDED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'SUSPENDED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('SUSPENDED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -499,10 +519,12 @@ const CompanyManagementSection: React.FC = () => {
                     Company Details
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setShowDetailsModal(false)}
-                    className="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+                    aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                    className="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -655,14 +677,14 @@ const CompanyManagementSection: React.FC = () => {
                   <button
                     onClick={handleApprove}
                     disabled={processing}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                   >
                     {processing ? 'Processing...' : 'Approve Company'}
                   </button>
                   <button
                     onClick={() => setShowRejectModal(true)}
                     disabled={processing}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
                   >
                     Reject
                   </button>
@@ -709,7 +731,7 @@ const CompanyManagementSection: React.FC = () => {
                 <button
                   onClick={handleReject}
                   disabled={processing || !rejectReason.trim()}
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                 >
                   {processing ? 'Processing...' : 'Confirm Rejection'}
                 </button>
@@ -719,7 +741,7 @@ const CompanyManagementSection: React.FC = () => {
                     setRejectReason('');
                   }}
                   disabled={processing}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Cancel
                 </button>
@@ -742,10 +764,12 @@ const CompanyManagementSection: React.FC = () => {
                     Document Preview
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setDocumentToView(null)}
-                    className="text-gray-400 hover:text-gray-500"
+                    aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                    className="text-gray-400 hover:text-gray-500 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
                 <div className="mt-4">

@@ -516,8 +516,8 @@ const TranslationCacheManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
             <LanguageIcon className="h-6 w-6" />
             {translations_t.title}
@@ -526,7 +526,7 @@ const TranslationCacheManagement: React.FC = () => {
             {translations_t.subtitle}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
               fetchTranslations();
@@ -607,17 +607,19 @@ const TranslationCacheManagement: React.FC = () => {
             {`${bulkResult.success} ${translations_t.bulk.profilesTranslated}${bulkResult.errors > 0 ? `, ${bulkResult.errors} ${translations_t.bulk.errors}` : ''}`}
           </p>
           <button
+            type="button"
             onClick={() => setBulkResult(null)}
+            aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
             className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
       )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-dark-border">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => { setActiveTab('profiles'); setSearchQuery(''); }}
             className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${

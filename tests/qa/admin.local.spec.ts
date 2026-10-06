@@ -49,15 +49,26 @@ async function openAdmin(context: BrowserContext, page: Page, theme: 'light' | '
   return mock;
 }
 
-/** Click centrando antes el elemento: en movil la cabecera sticky tapa los botones. */
+/**
+ * Click centrando antes el elemento (la cabecera sticky puede tapar botones de las
+ * tablas). Clic real: desde U14 la portada de /admin no ensancha el documento en
+ * movil y ya no hace falta el dispatchEvent de respaldo.
+ */
 async function clickCentered(loc: ReturnType<Page['locator']>) {
+  await loc.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'center' }));
+  await loc.click({ timeout: 10_000 });
+}
+
+/**
+ * Solo para /admin/search: en movil el filtro lateral (aside w-72 de
+ * talent-search/CompanyTalentSearchPage, fuera del panel /admin) se superpone a la
+ * paginacion e intercepta el puntero. Pendiente de arreglar en esa pagina.
+ */
+async function clickCenteredOrDispatch(loc: ReturnType<Page['locator']>) {
   await loc.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'center' }));
   try {
     await loc.click({ timeout: 5_000 });
   } catch {
-    // En movil (Pixel 7) las tarjetas de la portada de /admin se solapan y otra
-    // tarjeta intercepta el puntero (fallo de maquetacion ajeno a este arreglo,
-    // anotado en el informe). Se dispara el click directamente en el boton.
     await loc.dispatchEvent('click');
   }
 }
@@ -466,15 +477,15 @@ test.describe('Pagination en busqueda de talento', () => {
     await expect(nav.getByRole('button', { name: 'Página anterior' })).toBeDisabled();
     await expect(nav.locator('[aria-current="page"]')).toHaveText('1');
 
-    await clickCentered(nav.getByRole('button', { name: 'Página siguiente' }));
+    await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Página siguiente' }));
     await expect(page.getByText(`Page 2 of ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['1', '2', '3']);
     expect(mock.requestsTo('profiles').some(r => r.params.offset?.[0] === '30' && r.params.limit?.[0] === '30')).toBe(true);
 
-    await clickCentered(nav.getByRole('button', { name: 'Ir a la página 3' }));
+    await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Ir a la página 3' }));
     await expect(page.getByText(`Page 3 of ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['2', '3', '4']);
-    await clickCentered(nav.getByRole('button', { name: 'Página siguiente' }));
+    await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Página siguiente' }));
     await expect(page.getByText(`Page ${pages} of ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['1', '3', '4']);
     await expect(nav.getByRole('button', { name: 'Página siguiente' })).toBeDisabled();
