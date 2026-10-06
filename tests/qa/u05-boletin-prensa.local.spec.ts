@@ -32,7 +32,7 @@ const T = {
     subFail: 'No hemos podido completar la suscripción.', subNotConf: 'La suscripción automática no está disponible ahora mismo.',
     network: 'No hay conexión con el servidor.', invalid: 'El correo no es válido', rate: 'Demasiados intentos',
     retry: 'Reintentar',
-    name: 'Nombre Completo', outlet: 'Medio de Comunicación', email: 'Correo Electrónico', message: 'Mensaje',
+    name: 'Nombre completo', outlet: 'Medio de comunicación', email: 'Correo electrónico', message: 'Mensaje',
     send: 'Enviar consulta', pressOk: 'Mensaje enviado. Hemos recibido tu consulta.', pressFail: 'No hemos podido enviar tu mensaje.',
     pressNotConf: 'El envío automático no está disponible ahora mismo.', mailSubject: 'Consulta%20de%20prensa',
   },
