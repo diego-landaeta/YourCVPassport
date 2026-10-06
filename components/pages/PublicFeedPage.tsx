@@ -56,7 +56,8 @@ const LeftProfileCard: React.FC<{ session: Session | null; lang: string }> = ({ 
   if (session) {
     const avatarUrl = profile?.avatar_url ||
       `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=3B82F6&color=fff`;
-    const profileHref = profile?.slug ? `/profesionales/${profile.slug}` : '/dashboard';
+    // El CV público vive en /cv/:slug (/profesionales/:slug no existe y daba 404)
+    const profileHref = profile?.slug ? `/cv/${profile.slug}` : '/dashboard';
 
     return (
       <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
@@ -300,11 +301,13 @@ const CommunityCard: React.FC<{ lang: string; isLoggedIn: boolean }> = ({ lang, 
             {lang === 'es' ? 'Publicando recientemente' : 'Recently posting'}
           </p>
           <div className="flex items-center -space-x-2">
-            {posters.map(p => (
+            {/* Solo perfiles con CV público: /cv/:slug (/profesionales/:slug no existe) */}
+            {posters.filter(p => p.slug).map(p => (
               <Link
                 key={p.id}
-                to={`/profesionales/${p.slug ?? p.id}`}
+                to={`/cv/${p.slug}`}
                 title={p.full_name}
+                aria-label={p.full_name}
                 className="relative hover:z-10"
               >
                 {p.avatar_url ? (
