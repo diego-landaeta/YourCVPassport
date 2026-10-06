@@ -9,6 +9,7 @@ import React from 'react';
 import { X, Zap, Lock, TrendingUp, Crown } from 'lucide-react';
 import { FeatureType, FeatureLimitCheck, PLAN_INFO, FEATURE_INFO, PlanType } from '../hooks/useUsageLimits';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useA11yLabels } from './shared/a11y';
 
 interface UsageLimitModalProps {
   isOpen: boolean;
@@ -105,6 +106,7 @@ export function UsageLimitModal({
   limitInfo,
   onUpgrade,
 }: UsageLimitModalProps) {
+  const a11y = useA11yLabels();
   const { lang: language } = useLanguage();
   const t = translations[language] || translations.en;
 
@@ -129,11 +131,11 @@ export function UsageLimitModal({
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-md transform rounded-2xl bg-white shadow-2xl transition-all">
           {/* Close button */}
-          <button
+          <button aria-label={a11y.close}
             onClick={onClose}
             className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X aria-hidden="true" className="h-5 w-5" />
           </button>
 
           {/* Header */}

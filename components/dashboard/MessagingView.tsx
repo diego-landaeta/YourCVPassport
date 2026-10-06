@@ -7,6 +7,7 @@ import {
   PaperAirplaneIcon,
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface Message {
   id: string;
@@ -39,6 +40,7 @@ interface MessagingViewProps {
 }
 
 const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, onBack }) => {
+  const a11y = useA11yLabels();
   const { user, profile } = useAuth();
   const t = useTranslations();
   const toast = useToastContext();
@@ -291,7 +293,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
               const isSelected = conv.lead_id === selectedLeadId;
 
               return (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setSelectedLeadId(conv.lead_id))} aria-current={isSelected ? true : undefined}
                   key={conv.lead_id}
                   onClick={() => setSelectedLeadId(conv.lead_id)}
                   className={`p-4 cursor-pointer transition-all border-l-4 ${
@@ -355,14 +357,14 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
           {/* Chat Header */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-bg-secondary">
             <div className="flex items-center gap-4">
-              <button
+              <button aria-label={a11y.back}
                 onClick={() => {
                   setSelectedLeadId(null);
                   if (onBack) onBack();
                 }}
                 className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors"
               >
-                <ArrowLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <ArrowLeftIcon aria-hidden="true" className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg shadow-md">
                 {otherPersonName.charAt(0).toUpperCase()}
@@ -452,7 +454,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                   {newMessage.length > 0 && `${newMessage.length}`}
                 </div>
               </div>
-              <button
+              <button aria-label={a11y.sendMessage}
                 onClick={sendMessage}
                 disabled={!newMessage.trim() || sending}
                 className="flex-shrink-0 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg disabled:hover:shadow-md flex items-center justify-center"
@@ -461,7 +463,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                 {sending ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <PaperAirplaneIcon className="w-5 h-5" />
+                  <PaperAirplaneIcon aria-hidden="true" className="w-5 h-5" />
                 )}
               </button>
             </div>

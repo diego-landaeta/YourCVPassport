@@ -6,6 +6,7 @@ import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useA11yLabels } from '../shared/a11y';
 
 interface PreferencesSectionProps {
   initialData?: Partial<PreferencesFormData>;
@@ -81,6 +82,7 @@ const CITIES_BY_COUNTRY: Record<string, string[]> = {
 };
 
 const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, onSave, onNext }) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const { lang, setLang } = useLanguage();
   const toast = useToastContext();
@@ -412,7 +414,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                                 className="inline-flex items-center gap-1 px-3 py-1 bg-cv-blue text-white rounded-full text-sm"
                               >
                                 {location}
-                                <button
+                                <button aria-label={`${a11y.remove}: ${location}`}
                                   type="button"
                                   onClick={() => {
                                     const updated = selectedLocations.filter((_: string, i: number) => i !== index);
@@ -420,7 +422,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                                   }}
                                   className="ml-1 hover:bg-cv-blue-dark rounded-full p-0.5"
                                 >
-                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 </button>

@@ -14,12 +14,14 @@ import {
   PlusIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
+import { useA11yLabels, activateOnKey } from './shared/a11y';
 
 interface AIQuestionnaireAssistantProps {
   onComplete?: () => void;
 }
 
 export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionnaireAssistantProps) {
+  const a11y = useA11yLabels();
   const { user, profile, refetchProfile } = useAuth();
   const { lang } = useLanguage();
   const t = useTranslations();
@@ -732,18 +734,18 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{q.common.add}</span>
+                  <PlusIcon aria-hidden="true" className="h-5 w-5" />
+                  <span className="sr-only sm:not-sr-only">{q.common.add}</span>
                 </button>
                 {formData.experiences.length > 1 && (
-                  <button
+                  <button aria-label={a11y.delete}
                     onClick={() => {
                       removeArrayItem('experiences', selectedExpIndex);
                       setSelectedExpIndex(Math.max(0, selectedExpIndex - 1));
                     }}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon aria-hidden="true" className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -854,18 +856,18 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{q.common.add}</span>
+                  <PlusIcon aria-hidden="true" className="h-5 w-5" />
+                  <span className="sr-only sm:not-sr-only">{q.common.add}</span>
                 </button>
                 {formData.education.length > 1 && (
-                  <button
+                  <button aria-label={a11y.delete}
                     onClick={() => {
                       removeArrayItem('education', selectedEduIndex);
                       setSelectedEduIndex(Math.max(0, selectedEduIndex - 1));
                     }}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon aria-hidden="true" className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -975,18 +977,18 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{q.common.add}</span>
+                  <PlusIcon aria-hidden="true" className="h-5 w-5" />
+                  <span className="sr-only sm:not-sr-only">{q.common.add}</span>
                 </button>
                 {formData.skills.length > 1 && (
-                  <button
+                  <button aria-label={a11y.delete}
                     onClick={() => {
                       removeArrayItem('skills', selectedSkillIndex);
                       setSelectedSkillIndex(Math.max(0, selectedSkillIndex - 1));
                     }}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon aria-hidden="true" className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -1100,18 +1102,18 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
                 >
-                  <PlusIcon className="h-5 w-5" />
-                  <span className="hidden sm:inline">{q.common.add}</span>
+                  <PlusIcon aria-hidden="true" className="h-5 w-5" />
+                  <span className="sr-only sm:not-sr-only">{q.common.add}</span>
                 </button>
                 {formData.languages.length > 1 && (
-                  <button
+                  <button aria-label={a11y.delete}
                     onClick={() => {
                       removeArrayItem('languages', selectedLangIndex);
                       setSelectedLangIndex(Math.max(0, selectedLangIndex - 1));
                     }}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium shadow-md hover:shadow-lg transition-all"
                   >
-                    <TrashIcon className="h-5 w-5" />
+                    <TrashIcon aria-hidden="true" className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -1312,7 +1314,7 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             {/* Template Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[500px] pr-2">
               {templates.map((template) => (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => updateFormData('template_id', template.id))} aria-pressed={formData.template_id === template.id}
                   key={template.id}
                   onClick={() => updateFormData('template_id', template.id)}
                   className={`cursor-pointer border-3 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl ${
@@ -1394,12 +1396,12 @@ export default function AIQuestionnaireAssistantNew({ onComplete }: AIQuestionna
             </div>
 
             {/* Close button */}
-            <button
+            <button aria-label={q.navigation.close}
               onClick={onComplete}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title={q.navigation.close}
             >
-              <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

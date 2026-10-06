@@ -7,6 +7,7 @@ import { businessCardStyles, BusinessCardStyle } from './businessCardStyles';
 import { templates } from '../templates/templateData';
 import { supabase } from '../../supabase/client';
 import { useToastContext } from '../../contexts/ToastContext';
+import { activateOnKey } from '../shared/a11y';
 
 interface BusinessCardGalleryProps {
   profile: Profile | null;
@@ -120,7 +121,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
         )}
 
         {/* Card Container with 3D Effect */}
-        <div
+        <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => onSelect?.())} aria-pressed={!!isActive}
           onClick={onSelect}
           className={`relative rounded-2xl p-5 shadow-2xl overflow-hidden transition-all duration-300 transform cursor-pointer ${
             isActive

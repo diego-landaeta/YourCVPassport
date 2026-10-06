@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { useA11yLabels } from './shared/a11y';
 
 interface PhotoPreviewModalProps {
   imageUrl: string;
@@ -19,6 +20,7 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
   onCancel,
   originalFile,
 }) => {
+  const a11y = useA11yLabels();
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -209,11 +211,11 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
                 Centra y ajusta el zoom de tu imagen
               </p>
             </div>
-            <button
+            <button aria-label={a11y.close}
               onClick={onCancel}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -276,12 +278,12 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
                 </span>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
-                <button
+                <button aria-label={a11y.zoomOut}
                   onClick={handleZoomOut}
                   className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   title="Alejar"
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
                   </svg>
                 </button>
@@ -294,12 +296,12 @@ const PhotoPreviewModal: React.FC<PhotoPreviewModalProps> = ({
                   onChange={(e) => setScale(parseFloat(e.target.value))}
                   className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                 />
-                <button
+                <button aria-label={a11y.zoomIn}
                   onClick={handleZoomIn}
                   className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   title="Acercar"
                 >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                   </svg>
                 </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { useA11yLabels } from './a11y';
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
   cancelText = 'Cancelar',
   showCancel = false,
 }) => {
+  const a11y = useA11yLabels();
   if (!isOpen) return null;
 
   const getIcon = () => {
@@ -52,11 +54,11 @@ const AlertModal: React.FC<AlertModalProps> = ({
       <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
         {/* Header with close button */}
         <div className="flex justify-end p-4 pb-0">
-          <button
+          <button aria-label={a11y.close}
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <XMarkIcon aria-hidden="true" className="w-6 h-6" />
           </button>
         </div>
 

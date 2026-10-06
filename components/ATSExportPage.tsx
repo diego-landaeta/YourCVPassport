@@ -9,6 +9,7 @@ import PageSEO from './shared/PageSEO';
 import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 import HeroImage from './landing/HeroImage';
+import { activateOnKey } from './shared/a11y';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -20,7 +21,7 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 };
 
 const TemplateCard: React.FC<{ title: string; imageUrl: string; onClick: () => void }> = ({ title, imageUrl, onClick }) => (
-  <div
+  <div role="button" tabIndex={0} onKeyDown={activateOnKey(onClick)}
     onClick={onClick}
     className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[3/4] cursor-pointer"
   >

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Stamp } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
+import { useA11yLabels } from './shared/a11y';
 
 interface PublicStampBadgesProps {
     stamps: Stamp[];
@@ -14,6 +15,7 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
     compact = false,
     showDetails = false
 }) => {
+    const a11y = useA11yLabels();
     const { lang } = useLanguage();
     const t = useTranslations();
     const [selectedStamp, setSelectedStamp] = useState<Stamp | null>(null);
@@ -213,11 +215,11 @@ const PublicStampBadges: React.FC<PublicStampBadgesProps> = ({
                                     </span>
                                 </div>
                             </div>
-                            <button
+                            <button aria-label={a11y.close}
                                 onClick={() => setSelectedStamp(null)}
                                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg aria-hidden="true" className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>

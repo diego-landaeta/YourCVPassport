@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { useA11yLabels } from './shared/a11y';
 
 interface BlogPost {
     id?: number;
@@ -23,6 +24,7 @@ interface BlogPost {
 }
 
 const BlogManagementSection: React.FC = () => {
+    const a11y = useA11yLabels();
     const { session } = useAuth();
     const { lang } = useLanguage();
     const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -202,8 +204,8 @@ const BlogManagementSection: React.FC = () => {
                         <div className="flex-1">
                             <p className="font-bold text-lg">{errorMessage}</p>
                         </div>
-                        <button onClick={() => setErrorMessage(null)} className="flex-shrink-0 hover:bg-red-600 rounded p-1">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button aria-label={a11y.close} onClick={() => setErrorMessage(null)} className="flex-shrink-0 hover:bg-red-600 rounded p-1">
+                            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
@@ -413,19 +415,19 @@ const BlogManagementSection: React.FC = () => {
 
                                         {/* Actions */}
                                         <div className="flex flex-col gap-2">
-                                            <button 
+                                            <button aria-label="Editar" 
                                                 onClick={() => setEditingPost(post)} 
                                                 className="p-2 text-gray-500 hover:text-cv-blue rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-primary transition-colors"
                                                 title="Editar"
                                             >
-                                                <PencilIcon className="w-5 h-5" />
+                                                <PencilIcon aria-hidden="true" className="w-5 h-5" />
                                             </button>
-                                            <button 
+                                            <button aria-label="Eliminar" 
                                                 onClick={() => handleDelete(post.id!)} 
                                                 className="p-2 text-gray-500 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                 title="Eliminar"
                                             >
-                                                <TrashIcon className="w-5 h-5" />
+                                                <TrashIcon aria-hidden="true" className="w-5 h-5" />
                                             </button>
                                         </div>
                                     </div>

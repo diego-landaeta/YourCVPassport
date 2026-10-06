@@ -26,6 +26,7 @@ import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import ProfessionalClassicTemplate from '../templates/ProfessionalClassicTemplate';
 import HealthcareProfessionalTemplate from '../templates/HealthcareProfessionalTemplate';
 import UrbanTemplate from '../templates/UrbanTemplate';
+import { activateOnKey } from '../shared/a11y';
 interface TemplateSelectorProps {
   currentTemplate?: string;
   onTemplateChange: (templateId: string) => void;
@@ -233,7 +234,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
                 } ${isLocked ? 'opacity-60' : ''}`}
               >
                 {/* Template Preview - Static Image with Click to Preview */}
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => !isLocked && setPreviewTemplate(template.id))} aria-disabled={isLocked || undefined}
                   className="aspect-[3/4] bg-white relative overflow-hidden cursor-pointer group"
                   onClick={() => !isLocked && setPreviewTemplate(template.id)}
                 >
@@ -338,11 +339,11 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
                 >
                   {t.useTemplate}
                 </button>
-                <button
+                <button aria-label={translations.common.close}
                   onClick={() => setPreviewTemplate(null)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>

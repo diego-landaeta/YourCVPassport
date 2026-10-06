@@ -84,7 +84,7 @@ const URLSimulator: React.FC = () => {
                         type="text"
                         value={slug}
                         onChange={handleInputChange}
-                        className="font-mono text-cv-dark-gray dark:text-dark-text-primary bg-transparent focus:outline-none w-full text-center sm:text-left"
+                        className="font-mono text-cv-dark-gray dark:text-dark-text-primary bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light rounded w-full text-center sm:text-left"
                     />
                 </div>
                 <button

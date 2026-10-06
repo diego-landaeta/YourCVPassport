@@ -22,6 +22,7 @@ import LanguagesSection from './LanguagesSection';
 import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
 import FinalizationStep from './FinalizationStep';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface ProfileWizardProps {
   profile: any;
@@ -62,6 +63,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   initialStep,
   onComplete
 }) => {
+  const a11y = useA11yLabels();
   const t = useTranslations();
   const { lang } = useLanguage();
   const navigate = useNavigate();
@@ -342,9 +344,35 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
             // para publicar" de "esto puedes saltartelo".
             const needsAttention = Boolean(rule?.required && rule.missing.length > 0);
 
+            const goToStep = async () => {
+              // Check if trying to access finalization step
+              const isFinalizationStep = step.id === 'finalization';
+
+              if (isFinalizationStep) {
+                // Auto-guardar Preferences si estamos en ese paso
+                const saveSuccess = await handlePreferencesSave();
+
+                // Si el guardado falló (porque no hay campos llenos), no avanzar
+                if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
+                  return; // Error already shown by PreferencesSection
+                }
+
+                const canAccess = canAccessFinalization();
+                if (!canAccess) {
+                  return; // Validation failed, warning already shown
+                }
+              }
+
+              // Allow navigation
+              setCurrentStep(index);
+              window.scrollTo(0, 0);
+            };
+
             return (
               <div key={step.id} className="flex items-center flex-shrink-0">
-                <div
+                {/* En movil el titulo de los pasos no activos va oculto: el aria-label
+                    mantiene el nombre accesible del paso. */}
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(goToStep)} aria-current={isActive ? 'step' : undefined} aria-label={step.title}
                   className={`flex flex-col items-center cursor-pointer group transition-all ${
                     isActive
                       ? 'text-cv-blue'
@@ -354,29 +382,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                           ? 'text-amber-600 dark:text-amber-500'
                           : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
-                  onClick={async () => {
-                    // Check if trying to access finalization step
-                    const isFinalizationStep = step.id === 'finalization';
-
-                    if (isFinalizationStep) {
-                      // Auto-guardar Preferences si estamos en ese paso
-                      const saveSuccess = await handlePreferencesSave();
-
-                      // Si el guardado falló (porque no hay campos llenos), no avanzar
-                      if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
-                        return; // Error already shown by PreferencesSection
-                      }
-
-                      const canAccess = canAccessFinalization();
-                      if (!canAccess) {
-                        return; // Validation failed, warning already shown
-                      }
-                    }
-
-                    // Allow navigation
-                    setCurrentStep(index);
-                    window.scrollTo(0, 0);
-                  }}
+                  onClick={goToStep}
                 >
                   <div className={`
                     relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
@@ -516,11 +522,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   </span>
                 </div>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowIncompleteWarning(false)}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors hover:scale-110 transform"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -556,11 +562,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   {t.profileWizard.viewPlans}
                 </button>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowPremiumToast(false)}
                 className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

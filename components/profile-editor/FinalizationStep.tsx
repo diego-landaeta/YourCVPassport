@@ -21,6 +21,7 @@ import { sanitizeSlug } from '../../utils/slugUtils';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
+import { activateOnKey } from '../shared/a11y';
 
 // Identificadores de plantilla guardados en perfiles antiguos que ya no
 // corresponden a ninguna opcion de este paso. Sin traducirlos, al abrir la
@@ -490,7 +491,7 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
               )}
 
               {/* Template Preview - Theme-aware Image */}
-              <div className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setPreviewTemplate(template.id))} className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
                    onClick={() => setPreviewTemplate(template.id)}>
                 <img
                   src={getTemplatePreviewImage(template.id)}
@@ -587,11 +588,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
                 >
                   Usar esta plantilla
                 </button>
-                <button
+                <button aria-label={translations.common.close}
                   onClick={() => setPreviewTemplate(null)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
