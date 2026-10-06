@@ -160,6 +160,57 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
     return true;
   };
 
+  // Cuerpo { error, code, ... } de una respuesta no-2xx de la Edge Function.
+  // supabase.functions.invoke solo devuelve `error` (FunctionsHttpError) y deja
+  // la respuesta en error.context.
+  const readFunctionError = async (fnError: any): Promise<{ code?: string; error?: string; attemptsRemaining?: number }> => {
+    try {
+      const res = fnError?.context;
+      if (res && typeof res.json === 'function') {
+        const body = await res.json();
+        if (body && typeof body === 'object') return body;
+      }
+    } catch {
+      // cuerpo no JSON: mensaje genérico
+    }
+    return {};
+  };
+
+  // Mensaje para el usuario según el código de error del servidor.
+  const messageForCode = (body: { code?: string; attemptsRemaining?: number }, fallback: string): string => {
+    switch (body.code) {
+      case 'RATE_LIMITED':
+      case 'RATE_LIMIT_EXCEEDED':
+        return 'Has excedido el límite de intentos. Por favor espera antes de solicitar otro código.';
+      case 'CODE_EXPIRED':
+        return 'El código ha expirado. Por favor solicita uno nuevo.';
+      case 'TOO_MANY_ATTEMPTS':
+        return 'Demasiados intentos incorrectos. Por favor solicita un nuevo código.';
+      case 'INVALID_CODE': {
+        const attemptsMsg = body.attemptsRemaining ? ` (${body.attemptsRemaining} intentos restantes)` : '';
+        return `Código incorrecto. Por favor verifica e intenta nuevamente.${attemptsMsg}`;
+      }
+      case 'NO_PENDING_VERIFICATION':
+        return 'No se encontró una verificación pendiente. Por favor solicita un nuevo código.';
+      case 'INVALID_INPUT':
+        return stampType === 'EMAIL' && step === 'input'
+          ? 'Por favor ingresa un email válido'
+          : 'El código debe tener 6 dígitos.';
+      case 'INVALID_PHONE_FORMAT':
+        return 'Por favor ingresa un número de teléfono válido';
+      case 'UNAUTHORIZED':
+        return 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
+      case 'CONCURRENT_ATTEMPT':
+        return 'Se está procesando otro intento. Vuelve a intentarlo.';
+      default:
+        return fallback;
+    }
+  };
+
+  // Ya no hay "modo de prueba" local: el código lo genera y lo comprueba solo el
+  // servidor (en BD se guarda su HMAC, no el código). Si la función falla se
+  // muestra el error; antes se creaba un sello desde el navegador y se enseñaba
+  // el código en un alert.
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -170,106 +221,28 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
     setSending(true);
 
     try {
-      if (stampType === 'EMAIL') {
-        // Try to call the send-verification-email edge function
-        const { data, error } = await supabase.functions.invoke('send-verification-email', {
-          body: {
-            email: contactValue,
-            userId: user.id
-          }
-        });
+      const functionName = stampType === 'EMAIL' ? 'send-verification-email' : 'send-verification-sms';
+      const body = stampType === 'EMAIL'
+        ? { email: contactValue.trim(), userId: user.id }
+        : { phone: `${countryCode}${phoneNumber.replace(/\D/g, '')}`, userId: user.id };
 
-        // If edge function fails (not deployed, error, etc.), fall back to local creation
-        if (error) {// Generate a random 6-digit code
-          const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const { data, error } = await supabase.functions.invoke(functionName, { body });
 
-          // Create a pending stamp record with the code
-          const { data: stampData, error: stampError } = await supabase
-            .from('stamps')
-            .insert({
-              profile_id: user.id,
-              type: 'EMAIL',
-              status: 'PENDING',
-              evidence: {
-                email: contactValue,
-                verification_code: code,
-                verification_sent_at: new Date().toISOString(),
-                expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString() // 15 minutes
-              },
-              provider: 'email_verification'
-            })
-            .select()
-            .single();
-
-          if (stampError) throw stampError;
-          setSentCodeId(stampData.id);
-
-          // Show code to user in fallback mode
-          alert(`MODO DE PRUEBA: Tu código es ${code}\n\n(En producción, este código se enviaría por email)`);
-          alert(`⚠️ IMPORTANTE: Copia este código ahora: ${code}`);
-          
-        } else if (data.error) {
-          throw new Error(data.error);
-        } else {
-          // Store the stamp ID returned by the edge function
-          setSentCodeId(data.stampId);
-        }
-
-      } else {
-        // Combine country code and phone number
-        const fullPhoneNumber = `${countryCode} ${phoneNumber}`;
-
-        // Try to call the send-verification-sms edge function
-        const { data, error } = await supabase.functions.invoke('send-verification-sms', {
-          body: {
-            phone: fullPhoneNumber,
-            userId: user.id
-          }
-        });
-
-        // If edge function fails, fall back to local creation
-        if (error) {const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-          const { data: stampData, error: stampError } = await supabase
-            .from('stamps')
-            .insert({
-              profile_id: user.id,
-              type: 'PHONE',
-              status: 'PENDING',
-              evidence: {
-                phone: fullPhoneNumber,
-                verification_code: code,
-                verification_sent_at: new Date().toISOString(),
-                expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
-              },
-              provider: 'sms_verification'
-            })
-            .select()
-            .single();
-
-          if (stampError) throw stampError;
-          setSentCodeId(stampData.id);
-
-          // Show code to user in fallback mode
-          alert(`MODO DE PRUEBA: Tu código es ${code}\n\n(En producción, este código se enviaría por SMS)`);
-          alert(`⚠️ IMPORTANTE: Copia este código ahora: ${code}`);
-          
-        } else if (data.error) {
-          throw new Error(data.error);
-        } else {
-          setSentCodeId(data.stampId);
-        }
+      if (error) {
+        const errBody = await readFunctionError(error);
+        setError(messageForCode(errBody, 'Error al enviar el código. Intenta nuevamente.'));
+        return;
+      }
+      if (!data?.success || !data?.stampId) {
+        setError(messageForCode(data ?? {}, 'Error al enviar el código. Intenta nuevamente.'));
+        return;
       }
 
+      setSentCodeId(data.stampId);
       setStep('verify');
       setError(null);
-
-    } catch (err: any) {// Handle specific error codes
-      if (err.message?.includes('RATE_LIMIT_EXCEEDED')) {
-        setError('Has excedido el límite de intentos. Por favor espera antes de solicitar otro código.');
-      } else {
-        setError(err.message || 'Error al enviar el código. Intenta nuevamente.');
-      }
+    } catch (err: any) {
+      setError(err?.message || 'Error al enviar el código. Intenta nuevamente.');
     } finally {
       setSending(false);
     }
@@ -279,7 +252,8 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
     e.preventDefault();
     if (!user || !sentCodeId) return;
 
-    if (!verificationCode.trim()) {
+    const code = verificationCode.trim();
+    if (!code) {
       setError('Por favor ingresa el código de verificación');
       return;
     }
@@ -288,88 +262,30 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
     setError(null);
 
     try {
-      // Call the appropriate verification edge function
       const functionName = stampType === 'EMAIL' ? 'verify-email-code' : 'verify-phone-code';
-      
+
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
-          code: verificationCode,
+          code,
           userId: user.id
         }
       });
 
-      // If edge function fails (not deployed, error, etc.), fall back to local verification
-      if (error) {// Fetch stamp directly from database as fallback
-        const { data: stampData, error: fetchError } = await supabase
-          .from('stamps')
-          .select('evidence')
-          .eq('id', sentCodeId)
-          .single();
-
-        if (fetchError) throw fetchError;
-
-        const evidence = stampData.evidence as any;
-
-        // Check if code expired
-        if (new Date() > new Date(evidence.expires_at || evidence.code_expires_at)) {
-          setError('El código ha expirado. Por favor solicita uno nuevo.');
-          return;
-        }
-
-        // Verify code
-        if (verificationCode === evidence.verification_code) {
-          // Update stamp status to VERIFIED
-          const { error: updateError } = await supabase
-            .from('stamps')
-            .update({
-              status: 'VERIFIED',
-              verified_at: new Date().toISOString(),
-              evidence: {
-                ...evidence,
-                verified: true,
-                verification_code: null
-              }
-            })
-            .eq('id', sentCodeId);
-
-          if (updateError) throw updateError;
-
-          onSuccess?.();
-          onClose();
-          resetForm();
-        } else {
-          setError('Código incorrecto. Por favor verifica e intenta nuevamente.');
-        }
+      if (error) {
+        const errBody = await readFunctionError(error);
+        setError(messageForCode(errBody, 'Error al verificar el código.'));
         return;
       }
 
-      if (data.error) {
-        // Handle specific error codes from the edge function
-        if (data.code === 'CODE_EXPIRED') {
-          setError('El código ha expirado. Por favor solicita uno nuevo.');
-        } else if (data.code === 'TOO_MANY_ATTEMPTS') {
-          setError('Demasiados intentos incorrectos. Por favor solicita un nuevo código.');
-        } else if (data.code === 'INVALID_CODE') {
-          const attemptsMsg = data.attemptsRemaining 
-            ? ` (${data.attemptsRemaining} intentos restantes)` 
-            : '';
-          setError(`Código incorrecto. Por favor verifica e intenta nuevamente.${attemptsMsg}`);
-        } else if (data.code === 'NO_PENDING_VERIFICATION') {
-          setError('No se encontró una verificación pendiente. Por favor solicita un nuevo código.');
-        } else {
-          setError(data.error || 'Error al verificar el código.');
-        }
-        return;
-      }
-
-      // Success!
-      if (data.success) {
+      if (data?.success) {
         onSuccess?.();
         onClose();
         resetForm();
+      } else {
+        setError(messageForCode(data ?? {}, 'Error al verificar el código.'));
       }
-
-    } catch (err: any) {setError(err.message || 'Error al verificar el código. Intenta nuevamente.');
+    } catch (err: any) {
+      setError(err?.message || 'Error al verificar el código. Intenta nuevamente.');
     } finally {
       setVerifying(false);
     }
