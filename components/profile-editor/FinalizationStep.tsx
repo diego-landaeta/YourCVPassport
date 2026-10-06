@@ -17,7 +17,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { canChangeSlug, getNextSlugChangeDate } from '../../utils/slugValidation';
-import { sanitizeSlug } from '../../utils/slugUtils';
+import { sanitizeSlug, checkSlugAvailability } from '../../utils/slugUtils';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
@@ -229,21 +229,10 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
 
     setIsCheckingSlug(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('slug', slug)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        // No rows found - slug is available
-        setIsSlugValid(true);
-        return true;
-      }
-
-      // Slug already exists
-      setIsSlugValid(false);
-      return false;
+      // Helper común (maybeSingle): sin 406 en la red; un error real cuenta como ocupado
+      const available = await checkSlugAvailability(slug, session?.user?.id);
+      setIsSlugValid(available);
+      return available;
     } catch (err) {
       setIsSlugValid(false);
       return false;

@@ -82,6 +82,12 @@ const CompanyProfileViewPage: React.FC = () => {
       if (isUUID) {
         query = query.eq('id', profileId);
       } else {
+        // El parámetro de la URL va dentro de un filtro .or() de PostgREST: con comas,
+        // paréntesis o puntos podría añadir condiciones. Solo se aceptan slugs/handles.
+        if (!/^[a-z0-9][a-z0-9_-]{0,99}$/i.test(profileId || '')) {
+          setProfile(null);
+          return;
+        }
         // Try slug first, then handle
         query = query.or(`slug.eq.${profileId},handle.eq.${profileId}`);
       }

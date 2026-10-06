@@ -466,9 +466,11 @@ const ProfilesManagement: React.FC = () => {
           .from('profiles')
           .select('id')
           .eq('slug', updates.slug)
-          .single();
+          .neq('id', profileId)
+          // maybeSingle: slug libre = sin fila, no un 406
+          .maybeSingle();
 
-        if (checkError && checkError.code !== 'PGRST116') {
+        if (checkError) {
           throw new Error(lt.slugCheckError);
         }
 
@@ -701,7 +703,8 @@ const ProfilesManagement: React.FC = () => {
           .from('profiles')
           .select('id')
           .eq('slug', selectedProfile.slug)
-          .single();
+          .neq('id', selectedProfile.id)
+          .maybeSingle();
 
         if (existingProfile && existingProfile.id !== selectedProfile.id) {
           setSlugError(lt.slugTakenShort);

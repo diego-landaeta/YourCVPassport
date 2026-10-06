@@ -9,7 +9,7 @@ import { AI_FEATURES_ENABLED } from '../../lib/ai';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 import { canChangeSlug, getNextSlugChangeDate, updateSlugWithValidation } from '../../utils/slugValidation';
-import { sanitizeSlug } from '../../utils/slugUtils';
+import { sanitizeSlug, checkSlugAvailability as isSlugAvailable } from '../../utils/slugUtils';
 import ModernDashboardView from './ModernDashboardView';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CVVersionsSection } from './CVVersionsSection';
@@ -131,17 +131,8 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
 
     setIsCheckingAvailability(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('slug', slug)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        setIsAvailable(true);
-      } else if (data) {
-        setIsAvailable(false);
-      }
+      // Helper común (maybeSingle): sin 406 en la red y un error real no se toma por "libre"
+      setIsAvailable(await isSlugAvailable(slug, userId));
     } catch {
       setIsAvailable(false);
     } finally {
