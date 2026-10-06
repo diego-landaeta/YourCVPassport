@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import toast from 'react-hot-toast';
 import PageSEO from '../shared/PageSEO';
+
+// Textos SEO de la ficha de oferta (diccionario local ES/EN).
+const JOB_DETAIL_SEO = {
+  es: {
+    titleWithCompany: (title: string, company: string) => `${title} en ${company}`,
+    fallbackTitle: 'Detalle de la oferta de empleo',
+    fallbackDescription: 'Consulta los detalles de la oferta y postúlate con tu perfil de CV verificado en YourCVPassport.',
+    keywordSuffix: 'oferta de empleo',
+  },
+  en: {
+    titleWithCompany: (title: string, company: string) => `${title} at ${company}`,
+    fallbackTitle: 'Job Details',
+    fallbackDescription: 'View job details and apply with your verified CV profile on YourCVPassport.',
+    keywordSuffix: 'job opening',
+  },
+} as const;
 import {
   BuildingOfficeIcon,
   MapPinIcon,
@@ -70,7 +86,17 @@ const JobDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { lang: language } = useLanguage();
+  const location = useLocation();
+  const { lang: language, setLang } = useLanguage();
+
+  // /empleos/:slug fija el espanol y /jobs/:slug el ingles (rutas fuera de routeConfig).
+  const pathLang = location.pathname.startsWith('/empleos/') ? 'es' : 'en';
+  useEffect(() => {
+    if (language !== pathLang) setLang(pathLang);
+    // Solo al entrar en la ruta: el selector de idioma puede cambiarlo despues.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathLang]);
+  const jobsBasePath = pathLang === 'es' ? '/empleos' : '/jobs';
   const t = useTranslations();
 
   const [job, setJob] = useState<JobPosting | null>(null);
@@ -142,7 +168,7 @@ const JobDetailPage: React.FC = () => {
     } catch (error: any) {
       console.error('Error loading job details:', error);
       toast.error(t.company?.jobDetail?.errors?.loadingJob || 'Error loading job');
-      navigate('/jobs');
+      navigate(jobsBasePath);
     } finally {
       setLoading(false);
     }
@@ -304,20 +330,29 @@ const JobDetailPage: React.FC = () => {
 
   const daysRemaining = getDaysRemaining(job.application_deadline);
 
+  const seoText = JOB_DETAIL_SEO[pathLang];
+  const seoTitle = job.title
+    ? (job.company?.name ? seoText.titleWithCompany(job.title, job.company.name) : job.title)
+    : seoText.fallbackTitle;
+  const seoDescription = job.description
+    ? (job.description.length > 155 ? `${job.description.substring(0, 155).trim()}...` : job.description)
+    : seoText.fallbackDescription;
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Canonical por defecto: la propia oferta en el idioma de la URL
+          (/jobs/:slug o /empleos/:slug), con hreflang reciprocos entre ambas. */}
       <PageSEO
-        title={job.title ? `${job.title} at ${job.company.name}` : 'Job Details'}
-        description={job.description ? job.description.substring(0, 155) + '...' : 'View job details and apply with your verified CV profile on YourCVPassport.'}
-        keywords={`${job.title || 'job'}, ${job.company.name || ''}, ${job.location_city || ''}, ${job.employment_type || ''}, job opening`.replace(/, ,/g, ',')}
-        lang={language}
-        canonical={`https://yourcvpassport.com/jobs/${slug}`}
+        title={seoTitle}
+        description={seoDescription}
+        keywords={[job.title, job.company?.name, job.location_city, job.employment_type, seoText.keywordSuffix].filter(Boolean).join(', ')}
+        lang={pathLang}
       />
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => navigate('/jobs')}
+            onClick={() => navigate(jobsBasePath)}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />

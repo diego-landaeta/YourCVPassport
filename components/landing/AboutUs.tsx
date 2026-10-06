@@ -2,16 +2,30 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import PageSEO from '../shared/PageSEO';
+
+// SEO de /about y /nosotros (diccionario local ES/EN).
+const ABOUT_SEO = {
+  es: {
+    title: 'Sobre nosotros',
+    description: 'Conoce YourCVPassport: quiénes somos, nuestra misión y los valores con los que ayudamos a profesionales y empresas a confiar en perfiles verificados.',
+  },
+  en: {
+    title: 'About us',
+    description: 'Get to know YourCVPassport: who we are, our mission and the values behind how we help professionals and companies trust verified profiles.',
+  },
+} as const;
 
 const AboutUs: React.FC = () => {
   const { lang } = useLanguage();
   const t = useTranslations();
-  const langPrefix = lang === 'es' ? '/es' : '';
-  const pressPath = `${langPrefix}/${t.aboutUs.pressLink}`.replace(/\/+/g, '/');
-  const contactPath = `${langPrefix}/${t.aboutUs.contactLink}`.replace(/\/+/g, '/');
+  // Las rutas en espanol no llevan prefijo /es (no existe): /nosotros/prensa, /about/press
+  const pressPath = `/${t.aboutUs.pressLink}`.replace(/\/+/g, '/');
+  const contactPath = `/${t.aboutUs.contactLink}`.replace(/\/+/g, '/');
 
   return (
     <div className="bg-white dark:bg-dark-bg-primary">
+      <PageSEO title={ABOUT_SEO[lang].title} description={ABOUT_SEO[lang].description} lang={lang} />
       <section className="bg-cv-light-gray dark:bg-dark-bg-secondary border-b border-transparent dark:border-dark-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary leading-tight">

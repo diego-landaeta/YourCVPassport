@@ -95,7 +95,6 @@ const PricingPage: React.FC = () => {
                 description={seoDescription}
                 lang={lang}
                 keywords={seoKeywords}
-                canonical="https://yourcvpassport.com/pricing"
             />
             <div className="bg-white dark:bg-dark-bg-primary">
             {/* Hero */}
