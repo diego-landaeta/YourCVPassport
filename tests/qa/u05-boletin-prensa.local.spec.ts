@@ -33,7 +33,7 @@ const T = {
     network: 'No hay conexión con el servidor.', invalid: 'El correo no es válido', rate: 'Demasiados intentos',
     retry: 'Reintentar',
     name: 'Nombre Completo', outlet: 'Medio de Comunicación', email: 'Correo Electrónico', message: 'Mensaje',
-    send: 'Enviar Consulta', pressOk: 'Mensaje enviado. Hemos recibido tu consulta.', pressFail: 'No hemos podido enviar tu mensaje.',
+    send: 'Enviar consulta', pressOk: 'Mensaje enviado. Hemos recibido tu consulta.', pressFail: 'No hemos podido enviar tu mensaje.',
     pressNotConf: 'El envío automático no está disponible ahora mismo.', mailSubject: 'Consulta%20de%20prensa',
   },
   en: {
