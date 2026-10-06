@@ -5,8 +5,9 @@
  * Supabase se responde en local (helpers/supabaseMock): la tabla `blog_posts` va vacia y
  * el listado sale de content/posts. Solo los tests de #5 dejan pasar images.unsplash.com
  * (lectura) para comprobar que las fotos cargan de verdad; en el resto se bloquean para no
- * saturar los navegadores. No se envia ningun formulario real: prensa y boletin solo
- * preparan un enlace mailto que el usuario abre.
+ * saturar los navegadores. No se envia ningun formulario real: prensa y boletin llaman a
+ * la Edge Function newsletter-contact, que aqui se responde con page.route (ver tambien
+ * u05-boletin-prensa.local.spec.ts).
  *
  *   QA_PORT=5320 npx playwright test -c tests/qa/playwright.qa.config.ts tests/qa/publicas.local.spec.ts
  */
@@ -138,8 +139,22 @@ test.describe('#4 blog visible y paginado', () => {
     });
   }
 
-  test('el boletin no usa alert() y prepara un mailto explicito', async ({ page, context }) => {
+  test('el boletin no usa alert(): alta via newsletter-contact y mailto solo de respaldo', async ({ page, context }) => {
     await setup(context, 'es');
+    const replies = [
+      { status: 200, body: { success: true } },
+      { status: 503, body: { error: 'Newsletter is not configured', code: 'NOT_CONFIGURED' } },
+    ];
+    const calls: unknown[] = [];
+    await page.route('**/functions/v1/newsletter-contact', route => {
+      const cors = { 'access-control-allow-origin': '*' };
+      // `*` no cubre Authorization en el preflight (WebKit): se devuelven las pedidas.
+      const asked = route.request().headers()['access-control-request-headers'] || 'authorization,apikey,content-type,x-client-info';
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { ...cors, 'access-control-allow-headers': asked } });
+      const reply = replies[Math.min(calls.length, replies.length - 1)];
+      calls.push(JSON.parse(route.request().postData() || 'null'));
+      return route.fulfill({ status: reply.status, contentType: 'application/json', headers: cors, body: JSON.stringify(reply.body) });
+    });
     await openBlog(page, 'es');
     let dialog = false;
     page.on('dialog', d => { dialog = true; d.dismiss(); });
@@ -147,10 +162,16 @@ test.describe('#4 blog visible y paginado', () => {
     await email.evaluate(el => el.scrollIntoView({ block: 'center' }));
     await email.fill('qa@example.com');
     await page.getByRole('button', { name: 'Suscribirse' }).click();
-    const status = page.getByRole('status').filter({ hasText: 'support@yourcvpassport.com' });
-    await expect(status).toBeVisible();
-    const link = status.getByRole('link', { name: 'Abrir correo' });
-    await expect(link).toHaveAttribute('href', /^mailto:support@yourcvpassport\.com\?subject=.+qa%40example\.com/);
+    await expect(page.getByRole('status').filter({ hasText: 'Revisa tu correo para confirmar la suscripción' })).toBeVisible();
+    expect(calls).toEqual([{ action: 'subscribe', email: 'qa@example.com', lang: 'es', website: '' }]);
+
+    // Sin Brevo configurado: el error ofrece el mailto de respaldo
+    await email.fill('qa@example.com');
+    await page.getByRole('button', { name: 'Suscribirse' }).click();
+    const alert = page.getByRole('alert').filter({ hasText: 'no está disponible' });
+    await expect(alert).toBeVisible();
+    await expect(alert.getByRole('link', { name: 'support@yourcvpassport.com' }))
+      .toHaveAttribute('href', /^mailto:support@yourcvpassport\.com\?subject=.+qa%40example\.com/);
     expect(dialog).toBe(false);
     expect(new URL(page.url()).pathname).toBe('/recursos/blog');
   });
@@ -364,8 +385,10 @@ test.describe('#7 kit de prensa', () => {
     ).toBeGreaterThan(0.99);
   });
 
-  test('el formulario de prensa no usa alert() y prepara el mailto a press@', async ({ page, context }) => {
+  test('el formulario de prensa no usa alert() y, si el envio falla, ofrece el mailto a press@', async ({ page, context }) => {
     await setup(context, 'es');
+    // Fallo de red hacia la funcion: el mensaje de error incluye el mailto de respaldo.
+    await page.route('**/functions/v1/newsletter-contact', route => route.abort('connectionfailed'));
     await page.goto('/nosotros/prensa', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('press-download-kit')).toBeVisible({ timeout: 45_000 });
     let dialog = false;
@@ -375,9 +398,9 @@ test.describe('#7 kit de prensa', () => {
     await page.getByLabel('Correo Electrónico').fill('qa@example.com');
     await page.getByLabel('Mensaje').fill('Prueba local, no se envia nada.');
     await page.getByRole('button', { name: 'Enviar Consulta' }).click();
-    const status = page.getByRole('status').filter({ hasText: 'press@yourcvpassport.com' });
-    await expect(status).toBeVisible();
-    await expect(status.getByRole('link', { name: 'Abrir en mi correo' }))
+    const alert = page.getByRole('alert').filter({ hasText: 'No hay conexión con el servidor' });
+    await expect(alert).toBeVisible();
+    await expect(alert.getByRole('link', { name: 'press@yourcvpassport.com' }))
       .toHaveAttribute('href', /^mailto:press@yourcvpassport\.com\?subject=Consulta%20de%20prensa%20-%20QA%20Medio&body=.+Prueba%20local/);
     expect(dialog).toBe(false);
     expect(new URL(page.url()).pathname).toBe('/nosotros/prensa');
