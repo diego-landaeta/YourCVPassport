@@ -158,6 +158,21 @@ test.describe('U17 imagenes de plantillas', () => {
     await page.screenshot({ path: path.join(SHOTS_DIR, `${process.env.U17_SHOT || 'despues'}-profesionales-plantillas-${testInfo.project.name}.png`) });
   });
 
+  test('galeria de profesionales/plantillas: miniaturas que fallan muestran la reserva', async ({ page, context }) => {
+    test.setTimeout(120_000);
+    await setup(context, 'es');
+    await page.route('**/images/templates/*.png', route => route.abort());
+    await page.goto('/profesionales/plantillas', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('h1')).toBeVisible({ timeout: 45_000 });
+    await scrollThrough(page);
+    const imgs = await loadTemplateImages(page);
+    expect(imgs.length).toBeGreaterThan(5);
+    for (const img of imgs) {
+      expect(img.fallback, `${img.alt} sin reserva`).toBe(true);
+      expect(img.naturalWidth).toBeGreaterThan(0);
+    }
+  });
+
   test('una miniatura que falla muestra la imagen de reserva (tarjeta y modal)', async ({ page, context }, testInfo) => {
     test.setTimeout(120_000);
     await setup(context, 'es');

@@ -133,9 +133,9 @@ test.describe('(b) detalle de empleo', () => {
     );
     const w = watch(page);
 
-    await page.goto('/jobs/data-engineer-u16', { waitUntil: 'domcontentloaded' });
+    await page.goto('/empleos/data-engineer-u16', { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Data Engineer U16').first()).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole('button', { name: 'Aplicar Ahora' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Aplicar ahora' })).toBeVisible();
     await expect(page.getByText('Ya aplicaste')).toHaveCount(0);
     await settle(page);
 

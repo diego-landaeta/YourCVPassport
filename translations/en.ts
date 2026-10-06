@@ -2344,7 +2344,7 @@ export const translations = {
     PRICING_PLANS: [
         { title: 'Basic Plan', price: 'Free', period: 'Forever', description: 'Start with a professional, verified profile.', features: ['1 Verified Profile', 'Limited Verifications (Stamps)', 'Standard Templates', 'Sharable URL'], cta: 'Get Started for Free' },
         { title: 'Professional Plan', price: '€15', period: '/ month', description: 'Unlock powerful tools to accelerate your career.', features: ['Everything in Basic', 'Unlimited Verifications', 'Premium Templates', 'Custom Domain', 'AI Profile Enhancement', 'Advanced Analytics'], cta: 'Get Started Now', highlight: true },
-        { title: 'Enterprise Plan', price: 'Custom', period: '', description: 'For teams and companies looking to recruit top talent.', features: ['Team Management', 'Advanced Talent Search', 'ATS Integrations', 'Dedicated Support', 'Enhanced Security'], cta: 'Contact Sales' },
+        { contactSales: true, title: 'Enterprise Plan', price: 'Custom', period: '', description: 'For teams and companies looking to recruit top talent.', features: ['Team Management', 'Advanced Talent Search', 'ATS Integrations', 'Dedicated Support', 'Enhanced Security'], cta: 'Contact Sales' },
     ],
     PRICING_PAGE_PLANS: [
       {

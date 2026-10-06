@@ -171,80 +171,50 @@ function generateMetaTags(profile, skills, experiences) {
 }
 
 function injectMetaTags(html, metaTags) {
-  // Escape special characters in content
-  const escape = (str) => str.replace(/"/g, '&quot;');
+  // Escapado completo: nombre, titular y demás los escribe el usuario. Antes solo
+  // se escapaban las comillas y un `</title><script>` acababa en el HTML estático.
+  const escape = (str) => String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  // Reemplazo por función: con un string, `$&` o `$'` en los datos del usuario se
+  // interpretarían como patrones de String.replace y reinyectarían HTML.
+  const rep = (pattern, value) => { html = html.replace(pattern, () => value); };
 
   // Replace title
-  html = html.replace(
-    /<title>.*?<\/title>/,
-    `<title>${escape(metaTags.title)}</title>`
-  );
+  rep(/<title>.*?<\/title>/, `<title>${escape(metaTags.title)}</title>`);
 
   // Replace description
-  html = html.replace(
-    /<meta name="description" content=".*?".*?>/,
-    `<meta name="description" content="${escape(metaTags.description)}">`
-  );
+  rep(/<meta name="description" content=".*?".*?>/, `<meta name="description" content="${escape(metaTags.description)}">`);
 
   // Add/replace keywords
   if (html.includes('name="keywords"')) {
-    html = html.replace(
-      /<meta name="keywords" content=".*?".*?>/,
-      `<meta name="keywords" content="${escape(metaTags.keywords)}">`
-    );
+    rep(/<meta name="keywords" content=".*?".*?>/, `<meta name="keywords" content="${escape(metaTags.keywords)}">`);
   } else {
-    html = html.replace(
-      '</head>',
-      `    <meta name="keywords" content="${escape(metaTags.keywords)}">\n</head>`
-    );
+    rep('</head>', `    <meta name="keywords" content="${escape(metaTags.keywords)}">\n</head>`);
   }
 
   // Replace Open Graph tags
-  html = html.replace(
-    /<meta property="og:title" content=".*?".*?>/,
-    `<meta property="og:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:description" content=".*?".*?>/,
-    `<meta property="og:description" content="${escape(metaTags.description)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:image" content=".*?".*?>/,
-    `<meta property="og:image" content="${metaTags.image}">`
-  );
+  rep(/<meta property="og:title" content=".*?".*?>/, `<meta property="og:title" content="${escape(metaTags.title)}">`);
+  rep(/<meta property="og:description" content=".*?".*?>/, `<meta property="og:description" content="${escape(metaTags.description)}">`);
+  rep(/<meta property="og:image" content=".*?".*?>/, `<meta property="og:image" content="${escape(metaTags.image)}">`);
 
   // Add og:url
   if (html.includes('property="og:url"')) {
-    html = html.replace(
-      /<meta property="og:url" content=".*?".*?>/,
-      `<meta property="og:url" content="${metaTags.url}">`
-    );
+    rep(/<meta property="og:url" content=".*?".*?>/, `<meta property="og:url" content="${escape(metaTags.url)}">`);
   } else {
-    html = html.replace(
-      /<meta property="og:image"/,
-      `<meta property="og:url" content="${metaTags.url}">\n    <meta property="og:image"`
-    );
+    rep(/<meta property="og:image"/, `<meta property="og:url" content="${escape(metaTags.url)}">\n    <meta property="og:image"`);
   }
 
   // Replace Twitter Card tags
-  html = html.replace(
-    /<meta name="twitter:title" content=".*?".*?>/,
-    `<meta name="twitter:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta name="twitter:description" content=".*?".*?>/,
-    `<meta name="twitter:description" content="${escape(metaTags.description)}">`
-  );
+  rep(/<meta name="twitter:title" content=".*?".*?>/, `<meta name="twitter:title" content="${escape(metaTags.title)}">`);
+  rep(/<meta name="twitter:description" content=".*?".*?>/, `<meta name="twitter:description" content="${escape(metaTags.description)}">`);
 
   // Add author meta tag
   if (!html.includes('name="author"')) {
-    html = html.replace(
-      '</head>',
-      `    <meta name="author" content="${escape(metaTags.authorName)}">\n</head>`
-    );
+    rep('</head>', `    <meta name="author" content="${escape(metaTags.authorName)}">\n</head>`);
   }
 
   // Change og:type to profile

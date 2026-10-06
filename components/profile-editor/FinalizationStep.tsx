@@ -22,6 +22,7 @@ import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import { activateOnKey } from '../shared/a11y';
+import { handleTemplateImageError } from '../../utils/templateImageFallback';
 
 // Identificadores de plantilla guardados en perfiles antiguos que ya no
 // corresponden a ninguna opcion de este paso. Sin traducirlos, al abrir la
@@ -278,16 +279,6 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     }
   };
 
-  // Get theme-appropriate preview image
-  const getTemplatePreviewImage = (templateId: string) => {
-    // Check if dark mode is enabled
-    const isDark = document.documentElement.classList.contains('dark');
-    const theme = isDark ? 'dark' : 'light';
-
-    // Try to load theme-specific image, fallback to default
-    return `/images/templates/${templateId}-${theme}.png`;
-  };
-
   const handleSaveAndComplete = async (redirectToCV = false) => {
     if (!session?.user?.id) return;
 
@@ -494,16 +485,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
               <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setPreviewTemplate(template.id))} className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
                    onClick={() => setPreviewTemplate(template.id)}>
                 <img
-                  src={getTemplatePreviewImage(template.id)}
+                  // No hay variantes -light/-dark de las miniaturas: se usa la imagen de la plantilla
+                  src={template.previewImage}
                   alt={`${template.name} template preview`}
                   className="w-full h-48 object-cover object-top"
-                  onError={(e) => {
-                    // Fallback to default image if theme-specific not found
-                    const target = e.target as HTMLImageElement;
-                    if (!target.src.endsWith(template.previewImage)) {
-                      target.src = template.previewImage;
-                    }
-                  }}
+                  onError={handleTemplateImageError}
                 />
                 {/* Hover Overlay for Preview */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">

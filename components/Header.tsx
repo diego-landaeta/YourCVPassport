@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
 const DarkModeToggle: React.FC = () => {
+    const { lang } = useLanguage();
     const [isDark, setIsDark] = useState(() => {
         return localStorage.theme === 'dark' ||
                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -27,8 +28,10 @@ const DarkModeToggle: React.FC = () => {
     return (
         <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border text-gray-600 dark:text-dark-text-primary focus:outline-none transition-all duration-200"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="p-2 rounded-full bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border text-gray-600 dark:text-dark-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all duration-200"
+            aria-label={isDark
+                ? (lang === 'es' ? 'Cambiar a modo claro' : 'Switch to light mode')
+                : (lang === 'es' ? 'Cambiar a modo oscuro' : 'Switch to dark mode')}
         >
             {isDark ? (
                 // Sun icon for light mode

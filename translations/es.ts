@@ -2331,7 +2331,7 @@ export const translations = {
     PRICING_PLANS: [
         { title: 'Plan Básico', price: 'Gratis', period: 'Para siempre', description: 'Comienza con un perfil profesional y verificado.', features: ['1 perfil verificado', 'Verificaciones limitadas (sellos)', 'Plantillas estándar', 'URL compartible'], cta: 'Comienza gratis' },
         { title: 'Plan Profesional', price: '€15', period: '/ mes', description: 'Desbloquea potentes herramientas para acelerar tu carrera.', features: ['Todo en Básico', 'Verificaciones ilimitadas', 'Plantillas Premium', 'Dominio personalizado', 'Mejora de perfil con IA', 'Analíticas avanzadas'], cta: 'Comenzar ahora', highlight: true },
-        { title: 'Plan Corporativo', price: 'A medida', period: '', description: 'Para equipos y empresas que buscan reclutar el mejor talento.', features: ['Gestión de equipos', 'Búsqueda avanzada de talento', 'Integraciones ATS', 'Soporte dedicado', 'Seguridad mejorada'], cta: 'Contactar Ventas' }, // Pricing.tsx compara este texto literal para enlazar a planes de empresa: no cambiar sin actualizarlo
+        { contactSales: true, title: 'Plan Corporativo', price: 'A medida', period: '', description: 'Para equipos y empresas que buscan reclutar el mejor talento.', features: ['Gestión de equipos', 'Búsqueda avanzada de talento', 'Integraciones ATS', 'Soporte dedicado', 'Seguridad mejorada'], cta: 'Contactar Ventas' }, // Pricing.tsx compara este texto literal para enlazar a planes de empresa: no cambiar sin actualizarlo
     ],
      PRICING_PAGE_PLANS: [
       {

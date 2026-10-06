@@ -31,6 +31,8 @@ function me(overrides: Row = {}): Row {
     first_login_completed: true,
     dashboard_tour_completed: true,
     wizard_completed: true,
+    // Usuario normal: un admin va directo a /admin (U2) y no vería el dashboard.
+    role: 'user',
     ...overrides,
   };
 }

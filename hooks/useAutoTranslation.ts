@@ -65,7 +65,9 @@ export function useAutoTranslation(
       if (cancelled) return;
       setTranslated(results.map((r, i) => (r !== null && isMeaningfulTranslation(originals[i] || '', r) ? r : null)));
       setIsTranslating(false);
-    });
+    })
+      // Si una traducción falla se muestra el original, sin quedarse en "traduciendo"
+      .catch(() => { if (!cancelled) setIsTranslating(false); });
     return () => { cancelled = true; };
   }, [originals, needsTranslation, sourceLang, target, fromMemory]);
 
