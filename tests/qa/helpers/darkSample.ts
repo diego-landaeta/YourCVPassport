@@ -14,11 +14,18 @@ export interface ColorSample {
 }
 
 /**
+ * Widgets de terceros que se excluyen SIEMPRE de la muestra: su DOM lo inyecta un
+ * script externo (que en QA no carga) y no depende de nuestro Tailwind.
+ */
+export const THIRD_PARTY_WIDGETS = '.opynio-widget';
+
+/**
  * Devuelve los colores de los elementos (raiz incluida) cuya clase contiene `dark:`
- * dentro de `rootSelector`, omitiendo los subarboles marcados con
- * `[data-qa-skip]` o que casen con `excludeSelector`.
+ * dentro de `rootSelector`, omitiendo los subarboles de widgets de terceros y los
+ * que casen con `opts.exclude` (p. ej. `[data-qa-skip]`).
  */
 export async function sampleDarkColors(page: Page, rootSelector: string, opts: { exclude?: string; max?: number } = {}): Promise<ColorSample[]> {
+  const exclude = [THIRD_PARTY_WIDGETS, opts.exclude].filter(Boolean).join(', ');
   return page.evaluate(([rootSel, exclude, max]) => {
     const root = document.querySelector(rootSel as string);
     if (!root) throw new Error(`No existe ${rootSel}`);
@@ -40,7 +47,7 @@ export async function sampleDarkColors(page: Page, rootSelector: string, opts: {
       if (out.length >= (max as number)) break;
     }
     return out;
-  }, [rootSelector, opts.exclude ?? null, opts.max ?? 400] as const);
+  }, [rootSelector, exclude, opts.max ?? 400] as const);
 }
 
 /**
@@ -75,15 +82,49 @@ export async function readEffectiveColors(page: Page, selector: string, nth = 0)
   });
 }
 
-export function diffSamples(before: ColorSample[], after: ColorSample[]): string[] {
+/** Clave sin el indice de posicion: `etiqueta:clases`. */
+const signature = (s: ColorSample) => s.key.replace(/^\d+:/, '');
+
+/**
+ * Compara dos muestras alineandolas por `etiqueta:clases` (subsecuencia comun mas
+ * larga) en vez de por posicion. Asi un elemento nuevo o quitado del DOM sale como
+ * UNA linea (`+`/`-`) y no desplaza todas las claves que vienen detras (antes un
+ * boton nuevo en la cabecera producia decenas de "clave distinta" en cascada).
+ *
+ * Cuentan como diferencia: los elementos quitados, en los emparejados cualquier
+ * cambio de color, fondo, borde o degradado y, salvo `opts.added` = 'ignore', los
+ * elementos nuevos. Con 'ignore' los nuevos se devuelven aparte en `opts.onAdded`
+ * (no tienen valor de referencia con el que compararse; ver la regresion #19).
+ */
+export function diffSamples(
+  before: ColorSample[],
+  after: ColorSample[],
+  opts: { added?: 'fail' | 'ignore'; onAdded?: (key: string) => void } = {},
+): string[] {
+  const a = before.map(signature);
+  const b = after.map(signature);
+  // lcs[i][j] = longitud de la subsecuencia comun de a[i..] y b[j..]
+  const lcs: number[][] = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
+      lcs[i][j] = a[i] === b[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
   const diffs: string[] = [];
-  if (before.length !== after.length) diffs.push(`numero de elementos: ${before.length} -> ${after.length}`);
-  const n = Math.min(before.length, after.length);
-  for (let i = 0; i < n; i++) {
-    const a = before[i], b = after[i];
-    if (a.key !== b.key) { diffs.push(`[${i}] clave distinta: ${a.key} | ${b.key}`); continue; }
-    for (const p of ['color', 'bg', 'border', 'bgImage'] as const) {
-      if (a[p] !== b[p]) diffs.push(`[${a.key}] ${p}: ${a[p]} -> ${b[p]}`);
+  let i = 0, j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i] === b[j]) {
+      for (const p of ['color', 'bg', 'border', 'bgImage'] as const) {
+        if (before[i][p] !== after[j][p]) diffs.push(`[${before[i].key}] ${p}: ${before[i][p]} -> ${after[j][p]}`);
+      }
+      i++; j++;
+    } else if (j < b.length && (i >= a.length || lcs[i][j + 1] >= lcs[i + 1][j])) {
+      if (opts.added === 'ignore') opts.onAdded?.(after[j].key);
+      else diffs.push(`+ elemento nuevo: ${after[j].key}`);
+      j++;
+    } else {
+      diffs.push(`- elemento quitado: ${before[i].key}`);
+      i++;
     }
   }
   return diffs;

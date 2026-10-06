@@ -78,6 +78,13 @@ test.describe('#19 regresion modo oscuro global', () => {
     {
       const context = await newCtx(browser, testInfo, 'dark');
       const page = await context.newPage();
+      // Testimonials oculta su seccion si el script de Opynio falla (onerror) y el
+      // router de QA aborta todo origen externo: sin este stub la seccion desaparece
+      // y la muestra de `main` depende de la red. Se sirve un script vacio en local
+      // (page.route tiene prioridad sobre el route del contexto); el contenido del
+      // widget queda fuera de la muestra (THIRD_PARTY_WIDGETS).
+      await page.route('https://web.opynio.com/**', route =>
+        route.fulfill({ status: 200, contentType: 'application/javascript', body: '/* stub QA: widget de Opynio */' }));
       await openApp(context, page, { theme: 'dark', route: '/', session: false });
       await expect(page.locator('header').first()).toBeVisible({ timeout: 45_000 });
       await page.waitForLoadState('networkidle').catch(() => {});
@@ -127,8 +134,16 @@ test.describe('#19 regresion modo oscuro global', () => {
     const baseline = JSON.parse(fs.readFileSync(file, 'utf8')) as Record<string, ColorSample[]>;
     const report: string[] = [];
     for (const area of Object.keys(baseline)) {
-      const d = diffSamples(baseline[area], samples[area] || []);
+      // La linea base se capturo con el darkMode de referencia ('class'). Lo que se
+      // verifica es que TODO elemento de la linea base sigue existiendo con colores
+      // identicos. Los elementos anadidos despues (p. ej. el selector de idioma
+      // movil que paso a la cabecera, Header.tsx) no tienen valor de referencia:
+      // se anotan en el informe pero no fallan. Un elemento quitado o con otras
+      // clases (sale como quitado + nuevo) SI falla.
+      const added: string[] = [];
+      const d = diffSamples(baseline[area], samples[area] || [], { added: 'ignore', onAdded: k => added.push(k) });
       if (d.length) report.push(`== ${area} ==`, ...d.slice(0, 40));
+      for (const k of added) testInfo.annotations.push({ type: 'elemento nuevo sin linea base', description: `${area}: ${k}` });
     }
     expect(report, report.join('\n')).toEqual([]);
   });
