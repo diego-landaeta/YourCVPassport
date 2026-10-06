@@ -26,6 +26,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useA11yLabels } from '../shared/a11y';
 
 // Lazy load AI optimizer
 const AITextOptimizer = lazy(() => import('./AITextOptimizer'));
@@ -54,6 +55,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
   onDelete,
   lang,
 }) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: experience.id || 'temp-new',
@@ -83,13 +85,13 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
     >
       <div className="flex items-start gap-4">
         {/* Drag Handle */}
-        <button
+        <button aria-label={a11y.dragToReorder}
           type="button"
           {...attributes}
           {...listeners}
           className="mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
           </svg>
         </button>
@@ -131,21 +133,21 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
 
         {/* Actions */}
         <div className="flex gap-2">
-          <button
+          <button aria-label={translations.common.edit}
             type="button"
             onClick={onEdit}
             className="text-cv-blue hover:text-cv-blue-dark"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
-          <button
+          <button aria-label={translations.common.delete}
             type="button"
             onClick={onDelete}
             className="text-red-500 hover:text-red-700"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
@@ -156,6 +158,7 @@ const SortableExperienceItem: React.FC<SortableExperienceItemProps> = ({
 };
 
 const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionProps>(({ initialData = [], onSave, onNavigateToVerifications, onNext }, ref) => {
+  const a11y = useA11yLabels();
   const { session } = useAuth();
   const { lang } = useLanguage();
   const translations = useTranslations();
@@ -777,12 +780,12 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                         placeholder={modals.achievementPlaceholder}
                       />
                       {achievements.length > 1 && (
-                        <button
+                        <button aria-label={a11y.removeAchievement}
                           type="button"
                           onClick={() => removeAchievement(index)}
                           className="text-red-500 hover:text-red-700"
                         >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>

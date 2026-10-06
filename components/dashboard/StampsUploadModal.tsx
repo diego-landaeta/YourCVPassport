@@ -12,6 +12,7 @@ import {
   AcademicCapIcon,
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
+import { useA11yLabels } from '../shared/a11y';
 
 interface StampsUploadModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
   stampType,
   onSuccess
 }) => {
+  const a11y = useA11yLabels();
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -243,11 +245,11 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
                 </p>
               </div>
             </div>
-            <button
+            <button aria-label={a11y.close}
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors p-1"
             >
-              <XMarkIcon className="w-6 h-6" />
+              <XMarkIcon aria-hidden="true" className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -388,7 +390,7 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
                                   {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type.split('/')[1].toUpperCase()}
                                 </p>
                               </div>
-                              <button
+                              <button aria-label={a11y.removeFile}
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -398,7 +400,7 @@ const StampsUploadModal: React.FC<StampsUploadModalProps> = ({
                                 className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                 title="Eliminar archivo"
                               >
-                                <XMarkIcon className="w-5 h-5" />
+                                <XMarkIcon aria-hidden="true" className="w-5 h-5" />
                               </button>
                             </div>
                             <div className="mt-3 flex items-center gap-2 text-green-600 dark:text-green-400 text-xs font-bold bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full w-fit">

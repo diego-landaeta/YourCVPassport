@@ -17,6 +17,7 @@ import { BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
+import { useA11yLabels, activateOnKey } from '../../shared/a11y';
 
 interface JobPosting {
   id: string;
@@ -48,6 +49,7 @@ interface AllJobsTabProps {
 }
 
 const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
+  const a11y = useA11yLabels();
   const { lang } = useLanguage();
   const t = useTranslations();
   const navigate = useNavigate();
@@ -280,11 +282,11 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
               <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2 text-cv-blue dark:text-cv-blue-light" />
               {t.dashboard.opportunities.advancedFilters}
             </h3>
-            <button
+            <button aria-label={a11y.close}
               onClick={() => setShowFilters(false)}
               className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon aria-hidden="true" className="h-6 w-6" />
             </button>
           </div>
 
@@ -409,7 +411,7 @@ const AllJobsTab: React.FC<AllJobsTabProps> = ({ profileId }) => {
 
                   {/* Job Info */}
                   <div className="flex-1 min-w-0">
-                    <h3
+                    <h3 role="link" tabIndex={0} onKeyDown={activateOnKey(() => navigate(`/jobs/${job.slug}`))}
                       onClick={() => navigate(`/jobs/${job.slug}`)}
                       className="text-lg font-bold text-gray-900 dark:text-white mb-1 hover:text-cv-blue dark:hover:text-cv-blue-light cursor-pointer transition-colors"
                     >

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Visa } from '../../types';
 import Modal from '../shared/Modal';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useA11yLabels } from '../shared/a11y';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface VisaFormModalProps {
@@ -21,6 +22,7 @@ const VisaFormModal: React.FC<VisaFormModalProps> = ({
 }) => {
   const translations = useTranslations();
   const t = translations.dashboard.visas;
+  const a11y = useA11yLabels();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -369,10 +371,10 @@ const VisaFormModal: React.FC<VisaFormModalProps> = ({
                 <button
                   type="button"
                   onClick={() => removeImage(image)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remove image"
+                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                  aria-label={a11y.removeImage}
                 >
-                  <XMarkIcon className="w-4 h-4" />
+                  <XMarkIcon aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             ))}

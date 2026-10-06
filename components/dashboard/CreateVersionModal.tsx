@@ -30,6 +30,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { TemplatePreviewSelector, ALL_TEMPLATES } from './TemplatePreviewSelector';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useA11yLabels } from '../shared/a11y';
 
 // SVG Icons as simple functions
 function FiX({ className = "w-5 h-5" }: { className?: string }) {
@@ -107,6 +108,7 @@ export function CreateVersionModal({
   onClose,
   editingVersion
 }: CreateVersionModalProps) {
+  const a11y = useA11yLabels();
   const { createVersion, updateVersion, isCreating, error: hookError } = useCVVersions();
   const { profile } = useAuth();
   const t = useTranslations();
@@ -270,11 +272,11 @@ export function CreateVersionModal({
                   {editingVersion ? vm.editSubtitle : vm.newSubtitle}
                 </p>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={onClose}
                 className="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1"
               >
-                <FiX className="w-5 h-5" />
+                <FiX aria-hidden="true" className="w-5 h-5" />
               </button>
             </div>
           </div>

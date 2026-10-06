@@ -13,6 +13,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../shared/CountrySelector';
 import PhotoPreviewModal, { CropData } from '../PhotoPreviewModal';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface IdentitySectionProps {
   profile: any;
@@ -25,6 +26,7 @@ export interface WizardStepHandle {
 }
 
 const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave, onNext }, ref) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const { lang } = useLanguage();
   const t = translations.dashboard.identity;
@@ -464,7 +466,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             {/* Avatar */}
             <div className="flex flex-col items-center gap-2 pt-1 flex-shrink-0">
               <div className="relative group">
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(handleAvatarClick)} aria-label={a11y.changePhoto}
                   onClick={handleAvatarClick}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-600 shadow-sm group-hover:border-cv-blue transition-colors"
                 >
@@ -476,7 +478,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                     </svg>
                   )}
                 </div>
-                <div
+                <div aria-hidden="true"
                   className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   onClick={handleAvatarClick}
                 >
@@ -840,14 +842,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                   Selecciona un resumen profesional
                 </h3>
-                <button
+                <button aria-label={translations.common.close}
                   onClick={() => {
                     setShowAIModal(false);
                     setAiSummaryVariants([]);
                   }}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -859,7 +861,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
             <div className="p-6 space-y-4">
               {aiSummaryVariants.map((variant, index) => (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => handleSelectSummaryVariant(variant))}
                   key={index}
                   className="border border-gray-200 dark:border-dark-border rounded-lg p-4 hover:border-cv-blue dark:hover:border-cv-blue transition-colors cursor-pointer"
                   onClick={() => handleSelectSummaryVariant(variant)}
@@ -927,7 +929,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
               {/* Optimized Headline Variants */}
               {aiHeadlineVariants.map((variant, index) => (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => handleSelectHeadlineVariant(variant))}
                   key={index}
                   className="border-2 border-cv-blue rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10 hover:border-purple-600 transition-colors cursor-pointer group"
                   onClick={() => handleSelectHeadlineVariant(variant)}
