@@ -61,7 +61,8 @@ const JobPostingsManagementPage: React.FC = () => {
         .from('company_users')
         .select('company_id, role')
         .eq('user_id', user.id)
-        .single();
+        // maybeSingle: sin empresa → null y se redirige al registro, sin 406
+        .maybeSingle();
 
       if (companyUserError || !companyUser) {
         toast.error(translations.toasts.noCompanyFound);

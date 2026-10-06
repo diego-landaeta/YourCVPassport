@@ -203,7 +203,8 @@ export const useNotifications = () => {
                 .from('profiles')
                 .select('full_name')
                 .eq('id', notif.actor_id)
-                .single();
+                // maybeSingle: el actor puede tener el perfil oculto (sin fila visible)
+                .maybeSingle();
               actorName = data?.full_name || '';
             } catch { /* ignore */ }
 

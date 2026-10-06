@@ -303,7 +303,8 @@ export const useFeed = (filterType: FeedContentType | 'ALL' = 'ALL', searchTerm:
               .from('profiles')
               .select('id, full_name, headline, avatar_url, slug')
               .eq('id', newPost.author_id)
-              .single();
+              // maybeSingle: si el perfil del autor no es visible, el post se muestra sin autor
+              .maybeSingle();
 
             setPosts(prev => {
               if (prev.some(p => p.id === newPost.id)) return prev;

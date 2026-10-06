@@ -11,6 +11,14 @@ export interface ProfileWithSkills extends Profile {
   stamps?: Stamp[];
 }
 
+/**
+ * Limpia un texto del usuario antes de meterlo en un filtro `or=(...)` de
+ * PostgREST: comas, paréntesis, comillas y barras romperían (o ampliarían) el
+ * filtro. Se sustituyen por espacios.
+ */
+const sanitizeOrValue = (value: string | undefined | null): string =>
+  (value || '').replace(/[,()"\\]/g, ' ').trim();
+
 interface UseTalentSearchOptions {
   resultsPerPage?: number;
   isCompanySearch?: boolean;
@@ -66,7 +74,11 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
             is_current
           )
         `, { count: 'exact' })
-        .eq('is_public', true)
+        // Perfil público = mismo criterio que la RLS de profiles
+        // (20261005_proteger_datos_profiles.sql): con slug, no oculto por
+        // moderación y no suspendido. `is_public` no existe en la tabla.
+        .not('profile_hidden', 'is', true)
+        .not('is_active', 'is', false)
         // Exclude profiles without basic information
         .not('full_name', 'is', null)
         .not('headline', 'is', null)
@@ -80,8 +92,11 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
         .neq('role', 'admin');
 
       // Apply keyword search (full-text search on multiple fields)
-      if (filters.keywords) {
-        query = query.or(`full_name.ilike.%${filters.keywords}%,bio.ilike.%${filters.keywords}%,professional_title.ilike.%${filters.keywords}%,title.ilike.%${filters.keywords}%,headline.ilike.%${filters.keywords}%`);
+      // Solo columnas públicas: `bio` y `professional_title` no existen en profiles
+      // (el texto libre del perfil está en `summary`).
+      const keywords = sanitizeOrValue(filters.keywords);
+      if (keywords) {
+        query = query.or(`full_name.ilike.%${keywords}%,title.ilike.%${keywords}%,headline.ilike.%${keywords}%,summary.ilike.%${keywords}%`);
       }
 
       // Apply niche filter
@@ -95,8 +110,9 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
       }
 
       // Apply specialization filter (searches both title and headline)
-      if (filters.specialization) {
-        query = query.or(`title.ilike.%${filters.specialization}%,headline.ilike.%${filters.specialization}%`);
+      const specialization = sanitizeOrValue(filters.specialization);
+      if (specialization) {
+        query = query.or(`title.ilike.%${specialization}%,headline.ilike.%${specialization}%`);
       }
 
       // Apply location filter
@@ -104,9 +120,9 @@ export const useTalentSearch = (options: UseTalentSearchOptions = {}) => {
         query = query.ilike('location', `%${filters.location}%`);
       }
 
-      // Apply job title filter
+      // Apply job title filter (el cargo público del perfil está en `title`)
       if (filters.jobTitle) {
-        query = query.ilike('professional_title', `%${filters.jobTitle}%`);
+        query = query.ilike('title', `%${filters.jobTitle}%`);
       }
 
       // Apply availability filter

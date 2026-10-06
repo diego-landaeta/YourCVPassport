@@ -96,7 +96,8 @@ const JobApplicationsPage: React.FC = () => {
         .from('company_users')
         .select('company_id')
         .eq('user_id', user.id)
-        .single();
+        // maybeSingle: sin empresa → null (aviso "no encontrada"), sin 406
+        .maybeSingle();
 
       if (companyError || !companyUser) {
         toast.error('Empresa no encontrada');

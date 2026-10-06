@@ -115,10 +115,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select('*')
           .eq('id', user.id)
           .limit(1)
-          .single();
+          // maybeSingle: si aún no hay perfil, data = null sin 406 (PGRST116) en la red
+          .maybeSingle();
 
         // If profile doesn't exist (e.g., user signed up before trigger was in place), create one.
-        if (error && error.code === 'PGRST116') {
+        if (!error && !data) {
           // Sin .select() tras el insert: el RETURNING pediría columnas privadas de profiles.
           const { error: insertError } = await supabase
             .from('profiles')
@@ -137,7 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('profiles_full')
             .select('*')
             .eq('id', user.id)
-            .single();
+            // maybeSingle: si la fila recién creada aún no es visible, el perfil queda en null (igual que antes)
+            .maybeSingle();
           if (reloadError) {
             throw reloadError;
           }
@@ -222,7 +224,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('companies')
         .select('*')
         .eq('id', companyUserData.company_id)
-        .single();
+        // maybeSingle: si la empresa ya no existe o no es visible, company = null sin 406
+        .maybeSingle();
 
       if (companyError) {
         console.error('Error fetching company:', companyError);
@@ -231,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      setCompany(companyData as Company);
+      setCompany((companyData as Company | null) ?? null);
     } catch (error) {
       console.error('Error in fetchCompany:', error);
       setCompanyUser(null);

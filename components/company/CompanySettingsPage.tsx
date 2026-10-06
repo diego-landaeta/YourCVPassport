@@ -71,15 +71,12 @@ const CompanySettingsPage_NEW: React.FC = () => {
         .from('company_settings')
         .select('*')
         .eq('company_id', company.id)
-        .single();
+        // maybeSingle: si aún no hay ajustes, data = null y se usan los valores
+        // por defecto (se crean al guardar por primera vez), sin 406 en la red
+        .maybeSingle();
 
       if (error) {
-        // If no settings exist yet, use defaults (will be created on first save)
-        if (error.code === 'PGRST116') {
-          // No settings exist yet, use defaults (will be created on first save)
-        } else {
-          throw error;
-        }
+        throw error;
       } else if (data) {
         // Update state with loaded settings
         setSettings({
@@ -118,7 +115,7 @@ const CompanySettingsPage_NEW: React.FC = () => {
         .from('company_settings')
         .select('id')
         .eq('company_id', company.id)
-        .single();
+        .maybeSingle();
 
       if (existingSettings) {
         // Update existing settings

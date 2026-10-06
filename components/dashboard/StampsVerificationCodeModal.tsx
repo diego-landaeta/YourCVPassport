@@ -53,7 +53,8 @@ const StampsVerificationCodeModal: React.FC<StampsVerificationCodeModalProps> = 
         .select('remaining_attempts')
         .eq('profile_id', user.id)
         .eq('type', stampType)
-        .single();
+        // maybeSingle: sin intentos previos no hay fila (se asumen los 4), sin 406
+        .maybeSingle();
 
       if (!error && data) {
         setRemainingAttempts(data.remaining_attempts);

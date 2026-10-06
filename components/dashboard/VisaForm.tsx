@@ -55,12 +55,17 @@ const VisaForm: React.FC = () => {
         .select('*')
         .eq('id', id)
         .eq('profile_id', session.user.id)
-        .single();
+        // maybeSingle: una visa inexistente (o ajena) es "no encontrada", no un 406
+        .maybeSingle();
 
       if (error) throw error;
-      if (data) {
-        setFormData(data);
+      if (!data) {
+        // Mismo aviso y vuelta al listado que antes, pero sin error de red
+        toast.error('Error al cargar la Visa');
+        navigate('/dashboard/visas');
+        return;
       }
+      setFormData(data);
     } catch (error) {toast.error('Error al cargar la Visa');
       navigate('/dashboard/visas');
     } finally {

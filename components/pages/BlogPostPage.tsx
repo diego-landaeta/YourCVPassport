@@ -5,6 +5,7 @@ import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { applyBlogImageFallback, handleBlogImageError } from '../../utils/blogImageFallback';
+import NotFoundPage from '../../pages/NotFoundPage';
 
 
 interface BlogPost {
@@ -28,6 +29,7 @@ const BlogPostPage: React.FC = () => {
     const t = useTranslations();
     const [post, setPost] = useState<BlogPost | null>(null);
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
 
     // Las imagenes del cuerpo llegan como HTML (dangerouslySetInnerHTML), asi que el
@@ -53,6 +55,7 @@ const BlogPostPage: React.FC = () => {
 
     const fetchPost = async () => {
         setLoading(true);
+        setNotFound(false);
 
         // 1. Try static blog posts first (individual .ts files)
         try {
@@ -75,9 +78,15 @@ const BlogPostPage: React.FC = () => {
             .from('blog_posts')
             .select('*')
             .eq('slug', slug)
-            .single();
+            // maybeSingle: un slug inexistente es "no encontrado", no un 406 (PGRST116)
+            .maybeSingle();
 
-        if (error) {navigate('/blog');
+        if (error) {
+            console.error('Error loading blog post:', error);
+            navigate(blogListPath, { replace: true });
+        } else if (!data) {
+            setPost(null);
+            setNotFound(true);
         } else {
             setPost(data as BlogPost);
             fetchRelatedPosts(data.category, data.id);
@@ -104,6 +113,10 @@ const BlogPostPage: React.FC = () => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cv-blue"></div>
             </div>
         );
+    }
+
+    if (notFound) {
+        return <NotFoundPage />;
     }
 
     if (!post) {
