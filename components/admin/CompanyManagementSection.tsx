@@ -79,7 +79,9 @@ const CompanyManagementSection: React.FC = () => {
       // Columnas privadas (email, CIF, documentos, notas...): vista companies_full (admin)
       let query = supabase
         .from('companies_full')
-        .select(`${COMPANY_FULL_COLUMNS}, company_users(*)`)
+        // Sin embed company_users: no se usaba y, desde una vista, depende de que
+        // PostgREST deduzca la relación
+        .select(COMPANY_FULL_COLUMNS)
         .order('created_at', { ascending: false });
 
       // Apply filter
@@ -88,8 +90,11 @@ const CompanyManagementSection: React.FC = () => {
       }
 
       // Apply search
-      if (searchTerm.trim()) {
-        query = query.or(`company_name.ilike.%${searchTerm}%,company_email.ilike.%${searchTerm}%,tax_id.ilike.%${searchTerm}%`);
+      // Sin caracteres de sintaxis de PostgREST: comas, paréntesis o comillas en la
+      // búsqueda alterarían el filtro .or()
+      const term = searchTerm.replace(/[,()"\\*]/g, ' ').trim();
+      if (term) {
+        query = query.or(`company_name.ilike.%${term}%,company_email.ilike.%${term}%,tax_id.ilike.%${term}%`);
       }
 
       const { data, error } = await query;

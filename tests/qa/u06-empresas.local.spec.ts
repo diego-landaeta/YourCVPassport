@@ -207,15 +207,28 @@ test('admin > empresas: lee companies_full con columnas explícitas y cuenta con
   await tab.evaluate(el => (el as HTMLElement).click());
   await expect(page.getByText(COMPANY_ROW.company_name).first()).toBeVisible({ timeout: 20_000 });
 
-  const list = mock.requestsTo('companies_full').filter(r => r.method === 'GET' && r.params.select?.[0]?.includes('company_users'));
+  const list = mock.requestsTo('companies_full').filter(r => r.method === 'GET' && r.params.select?.[0]?.includes('tax_id'));
   expect(list.length).toBeGreaterThan(0);
   for (const r of list) {
     const cols = topLevelColumns(r.params.select![0]);
     expect(cols).not.toContain('*');
+    // Sin embed company_users: no se usaba y desde una vista depende de que PostgREST deduzca la relación
+    expect(r.params.select![0]).not.toContain('company_users');
     for (const c of ['id', 'company_name', 'tax_id', 'company_email', 'status', 'admin_notes', 'tax_document_url', 'verification_document_url']) expect(cols).toContain(c);
   }
   // Estadísticas por estado: también desde la vista
   expect(mock.requestsTo('companies_full').some(r => r.method === 'GET' && r.params.select?.[0] === 'status')).toBe(true);
+
+  // Búsqueda: comas o paréntesis no añaden condiciones al filtro .or()
+  await page.getByPlaceholder(/Search by company name/).fill('acme),status.eq.APPROVED');
+  await expect.poll(() => mock.requestsTo('companies_full').filter(r => r.method === 'GET' && r.params.or).length, { timeout: 15_000 }).toBeGreaterThan(0);
+  for (const r of mock.requestsTo('companies_full').filter(r => r.method === 'GET' && r.params.or)) {
+    const or = r.params.or![0];
+    expect(or.startsWith('(') && or.endsWith(')')).toBe(true);
+    const inner = or.slice(1, -1);
+    expect(inner).not.toMatch(/[()]/);
+    expect(inner.split(',')).toHaveLength(3);
+  }
   expectOnlyPublicCompanyColumns(mock);
 });
 

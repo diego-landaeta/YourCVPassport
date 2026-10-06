@@ -75,7 +75,7 @@ test.describe('U2 admin: menu de cuenta y navegacion', () => {
   test('admin: "Panel admin" y "Salir" (cerrar sesión), sin "Mi perfil", "Dashboard", "Ver mi CV" ni "Comunidad"', async ({ page, context }, testInfo) => {
     await openAs(context, page, 'admin', '/');
     if (isMobile(testInfo)) {
-      await page.getByRole('button', { name: 'Open main menu' }).click();
+      await page.getByRole('button', { name: /^(Abrir menú principal|Open main menu)$/ }).click();
       const drawer = page.locator('div.fixed.inset-y-0.left-0');
       await expect(drawer.getByRole('link', { name: 'Panel admin' })).toBeVisible({ timeout: 45_000 });
       await expect(drawer.getByRole('button', { name: t.logout })).toBeVisible();

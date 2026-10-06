@@ -11,7 +11,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,12 +23,15 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+// Solo al ejecutarlo como script: importado (tests) expone injectMetaTags sin tocar Supabase
+const isMain = !!process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isMain && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.error('❌ Error: VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY deben estar definidos en .env.local');
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = isMain ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 async function generateProfileHTML(slug) {
   try {
@@ -99,7 +102,7 @@ async function generateProfileHTML(slug) {
   }
 }
 
-function generateMetaTags(profile, skills, experiences) {
+export function generateMetaTags(profile, skills, experiences) {
   // Title
   const title = profile.meta_title ||
     `${profile.full_name} - ${profile.headline} | YourCVPassport`;
@@ -170,7 +173,7 @@ function generateMetaTags(profile, skills, experiences) {
   };
 }
 
-function injectMetaTags(html, metaTags) {
+export function injectMetaTags(html, metaTags) {
   // Escapado completo: nombre, titular y demás los escribe el usuario. Antes solo
   // se escapaban las comillas y un `</title><script>` acababa en el HTML estático.
   const escape = (str) => String(str ?? '')
@@ -265,24 +268,26 @@ async function generateAllProfiles() {
   console.log('\n' + '='.repeat(50));
 }
 
-// Main execution
-const args = process.argv.slice(2);
+// Main execution (solo al ejecutarlo como script; importado no hace nada)
+if (isMain) {
+  const args = process.argv.slice(2);
 
-if (args.length === 0) {
-  console.error('\n❌ Error: Debes especificar un slug o usar --all\n');
-  console.log('Uso:');
-  console.log('  node scripts/generate-profile-html.mjs emily-harper');
-  console.log('  node scripts/generate-profile-html.mjs --all');
-  process.exit(1);
-}
+  if (args.length === 0) {
+    console.error('\n❌ Error: Debes especificar un slug o usar --all\n');
+    console.log('Uso:');
+    console.log('  node scripts/generate-profile-html.mjs emily-harper');
+    console.log('  node scripts/generate-profile-html.mjs --all');
+    process.exit(1);
+  }
 
-if (args[0] === '--all') {
-  generateAllProfiles();
-} else {
-  const slug = args[0];
-  generateProfileHTML(slug).then(success => {
-    if (!success) {
-      process.exit(1);
-    }
-  });
+  if (args[0] === '--all') {
+    generateAllProfiles();
+  } else {
+    const slug = args[0];
+    generateProfileHTML(slug).then(success => {
+      if (!success) {
+        process.exit(1);
+      }
+    });
+  }
 }

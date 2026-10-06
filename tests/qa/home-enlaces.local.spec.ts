@@ -15,6 +15,42 @@ const CASES = [
   { lang: 'en', plans: '/companies/plans', pricing: '/pricing', security: '/companies/security' },
 ] as const;
 
+test('og-image.png existe (1200x630) y es la imagen por defecto al compartir', async ({ page, request }) => {
+  const res = await request.get('/og-image.png');
+  expect(res.status()).toBe(200);
+  expect(res.headers()['content-type']).toContain('image/png');
+  const png = await res.body();
+  // Cabecera IHDR de PNG: ancho y alto en los bytes 16-23
+  expect(png.readUInt32BE(16)).toBe(1200);
+  expect(png.readUInt32BE(20)).toBe(630);
+  const html = await (await request.get('/')).text();
+  expect(html).toContain('<meta property="og:image" content="https://yourcvpassport.com/og-image.png"');
+  await page.goto('/og-image.png');
+  expect(await page.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1200);
+});
+
+const TOGGLE = {
+  es: { toDark: 'Cambiar a modo oscuro', toLight: 'Cambiar a modo claro' },
+  en: { toDark: 'Switch to dark mode', toLight: 'Switch to light mode' },
+} as const;
+
+for (const lang of ['es', 'en'] as const) {
+  test(`botón de modo oscuro con nombre en el idioma activo (${lang})`, async ({ page, context }) => {
+    await installInitState(context, { language: lang, theme: 'light' });
+    await mockSupabase(context, {});
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const toDark = page.getByRole('button', { name: TOGGLE[lang].toDark, exact: true });
+    // En móvil el botón está dentro del menú principal
+    const menu = page.getByRole('button', { name: lang === 'es' ? 'Abrir menú principal' : 'Open main menu', exact: true });
+    await expect(page.locator('header')).toBeVisible({ timeout: 45_000 });
+    if (await menu.isVisible()) await menu.click();
+    await expect(toDark.locator('visible=true').first()).toBeVisible({ timeout: 45_000 });
+    await toDark.locator('visible=true').first().click();
+    await expect(page.locator('html')).toHaveClass(/\bdark\b/);
+    await expect(page.getByRole('button', { name: TOGGLE[lang].toLight, exact: true }).locator('visible=true').first()).toBeVisible();
+  });
+}
+
 for (const c of CASES) {
   test(`home (${c.lang}): precios y seguridad enlazan a rutas del idioma y sin 404`, async ({ page, context }) => {
     await installInitState(context, { language: c.lang, theme: 'light' });

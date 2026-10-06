@@ -107,9 +107,12 @@ async function generateSitemap(): Promise<string> {
   }
 
   // Blog posts — alphabetical by slug
-  for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
+  // Cada artículo solo bajo la ruta de su idioma (como scripts/generate-sitemap.mjs):
+  // un post en español bajo /resources/blog/ duplicaba una URL no canónica.
+  for (const post of blogPosts as Array<{ slug: string; published_at: string; lang?: string }>) {
     const lastmod = post.published_at.split('T')[0];
-    blogEntries.push({ path: `/resources/blog/${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
+    const base = post.lang === 'en' ? '/resources/blog/' : '/recursos/blog/';
+    blogEntries.push({ path: `${base}${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
   }
   blogEntries.sort((a, b) => a.path.localeCompare(b.path));
 
