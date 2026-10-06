@@ -18,12 +18,16 @@
 // redirectTo: solo se acepta un origen de la lista de CORS con path /recovery
 // (ver resolveAuthRedirect en _shared/cors.ts); si no, se usa el origen
 // permitido de la petición o https://www.yourcvpassport.com.
+//
+// Enlace del correo: <redirectTo>?token_hash=…&type=recovery (dominio propio, sin
+// supabase.co); RecoveryPage lo verifica con verifyOtp. Ver _shared/authLink.ts.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts'
 import { sendEmail } from '../_shared/email.ts'
+import { buildAuthEmailLink } from '../_shared/authLink.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -133,7 +137,13 @@ serve(async (req: Request) => {
       throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate reset link')
     }
 
-    const resetLink = resetData.properties.action_link
+    // Enlace con el dominio propio (/recovery?token_hash=…&type=recovery), no el
+    // action_link de <proyecto>.supabase.co (ver _shared/authLink.ts).
+    const resetLink = buildAuthEmailLink(redirectTo, resetData?.properties, 'recovery')
+    if (!resetLink) {
+      console.error('[send-password-reset] generateLink returned no usable link')
+      throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate reset link')
+    }
     const userId: string | undefined = resetData.user?.id
 
     // Get user profile for personalization

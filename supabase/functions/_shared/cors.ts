@@ -55,9 +55,13 @@ export function getAllowedOrigin(req: Request): string | null {
   return isAllowedOrigin(origin) ? origin : null
 }
 
-// URL final del enlace del correo para `path` ('/confirm' o '/recovery').
+// Rutas de la app que reciben los enlaces de los correos de auth (App.tsx):
+// /confirm (alta), /recovery (nueva contraseña) y /callback (magic link).
+export type AuthRedirectPath = '/confirm' | '/recovery' | '/callback'
+
+// URL final del enlace del correo para `path`.
 // Se reconstruye como origen + path: se descartan query, hash y credenciales.
-export function resolveAuthRedirect(req: Request, requested: unknown, path: '/confirm' | '/recovery'): string {
+export function resolveAuthRedirect(req: Request, requested: unknown, path: AuthRedirectPath): string {
   if (typeof requested === 'string' && requested.length <= 2048) {
     try {
       const url = new URL(requested)
