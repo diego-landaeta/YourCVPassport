@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import Faq from './landing/Faq';
@@ -16,20 +17,41 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
     );
 };
 
-const CategoryTile: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
-    <a href="#" className="block bg-white dark:bg-dark-bg-primary p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-dark-border">
-        <div className="flex items-center justify-center w-16 h-16 bg-cv-blue/10 rounded-lg mb-4">
-            {icon}
-        </div>
-        <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{title}</h3>
-        <p className="mt-2 text-gray-600 dark:text-dark-text-secondary">{description}</p>
-    </a>
-);
+const CategoryTile: React.FC<{ icon: React.ReactNode; title: string; description: string; to?: string }> = ({ icon, title, description, to }) => {
+    const content = (
+        <>
+            <div className="flex items-center justify-center w-16 h-16 bg-cv-blue/10 rounded-lg mb-4">
+                {icon}
+            </div>
+            <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{title}</h3>
+            <p className="mt-2 text-gray-600 dark:text-dark-text-secondary">{description}</p>
+        </>
+    );
+    // Sin destino conocido la tarjeta se queda como bloque informativo (sin el efecto de "clicable").
+    if (!to) {
+        return <div className="block bg-white dark:bg-dark-bg-primary p-6 rounded-lg shadow-md border border-gray-100 dark:border-dark-border">{content}</div>;
+    }
+    return (
+        <Link to={to} className="block bg-white dark:bg-dark-bg-primary p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-dark-border">
+            {content}
+        </Link>
+    );
+};
 
 const HelpCenterPage: React.FC = () => {
     const t = useTranslations();
     const pageData = t.helpCenterPage;
     const { lang } = useLanguage();
+    const links = t.footer.links;
+    const isEs = lang === 'es';
+
+    // Destinos reales de cada bloque (antes todos apuntaban a "#"). Van por posición,
+    // en el mismo orden que helpCenterPage.categories / popular.articles en es.ts y en.ts.
+    // Primeros pasos → cómo funciona; Verificación → sellos; Cuenta → panel (pide login si no hay sesión).
+    const categoryPaths = [links.professionals, links.stamps, '/dashboard'];
+    // Verificar educación → sellos; dominio personalizado → dominio; exportación ATS → ATS.
+    const articlePaths = [links.stamps, isEs ? '/producto/dominio' : '/product/domain', links.ats];
+    const communityPath = isEs ? '/comunidad' : '/feed';
 
     const seoTitle = lang === 'es'
         ? 'Centro de Ayuda'
@@ -94,7 +116,7 @@ const HelpCenterPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {pageData.categories.map((cat: any) => <CategoryTile key={cat.title} {...cat} />)}
+                            {pageData.categories.map((cat: any, i: number) => <CategoryTile key={cat.title} {...cat} to={categoryPaths[i]} />)}
                         </div>
                     </AnimatedWrapper>
                 </div>
@@ -107,14 +129,24 @@ const HelpCenterPage: React.FC = () => {
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary mb-8">{pageData.popular.title}</h2>
                             <ul className="space-y-4">
-                                {pageData.popular.articles.map((article: string) => (
-                                    <li key={article}>
-                                        <a href="#" className="flex items-center text-lg text-gray-700 dark:text-dark-text-secondary hover:text-cv-blue font-semibold group">
-                                            <svg className="w-5 h-5 mr-3 text-cv-blue/50 group-hover:text-cv-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-                                            {article}
-                                        </a>
-                                    </li>
-                                ))}
+                                {pageData.popular.articles.map((article: string, i: number) => {
+                                    const icon = <svg className="w-5 h-5 mr-3 text-cv-blue/50 group-hover:text-cv-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>;
+                                    return (
+                                        <li key={article}>
+                                            {articlePaths[i] ? (
+                                                <Link to={articlePaths[i]} className="flex items-center text-lg text-gray-700 dark:text-dark-text-secondary hover:text-cv-blue font-semibold group">
+                                                    {icon}
+                                                    {article}
+                                                </Link>
+                                            ) : (
+                                                <span className="flex items-center text-lg text-gray-700 dark:text-dark-text-secondary font-semibold">
+                                                    {icon}
+                                                    {article}
+                                                </span>
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     </AnimatedWrapper>
@@ -146,18 +178,18 @@ const HelpCenterPage: React.FC = () => {
                         <div className="bg-cv-light-gray dark:bg-dark-bg-secondary p-10 rounded-lg text-center h-full flex flex-col justify-center">
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.community.title}</h2>
                             <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">{pageData.community.description}</p>
-                            <a href="#" className="mt-6 inline-block bg-cv-dark-gray text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-80 transition-colors">
+                            <Link to={communityPath} className="mt-6 inline-block bg-cv-dark-gray text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-80 transition-colors">
                                 {pageData.community.button}
-                            </a>
+                            </Link>
                         </div>
                     </AnimatedWrapper>
                      <AnimatedWrapper delay="duration-1000">
                          <div className="bg-cv-blue p-10 rounded-lg text-center text-white h-full flex flex-col justify-center">
                             <h2 className="text-3xl font-bold">{pageData.contact.title}</h2>
                             <p className="mt-4 text-lg text-white/80">{pageData.contact.description}</p>
-                            <a href="#" className="mt-6 inline-block bg-white dark:bg-dark-bg-primary text-cv-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary dark:bg-dark-bg-secondary transition-colors">
+                            <Link to={links.contact} className="mt-6 inline-block bg-white dark:bg-dark-bg-primary text-cv-blue px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary dark:bg-dark-bg-secondary transition-colors">
                                 {pageData.contact.button}
-                            </a>
+                            </Link>
                         </div>
                     </AnimatedWrapper>
                 </div>
