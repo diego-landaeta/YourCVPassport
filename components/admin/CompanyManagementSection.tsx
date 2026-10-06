@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import type { Company, CompanyUser } from '../../types';
+import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
@@ -75,12 +76,10 @@ const CompanyManagementSection: React.FC = () => {
     try {
       setLoading(true);
 
+      // Columnas privadas (email, CIF, documentos, notas...): vista companies_full (admin)
       let query = supabase
-        .from('companies')
-        .select(`
-          *,
-          company_users(*)
-        `)
+        .from('companies_full')
+        .select(`${COMPANY_FULL_COLUMNS}, company_users(*)`)
         .order('created_at', { ascending: false });
 
       // Apply filter
@@ -101,7 +100,7 @@ const CompanyManagementSection: React.FC = () => {
 
       // Calculate stats
       const allCompanies = await supabase
-        .from('companies')
+        .from('companies_full')
         .select('status');
 
       if (allCompanies.data) {

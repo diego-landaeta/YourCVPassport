@@ -310,12 +310,14 @@ function project(row: Row, select: string | null): Row {
  * Filas de una tabla del mock. Las vistas de la BD real se sirven a partir de
  * su tabla base si el spec no las define:
  *   - profiles_full: vista con todas las columnas (perfil propio / gestor / admin);
- *   - public_stamps: sellos VERIFIED sin evidence.
+ *   - public_stamps: sellos VERIFIED sin evidence;
+ *   - companies_full: vista con todas las columnas (miembros / creador / admin).
  * (El mock no aplica privilegios ni RLS: eso se prueba en PGlite.)
  */
 function tableRows(db: MockDb, table: string): Row[] {
   if (db[table]) return db[table];
   if (table === 'profiles_full') return db.profiles ?? [];
+  if (table === 'companies_full') return db.companies ?? [];
   if (table === 'public_stamps') {
     return (db.stamps ?? [])
       .filter(s => s.status === 'VERIFIED')

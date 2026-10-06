@@ -11,9 +11,13 @@
  *   podía ejecutar anon sobre cualquier tabla).
  * - Panel de admin > empresas: si approve_company responde 42501 (la sesión no
  *   es admin en el servidor) se muestra un mensaje claro en vez de "Error: ...".
+ * - Columnas privadas de companies (20261009 / 20261009b): el panel de admin y
+ *   el de empresa leen `companies_full` con columnas explícitas; a `companies`
+ *   solo se le piden columnas públicas (los counts, `select=id`).
  */
 import { test, expect, type BrowserContext, type Route } from '@playwright/test';
-import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase, type SupabaseMock } from './helpers/supabaseMock';
+import { PUBLIC_COMPANY_COLUMN_LIST } from '../../lib/companyColumns';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -130,4 +134,113 @@ test('admin > empresas: approve_company con 42501 muestra un mensaje claro', asy
   await expect(page.getByText(/Solo un administrador puede aprobar o rechazar empresas/)).toBeVisible({ timeout: 15_000 });
   const call = calls.find(c => c.fn === 'approve_company')!;
   expect(call.body.p_company_id).toBe(company.id);
+});
+
+// ---------------------------------------------------------------------------
+// Columnas privadas de companies (20261009_proteger_datos_companies.sql +
+// 20261009b_cerrar_columnas_privadas_companies.sql): a `companies` solo se le
+// piden id / company_name / logo_url; el resto se lee de `companies_full`.
+// ---------------------------------------------------------------------------
+
+/** Columnas de nivel superior de un `select` (sin los embeds `tabla(...)`). */
+function topLevelColumns(select: string): string[] {
+  let depth = 0;
+  let cur = '';
+  const out: string[] = [];
+  for (const ch of select) {
+    if (ch === '(') depth++;
+    if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) { out.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out.filter(c => !c.includes('('));
+}
+
+/** Ninguna petición a la tabla `companies` pide columnas privadas ni `*`. */
+function expectOnlyPublicCompanyColumns(mock: SupabaseMock) {
+  for (const r of mock.requestsTo('companies')) {
+    const cols = topLevelColumns(r.params.select?.[0] ?? '*');
+    for (const c of cols) expect(PUBLIC_COMPANY_COLUMN_LIST as readonly string[], `companies?${r.query}`).toContain(c);
+    for (const k of Object.keys(r.params)) {
+      if (['select', 'order', 'limit', 'offset'].includes(k)) continue;
+      expect(PUBLIC_COMPANY_COLUMN_LIST as readonly string[], `filtro sobre columna privada: companies?${r.query}`).toContain(k);
+    }
+  }
+}
+
+const COMPANY_ROW = {
+  id: '22222222-2222-4222-8222-222222222223',
+  company_name: 'Empresa Columnas QA',
+  legal_name: 'Empresa Columnas QA SL',
+  tax_id: 'B12345678',
+  company_email: 'columnas@example.test',
+  status: 'PENDING',
+  credit_balance: 0,
+  total_credits_purchased: 0,
+  total_credits_used: 0,
+  admin_notes: 'nota interna QA',
+  created_at: '2026-10-01T00:00:00Z',
+};
+
+test('admin > empresas: lee companies_full con columnas explícitas y cuenta con id', async ({ context, page }) => {
+  test.setTimeout(150_000);
+  const profiles = makeProfiles(5);
+  const admin = profiles.find(p => p.id === ADMIN_ID)!;
+  await installInitState(context, { sessionProfile: admin, language: 'es' });
+  const mock = await mockSupabase(context, { profiles, companies: [{ ...COMPANY_ROW, company_users: [] }], company_users: [] });
+
+  await page.goto('/admin', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByText('Moderación de Usuarios').first()).toBeVisible({ timeout: 90_000 });
+  // Contadores del panel: total sobre companies.id, los del mes sobre companies_full
+  await expect.poll(() => mock.requestsTo('companies').filter(r => r.method === 'HEAD').length, { timeout: 15_000 }).toBeGreaterThan(0);
+  for (const r of mock.requestsTo('companies').filter(r => r.method === 'HEAD')) expect(r.params.select?.[0]).toBe('id');
+  const monthly = mock.requestsTo('companies_full').filter(r => r.method === 'HEAD');
+  expect(monthly.length).toBeGreaterThan(0);
+  for (const r of monthly) {
+    expect(r.params.select?.[0]).toBe('id');
+    expect(r.params.created_at?.[0]).toMatch(/^gte\./);
+  }
+
+  const tab = page.getByRole('button', { name: /Gestión de Empresas/ }).first();
+  await expect(tab).toBeVisible();
+  await tab.evaluate(el => (el as HTMLElement).click());
+  await expect(page.getByText(COMPANY_ROW.company_name).first()).toBeVisible({ timeout: 20_000 });
+
+  const list = mock.requestsTo('companies_full').filter(r => r.method === 'GET' && r.params.select?.[0]?.includes('company_users'));
+  expect(list.length).toBeGreaterThan(0);
+  for (const r of list) {
+    const cols = topLevelColumns(r.params.select![0]);
+    expect(cols).not.toContain('*');
+    for (const c of ['id', 'company_name', 'tax_id', 'company_email', 'status', 'admin_notes', 'tax_document_url', 'verification_document_url']) expect(cols).toContain(c);
+  }
+  // Estadísticas por estado: también desde la vista
+  expect(mock.requestsTo('companies_full').some(r => r.method === 'GET' && r.params.select?.[0] === 'status')).toBe(true);
+  expectOnlyPublicCompanyColumns(mock);
+});
+
+test('panel de empresa: la empresa del miembro se lee de companies_full', async ({ context, page }) => {
+  test.setTimeout(150_000);
+  const member = { ...makeProfiles(4)[3], role: 'employer' };
+  await installInitState(context, { sessionProfile: member, language: 'es' });
+  const mock = await mockSupabase(context, {
+    profiles: [member],
+    companies: [COMPANY_ROW],
+    company_users: [{ id: '77777777-7777-4777-8777-777777777771', company_id: COMPANY_ROW.id, user_id: member.id, role: 'OWNER' }],
+  });
+
+  await page.goto('/company/dashboard', { waitUntil: 'domcontentloaded' });
+  // Empresa PENDING: la pantalla de revisión muestra nombre, email y CIF (columnas privadas)
+  await expect(page.getByText(COMPANY_ROW.tax_id)).toBeVisible({ timeout: 90_000 });
+  await expect(page.getByText(COMPANY_ROW.company_email)).toBeVisible();
+
+  const reads = mock.requestsTo('companies_full').filter(r => r.method === 'GET');
+  expect(reads.length).toBeGreaterThan(0);
+  for (const r of reads) {
+    expect(r.params.id?.[0]).toBe(`eq.${COMPANY_ROW.id}`);
+    const cols = topLevelColumns(r.params.select![0]);
+    expect(cols).not.toContain('*');
+    expect(cols).toEqual(expect.arrayContaining(['id', 'company_name', 'tax_id', 'company_email', 'status', 'credit_balance']));
+  }
+  expect(mock.requestsTo('companies')).toEqual([]);
 });

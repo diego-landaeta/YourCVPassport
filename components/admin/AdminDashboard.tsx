@@ -106,14 +106,15 @@ const AdminDashboard: React.FC = () => {
         { count: companiesThisMonth },
       ] = await Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('companies').select('*', { count: 'exact', head: true }),
+        supabase.from('companies').select('id', { count: 'exact', head: true }),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }),
         supabase.from('job_postings').select('*', { count: 'exact', head: true }),
         supabase.from('stamps').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
         supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('job_applications').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
-        supabase.from('companies').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
+        // created_at de companies es privado: este count va contra companies_full (admin ve todas)
+        supabase.from('companies_full').select('id', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth.toISOString()),
       ]);
 
       setStats({
