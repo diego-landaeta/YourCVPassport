@@ -29,6 +29,7 @@ const POST_SEEDED = '00000000-0000-4000-8000-0000000c1004';
 const COMMENT_1 = '00000000-0000-4000-8000-0000000c2001';
 const COMMENT_2 = '00000000-0000-4000-8000-0000000c2002';
 const REPLY_1 = '00000000-0000-4000-8000-0000000c2003';
+const HIDDEN_PROFILE = '00000000-0000-4000-8000-0000000c0004';
 
 const DAY = 86400000;
 const now = Date.now();
@@ -89,11 +90,15 @@ interface MockOptions {
   wizardCompleted?: boolean;
   createdDaysAgo?: number;
   viewsIso?: string[];
+  /** El usuario de la sesión es miembro del grupo (aparece en "Mis grupos" y en "Publicar en"). */
+  memberOfGroup?: boolean;
 }
 
 interface MockLog {
   edgeBodies: { texts: string[]; sourceLang: string; targetLang: string }[];
   writes: { method: string; path: string; body: string | null }[];
+  /** Lecturas REST (GET/HEAD) con la query decodificada. */
+  reads: { table: string; query: string }[];
   incrementPostViews: number;
   external: string[];
 }
@@ -121,6 +126,8 @@ function buildDb(opts: MockOptions) {
     me,
     { id: AUTHOR_EN, full_name: 'Sarah Johnson', headline: 'Cloud Architect', avatar_url: null, slug: 'sarah-johnson' },
     { id: AUTHOR_ES, full_name: 'Laura García', headline: 'Reclutadora', avatar_url: null, slug: 'laura-garcia' },
+    // Perfil oculto con avatar: nunca debe salir en "Miembros activos"
+    { id: HIDDEN_PROFILE, full_name: 'Perfil Oculto', headline: 'No visible', avatar_url: 'https://example.test/oculto.png', slug: 'perfil-oculto', profile_hidden: true, is_active: true, updated_at: isoDaysAgo(0) },
   ];
   const basePost = { visibility: 'PUBLIC', is_hidden: false, is_pinned: false, is_edited: false, image_urls: [], shares_count: 0, views_count: 0, group_id: null, achievement_type: null, achievement_data: {}, updated_at: isoDaysAgo(1) };
   const posts = [
@@ -146,7 +153,9 @@ function buildDb(opts: MockOptions) {
     Array.from({ length: n }, (_, i) => ({ id: `00000000-0000-4000-8000-0000000d${String(i).padStart(4, '0')}`, profile_id: ME, created_at: isoDaysAgo(100), ...extra }));
   return { experiences: own(1, { title: 'QA', company: 'ACME', start_date: '2020-01-01' }), education: own(1, { institution: 'UPM', degree: 'Ing.', start_date: '2015-01-01' }),
     skills: own(3, { name: 'Testing' }), languages: own(1, { language: 'Español', level: 'native' }),
-    profiles: authors, feed_posts: posts, feed_comments: comments, groups, group_members: [] as any[], analytics_views, text_translations: DB_CACHE_ROWS } as Record<string, any[]>;
+    profiles: authors, feed_posts: posts, feed_comments: comments, groups,
+    group_members: opts.memberOfGroup ? [{ id: '00000000-0000-4000-8000-0000000c0200', group_id: GROUP_ID, user_id: ME, role: 'member', joined_at: isoDaysAgo(10) }] : [] as any[],
+    analytics_views, text_translations: DB_CACHE_ROWS } as Record<string, any[]>;
 }
 
 // Mini evaluador de filtros PostgREST (eq, neq, in, not.in, is, gte, lte, gt, lt, ilike)
@@ -179,7 +188,7 @@ const RESERVED = new Set(['select', 'order', 'limit', 'offset', 'on_conflict', '
 async function setupMocks(page: Page, opts: MockOptions = {}): Promise<MockLog> {
   const db = buildDb(opts);
   const profilesById = new Map(db.profiles.map((p) => [p.id, p]));
-  const log: MockLog = { edgeBodies: [], writes: [], incrementPostViews: 0, external: [] };
+  const log: MockLog = { edgeBodies: [], writes: [], reads: [], incrementPostViews: 0, external: [] };
 
   await page.routeWebSocket(/.*/, (ws) => ws.close());
   await page.route('**/*', async (route: Route) => {
@@ -237,6 +246,8 @@ async function setupMocks(page: Page, opts: MockOptions = {}): Promise<MockLog> 
       }
       return json(wantsObject ? 200 : 201, wantsObject ? {} : []);
     }
+
+    log.reads.push({ table, query: decodeURIComponent(url.search) });
 
     // profiles_full (perfil propio completo) y public_stamps son vistas sobre profiles/stamps
     const source = db[table]
@@ -464,6 +475,166 @@ test.describe('#8/#9 Traducción automática del feed, encuestas y grupos', () =
     const header = page.locator('div', { has: page.getByRole('heading', { name: GROUP_NAME_TR }) }).last();
     await header.getByRole('button', { name: 'Ver original' }).first().click();
     await expect(page.getByRole('heading', { name: GROUP_NAME })).toBeVisible();
+  });
+});
+
+// ───────────────────────────── U15 Comunidad ─────────────────────────────
+const PRIVATE_PROFILE_COLUMNS = ['email', 'phone', 'plan', 'salary_min', 'salary_max', 'salary_currency', 'managed_by',
+  'suspension_reason', 'suspended_until', 'search_blocked', 'messages_blocked', 'slug_validation_error',
+  'last_slug_changed_at', 'dashboard_tour_completed', 'first_login_completed'];
+
+/** Columnas pedidas en `select=` (incluidas las de recursos embebidos). */
+function selectedColumns(query: string): string[] {
+  const m = query.match(/[?&]select=([^&]*)/);
+  if (!m) return [];
+  return m[1].split(/[(),]/).map((c) => c.trim().replace(/^.*:/, '').replace(/!.*$/, '')).filter(Boolean);
+}
+
+/** La barra lateral izquierda (Mis grupos, Miembros activos) solo se muestra desde xl. */
+const hasLeftSidebar = (page: Page) => page.evaluate(() => window.matchMedia('(min-width: 1280px)').matches);
+
+/** Expande el compositor (el selector "Publicar en" aparece al tener foco). */
+async function expandComposer(page: Page) {
+  await page.getByRole('textbox', { name: 'Texto de la publicación' }).click();
+}
+
+test.describe('U15 Comunidad: nombres de grupo traducidos', () => {
+  test('cabecera del post y "Publicar en" con el nombre del grupo en español (original en el title)', async ({ page }) => {
+    await boot(page, '/comunidad', { memberOfGroup: true });
+    const groupPost = await lockArticle(page, GROUP_POST_TR);
+    const headerName = groupPost.getByText(GROUP_NAME_TR, { exact: true });
+    await expect(headerName).toBeVisible();
+    await expect(headerName).toHaveAttribute('title', `Nombre original: ${GROUP_NAME}`);
+    await expect(groupPost).not.toContainText(GROUP_NAME);
+
+    // Selector del compositor
+    await expandComposer(page);
+    const select = page.getByLabel('Publicar en:');
+    await expect(select).toBeVisible();
+    await expect(select.locator('option', { hasText: GROUP_NAME_TR })).toHaveCount(1);
+    await expect(select.locator('option', { hasText: GROUP_NAME })).toHaveCount(0);
+
+    // "Mis grupos" (barra lateral izquierda, solo xl)
+    // Barra lateral izquierda solo desde xl (en Firefox la barra de scroll deja el viewport por debajo)
+    if (await hasLeftSidebar(page)) {
+      const item = page.getByRole('button', { name: GROUP_NAME_TR, exact: true });
+      await expect(item).toBeVisible();
+      await expect(item).toHaveAttribute('title', `Nombre original: ${GROUP_NAME}`);
+    }
+  });
+
+  test('"Comunidades sugeridas" con el nombre traducido y botón "Ver" (no se une)', async ({ page }, testInfo) => {
+    test.skip(isMobile(testInfo), 'La barra lateral derecha solo existe desde lg');
+    const log = await boot(page, '/comunidad');
+    // Tarjeta = el contenedor redondeado más interno que contiene el título
+    const card = page.locator('div.rounded-2xl', { has: page.getByRole('heading', { name: 'Comunidades sugeridas' }) }).last();
+    await expect(card.getByText(GROUP_NAME_TR, { exact: true })).toBeVisible({ timeout: 60000 });
+    await expect(card).not.toContainText(GROUP_NAME);
+    await card.getByRole('button', { name: `Ver ${GROUP_NAME_TR}` }).click();
+    expect(log.writes.filter((w) => w.path.includes('group_members'))).toEqual([]);
+  });
+});
+
+test.describe('U15 Comunidad: perfiles públicos en el feed', () => {
+  test('sin filtro is_public ni columnas privadas; "Miembros activos" excluye perfiles ocultos', async ({ page }) => {
+    const log = await boot(page, '/comunidad');
+    await lockArticle(page, ES_POST_TR);
+    await expect.poll(() => log.reads.filter((r) => r.table === 'profiles' && r.query.includes('profile_hidden')).length, { timeout: 30000 }).toBeGreaterThan(0);
+
+    const profileReads = log.reads.filter((r) => r.table === 'profiles');
+    for (const r of profileReads) {
+      expect(r.query, r.query).not.toContain('is_public');
+      const cols = selectedColumns(r.query);
+      for (const c of PRIVATE_PROFILE_COLUMNS) expect(cols, r.query).not.toContain(c);
+    }
+    const active = profileReads.find((r) => r.query.includes('profile_hidden'))!;
+    expect(active.query).toContain('slug=not.is.null');
+    expect(active.query).toContain('profile_hidden=not.is.true');
+    expect(active.query).toContain('is_active=not.is.false');
+
+    if (await hasLeftSidebar(page)) {
+      await expect(page.getByRole('button', { name: /QA Usuario/ }).first()).toBeVisible();
+      await expect(page.getByText('Perfil Oculto')).toHaveCount(0);
+    }
+  });
+});
+
+test.describe('U15 Comunidad: accesibilidad', () => {
+  test('todos los botones visibles del feed tienen nombre accesible', async ({ page }) => {
+    await boot(page, '/comunidad', { memberOfGroup: true });
+    const seeded = await lockArticle(page, SEEDED_POST_TR);
+    // Compositor en modo encuesta con 3 opciones (aparecen los botones de eliminar opción)
+    await expandComposer(page);
+    await page.getByRole('button', { name: 'Crear encuesta' }).click();
+    await page.getByRole('button', { name: 'Añadir opción' }).click();
+    await expect(page.getByRole('button', { name: 'Eliminar opción 3' })).toBeVisible();
+    // Comentarios abiertos y respuesta en curso (botón de cancelar respuesta)
+    await seeded.getByRole('button', { name: 'Comentar', exact: true }).click();
+    await seeded.getByRole('button', { name: 'Responder' }).first().click();
+    await expect(seeded.getByRole('button', { name: 'Cancelar respuesta' })).toBeVisible();
+
+    // Solo la rejilla de la comunidad (FeedSection): la cabecera móvil del dashboard es de otra unidad
+    const buttons = page.locator('main.grid button:visible');
+    const n = await buttons.count();
+    expect(n).toBeGreaterThan(20);
+    const unnamed: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const b = buttons.nth(i);
+      const name = await b.evaluate((el) => {
+        const aria = el.getAttribute('aria-label');
+        if (aria && aria.trim()) return aria.trim();
+        const labelledby = el.getAttribute('aria-labelledby');
+        if (labelledby) return labelledby.split(/\s+/).map((id) => document.getElementById(id)?.textContent || '').join(' ').trim();
+        const imgAlt = Array.from(el.querySelectorAll('img')).map((img) => img.getAttribute('alt') || '').join(' ');
+        return `${(el as HTMLElement).innerText || ''} ${imgAlt} ${el.getAttribute('title') || ''}`.trim();
+      });
+      if (!name) unnamed.push(await b.evaluate((el) => el.outerHTML.slice(0, 160)));
+    }
+    expect(unnamed).toEqual([]);
+  });
+
+  test('foco visible con Tab en buscador y botones de la cabecera', async ({ page }, testInfo) => {
+    await boot(page, '/comunidad');
+    await lockArticle(page, ES_POST_TR);
+
+    if (isMobile(testInfo)) {
+      const input = page.getByRole('textbox', { name: 'Buscar posts' });
+      await input.focus();
+      await expect(input).toBeFocused();
+      // El input no pinta outline: el contenedor muestra el anillo (focus-within)
+      const shadow = await input.evaluate((el) => getComputedStyle(el.parentElement as HTMLElement).boxShadow);
+      expect(shadow).not.toBe('none');
+      return;
+    }
+
+    const search = page.getByRole('textbox', { name: 'Buscar en la comunidad' });
+    await search.focus();
+    await expect(search).toBeFocused();
+    const containerShadow = await search.evaluate((el) => getComputedStyle(el.parentElement as HTMLElement).boxShadow);
+    expect(containerShadow).not.toBe('none');
+
+    // Tab → botón de ordenar (solo icono): nombre accesible y anillo de foco
+    await page.keyboard.press('Tab');
+    const sort = page.getByRole('button', { name: /^Ordenar:/ });
+    await expect(sort).toBeFocused();
+    expect(await sort.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+    // Tab → actualizar feed
+    await page.keyboard.press('Tab');
+    const focusedShadow = await page.evaluate(() => getComputedStyle(document.activeElement as HTMLElement).boxShadow);
+    expect(focusedShadow).not.toBe('none');
+  });
+
+  test('elegir un emoji en comentarios no publica el comentario a medias', async ({ page }) => {
+    const log = await boot(page, '/comunidad');
+    const seeded = await lockArticle(page, SEEDED_POST_TR);
+    await seeded.getByRole('button', { name: 'Comentar', exact: true }).click();
+    const input = seeded.getByRole('textbox', { name: /comentario/i }).first();
+    await input.fill('Muy buen consejo');
+    await seeded.getByRole('button', { name: 'Insertar emoji' }).click();
+    await seeded.getByRole('button', { name: '😎', exact: true }).first().click();
+    await expect(input).toHaveValue('Muy buen consejo😎');
+    await page.waitForTimeout(500);
+    expect(log.writes.filter((w) => w.method === 'POST' && w.path.startsWith('/rest/v1/feed_comments'))).toEqual([]);
   });
 });
 

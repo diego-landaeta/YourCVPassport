@@ -119,24 +119,34 @@ const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100 dark:border-dark-border">
-        <div className="flex-1 flex items-center gap-2 bg-gray-100 dark:bg-dark-bg-tertiary rounded-full px-3 py-1.5">
+        {/* type="button" y Enter anulado: el selector vive dentro del <form> de comentarios */}
+        <div className="flex-1 flex items-center gap-2 bg-gray-100 dark:bg-dark-bg-tertiary rounded-full px-3 py-1.5 focus-within:ring-2 focus-within:ring-cv-blue dark:focus-within:ring-cv-blue-light">
           <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
             placeholder={lang === 'es' ? 'Buscar GIFs...' : 'Search GIFs...'}
+            aria-label={lang === 'es' ? 'Buscar GIFs' : 'Search GIFs'}
             className="flex-1 text-xs bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="text-gray-400 hover:text-gray-600">
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label={lang === 'es' ? 'Borrar búsqueda' : 'Clear search'}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
               <XMarkIcon className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
         <button
+          type="button"
           onClick={onClose}
+          aria-label={lang === 'es' ? 'Cerrar selector de GIFs' : 'Close GIF picker'}
           className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
         >
           <XMarkIcon className="w-4 h-4" />
@@ -174,8 +184,9 @@ const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
             {gifs.map((gif) => (
               <button
                 key={gif.id}
+                type="button"
                 onClick={() => onSelect(gif.url)}
-                className="relative group rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-bg-tertiary hover:ring-2 hover:ring-cv-blue transition-all"
+                className="relative group rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-bg-tertiary hover:ring-2 hover:ring-cv-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light transition-all"
                 style={{
                   aspectRatio: `${gif.width} / ${gif.height}`,
                   minHeight: '80px',
@@ -189,7 +200,7 @@ const GifPicker: React.FC<GifPickerProps> = ({ onSelect, onClose }) => {
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" aria-hidden="true" />
               </button>
             ))}
           </div>

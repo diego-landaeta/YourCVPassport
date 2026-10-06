@@ -247,7 +247,7 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
         onClick={onBack}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mb-4 transition-colors"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         {isEs
@@ -338,7 +338,8 @@ const GroupDetailView: React.FC<GroupDetailViewProps> = ({ groupId, onBack }) =>
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={uploadingAvatar}
                 className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gray-800 hover:bg-gray-700 text-white flex items-center justify-center shadow-md transition-colors disabled:opacity-50"
-                title={isEs ? 'Cambiar ícono' : 'Change icon'}
+                title={isEs ? 'Cambiar icono' : 'Change icon'}
+                aria-label={isEs ? 'Cambiar icono del grupo' : 'Change group icon'}
               >
                 {uploadingAvatar ? (
                   <div className="w-3 h-3 border-[1.5px] border-white border-t-transparent rounded-full animate-spin" />

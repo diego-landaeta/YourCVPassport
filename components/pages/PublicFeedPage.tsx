@@ -34,6 +34,9 @@ import {
   BookmarkIcon,
 } from '@heroicons/react/24/outline';
 
+/** Indicador de foco de teclado (solo :focus-visible) con los tokens de marca. */
+const FOCUS_RING = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light';
+
 /* ── Left sidebar: profile card ────────────────────────── */
 type UserProfile = { full_name: string; headline: string | null; avatar_url: string | null; slug: string | null };
 
@@ -227,7 +230,12 @@ const CommunityCard: React.FC<{ lang: string; isLoggedIn: boolean }> = ({ lang, 
   useEffect(() => {
     const load = async () => {
       const [profRes, postsRes, feedRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        // Perfiles públicos: mismo criterio que la política RLS de lectura pública
+        // (slug no nulo, profile_hidden no true, is_active no false; null = activo).
+        supabase.from('profiles').select('id', { count: 'exact', head: true })
+          .not('slug', 'is', null)
+          .not('profile_hidden', 'is', true)
+          .not('is_active', 'is', false),
         supabase.from('feed_posts').select('id', { count: 'exact', head: true }).eq('visibility', 'PUBLIC').eq('is_hidden', false),
         supabase.from('feed_posts')
           .select('author:profiles!author_id(id, full_name, avatar_url, slug)')
@@ -335,7 +343,7 @@ const CommunityCard: React.FC<{ lang: string; isLoggedIn: boolean }> = ({ lang, 
 };
 
 /* ── Mobile Facebook-style header ───────────────────────── */
-const FeedMobileHeader: React.FC<{ session: Session | null; lang: string }> = ({ session, lang }) => {
+const FeedMobileHeader: React.FC<{ session: Session | null; lang: string; onSearch: () => void }> = ({ session, lang, onSearch }) => {
   const navigate = useNavigate();
   return (
     <header className="fixed top-0 left-0 right-0 h-14 bg-white/95 dark:bg-dark-bg-secondary/95 backdrop-blur-md border-b border-gray-200/70 dark:border-dark-border z-50 flex items-center justify-between px-4 lg:hidden shadow-sm">
@@ -348,17 +356,27 @@ const FeedMobileHeader: React.FC<{ session: Session | null; lang: string }> = ({
         </span>
       </div>
       <div className="flex items-center gap-1">
-        <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+        {/* Antes no hacía nada: abre el buscador de la comunidad */}
+        <button
+          onClick={onSearch}
+          aria-label={lang === 'es' ? 'Buscar en la comunidad' : 'Search the community'}
+          className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}
+        >
           <MagnifyingGlassIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
         </button>
         {session ? (
           <>
-            <button className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+            <button
+              onClick={() => navigate('/dashboard')}
+              aria-label={lang === 'es' ? 'Notificaciones' : 'Notifications'}
+              className={`relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}
+            >
               <BellIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={() => navigate('/dashboard', { state: { openComposer: true } })}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors"
+              aria-label={lang === 'es' ? 'Crear publicación' : 'Create post'}
+              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}
             >
               <PencilSquareIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
@@ -409,8 +427,9 @@ const FeedTabBar: React.FC<{
       active: activeFilter === 'IMAGE',
     },
     {
+      // Filtra encuestas (POLL): mismo nombre que el filtro "Encuestas"/"Polls"
       id: 'quiz',
-      label: 'Quiz',
+      label: lang === 'es' ? 'Encuestas' : 'Polls',
       icon: <QuestionMarkCircleIcon className="w-6 h-6" />,
       action: () => onFilterChange(activeFilter === 'POLL' ? 'ALL' : 'POLL'),
       active: activeFilter === 'POLL',
@@ -433,6 +452,7 @@ const FeedTabBar: React.FC<{
 
   return (
     <nav
+      aria-label={lang === 'es' ? 'Navegación de la comunidad' : 'Community navigation'}
       className="fixed bottom-0 left-0 right-0 z-[999] lg:hidden bg-white dark:bg-dark-bg-secondary border-t border-gray-200 dark:border-dark-border"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
@@ -441,7 +461,8 @@ const FeedTabBar: React.FC<{
           <button
             key={tab.id}
             onClick={tab.action}
-            className={`flex flex-col items-center justify-center flex-1 gap-0.5 transition-colors ${
+            aria-pressed={tab.id === 'fotos' || tab.id === 'quiz' ? tab.active : undefined}
+            className={`flex flex-col items-center justify-center flex-1 gap-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light ${
               tab.active
                 ? 'text-cv-blue'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -536,46 +557,65 @@ const FeedFilters: React.FC<{
   searchTerm: string;
   onSearchChange: (s: string) => void;
   lang: string;
-}> = ({ activeFilter, onFilterChange, searchTerm, onSearchChange, lang }) => {
-  const [searchOpen, setSearchOpen] = useState(false);
+  /** Estado del buscador controlado desde la página (lo abre también la cabecera móvil). */
+  searchOpen: boolean;
+  onSearchOpenChange: (open: boolean) => void;
+  /** Abre el buscador y pide foco (lupa de aquí o de la cabecera móvil). */
+  onOpenSearch: () => void;
+  /** Contador de peticiones de foco: cada incremento enfoca el input. */
+  focusRequest: number;
+}> = ({ activeFilter, onFilterChange, searchTerm, onSearchChange, lang, searchOpen, onSearchOpenChange, onOpenSearch, focusRequest }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const openSearch = () => {
-    setSearchOpen(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
+  // Solo al pedirlo la lupa (no al abrirse por un hashtag: ahí no se roba el
+  // scroll ni se abre el teclado en móvil). Funciona también si ya estaba abierto.
+  useEffect(() => {
+    if (!focusRequest) return;
+    containerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    inputRef.current?.focus({ preventScroll: true });
+  }, [focusRequest]);
+
+  const openSearch = onOpenSearch;
   const closeSearch = () => {
-    setSearchOpen(false);
+    onSearchOpenChange(false);
     onSearchChange('');
   };
 
   return (
-    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden">
+    <div ref={containerRef} className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm overflow-hidden scroll-mt-20">
       {searchOpen ? (
-        <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-2xl focus-within:ring-2 focus-within:ring-inset focus-within:ring-cv-blue dark:focus-within:ring-cv-blue-light">
           <MagnifyingGlassIcon className="w-4 h-4 text-cv-blue flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') closeSearch(); }}
             placeholder={lang === 'es' ? 'Buscar en la comunidad...' : 'Search community...'}
+            aria-label={lang === 'es' ? 'Buscar en la comunidad' : 'Search the community'}
             className="flex-1 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
           />
-          <button onClick={closeSearch} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
+          <button
+            onClick={closeSearch}
+            aria-label={lang === 'es' ? 'Cerrar búsqueda' : 'Close search'}
+            className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}
+          >
             <XMarkIcon className="w-4 h-4 text-gray-400" />
           </button>
         </div>
       ) : (
         <div className="flex items-center">
-          <div className="flex items-center flex-wrap gap-1 flex-1 px-2.5 py-2">
+          <div className="flex items-center flex-wrap gap-1 flex-1 px-2.5 py-2" role="group" aria-label={lang === 'es' ? 'Filtrar por tipo de publicación' : 'Filter by post type'}>
             {FEED_FILTERS.map((f) => {
               const isActive = activeFilter === f.value;
               return (
                 <button
                   key={f.value}
                   onClick={() => onFilterChange(f.value)}
-                  className={`px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-all rounded-full ${
+                  aria-pressed={isActive}
+                  className={`px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-all rounded-full ${FOCUS_RING} ${
                     isActive
                       ? 'bg-cv-blue text-white shadow-sm shadow-blue-500/30'
                       : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary hover:text-gray-700'
@@ -588,7 +628,7 @@ const FeedFilters: React.FC<{
           </div>
           <button
             onClick={openSearch}
-            className="flex-shrink-0 p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-l border-gray-100 dark:border-dark-border/50 transition-colors"
+            className={`flex-shrink-0 p-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border-l border-gray-100 dark:border-dark-border/50 transition-colors ${FOCUS_RING}`}
             aria-label={lang === 'es' ? 'Buscar' : 'Search'}
           >
             <MagnifyingGlassIcon className="w-4 h-4" />
@@ -608,6 +648,12 @@ const PublicFeedPage: React.FC = () => {
   // Filter + search state
   const [activeFilter, setActiveFilter] = useState<FeedContentType | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocusRequest, setSearchFocusRequest] = useState(0);
+  const openSearchWithFocus = useCallback(() => {
+    setSearchOpen(true);
+    setSearchFocusRequest((n) => n + 1);
+  }, []);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
@@ -675,6 +721,8 @@ const PublicFeedPage: React.FC = () => {
   // Hashtag click → search
   const handleHashtagClick = useCallback((tag: string) => {
     setSearchTerm(tag);
+    // Se muestra el buscador con el hashtag (antes la búsqueda quedaba aplicada pero oculta)
+    setSearchOpen(true);
     setActiveFilter('ALL');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -692,7 +740,7 @@ const PublicFeedPage: React.FC = () => {
       </Helmet>
 
       {/* Mobile header — Facebook-style, only on small screens */}
-      <FeedMobileHeader session={session} lang={lang} />
+      <FeedMobileHeader session={session} lang={lang} onSearch={openSearchWithFocus} />
 
       {/* Guest banner */}
       {!session && <GuestBanner lang={lang} />}
@@ -735,6 +783,10 @@ const PublicFeedPage: React.FC = () => {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             lang={lang}
+            searchOpen={searchOpen}
+            onSearchOpenChange={setSearchOpen}
+            onOpenSearch={openSearchWithFocus}
+            focusRequest={searchFocusRequest}
           />
 
           {error && (

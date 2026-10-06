@@ -40,6 +40,10 @@ import {
   BellIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
+import { useTranslatedGroupName } from './TranslatedGroupName';
+
+/** Indicador de foco de teclado (solo :focus-visible) con los tokens de marca. */
+const FOCUS_RING = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light';
 
 /* ── Left Sidebar: Feed Navigation ────────────────────────── */
 const FeedNavCard: React.FC<{
@@ -54,25 +58,27 @@ const FeedNavCard: React.FC<{
 }> = ({ onBookmarks, onMyPosts, onFilterEvents, onFollowing, onSectionChange, showBookmarks, showMyPosts, showFollowing }) => {
   const { lang } = useLanguage();
 
+  // `toggle`: filtros que se activan/desactivan (aria-pressed); el resto navega.
   const items = [
-    { label: lang === 'es' ? 'Siguiendo' : 'Following', icon: UsersIcon, action: onFollowing, active: showFollowing },
-    { label: lang === 'es' ? 'Guardados' : 'Saved', icon: BookmarkIcon, action: onBookmarks, active: showBookmarks },
-    { label: lang === 'es' ? 'Mis posts' : 'My posts', icon: UserCircleIcon, action: onMyPosts, active: showMyPosts },
-    { label: lang === 'es' ? 'Perfiles' : 'Profiles', icon: UsersIcon, action: () => onSectionChange?.('perfiles'), active: false },
-    { label: lang === 'es' ? 'Grupos' : 'Groups', icon: UserGroupIcon, action: () => onSectionChange?.('grupos'), active: false },
-    { label: lang === 'es' ? 'Canales' : 'Channels', icon: HashtagIcon, action: () => onSectionChange?.('canales'), active: false },
-    { label: lang === 'es' ? 'Notificaciones' : 'Notifications', icon: BellIcon, action: () => onSectionChange?.('notificaciones'), active: false },
-    { label: lang === 'es' ? 'Eventos' : 'Events', icon: CalendarDaysIcon, action: onFilterEvents, active: false },
+    { label: lang === 'es' ? 'Siguiendo' : 'Following', icon: UsersIcon, action: onFollowing, active: showFollowing, toggle: true },
+    { label: lang === 'es' ? 'Guardados' : 'Saved', icon: BookmarkIcon, action: onBookmarks, active: showBookmarks, toggle: true },
+    { label: lang === 'es' ? 'Mis posts' : 'My posts', icon: UserCircleIcon, action: onMyPosts, active: showMyPosts, toggle: true },
+    { label: lang === 'es' ? 'Perfiles' : 'Profiles', icon: UsersIcon, action: () => onSectionChange?.('perfiles'), active: false, toggle: false },
+    { label: lang === 'es' ? 'Grupos' : 'Groups', icon: UserGroupIcon, action: () => onSectionChange?.('grupos'), active: false, toggle: false },
+    { label: lang === 'es' ? 'Canales' : 'Channels', icon: HashtagIcon, action: () => onSectionChange?.('canales'), active: false, toggle: false },
+    { label: lang === 'es' ? 'Notificaciones' : 'Notifications', icon: BellIcon, action: () => onSectionChange?.('notificaciones'), active: false, toggle: false },
+    { label: lang === 'es' ? 'Eventos' : 'Events', icon: CalendarDaysIcon, action: onFilterEvents, active: false, toggle: false },
   ];
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border shadow-sm p-3">
-      <nav className="space-y-1">
-        {items.map(({ label, icon: Icon, action, active }) => (
+      <nav className="space-y-1" aria-label={lang === 'es' ? 'Navegación de la comunidad' : 'Community navigation'}>
+        {items.map(({ label, icon: Icon, action, active, toggle }) => (
           <button
             key={label}
             onClick={action}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${
+            aria-pressed={toggle ? active : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${FOCUS_RING} ${
               active
                 ? 'bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'
@@ -90,6 +96,33 @@ const FeedNavCard: React.FC<{
 };
 
 /* ── Left Sidebar: My Groups & Channels ──────────────────── */
+/** Fila compacta de "Mis grupos"/"Canales": nombre traducido, original en el tooltip. */
+const MyCommunityItem: React.FC<{ name: string; isChannel: boolean; onClick: () => void }> = ({ name, isChannel, onClick }) => {
+  const { name: shownName, originalTitle } = useTranslatedGroupName(name);
+  return (
+    <button
+      onClick={onClick}
+      title={originalTitle}
+      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors group ${FOCUS_RING}`}
+    >
+      {isChannel ? (
+        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <HashtagIcon className="w-3 h-3 text-white" />
+        </div>
+      ) : (
+        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cv-blue to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm" aria-hidden="true">
+          <span className="text-[10px] font-bold text-white leading-none">
+            {shownName.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )}
+      <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white truncate font-medium">
+        {shownName}
+      </span>
+    </button>
+  );
+};
+
 const MyCommunitiesCard: React.FC<{
   myGroups: Group[];
   onSectionChange?: (section: string) => void;
@@ -123,19 +156,7 @@ const MyCommunitiesCard: React.FC<{
           <ul className="space-y-0.5">
             {groups.map((g) => (
               <li key={g.id}>
-                <button
-                  onClick={() => onSectionChange?.('grupos')}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors group"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cv-blue to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <span className="text-[10px] font-bold text-white leading-none">
-                      {g.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white truncate font-medium">
-                    {g.name}
-                  </span>
-                </button>
+                <MyCommunityItem name={g.name} isChannel={false} onClick={() => onSectionChange?.('grupos')} />
               </li>
             ))}
           </ul>
@@ -162,17 +183,7 @@ const MyCommunitiesCard: React.FC<{
           <ul className="space-y-0.5">
             {channels.map((ch) => (
               <li key={ch.id}>
-                <button
-                  onClick={() => onSectionChange?.('canales')}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-xl text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors group"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <HashtagIcon className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white truncate font-medium">
-                    {ch.name}
-                  </span>
-                </button>
+                <MyCommunityItem name={ch.name} isChannel onClick={() => onSectionChange?.('canales')} />
               </li>
             ))}
           </ul>
@@ -204,11 +215,15 @@ const ActiveMembersCard: React.FC<{ onSectionChange?: (section: string) => void 
 
   useEffect(() => {
     const load = async () => {
-      // Query profiles directly — much faster than scanning 50 posts
+      // Perfiles públicos (mismo criterio que la política RLS de lectura pública:
+      // slug no nulo, profile_hidden no true, is_active no false). `is_public` no
+      // existe en `profiles` y solo se piden columnas públicas (PUBLIC_PROFILE_COLUMNS).
       const { data } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, slug, headline')
-        .eq('is_public', true)
+        .not('slug', 'is', null)
+        .not('profile_hidden', 'is', true)
+        .not('is_active', 'is', false)
         .not('full_name', 'is', null)
         .not('avatar_url', 'is', null)
         .order('updated_at', { ascending: false })
@@ -234,7 +249,7 @@ const ActiveMembersCard: React.FC<{ onSectionChange?: (section: string) => void 
           <li key={m.id}>
             <button
               onClick={() => onSectionChange?.(`perfil-usuario:${m.id}`)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors group text-left"
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors group text-left ${FOCUS_RING}`}
             >
               {m.avatar_url ? (
                 <img src={m.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
@@ -385,6 +400,47 @@ const TrendsCard: React.FC<{ onTagClick: (tag: string) => void }> = ({ onTagClic
 };
 
 /* ── Right Sidebar: Suggested Communities ────────────────── */
+const SuggestedCommunityItem: React.FC<{
+  group: Group;
+  onSectionChange?: (section: string) => void;
+}> = ({ group: g, onSectionChange }) => {
+  const { lang } = useLanguage();
+  const isChannel = (g.metadata as any)?.type === 'channel';
+  const { name: shownName, originalTitle } = useTranslatedGroupName(g.name);
+  const count = g.member_count ?? 0;
+  const countLabel = isChannel
+    ? (lang === 'es' ? (count === 1 ? 'seguidor' : 'seguidores') : (count === 1 ? 'follower' : 'followers'))
+    : (lang === 'es' ? (count === 1 ? 'miembro' : 'miembros') : (count === 1 ? 'member' : 'members'));
+  return (
+    <li className="flex items-start gap-2.5">
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm ${
+        isChannel
+          ? 'bg-gradient-to-br from-violet-500 to-purple-600'
+          : 'bg-gradient-to-br from-cv-blue to-indigo-600'
+      }`} aria-hidden="true">
+        {isChannel
+          ? <HashtagIcon className="w-4 h-4 text-white" />
+          : <span className="text-xs font-bold text-white">{shownName.charAt(0).toUpperCase()}</span>
+        }
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-semibold text-gray-800 dark:text-white truncate" title={originalTitle}>{shownName}</p>
+        <p className="text-[11px] text-gray-400 dark:text-gray-500">
+          {count} {countLabel}
+        </p>
+      </div>
+      {/* Lleva a la sección de grupos (no se une directamente): "Ver", no "Unirse" */}
+      <button
+        onClick={() => onSectionChange?.(isChannel ? 'canales' : 'grupos')}
+        aria-label={`${lang === 'es' ? 'Ver' : 'View'} ${shownName}`}
+        className={`flex-shrink-0 text-[11px] font-semibold text-cv-blue border border-cv-blue/30 rounded-lg px-2 py-1 hover:bg-cv-blue hover:text-white transition-all ${FOCUS_RING}`}
+      >
+        {lang === 'es' ? 'Ver' : 'View'}
+      </button>
+    </li>
+  );
+};
+
 const SuggestedCommunitiesCard: React.FC<{
   suggestedGroups: Group[];
   onSectionChange?: (section: string) => void;
@@ -401,39 +457,13 @@ const SuggestedCommunitiesCard: React.FC<{
         </h4>
       </div>
       <ul className="space-y-3">
-        {items.map((g) => {
-          const isChannel = (g.metadata as any)?.type === 'channel';
-          return (
-            <li key={g.id} className="flex items-start gap-2.5">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm ${
-                isChannel
-                  ? 'bg-gradient-to-br from-violet-500 to-purple-600'
-                  : 'bg-gradient-to-br from-cv-blue to-indigo-600'
-              }`}>
-                {isChannel
-                  ? <HashtagIcon className="w-4 h-4 text-white" />
-                  : <span className="text-xs font-bold text-white">{g.name.charAt(0).toUpperCase()}</span>
-                }
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{g.name}</p>
-                <p className="text-[11px] text-gray-400 dark:text-gray-500">
-                  {g.member_count ?? 0} {lang === 'es' ? 'miembros' : 'members'}
-                </p>
-              </div>
-              <button
-                onClick={() => onSectionChange?.('grupos')}
-                className="flex-shrink-0 text-[11px] font-semibold text-cv-blue border border-cv-blue/30 rounded-lg px-2 py-1 hover:bg-cv-blue hover:text-white transition-all"
-              >
-                {lang === 'es' ? 'Unirse' : 'Join'}
-              </button>
-            </li>
-          );
-        })}
+        {items.map((g) => (
+          <SuggestedCommunityItem key={g.id} group={g} onSectionChange={onSectionChange} />
+        ))}
       </ul>
       <button
         onClick={() => onSectionChange?.('grupos')}
-        className="mt-3 w-full text-xs font-semibold text-cv-blue hover:underline text-center"
+        className={`mt-3 w-full text-xs font-semibold text-cv-blue hover:underline text-center rounded ${FOCUS_RING}`}
       >
         {lang === 'es' ? 'Ver todas las comunidades' : 'See all communities'} →
       </button>
@@ -531,10 +561,10 @@ const FeedHeader: React.FC<{
               </p>
             </div>
 
-            {/* Search */}
+            {/* Search (el foco se ve en el contenedor: borde y anillo de marca) */}
             <div className={`relative flex items-center h-[36px] rounded-full flex-1 transition-all duration-200 ${
               searchFocused
-                ? 'bg-white dark:bg-dark-bg-secondary border border-cv-blue/50 shadow-lg shadow-cv-blue/10 ring-2 ring-cv-blue/10'
+                ? 'bg-white dark:bg-dark-bg-secondary border border-cv-blue dark:border-cv-blue-light shadow-lg shadow-cv-blue/10 ring-2 ring-cv-blue/40 dark:ring-cv-blue-light/40'
                 : 'bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border shadow-sm hover:border-gray-300 dark:hover:border-gray-600'
             }`}>
               <div className={`absolute left-3.5 transition-colors duration-200 ${searchFocused ? 'text-cv-blue' : 'text-gray-400'}`}>
@@ -548,14 +578,20 @@ const FeedHeader: React.FC<{
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder={lang === 'es' ? 'Busca posts, personas, comunidades...' : 'Search posts, people, communities...'}
+                aria-label={lang === 'es' ? 'Buscar en la comunidad' : 'Search the community'}
+                aria-keyshortcuts="Control+K Meta+K"
                 className="h-full w-full pl-10 pr-14 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none"
               />
               {searchQuery ? (
-                <button onClick={() => onSearchChange('')} className="absolute right-3 p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary">
+                <button
+                  onClick={() => onSearchChange('')}
+                  aria-label={lang === 'es' ? 'Borrar búsqueda' : 'Clear search'}
+                  className={`absolute right-3 p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary ${FOCUS_RING}`}
+                >
                   <XMarkIcon className="w-4 h-4" />
                 </button>
               ) : (
-                <kbd className="absolute right-3 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-200/80 dark:border-dark-border/80 rounded-md select-none tracking-tight">
+                <kbd className="absolute right-3 hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-dark-bg-tertiary border border-gray-200/80 dark:border-dark-border/80 rounded-md select-none tracking-tight" aria-hidden="true">
                   ⌘K
                 </kbd>
               )}
@@ -565,43 +601,49 @@ const FeedHeader: React.FC<{
             <div className="hidden lg:flex items-center gap-0.5 flex-shrink-0">
               <div ref={sortRef} className="relative">
                 <button onClick={() => setSortOpen((p) => !p)} title={sortLabel}
-                  className={`p-1.5 rounded-lg transition-colors ${sortBy !== 'recent' ? 'text-cv-blue bg-blue-50 dark:bg-blue-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white dark:hover:bg-dark-bg-secondary'}`}>
+                  aria-label={`${lang === 'es' ? 'Ordenar' : 'Sort'}: ${sortLabel}`}
+                  aria-haspopup="true"
+                  aria-expanded={sortOpen}
+                  className={`p-1.5 rounded-lg transition-colors ${FOCUS_RING} ${sortBy !== 'recent' ? 'text-cv-blue bg-blue-50 dark:bg-blue-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white dark:hover:bg-dark-bg-secondary'}`}>
                   <ArrowTrendingUpIcon className="w-4 h-4" />
                 </button>
                 {sortOpen && (
                   <div className="absolute right-0 top-full mt-1.5 w-36 bg-white dark:bg-dark-bg-secondary rounded-xl shadow-xl shadow-black/10 border border-gray-200 dark:border-dark-border overflow-hidden z-50">
                     {[{ value: 'recent' as const, label: tt.sortRecent }, { value: 'top' as const, label: tt.sortTop }].map((opt) => (
                       <button key={opt.value} onClick={() => { onSortChange(opt.value); setSortOpen(false); }}
-                        className={`w-full px-3.5 py-2.5 text-left text-xs font-medium transition-colors flex items-center gap-2 ${sortBy === opt.value ? 'text-cv-blue bg-blue-50 dark:bg-blue-900/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'}`}>
-                        {sortBy === opt.value && <span className="w-1 h-1 rounded-full bg-cv-blue flex-shrink-0" />}
+                        aria-pressed={sortBy === opt.value}
+                        className={`w-full px-3.5 py-2.5 text-left text-xs font-medium transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light ${sortBy === opt.value ? 'text-cv-blue bg-blue-50 dark:bg-blue-900/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'}`}>
+                        {sortBy === opt.value && <span className="w-1 h-1 rounded-full bg-cv-blue flex-shrink-0" aria-hidden="true" />}
                         {opt.label}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-              <button onClick={onRefresh} title={th.refreshFeed}
-                className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white dark:hover:bg-dark-bg-secondary rounded-lg transition-colors">
+              <button onClick={onRefresh} title={th.refreshFeed} aria-label={th.refreshFeed}
+                className={`p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white dark:hover:bg-dark-bg-secondary rounded-lg transition-colors ${FOCUS_RING}`}>
                 <ArrowPathIcon className="w-4 h-4" />
               </button>
               <NotificationBell />
               <button onClick={onNewPost}
-                className="flex items-center gap-1.5 ml-2 px-4 py-1.5 text-sm font-semibold text-white bg-cv-blue hover:bg-blue-700 rounded-xl transition-all active:scale-[0.97] shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40">
+                className={`flex items-center gap-1.5 ml-2 px-4 py-1.5 text-sm font-semibold text-white bg-cv-blue hover:bg-blue-700 rounded-xl transition-all active:scale-[0.97] shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 ${FOCUS_RING} focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-primary`}>
                 <PencilSquareIcon className="w-4 h-4" />
                 {th.newPost}
               </button>
             </div>
           </div>
 
-          {/* Row 2: filter tabs */}
+          {/* Row 2: filter tabs (solo el activo muestra texto: el nombre va en aria-label) */}
           <div className="overflow-x-auto scrollbar-hide h-11">
-            <div className="flex items-stretch h-full w-max mx-auto">
+            <div className="flex items-stretch h-full w-max mx-auto" role="group" aria-label={lang === 'es' ? 'Filtrar por tipo de publicación' : 'Filter by post type'}>
               {FILTERS.map((filter) => {
                 const isActive = contentFilter === filter.value;
                 const Icon = filter.icon;
                 return (
                   <button key={filter.value} onClick={() => onContentFilterChange(filter.value)} title={filter.label}
-                    className={`h-full relative flex-shrink-0 transition-all flex items-center gap-2 ${isActive ? 'px-4 text-cv-blue' : 'px-3.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}>
+                    aria-label={filter.label}
+                    aria-pressed={isActive}
+                    className={`h-full relative flex-shrink-0 transition-all flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light rounded-md ${isActive ? 'px-4 text-cv-blue' : 'px-3.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}>
                     <Icon className={`flex-shrink-0 transition-all ${isActive ? 'w-[18px] h-[18px]' : 'w-[17px] h-[17px]'}`} />
                     {isActive && <span className="text-[13px] font-semibold whitespace-nowrap">{filter.label}</span>}
                     {isActive && <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-cv-blue rounded-full" />}
@@ -854,17 +896,23 @@ const FeedSection: React.FC<FeedSectionProps> = ({ onSectionChange }) => {
 
           {/* Mobile search bar (hidden on sm+ where FeedHeader has search) */}
           <div className="sm:hidden">
-            <div className="flex items-center gap-2 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-2xl px-3.5 py-2 shadow-sm">
+            {/* El input no pinta outline: el foco se ve en el contenedor (focus-within) */}
+            <div className="flex items-center gap-2 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-2xl px-3.5 py-2 shadow-sm transition-colors focus-within:border-cv-blue dark:focus-within:border-cv-blue-light focus-within:ring-2 focus-within:ring-cv-blue/40 dark:focus-within:ring-cv-blue-light/40">
               <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder={lang === 'es' ? 'Buscar posts...' : 'Search posts...'}
+                aria-label={lang === 'es' ? 'Buscar posts' : 'Search posts'}
                 className="flex-1 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none min-w-0"
               />
               {searchQuery && (
-                <button onClick={() => handleSearchChange('')} className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button
+                  onClick={() => handleSearchChange('')}
+                  aria-label={lang === 'es' ? 'Borrar búsqueda' : 'Clear search'}
+                  className={`p-0.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 ${FOCUS_RING}`}
+                >
                   <XMarkIcon className="w-4 h-4" />
                 </button>
               )}

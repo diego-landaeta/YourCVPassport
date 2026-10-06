@@ -33,6 +33,7 @@ import {
 import { supabase } from '../../../supabase/client';
 import CommentSection from './CommentSection';
 import AutoTranslationNotice from './AutoTranslationNotice';
+import { TranslatedGroupName } from './TranslatedGroupName';
 import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 import ImageGallery from './ImageGallery';
 import PostOptionsMenu from './PostOptionsMenu';
@@ -622,9 +623,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                   {post.group && (
                     <>
                       <span className="text-[11px] text-gray-300 dark:text-gray-600">·</span>
-                      <span className="text-[11px] font-semibold text-cv-blue/80 dark:text-cv-blue/70 truncate max-w-[140px]">
-                        {post.group.name}
-                      </span>
+                      <TranslatedGroupName
+                        name={post.group.name}
+                        className="text-[11px] font-semibold text-cv-blue/80 dark:text-cv-blue/70 truncate max-w-[140px]"
+                      />
                     </>
                   )}
                 </div>
