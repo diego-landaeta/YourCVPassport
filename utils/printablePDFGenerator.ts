@@ -24,6 +24,50 @@ function cleanupPrintMode(): void {
   document.head.querySelectorAll('[data-from-iframe]').forEach((el) => el.remove());
 }
 
+/**
+ * Alto máximo (px del iframe de 1200 px de ancho) de un bloque que se mantiene entero
+ * al imprimir. Al imprimir en A4 (~794 px de ancho) el texto se reparte en más líneas y
+ * el bloque crece; con 700 px sigue cabiendo en una página (~1123 px).
+ */
+const KEEP_TOGETHER_MAX_PX = 700;
+
+/** Ítems que las plantillas suelen nombrar así, además de las tarjetas con fondo/borde/sombra. */
+const KEEP_TOGETHER_HINTS = '[class*="experience"], [class*="trabajo"], [class*="education"], [class*="educacion"], div:has(> h3), [data-pdf-avoid-break]';
+
+/**
+ * Marca con `keep-together` en el clon los bloques que no deben partirse entre páginas.
+ * `original` y `clone` tienen el mismo árbol (el clon aún no se ha modificado), así que
+ * sus elementos se emparejan por orden.
+ */
+function markKeepTogether(original: Element, clone: Element): void {
+  const view = original.ownerDocument.defaultView;
+  const originals = original.querySelectorAll('*');
+  const clones = clone.querySelectorAll('*');
+  if (!view || originals.length !== clones.length) return;
+  originals.forEach((el, i) => {
+    if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') return;
+    const height = el.getBoundingClientRect().height;
+    if (height <= 0 || height > KEEP_TOGETHER_MAX_PX) return;
+    let keep = false;
+    try {
+      keep = el.matches(KEEP_TOGETHER_HINTS);
+    } catch {
+      // Navegadores sin :has(): se queda con la detección por estilos
+      keep = el.matches('[class*="experience"], [class*="trabajo"], [class*="education"], [class*="educacion"], [data-pdf-avoid-break]');
+    }
+    if (!keep) {
+      const cs = view.getComputedStyle(el);
+      const hasBackground = cs.backgroundImage !== 'none' || !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor);
+      const hasBorder =
+        (parseFloat(cs.borderTopWidth) > 0 && cs.borderTopStyle !== 'none') ||
+        (parseFloat(cs.borderBottomWidth) > 0 && cs.borderBottomStyle !== 'none');
+      const hasShadow = !!cs.boxShadow && cs.boxShadow !== 'none';
+      keep = hasBackground || hasBorder || hasShadow;
+    }
+    if (keep) clones[i].classList.add('keep-together');
+  });
+}
+
 interface PrintablePDFOptions {
   profileSlug: string;
   profileId: string;
@@ -45,8 +89,9 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       throw new Error('Contenedor #print-mount no encontrado');
     }
 
-    // Construir URL del CV
-    const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}`;
+    // Construir URL del CV (`?export=1`: carga de exportación, no una visita real; la
+    // analítica de visitas debe ignorarlo, lo implementa otra unidad)
+    const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}?export=1`;
 
     // Crear iframe temporal para cargar el CV
     const iframe = document.createElement('iframe');
@@ -117,19 +162,20 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       })
     );
 
+    // Las plantillas pueden reaccionar a la exportación (p. ej. mostrar todas las pestañas)
+    if (cvContainer !== iframeDoc.body) {
+      cvContainer.setAttribute('data-pdf-export', 'true');
+    }
+
     // Clonar el contenido del CV completo
     const cvClone = cvContainer.cloneNode(true) as HTMLElement;
 
-    // Agregar clases para evitar cortes de página
-    const experienceItems = cvClone.querySelectorAll('[class*="experience"], [class*="trabajo"], div:has(> h3)');
-    experienceItems.forEach((item: any) => {
-      item.classList.add('keep-together');
-    });
-
-    const educationItems = cvClone.querySelectorAll('[class*="education"], [class*="educacion"]');
-    educationItems.forEach((item: any) => {
-      item.classList.add('keep-together');
-    });
+    // Evitar cortes de página dentro de tarjetas e ítems (clase keep-together →
+    // break-inside: avoid en src/print-styles.css). Se mide en el original, que sí está
+    // maquetado: solo se marcan los bloques bajos; uno más alto que una página se
+    // partiría igualmente y antes dejaría un hueco en blanco al saltar de página.
+    // Párrafos, li, títulos y filas los cubre el @media print de index.css.
+    markKeepTogether(cvContainer, cvClone);
 
     // Forzar tema claro y limpiar clases oscuras SOLO del body/container principal
     cvClone.classList.remove('dark');

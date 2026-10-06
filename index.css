@@ -129,11 +129,55 @@ body {
     size: A4 portrait;
   }
 
-  /* Ensure proper page breaks */
+  /*
+   * Saltos de página: el CV entero sí puede partirse (antes llevaba `avoid`, que en un
+   * CV de varias páginas no se puede cumplir), pero no sus bloques: líneas de un mismo
+   * párrafo, ítems de lista, títulos (que además no quedan solos al pie), filas, imágenes
+   * y lo marcado con [data-pdf-avoid-break] / .keep-together (tarjetas e ítems que
+   * marca printablePDFGenerator). Un bloque más alto que una página se parte igualmente.
+   */
   .cv-template {
-    page-break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
     page-break-before: auto;
     page-break-after: auto;
+  }
+
+  .cv-template p,
+  .cv-template li,
+  .cv-template h1,
+  .cv-template h2,
+  .cv-template h3,
+  .cv-template h4,
+  .cv-template h5,
+  .cv-template h6,
+  .cv-template tr,
+  .cv-template dt,
+  .cv-template dd,
+  .cv-template figure,
+  .cv-template blockquote,
+  .cv-template pre,
+  .cv-template svg,
+  .cv-template [data-pdf-avoid-break],
+  .cv-template .keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .cv-template h1,
+  .cv-template h2,
+  .cv-template h3,
+  .cv-template h4,
+  .cv-template h5,
+  .cv-template h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .cv-template p,
+  .cv-template li {
+    orphans: 3;
+    widows: 3;
   }
 
   /* Remove transitions and animations for print */
