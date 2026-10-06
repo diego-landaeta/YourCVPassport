@@ -29,6 +29,34 @@ test('og-image.png existe (1200x630) y es la imagen por defecto al compartir', a
   expect(await page.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1200);
 });
 
+// Issue #244 del CRM: el precio se ve claro antes de pagar, en PC y en móvil
+const PRICES = [
+  { lang: 'es', path: '/precios', plan: 'Plan Profesional', price: '€15', period: '/ mes' },
+  { lang: 'en', path: '/pricing', plan: 'Professional Plan', price: '€15', period: '/ month' },
+] as const;
+
+for (const p of PRICES) {
+  for (const where of ['home', 'precios'] as const) {
+    test(`precio visible en ${where === 'home' ? 'la home' : p.path} (${p.lang})`, async ({ page, context }) => {
+      await installInitState(context, { language: p.lang, theme: 'light' });
+      await mockSupabase(context, {});
+      await page.goto(where === 'home' ? '/' : p.path, { waitUntil: 'domcontentloaded' });
+      const scope = where === 'home' ? page.locator('section#pricing') : page.locator('main');
+      const card = scope.locator('div', { has: page.getByRole('heading', { name: p.plan, exact: true }) }).last();
+      await card.scrollIntoViewIfNeeded({ timeout: 45_000 });
+      await expect(card).toBeVisible();
+      const text = (await card.innerText()).replace(/\s+/g, ' ');
+      expect(text).toContain(p.price);
+      expect(text).toContain(p.period.replace(/\s+/g, ' ').trim().split(' ').pop()!);
+      // Dentro de la pantalla (sin desbordar en móvil)
+      const box = (await card.boundingBox())!;
+      const vw = page.viewportSize()!.width;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(vw + 1);
+    });
+  }
+}
+
 const TOGGLE = {
   es: { toDark: 'Cambiar a modo oscuro', toLight: 'Cambiar a modo claro' },
   en: { toDark: 'Switch to dark mode', toLight: 'Switch to light mode' },
