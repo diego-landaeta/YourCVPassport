@@ -17,6 +17,7 @@ import {
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import { localDayKeysBetween, parseLocalDayKey, toLocalDayKey } from '../../utils/dateKeys';
 import {
   useManagedProfilesData,
   missingToPublish,
@@ -90,17 +91,19 @@ const ManagerAnalytics: React.FC = () => {
 
   // Serie diaria completa: sin rellenar los huecos, dos visitas separadas por
   // una semana se dibujarian como dias consecutivos y la grafica mentiria.
+  // Se agrupa por dia LOCAL: con viewed_at.slice(0, 10) el dia era el de UTC y una
+  // visita a las 23:30 en Mexico salia al dia siguiente (y la etiqueta, que se
+  // calculaba en local sobre una medianoche UTC, mostraba otro dia distinto).
   const porDia = new Map<string, number>();
   for (const v of views) {
-    const dia = v.viewed_at.slice(0, 10);
+    const dia = toLocalDayKey(v.viewed_at);
     porDia.set(dia, (porDia.get(dia) || 0) + 1);
   }
   const serie: Array<{ dia: string; etiqueta: string; visitas: number }> = [];
   if (views.length > 0) {
-    const inicio = new Date(views[0].viewed_at.slice(0, 10));
-    const fin = new Date();
-    for (let d = new Date(inicio); d <= fin; d.setDate(d.getDate() + 1)) {
-      const clave = d.toISOString().slice(0, 10);
+    // views llega ordenado por viewed_at ascendente: el primero es el mas antiguo.
+    for (const clave of localDayKeysBetween(views[0].viewed_at)) {
+      const d = parseLocalDayKey(clave);
       serie.push({
         dia: clave,
         etiqueta: `${d.getDate()}/${d.getMonth() + 1}`,
