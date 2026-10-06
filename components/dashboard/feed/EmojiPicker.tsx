@@ -66,9 +66,14 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose }) => {
       {/* Tabs */}
       <div className="flex items-center border-b border-gray-100 dark:border-dark-border px-1 pt-1">
         {EMOJI_CATEGORIES.map((cat, idx) => (
+          // type="button": el selector vive dentro del <form> de comentarios y un
+          // botón sin tipo lo enviaba (publicaba el texto sin el emoji elegido).
           <button
             key={cat.id}
+            type="button"
             onClick={() => setActiveTab(idx)}
+            aria-label={lang === 'es' ? CATEGORY_LABELS[cat.id].es : CATEGORY_LABELS[cat.id].en}
+            aria-pressed={activeTab === idx}
             className={`flex-1 py-1.5 text-center text-sm rounded-t-lg transition-colors ${
               activeTab === idx
                 ? 'bg-gray-100 dark:bg-dark-bg-tertiary'
@@ -87,6 +92,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose }) => {
           {EMOJI_CATEGORIES[activeTab].emojis.map((emoji) => (
             <button
               key={emoji}
+              type="button"
               onClick={() => onSelect(emoji)}
               className="w-9 h-9 flex items-center justify-center text-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors hover:scale-110 active:scale-95"
             >

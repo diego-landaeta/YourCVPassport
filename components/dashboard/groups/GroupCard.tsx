@@ -83,8 +83,11 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
         {/* Share button */}
         <button
           onClick={handleShare}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           title={isEs ? 'Compartir' : 'Share'}
+          aria-label={copied
+            ? (isEs ? 'Enlace copiado' : 'Link copied')
+            : `${isEs ? 'Compartir' : 'Share'} ${shownName}`}
         >
           {copied ? (
             <CheckIcon className="w-3.5 h-3.5 text-green-300" />
@@ -121,9 +124,9 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
           }`}
         >
           {group.avatar_url ? (
-            <img src={group.avatar_url} alt={group.name} className="w-full h-full object-cover" />
+            <img src={group.avatar_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            group.name.charAt(0).toUpperCase()
+            <span aria-hidden="true">{shownName.charAt(0).toUpperCase()}</span>
           )}
         </div>
         {/* Member / follower count pill */}

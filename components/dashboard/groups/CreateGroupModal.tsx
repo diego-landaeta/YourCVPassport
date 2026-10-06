@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { useGroupActions } from '../../../hooks/useGroups';
 import { Group } from '../../../types/groups';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -14,6 +14,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ type = 'group', onC
   const { createGroup } = useGroupActions();
   const isEs = lang === 'es';
   const isChannel = type === 'channel';
+  const fieldId = useId();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -72,17 +73,24 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ type = 'group', onC
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+      <div
+        className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${fieldId}-title`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <h3 className="font-bold text-gray-900 dark:text-gray-100">
+          <h3 id={`${fieldId}-title`} className="font-bold text-gray-900 dark:text-gray-100">
             {titleLabel}
           </h3>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
+            aria-label={isEs ? 'Cerrar' : 'Close'}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
 
@@ -90,11 +98,13 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ type = 'group', onC
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor={`${fieldId}-name`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {nameLabel} *
             </label>
             <input
+              id={`${fieldId}-name`}
               type="text"
+              aria-required="true"
               value={name}
               onChange={e => setName(e.target.value)}
               maxLength={100}
@@ -105,10 +115,11 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ type = 'group', onC
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor={`${fieldId}-desc`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {isEs ? 'Descripción (opcional)' : 'Description (optional)'}
             </label>
             <textarea
+              id={`${fieldId}-desc`}
               value={description}
               onChange={e => setDescription(e.target.value)}
               maxLength={500}
@@ -121,17 +132,21 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({ type = 'group', onC
           {/* Privacy toggle */}
           <div className="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700">
             <div>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              <p id={`${fieldId}-private`} className="text-sm font-medium text-gray-800 dark:text-gray-200">
                 {privacyLabel}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p id={`${fieldId}-private-desc`} className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {privacyDesc}
               </p>
             </div>
             <button
               type="button"
+              role="switch"
+              aria-checked={isPrivate}
+              aria-labelledby={`${fieldId}-private`}
+              aria-describedby={`${fieldId}-private-desc`}
               onClick={() => setIsPrivate(p => !p)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${isPrivate ? 'bg-cv-blue' : 'bg-gray-300 dark:bg-gray-600'}`}
+              className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-cv-blue-light dark:focus-visible:ring-offset-gray-900 ${isPrivate ? 'bg-cv-blue' : 'bg-gray-300 dark:bg-gray-600'}`}
             >
               <span
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isPrivate ? 'translate-x-5' : ''}`}

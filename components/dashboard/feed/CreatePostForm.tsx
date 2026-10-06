@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useId } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTranslations } from '../../../hooks/useTranslations';
 import { supabase } from '../../../supabase/client';
@@ -24,6 +24,10 @@ import { feedService } from '../../../services/feedService';
 import type { Profile } from '../../../types';
 import type { FeedContentType, PollDuration } from '../../../types/feed';
 import { useGroups } from '../../../hooks/useGroups';
+import { TranslatedGroupOption } from './TranslatedGroupName';
+
+/** Indicador de foco de teclado (solo :focus-visible) con los tokens de marca. */
+const FOCUS_RING = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light';
 
 /* ── Types ─────────────────────────────────────────────────── */
 type PostMode = 'TEXT' | 'IMAGE' | 'ACHIEVEMENT' | 'JOB_UPDATE' | 'MILESTONE' | 'POLL' | 'EVENT';
@@ -77,6 +81,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
   const { lang } = useLanguage();
   const t = useTranslations();
   const { myGroups } = useGroups();
+  const groupSelectId = useId();
   // Core state
   const [mode, setMode] = useState<PostMode>('TEXT');
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
@@ -481,7 +486,9 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
     setPollDuration('3d');
     setEventTitle('');
     setEventDate('');
-    setEventTime('');
+    // Mismo valor por defecto que el estado inicial y "Cancelar": con '' los
+    // selectores mostraban 09:00 pero el evento se publicaba sin hora.
+    setEventTime('09:00');
     setEventLocation('');
     setEventLink('');
     setLinkPreview(null);
@@ -626,6 +633,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                       ? (lang === 'es' ? `¿Qué estás pensando, ${firstName}?` : `What's on your mind, ${firstName}?`)
                       : t.feed.createPost.placeholder
                 }
+                aria-label={
+                  mode === 'IMAGE'
+                    ? (lang === 'es' ? 'Descripción de la foto' : 'Photo caption')
+                    : (lang === 'es' ? 'Texto de la publicación' : 'Post text')
+                }
                 className="w-full bg-transparent border-none focus:ring-0 p-1.5 text-gray-700 dark:text-white text-[15px] resize-none placeholder:text-gray-400 dark:placeholder:text-gray-500 leading-relaxed"
                 rows={isExpanded ? 3 : 1}
                 maxLength={2000}
@@ -640,6 +652,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 onKeyDown={handleMentionKeyDown}
                 onFocus={() => setIsFocused(true)}
                 placeholder={lang === 'es' ? 'Añade un mensaje personal (opcional)...' : 'Add a personal message (optional)...'}
+                aria-label={lang === 'es' ? 'Mensaje personal (opcional)' : 'Personal message (optional)'}
                 className="w-full bg-transparent border-none focus:ring-0 p-1.5 text-gray-700 dark:text-white text-[15px] resize-none placeholder:text-gray-400 dark:placeholder:text-gray-500 leading-relaxed"
                 rows={2}
                 maxLength={2000}
@@ -730,13 +743,14 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                   <div key={index} className="relative group">
                     <img
                       src={url}
-                      alt={`Upload ${index + 1}`}
+                      alt={lang === 'es' ? `Imagen ${index + 1}` : `Image ${index + 1}`}
                       className="w-24 h-24 object-cover rounded-xl border border-gray-200 dark:border-dark-border shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(index)}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                      aria-label={lang === 'es' ? `Quitar imagen ${index + 1}` : `Remove image ${index + 1}`}
+                      className={`absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity ${FOCUS_RING}`}
                     >
                       <XMarkIcon className="w-3 h-3" />
                     </button>
@@ -746,7 +760,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-24 h-24 border-2 border-dashed border-gray-200 dark:border-dark-border rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-green-500 hover:border-green-400 transition-colors"
+                    aria-label={lang === 'es' ? `Añadir foto (${previews.length} de 4)` : `Add photo (${previews.length} of 4)`}
+                    className={`w-24 h-24 border-2 border-dashed border-gray-200 dark:border-dark-border rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-green-500 hover:border-green-400 transition-colors ${FOCUS_RING}`}
                   >
                     <PhotoIcon className="w-6 h-6" />
                     <span className="text-[10px] font-medium">{previews.length}/4</span>
@@ -818,6 +833,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                         value={templateFields[field] || ''}
                         onChange={(e) => setTemplateFields(prev => ({ ...prev, [field]: e.target.value }))}
                         placeholder={lang === 'es' ? fl?.placeholder_es : fl?.placeholder_en}
+                        aria-label={lang === 'es' ? fl?.es : fl?.en}
                         className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 transition-all"
                         min={field === 'years' ? 1 : undefined}
                       />
@@ -885,6 +901,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 value={jobCompany}
                 onChange={(e) => setJobCompany(e.target.value)}
                 placeholder={lang === 'es' ? 'Ej: Google, Mercado Libre...' : 'e.g. Google, Amazon...'}
+                aria-label={lang === 'es' ? 'Empresa' : 'Company'}
                 className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
               />
             </div>
@@ -897,6 +914,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 value={jobPosition}
                 onChange={(e) => setJobPosition(e.target.value)}
                 placeholder={lang === 'es' ? 'Ej: Senior Frontend Developer' : 'e.g. Senior Frontend Developer'}
+                aria-label={lang === 'es' ? 'Cargo' : 'Position'}
                 className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
               />
             </div>
@@ -935,6 +953,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 min={1}
                 max={99}
                 placeholder="0"
+                aria-label={lang === 'es' ? 'Años de experiencia' : 'Years of experience'}
                 className="w-20 h-20 sm:w-24 sm:h-24 text-center text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest bg-white dark:bg-dark-bg-secondary px-2">
@@ -961,6 +980,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               value={milestoneMessage}
               onChange={(e) => setMilestoneMessage(e.target.value)}
               placeholder={lang === 'es' ? 'Ej: Agradecido por cada oportunidad...' : 'e.g. Grateful for every opportunity...'}
+              aria-label={lang === 'es' ? 'Mensaje personal (opcional)' : 'Personal message (optional)'}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all"
             />
           </div>
@@ -993,6 +1013,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               value={pollQuestion}
               onChange={(e) => setPollQuestion(e.target.value)}
               placeholder={lang === 'es' ? '¿Cuál es tu opinión sobre...?' : 'What is your opinion on...?'}
+              aria-label={lang === 'es' ? 'Pregunta de la encuesta' : 'Poll question'}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition-all"
               maxLength={200}
             />
@@ -1015,6 +1036,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                     setPollOptions(updated);
                   }}
                   placeholder={`${lang === 'es' ? 'Opción' : 'Option'} ${idx + 1}`}
+                  aria-label={`${lang === 'es' ? 'Opción' : 'Option'} ${idx + 1}`}
                   className="flex-1 px-3 py-2 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 transition-all"
                   maxLength={100}
                 />
@@ -1022,7 +1044,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                   <button
                     type="button"
                     onClick={() => setPollOptions(prev => prev.filter((_, i) => i !== idx))}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    aria-label={lang === 'es' ? `Eliminar opción ${idx + 1}` : `Remove option ${idx + 1}`}
+                    className={`p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${FOCUS_RING}`}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -1100,6 +1123,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               value={eventTitle}
               onChange={(e) => setEventTitle(e.target.value)}
               placeholder={lang === 'es' ? 'Ej: Meetup de React en Madrid' : 'e.g. React Meetup in Madrid'}
+              aria-label={lang === 'es' ? 'Título del evento' : 'Event title'}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
               maxLength={150}
             />
@@ -1127,6 +1151,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                     else setCalendarViewDate(new Date());
                     setCalendarOpen(!calendarOpen);
                   }}
+                  aria-haspopup="dialog"
+                  aria-expanded={calendarOpen}
+                  aria-label={`${lang === 'es' ? 'Fecha del evento' : 'Event date'}: ${eventDate
+                    ? new Date(eventDate + 'T00:00:00').toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+                    : (lang === 'es' ? 'sin seleccionar' : 'not selected')}`}
                   className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-left flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
                 >
                   <CalendarDaysIcon className="w-4 h-4 text-rose-400 flex-shrink-0" />
@@ -1167,6 +1196,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                       <button
                         key={d} type="button" disabled={isPast}
                         onClick={() => { setEventDate(ds); setCalendarOpen(false); }}
+                        aria-label={cellDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                        aria-pressed={!!isSelected}
                         className={`h-8 w-full rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center
                           ${isPast ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : ''}
                           ${isSelected ? 'bg-rose-500 text-white' : ''}
@@ -1181,12 +1212,12 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                     <div className="absolute top-full left-0 mt-1.5 z-50 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-2xl shadow-xl p-3 w-64">
                       {/* Month nav */}
                       <div className="flex items-center justify-between mb-2">
-                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month - 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
-                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month - 1, 1))} aria-label={lang === 'es' ? 'Mes anterior' : 'Previous month'} className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}>
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                         </button>
-                        <span className="text-sm font-semibold text-gray-800 dark:text-white">{monthNames[month]} {year}</span>
-                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month + 1, 1))} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">
-                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        <span className="text-sm font-semibold text-gray-800 dark:text-white" aria-live="polite">{monthNames[month]} {year}</span>
+                        <button type="button" onClick={() => setCalendarViewDate(new Date(year, month + 1, 1))} aria-label={lang === 'es' ? 'Mes siguiente' : 'Next month'} className={`p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors ${FOCUS_RING}`}>
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                         </button>
                       </div>
                       {/* Day headers */}
@@ -1211,6 +1242,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 <select
                   value={eventTime.split(':')[0] || '09'}
                   onChange={(e) => setEventTime(`${e.target.value}:${eventTime.split(':')[1] || '00'}`)}
+                  aria-label={lang === 'es' ? 'Hora del evento' : 'Event hour'}
                   className="flex-1 bg-transparent text-sm text-gray-700 dark:text-white focus:outline-none text-center cursor-pointer"
                 >
                   {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => (
@@ -1221,6 +1253,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
                 <select
                   value={eventTime.split(':')[1] || '00'}
                   onChange={(e) => setEventTime(`${eventTime.split(':')[0] || '09'}:${e.target.value}`)}
+                  aria-label={lang === 'es' ? 'Minutos del evento' : 'Event minutes'}
                   className="flex-1 bg-transparent text-sm text-gray-700 dark:text-white focus:outline-none text-center cursor-pointer"
                 >
                   {['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => (
@@ -1242,6 +1275,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               value={eventLocation}
               onChange={(e) => setEventLocation(e.target.value)}
               placeholder={lang === 'es' ? 'Ej: Google Campus Madrid' : 'e.g. Google Campus Madrid'}
+              aria-label={lang === 'es' ? 'Ubicación' : 'Location'}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
             />
           </div>
@@ -1257,6 +1291,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               value={eventLink}
               onChange={(e) => setEventLink(e.target.value)}
               placeholder="https://..."
+              aria-label={lang === 'es' ? 'Enlace del evento' : 'Event link'}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-700 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 transition-all"
             />
           </div>
@@ -1302,13 +1337,14 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               <div key={index} className="relative group">
                 <img
                   src={url}
-                  alt={`Upload ${index + 1}`}
+                  alt={lang === 'es' ? `Imagen ${index + 1}` : `Image ${index + 1}`}
                   className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-gray-200 dark:border-dark-border shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                  aria-label={lang === 'es' ? `Quitar imagen ${index + 1}` : `Remove image ${index + 1}`}
+                  className={`absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity ${FOCUS_RING}`}
                 >
                   <XMarkIcon className="w-3 h-3" />
                 </button>
@@ -1336,7 +1372,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
             <button
               type="button"
               onClick={() => { setLinkPreview(null); linkPreviewUrlRef.current = 'dismissed'; }}
-              className="absolute top-1.5 right-1.5 w-5 h-5 bg-gray-200 dark:bg-dark-bg-tertiary text-gray-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label={lang === 'es' ? 'Quitar vista previa del enlace' : 'Remove link preview'}
+              className={`absolute top-1.5 right-1.5 w-5 h-5 bg-gray-200 dark:bg-dark-bg-tertiary text-gray-500 dark:text-gray-300 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity ${FOCUS_RING}`}
             >
               <XMarkIcon className="w-3 h-3" />
             </button>
@@ -1379,17 +1416,19 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
       {/* ── Group selector ── */}
       {isExpanded && myGroups.length > 0 && (
         <div className="px-4 pb-1 sm:pl-[68px] flex items-center gap-2">
-          <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+          <label htmlFor={groupSelectId} className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
             {lang === 'es' ? 'Publicar en:' : 'Post to:'}
-          </span>
+          </label>
           <select
+            id={groupSelectId}
             value={selectedGroupId}
             onChange={e => setSelectedGroupId(e.target.value)}
-            className="text-xs px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-cv-blue"
+            className="text-xs px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light"
           >
             <option value="">{lang === 'es' ? 'Feed general' : 'General feed'}</option>
+            {/* Nombre traducido al idioma de la interfaz; el original en el title */}
             {myGroups.map(g => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+              <TranslatedGroupOption key={g.id} value={g.id} name={g.name} />
             ))}
           </select>
         </div>
@@ -1407,7 +1446,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               onClick={() => { if (mode !== 'IMAGE') setMode('IMAGE'); fileInputRef.current?.click(); }}
               disabled={previews.length >= 4 || isUploading}
               title={lang === 'es' ? 'Añadir foto' : 'Add photo'}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label={lang === 'es' ? 'Añadir foto' : 'Add photo'}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed ${FOCUS_RING}`}
             >
               {isUploading ? (
                 <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -1419,67 +1459,38 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ profile, onSubmit, isSu
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleModeChange('ACHIEVEMENT')}
-              title={lang === 'es' ? 'Compartir logro' : 'Share achievement'}
-              className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${
-                mode === 'ACHIEVEMENT' ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
-              }`}
-            >
-              <TrophyIcon className="w-5 h-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleModeChange('JOB_UPDATE')}
-              title={lang === 'es' ? 'Actualización laboral' : 'Job update'}
-              className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${
-                mode === 'JOB_UPDATE' ? 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
-              }`}
-            >
-              <BriefcaseIcon className="w-5 h-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleModeChange('MILESTONE')}
-              title={lang === 'es' ? 'Compartir hito' : 'Share milestone'}
-              className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${
-                mode === 'MILESTONE' ? 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'text-gray-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
-              }`}
-            >
-              <SparklesIcon className="w-5 h-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleModeChange('POLL')}
-              title={lang === 'es' ? 'Crear encuesta' : 'Create poll'}
-              className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${
-                mode === 'POLL' ? 'text-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'text-gray-400 hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20'
-              }`}
-            >
-              <ChartBarIcon className="w-5 h-5" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleModeChange('EVENT')}
-              title={lang === 'es' ? 'Crear evento' : 'Create event'}
-              className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${
-                mode === 'EVENT' ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20'
-              }`}
-            >
-              <CalendarDaysIcon className="w-5 h-5" />
-            </button>
+            {/* Modos de publicación: solo icono → nombre accesible y estado pulsado */}
+            {([
+              { id: 'ACHIEVEMENT' as const, Icon: TrophyIcon,       es: 'Compartir logro',       en: 'Share achievement', on: 'text-amber-500 bg-amber-50 dark:bg-amber-900/20',    off: 'hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20' },
+              { id: 'JOB_UPDATE' as const,  Icon: BriefcaseIcon,    es: 'Actualización laboral', en: 'Job update',        on: 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20', off: 'hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20' },
+              { id: 'MILESTONE' as const,   Icon: SparklesIcon,     es: 'Compartir hito',        en: 'Share milestone',   on: 'text-purple-500 bg-purple-50 dark:bg-purple-900/20', off: 'hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20' },
+              { id: 'POLL' as const,        Icon: ChartBarIcon,     es: 'Crear encuesta',        en: 'Create poll',       on: 'text-teal-500 bg-teal-50 dark:bg-teal-900/20',       off: 'hover:text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/20' },
+              { id: 'EVENT' as const,       Icon: CalendarDaysIcon, es: 'Crear evento',          en: 'Create event',      on: 'text-rose-500 bg-rose-50 dark:bg-rose-900/20',       off: 'hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20' },
+            ]).map(({ id, Icon, es, en, on, off }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => handleModeChange(id)}
+                title={lang === 'es' ? es : en}
+                aria-label={lang === 'es' ? es : en}
+                aria-pressed={mode === id}
+                className={`flex items-center px-2.5 sm:px-3 py-2 rounded-full transition-colors ${FOCUS_RING} ${
+                  mode === id ? on : `text-gray-400 ${off}`
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
 
             <div className="relative" data-emoji-picker>
               <button
                 type="button"
                 title="Emoji"
+                aria-label={lang === 'es' ? 'Insertar emoji' : 'Insert emoji'}
+                aria-haspopup="true"
+                aria-expanded={showEmojiPicker}
                 onClick={() => { setShowEmojiPicker(prev => !prev); setIsFocused(true); }}
-                className={`hidden sm:flex items-center px-3 py-2 rounded-full transition-colors ${
+                className={`hidden sm:flex items-center px-3 py-2 rounded-full transition-colors ${FOCUS_RING} ${
                   showEmojiPicker ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
                 }`}
               >
