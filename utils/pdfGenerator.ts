@@ -3,6 +3,9 @@
  *
  * Generates PDF from CV using html2canvas and jspdf
  * Downloads the PDF file directly without print dialog
+ *
+ * Los saltos de página no se hacen a altura fija: se eligen en huecos entre bloques
+ * (ver "Saltos de página inteligentes") para no partir líneas de texto ni tarjetas.
  */
 
 interface PDFGeneratorOptions {
@@ -183,6 +186,293 @@ function measureContentBottom(root: HTMLElement): number {
   return bottom - rootRect.top;
 }
 
+// ---------------------------------------------------------------------------
+// Saltos de página inteligentes
+// ---------------------------------------------------------------------------
+//
+// Antes la captura se troceaba en páginas A4 a altura fija y el corte atravesaba
+// tarjetas, líneas de texto e incluso letras. Ahora, antes de capturar, se miden en el
+// clon las cajas que no deben partirse y, para cada página, se elige el punto de corte
+// más bajo que caiga en un hueco entre bloques. Después cada página del PDF muestra solo
+// su tramo [corte i, corte i+1) y el resto de la hoja queda en blanco.
+
+/** Franja vertical (px CSS, relativa al envoltorio capturado) que un corte no debería atravesar. */
+export interface PdfBreakObstacle {
+  top: number;
+  bottom: number;
+  /** Coste de cortar por dentro: PDF_BREAK_WEIGHT_TEXT (prohibido) o PDF_BREAK_WEIGHT_BLOCK (evitable). */
+  weight: number;
+}
+
+/** Línea de texto, icono, imagen o el pie: no se corta salvo como último recurso. */
+export const PDF_BREAK_WEIGHT_TEXT = 1000;
+/** Tarjeta, ítem, párrafo o título: se prefiere no partirlo si cabe en una página. */
+export const PDF_BREAK_WEIGHT_BLOCK = 10;
+/**
+ * Coste de dejar en blanco una página entera al final de la hoja. Con 20, partir un
+ * bloque (10) solo compensa cuando empujarlo entero a la página siguiente dejaría más
+ * de media página vacía.
+ */
+const PDF_BREAK_WEIGHT_WASTE = 20;
+/**
+ * Grupo pequeño sin estilo (p. ej. "Grado / Universidad / 2010 - 2012"): un div de
+ * bloque con texto que mide menos de un cuarto de página. Coste bajo: separa ítems de
+ * una lista sin impedir cortes dentro de contenedores mayores.
+ */
+export const PDF_BREAK_WEIGHT_GROUP = 3;
+/** Distancia mínima (px CSS) entre el corte y el borde superior del siguiente obstáculo. */
+const CUT_CLEARANCE_PX = 2;
+/**
+ * Holgura deseable (px CSS) entre el corte y la línea de texto más cercana. html2canvas
+ * no siempre pinta el texto exactamente en su caja del DOM (en WebKit puede desplazarse
+ * unos px por la línea base), así que entre dos huecos se prefiere el más ancho.
+ */
+const CUT_COMFORT_PX = 8;
+const PDF_BREAK_WEIGHT_TIGHT = 6;
+
+/** Bloques que no conviene partir (además de los que piden `break-inside: avoid`). */
+const AVOID_BREAK_SELECTOR = [
+  'li', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'tr', 'dt', 'dd', 'figure', 'blockquote', 'pre',
+  'table', 'article', 'section', '[data-pdf-avoid-break]', '.keep-together', '.break-inside-avoid',
+].join(',');
+const MEDIA_TAGS = /^(img|svg|video|canvas|picture|iframe)$/i;
+const HEADING_TAGS = /^h[1-6]$/i;
+/** Distancia máxima (px CSS) entre un título y la primera línea que lo sigue para mantenerlos juntos. */
+const HEADING_KEEP_WITH_NEXT_PX = 120;
+
+function isTransparent(color: string): boolean {
+  return /^(transparent|rgba\(0, 0, 0, 0\))$/.test(color);
+}
+
+/**
+ * Mide en `root` (ya en el documento) las franjas que los cortes de página deben evitar:
+ * - cada línea de texto (getClientRects de los nodos de texto) e imágenes/iconos;
+ * - bloques (li, p, títulos, filas, secciones, tarjetas con fondo/borde/sombra,
+ *   `break-inside: avoid`, `[data-pdf-avoid-break]`) que caben en una página;
+ * - cada título junto con la primera línea que lo sigue (que no quede huérfano al pie).
+ * Las posiciones son relativas a `originTop` (borde superior del envoltorio capturado).
+ */
+export function collectBreakObstacles(root: HTMLElement, originTop: number, pagePx: number): PdfBreakObstacle[] {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  const obstacles: PdfBreakObstacle[] = [];
+  const lines: { top: number; bottom: number; left: number; right: number }[] = [];
+  const styleCache = new Map<Element, CSSStyleDeclaration>();
+  const styleOf = (el: Element): CSSStyleDeclaration | null => {
+    if (!view) return null;
+    let cs = styleCache.get(el);
+    if (!cs) {
+      cs = view.getComputedStyle(el);
+      styleCache.set(el, cs);
+    }
+    return cs;
+  };
+
+  // Líneas de texto
+  const range = doc.createRange();
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!node.textContent || !node.textContent.trim()) continue;
+    const parent = node.parentElement;
+    if (parent && styleOf(parent)?.visibility === 'hidden') continue;
+    range.selectNodeContents(node);
+    const rects = range.getClientRects();
+    for (let i = 0; i < rects.length; i++) {
+      const r = rects[i];
+      if (r.width <= 0 || r.height <= 0 || r.height >= pagePx) continue;
+      const line = { top: r.top - originTop, bottom: r.bottom - originTop, left: r.left, right: r.right };
+      lines.push(line);
+      obstacles.push({ top: line.top, bottom: line.bottom, weight: PDF_BREAK_WEIGHT_TEXT });
+    }
+  }
+  range.detach?.();
+  lines.sort((a, b) => a.top - b.top);
+
+  root.querySelectorAll('*').forEach((el) => {
+    // Lo de dentro de un SVG va con el propio SVG
+    if (el.parentElement && el.parentElement.closest('svg')) return;
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0 || r.height >= pagePx) return;
+    const top = r.top - originTop;
+    const bottom = r.bottom - originTop;
+
+    if (MEDIA_TAGS.test(el.tagName)) {
+      obstacles.push({ top, bottom, weight: r.height <= pagePx / 2 ? PDF_BREAK_WEIGHT_TEXT : PDF_BREAK_WEIGHT_BLOCK });
+      return;
+    }
+
+    const cs = styleOf(el);
+    let avoid = el.matches(AVOID_BREAK_SELECTOR);
+    if (!avoid && cs) {
+      const breakInside = cs.breakInside || cs.getPropertyValue('page-break-inside');
+      const hasBackground = cs.backgroundImage !== 'none' || !isTransparent(cs.backgroundColor);
+      const hasBorder =
+        (parseFloat(cs.borderTopWidth) > 0 && cs.borderTopStyle !== 'none') ||
+        (parseFloat(cs.borderBottomWidth) > 0 && cs.borderBottomStyle !== 'none');
+      const hasShadow = !!cs.boxShadow && cs.boxShadow !== 'none';
+      avoid = /avoid/.test(breakInside) || hasBackground || hasBorder || hasShadow;
+    }
+    if (avoid) {
+      obstacles.push({ top, bottom, weight: PDF_BREAK_WEIGHT_BLOCK });
+    } else if (cs && r.height <= pagePx / 4 && !/^(inline|contents|none)$/.test(cs.display) && (el.textContent || '').trim()) {
+      obstacles.push({ top, bottom, weight: PDF_BREAK_WEIGHT_GROUP });
+    }
+
+    // Título + primera línea que lo sigue en su misma columna
+    if (HEADING_TAGS.test(el.tagName)) {
+      const next = lines.find((l) =>
+        l.top >= bottom - 1 &&
+        l.top - bottom <= HEADING_KEEP_WITH_NEXT_PX &&
+        l.right > r.left && l.left < r.right
+      );
+      if (next && next.bottom - top < pagePx) obstacles.push({ top, bottom: next.bottom, weight: PDF_BREAK_WEIGHT_BLOCK });
+    }
+  });
+
+  return obstacles;
+}
+
+/**
+ * Elige dónde termina la página que empieza en `start` (corte en `(start, start + pagePx]`):
+ * el punto que minimiza el coste de las franjas que atraviesa más el espacio que deja en
+ * blanco. Si todos los puntos posibles cortan texto (un bloque más alto que una página
+ * sin huecos entre líneas), se corta a altura fija.
+ */
+export function findPageCut(obstacles: PdfBreakObstacle[], start: number, pagePx: number): number {
+  const limit = start + pagePx;
+  // También los que empiezan justo bajo el límite: cuentan para la holgura del corte
+  const relevant = obstacles.filter((o) => o.bottom > start && o.top < limit + CUT_COMFORT_PX);
+
+  const boundaries = new Set<number>([start, limit]);
+  relevant.forEach((o) => {
+    if (o.top > start && o.top < limit) boundaries.add(o.top);
+    if (o.bottom > start && o.bottom < limit) boundaries.add(o.bottom);
+  });
+  const sorted = Array.from(boundaries).sort((a, b) => a - b);
+  const obstacleTops = new Set(relevant.map((o) => o.top));
+
+  // Candidatos: cada borde (cortar justo entre dos líneas que se tocan) y, en cada
+  // hueco entre bordes, el punto más bajo que deja aire con el siguiente obstáculo.
+  const candidates: number[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const a = sorted[i];
+    candidates.push(a);
+    if (i === sorted.length - 1) break;
+    const b = sorted[i + 1];
+    candidates.push((a + b) / 2);
+    if (b === limit && !obstacleTops.has(limit)) {
+      candidates.push(limit);
+    } else if (b - a > 2 * CUT_CLEARANCE_PX) {
+      candidates.push(b - CUT_CLEARANCE_PX);
+    }
+    if (b - a > 2 * CUT_COMFORT_PX) candidates.push(b - CUT_COMFORT_PX);
+  }
+
+  let best = limit;
+  let bestCost = Infinity;
+  for (const y of candidates) {
+    if (y <= start + 1 || y > limit) continue;
+    let cost = ((limit - y) / pagePx) * PDF_BREAK_WEIGHT_WASTE;
+    let nearestText = Infinity;
+    for (const o of relevant) {
+      if (o.top < y && o.bottom > y) cost += o.weight;
+      else if (o.weight >= PDF_BREAK_WEIGHT_TEXT) nearestText = Math.min(nearestText, o.top >= y ? o.top - y : y - o.bottom);
+    }
+    // Hueco estrecho junto a una línea de texto: válido, pero peor que uno holgado
+    if (nearestText < CUT_COMFORT_PX) cost += ((CUT_COMFORT_PX - nearestText) / CUT_COMFORT_PX) * PDF_BREAK_WEIGHT_TIGHT;
+    if (cost < bestCost - 1e-9 || (Math.abs(cost - bestCost) <= 1e-9 && y > best)) {
+      bestCost = cost;
+      best = y;
+    }
+  }
+  // Último recurso: no hay hueco sin texto en toda la página → altura fija
+  return bestCost >= PDF_BREAK_WEIGHT_TEXT ? limit : best;
+}
+
+/**
+ * Posiciones (px CSS) donde empieza cada página para un contenido de alto `totalHeight`.
+ * La primera es siempre 0 y el tramo de la última página nunca supera `pagePx`.
+ */
+export function computePageStarts(obstacles: PdfBreakObstacle[], totalHeight: number, pagePx: number): number[] {
+  const starts = [0];
+  let start = 0;
+  while (totalHeight - start > pagePx + 0.5) {
+    const cut = findPageCut(obstacles, start, pagePx);
+    starts.push(cut);
+    start = cut;
+  }
+  return starts;
+}
+
+interface PagePlan {
+  /** Inicio de cada página (px CSS relativos al envoltorio). */
+  starts: number[];
+  /** Alto al que hay que dejar el clon para que el pie cierre la última página (null = no tocar). */
+  cloneHeight: number | null;
+}
+
+/**
+ * Reparte en páginas el CV (`cvClone`) más el pie, con el pie siempre al final de la
+ * última página con contenido (ninguna página vacía, #11): el fondo sobrante de la
+ * plantilla bajo el último contenido se recorta lo necesario.
+ */
+function planPages(wrapper: HTMLElement, cvClone: HTMLElement, footer: HTMLElement, pagePx: number, naturalCloneHeight: number): PagePlan {
+  const originTop = wrapper.getBoundingClientRect().top;
+  const cloneRect = cvClone.getBoundingClientRect();
+  const cloneTop = cloneRect.top - originTop;
+  const footerRect = footer.getBoundingClientRect();
+  // Lo que ocupa el pie más el hueco que lo separa del clon (p. ej. el margen inferior
+  // del último hijo, que se colapsa a través del clon y no cuenta en su alto)
+  const footerBlock = footerRect.height + Math.max(0, footerRect.top - cloneRect.bottom);
+  const contentBottom = cloneTop + Math.min(naturalCloneHeight, measureContentBottom(cvClone) + CONTENT_BOTTOM_MARGIN_PX);
+
+  const obstacles = collectBreakObstacles(cvClone, originTop, pagePx);
+  // El pie va (virtualmente) justo bajo el contenido, no se parte y viaja con la última
+  // línea de texto: así la última página nunca queda solo con el pie y fondo (#11).
+  let lastTextTop = -Infinity;
+  for (const o of obstacles) {
+    if (o.weight >= PDF_BREAK_WEIGHT_TEXT && o.top < contentBottom) lastTextTop = Math.max(lastTextTop, o.top);
+  }
+  const footerGroupTop = Number.isFinite(lastTextTop) && contentBottom + footerBlock - lastTextTop < pagePx ? lastTextTop : contentBottom;
+  obstacles.push({ top: footerGroupTop, bottom: contentBottom + footerBlock, weight: PDF_BREAK_WEIGHT_TEXT });
+  const starts = computePageStarts(obstacles, contentBottom + footerBlock, pagePx);
+
+  const lastStart = starts[starts.length - 1];
+  const maxCloneHeight = Math.floor(lastStart + pagePx - footerBlock - cloneTop);
+  const cloneHeight = naturalCloneHeight > maxCloneHeight
+    ? Math.max(maxCloneHeight, Math.ceil(contentBottom - cloneTop))
+    : null;
+  return { starts, cloneHeight };
+}
+
+/**
+ * Crea un canvas de `páginas × alto A4` (en px de la captura) con el tramo de cada página
+ * arriba de su hoja y blanco debajo. Así jsPDF sigue incrustando una sola imagen y el
+ * troceo a altura fija de computePdfLayout cae siempre en los cortes elegidos.
+ */
+function composePagedCanvas(capture: HTMLCanvasElement, pageStarts: number[], captureHeightCss: number): HTMLCanvasElement {
+  const pageCanvasHeight = (capture.width * A4_HEIGHT_MM) / A4_WIDTH_MM;
+  const pageCanvasFloor = Math.floor(pageCanvasHeight);
+  const k = capture.height / captureHeightCss; // px de canvas por px CSS en vertical
+  const paged = document.createElement('canvas');
+  paged.width = capture.width;
+  // floor: el alto en mm nunca pasa de páginas × 297, así que no aparece una página extra
+  paged.height = Math.floor(pageStarts.length * pageCanvasHeight);
+  const ctx = paged.getContext('2d');
+  if (!ctx) throw new Error('Canvas 2D context not available');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, paged.width, paged.height);
+  for (let i = 0; i < pageStarts.length; i++) {
+    const sy = Math.round(pageStarts[i] * k);
+    const ey = i + 1 < pageStarts.length ? Math.round(pageStarts[i + 1] * k) : capture.height;
+    const sh = Math.min(ey - sy, pageCanvasFloor, capture.height - sy);
+    if (sh <= 0) continue;
+    const dy = Math.ceil(i * pageCanvasHeight);
+    ctx.drawImage(capture, 0, sy, capture.width, sh, 0, dy, capture.width, sh);
+  }
+  return paged;
+}
+
 /**
  * Generate PDF from CV by loading it in a hidden iframe and capturing with html2canvas
  * Downloads the PDF file directly
@@ -200,9 +490,11 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
 
     if (onProgress) onProgress(10);
 
-    // Construct CV URL
+    // Construct CV URL. `?export=1` marca la carga como exportación, no como visita real
+    // al perfil (la analítica de visitas debe ignorarlo; lo implementa otra unidad).
+    // El pie del PDF muestra la dirección sin el parámetro.
     const profilePath = `/cv/${profileSlug || profileId}`;
-    const cvUrl = `${window.location.origin}${profilePath}`;
+    const cvUrl = `${window.location.origin}${profilePath}?export=1`;
 
     if (onProgress) onProgress(20);
 
@@ -240,6 +532,9 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     if (!cvContainer) {
       throw new Error('CV template container not found');
     }
+    // Las plantillas pueden reaccionar a la exportación (p. ej. mostrar todas las
+    // pestañas); el clon hereda el atributo.
+    cvContainer.setAttribute('data-pdf-export', 'true');
     await loadLazyImages(iframeDoc, 8000);
 
     // Force light theme by removing dark mode classes
@@ -296,6 +591,14 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     // los botones "Contáctame / Agendar Reunión" (ProfileContactButtons y
     // PassportTemplate) y el aviso de perfil propio. En un PDF no se pueden pulsar.
     cvClone.querySelectorAll('.print\\:hidden, .no-print').forEach((el) => el.remove());
+
+    // Guionado automático (index.css: `hyphens: auto` en el texto justificado de las
+    // plantillas): html2canvas no pinta el guion que inserta el navegador y la palabra
+    // salía partida en dos líneas sin guion ("coordin / ando"). En el PDF se desactiva.
+    cvClone.querySelectorAll<HTMLElement>('p, li, blockquote').forEach((el) => {
+      el.style.hyphens = 'manual';
+      el.style.setProperty('-webkit-hyphens', 'manual');
+    });
 
     // FIX: html2canvas has issues with bg-clip-text and text-transparent
     // It renders the background gradient as a solid block or makes text invisible.
@@ -362,31 +665,40 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     // Wait a bit more for styles to apply
     await wait(500);
 
-    // Número de páginas según el contenido real: si solo el padding/fondo final de la
-    // plantilla y el pie obligan a abrir otra página, se recorta ese fondo sobrante
-    // para que el pie cierre la última página con contenido (ninguna página vacía).
+    // Saltos de página: se eligen sobre el clon ya maquetado (ver planPages). Si hay que
+    // recortar el fondo sobrante para que el pie cierre la última página, el recorte
+    // (`overflow: hidden`) puede mover el contenido unos px (deja de colapsar márgenes),
+    // así que en ese caso se vuelve a medir y planificar con el recorte ya aplicado.
     const fullWidth = wrapper.scrollWidth || PDF_VIEWPORT_WIDTH;
     const pagePx = (fullWidth * A4_HEIGHT_MM) / A4_WIDTH_MM;
-    const footerHeight = footer.getBoundingClientRect().height;
-    const cloneHeight = cvClone.getBoundingClientRect().height;
-    const contentBottom = Math.min(cloneHeight, measureContentBottom(cvClone) + CONTENT_BOTTOM_MARGIN_PX);
-    const pagesNeeded = Math.max(1, Math.ceil((contentBottom + footerHeight) / pagePx - 1e-6));
-    const maxCloneHeight = Math.floor(pagesNeeded * pagePx - footerHeight);
-    if (cloneHeight > maxCloneHeight && maxCloneHeight >= contentBottom) {
-      cvClone.style.height = `${maxCloneHeight}px`;
+    const naturalCloneHeight = cvClone.getBoundingClientRect().height;
+    let plan = planPages(wrapper, cvClone, footer, pagePx, naturalCloneHeight);
+    if (plan.cloneHeight !== null) {
+      cvClone.style.height = `${plan.cloneHeight}px`;
       cvClone.style.overflow = 'hidden';
+      plan = planPages(wrapper, cvClone, footer, pagePx, naturalCloneHeight);
+      if (plan.cloneHeight !== null) cvClone.style.height = `${plan.cloneHeight}px`;
     }
+    const pageStarts = plan.starts;
 
     // Alto real del contenido (ya sin alturas mínimas de viewport)
     const fullHeight = Math.ceil(wrapper.scrollHeight);
     wrapper.style.height = `${fullHeight}px`;
 
+    // Red de seguridad: si por redondeos el final no cabe en la última página, se añaden
+    // páginas a altura fija antes que perder el pie.
+    while (fullHeight - pageStarts[pageStarts.length - 1] > pagePx + 1) {
+      pageStarts.push(pageStarts[pageStarts.length - 1] + pagePx);
+    }
+
     // Wait for layout to settle
     await wait(300);
 
-    // Generate canvas from wrapper element with optimized settings for FULL content
+    // Generate canvas from wrapper element with optimized settings for FULL content.
+    // La escala se calcula con el alto final paginado (páginas × alto A4), que es el
+    // canvas más grande que se llega a crear.
     const canvas = await html2canvas(wrapper, {
-      scale: computeCaptureScale(fullWidth, fullHeight), // Nitidez máxima sin pasar del límite de canvas de Safari/iOS
+      scale: computeCaptureScale(fullWidth, Math.max(fullHeight, pageStarts.length * pagePx)), // Nitidez máxima sin pasar del límite de canvas de Safari/iOS
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
@@ -410,7 +722,15 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
       throw new Error('Empty canvas');
     }
 
-    const layout = computePdfLayout(canvas.width, canvas.height);
+    // Componer una imagen "paginada": cada página A4 recibe solo su tramo de la captura
+    // [inicio de página, inicio de la siguiente) y el resto de la hoja queda en blanco,
+    // de modo que ningún salto atraviesa texto ni tarjetas.
+    const pagedCanvas = composePagedCanvas(canvas, pageStarts, fullHeight);
+    // Liberar cuanto antes la captura original (memoria de canvas limitada en iOS)
+    canvas.width = 0;
+    canvas.height = 0;
+
+    const layout = computePdfLayout(pagedCanvas.width, pagedCanvas.height);
 
     // Create PDF with better compression settings
     const pdf = new jsPDF({
@@ -422,10 +742,12 @@ export async function generateCVPDF(options: PDFGeneratorOptions): Promise<void>
     });
 
     // Convert canvas to image with maximum quality
-    const imgData = canvas.toDataURL('image/jpeg', 0.95); // Use JPEG with high quality for smaller file size
+    const imgData = pagedCanvas.toDataURL('image/jpeg', 0.95); // Use JPEG with high quality for smaller file size
+    pagedCanvas.width = 0;
+    pagedCanvas.height = 0;
 
-    // Cada página muestra la misma imagen desplazada una altura de página hacia arriba
-    // (jsPDF la incrusta una sola vez y la reutiliza en todas las páginas).
+    // Cada página muestra la misma imagen paginada desplazada una altura de página hacia
+    // arriba (jsPDF la incrusta una sola vez y la reutiliza en todas las páginas).
     for (let page = 0; page < layout.pages; page++) {
       if (page > 0) pdf.addPage();
       pdf.addImage(imgData, 'JPEG', layout.offsetX, -page * A4_HEIGHT_MM, layout.drawWidth, layout.drawHeight, undefined, 'FAST');
