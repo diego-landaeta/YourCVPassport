@@ -4,8 +4,18 @@
  * Este servidor intercepta peticiones a /cv/:slug y:
  * 1. Consulta el perfil del usuario en Supabase
  * 2. Genera meta tags personalizados desde los datos reales
- * 3. Inyecta los meta tags en el HTML
+ * 3. Inyecta los meta tags en el HTML (escapados: los datos vienen de usuarios)
  * 4. Sirve el HTML con los meta tags correctos
+ *
+ * Además sirve /api/translate, /api/admin/users/:id, /sitemap.xml y /health.
+ *
+ * Variables de entorno (ver nginx/README.md):
+ * - PORT (3001 por defecto, el mismo que el upstream de nginx/*.conf)
+ * - HOST (127.0.0.1 por defecto: solo nginx debe hablar con este proceso)
+ * - DIST_DIR (carpeta del build; ./dist por defecto)
+ * - TRUST_PROXY (proxies de confianza para X-Forwarded-*; 'loopback' por defecto)
+ * - TRANSLATE_RATE_LIMIT / TRANSLATE_RATE_WINDOW_MS (límite de /api/translate por IP)
+ * - VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
  */
 
 import express from 'express';
@@ -22,11 +32,64 @@ const __dirname = path.dirname(__filename);
 // Cargar variables de entorno
 dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// URL canónica del sitio: el APEX (sin www), igual que public/sitemap.xml y los canonical.
+const SITE_URL = 'https://yourcvpassport.com';
 
-// Middleware para parsear JSON
-app.use(express.json());
+const PORT = Number(process.env.PORT) || 3001;
+// Por defecto solo loopback: en producción nginx hace de proxy y el puerto no debe
+// quedar expuesto. HOST=0.0.0.0 si de verdad se quiere escuchar en todas las interfaces.
+const HOST = process.env.HOST || '127.0.0.1';
+const DIST_DIR = path.resolve(process.env.DIST_DIR || path.join(__dirname, 'dist'));
+const INDEX_HTML = path.join(DIST_DIR, 'index.html');
+
+const app = express();
+
+// No anunciar "X-Powered-By: Express"
+app.disable('x-powered-by');
+
+// Detrás de nginx (mismo host): req.ip y req.secure salen de X-Forwarded-For/-Proto.
+// Solo se confía en proxies de loopback para que un cliente no pueda falsear su IP.
+const TRUST_PROXY = process.env.TRUST_PROXY || 'loopback';
+app.set('trust proxy', /^\d+$/.test(TRUST_PROXY) ? Number(TRUST_PROXY) : TRUST_PROXY);
+
+// ===== CABECERAS DE SEGURIDAD =====
+// Mismo contenido que nginx/yourcvpassport-security-headers.conf: si cambias uno, cambia
+// el otro. nginx oculta estas cabeceras del upstream (proxy_hide_header) para no duplicarlas.
+// La CSP va en modo Report-Only: ver nginx/README.md para pasar a enforcing.
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' https://web.opynio.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://djehzlzombqrzzuchcef.supabase.co https://flagcdn.com https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://ui-avatars.com https://images.pexels.com https://via.placeholder.com https://api.qrserver.com https://maps.googleapis.com https://media.tenor.com https://www.google.com https://*.gstatic.com https://iseie.com https://psikoaprende.com",
+  "connect-src 'self' https://djehzlzombqrzzuchcef.supabase.co wss://djehzlzombqrzzuchcef.supabase.co https://translate.googleapis.com https://api.mymemory.translated.net https://api.ipify.org https://tenor.googleapis.com https://web.opynio.com https://hvtrrhxeqrsnjxhngdsj.supabase.co",
+  "font-src 'self' data:",
+  "frame-src https://www.google.com",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'self'",
+].join('; ');
+
+const SECURITY_HEADERS = {
+  'Content-Security-Policy-Report-Only': CONTENT_SECURITY_POLICY,
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
+  // El auditor XSS de los navegadores antiguos introducía fugas: se desactiva explícitamente
+  'X-XSS-Protection': '0',
+};
+
+app.use((req, res, next) => {
+  res.set(SECURITY_HEADERS);
+  // HSTS solo tiene efecto (y sentido) sobre HTTPS
+  if (req.secure) res.set('Strict-Transport-Security', 'max-age=31536000');
+  next();
+});
+
+// Middleware para parsear JSON (límite explícito: /api/translate es el único body grande)
+app.use(express.json({ limit: '256kb' }));
 
 // Configurar Supabase (cliente anónimo para consultas públicas)
 const supabase = createClient(
@@ -51,23 +114,106 @@ const supabaseAdmin = serviceRoleKey ? createClient(
   }
 ) : null;
 
-// ===== API DE TRADUCCIÓN =====
-// Endpoint para traducir textos usando Google Translate (server-side, sin CORS)
+// ===== HEALTH CHECK =====
+// Lo usa nginx/yourcvpassport-ssr-only.conf (location = /health). No toca servicios externos.
+app.get('/health', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ status: 'ok' });
+});
 
-app.post('/api/translate', async (req, res) => {
+// ===== LÍMITE DE PETICIONES (en memoria, por IP) =====
+// Suficiente para un único proceso Node detrás de nginx. Si se escala a varios
+// procesos, el límite pasa a ser por proceso (documentado en nginx/README.md).
+function createRateLimiter({ limit, windowMs, maxKeys = 10000 }) {
+  const hits = new Map(); // ip -> { count, resetAt }
+
+  const sweep = () => {
+    const now = Date.now();
+    for (const [key, entry] of hits) {
+      if (entry.resetAt <= now) hits.delete(key);
+    }
+  };
+  setInterval(sweep, windowMs).unref();
+
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = req.ip || 'unknown';
+    let entry = hits.get(key);
+
+    if (!entry || entry.resetAt <= now) {
+      // Tope de memoria: si hay demasiadas IPs distintas, se purgan las caducadas
+      if (!entry && hits.size >= maxKeys) {
+        sweep();
+        if (hits.size >= maxKeys) hits.clear();
+      }
+      entry = { count: 0, resetAt: now + windowMs };
+      hits.set(key, entry);
+    }
+
+    entry.count++;
+    const remaining = Math.max(0, limit - entry.count);
+    res.set('RateLimit-Limit', String(limit));
+    res.set('RateLimit-Remaining', String(remaining));
+
+    if (entry.count > limit) {
+      const retryAfter = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({ error: 'Too many requests', retryAfter });
+    }
+    next();
+  };
+}
+
+const translateLimiter = createRateLimiter({
+  limit: Number(process.env.TRANSLATE_RATE_LIMIT) || 60,
+  windowMs: Number(process.env.TRANSLATE_RATE_WINDOW_MS) || 60 * 1000,
+});
+
+// ===== API DE TRADUCCIÓN =====
+// Endpoint para traducir textos usando Google Translate (server-side, sin CORS).
+// No es un proxy abierto: solo es<->en, con tope de textos y de longitud, y rate limit.
+
+const TRANSLATE_LANGS = new Set(['es', 'en']);
+const TRANSLATE_MAX_TEXTS = 200;          // autoTranslate manda lotes de 40
+const TRANSLATE_MAX_TEXT_LENGTH = 5000;   // caracteres por texto
+const TRANSLATE_MAX_TOTAL_CHARS = 50000;  // caracteres por petición
+
+function validateTranslateBody(body) {
+  const { texts, sourceLang, targetLang } = body || {};
+
+  if (!Array.isArray(texts) || texts.length === 0) {
+    return { status: 400, error: 'texts array is required' };
+  }
+  if (texts.length > TRANSLATE_MAX_TEXTS) {
+    return { status: 413, error: `Too many texts (max ${TRANSLATE_MAX_TEXTS})` };
+  }
+  if (!texts.every(t => typeof t === 'string')) {
+    return { status: 400, error: 'texts must be strings' };
+  }
+  if (texts.some(t => t.length > TRANSLATE_MAX_TEXT_LENGTH)) {
+    return { status: 413, error: `Text too long (max ${TRANSLATE_MAX_TEXT_LENGTH} characters)` };
+  }
+  const totalChars = texts.reduce((sum, t) => sum + t.length, 0);
+  if (totalChars > TRANSLATE_MAX_TOTAL_CHARS) {
+    return { status: 413, error: `Request too large (max ${TRANSLATE_MAX_TOTAL_CHARS} characters)` };
+  }
+  if (!TRANSLATE_LANGS.has(sourceLang) || !TRANSLATE_LANGS.has(targetLang)) {
+    return { status: 400, error: 'sourceLang and targetLang must be "es" or "en"' };
+  }
+  return null;
+}
+
+app.post('/api/translate', translateLimiter, async (req, res) => {
   try {
+    const invalid = validateTranslateBody(req.body);
+    if (invalid) {
+      return res.status(invalid.status).json({ error: invalid.error });
+    }
+
     const { texts, sourceLang, targetLang } = req.body;
 
-    if (!texts || !Array.isArray(texts) || texts.length === 0) {
-      return res.status(400).json({ error: 'texts array is required' });
-    }
-
-    if (!sourceLang || !targetLang) {
-      return res.status(400).json({ error: 'sourceLang and targetLang are required' });
-    }
-
     // Filtrar textos vacíos y obtener únicos
-    const uniqueTexts = [...new Set(texts.filter(t => t && t.trim() !== ''))];
+    const uniqueTexts = [...new Set(texts.filter(t => t.trim() !== ''))];
 
     if (uniqueTexts.length === 0) {
       return res.json({ translations: {} });
@@ -119,7 +265,7 @@ app.post('/api/translate', async (req, res) => {
             translations[text] = result.text;
             successCount++;
           } catch (singleError) {
-            console.error(`[Translate API] Single error for "${text.substring(0, 30)}...":`, singleError.message);
+            console.error(`[Translate API] Single error:`, singleError.message);
           }
         }
       }
@@ -131,22 +277,32 @@ app.post('/api/translate', async (req, res) => {
 
   } catch (error) {
     console.error('[Translate API] Error:', error.message);
-    res.status(500).json({ error: 'Translation failed', message: error.message });
+    res.status(500).json({ error: 'Translation failed' });
   }
 });
 
-// Endpoint de health check para la API de traducción
-app.get('/api/translate/health', async (req, res) => {
+// Endpoint de health check para la API de traducción.
+// El resultado se cachea: cada llamada sin caché era una petición real a Google.
+const TRANSLATE_HEALTH_TTL = 5 * 60 * 1000;
+let translateHealthCache = { body: null, status: 0, timestamp: 0 };
+
+app.get('/api/translate/health', translateLimiter, async (req, res) => {
+  const now = Date.now();
+  if (translateHealthCache.body && (now - translateHealthCache.timestamp) < TRANSLATE_HEALTH_TTL) {
+    return res.status(translateHealthCache.status).json(translateHealthCache.body);
+  }
   try {
     const result = await translate('hello', { from: 'en', to: 'es' });
-    res.json({
-      status: 'ok',
-      provider: 'google-translate-api-x',
-      test: { input: 'hello', output: result.text }
-    });
+    translateHealthCache = {
+      status: 200,
+      body: { status: 'ok', provider: 'google-translate-api-x', test: { input: 'hello', output: result.text } },
+      timestamp: now,
+    };
   } catch (error) {
-    res.status(503).json({ status: 'error', message: error.message });
+    console.error('[Translate API] Health check failed:', error.message);
+    translateHealthCache = { status: 503, body: { status: 'error' }, timestamp: now };
   }
+  res.status(translateHealthCache.status).json(translateHealthCache.body);
 });
 
 // ===== API DE ADMINISTRACIÓN =====
@@ -211,13 +367,14 @@ app.delete('/api/admin/users/:userId', async (req, res) => {
 
   } catch (error) {
     console.error('[Admin API] Error:', error.message);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // ===== SITEMAP DINÁMICO =====
 // Se regenera en cada request - siempre incluye los últimos posts/CVs/jobs publicados
-// Cache de 1 hora para no sobrecargar Supabase
+// Cache de 1 hora para no sobrecargar Supabase.
+// Todas las URLs usan SITE_URL (apex), igual que public/sitemap.xml y los canonical.
 
 let sitemapCache = { xml: null, timestamp: 0 };
 const SITEMAP_CACHE_TTL = 60 * 60 * 1000; // 1 hora
@@ -256,13 +413,40 @@ function getEsPath(enPath) {
   return null;
 }
 
+// Los slugs vienen de la BD: se codifican para que la URL y el XML sean válidos
+const slugPath = (prefix, slug) => `${prefix}${encodeURIComponent(String(slug))}`;
+
 function sitemapEntry(path, lastmod, priority, changefreq) {
-  const base = 'https://yourcvpassport.com';
+  const loc = escapeHtml(`${SITE_URL}${path}`);
   const esPath = getEsPath(path);
-  let hreflang = `    <xhtml:link rel="alternate" hreflang="en" href="${base}${path}" />\n`;
-  if (esPath) hreflang += `    <xhtml:link rel="alternate" hreflang="es" href="${base}${esPath}" />\n`;
-  hreflang += `    <xhtml:link rel="alternate" hreflang="x-default" href="${base}${path}" />`;
-  return `  <url>\n    <loc>${base}${path}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n${hreflang}\n  </url>`;
+  let hreflang = `    <xhtml:link rel="alternate" hreflang="en" href="${loc}" />\n`;
+  if (esPath) hreflang += `    <xhtml:link rel="alternate" hreflang="es" href="${escapeHtml(`${SITE_URL}${esPath}`)}" />\n`;
+  hreflang += `    <xhtml:link rel="alternate" hreflang="x-default" href="${loc}" />`;
+  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n${hreflang}\n  </url>`;
+}
+
+/**
+ * Posts estáticos del blog (content/posts/index.ts), los mismos que incluye
+ * scripts/generate-sitemap.mjs. Si el archivo no está junto al servidor, se omiten.
+ */
+function readStaticBlogPosts() {
+  try {
+    const source = fs.readFileSync(path.resolve(__dirname, 'content/posts/index.ts'), 'utf-8');
+    const metaStart = source.indexOf('allPostsMeta:');
+    if (metaStart === -1) return [];
+    const re = /"slug":\s*"([^"]+)"[\s\S]*?"published_at":\s*"([^"]+)"/g;
+    const block = source.slice(metaStart);
+    const now = new Date();
+    const out = [];
+    let m;
+    while ((m = re.exec(block)) !== null) {
+      if (new Date(m[2]) > now) continue;
+      out.push({ slug: m[1], lastmod: m[2].split('T')[0] });
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 async function generateDynamicSitemap() {
@@ -289,20 +473,24 @@ async function generateDynamicSitemap() {
     entries.push(sitemapEntry(path, now, priority, freq));
   }
 
-  // Blog posts (only published, published_at <= now)
+  // Blog posts: estáticos (content/posts) + tabla blog_posts (publicados, published_at <= now).
+  // Si un slug está en ambos, gana el estático (mismo criterio que generate-sitemap.mjs).
+  const blogBySlug = new Map();
   try {
     const { data: posts } = await supabase
       .from('blog_posts')
       .select('slug, updated_at, published_at')
       .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false });
-    if (posts) {
-      for (const p of posts) {
-        const lastmod = (p.updated_at || p.published_at || now).split('T')[0];
-        entries.push(sitemapEntry(`/resources/blog/${p.slug}`, lastmod, '0.7', 'monthly'));
-      }
+    for (const p of posts || []) {
+      if (!p.slug) continue;
+      blogBySlug.set(p.slug, (p.updated_at || p.published_at || now).split('T')[0]);
     }
   } catch (e) { console.error('[Sitemap] Blog error:', e.message); }
+  for (const p of readStaticBlogPosts()) blogBySlug.set(p.slug, p.lastmod);
+  for (const [slug, lastmod] of blogBySlug) {
+    entries.push(sitemapEntry(slugPath('/resources/blog/', slug), lastmod, '0.7', 'monthly'));
+  }
 
   // CV profiles (active, not hidden, complete)
   try {
@@ -318,7 +506,7 @@ async function generateDynamicSitemap() {
     if (profiles) {
       for (const p of profiles) {
         const lastmod = (p.updated_at || now).split('T')[0];
-        entries.push(sitemapEntry(`/cv/${p.slug}`, lastmod, '0.6', 'weekly'));
+        entries.push(sitemapEntry(slugPath('/cv/', p.slug), lastmod, '0.6', 'weekly'));
       }
     }
   } catch (e) { console.error('[Sitemap] Profiles error:', e.message); }
@@ -332,8 +520,9 @@ async function generateDynamicSitemap() {
       .order('published_at', { ascending: false });
     if (jobs) {
       for (const j of jobs) {
+        if (!j.slug) continue;
         const lastmod = (j.updated_at || j.published_at || now).split('T')[0];
-        entries.push(sitemapEntry(`/jobs/${j.slug}`, lastmod, '0.7', 'weekly'));
+        entries.push(sitemapEntry(slugPath('/jobs/', j.slug), lastmod, '0.7', 'weekly'));
       }
     }
   } catch (e) { console.error('[Sitemap] Jobs error:', e.message); }
@@ -347,6 +536,7 @@ app.get('/sitemap.xml', async (req, res) => {
     if (sitemapCache.xml && (now - sitemapCache.timestamp) < SITEMAP_CACHE_TTL) {
       console.log('[Sitemap] Serving from cache');
       res.set('Content-Type', 'application/xml');
+      res.set('Cache-Control', 'public, max-age=3600');
       return res.send(sitemapCache.xml);
     }
 
@@ -362,8 +552,22 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
-// Servir archivos estáticos
-app.use(express.static('dist'));
+// Servir archivos estáticos.
+// - /assets/* lleva hash en el nombre (Vite): caché larga e inmutable.
+// - index.html y sw.js: no-cache (siempre revalidar, si no un deploy no llega a los usuarios).
+// - Resto (favicons, imágenes de public/): caché corta.
+app.use(express.static(DIST_DIR, {
+  setHeaders(res, filePath) {
+    const rel = path.relative(DIST_DIR, filePath).split(path.sep).join('/');
+    if (rel.startsWith('assets/')) {
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    } else if (rel === 'index.html' || rel === 'sw.js') {
+      res.set('Cache-Control', 'no-cache');
+    } else {
+      res.set('Cache-Control', 'public, max-age=86400');
+    }
+  },
+}));
 
 // Middleware para inyectar meta tags en perfiles
 app.get('/cv/:slug', async (req, res, next) => {
@@ -376,11 +580,14 @@ app.get('/cv/:slug', async (req, res, next) => {
 
     console.log(`[SEO] Request for /cv/${slug} - Bot: ${isBot ? 'Yes' : 'No'}`);
 
-    // Consultar perfil en la base de datos
+    // Consultar perfil en la base de datos (mismos filtros que el sitemap: un perfil
+    // oculto o inactivo no debe exponer nombre/titular a los crawlers)
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('id, full_name, headline, summary, location, avatar_url, slug, meta_title, meta_description')
       .eq('slug', slug)
+      .eq('is_active', true)
+      .eq('profile_hidden', false)
       .maybeSingle();
 
     if (error || !profile) {
@@ -394,7 +601,7 @@ app.get('/cv/:slug', async (req, res, next) => {
       return next();
     }
 
-    console.log(`[SEO] Profile found: ${profile.full_name}`);
+    console.log(`[SEO] Profile found: ${profile.slug}`);
 
     // Obtener skills y experiencias
     const [
@@ -409,19 +616,16 @@ app.get('/cv/:slug', async (req, res, next) => {
     const metaTags = generateMetaTags(profile, skills || [], experiences || []);
 
     // Leer el HTML base
-    const htmlPath = path.resolve(__dirname, 'dist/index.html');
-    let html = fs.readFileSync(htmlPath, 'utf-8');
+    let html = await fs.promises.readFile(INDEX_HTML, 'utf-8');
 
     // Inyectar meta tags personalizados
     html = injectMetaTags(html, metaTags);
 
-    // Log de meta tags generados
-    console.log(`[SEO] Meta tags injected for ${profile.full_name}:`);
-    console.log(`  - Title: ${metaTags.title}`);
-    console.log(`  - Description: ${metaTags.description.substring(0, 80)}...`);
+    console.log(`[SEO] Meta tags injected for /cv/${profile.slug}`);
 
     // Servir HTML con meta tags personalizados
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache');
     res.send(html);
 
   } catch (error) {
@@ -430,12 +634,66 @@ app.get('/cv/:slug', async (req, res, next) => {
   }
 });
 
+// Las rutas /api/* que no existen responden 404 JSON, no el index.html de la SPA
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 // Fallback: servir index.html para todas las demás rutas (SPA)
 app.use((req, res) => {
-  res.sendFile(path.resolve(__dirname, 'dist/index.html'));
+  res.set('Cache-Control', 'no-cache');
+  res.sendFile(INDEX_HTML);
+});
+
+// Errores (JSON inválido, body demasiado grande...): respuesta corta, sin stack trace
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const status = Number(err.status || err.statusCode) || 500;
+  if (status >= 500) console.error('[Server] Error:', err.message);
+  res.status(status).json({ error: status >= 500 ? 'Internal server error' : (err.expose ? err.message : 'Bad request') });
 });
 
 // Funciones auxiliares
+
+/** Escapa un texto para usarlo dentro de HTML/XML (contenido o valor de atributo). */
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Orígenes desde los que se acepta avatar_url como og:image. Cualquier otra cosa
+// (http, javascript:, data:, dominios ajenos) se sustituye por la imagen por defecto.
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
+const ALLOWED_IMAGE_HOSTS = new Set([
+  'yourcvpassport.com',
+  'djehzlzombqrzzuchcef.supabase.co',
+  'images.unsplash.com',
+  'images.pexels.com',
+  'ui-avatars.com',
+  // Avatares de instructores sembrados por migraciones (supabase/migrations/*seed*)
+  'iseie.com',
+  'psikoaprende.com',
+]);
+try {
+  const envSupabase = new URL(process.env.VITE_SUPABASE_URL || '');
+  if (envSupabase.protocol === 'https:') ALLOWED_IMAGE_HOSTS.add(envSupabase.hostname);
+} catch { /* VITE_SUPABASE_URL ausente o no válida */ }
+
+function safeImageUrl(raw) {
+  if (typeof raw !== 'string' || raw.trim() === '') return DEFAULT_OG_IMAGE;
+  try {
+    const url = new URL(raw.trim());
+    if (url.protocol !== 'https:' || url.username || url.password) return DEFAULT_OG_IMAGE;
+    if (!ALLOWED_IMAGE_HOSTS.has(url.hostname)) return DEFAULT_OG_IMAGE;
+    return url.href;
+  } catch {
+    return DEFAULT_OG_IMAGE;
+  }
+}
 
 function generateMetaTags(profile, skills, experiences) {
   // Title
@@ -492,11 +750,11 @@ function generateMetaTags(profile, skills, experiences) {
   keywordParts.push('professional profile', 'CV', 'resume', 'YourCVPassport');
   const keywords = [...new Set(keywordParts.filter(Boolean))].join(', ');
 
-  // Image
-  const image = profile.avatar_url || 'https://yourcvpassport.com/default-avatar.png';
+  // Image (solo https de un origen permitido)
+  const image = safeImageUrl(profile.avatar_url);
 
-  // URL
-  const url = `https://yourcvpassport.com/cv/${profile.slug}`;
+  // URL canónica (apex)
+  const url = `${SITE_URL}${slugPath('/cv/', profile.slug)}`;
 
   return {
     title,
@@ -509,93 +767,58 @@ function generateMetaTags(profile, skills, experiences) {
 }
 
 function injectMetaTags(html, metaTags) {
-  // Escape special characters
-  const escape = (str) => str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  // Todo valor pasa por escapeHtml (&, <, >, " y '). Las sustituciones usan una
+  // función: con un string, patrones como "$&" o "$'" en los datos del usuario
+  // serían interpretados por String.replace y reinyectarían HTML.
+  const e = escapeHtml;
+  const set = (pattern, tag) => { html = html.replace(pattern, () => tag); };
+  const appendToHead = (tag) => { html = html.replace('</head>', () => `    ${tag}\n</head>`); };
 
-  // Replace title
-  html = html.replace(
-    /<title>.*?<\/title>/i,
-    `<title>${escape(metaTags.title)}</title>`
-  );
-
-  // Replace description
-  html = html.replace(
-    /<meta name="description" content=".*?".*?>/i,
-    `<meta name="description" content="${escape(metaTags.description)}">`
-  );
+  set(/<title>[\s\S]*?<\/title>/i, `<title>${e(metaTags.title)}</title>`);
+  set(/<meta name="description" content=".*?".*?>/i, `<meta name="description" content="${e(metaTags.description)}">`);
 
   // Add/replace keywords
-  if (html.match(/<meta name="keywords"/i)) {
-    html = html.replace(
-      /<meta name="keywords" content=".*?".*?>/i,
-      `<meta name="keywords" content="${escape(metaTags.keywords)}">`
-    );
+  if (/<meta name="keywords"/i.test(html)) {
+    set(/<meta name="keywords" content=".*?".*?>/i, `<meta name="keywords" content="${e(metaTags.keywords)}">`);
   } else {
-    html = html.replace(
-      '</head>',
-      `    <meta name="keywords" content="${escape(metaTags.keywords)}">\n</head>`
-    );
+    appendToHead(`<meta name="keywords" content="${e(metaTags.keywords)}">`);
   }
 
   // Replace Open Graph tags
-  html = html.replace(
-    /<meta property="og:title" content=".*?".*?>/i,
-    `<meta property="og:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:description" content=".*?".*?>/i,
-    `<meta property="og:description" content="${escape(metaTags.description)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:image" content=".*?".*?>/i,
-    `<meta property="og:image" content="${metaTags.image}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:type" content="website".*?>/i,
-    `<meta property="og:type" content="profile">`
-  );
+  set(/<meta property="og:title" content=".*?".*?>/i, `<meta property="og:title" content="${e(metaTags.title)}">`);
+  set(/<meta property="og:description" content=".*?".*?>/i, `<meta property="og:description" content="${e(metaTags.description)}">`);
+  set(/<meta property="og:image" content=".*?".*?>/i, `<meta property="og:image" content="${e(metaTags.image)}">`);
+  set(/<meta property="og:type" content="website".*?>/i, `<meta property="og:type" content="profile">`);
 
   // Add og:url if not present
-  if (!html.match(/<meta property="og:url"/i)) {
-    html = html.replace(
-      /<meta property="og:image"/i,
-      `<meta property="og:url" content="${metaTags.url}">\n    <meta property="og:image"`
-    );
+  if (!/<meta property="og:url"/i.test(html)) {
+    set(/<meta property="og:image"/i, `<meta property="og:url" content="${e(metaTags.url)}">\n    <meta property="og:image"`);
   } else {
-    html = html.replace(
-      /<meta property="og:url" content=".*?".*?>/i,
-      `<meta property="og:url" content="${metaTags.url}">`
-    );
+    set(/<meta property="og:url" content=".*?".*?>/i, `<meta property="og:url" content="${e(metaTags.url)}">`);
+  }
+
+  // Canonical (apex) del perfil
+  if (/<link rel="canonical"/i.test(html)) {
+    set(/<link rel="canonical" href=".*?".*?>/i, `<link rel="canonical" href="${e(metaTags.url)}">`);
+  } else {
+    appendToHead(`<link rel="canonical" href="${e(metaTags.url)}">`);
   }
 
   // Replace Twitter Card tags
-  html = html.replace(
-    /<meta name="twitter:title" content=".*?".*?>/i,
-    `<meta name="twitter:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta name="twitter:description" content=".*?".*?>/i,
-    `<meta name="twitter:description" content="${escape(metaTags.description)}">`
-  );
+  set(/<meta name="twitter:title" content=".*?".*?>/i, `<meta name="twitter:title" content="${e(metaTags.title)}">`);
+  set(/<meta name="twitter:description" content=".*?".*?>/i, `<meta name="twitter:description" content="${e(metaTags.description)}">`);
 
   // Add author meta tag
-  if (!html.match(/<meta name="author"/i)) {
-    html = html.replace(
-      '</head>',
-      `    <meta name="author" content="${escape(metaTags.authorName)}">\n</head>`
-    );
+  if (!/<meta name="author"/i.test(html)) {
+    appendToHead(`<meta name="author" content="${e(metaTags.authorName)}">`);
   }
 
   return html;
 }
 
 // Iniciar servidor
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n✅ Servidor SEO iniciado en http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`\n✅ Servidor SEO iniciado en http://${HOST}:${PORT}`);
   console.log(`📊 Los perfiles en /cv/:slug tendrán meta tags personalizados`);
   console.log(`🔍 Detecta automáticamente bots de SEO\n`);
 });
