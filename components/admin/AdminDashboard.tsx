@@ -1,23 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
-import BlogManagementSection from '../BlogManagementSection';
-import SuccessStoriesManagement from './SuccessStoriesManagement';
+// La gestion de perfiles se pinta en la portada: carga estatica.
 import ProfilesManagement from './ProfilesManagement';
-import StampsManagement from './StampsManagement';
-import CompanyManagementSection from './CompanyManagementSection';
-import CompaniesViewSection from './CompaniesViewSection';
-import UserMonitoring from './UserMonitoring';
-import JobPostingsManagement from './JobPostingsManagement';
-import JobApplicationsManagement from './JobApplicationsManagement';
-import UserModeration from './UserModeration';
-import AdminTestingHub from './AdminTestingHub';
-import EnterpriseFeaturesManagement from './EnterpriseFeaturesManagement';
-import { TemplateManagement } from './TemplateManagement';
-import TranslationCacheManagement from './TranslationCacheManagement';
-import FeedSection from '../dashboard/feed/FeedSection';
 import {
   UsersIcon,
   BuildingOfficeIcon,
@@ -37,6 +24,31 @@ import {
   LanguageIcon,
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
+
+// Cada pestana va en su propio chunk y solo se descarga al abrirla (UserMonitoring
+// arrastra recharts; el Testing Hub, todas las plantillas de CV).
+const BlogManagementSection = lazy(() => import('../BlogManagementSection'));
+const SuccessStoriesManagement = lazy(() => import('./SuccessStoriesManagement'));
+const StampsManagement = lazy(() => import('./StampsManagement'));
+const CompanyManagementSection = lazy(() => import('./CompanyManagementSection'));
+const CompaniesViewSection = lazy(() => import('./CompaniesViewSection'));
+const UserMonitoring = lazy(() => import('./UserMonitoring'));
+const JobPostingsManagement = lazy(() => import('./JobPostingsManagement'));
+const JobApplicationsManagement = lazy(() => import('./JobApplicationsManagement'));
+const UserModeration = lazy(() => import('./UserModeration'));
+const AdminTestingHub = lazy(() => import('./AdminTestingHub'));
+const EnterpriseFeaturesManagement = lazy(() => import('./EnterpriseFeaturesManagement'));
+const TemplateManagement = lazy(() => import('./TemplateManagement').then(m => ({ default: m.TemplateManagement })));
+const TranslationCacheManagement = lazy(() => import('./TranslationCacheManagement'));
+const FeedSection = lazy(() => import('../dashboard/feed/FeedSection'));
+
+/** Fallback de Suspense mientras se descarga el chunk de la pestana. */
+const TabLoading: React.FC<{ label: string }> = ({ label }) => (
+  <div role="status" aria-live="polite" aria-label={label} className="flex items-center justify-center py-12">
+    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cv-blue dark:border-blue-400" aria-hidden="true" />
+    <span className="sr-only">{label}</span>
+  </div>
+);
 
 interface AdminStats {
   totalProfiles: number;
@@ -184,6 +196,7 @@ const AdminDashboard: React.FC = () => {
       comingSoon: 'Coming Soon',
       inDevelopment: 'This feature is currently in development',
       back: 'Back to Dashboard',
+      loadingSection: 'Loading section…',
       testingTools: {
         title: 'Testing & Tools',
         testingHub: 'Testing Hub',
@@ -256,6 +269,7 @@ const AdminDashboard: React.FC = () => {
       comingSoon: 'Próximamente',
       inDevelopment: 'Esta funcionalidad está actualmente en desarrollo',
       back: 'Volver al Dashboard',
+      loadingSection: 'Cargando sección…',
       testingTools: {
         title: 'Testing y Herramientas',
         testingHub: 'Hub de Testing',
@@ -354,23 +368,23 @@ const AdminDashboard: React.FC = () => {
               {/* Main Content Grid - 2 columns */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Column 1: Users & Companies (FIRST) */}
-                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm min-w-0">
                   <div className="p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
                     <UsersIcon className="h-5 w-5 text-gray-700 dark:text-dark-text-primary" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                       {translations.users.title}
                     </h2>
                   </div>
-                  <div className="p-6 space-y-4 flex-1">
+                  <div className="p-4 sm:p-6 space-y-4">
                     {/* User Monitoring */}
                     <button
                       onClick={() => setActiveTab('monitoring')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <ChartBarIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.users.monitoringTitle}
                         </h3>
@@ -386,12 +400,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Companies Management */}
                     <button
                       onClick={() => setActiveTab('companies')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <BuildingOfficeIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.users.companyManagementTitle}
                         </h3>
@@ -407,18 +421,18 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Column 2: Moderation & Verification */}
-                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm min-w-0">
                   <div className="p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
                     <ClockIcon className="h-5 w-5 text-gray-700 dark:text-dark-text-primary" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                       {translations.moderation.title}
                     </h2>
                   </div>
-                  <div className="p-6 space-y-4 flex-1">
+                  <div className="p-4 sm:p-6 space-y-4">
                     {/* Stamp Verification */}
                     <button
                       onClick={() => setActiveTab('stamps')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg relative">
                         <ShieldCheckIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
@@ -428,7 +442,7 @@ const AdminDashboard: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
                           {translations.moderation.stampsTitle}
                           {stats.pendingStamps > 0 && (
@@ -449,7 +463,7 @@ const AdminDashboard: React.FC = () => {
                     {/* Job Postings Approval */}
                     <button
                       onClick={() => setActiveTab('jobs')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg relative">
                         <DocumentCheckIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
@@ -459,7 +473,7 @@ const AdminDashboard: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
                           {translations.moderation.jobsTitle}
                           {stats.pendingJobPostings > 0 && (
@@ -480,12 +494,12 @@ const AdminDashboard: React.FC = () => {
                     {/* User Moderation */}
                     <button
                       onClick={() => setActiveTab('user-moderation')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <ExclamationTriangleIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.moderation.userModerationTitle}
                         </h3>
@@ -501,23 +515,23 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Column 3: Content Management */}
-                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm min-w-0">
                   <div className="p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
                     <DocumentTextIcon className="h-5 w-5 text-gray-700 dark:text-dark-text-primary" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                       {translations.content.title}
                     </h2>
                   </div>
-                  <div className="p-6 space-y-4 flex-1">
+                  <div className="p-4 sm:p-6 space-y-4">
                     {/* Blog Management */}
                     <button
                       onClick={() => setActiveTab('blog')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <DocumentTextIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.content.blogTitle}
                         </h3>
@@ -533,12 +547,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Success Stories */}
                     <button
                       onClick={() => setActiveTab('stories')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <SparklesIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.content.storiesTitle}
                         </h3>
@@ -554,12 +568,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Template Management */}
                     <button
                       onClick={() => setActiveTab('templates')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <PaintBrushIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.content.templatesTitle}
                         </h3>
@@ -575,23 +589,23 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Column 4: Testing & Tools */}
-                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm h-full flex flex-col">
+                <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border shadow-sm min-w-0">
                   <div className="p-6 border-b border-gray-200 dark:border-dark-border flex items-center gap-2">
                     <BeakerIcon className="h-5 w-5 text-gray-700 dark:text-dark-text-primary" />
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                       {translations.testingTools.title}
                     </h2>
                   </div>
-                  <div className="p-6 space-y-4 flex-1">
+                  <div className="p-4 sm:p-6 space-y-4">
                     {/* Testing Hub */}
                     <button
                       onClick={() => setActiveTab('testing')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                         <BeakerIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.testingTools.testingHub}
                         </h3>
@@ -607,12 +621,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Enterprise Features */}
                     <button
                       onClick={() => setActiveTab('enterprise')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                         <StarIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.testingTools.enterpriseFeatures}
                         </h3>
@@ -628,12 +642,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Translation Cache */}
                     <button
                       onClick={() => setActiveTab('translations')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                         <LanguageIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.testingTools.translationCache}
                         </h3>
@@ -649,12 +663,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Feed (Beta) */}
                     <button
                       onClick={() => setActiveTab('feed')}
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                         <ChatBubbleLeftRightIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
                           Feed
                           <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded">
@@ -673,12 +687,12 @@ const AdminDashboard: React.FC = () => {
                     {/* Talent Search */}
                     <Link
                       to="/admin/search"
-                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border"
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
                     >
                       <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
                         <MagnifyingGlassIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 min-w-0 text-left">
                         <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">
                           {translations.quickActions.searchTitle}
                         </h3>
@@ -704,7 +718,7 @@ const AdminDashboard: React.FC = () => {
                     </h2>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <ProfilesManagement />
                 </div>
               </div>
@@ -722,22 +736,23 @@ const AdminDashboard: React.FC = () => {
               <span className="text-sm font-medium">{translations.back}</span>
             </button>
 
+            <Suspense fallback={<TabLoading label={translations.loadingSection} />}>
             {activeTab === 'templates' ? (
               <TemplateManagement />
             ) : activeTab === 'testing' ? (
               <AdminTestingHub />
             ) : activeTab === 'enterprise' ? (
-              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6">
                 <EnterpriseFeaturesManagement />
               </div>
             ) : activeTab === 'translations' ? (
-              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6">
                 <TranslationCacheManagement />
               </div>
             ) : activeTab === 'feed' ? (
               <FeedSection />
             ) : (
-              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6">
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-4 sm:p-6">
                 {activeTab === 'profiles' && <ProfilesManagement />}
                 {activeTab === 'blog' && <BlogManagementSection />}
                 {activeTab === 'stories' && <SuccessStoriesManagement />}
@@ -750,6 +765,7 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'user-moderation' && <UserModeration />}
               </div>
             )}
+            </Suspense>
           </div>
         )}
       </div>

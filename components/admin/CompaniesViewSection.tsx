@@ -332,10 +332,12 @@ const CompaniesViewSection: React.FC = () => {
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSelectedCompany(null)}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                 >
-                  <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                  <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" aria-hidden="true" />
                 </button>
               </div>
 

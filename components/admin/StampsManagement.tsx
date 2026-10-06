@@ -22,9 +22,12 @@ import {
   Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../contexts/LanguageContext';
 import Toast from '../common/Toast';
 
 const StampsManagement: React.FC = () => {
+  const { lang: uiLang } = useLanguage();
+  const closeLabel = uiLang === 'en' ? 'Close' : 'Cerrar';
   const [stamps, setStamps] = useState<Stamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StampStatus | 'ALL'>('PENDING');
@@ -686,9 +689,10 @@ const StampsManagement: React.FC = () => {
                         <button
                           onClick={() => viewUserProfile(stamp.profile_id)}
                           className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title="Ver información completa del usuario"
+                          title={uiLang === 'en' ? 'View full user information' : 'Ver información completa del usuario'}
+                          aria-label={uiLang === 'en' ? 'View full user information' : 'Ver información completa del usuario'}
                         >
-                          <IdentificationIcon className="w-5 h-5" />
+                          <IdentificationIcon className="w-5 h-5" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
@@ -764,9 +768,10 @@ const StampsManagement: React.FC = () => {
                     setActionNotes('');
                     setDocumentUrl(null);
                   }}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
+                  aria-label={closeLabel}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  <XMarkIcon className="w-6 h-6" />
+                  <XMarkIcon className="w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -1117,9 +1122,10 @@ const StampsManagement: React.FC = () => {
                     setShowUserInfoModal(false);
                     setSelectedUserProfile(null);
                   }}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors"
+                  aria-label={closeLabel}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  <XMarkIcon className="w-6 h-6" />
+                  <XMarkIcon className="w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
             </div>

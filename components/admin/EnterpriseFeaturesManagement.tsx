@@ -446,8 +446,12 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
+                      type="button"
+                      role="switch"
+                      aria-checked={feature.is_active}
+                      aria-label={lang === 'es' ? feature.name_es : feature.name_en}
                       onClick={() => handleToggleActive(feature)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400 ${
                         feature.is_active ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                       }`}
                     >
@@ -469,6 +473,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                         onClick={() => handleEdit(feature)}
                         className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 dark:text-indigo-400 rounded transition-colors"
                         title={et.edit}
+                        aria-label={et.edit}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -478,6 +483,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                         onClick={() => handleDelete(feature)}
                         className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 rounded transition-colors"
                         title={et.delete}
+                        aria-label={et.delete}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -508,10 +514,12 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                   {editingFeature ? et.editFeature : et.newFeature}
                 </h3>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -638,8 +646,11 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={formData.is_active}
+                    aria-labelledby="enterprise-feature-active-label"
                     onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400 ${
                       formData.is_active ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                     }`}
                   >
@@ -649,7 +660,7 @@ const EnterpriseFeaturesManagement: React.FC = () => {
                       }`}
                     />
                   </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span id="enterprise-feature-active-label" className="text-sm text-gray-700 dark:text-gray-300">
                     {et.form.featureActive}
                   </span>
                 </div>
