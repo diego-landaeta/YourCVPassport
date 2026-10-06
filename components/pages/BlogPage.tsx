@@ -7,6 +7,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import { Link, useLocation } from 'react-router-dom';
 import { handleBlogImageError } from '../../utils/blogImageFallback';
+import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface BlogPost {
     id: number;
@@ -30,6 +31,64 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
         </div>
     );
 };
+
+// ---------------------------------------------------------------------------
+// Boletin: alta con doble opt-in en Brevo via la Edge Function newsletter-contact.
+// Codigos de error de la funcion: INVALID_INPUT, RATE_LIMITED, NOT_CONFIGURED,
+// SEND_FAILED (+ NETWORK_ERROR en el cliente: red caida, CORS o timeout).
+// ---------------------------------------------------------------------------
+type NewsletterStatus = 'idle' | 'sending' | 'success' | 'error';
+type NewsletterErrorCode = 'INVALID_INPUT' | 'RATE_LIMITED' | 'NOT_CONFIGURED' | 'SEND_FAILED' | 'NETWORK_ERROR';
+
+const NEWSLETTER_TIMEOUT_MS = 15000;
+const NEWSLETTER_COPY = {
+    es: {
+        sending: 'Enviando…',
+        success: 'Revisa tu correo para confirmar la suscripción.',
+        confirmed: 'Suscripción confirmada. ¡Gracias!',
+        retry: 'Reintentar',
+        fallback: 'También puedes suscribirte enviándonos un correo:',
+        errors: {
+            INVALID_INPUT: 'El correo no es válido. Revísalo e inténtalo de nuevo.',
+            RATE_LIMITED: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
+            NOT_CONFIGURED: 'La suscripción automática no está disponible ahora mismo.',
+            SEND_FAILED: 'No hemos podido completar la suscripción.',
+            NETWORK_ERROR: 'No hay conexión con el servidor.',
+        },
+    },
+    en: {
+        sending: 'Sending…',
+        success: 'Check your email to confirm your subscription.',
+        confirmed: 'Subscription confirmed. Thank you!',
+        retry: 'Try again',
+        fallback: 'You can also subscribe by sending us an email:',
+        errors: {
+            INVALID_INPUT: 'The email address is not valid. Check it and try again.',
+            RATE_LIMITED: 'Too many attempts. Wait a few minutes and try again.',
+            NOT_CONFIGURED: 'Automatic sign-up is not available right now.',
+            SEND_FAILED: 'We could not complete your subscription.',
+            NETWORK_ERROR: 'Could not reach the server.',
+        },
+    },
+} as const;
+
+const NEWSLETTER_CODES: NewsletterErrorCode[] = ['INVALID_INPUT', 'RATE_LIMITED', 'NOT_CONFIGURED', 'SEND_FAILED'];
+
+// Traduce el `error` de supabase.functions.invoke a un codigo conocido.
+async function newsletterErrorCode(error: any): Promise<NewsletterErrorCode> {
+    const response = error?.context;
+    if (error?.name === 'FunctionsHttpError' && response && typeof response.json === 'function') {
+        try {
+            const body = await response.json();
+            if (NEWSLETTER_CODES.includes(body?.code)) return body.code;
+        } catch { /* cuerpo no JSON */ }
+        if (response.status === 429) return 'RATE_LIMITED';
+        if (response.status === 400) return 'INVALID_INPUT';
+        return 'SEND_FAILED';
+    }
+    // FunctionsFetchError / FunctionsRelayError / AbortError: sin respuesta util.
+    return 'NETWORK_ERROR';
+}
 
 // Identificador interno del filtro "todas las categorias" (la etiqueta visible sale de traducciones).
 const ALL_CATEGORIES = '__all__';
@@ -70,7 +129,9 @@ const BlogPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const [email, setEmail] = useState('');
-    const [newsletterMailto, setNewsletterMailto] = useState('');
+    const [newsletterHoneypot, setNewsletterHoneypot] = useState('');
+    const [newsletterStatus, setNewsletterStatus] = useState<NewsletterStatus>('idle');
+    const [newsletterError, setNewsletterError] = useState<NewsletterErrorCode | null>(null);
     const { lang } = useLanguage();
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -158,17 +219,49 @@ const BlogPage: React.FC = () => {
         .replace('{shown}', String(visiblePosts.length))
         .replace('{total}', String(filteredPosts.length));
 
-    // PENDIENTE: no existe endpoint de boletin (Brevo u otro) en el repo. Hasta que exista,
-    // no se finge un alta: se prepara un correo (mailto) y el usuario decide enviarlo.
-    // Se muestra como enlace explicito en lugar de navegar solo (evita salir de la pagina).
-    const handleSubscribe = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email) return;
+    const newsletterCopy = NEWSLETTER_COPY[lang] ?? NEWSLETTER_COPY.es;
+    // Vuelta desde el enlace de confirmacion de Brevo (redirectionUrl ...?suscrito=1).
+    const newsletterConfirmed = new URLSearchParams(location.search).get('suscrito') === '1';
+
+    // Respaldo si el alta automatica no esta disponible: correo preparado (mailto).
+    const newsletterMailto = useMemo(() => {
         const newsletter = pageData.sidebar.newsletter;
         const subject = encodeURIComponent(newsletter.mailSubject);
-        const body = encodeURIComponent(`${newsletter.mailBody} ${email}`);
-        setNewsletterMailto(`mailto:${newsletter.mailTo}?subject=${subject}&body=${body}`);
+        const body = encodeURIComponent(`${newsletter.mailBody} ${email.trim()}`);
+        return `mailto:${newsletter.mailTo}?subject=${subject}&body=${body}`;
+    }, [pageData, email]);
+
+    const subscribe = async () => {
+        const address = email.trim();
+        if (!address || newsletterStatus === 'sending') return;
+        setNewsletterStatus('sending');
+        setNewsletterError(null);
+        try {
+            const { data, error } = await supabase.functions.invoke('newsletter-contact', {
+                body: { action: 'subscribe', email: address, lang, website: newsletterHoneypot },
+                timeout: NEWSLETTER_TIMEOUT_MS,
+            });
+            if (error || (data as any)?.error) {
+                setNewsletterError(error ? await newsletterErrorCode(error) : 'SEND_FAILED');
+                setNewsletterStatus('error');
+                return;
+            }
+            setNewsletterStatus('success');
+            setEmail('');
+        } catch {
+            setNewsletterError('NETWORK_ERROR');
+            setNewsletterStatus('error');
+        }
     };
+
+    const handleSubscribe = (e: React.FormEvent) => {
+        e.preventDefault();
+        subscribe();
+    };
+
+    // Mailto de respaldo cuando el fallo no es culpa de los datos introducidos.
+    const newsletterShowsMailto = newsletterError === 'NOT_CONFIGURED' || newsletterError === 'NETWORK_ERROR' || newsletterError === 'SEND_FAILED';
+    const newsletterCanRetry = newsletterError !== 'INVALID_INPUT' && newsletterError !== 'NOT_CONFIGURED';
 
     return (
         <>
@@ -321,32 +414,70 @@ const BlogPage: React.FC = () => {
                                     <div className="bg-cv-blue text-white p-8 rounded-lg shadow-lg text-center">
                                         <h3 className="text-2xl font-bold">{pageData.sidebar.newsletter.title}</h3>
                                         <p className="mt-2 text-white/80">{pageData.sidebar.newsletter.subtitle}</p>
-                                        <form onSubmit={handleSubscribe} className="mt-6">
-                                            <input 
-                                                type="email" 
-                                                aria-label={pageData.sidebar.newsletter.placeholder}
+                                        <form onSubmit={handleSubscribe} className="mt-6 relative" aria-busy={newsletterStatus === 'sending'} data-testid="newsletter-form">
+                                            {/* Honeypot: fuera de pantalla y oculto a lectores de pantalla; los bots lo rellenan. */}
+                                            <div aria-hidden="true" className="absolute -left-[10000px] top-0 w-px h-px overflow-hidden">
+                                                <label htmlFor="newsletter-website">Website</label>
+                                                <input id="newsletter-website" type="text" name="ycp-hp" tabIndex={-1} autoComplete="off" value={newsletterHoneypot} onChange={(e) => setNewsletterHoneypot(e.target.value)} />
+                                            </div>
+                                            <label htmlFor="newsletter-email" className="sr-only">{pageData.sidebar.newsletter.placeholder}</label>
+                                            <input
+                                                id="newsletter-email"
+                                                type="email"
+                                                name="email"
+                                                autoComplete="email"
+                                                maxLength={254}
                                                 placeholder={pageData.sidebar.newsletter.placeholder}
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
+                                                aria-invalid={newsletterError === 'INVALID_INPUT' || undefined}
+                                                aria-describedby={newsletterStatus === 'error' ? 'newsletter-error' : undefined}
                                                 className="w-full p-3 rounded-md bg-white dark:bg-dark-bg-primary text-gray-800 dark:text-dark-text-primary" />
-                                            <button type="submit" className="mt-4 w-full bg-white dark:bg-dark-bg-primary text-cv-blue dark:text-cv-blue-light font-bold py-3 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                                                {pageData.sidebar.newsletter.button}
+                                            <button
+                                                type="submit"
+                                                disabled={newsletterStatus === 'sending'}
+                                                className="mt-4 w-full bg-white dark:bg-dark-bg-primary text-cv-blue dark:text-cv-blue-light font-bold py-3 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:opacity-70 disabled:cursor-wait"
+                                            >
+                                                {newsletterStatus === 'sending' ? newsletterCopy.sending : pageData.sidebar.newsletter.button}
                                             </button>
                                         </form>
-                                        <div className="mt-3 text-sm text-white" role="status" aria-live="polite">
-                                            {newsletterMailto && (
-                                                <>
-                                                    <p>{pageData.sidebar.newsletter.notice} {pageData.sidebar.newsletter.mailTo}</p>
-                                                    <a
-                                                        href={newsletterMailto}
-                                                        className="mt-3 inline-block font-semibold underline underline-offset-2 hover:no-underline rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                                                    >
-                                                        {pageData.sidebar.newsletter.openMail}
-                                                    </a>
-                                                </>
+                                        <div className="mt-3 text-sm text-white" role="status" aria-live="polite" data-testid="newsletter-status">
+                                            {(newsletterStatus === 'success' || (newsletterConfirmed && newsletterStatus === 'idle')) && (
+                                                <p className="flex items-center justify-center gap-2 font-semibold">
+                                                    <CheckCircleIcon className="w-5 h-5 shrink-0" aria-hidden="true" />
+                                                    {newsletterStatus === 'success' ? newsletterCopy.success : newsletterCopy.confirmed}
+                                                </p>
                                             )}
                                         </div>
+                                        {newsletterStatus === 'error' && newsletterError && (
+                                            <div id="newsletter-error" role="alert" data-testid="newsletter-error" className="mt-3 p-3 text-sm text-left text-white bg-white/10 border border-white/40 rounded-md">
+                                                <p className="flex items-start gap-2 font-semibold">
+                                                    <ExclamationTriangleIcon className="w-5 h-5 shrink-0" aria-hidden="true" />
+                                                    {newsletterCopy.errors[newsletterError]}
+                                                </p>
+                                                {newsletterShowsMailto && (
+                                                    <p className="mt-2">
+                                                        {newsletterCopy.fallback}{' '}
+                                                        <a
+                                                            href={newsletterMailto}
+                                                            className="font-semibold underline underline-offset-2 hover:no-underline rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white break-all"
+                                                        >
+                                                            {pageData.sidebar.newsletter.mailTo}
+                                                        </a>
+                                                    </p>
+                                                )}
+                                                {newsletterCanRetry && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={subscribe}
+                                                        className="mt-3 px-4 py-2 rounded-md font-semibold bg-white text-cv-blue hover:bg-gray-100 dark:bg-dark-bg-primary dark:text-cv-blue-light dark:hover:bg-dark-bg-tertiary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                                                    >
+                                                        {newsletterCopy.retry}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </AnimatedWrapper>
