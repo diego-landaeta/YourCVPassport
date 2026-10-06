@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
         allowedHosts: ['apply-kurt-describes-completely.trycloudflare.com'],
         proxy: {
           '/api': {
-            target: 'http://localhost:3000',
+            // server.mjs pasa a escuchar por defecto en 127.0.0.1:3001 (cambio coordinado con
+            // la unidad que edita server.mjs; hasta integrarlo, arrancarlo con PORT=3001)
+            target: 'http://127.0.0.1:3001',
             changeOrigin: true,
           },
         },
@@ -42,11 +44,20 @@ export default defineConfig(({ mode }) => {
               }
               return `assets/[name]-[hash][extname]`;
             },
-            chunkFileNames: 'assets/js/[name]-[hash].js',
+            // Los diccionarios (translations/en.ts, es.ts) ya salen en su propio chunk porque
+            // LanguageProvider los importa con import(); aqui solo se les da un nombre
+            // reconocible (i18n-en / i18n-es). Ojo: NO usar manualChunks para esto, porque
+            // arrastra sus dependencias (React) al chunk del diccionario.
+            chunkFileNames: (chunkInfo) =>
+              /[\\/]translations[\\/](en|es)\.ts$/.test(chunkInfo.facadeModuleId ?? '')
+                ? 'assets/js/i18n-[name]-[hash].js'
+                : 'assets/js/[name]-[hash].js',
             entryFileNames: 'assets/js/[name]-[hash].js',
           },
         },
-        chunkSizeWarningLimit: 5000,
+        // Limite realista para que Vite avise si un chunk se dispara. Por encima quedan, a
+        // proposito, los que solo se descargan bajo demanda (react-pdf al exportar ATS).
+        chunkSizeWarningLimit: 800,
         minify: 'terser',
         terserOptions: {
           compress: {
@@ -66,10 +77,8 @@ export default defineConfig(({ mode }) => {
           'react-router-dom',
           '@supabase/supabase-js',
           'react-helmet-async',
-          'zustand',
           'react-hot-toast',
         ],
-        exclude: ['@google/generative-ai', 'openai'],
       },
       esbuild: {
         logOverride: { 'this-is-undefined-in-esm': 'silent' },

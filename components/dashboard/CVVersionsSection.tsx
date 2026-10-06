@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import { useCVVersions } from '../../hooks/useCVVersions';
-import { useATSExport } from '../../hooks/useATSExport';
 import { useAuth } from '../../contexts/AuthContext';
 import { CVVersion } from '../../types';
 import { CreateVersionModal } from './CreateVersionModal';
@@ -513,8 +512,6 @@ export function CVVersionsSection() {
     duplicateVersion,
     fetchCurrentProfileData
   } = useCVVersions();
-
-  const { exportAndDownload, isExporting: isExportingFile } = useATSExport({ preferServerSide: true });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<CVVersion | null>(null);
