@@ -35,7 +35,8 @@ export async function getFromDbCache(
       .eq('text_hash', textHash)
       .eq('source_lang', sourceLang)
       .eq('target_lang', targetLang)
-      .single();
+      // maybeSingle: un texto aún sin traducir es un fallo de caché normal, no un 406
+      .maybeSingle();
 
     if (error || !data || data.original_text !== text) return null;
 
@@ -120,8 +121,6 @@ export async function getBatchFromDbCache(
         uncached.push(text);
       }
     });
-
-    console.log(`[DbTextCache] Cache check: ${cached.size} hits, ${uncached.length} misses`);
 
     return { cached, uncached };
   } catch (error) {

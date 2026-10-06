@@ -145,10 +145,11 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                 .from('stamps_summary')
                 .select('*')
                 .eq('profile_id', session?.user.id)
-                .single();
+                // maybeSingle: sin sellos todavía no hay resumen (null), sin 406 en la red
+                .maybeSingle();
 
-            if (error && error.code !== 'PGRST116') throw error; // Ignore "not found" error
-            setSummary(data);
+            if (error) throw error;
+            setSummary(data ?? null);
         } catch (error) {}
     };
 

@@ -78,10 +78,12 @@ const CompanyProfileViewPage: React.FC = () => {
         query = query.or(`slug.eq.${profileId},handle.eq.${profileId}`);
       }
 
-      const { data, error } = await query.single();
+      // maybeSingle: un slug/id inexistente o un perfil no visible deja profile = null
+      // (pantalla "no encontrado") en lugar de un 406 tratado como error de carga
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error(t('company.profile.fetchError') || 'Error al cargar el perfil');
@@ -99,7 +101,9 @@ const CompanyProfileViewPage: React.FC = () => {
         .select('*')
         .eq('company_id', company.id)
         .eq('profile_id', profileId)
-        .single();
+        // Lo normal es que aún no esté desbloqueado: maybeSingle devuelve null sin 406
+        .limit(1)
+        .maybeSingle();
 
       if (viewData) {
         setIsUnlocked(true);
@@ -111,7 +115,8 @@ const CompanyProfileViewPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('profile_id', profileId)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (contactData) {
         setHasContacted(true);

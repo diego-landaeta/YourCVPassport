@@ -126,7 +126,8 @@ const CompanyMessagesPage: React.FC = () => {
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            // maybeSingle: una conversación aún sin mensajes no es un error (evita el 406)
+            .maybeSingle();
 
           return {
             ...conv,

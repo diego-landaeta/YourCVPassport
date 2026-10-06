@@ -317,10 +317,11 @@ export function useCVVersions(options: UseCVVersionsOptions = {}) {
           .select('*')
           .eq('id', versionId)
           .eq('profile_id', profile.id)
-          .single();
+          // maybeSingle: una versión inexistente (o ajena) devuelve null, no un 406
+          .maybeSingle();
 
         if (error) throw error;
-        return data;
+        return data ?? null;
       } catch (err) {
         
         setError(err instanceof Error ? err.message : 'Failed to fetch version');

@@ -48,7 +48,8 @@ const CompanyProtectedRoute: React.FC = () => {
         .from('company_users')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        // maybeSingle: un usuario sin empresa es lo normal, no un error (evita el 406)
+        .maybeSingle();
 
       if (companyUserError || !companyUserData) {
         // User is not part of any company
@@ -65,7 +66,7 @@ const CompanyProtectedRoute: React.FC = () => {
         .from('companies')
         .select('*')
         .eq('id', companyUserData.company_id)
-        .single();
+        .maybeSingle();
 
       if (companyError || !companyData) {
         setCompany(null);

@@ -87,7 +87,8 @@ const CreateJobPostingPage: React.FC = () => {
         .from('company_users')
         .select('company_id')
         .eq('user_id', user.id)
-        .single();
+        // maybeSingle: sin empresa → null y se redirige al registro, sin 406
+        .maybeSingle();
 
       if (companyUserError || !companyUser) {
         toast.error(translations.toasts.noCompanyFound);
@@ -103,7 +104,7 @@ const CreateJobPostingPage: React.FC = () => {
           .select('*')
           .eq('id', id)
           .eq('company_id', companyUser.company_id)
-          .single();
+          .maybeSingle();
 
         if (jobError || !jobPosting) {
           toast.error(translations.toasts.jobNotFound);

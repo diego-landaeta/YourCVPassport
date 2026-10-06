@@ -107,9 +107,10 @@ export const feedService = {
         )
       `)
       .eq('id', postId)
-      .single();
+      // maybeSingle: un id inexistente (o borrado) es "no encontrado", no un 406
+      .maybeSingle();
 
-    if (error) return null;
+    if (error || !data) return null;
     return data;
   },
 

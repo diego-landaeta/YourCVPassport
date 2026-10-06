@@ -105,7 +105,9 @@ const CompanyTeamPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('profile_id', userData.id)
-        .single();
+        // Puede no haber contacto (o haber varios): basta con saber si existe alguno, sin 406
+        .limit(1)
+        .maybeSingle();
 
       if (contactError || !priorContact) {
         toast.error(
@@ -121,7 +123,8 @@ const CompanyTeamPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('user_id', userData.id)
-        .single();
+        // Lo normal es que aún no sea miembro: maybeSingle devuelve null sin 406
+        .maybeSingle();
 
       if (existingMember) {
         toast.error(t('company.team.alreadyMember') || 'User is already a team member');

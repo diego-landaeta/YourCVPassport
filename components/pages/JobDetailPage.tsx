@@ -155,11 +155,10 @@ const JobDetailPage: React.FC = () => {
       .from('profiles')
       .select('id')
       .eq('id', user.id)
-      .single();
+      // maybeSingle: un usuario sin perfil visible (oculto o sin slug) no es un error de red
+      .maybeSingle();
 
-    if (data) {
-      setProfileId(data.id);
-    }
+    setProfileId(data?.id ?? null);
   };
 
   const checkIfApplied = async () => {
@@ -170,7 +169,9 @@ const JobDetailPage: React.FC = () => {
       .select('id')
       .eq('job_posting_id', job.id)
       .eq('profile_id', user.id)
-      .single();
+      // Lo normal es que aún no haya postulación: maybeSingle devuelve null sin 406
+      .limit(1)
+      .maybeSingle();
 
     setHasApplied(!!data);
   };

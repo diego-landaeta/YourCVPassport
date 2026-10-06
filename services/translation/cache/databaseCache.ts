@@ -142,35 +142,26 @@ export async function getCachedTranslation(
   currentContentHash: string
 ): Promise<TranslatedProfileContent | null> {
   try {
-    console.log('[DatabaseCache] Checking cache for:', { profileId, targetLanguage, currentContentHash });
-
+    // maybeSingle: que el perfil aún no tenga traducción en caché es lo normal.
+    // Con .single() PostgREST respondía 406 (PGRST116) y el error salía en la red.
     const { data, error } = await supabase
       .from('profile_translations')
       .select('translated_content, source_content_hash')
       .eq('profile_id', profileId)
       .eq('target_language', targetLanguage)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned - cache miss
-        console.log('[DatabaseCache] Cache miss - no entry found');
-        return null;
-      }
       console.error('[DatabaseCache] Error fetching cache:', error);
       return null;
     }
 
-    // Check if content hash matches (profile hasn't changed)
-    if (data.source_content_hash !== currentContentHash) {
-      console.log('[DatabaseCache] Cache invalid - content has changed', {
-        cachedHash: data.source_content_hash,
-        currentHash: currentContentHash,
-      });
-      return null;
-    }
+    // Sin entrada en caché
+    if (!data) return null;
 
-    console.log('[DatabaseCache] Cache hit!');
+    // La caché solo vale si el contenido del perfil no ha cambiado
+    if (data.source_content_hash !== currentContentHash) return null;
+
     return data.translated_content as TranslatedProfileContent;
   } catch (err) {
     console.error('[DatabaseCache] Error:', err);
@@ -414,7 +405,6 @@ export async function deleteCachedTranslation(
       return false;
     }
 
-    console.log('[DatabaseCache] Cache deleted for profile:', profileId);
     return true;
   } catch (err) {
     console.error('[DatabaseCache] Error deleting:', err);
