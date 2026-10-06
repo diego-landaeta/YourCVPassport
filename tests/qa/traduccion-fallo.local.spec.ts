@@ -60,7 +60,7 @@ function buildDb() {
   };
 }
 
-type Mode = '500' | 'abort' | 'reject';
+type Mode = '500' | 'abort' | 'reject' | 'no-texto';
 
 interface TranslationLog {
   edgeCalls: number;
@@ -100,6 +100,15 @@ async function boot(page: Page, mode: Mode): Promise<{ mock: SupabaseMock; log: 
     // Pequeña espera: el indicador "Traduciendo..." se ve en todos los navegadores.
     await new Promise((r) => setTimeout(r, 1500));
     if (mode === 'abort') return route.abort('failed');
+    if (mode === 'no-texto') {
+      // 200 con traducciones que no son texto (proveedor roto)
+      const texts: string[] = route.request().postDataJSON()?.texts ?? [];
+      return route.fulfill({
+        status: 200, contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ translations: Object.fromEntries(texts.map((t) => [t, { roto: true }])) }),
+      });
+    }
     return route.fulfill({
       status: 500, contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
@@ -160,6 +169,15 @@ test.describe('Traducción automática que falla: se ve el original y no se qued
     await expectOriginalWithoutLoading(page, 75_000);
     expect(log.edgeCalls).toBeGreaterThan(0);
     expect(mock.writes.filter((w) => w.url.includes('text_translations'))).toEqual([]);
+  });
+
+  test('(d) el proveedor devuelve algo que no es texto: se ve el original', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(e.message));
+    const { log } = await boot(page, 'no-texto');
+    await expectOriginalWithoutLoading(page, 30_000);
+    expect(log.edgeCalls).toBeGreaterThan(0);
+    expect(pageErrors.filter((m) => /trim is not a function/.test(m))).toEqual([]);
   });
 
   test('(c) la capa de traducción rechaza: el .catch del hook quita el indicador', async ({ page }) => {

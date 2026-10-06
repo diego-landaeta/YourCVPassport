@@ -35,7 +35,9 @@ const normalize = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
 
 /** true si `translated` aporta algo respecto al original (no vacío ni idéntico). */
 export function isMeaningfulTranslation(original: string, translated: string | null | undefined): boolean {
-  if (!translated || !translated.trim()) return false;
+  // Un proveedor que devuelva algo que no es texto no debe romper flush(): si lanzara,
+  // las promesas pendientes no se resolverían y el indicador se quedaría para siempre
+  if (typeof translated !== 'string' || !translated.trim()) return false;
   return normalize(original) !== normalize(translated);
 }
 
