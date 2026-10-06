@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface CorporateClassicTemplateProps {
     data: FullProfileData;
@@ -11,6 +13,8 @@ interface CorporateClassicTemplateProps {
 const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#1E40AF'; // Classic corporate blue
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     return (
         <div className="font-serif bg-white dark:bg-dark-bg-secondary">
@@ -34,13 +38,16 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                     <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">{profile.headline}</p>
                     {profile.country_code && (
                         <div className="flex items-center justify-center gap-2 mb-4">
-                            <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                            <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                         </div>
                     )}
-                    <div className="flex justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
-                        <span>📧 {profile.meta_description || 'N/A'}</span>
-                        <span>📍 Location</span>
-                    </div>
+                    {/* Antes: 'N/A' y el literal "Location" en lugar de los datos */}
+                    {(email || profile.location) && (
+                        <div className="flex justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
+                            {email && <span>📧 {email}</span>}
+                            {profile.location && <span>📍 {profile.location}</span>}
+                        </div>
+                    )}
                     {/* Contact Buttons */}
                     <div className="mt-6 flex justify-center">
                         <ProfileContactButtons
@@ -56,7 +63,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                 {/* Professional Summary */}
                 <section className="mb-10">
                     <h2 className="text-2xl font-bold mb-4 uppercase text-gray-900 dark:text-white" style={{ color: accentColor }}>
-                        Resumen Profesional
+                        {L.professionalSummary}
                     </h2>
                     <div className="border-l-4 pl-6" style={{ borderColor: accentColor }}>
                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{profile.summary}</p>
@@ -66,7 +73,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                 {/* Experience */}
                 <section className="mb-10">
                     <h2 className="text-2xl font-bold mb-4 uppercase text-gray-900 dark:text-white" style={{ color: accentColor }}>
-                        Experiencia Profesional
+                        {L.professionalExperience}
                     </h2>
                     <div className="space-y-6">
                         {experiences.map(exp => (
@@ -77,7 +84,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                                         <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">{exp.company_name}</p>
                                     </div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap ml-4">
-                                        {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Presente'}
+                                        {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present}
                                     </p>
                                 </div>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap mt-2">{exp.description}</p>
@@ -89,7 +96,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                 {/* Education */}
                 <section className="mb-10">
                     <h2 className="text-2xl font-bold mb-4 uppercase text-gray-900 dark:text-white" style={{ color: accentColor }}>
-                        Educación
+                        {L.education}
                     </h2>
                     <div className="space-y-4">
                         {education.map(edu => (
@@ -97,7 +104,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
                                 <p className="text-gray-700 dark:text-gray-300">{edu.institution_name}</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Presente'}
+                                    {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : L.present}
                                 </p>
                             </div>
                         ))}
@@ -107,7 +114,7 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                 {/* Skills */}
                 <section>
                     <h2 className="text-2xl font-bold mb-4 uppercase text-gray-900 dark:text-white" style={{ color: accentColor }}>
-                        Competencias Clave
+                        {L.keyCompetencies}
                     </h2>
                     <div className="border-l-4 pl-6" style={{ borderColor: accentColor }}>
                         <div className="grid grid-cols-2 gap-3">

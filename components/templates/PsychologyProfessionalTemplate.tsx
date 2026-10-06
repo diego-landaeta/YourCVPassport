@@ -16,6 +16,8 @@ import { ProfileContactButtons } from './ProfileContactButtons';
 import PublicStampBadges from '../PublicStampBadges';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTemplateLabels } from './templateLabels';
+import { safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface PsychologyProfessionalTemplateProps {
   data: FullProfileData;
@@ -30,6 +32,7 @@ const PsychologyProfessionalTemplate: React.FC<PsychologyProfessionalTemplatePro
   const accentStrong = `${accentColor}30`;
   const t = useTranslations();
   const { lang } = useLanguage();
+  const { L } = useTemplateLabels();
 
   const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return '';
@@ -42,10 +45,10 @@ const PsychologyProfessionalTemplate: React.FC<PsychologyProfessionalTemplatePro
 
   // Social links available in profile
   const socialLinks = [
-    profile.linkedin_url && { label: 'LinkedIn', url: profile.linkedin_url },
-    profile.portfolio_url && { label: lang === 'es' ? 'Web' : 'Website', url: profile.portfolio_url },
-    profile.github_url && { label: 'GitHub', url: profile.github_url },
-  ].filter(Boolean) as { label: string; url: string }[];
+    { label: 'LinkedIn', url: safeExternalUrl(profile.linkedin_url) },
+    { label: lang === 'es' ? 'Web' : 'Website', url: safeExternalUrl(profile.portfolio_url) },
+    { label: 'GitHub', url: safeExternalUrl(profile.github_url) },
+  ].filter((link): link is { label: string; url: string } => Boolean(link.url));
 
   // Psi symbol for psychology branding
   const PsiIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
@@ -71,7 +74,7 @@ const PsychologyProfessionalTemplate: React.FC<PsychologyProfessionalTemplatePro
     if (!level) return null;
     const normalized = level.toUpperCase();
     const config: Record<string, { opacity: string; label: string }> = {
-      EXPERT: { opacity: '25', label: 'Expert' },
+      EXPERT: { opacity: '25', label: L.levelExpert },
       ADVANCED: { opacity: '18', label: lang === 'es' ? 'Avanzado' : 'Advanced' },
       INTERMEDIATE: { opacity: '12', label: lang === 'es' ? 'Intermedio' : 'Intermediate' },
       BEGINNER: { opacity: '08', label: lang === 'es' ? 'Básico' : 'Beginner' },
@@ -129,7 +132,7 @@ const PsychologyProfessionalTemplate: React.FC<PsychologyProfessionalTemplatePro
               {/* Location + Colegiado badge */}
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-4">
                 {profile.country_code && (
-                  <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                  <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                 )}
                 {profile.location && (
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{profile.location}</span>
@@ -148,7 +151,7 @@ const PsychologyProfessionalTemplate: React.FC<PsychologyProfessionalTemplatePro
               {socialLinks.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-4">
                   {socialLinks.map((link) => (
-                    <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer"
+                    <a key={link.label} href={link.url} {...EXTERNAL_LINK_PROPS}
                        className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:opacity-80 transition-opacity"
                        style={{ color: accentColor }}>
                       <LinkIcon className="w-3.5 h-3.5" />
