@@ -251,7 +251,7 @@ test.describe('IA via Edge Function ai-cv-assistant', () => {
 
     // Fallo del proveedor -> mensaje de error visible en el panel.
     ctx.fnErrorByTask.suggest_skills = { status: 502, body: { success: false, code: 'ai_provider_error', error: 'AI provider error' } };
-    await page.getByRole('button', { name: /Regenerar Sugerencias IA/ }).click();
+    await page.getByRole('button', { name: /Regenerar sugerencias IA/ }).click();
     await expect(page.getByRole('alert').filter({ hasText: 'El servicio de IA no está disponible en este momento' })).toBeVisible();
     expect(ctx.fnCalls.filter((c) => c.task === 'suggest_skills')).toHaveLength(2);
 

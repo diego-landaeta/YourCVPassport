@@ -2,6 +2,15 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../contexts/LanguageContext';
 
+// Fecha del último cambio real del texto legal (términos y privacidad).
+// Actualízala solo cuando cambie el contenido de TermsPage o PrivacyPage.
+export const LEGAL_LAST_UPDATED = '2026-10-05';
+
+/** Formatea LEGAL_LAST_UPDATED según el idioma (en UTC para que no cambie de día por zona horaria). */
+export const formatLegalDate = (lang: 'en' | 'es'): string =>
+  new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-US', { dateStyle: 'long', timeZone: 'UTC' })
+    .format(new Date(`${LEGAL_LAST_UPDATED}T00:00:00Z`));
+
 // Textos por idioma (la ruta /terminos es la version en espanol de /terms).
 const CONTENT = {
   en: {
@@ -17,14 +26,14 @@ const CONTENT = {
     ],
   },
   es: {
-    title: 'Términos y Condiciones',
-    metaDescription: 'Términos y Condiciones de YourCVPassport',
+    title: 'Términos y condiciones',
+    metaDescription: 'Términos y condiciones de YourCVPassport',
     lastUpdated: 'Última actualización',
     intro: 'Bienvenido a YourCVPassport. Lee atentamente estos términos y condiciones antes de usar nuestro servicio.',
     sections: [
-      { heading: '1. Aceptación de los Términos', body: 'Al acceder o utilizar nuestro servicio, aceptas quedar vinculado por estos Términos. Si no estás de acuerdo con alguna parte de los términos, no podrás acceder al servicio.' },
+      { heading: '1. Aceptación de los términos', body: 'Al acceder o utilizar nuestro servicio, aceptas quedar vinculado por estos Términos. Si no estás de acuerdo con alguna parte de los términos, no podrás acceder al servicio.' },
       { heading: '2. Cuentas', body: 'Al crear una cuenta con nosotros, debes proporcionarnos información precisa, completa y actualizada en todo momento. No hacerlo constituye un incumplimiento de los Términos, que puede dar lugar a la cancelación inmediata de tu cuenta en nuestro Servicio.' },
-      { heading: '3. Propiedad Intelectual', body: 'El Servicio y su contenido original, características y funcionalidades son y seguirán siendo propiedad exclusiva de YourCVPassport y de sus licenciantes.' },
+      { heading: '3. Propiedad intelectual', body: 'El Servicio y su contenido original, características y funcionalidades son y seguirán siendo propiedad exclusiva de YourCVPassport y de sus licenciantes.' },
       { heading: '4. Terminación', body: 'Podemos cancelar o suspender el acceso a nuestro Servicio de forma inmediata, sin previo aviso ni responsabilidad, por cualquier motivo, incluido, entre otros, el incumplimiento de los Términos.' },
     ],
   },
@@ -41,7 +50,7 @@ const TermsPage: React.FC = () => {
       </Helmet>
       <h1 className="text-3xl font-bold mb-6">{c.title}</h1>
       <div className="prose prose-lg dark:prose-invert">
-        <p className="mb-4">{c.lastUpdated}: {new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US')}</p>
+        <p className="mb-4">{c.lastUpdated}: <time dateTime={LEGAL_LAST_UPDATED}>{formatLegalDate(lang)}</time></p>
 
         <section className="mb-6">
           <p className="mb-4">{c.intro}</p>

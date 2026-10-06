@@ -401,7 +401,7 @@ export const translations = {
                 { title: 'Passport (New)', imageUrl: '/images/templates/passport.png' },
                 { title: 'Classic', imageUrl: '/images/templates/classic.png' },
                 { title: 'Modern Professional', imageUrl: '/images/templates/modern-professional.png' },
-                { title: 'Classic Corporate', imageUrl: '/images/templates/classic-corporate.png' },
+                { title: 'Classic Corporate', imageUrl: '/images/templates/corporate-classic.png' },
                 { title: 'Creative Minimalist', imageUrl: '/images/templates/creative-minimalist.png' },
                 { title: 'Academic Standard', imageUrl: '/images/templates/academic-standard.png' },
                 { title: 'Modern Minimalist', imageUrl: '/images/templates/modern-minimalist.png' },
@@ -781,7 +781,8 @@ export const translations = {
             social: ["LinkedIn", "X (Twitter)", "YouTube"]
         },
         faqTitle: "Frequently Asked Questions",
-        mapImageUrl: "https://maps.googleapis.com/maps/api/staticmap?center=Ayuntamiento+de+Valencia,Spain&zoom=15&size=800x600&markers=color:blue%7Clabel:V%7CAyuntamiento+de+Valencia,Spain&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+        // Enlace a Google Maps sin clave de API (la página de contacto pinta el mapa con un iframe embed).
+        mapUrl: "https://www.google.com/maps/search/?api=1&query=Ayuntamiento+de+Valencia,Valencia,Spain"
     },
     successStoriesPage: {
         seo: {
@@ -1509,6 +1510,8 @@ export const translations = {
                 checkEmail: "Check your email!",
                 checkEmailDesc: "We've sent you a confirmation link to",
                 checkEmailAction: "Please click the link in the email to verify your account.",
+                divider: "Or sign up with",
+                sending: "Sending...",
                 welcomeTitle: "Start Your Journey",
                 welcomeSubtitle: "Join thousands of professionals creating outstanding CVs with our AI-powered platform.",
                 feature1: "Free to get started",
@@ -1530,6 +1533,9 @@ export const translations = {
                 checkEmailDesc: "We've sent a magic link to",
                 checkEmailAction: "Click the link in the email to sign in instantly.",
                 sending: "Sending...",
+                sendButton: "Send Magic Link",
+                emailSentMessage: "We've sent a magic link to",
+                clickLink: "Click the link to sign in securely.",
             },
             recovery: {
                 title: "Reset Password",
@@ -1554,6 +1560,10 @@ export const translations = {
                 sendButton: "Send Reset Link",
                 resetting: "Updating...",
                 resetButton: "Update Password",
+                emailSentMessage: "We've sent password recovery instructions to",
+                resetPassword: "Reset Password",
+                successMessage: "Your password has been successfully reset",
+                loginNow: "Log in now",
             },
             errors: {
                 invalidEmail: "Please enter a valid email address",
@@ -1571,6 +1581,9 @@ export const translations = {
                 tooManyRequests: "Too many requests. Please try again later",
                 networkError: "Network error. Please check your connection",
                 unknownError: "An error occurred. Please try again",
+                sessionExpired: "Your session has expired. Please log in again",
+                unauthorized: "Unauthorized. Please log in",
+                tooManyAttempts: "Too many attempts. Please try again later",
                 serverError: "An unexpected error occurred. Please try again later.",
                 // Errores de las Edge Functions signup / send-password-reset (códigos en utils/authFunctionErrors.ts)
                 invalidInput: "Please check your details: the email or password is not valid",
@@ -1582,6 +1595,8 @@ export const translations = {
             success: {
                 signUpSuccess: "Account created successfully!",
                 signInSuccess: "Welcome back!",
+                loginSuccess: "Logged in successfully!",
+                signupSuccess: "Account created successfully! Please check your email to confirm",
                 passwordResetSent: "Password reset link sent!",
                 passwordUpdated: "Password updated successfully!",
                 magicLinkSent: "Magic link sent to your email!",
@@ -2487,7 +2502,7 @@ export const translations = {
 
         // CVs - Corporate
         { id: 17, title: 'Classic Professional Layout', category: 'CV', imageUrl: '/images/templates/professional-classic.png', industry: 'Corporate', level: 'Executive', downloads: 2100, rating: 4.7 },
-        { id: 18, title: 'Project Manager', category: 'CV', imageUrl: '/images/templates/classic-corporate.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.8 },
+        { id: 18, title: 'Project Manager', category: 'CV', imageUrl: '/images/templates/corporate-classic.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.8 },
         { id: 19, title: 'Financial Analyst', category: 'CV', imageUrl: '/images/templates/classic-sidebar.png', industry: 'Corporate', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
         { id: 20, title: 'Professional Accountant', category: 'CV', imageUrl: '/images/templates/academic-standard.png', industry: 'Corporate', level: 'Senior', downloads: 1234, rating: 4.7 },
         { id: 21, title: 'Business Consultant', category: 'CV', imageUrl: '/images/templates/template-21.png', industry: 'Corporate', level: 'Executive', downloads: 1456, rating: 4.9 },
@@ -2499,7 +2514,7 @@ export const translations = {
         { id: 25, title: 'Healthcare Professional', category: 'CV', imageUrl: '/images/templates/healthcare-professional.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 850, rating: 4.6 },
         { id: 26, title: 'Registered Nurse', category: 'CV', imageUrl: '/images/templates/template-26.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 1456, rating: 4.7 },
         { id: 27, title: 'Medical Specialist', category: 'CV', imageUrl: '/images/templates/template-27.png', industry: 'Healthcare', level: 'Executive', downloads: 1123, rating: 4.9 },
-        { id: 28, title: 'Pharmacist', category: 'CV', imageUrl: '/images/templates/pharmacist.png', industry: 'Healthcare', level: 'Senior', downloads: 890, rating: 4.6 },
+        { id: 28, title: 'Pharmacist', category: 'CV', imageUrl: '/images/templates/template-28.png', industry: 'Healthcare', level: 'Senior', downloads: 890, rating: 4.6 },
         { id: 29, title: 'Physiotherapist', category: 'CV', imageUrl: '/images/templates/template-29.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 756, rating: 4.5 },
         { id: 30, title: 'Lab Technician', category: 'CV', imageUrl: '/images/templates/template-30.png', industry: 'Healthcare', level: 'Entry-Level', downloads: 923, rating: 4.4 },
 
@@ -2516,7 +2531,7 @@ export const translations = {
         // Emails
         { id: 39, title: 'Post-Interview Follow-Up Email', category: 'Email', imageUrl: '/images/templates/template-39.png', industry: 'Technology', level: 'Mid-Career', downloads: 2345, rating: 4.8 },
         { id: 40, title: 'Professional Networking Email', category: 'Email', imageUrl: '/images/templates/template-40.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.7 },
-        { id: 41, title: 'Reference Request Email', category: 'Email', imageUrl: '/images/templates/email-reference.png', industry: 'Technology', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
+        { id: 41, title: 'Reference Request Email', category: 'Email', imageUrl: '/images/templates/template-41.png', industry: 'Technology', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
         { id: 42, title: 'Thank You Email', category: 'Email', imageUrl: '/images/templates/template-42.png', industry: 'Corporate', level: 'Entry-Level', downloads: 2456, rating: 4.5 },
         { id: 43, title: 'Freelance Proposal Email', category: 'Email', imageUrl: '/images/templates/template-43.png', industry: 'Creative', level: 'Senior', downloads: 1234, rating: 4.9 },
         { id: 44, title: 'Salary Negotiation Email', category: 'Email', imageUrl: '/images/templates/template-44.png', industry: 'Corporate', level: 'Senior', downloads: 1678, rating: 4.8 },
@@ -4230,6 +4245,7 @@ export const translations = {
             conversationStarted: 'Conversation started successfully',
             conversationError: 'Error starting conversation',
             creditsRequired: '{credits} credits required to start this conversation',
+            notFound: 'Profile not found',
         },
         credits: {
             title: 'Credits Management',

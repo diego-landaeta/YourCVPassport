@@ -341,7 +341,7 @@ test.describe('#11 generateCVPDF: paginas = contenido, ninguna vacia', () => {
       expect(capturedText).toContain(c.len === 'largo' ? 'Lucía' : 'Pablo');
       expect(capturedText).toContain(c.len === 'largo' ? 'Directora de Ingeniería de Software' : 'Analista de datos');
       expect(capturedText).not.toContain('Contáctame');
-      expect(capturedText).not.toContain('Agendar Reunión');
+      expect(capturedText).not.toMatch(/Agendar reuni[oó]n/i);
       expect(capturedText).not.toContain('Contact Information');
 
       // Antes: 8000 px de alto minimo y 5 paginas siempre
