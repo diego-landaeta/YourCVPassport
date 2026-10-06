@@ -29,7 +29,7 @@ test.describe.configure({ timeout: 120_000 });
 // Textos esperados (translations/*.ts > dashboard.auth.errors / recovery).
 const TXT = {
   es: {
-    signupButton: 'Crear Cuenta',
+    signupButton: 'Crear cuenta',
     emailAlreadyExists: 'Este correo electrónico ya está registrado',
     weakPassword: 'La contraseña es demasiado débil',
     invalidInput: 'Revisa los datos',

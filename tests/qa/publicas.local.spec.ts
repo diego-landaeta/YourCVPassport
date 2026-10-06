@@ -304,7 +304,7 @@ test.describe('#6 migas de pan', () => {
     });
   }
 
-  test('el post del blog no duplica migas (ya tiene "Volver al Blog")', async ({ page, context }) => {
+  test('el post del blog no duplica migas (ya tiene "Volver al blog")', async ({ page, context }) => {
     await setup(context, 'es');
     await page.goto('/recursos/blog/como-hacer-cv-para-emigrar-europa', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible({ timeout: 45_000 });
@@ -370,11 +370,11 @@ test.describe('#7 kit de prensa', () => {
     await expect(page.getByTestId('press-download-kit')).toBeVisible({ timeout: 45_000 });
     let dialog = false;
     page.on('dialog', d => { dialog = true; d.dismiss(); });
-    await page.getByLabel('Nombre Completo').fill('QA Test');
-    await page.getByLabel('Medio de Comunicación').fill('QA Medio');
-    await page.getByLabel('Correo Electrónico').fill('qa@example.com');
+    await page.getByLabel('Nombre completo', { exact: true }).fill('QA Test');
+    await page.getByLabel('Medio de comunicación', { exact: true }).fill('QA Medio');
+    await page.getByLabel('Correo electrónico', { exact: true }).fill('qa@example.com');
     await page.getByLabel('Mensaje').fill('Prueba local, no se envia nada.');
-    await page.getByRole('button', { name: 'Enviar Consulta' }).click();
+    await page.getByRole('button', { name: 'Enviar consulta', exact: true }).click();
     const status = page.getByRole('status').filter({ hasText: 'press@yourcvpassport.com' });
     await expect(status).toBeVisible();
     await expect(status.getByRole('link', { name: 'Abrir en mi correo' }))
@@ -390,7 +390,7 @@ test.describe('#7 kit de prensa', () => {
 test('/terminos tiene el titulo en espanol y /terms en ingles', async ({ page, context }) => {
   await setup(context, 'es');
   await page.goto('/terminos', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { level: 1, name: 'Términos y Condiciones' })).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByRole('heading', { level: 1, name: 'Términos y condiciones', exact: true })).toBeVisible({ timeout: 45_000 });
   await page.goto('/terms', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { level: 1, name: 'Terms and Conditions' })).toBeVisible({ timeout: 45_000 });
 });
