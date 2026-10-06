@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { supabase } from '../supabase/client';
+import { localDayKeysBetween, localDaysAgo, toLocalDayKey } from '../utils/dateKeys';
 
 // Generar o recuperar un visitor_id único
 function getVisitorId(): string {
@@ -55,9 +56,31 @@ function markViewRecorded(profileId: string, visitorId: string): void {
   localStorage.setItem(storageKey, Date.now().toString());
 }
 
-// Trackear visita a un perfil (solo si no es el propio usuario y no hay visita reciente)
+// Carga de la ficha que no es una visita de una persona: los generadores de PDF
+// (admin, gestor, el propio usuario) abren /cv/:slug en un iframe oculto, y las
+// exportaciones añaden ?export=1. Sin esto cada PDF exportado sumaba una visita.
+function isExportRender(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    if (window.self !== window.top) return true;
+  } catch {
+    // Acceso a window.top bloqueado (iframe de otro origen): tampoco es una visita directa.
+    return true;
+  }
+  try {
+    return new URLSearchParams(window.location.search).get('export') === '1';
+  } catch {
+    return false;
+  }
+}
+
+// Trackear visita a un perfil (solo si no es el propio usuario, no es una
+// exportacion y no hay visita reciente)
 export async function trackView(profileId: string) {
   if (!profileId) return;
+
+  // No registrar las cargas de la ficha para exportar a PDF
+  if (isExportRender()) return;
 
   try {
     // No registrar si es el propio usuario viendo su perfil
@@ -144,8 +167,10 @@ export async function getAnalyticsStats(profileId: string) {
   if (!profileId) return null;
 
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Últimos 30 días naturales contando hoy, desde la medianoche LOCAL. Antes era
+    // "ahora - 30 días": la serie diaria tenía 31 días (el primero a medias) y el
+    // dashboard, que se queda con los 30 últimos, descuadraba con el total.
+    const thirtyDaysAgo = localDaysAgo(29);
 
     // Visitas totales en los últimos 30 días
     const { count: totalViews } = await supabase
@@ -195,7 +220,7 @@ export async function getAnalyticsStats(profileId: string) {
       .not('country', 'is', null);
 
     // Procesar datos de visitas por día
-    const viewsByDay = processViewsByDay(viewsData || []);
+    const viewsByDay = processViewsByDay(viewsData || [], thirtyDaysAgo);
 
     // Procesar fuentes de tráfico
     const trafficSources = processTrafficSources(referrers || []);
@@ -217,19 +242,25 @@ export async function getAnalyticsStats(profileId: string) {
   }
 }
 
-// Procesar visitas por día
-function processViewsByDay(views: any[]) {
-  const viewsMap: { [key: string]: number } = {};
+// Procesar visitas por día: agrupa por día LOCAL (no UTC: una visita a las 23:30
+// en México caía en el día siguiente) y devuelve todos los días del rango, con 0
+// en los que no hubo visitas, en orden cronológico.
+function processViewsByDay(views: any[], since: Date) {
+  const viewsMap = new Map<string, number>();
+  for (const key of localDayKeysBetween(since)) viewsMap.set(key, 0);
 
   views.forEach((view) => {
-    const date = new Date(view.viewed_at).toISOString().split('T')[0];
-    viewsMap[date] = (viewsMap[date] || 0) + 1;
+    if (!view.viewed_at) return;
+    const date = toLocalDayKey(view.viewed_at);
+    viewsMap.set(date, (viewsMap.get(date) || 0) + 1);
   });
 
-  return Object.entries(viewsMap).map(([date, count]) => ({
-    date,
-    views: count,
-  }));
+  return Array.from(viewsMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({
+      date,
+      views: count,
+    }));
 }
 
 // Procesar fuentes de tráfico
