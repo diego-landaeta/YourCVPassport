@@ -107,6 +107,9 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   const [isSaving, setIsSaving] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  // Último valor escrito y temporizador del debounce de la comprobación
+  const latestSlugRef = useRef(currentSlug);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { canChange, daysRemaining } = canChangeSlug(lastChangedAt);
   const nextChangeDate = getNextSlugChangeDate(lastChangedAt);
@@ -132,9 +135,11 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
     setIsCheckingAvailability(true);
     try {
       // Helper común (maybeSingle): sin 406 en la red y un error real no se toma por "libre"
-      setIsAvailable(await isSlugAvailable(slug, userId));
+      const available = await isSlugAvailable(slug, userId);
+      // Si mientras tanto se ha escrito otra cosa, este resultado ya no aplica
+      if (latestSlugRef.current === slug) setIsAvailable(available);
     } catch {
-      setIsAvailable(false);
+      if (latestSlugRef.current === slug) setIsAvailable(false);
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -143,13 +148,20 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   const handleSlugChange = (value: string) => {
     const sanitized = sanitizeSlug(value);
     setSlugValue(sanitized);
+    latestSlugRef.current = sanitized;
 
-    // Debounce availability check
+    // Debounce availability check. El `return () => clearTimeout` de antes no hacía
+    // nada (un manejador de evento no tiene limpieza): el temporizador de un valor
+    // anterior seguía disparándose.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     if (sanitized !== currentSlug) {
-      const timeoutId = setTimeout(() => {
+      debounceRef.current = setTimeout(() => {
         checkSlugAvailability(sanitized);
       }, 500);
-      return () => clearTimeout(timeoutId);
+    } else {
+      // Volver al slug propio: no está ocupado. Sin esto quedaba el "ocupado" del
+      // valor anterior y el botón Guardar seguía deshabilitado.
+      setIsAvailable(null);
     }
   };
 
@@ -191,6 +203,8 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   };
 
   const handleCancel = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    latestSlugRef.current = currentSlug;
     setSlugValue(currentSlug);
     setIsEditing(false);
     setIsAvailable(null);
