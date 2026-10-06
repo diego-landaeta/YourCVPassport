@@ -611,8 +611,9 @@ export function CVVersionsSection() {
     );
   }
 
-  // Block access for non-admin users
-  if (!isAdmin) {
+  // Sin acceso (no admin) o sin la tabla cv_versions: el mismo aviso para todos. Antes,
+  // sin tabla, se mostraban instrucciones de desarrollador (Supabase, SQL Editor, rutas locales).
+  if (!isAdmin || isTableMissing) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-800/30 border-2 border-gray-300 dark:border-gray-700 rounded-2xl p-10 text-center shadow-lg">
@@ -649,75 +650,6 @@ export function CVVersionsSection() {
           <div className="mt-8 text-sm text-gray-600 dark:text-gray-400">
             <p>Estamos trabajando en optimizar esta función para ofrecerte la mejor experiencia.</p>
             <p className="mt-2">Por ahora, puedes seguir usando todas las demás funciones del dashboard.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // If table is missing, show setup instructions
-  if (isTableMissing) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl p-10 text-center shadow-lg">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="bg-yellow-100 dark:bg-yellow-900/50 rounded-full p-5">
-              <svg className="w-16 h-16 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Title */}
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            Configuración de Base de Datos Requerida
-          </h2>
-
-          {/* Description */}
-          <p className="text-gray-700 dark:text-gray-300 mb-6 text-lg leading-relaxed">
-            La función "CV Versions" requiere que apliques una migración de base de datos.
-            Esta es una configuración única que solo necesitas hacer una vez.
-          </p>
-
-          {/* Instructions */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 text-left max-w-2xl mx-auto">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Instrucciones de Configuración
-            </h3>
-
-            <div className="space-y-4">
-              <div className="border-l-4 border-blue-500 pl-4">
-                <p className="font-semibold text-gray-900 dark:text-white mb-2">Opción 1: Supabase Dashboard (Recomendado)</p>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li>Abre <a href="https://app.supabase.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Supabase Dashboard</a></li>
-                  <li>Ve a tu proyecto → <strong>SQL Editor</strong></li>
-                  <li>Abre el archivo: <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">supabase/migrations/20250120_cv_versions_fix.sql</code></li>
-                  <li>Copia todo el contenido y pégalo en el SQL Editor</li>
-                  <li>Click en <strong>Run</strong></li>
-                  <li>Refresca esta página</li>
-                </ol>
-              </div>
-
-              <div className="border-l-4 border-green-500 pl-4">
-                <p className="font-semibold text-gray-900 dark:text-white mb-2">Opción 2: Supabase CLI</p>
-                <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
-{`cd c:\\Users\\molin\\Downloads\\yourcvpassport
-supabase db push`}
-                </pre>
-              </div>
-            </div>
-          </div>
-
-          {/* Help Link */}
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>Consulta <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">APPLY_CV_VERSIONS_FIX.md</code> para más detalles</span>
           </div>
         </div>
       </div>
