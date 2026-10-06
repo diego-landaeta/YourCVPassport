@@ -23,8 +23,15 @@ interface CompanyWithUsers extends Company {
 
 const CompanyManagementSection: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { lang } = useLanguage();
   const toast = useToastContext();
+
+  // approve_company / reject_company comprueban en el servidor que quien llama
+  // (auth.uid()) es admin; p_admin_id se sigue enviando pero se ignora.
+  // Un 42501 (PostgREST 403) significa que la sesión no es de un admin.
+  const notAdminMessage = lang === 'es'
+    ? 'Solo un administrador puede aprobar o rechazar empresas. Vuelve a iniciar sesión con una cuenta de administrador.'
+    : 'Only an administrator can approve or reject companies. Sign in again with an administrator account.';
 
   const [companies, setCompanies] = useState<CompanyWithUsers[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,7 +139,7 @@ const CompanyManagementSection: React.FC = () => {
     try {
       const { data, error } = await supabase.rpc('approve_company', {
         p_company_id: selectedCompany.id,
-        p_admin_id: user.id,
+        p_admin_id: user.id, // ignorado en el servidor (se usa auth.uid())
         p_notes: approvalNotes || null
       });
 
@@ -162,7 +169,7 @@ const CompanyManagementSection: React.FC = () => {
       setApprovalNotes('');
     } catch (error: any) {
       console.error('Error approving company:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(error?.code === '42501' ? notAdminMessage : `Error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
@@ -179,7 +186,7 @@ const CompanyManagementSection: React.FC = () => {
     try {
       const { data, error } = await supabase.rpc('reject_company', {
         p_company_id: selectedCompany.id,
-        p_admin_id: user.id,
+        p_admin_id: user.id, // ignorado en el servidor (se usa auth.uid())
         p_reason: rejectReason
       });
 
@@ -210,7 +217,7 @@ const CompanyManagementSection: React.FC = () => {
       setRejectReason('');
     } catch (error: any) {
       console.error('Error rejecting company:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(error?.code === '42501' ? notAdminMessage : `Error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
