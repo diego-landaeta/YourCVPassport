@@ -54,6 +54,8 @@ En el SQL editor, en este orden:
 - [ ] `20261005_recalcular_contadores_feed.sql`
 - [ ] `20261007_seguridad_empresas.sql` (aborta si falta la primera)
 - [ ] `20261008_stamps_insert_solo_pendiente.sql` (un usuario ya no puede crearse sellos VERIFIED)
+- [ ] `20261009_proteger_datos_companies.sql` (vista `companies_full` para miembros,
+      creador y admin; aborta si falta `20261007_seguridad_empresas.sql`)
 
 ## 3. Edge Functions
 
@@ -85,6 +87,10 @@ En el SQL editor, en este orden:
 - [ ] `20261006_cerrar_columnas_privadas_profiles_stamps.sql`. Quita a `anon` las
       columnas privadas de `profiles` y las políticas públicas de `stamps`. Revisar
       antes los avisos (WARNING) que imprime.
+- [ ] `20261009b_cerrar_columnas_privadas_companies.sql`. Deja a `anon` y `authenticated`
+      solo `id`, `company_name` y `logo_url` de `companies` (el resto, por
+      `companies_full`). Solo con el frontend nuevo ya subido: con el antiguo, el panel
+      de empresa y el de admin de empresas dejan de cargar. Revisar los avisos (WARNING).
 
 ## 6. Google y comprobaciones finales
 

@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../supabase/client';
 import { Company } from '../../types';
+import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const CompaniesViewSection: React.FC = () => {
@@ -108,8 +109,8 @@ const CompaniesViewSection: React.FC = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('companies')
-        .select('*')
+        .from('companies_full')
+        .select(COMPANY_FULL_COLUMNS)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

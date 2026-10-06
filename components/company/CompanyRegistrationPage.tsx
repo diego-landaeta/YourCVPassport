@@ -313,7 +313,9 @@ const CompanyRegistrationPage: React.FC = () => {
           signup_ip: signupIp,
           status: 'PENDING',
         })
-        .select()
+        // Solo columnas públicas: el resto de companies no es legible por authenticated
+        // (20261009b_cerrar_columnas_privadas_companies.sql). Aquí solo hace falta el id.
+        .select('id')
         .single();
 
       if (companyError) {

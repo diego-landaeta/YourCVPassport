@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import type { Company, CompanyUser } from '../../types';
+import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 
@@ -61,10 +62,10 @@ const CompanyProtectedRoute: React.FC = () => {
 
       setCompanyUser(companyUserData as CompanyUser);
 
-      // Fetch company details
+      // Fetch company details (columnas privadas: vista companies_full, solo miembros/creador/admin)
       const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .select('*')
+        .from('companies_full')
+        .select(COMPANY_FULL_COLUMNS)
         .eq('id', companyUserData.company_id)
         .maybeSingle();
 

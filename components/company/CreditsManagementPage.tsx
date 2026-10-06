@@ -124,8 +124,9 @@ const CreditsManagementPage: React.FC = () => {
       // For now, we'll simulate a purchase
 
       // Get current balance
+      // credit_balance es privado: se lee de la vista companies_full
       const { data: companyData, error: fetchError } = await supabase
-        .from('companies')
+        .from('companies_full')
         .select('credit_balance')
         .eq('id', company.id)
         .single();

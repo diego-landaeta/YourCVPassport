@@ -4,6 +4,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
 import { Profile, Company, CompanyUser } from '../types';
 import { invokeAuthFunction } from '../utils/authFunctionErrors';
+import { COMPANY_FULL_COLUMNS } from '../lib/companyColumns';
 
 type AuthMode = 'login' | 'signup';
 
@@ -219,10 +220,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setCompanyUser(companyUserData as CompanyUser);
 
-      // Fetch company details
+      // Fetch company details (columnas privadas: vista companies_full, solo miembros/creador/admin)
       const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .select('*')
+        .from('companies_full')
+        .select(COMPANY_FULL_COLUMNS)
         .eq('id', companyUserData.company_id)
         // maybeSingle: si la empresa ya no existe o no es visible, company = null sin 406
         .maybeSingle();
