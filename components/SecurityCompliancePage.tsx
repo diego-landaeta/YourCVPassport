@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './shared/PageSEO';
@@ -196,9 +197,12 @@ const SecurityCompliancePage: React.FC = () => {
                         <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">
                            {pageData.finalCta.subtitle}
                         </p>
-                        <a href="#" className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
-                            {pageData.finalCta.button}
-                        </a>
+                        {/* No existe un "Centro de Confianza" como página propia (el botón iba a "#"):
+                            lleva a la política de privacidad, que es donde están las políticas publicadas,
+                            y el texto del botón dice a dónde va. */}
+                        <Link to={lang === 'es' ? '/privacidad' : '/privacy'} className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+                            {lang === 'es' ? 'Ver la política de privacidad' : 'Read the privacy policy'}
+                        </Link>
                     </AnimatedWrapper>
                 </div>
             </section>

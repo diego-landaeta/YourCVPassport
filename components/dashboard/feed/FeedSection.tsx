@@ -17,6 +17,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { useNotifications } from '../../../hooks/useNotifications';
 import PushNotificationPrompt from '../../shared/PushNotificationPrompt';
 import { supabase } from '../../../supabase/client';
+import { Link } from 'react-router-dom';
 import {
   ArrowTrendingUpIcon,
   ChevronRightIcon,
@@ -444,14 +445,22 @@ const SuggestedCommunitiesCard: React.FC<{
 /* ── Right Sidebar: Footer Links ─────────────────────────── */
 const SidebarFooter: React.FC = () => {
   const t = useTranslations();
+  const { lang } = useLanguage();
   const fl = t.feed.footerLinks;
-  const links = [fl.about, fl.privacy, fl.terms, fl.helpCenter, fl.accessibility];
+  const isEs = lang === 'es';
+  // Rutas reales (antes todas eran "#"). "Accesibilidad" se quita: no hay página de accesibilidad.
+  const links = [
+    { label: fl.about, to: t.footer.links.about },
+    { label: fl.privacy, to: isEs ? '/privacidad' : '/privacy' },
+    { label: fl.terms, to: isEs ? '/terminos' : '/terms' },
+    { label: fl.helpCenter, to: t.footer.links.help },
+  ];
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1.5 px-1 text-[11px] text-gray-400 dark:text-gray-600">
-      {links.map((link) => (
-        <a key={link} href="#" className="hover:underline hover:text-gray-600 dark:hover:text-gray-400 transition-colors">{link}</a>
+      {links.map(({ label, to }) => (
+        <Link key={to} to={to} className="hover:underline hover:text-gray-600 dark:hover:text-gray-400 transition-colors">{label}</Link>
       ))}
-      <span className="block w-full mt-1">&copy; 2026 YourCVPassport</span>
+      <span className="block w-full mt-1">&copy; {new Date().getFullYear()} YourCVPassport</span>
     </div>
   );
 };
