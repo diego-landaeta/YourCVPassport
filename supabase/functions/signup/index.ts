@@ -15,12 +15,16 @@
 // redirectTo: solo se acepta un origen de la lista de CORS con path /confirm
 // (ver resolveAuthRedirect en _shared/cors.ts); si no, se usa el origen
 // permitido de la petición o https://www.yourcvpassport.com.
+//
+// Enlace del correo: <redirectTo>?token_hash=…&type=signup (dominio propio, sin
+// supabase.co); ConfirmPage lo verifica con verifyOtp. Ver _shared/authLink.ts.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { enforceRateLimit, getClientIp } from '../_shared/ratelimit.ts'
 import { sendEmail } from '../_shared/email.ts'
+import { buildAuthEmailLink } from '../_shared/authLink.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -162,7 +166,14 @@ serve(async (req: Request) => {
       throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate confirmation link')
     }
 
-    const confirmationLink = confirmData.properties.action_link
+    // Enlace con el dominio propio (/confirm?token_hash=…&type=signup), no el
+    // action_link de <proyecto>.supabase.co (ver _shared/authLink.ts).
+    const confirmationLink = buildAuthEmailLink(redirectTo, confirmData?.properties, 'signup')
+    if (!confirmationLink) {
+      console.error('[signup] generateLink returned no usable link')
+      await rollbackUser()
+      throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate confirmation link')
+    }
     const userName = escapeHtml(full_name || email.split('@')[0])
 
     // Envío por Brevo (_shared/email.ts, timeout de 10 s: un envío colgado

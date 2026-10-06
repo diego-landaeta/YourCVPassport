@@ -1,17 +1,21 @@
 // Supabase Edge Function: send-email-confirmation
 // Sends email confirmation via Brevo (_shared/email.ts)
+//
+// Enlace del correo: <origen permitido>/confirm?token_hash=…&type=signup (dominio
+// propio, sin supabase.co); ConfirmPage lo verifica con verifyOtp. Ver
+// _shared/authLink.ts. redirectTo: solo un origen de la lista de CORS con path
+// /confirm (resolveAuthRedirect en _shared/cors.ts); si no, el origen permitido de
+// la petición o https://www.yourcvpassport.com. Antes el valor por defecto era
+// http://localhost:52656 y se aceptaba cualquier redirectTo.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { sendEmail } from '../_shared/email.ts'
+import { buildAuthEmailLink } from '../_shared/authLink.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
 
 interface EmailConfirmationRequest {
   email: string
@@ -19,7 +23,19 @@ interface EmailConfirmationRequest {
   redirectTo?: string
 }
 
+// full_name lo controla el usuario y va dentro del HTML del correo.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req)
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -27,11 +43,15 @@ serve(async (req: Request) => {
 
   try {
     // Get request body
-    const { email, userId, redirectTo }: EmailConfirmationRequest = await req.json()
+    const payload: EmailConfirmationRequest = await req.json()
+    const email = typeof payload?.email === 'string' ? payload.email.trim().toLowerCase() : ''
+    const userId = typeof payload?.userId === 'string' ? payload.userId : ''
 
     if (!email || !userId) {
       throw new Error('Email and userId are required')
     }
+
+    const redirectTo = resolveAuthRedirect(req, payload?.redirectTo, '/confirm')
 
     // Create Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
@@ -40,23 +60,27 @@ serve(async (req: Request) => {
     const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
       type: 'signup',
       email: email,
-      options: {
-        redirectTo: redirectTo || `${req.headers.get('origin') || 'http://localhost:52656'}/confirm`
-      }
+      options: { redirectTo }
     })
 
     if (confirmError) throw confirmError
 
-    const confirmationLink = confirmData.properties.action_link
+    // Enlace con el dominio propio, no el action_link de <proyecto>.supabase.co.
+    const confirmationLink = buildAuthEmailLink(redirectTo, confirmData?.properties, 'signup')
+    if (!confirmationLink) throw new Error('Could not generate confirmation link')
 
-    // Get user profile for personalization
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', userId)
-      .single()
+    // Nombre del perfil para personalizar. Se busca por el usuario del enlace
+    // (el del email), no por el userId del cuerpo, que podría ser de otra cuenta.
+    const linkUserId: string | undefined = confirmData.user?.id
+    const { data: profile } = linkUserId
+      ? await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', linkUserId)
+        .maybeSingle()
+      : { data: null }
 
-    const userName = profile?.full_name || email.split('@')[0]
+    const userName = escapeHtml(profile?.full_name || email.split('@')[0])
 
     // Envío por Brevo (_shared/email.ts)
     const emailResult = await sendEmail({

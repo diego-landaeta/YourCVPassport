@@ -11,6 +11,9 @@
 //     Nota: con type 'magiclink' GoTrue crea la cuenta (sin confirmar) si el
 //     email no existe y el enlace sirve de alta, igual que antes de este cambio.
 //   - Nombre del perfil escapado antes de meterlo en el HTML.
+//   - Enlace del correo: <redirectTo>?token_hash=…&type=magiclink (dominio propio,
+//     sin supabase.co); CallbackPage lo verifica con verifyOtp. Ver
+//     _shared/authLink.ts.
 //
 // Contrato:
 //   200 { success, message }   siempre que el email sea válido
@@ -28,6 +31,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
 import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts'
 import { sendEmail } from '../_shared/email.ts'
+import { buildAuthEmailLink } from '../_shared/authLink.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -113,9 +117,8 @@ serve(async (req: Request) => {
     }
 
     // resolveAuthRedirect valida origen + path exacto; '/callback' es la ruta de
-    // la app que recoge la sesión (App.tsx). El tipo del helper solo enumera
-    // '/confirm' | '/recovery': ampliarlo en _shared/cors.ts quita este cast.
-    const redirectTo = resolveAuthRedirect(req, payload?.redirectTo, '/callback' as unknown as '/confirm')
+    // la app que recoge la sesión (App.tsx).
+    const redirectTo = resolveAuthRedirect(req, payload?.redirectTo, '/callback')
 
     // Rate limit por destinatario: evita bombardear un buzón cambiando de IP.
     const emailLimited = await rateLimit('authEmail', [`magic:email:${await sha256Hex(email)}`])
@@ -148,7 +151,15 @@ serve(async (req: Request) => {
       throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate access link')
     }
 
-    const magicLink = magicLinkData.properties.action_link
+    // Enlace con el dominio propio (/callback?token_hash=…&type=magiclink), no el
+    // action_link de <proyecto>.supabase.co (ver _shared/authLink.ts). Para una
+    // cuenta nueva GoTrue puede devolver verification_type 'signup': CallbackPage
+    // acepta cualquier tipo de verifyOtp.
+    const magicLink = buildAuthEmailLink(redirectTo, magicLinkData?.properties, 'magiclink')
+    if (!magicLink) {
+      console.error('[send-magic-link] generateLink returned no usable link')
+      throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate access link')
+    }
     const linkUserId: string | undefined = magicLinkData.user?.id
 
     // Get user profile for personalization (if user exists)
