@@ -135,7 +135,9 @@ async function call(handler: (req: Request) => Promise<Response>, fnCase: FnCase
   const st: StubState = g.__authLinkStub;
   const payload = st.brevoPayloads.at(-1);
   const html: string = payload?.htmlContent ?? '';
-  const href = html.match(/<a href="([^"]+)"/)?.[1] ?? '';
+  // Enlace del botón: el primero del cuerpo (después del <h1>; antes va el de
+  // la marca). En el HTML los & van escapados (&amp;).
+  const href = (html.slice(html.indexOf('<h1')).match(/<a href="([^"]+)"/)?.[1] ?? '').replace(/&amp;/g, '&');
   return { status: res.status, body: await res.json().catch(() => null), payload, html, href };
 }
 

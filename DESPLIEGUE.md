@@ -77,8 +77,11 @@ En el SQL editor, en este orden:
       `20261005_cerrar_escritura_profile_translations.sql`.
 - [ ] `./supabase/functions/deploy-signup.sh` (signup).
 - [ ] `./supabase/functions/deploy.sh` (verificación, contraseña, magic link,
-      `send-email`, registro de empresa). Exige `BREVO_API_KEY` en el entorno.
-- [ ] `supabase functions deploy send-lead-notification`
+      reenvío de confirmación, registro de empresa). Exige `BREVO_API_KEY` en el entorno.
+- [ ] Borrar las funciones retiradas, que siguen desplegadas con el código antiguo
+      (Resend): `supabase functions delete send-email` y
+      `supabase functions delete send-lead-notification`. Ver
+      `supabase/functions/EMAIL.md`.
 - [ ] `supabase functions deploy newsletter-contact --no-verify-jwt`
 - [ ] `./supabase/functions/deploy-export-pdf.sh` y `export-docx`
 - [ ] El resto de funciones modificadas: `admin-create-managed-profile`,

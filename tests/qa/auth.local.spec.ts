@@ -121,7 +121,9 @@ const toastArea = (page: Page) => page.locator('div.fixed.top-4.right-4');
 test.describe('#1 alta con email: todo error se muestra', () => {
   const cases: { name: string; respond: FnHandler; expected: string }[] = [
     {
-      name: '502 EMAIL_SEND_FAILED (Resend)',
+      // signup ya no lo devuelve (la cuenta queda pendiente, ver
+      // signup-pendiente.local.spec.ts); lo hace la versión desplegada antes.
+      name: 'contrato antiguo: 502 EMAIL_SEND_FAILED',
       respond: (r, _q, o) => json(r, 502, { error: 'Could not send confirmation email', code: 'EMAIL_SEND_FAILED' }, o),
       expected: TXT.es.signupEmailSendFailed,
     },

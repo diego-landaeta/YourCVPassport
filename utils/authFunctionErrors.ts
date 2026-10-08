@@ -7,8 +7,9 @@
 // En el cliente se añaden TIMEOUT, NETWORK_ERROR y RATE_LIMITED.
 //
 // También reconoce el contrato antiguo (500 + INTERNAL_ERROR con el mensaje de
-// GoTrue/Resend en `error`) para que la UI muestre algo útil aunque el frontend
-// se despliegue antes que las funciones.
+// GoTrue o "Resend error" en `error`, de cuando el correo iba por Resend) para
+// que la UI muestre algo útil aunque el frontend se despliegue antes que las
+// funciones. Se puede quitar cuando producción tenga las funciones con Brevo.
 // ============================================================================
 
 import { supabase } from '../supabase/client';

@@ -1,6 +1,6 @@
 /**
  * Edge Function Tests: Utilities (Updated for Real API)
- * Tests for analytics, AI optimization, sitemap, and lead notification functions
+ * Tests for analytics, AI optimization and sitemap functions
  */
 
 import { test, expect } from '@playwright/test';
@@ -94,45 +94,6 @@ test.describe('Sitemap Function', () => {
   });
 });
 
-test.describe('Send Lead Notification Function', () => {
-  test('send-lead-notification - should handle notification request', async ({ request }) => {
-    const response = await request.post(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      // Campos que espera la funcion (lead_id, profile_id, sender_*). El profile_id no
-      // existe: responde 404 sin enviar ningun correo.
-      data: {
-        lead_id: '00000000-0000-4000-8000-000000000000',
-        profile_id: '00000000-0000-4000-8000-000000000000',
-        sender_name: 'Test User',
-        sender_email: 'test@example.com',
-        message: 'Test message',
-      },
-    });
-
-    expect([200, 400, 404, 500]).toContain(response.status());
-  });
-
-  test('send-lead-notification - should require email parameter', async ({ request }) => {
-    const response = await request.post(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      data: {
-        lead_id: '00000000-0000-4000-8000-000000000000',
-        profile_id: '00000000-0000-4000-8000-000000000000',
-        sender_name: 'Test User',
-        message: 'Test message',
-      },
-    });
-
-    expect([400, 500]).toContain(response.status());
-  });
-});
-
 test.describe('CORS Handling', () => {
   test('should handle OPTIONS for track-analytics', async ({ request }) => {
     const response = await request.fetch(`${SUPABASE_URL}/functions/v1/track-analytics`, {
@@ -150,11 +111,4 @@ test.describe('CORS Handling', () => {
     expect(response.status()).toBe(200);
   });
 
-  test('should handle OPTIONS for send-lead-notification', async ({ request }) => {
-    const response = await request.fetch(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      method: 'OPTIONS',
-    });
-
-    expect(response.status()).toBe(200);
-  });
 });

@@ -4,13 +4,23 @@
 // Contrato de errores (la UI los traduce en utils/authFunctionErrors.ts):
 //   400 INVALID_INPUT            cuerpo inválido, email mal formado o sin password
 //   400 WEAK_PASSWORD            password que no cumple la política
-//   409 EMAIL_ALREADY_REGISTERED el email ya tiene cuenta
-//   429 RATE_LIMITED             demasiadas altas desde la misma IP (Upstash) o GoTrue limita la petición
-//   502 EMAIL_SEND_FAILED        Brevo no envió el correo (se borra el usuario: rollback)
+//   409 EMAIL_ALREADY_REGISTERED el email ya tiene una cuenta confirmada
+//   429 RATE_LIMITED             demasiadas altas desde la misma IP o hacia el mismo
+//                                email (Upstash), o GoTrue limita la petición
 //   500 INTERNAL_ERROR           cualquier otro fallo
 //
-// Éxito: 200 { success, message }. No se devuelve el objeto `user` de GoTrue
-// (metadatos, identidades, fechas): el frontend no lo usa.
+// Éxito: 200 { success, emailSent, alreadyPending }. No se devuelve el objeto
+// `user` de GoTrue (metadatos, identidades, fechas): el frontend no lo usa.
+//   - emailSent: false → la cuenta está creada y pendiente, pero el correo no
+//     salió (Brevo caído, sin key...). Antes se borraba la cuenta y se devolvía
+//     502 EMAIL_SEND_FAILED (issue #3); ahora la UI ofrece "Reenviar correo de
+//     confirmación" (send-email-confirmation).
+//   - alreadyPending: true → el email ya tenía una cuenta sin confirmar: no se
+//     crea otra ni se cambia su password, solo se reenvía la confirmación.
+//
+// Rate limit (Upstash, fail open si no está configurado): 5/min por IP (config
+// 'auth') y 3 cada 15 min por email (config 'authEmail', hash SHA-256, cubo
+// compartido con send-email-confirmation).
 //
 // redirectTo: solo se acepta un origen de la lista de CORS con path /confirm
 // (ver resolveAuthRedirect en _shared/cors.ts); si no, se usa el origen
@@ -22,9 +32,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders, resolveAuthRedirect } from '../_shared/cors.ts'
-import { enforceRateLimit, getClientIp } from '../_shared/ratelimit.ts'
+import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts'
 import { sendEmail } from '../_shared/email.ts'
 import { buildAuthEmailLink } from '../_shared/authLink.ts'
+import { generatePendingConfirmationLink } from '../_shared/confirmationEmail.ts'
+import { confirmSignupEmail } from '../_shared/emailTemplates.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -49,16 +61,16 @@ class HttpError extends Error {
   }
 }
 
-// El nombre lo escribe quien se registra y va dentro del HTML del correo: sin
-// escapar, cualquiera podría registrar el email de un tercero con un "nombre"
-// que inyecte enlaces o HTML en un correo enviado desde nuestro dominio.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
+// Respuesta de éxito: cuenta creada (o ya pendiente), con o sin correo enviado.
+function created(corsHeaders: Record<string, string>, result: { emailSent: boolean; alreadyPending?: boolean }): Response {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      emailSent: result.emailSent,
+      alreadyPending: !!result.alreadyPending,
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
 }
 
 // Misma política que el formulario (AuthScreen.validatePassword).
@@ -130,143 +142,80 @@ serve(async (req: Request) => {
       throw new HttpError(400, 'WEAK_PASSWORD', 'Password must be at least 8 characters and include uppercase, lowercase and a number')
     }
 
+    // Rate limit por destinatario, compartido con send-email-confirmation
+    // ("Reenviar"): evita bombardear un buzón ajeno cambiando de IP.
+    const emailLimited = await enforceRateLimit('authEmail', [`confirm:email:${await sha256Hex(email)}`], corsHeaders)
+    if (emailLimited) return emailLimited
+
     // Create Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
     // Create user
-    const { data: userData, error: createError } = await supabase.auth.admin.createUser({
+    const { error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: false, // Require email confirmation
       user_metadata: { full_name }
     })
 
-    if (createError) throw mapAuthError(createError)
+    let alreadyPending = false
+    let properties: any
 
-    const user = userData.user
+    if (createError) {
+      const mapped = mapAuthError(createError)
+      if (mapped.code !== 'EMAIL_ALREADY_REGISTERED') throw mapped
 
-    // Rollback: borra el usuario recién creado si no se puede completar el alta,
-    // para que pueda reintentar con el mismo email.
-    const rollbackUser = async () => {
-      if (!user?.id) return
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id)
-      if (deleteError) console.error('[signup] rollback deleteUser failed:', deleteError.message)
-    }
-
-    // Generate confirmation link
-    const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
-      type: 'signup',
-      email: email,
-      options: { redirectTo }
-    })
-
-    if (confirmError) {
-      console.error('[signup] generateLink failed:', confirmError.message)
-      await rollbackUser()
-      throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate confirmation link')
+      // El email ya tiene cuenta. Si está pendiente de confirmar (p. ej. el
+      // primer correo no llegó), se reenvía la confirmación en vez de un 409.
+      // Como GoTrue en un alta repetida, no se cambia la password: no sabemos
+      // si quien se registra ahora es el dueño del buzón.
+      const pending = await generatePendingConfirmationLink(supabase, email, redirectTo)
+      if (pending.kind === 'rate-limited') throw new HttpError(429, 'RATE_LIMITED', 'Too many requests')
+      if (pending.kind !== 'link') throw mapped
+      alreadyPending = true
+      properties = pending.properties
+    } else {
+      // Generate confirmation link
+      const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
+        type: 'signup',
+        email: email,
+        options: { redirectTo }
+      })
+      if (confirmError) {
+        // La cuenta queda creada y pendiente: el usuario puede pedir el
+        // correo con "Reenviar" (send-email-confirmation).
+        console.error('[signup] generateLink failed:', confirmError.message)
+        return created(corsHeaders, { emailSent: false })
+      }
+      properties = confirmData?.properties
     }
 
     // Enlace con el dominio propio (/confirm?token_hash=…&type=signup), no el
     // action_link de <proyecto>.supabase.co (ver _shared/authLink.ts).
-    const confirmationLink = buildAuthEmailLink(redirectTo, confirmData?.properties, 'signup')
+    const confirmationLink = buildAuthEmailLink(redirectTo, properties, 'signup')
     if (!confirmationLink) {
       console.error('[signup] generateLink returned no usable link')
-      await rollbackUser()
-      throw new HttpError(500, 'INTERNAL_ERROR', 'Could not generate confirmation link')
+      return created(corsHeaders, { emailSent: false, alreadyPending })
     }
-    const userName = escapeHtml(full_name || email.split('@')[0])
 
-    // Envío por Brevo (_shared/email.ts, timeout de 10 s: un envío colgado
-    // también es EMAIL_SEND_FAILED).
+    // En un alta repetida no se usa el nombre que se acaba de escribir: la
+    // cuenta es la de antes.
     const emailResult = await sendEmail({
       to: email,
-      subject: '¡Bienvenido a YourCVPassport! Confirma tu email',
+      ...confirmSignupEmail({ name: alreadyPending ? null : full_name, link: confirmationLink }),
       tags: ['signup'],
-      html: `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Confirma tu Email</title>
-              </head>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                  <h1 style="color: white; margin: 0; font-size: 28px;">YourCVPassport</h1>
-                  <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">Tu CV Profesional Verificado</p>
-                </div>
-  
-                <div style="background: #f9fafb; padding: 40px 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
-                  <h2 style="color: #1f2937; margin-top: 0;">¡Bienvenido ${userName}! 🎉</h2>
-  
-                  <p style="font-size: 16px; color: #4b5563;">
-                    Estamos emocionados de tenerte en YourCVPassport. Estás a un paso de crear tu CV profesional verificado.
-                  </p>
-  
-                  <p style="font-size: 16px; color: #4b5563;">
-                    Para comenzar, por favor confirma tu dirección de email haciendo clic en el botón de abajo:
-                  </p>
-  
-                  <div style="text-align: center; margin: 35px 0;">
-                    <a href="${confirmationLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">
-                      Confirmar Email
-                    </a>
-                  </div>
-  
-                  <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                    <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                      ✨ <strong>¿Qué puedes hacer con YourCVPassport?</strong>
-                    </p>
-                    <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #1e40af; font-size: 14px;">
-                      <li>Crear CVs profesionales con plantillas modernas</li>
-                      <li>Verificar tus credenciales y experiencia</li>
-                      <li>Compartir tu perfil con un enlace único</li>
-                      <li>Exportar en PDF y DOCX</li>
-                    </ul>
-                  </div>
-  
-                  <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                    <p style="margin: 0; color: #92400e; font-size: 14px;">
-                      ⏰ <strong>Este enlace expira en 24 horas</strong>
-                    </p>
-                  </div>
-  
-                  <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
-                    Si no creaste una cuenta en YourCVPassport, puedes ignorar este email de forma segura.
-                  </p>
-  
-                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-  
-                  <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-                    © 2025 YourCVPassport. Todos los derechos reservados.<br>
-                    Este es un email automático, por favor no respondas a este mensaje.
-                  </p>
-                </div>
-              </body>
-            </html>
-          `
     })
 
     if (!emailResult.ok) {
-      // Sin BREVO_API_KEY, timeout, o Brevo rechaza el envío (key mala, dominio
-      // sin autenticar...). El detalle no lleva secretos ni destinatario.
+      // Sin BREVO_API_KEY, timeout (10 s), o Brevo rechaza el envío (key mala,
+      // dominio sin autenticar...). El detalle no lleva secretos ni destinatario.
+      // La cuenta NO se borra (issue #3): queda pendiente y la UI ofrece
+      // "Reenviar correo de confirmación".
       console.error('[signup] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
-
-      // Rollback: Delete the user if email sending fails
-      await rollbackUser()
-
-      throw new HttpError(502, 'EMAIL_SEND_FAILED', 'Could not send confirmation email')
+      return created(corsHeaders, { emailSent: false, alreadyPending })
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'User created and confirmation email sent'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+    return created(corsHeaders, { emailSent: true, alreadyPending })
 
   } catch (error: any) {
     const httpError = error instanceof HttpError

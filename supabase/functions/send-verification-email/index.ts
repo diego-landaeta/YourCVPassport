@@ -27,7 +27,6 @@ import {
   authenticate,
   createAdminClient,
   errorResponse,
-  escapeHtml,
   findPendingStamp,
   generateCode,
   hashCode,
@@ -36,6 +35,7 @@ import {
   resolveTargetProfile,
 } from '../_shared/stampVerification.ts'
 import { isEmailConfigured, sendEmail } from '../_shared/email.ts'
+import { verificationCodeEmail } from '../_shared/emailTemplates.ts'
 
 const CODE_TTL_MS = 15 * 60 * 1000
 // Mismo criterio que el modal (acepta p. ej. o'connor@...). El email solo va en
@@ -159,62 +159,11 @@ serve(async (req: Request) => {
       .eq('id', userId)
       .maybeSingle()
 
-    const userName = escapeHtml(profile?.full_name || 'Usuario')
-
     // Envío vía Brevo (_shared/email.ts)
     const emailResult = await sendEmail({
-        to: email,
-        subject: 'Verifica tu email - YourCVPassport',
-        tags: ['verification-code'],
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Verificación de Email</title>
-            </head>
-            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0; font-size: 28px;">YourCVPassport</h1>
-              </div>
-
-              <div style="background: #f9fafb; padding: 40px 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
-                <h2 style="color: #1f2937; margin-top: 0;">¡Hola ${userName}!</h2>
-
-                <p style="font-size: 16px; color: #4b5563;">
-                  Has solicitado verificar tu dirección de email. Usa el siguiente código para completar la verificación:
-                </p>
-
-                <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
-                  <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
-                    Código de Verificación
-                  </div>
-                  <div style="font-size: 36px; font-weight: bold; color: #667eea; letter-spacing: 8px; font-family: 'Courier New', monospace;">
-                    ${verificationCode}
-                  </div>
-                </div>
-
-                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                  <p style="margin: 0; color: #92400e; font-size: 14px;">
-                    ⏰ <strong>Este código expira en 15 minutos</strong>
-                  </p>
-                </div>
-
-                <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
-                  Si no solicitaste esta verificación, puedes ignorar este email de forma segura.
-                </p>
-
-                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-                <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-                  © 2025 YourCVPassport. Todos los derechos reservados.<br>
-                  Este es un email automático, por favor no respondas a este mensaje.
-                </p>
-              </div>
-            </body>
-          </html>
-        `
+      to: email,
+      ...verificationCodeEmail({ name: profile?.full_name, code: verificationCode }),
+      tags: ['verification-code'],
     })
 
     if (!emailResult.ok) {

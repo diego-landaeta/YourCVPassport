@@ -141,17 +141,6 @@ else
 fi
 echo ""
 
-# Deploy send-email
-echo "📧 Deploying send-email..."
-supabase functions deploy send-email --no-verify-jwt
-if [ $? -eq 0 ]; then
-    echo "✅ send-email deployed successfully"
-else
-    echo "❌ Failed to deploy send-email"
-    exit 1
-fi
-echo ""
-
 # Deploy company-registration-email
 echo "🏢 Deploying company-registration-email..."
 supabase functions deploy company-registration-email

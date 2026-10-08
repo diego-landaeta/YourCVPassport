@@ -8,7 +8,7 @@ import OAuthButtons from './OAuthButtons';
 const AuthScreen: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signInWithEmail, signUpWithEmail, user } = useAuth();
+  const { signInWithEmail, signUpWithEmail, resendConfirmationEmail, user } = useAuth();
   const translations = useTranslations();
   const t = translations.dashboard.auth;
   const toast = useToastContext();
@@ -23,11 +23,29 @@ const AuthScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  // Issue #3: cuenta creada pero pendiente (correo no enviado o alta repetida).
+  const [pendingNotice, setPendingNotice] = useState<string | null>(null);
+  // Email al que se ofrece "Reenviar correo de confirmación" (null: no se ofrece).
+  const [resendEmail, setResendEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendFeedback, setResendFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const formLocked = isLoading || !!successMessage || !!pendingNotice;
 
   // Update view when route changes
   useEffect(() => {
     setIsLoginView(location.pathname === '/login');
+    setPendingNotice(null);
+    setResendEmail(null);
+    setResendFeedback(null);
   }, [location.pathname]);
+
+  // Cuenta atrás entre reenvíos (el servidor limita a 3 cada 15 min por email).
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -58,10 +76,34 @@ const AuthScreen: React.FC = () => {
     }
   };
 
+  // "Reenviar correo de confirmación": la función responde lo mismo exista o no
+  // una cuenta pendiente, así que el texto de éxito es neutro.
+  const handleResend = async () => {
+    if (!resendEmail || isResending || resendCooldown > 0) return;
+    setIsResending(true);
+    setResendFeedback(null);
+    const { error: resendError } = await resendConfirmationEmail(resendEmail);
+    setIsResending(false);
+    if (!resendError) {
+      setResendFeedback({ ok: true, text: t.signup.resendSent });
+      setResendCooldown(60);
+      return;
+    }
+    const code = resendError?.code;
+    const text = code === 'RATE_LIMITED' ? t.errors.tooManyRequests
+      : code === 'NETWORK_ERROR' ? t.errors.networkError
+      : t.signup.resendFailed;
+    setResendFeedback({ ok: false, text });
+    if (code === 'RATE_LIMITED') setResendCooldown(60);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setPendingNotice(null);
+    setResendEmail(null);
+    setResendFeedback(null);
 
     // Basic validation
     if (!email) {
@@ -86,7 +128,8 @@ const AuthScreen: React.FC = () => {
           if (authError.message?.includes('Invalid login credentials')) {
             setError(t.errors.invalidCredentials);
           } else if (authError.message?.includes('Email not confirmed')) {
-            setError('Please confirm your email before logging in');
+            setError(t.errors.emailNotConfirmed);
+            setResendEmail(email.trim().toLowerCase());
           } else {
             setError(t.errors.serverError);
           }
@@ -124,7 +167,7 @@ const AuthScreen: React.FC = () => {
 
       setIsLoading(true);
       try {
-        const { error: authError } = await signUpWithEmail(email, password, {
+        const { data: signUpData, error: authError } = await signUpWithEmail(email, password, {
           full_name: fullName.trim(),
         });
 
@@ -133,6 +176,22 @@ const AuthScreen: React.FC = () => {
           const msg = signupErrorMessage(authError);
           setError(msg);
           toast.error(msg, 8000);
+          setIsLoading(false);
+          return;
+        }
+
+        // Cuenta pendiente sin correo, o alta repetida de una cuenta sin
+        // confirmar: sin redirección, con aviso y botón "Reenviar".
+        if (signUpData?.emailSent === false || signUpData?.alreadyPending) {
+          const notice = !signUpData.alreadyPending ? t.signup.accountCreatedEmailNotSent
+            : signUpData.emailSent ? t.signup.alreadyPendingResent
+            : t.signup.alreadyPendingNotSent;
+          setPendingNotice(notice);
+          setResendEmail(email.trim().toLowerCase());
+          // Si el correo acaba de salir, no se ofrece reenviar enseguida.
+          if (signUpData.emailSent) setResendCooldown(60);
+          if (signUpData.emailSent) toast.success(notice, 8000);
+          else toast.warning(notice, 8000);
           setIsLoading(false);
           return;
         }
@@ -174,6 +233,35 @@ const AuthScreen: React.FC = () => {
           <p className="text-xs text-green-700 dark:text-green-400">{successMessage}</p>
         </div>
       )}
+      {pendingNotice && (
+        <div role="status" className="mb-4 p-2.5 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded">
+          <p className="text-xs text-amber-800 dark:text-amber-300">{pendingNotice}</p>
+        </div>
+      )}
+      {resendEmail && (
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isResending || resendCooldown > 0}
+            className="w-full px-3 py-2 text-sm font-medium border border-cv-blue text-cv-blue dark:text-blue-300 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isResending ? t.signup.resendSending : t.signup.resendButton}
+          </button>
+          <div aria-live="polite">
+            {resendFeedback && (
+              <p className={`mt-2 text-xs ${resendFeedback.ok ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                {resendFeedback.text}
+              </p>
+            )}
+          </div>
+          {resendCooldown > 0 && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {t.signup.resendCooldown.replace('{seconds}', String(resendCooldown))}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -190,7 +278,7 @@ const AuthScreen: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
               className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
               placeholder="John Doe"
-              disabled={isLoading || !!successMessage}
+              disabled={formLocked}
             />
           </div>
         )}
@@ -209,7 +297,7 @@ const AuthScreen: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
             placeholder="name@example.com"
-            disabled={isLoading || !!successMessage}
+            disabled={formLocked}
           />
         </div>
 
@@ -228,7 +316,7 @@ const AuthScreen: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
             placeholder="••••••••"
-            disabled={isLoading || !!successMessage}
+            disabled={formLocked}
           />
           {!isLoginView && (
             <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -253,7 +341,7 @@ const AuthScreen: React.FC = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
               placeholder="••••••••"
-              disabled={isLoading || !!successMessage}
+              disabled={formLocked}
             />
           </div>
         )}
@@ -288,7 +376,7 @@ const AuthScreen: React.FC = () => {
               checked={agreeToTerms}
               onChange={(e) => setAgreeToTerms(e.target.checked)}
               className="h-3.5 w-3.5 mt-0.5 text-cv-blue focus:ring-cv-blue border-gray-300 dark:border-dark-border dark:bg-dark-bg-tertiary rounded cursor-pointer"
-              disabled={isLoading || !!successMessage}
+              disabled={formLocked}
             />
             <label htmlFor="agreeToTerms" className="text-gray-600 dark:text-gray-400 cursor-pointer leading-tight">
               {t.signup.agreeToTerms}{' '}
@@ -306,7 +394,7 @@ const AuthScreen: React.FC = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isLoading || !!successMessage}
+          disabled={formLocked}
           className="w-full bg-cv-blue hover:bg-cv-blue-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
         >
           {isLoading ? (

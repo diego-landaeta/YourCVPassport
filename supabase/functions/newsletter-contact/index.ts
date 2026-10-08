@@ -34,6 +34,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getCorsHeaders, isAllowedOrigin } from '../_shared/cors.ts';
+import { pressContactEmail } from '../_shared/emailTemplates.ts';
 import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts';
 
 // ==================================================
@@ -152,15 +153,6 @@ function positiveInt(value: string | undefined): number | null {
 // BREVO
 // ==================================================
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 // Llama a Brevo con timeout. Devuelve el status y el `code` de error de Brevo
 // (p. ej. 'duplicate_parameter'); nunca el mensaje, que puede incluir el email.
 async function brevoPost(path: string, apiKey: string, payload: unknown, tag: string): Promise<{ status: number; code: string | null }> {
@@ -241,24 +233,8 @@ async function press(body: Record<string, unknown>, cors: Record<string, string>
 
   await limitEmail('press', email, cors);
 
-  const subject = `[Prensa] ${outlet || name}`;
-  const rows: [string, string][] = [
-    ['Nombre', name],
-    ['Medio', outlet || '-'],
-    ['Email', email],
-    ['Idioma', lang],
-  ];
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
-<body style="font-family: Arial, sans-serif; color: #1F2937; line-height: 1.5;">
-<h2 style="margin: 0 0 16px;">Nueva consulta de prensa (formulario web)</h2>
-<table cellpadding="4" style="border-collapse: collapse;">
-${rows.map(([k, v]) => `<tr><td style="font-weight: bold; vertical-align: top;">${k}</td><td>${escapeHtml(v)}</td></tr>`).join('\n')}
-</table>
-<p style="font-weight: bold; margin: 16px 0 4px;">Mensaje</p>
-<div style="white-space: pre-wrap; border-left: 4px solid #2563EB; padding-left: 12px;">${escapeHtml(message)}</div>
-<p style="color: #6B7280; font-size: 12px; margin-top: 24px;">Responde a este correo para contestar directamente al remitente.</p>
-</body></html>`;
-  const text = [...rows.map(([k, v]) => `${k}: ${v}`), '', message].join('\n');
+  // Plantilla en _shared/emailTemplates.ts (escapa los datos).
+  const { subject, html, text } = pressContactEmail({ name, outlet, email, lang, message });
 
   const { status, code } = await brevoPost('/smtp/email', apiKey, {
     sender: { name: senderName, email: senderEmail },

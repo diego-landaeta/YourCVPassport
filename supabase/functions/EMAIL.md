@@ -8,17 +8,39 @@ Antes se usaba Resend, pero el dominio nunca llegó a verificarse allí y todos 
 envíos fallaban (errores #1 y #12 del informe de testeo). Ya no queda ninguna
 referencia a Resend ni a `RESEND_API_KEY` en las funciones.
 
+## Correos (plantillas)
+
+Seis correos, todos sobre la misma plantilla base (`_shared/emailLayout.ts`:
+tablas y estilos en línea para Gmail/Outlook/Apple Mail, versión en texto plano,
+datos escapados y URLs solo http(s)/mailto). El contenido de cada uno está en
+`_shared/emailTemplates.ts`:
+
+| Correo | Plantilla | Lo envía |
+| --- | --- | --- |
+| Confirmación de alta (y "Reenviar") | `confirmSignupEmail` | `signup`, `send-email-confirmation` |
+| Recuperar contraseña | `passwordResetEmail` | `send-password-reset` |
+| Enlace de acceso sin contraseña | `magicLinkEmail` | `send-magic-link` |
+| Código del sello de correo | `verificationCodeEmail` | `send-verification-email` |
+| Empresa aprobada / rechazada | `companyApprovedEmail` / `companyRejectedEmail` | `company-registration-email` |
+| Consulta de prensa (interno) | `pressContactEmail` | `newsletter-contact` |
+
+Retiradas (2026-10-08): `send-email` (8 plantillas que disparaban triggers de
+Postgres vía `send_email_notification()`, que necesita `app.settings.*` y no
+llegaba a enviar nada; además duplicaba "empresa aprobada/rechazada") y
+`send-lead-notification` (no la llamaba nadie). Si se reactivan las
+notificaciones de empresa o empleo, añadir su plantilla en `emailTemplates.ts`.
+Siguen desplegadas con el código antiguo hasta borrarlas:
+`supabase functions delete send-email` y `supabase functions delete send-lead-notification`.
+
 ## Funciones que envían correo
 
 | Función | Tag en Brevo | Si el envío falla |
 | --- | --- | --- |
-| `signup` | `signup` | 502 `EMAIL_SEND_FAILED` y se borra el usuario recién creado (rollback) |
+| `signup` | `signup` | 200 con `emailSent: false`: la cuenta queda creada y pendiente (antes se borraba); la UI ofrece "Reenviar" |
 | `send-password-reset` | `password-reset` | 502 `EMAIL_SEND_FAILED` |
 | `send-magic-link` | `magic-link` | 500 `INTERNAL_ERROR` |
-| `send-email-confirmation` | `email-confirmation` | 500 `INTERNAL_ERROR` |
+| `send-email-confirmation` ("Reenviar correo de confirmación") | `email-confirmation` | 502 `EMAIL_SEND_FAILED` (200 neutro si no hay cuenta pendiente) |
 | `send-verification-email` | `verification-code` | 500 `INTERNAL_ERROR` (sin key: falla antes de crear el sello) |
-| `send-email` (plantillas, solo service_role) | nombre de la plantilla | 500 `Failed to send email` |
-| `send-lead-notification` | `lead-notification` | 500 (`replyTo` = email del visitante, si es una dirección válida) |
 | `company-registration-email` | `company-approved` / `company-rejected` | 400 (sin key: falla antes de leer la empresa) |
 
 Los contratos HTTP de cada función no cambian con la migración; el campo
@@ -91,9 +113,8 @@ en spam.
    - `signup` con `./deploy-signup.sh` (desde la rama que incluya también los cambios
      de autenticación de signup / send-password-reset).
    - `./deploy.sh` para `send-password-reset`, `send-email-confirmation`,
-     `send-magic-link`, `send-verification-email`, `send-email` y
-     `company-registration-email`.
-   - `supabase functions deploy send-lead-notification` (no está en `deploy.sh`).
+     `send-magic-link`, `send-verification-email` y `company-registration-email`.
+   - `supabase functions deploy newsletter-contact --no-verify-jwt` (prensa y boletín).
 4. Probar en producción: alta con un email propio y "olvidé mi contraseña". Los
    envíos aparecen en Brevo → *Transactional* → *Logs* con su tag.
 5. Cuando todo funcione: `supabase secrets unset RESEND_API_KEY` y revocar la key en

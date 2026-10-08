@@ -8,6 +8,16 @@ import { COMPANY_FULL_COLUMNS } from '../lib/companyColumns';
 
 type AuthMode = 'login' | 'signup';
 
+// Resultado del alta (Edge Function `signup`).
+export interface SignUpResult {
+  user: null;
+  session: null;
+  /** false: cuenta creada y pendiente, pero el correo de confirmación no salió. */
+  emailSent?: boolean;
+  /** true: el email ya tenía una cuenta sin confirmar; se reenvió el enlace. */
+  alreadyPending?: boolean;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -28,7 +38,8 @@ interface AuthContextType {
   refetchCompany: () => Promise<void>;
   // Auth methods
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ error: any }>;
+  signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ data?: SignUpResult; error: any }>;
+  resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithLinkedIn: () => Promise<{ error: any }>;
   sendMagicLink: (email: string) => Promise<{ error: any }>;
@@ -298,7 +309,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, password: string, userData: { full_name: string }) => {
     try {
-      // Use Edge Function to create user and send custom confirmation email via Resend.
+      // Use Edge Function to create user and send custom confirmation email via Brevo.
       // invokeAuthFunction aplica timeout (20 s) y devuelve un AuthFunctionError con
       // `code` (EMAIL_ALREADY_REGISTERED, WEAK_PASSWORD, EMAIL_SEND_FAILED, TIMEOUT...).
       const { data: funcData, error: funcError } = await invokeAuthFunction('signup', {
@@ -313,17 +324,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { data: { user: null, session: null }, error: funcError };
       }
 
-      // Return structure mimicking supabase.auth.signUp
-      return { 
-        data: { 
-          user: funcData.user, 
-          session: null // Session is null because email confirmation is required
-        }, 
-        error: null 
+      // emailSent: false → cuenta creada y pendiente pero sin correo (Brevo
+      // caído...); alreadyPending → el email ya tenía una cuenta sin confirmar
+      // y se ha reenviado el enlace. La UI ofrece "Reenviar" en ambos casos.
+      return {
+        data: {
+          user: null,
+          session: null, // Session is null because email confirmation is required
+          emailSent: funcData?.emailSent !== false,
+          alreadyPending: funcData?.alreadyPending === true,
+        },
+        error: null
       };
     } catch (error) {
       return { data: { user: null, session: null }, error };
     }
+  };
+
+  // "Reenviar correo de confirmación". La función responde lo mismo exista o no
+  // una cuenta pendiente; errores normalizados con `code` (RATE_LIMITED,
+  // EMAIL_SEND_FAILED, TIMEOUT...).
+  const resendConfirmationEmail = async (email: string) => {
+    const { error } = await invokeAuthFunction('send-email-confirmation', {
+      email: email.trim().toLowerCase(),
+      redirectTo: `${window.location.origin}/confirm`
+    });
+    if (error) console.error('[send-email-confirmation] Edge Function error:', error.code, error.status, error.message);
+    return { error };
   };
 
   const signInWithGoogle = async () => {
@@ -356,7 +383,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMagicLink = async (email: string) => {
     try {
-      // Use Edge Function to send custom magic link via Resend
+      // Use Edge Function to send custom magic link via Brevo
       const { data, error } = await supabase.functions.invoke('send-magic-link', {
         body: {
           email,
@@ -454,6 +481,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Auth methods
     signInWithEmail,
     signUpWithEmail,
+    resendConfirmationEmail,
     signInWithGoogle,
     signInWithLinkedIn,
     sendMagicLink,

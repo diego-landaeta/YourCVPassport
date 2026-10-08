@@ -128,30 +128,22 @@ Agrega columna `lang` (VARCHAR 2, default 'es') a `blog_posts`.
 
 ## Sistema de Emails
 
-**Stack:** Supabase Edge Functions + Resend API
+**Stack:** Supabase Edge Functions + Brevo (API v3), helper único `supabase/functions/_shared/email.ts`
 
 ### Config
-1. Obtener API Key en [resend.com](https://resend.com)
-2. En Supabase: Settings > Edge Functions > agregar `RESEND_API_KEY`
-3. Deploy: `supabase functions deploy send-email`
+Detalle completo (dominio, DNS, orden de despliegue) en `supabase/functions/EMAIL.md`.
+1. Brevo → *SMTP & API* → *API keys*: crear una key v3 (no la clave SMTP)
+2. Autenticar el dominio `yourcvpassport.com` en Brevo (SPF/DKIM/DMARC)
+3. En Supabase: `supabase secrets set BREVO_API_KEY=... SENDER_EMAIL=no-reply@yourcvpassport.com`
+4. Deploy: `./supabase/functions/deploy-signup.sh` y `./supabase/functions/deploy.sh`
 
-### Templates Disponibles
+### Correos
 
-| Template | Trigger | Datos clave |
-|----------|---------|-------------|
-| `company-approved` | Empresa aprobada | companyName, dashboardUrl, welcomeCredits |
-| `company-rejected` | Empresa rechazada | companyName, reason |
-| `new-message` | Nuevo mensaje | senderName, messagePreview, conversationUrl |
-| `welcome-team-member` | Agregado a equipo | userName, companyName, role, invitedBy |
-| `low-credits` | Creditos < 10 | companyName, creditsRemaining, purchaseUrl |
-| `credit-purchase` | Compra confirmada | credits, price, packageName, newBalance |
-
-### Test
-```typescript
-await supabase.functions.invoke('send-email', {
-  body: { to: 'test@test.com', template: 'company-approved', data: { companyName: 'Test', dashboardUrl: '/dashboard', welcomeCredits: 10 } }
-});
-```
+Hay 6 correos, todos sobre la misma plantilla (`_shared/emailLayout.ts`); el
+contenido está en `_shared/emailTemplates.ts`: confirmación de alta (y
+"Reenviar"), recuperar contraseña, enlace de acceso, código de verificación,
+empresa aprobada / rechazada y consulta de prensa. Detalle en
+`supabase/functions/EMAIL.md`.
 
 ---
 
