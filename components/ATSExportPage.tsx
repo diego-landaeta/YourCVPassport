@@ -307,7 +307,7 @@ const ATSExportPage: React.FC = () => {
                         {/* Template title */}
                         <div className="bg-gradient-to-r from-cv-blue to-cv-blue-dark p-6">
                             <h3 className="text-2xl font-bold text-white">{selectedTemplate.title}</h3>
-                            <p className="text-white/80 mt-1">Click en la imagen para descargar o cerrar para volver</p>
+                            <p className="text-white/80 mt-1">{lang === 'es' ? 'Haz clic en la imagen para descargarla o cierra para volver' : 'Click the image to download it or close to go back'}</p>
                         </div>
 
                         {/* Template image */}

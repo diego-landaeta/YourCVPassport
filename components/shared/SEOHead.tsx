@@ -49,8 +49,13 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   profileUrl = normalizeUrl(profileUrl);
   
   // Generate title and description
-  let title = propTitle || "YourCVPassport - Professional CV Verification";
-  let description = propDescription || "Create, verify, and share your professional CV with YourCVPassport.";
+  // Valores por defecto en el idioma activo (antes siempre en ingles)
+  let title = propTitle || (currentLang === 'es'
+    ? 'YourCVPassport - Plataforma de CV profesional verificado'
+    : 'YourCVPassport - Professional CV Verification');
+  let description = propDescription || (currentLang === 'es'
+    ? 'Crea, verifica y comparte tu CV profesional con YourCVPassport.'
+    : 'Create, verify, and share your professional CV with YourCVPassport.');
 
   if (profile) {
     title = propTitle || profile.meta_title || `${profile.full_name} - ${profile.headline} | YourCVPassport`;

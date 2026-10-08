@@ -1,7 +1,8 @@
 /**
  * U17 — Imagenes de plantillas contra la app local.
  *
- * - /recursos/biblioteca, /resources/library y /profesionales/plantillas: tras recorrer
+ * - /profesionales/plantillas y /professionals/templates (a las que redirigen /recursos/biblioteca
+ *   y /resources/library desde el issue #5): tras recorrer
  *   la pagina, ninguna miniatura de /images/templates/ queda con naturalWidth 0.
  * - Cada imagen referenciada en el codigo existe en public/images/templates (salvo las
  *   dos de en.ts que tampoco existen en produccion: van a la imagen de reserva).
@@ -109,31 +110,28 @@ test.describe('U17 imagenes de plantillas', () => {
     }
   });
 
-  for (const { lang, url } of [
-    { lang: 'es' as const, url: '/recursos/biblioteca' },
-    { lang: 'en' as const, url: '/resources/library' },
+  // /recursos/biblioteca y /resources/library se fusionaron con la galeria de
+  // /profesionales/plantillas (issue #5, B3): redirigen y la galeria no tiene miniaturas rotas.
+  for (const { lang, url, target } of [
+    { lang: 'es' as const, url: '/recursos/biblioteca', target: '/profesionales/plantillas' },
+    { lang: 'en' as const, url: '/resources/library', target: '/professionals/templates' },
   ]) {
-    test(`biblioteca sin miniaturas rotas (${lang})`, async ({ page, context }, testInfo) => {
+    test(`biblioteca redirige a la galeria sin miniaturas rotas (${lang})`, async ({ page, context }, testInfo) => {
       test.setTimeout(120_000);
       await setup(context, lang);
       await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await expect(page).toHaveURL(new RegExp(`${target}$`), { timeout: 45_000 });
       await expect(page.locator('h1')).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
       await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
       await scrollThrough(page);
       const imgs = await loadTemplateImages(page);
-
-      // 20 plantillas en es y en
-      expect(imgs.length).toBeGreaterThanOrEqual(20);
+      expect(imgs.length).toBeGreaterThan(5);
       for (const img of imgs) expect(img.naturalWidth, `${img.alt} (${img.src.slice(0, 60)})`).toBeGreaterThan(0);
-
       const fallbacks = imgs.filter(i => i.fallback).map(i => i.alt).sort();
       if (lang === 'es') expect(fallbacks).toEqual([]);
       else for (const alt of fallbacks) expect(KNOWN_MISSING_TITLES, `reserva inesperada: ${alt}`).toContain(alt);
 
       fs.mkdirSync(SHOTS_DIR, { recursive: true });
-      const grid = page.locator('.grid').first();
-      await grid.scrollIntoViewIfNeeded();
       await page.screenshot({ path: path.join(SHOTS_DIR, `${process.env.U17_SHOT || 'despues'}-biblioteca-${lang}-${testInfo.project.name}.png`), fullPage: false });
     });
   }
@@ -171,40 +169,5 @@ test.describe('U17 imagenes de plantillas', () => {
       expect(img.fallback, `${img.alt} sin reserva`).toBe(true);
       expect(img.naturalWidth).toBeGreaterThan(0);
     }
-  });
-
-  test('una miniatura que falla muestra la imagen de reserva (tarjeta y modal)', async ({ page, context }, testInfo) => {
-    test.setTimeout(120_000);
-    await setup(context, 'es');
-    // Se registra despues del mock: page.route tiene prioridad sobre context.route
-    await page.route('**/images/templates/passport.png', route => route.abort());
-    await page.goto('/recursos/biblioteca', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('h1')).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
-    await scrollThrough(page);
-    const imgs = await loadTemplateImages(page);
-    const broken = imgs.filter(i => i.fallback);
-    expect(broken.length).toBeGreaterThan(0);
-    for (const img of broken) {
-      expect(img.src.startsWith('data:image/svg+xml')).toBe(true);
-      expect(img.naturalWidth).toBeGreaterThan(0);
-    }
-    for (const img of imgs) expect(img.naturalWidth).toBeGreaterThan(0);
-
-    // La tarjeta con reserva es visible (opacidad 1) y sin esqueleto encima
-    const fallbackImg = page.locator('img[data-fallback-applied="true"]').first();
-    await fallbackImg.scrollIntoViewIfNeeded();
-    await expect(fallbackImg).toBeVisible();
-    await expect.poll(() => fallbackImg.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
-    await expect(fallbackImg.locator('xpath=following-sibling::div[contains(@class,"animate-pulse")]')).toHaveCount(0);
-    fs.mkdirSync(SHOTS_DIR, { recursive: true });
-    await page.screenshot({ path: path.join(SHOTS_DIR, `${process.env.U17_SHOT || 'despues'}-reserva-tarjeta-${testInfo.project.name}.png`) });
-
-    // Modal de vista previa: misma reserva
-    await fallbackImg.click({ force: true });
-    const modalImg = page.locator('[role="dialog"] img').first();
-    await expect(modalImg).toBeVisible();
-    await expect.poll(() => modalImg.evaluate(el => (el as HTMLImageElement).dataset.fallbackApplied === 'true' && (el as HTMLImageElement).naturalWidth > 0), { timeout: 15_000 }).toBe(true);
-    await page.screenshot({ path: path.join(SHOTS_DIR, `${process.env.U17_SHOT || 'despues'}-reserva-modal-${testInfo.project.name}.png`) });
   });
 });

@@ -5,6 +5,7 @@ import { supabase } from '../supabase/client';
 import { Profile, Company, CompanyUser } from '../types';
 import { invokeAuthFunction } from '../utils/authFunctionErrors';
 import { COMPANY_FULL_COLUMNS } from '../lib/companyColumns';
+import { formatPersonName } from '../utils/personName';
 
 type AuthMode = 'login' | 'signup';
 
@@ -137,7 +138,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('profiles')
             .insert({
               id: user.id,
-              full_name: user.user_metadata?.full_name || null,
+              // Google/LinkedIn a veces dan el nombre en minúsculas («manuel casas»).
+              full_name: formatPersonName(user.user_metadata?.full_name || user.user_metadata?.name) || null,
               email: user.email,
               // ❌ REMOVED: slug assignment - users must create their URL in Display Settings after completing wizard
               // Previously: slug: user.id, which auto-assigned a UUID and broke the intended workflow
@@ -158,6 +160,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data = newProfile;
         } else if (error) {
           throw error;
+        }
+
+        // El trigger handle_new_user copia tal cual el nombre de Google/LinkedIn,
+        // que puede venir en minúsculas («manuel casas»). Si el nombre del perfil
+        // sigue siendo exactamente ese y está todo en minúsculas, se muestra con
+        // mayúscula inicial; el asistente lo precarga así y se guarda al guardar
+        // Identidad. Un nombre que el usuario ya editó no se toca (issue #4, 27).
+        const oauthName = String(user.user_metadata?.full_name || user.user_metadata?.name || '').trim();
+        const currentName = typeof data?.full_name === 'string' ? data.full_name.trim() : '';
+        if (data && currentName && currentName === currentName.toLocaleLowerCase()
+          && currentName.toLocaleLowerCase() === oauthName.toLocaleLowerCase()) {
+          data = { ...data, full_name: formatPersonName(currentName) };
         }
 
         setProfile(data as Profile | null);

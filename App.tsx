@@ -1,6 +1,6 @@
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,7 +8,8 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
-import { routeConfig } from './config/routeConfig';
+import { routeConfig, routeRedirects } from './config/routeConfig';
+import { getRedirectPath } from './utils/canonicalUrl';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import Breadcrumbs from './components/shared/Breadcrumbs';
 import { QueryProvider } from './hooks/useQueryClient';
@@ -100,6 +101,16 @@ const DashboardFallbackRoute: React.FC = () => {
   if (session && profileLoading && !profile) return <LoadingSpinner />;
   if (session && profile?.role === 'admin') return <Navigate to="/admin" replace />;
   return <NotFoundPage />;
+};
+
+// Rutas fusionadas (/nosotros/mision) y enlaces antiguos con prefijo de idioma
+// (/es/pricing, /es/companies/plans...): redireccion a la ruta vigente conservando
+// query y hash. En produccion nginx/server.mjs ya responden 301 antes de llegar aqui.
+const RedirectRoute: React.FC = () => {
+  const { pathname, search, hash } = useLocation();
+  const target = getRedirectPath(pathname);
+  if (!target || target === pathname) return <NotFoundPage />;
+  return <Navigate to={`${target}${search}${hash}`} replace />;
 };
 
 const AppContent: React.FC = () => {
@@ -203,6 +214,13 @@ const AppContent: React.FC = () => {
               </React.Fragment>
             );
           })}
+
+          {/* Rutas fusionadas y prefijos /es, /en de la version antigua */}
+          {routeRedirects.map(({ from }) => (
+            <Route key={from} path={from} element={<RedirectRoute />} />
+          ))}
+          <Route path="/es/*" element={<RedirectRoute />} />
+          <Route path="/en/*" element={<RedirectRoute />} />
 
           {/* Public CV Route */}
           <Route path="/cv/:slug" element={<ProfileViewPage />} />

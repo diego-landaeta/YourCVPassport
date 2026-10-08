@@ -6,7 +6,7 @@ import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useConfirmDialog } from '../ConfirmDialog';
 import { useToastContext } from '../../contexts/ToastContext';
-import { validateDateRange } from '../../utils/dateValidation';
+import { validateDateRange, currentYearMonth } from '../../utils/dateValidation';
 import {
   DndContext,
   closestCenter,
@@ -455,11 +455,13 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
       return;
     }
 
-    // Validar fechas antes de guardar
+    // Validar fechas antes de guardar. Sin el 4o argumento los mensajes salian en
+    // ingles; los textos de fechas son genericos y viven en validationErrors.education.
     const dateValidation = validateDateRange(
       data.start_date,
       data.end_date,
-      data.is_current || false
+      data.is_current || false,
+      translations.validationErrors.education
     );
 
     if (!dateValidation.isValid) {
@@ -561,6 +563,9 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
     <>
       <Dialog />
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+      {/* Con el formulario abierto el boton de abrirlo sobra: convivia con el de
+          enviar y ambos decian "Añadir experiencia". */}
+      {!isFormOpen && (
       <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -574,6 +579,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
           </button>
         </div>
       </div>
+      )}
 
       {/* Verification Info Banner - Only show when NOT in wizard mode (onNext is undefined means we're not in wizard) */}
       {experiences.length > 0 && !onNext && onNavigateToVerifications && (
@@ -635,8 +641,9 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
         </div>
       )}
 
-      {/* Botón Continuar - Solo cuando hay experiencias y no está abierto el formulario */}
-      {experiences.length > 0 && !isFormOpen && onNext && (
+      {/* Botón Continuar - siempre que el formulario esté cerrado. Experiencia es
+          opcional: quien decide si algo bloquea la publicación es el asistente. */}
+      {!isFormOpen && onNext && (
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={onNext}
@@ -665,13 +672,15 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 <input
                   {...register('position')}
                   type="text"
-                  maxLength={60}
+                  maxLength={100}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   placeholder={modals.jobTitlePlaceholder}
                 />
                 {errors.position && <p className="text-red-500 text-sm mt-1">{errors.position.message}</p>}
+                {/* 100 y no 60: el ejemplo es el mismo que el del titular (150) y un
+                    cargo real ("Responsable de ... y ...") no cabia. */}
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {watch('position')?.length || 0}/60 {translations.common.characters}
+                  {watch('position')?.length || 0}/100 {translations.common.characters}
                 </p>
               </div>
 
@@ -702,6 +711,8 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                   <input
                     {...register('start_date')}
                     type="month"
+                    min="1950-01"
+                    max={currentYearMonth()}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   />
                 </div>
@@ -717,6 +728,8 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                   <input
                     {...register('end_date')}
                     type="month"
+                    min={watch('start_date') || '1950-01'}
+                    max={currentYearMonth()}
                     disabled={isCurrent}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   />
@@ -811,7 +824,7 @@ const ExperienceSection = forwardRef<ExperienceSectionHandle, ExperienceSectionP
                 type="submit"
                 className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
               >
-                {editingIndex !== null ? modals.update : modals.add} {modals.addExperience.replace('Añadir ', '')}
+                {modals.saveExperience}
               </button>
             </div>
           </form>

@@ -514,7 +514,8 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {t.fullNameRequired} <span className="text-red-500">*</span>
+                    {/* fullName y no fullNameRequired: esa clave ya trae su "*" y salía duplicado */}
+                    {t.fullName} <span className="text-red-500">*</span>
                   </label>
                   <span className="text-xs text-gray-400">
                     {watch('full_name')?.length || 0}/50
@@ -537,7 +538,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {t.headlineRequired} <span className="text-red-500">*</span>
+                    {t.headline} <span className="text-red-500">*</span>
                   </label>
                   <span className="text-xs text-gray-400">
                     {watch('headline')?.length || 0}/150
@@ -577,39 +578,28 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               )}
             </div>
 
-            {/* Gender Selection */}
+            {/* Gender Selection
+                Opcional. Antes era obligatorio y solo ofrecía M/F (letras sin
+                traducir ni nombre accesible). Solo se usa para concordar el género
+                gramatical de las traducciones del CV; "Prefiero no decirlo" = null. */}
             <div className="col-span-1 sm:col-span-3">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {translations.profileEditor.identity.gender} <span className="text-red-500">*</span>
+              <label htmlFor="identity-gender" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {translations.profileEditor.identity.gender}
               </label>
-              <div className="flex gap-1">
-                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
-                  watch('gender') === 'male'
-                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
-                }`}>
-                  <input
-                    type="radio"
-                    {...register('gender')}
-                    value="male"
-                    className="sr-only"
-                  />
-                  <span>M</span>
-                </label>
-                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
-                  watch('gender') === 'female'
-                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
-                }`}>
-                  <input
-                    type="radio"
-                    {...register('gender')}
-                    value="female"
-                    className="sr-only"
-                  />
-                  <span>F</span>
-                </label>
-              </div>
+              <select
+                id="identity-gender"
+                {...register('gender')}
+                aria-describedby="identity-gender-hint"
+                title={translations.profileEditor.identity.genderHint}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+              >
+                <option value="">{translations.profileEditor.identity.genderPreferNot}</option>
+                <option value="female">{translations.profileEditor.identity.genderFemale}</option>
+                <option value="male">{translations.profileEditor.identity.genderMale}</option>
+              </select>
+              <p id="identity-gender-hint" className="sr-only">
+                {translations.profileEditor.identity.genderHint}
+              </p>
               {errors.gender && (
                 <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
               )}
@@ -694,7 +684,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('linkedin_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="linkedin.com/in/user"
+                      placeholder={translations.aiQuestionnaire.identity.linkedinPlaceholder}
                     />
                   </div>
                   {errors.linkedin_url && (
@@ -716,7 +706,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('github_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="github.com/user"
+                      placeholder={translations.aiQuestionnaire.identity.githubPlaceholder}
                     />
                   </div>
                   {errors.github_url && (
@@ -738,7 +728,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('portfolio_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="yourportfolio.com"
+                      placeholder={translations.aiQuestionnaire.identity.portfolioPlaceholder}
                     />
                   </div>
                   {errors.portfolio_url && (

@@ -8,6 +8,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
+import { useOpynioWidget, OPYNIO_BUSINESS_ID } from '../../hooks/useOpynioWidget';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -81,14 +82,8 @@ const SuccessStoriesPage: React.FC = () => {
         setActiveGoal('');
     }, [lang]);
 
-    useEffect(() => {
-        const existing = document.querySelector('script[src*="opynio.com/widget"]');
-        if (existing) existing.remove();
-        const script = document.createElement('script');
-        script.src = 'https://web.opynio.com/widget.js';
-        script.async = true;
-        document.head.appendChild(script);
-    }, [lang]);
+    // Reseñas de Opynio: si no hay (API vacía o caída) se oculta su sección entera
+    const { ref: reviewsRef, status: reviewsStatus } = useOpynioWidget(lang);
 
     const loadStoriesFromDB = async () => {
         try {
@@ -232,18 +227,20 @@ const SuccessStoriesPage: React.FC = () => {
                 </section>
             )}
 
-            {/* Opynio Reviews Widget */}
-            <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary">
+            {/* Opynio Reviews Widget: el título solo se enseña cuando hay reseñas */}
+            {reviewsStatus !== 'empty' && (
+            <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary" aria-busy={reviewsStatus !== 'ready'}>
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
-                        <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8">
+                        <h2 className={`text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8 ${reviewsStatus === 'ready' ? '' : 'invisible'}`}>
                             {pageData.whatUsersSay}
                         </h2>
                         {/* Opynio Widget v6.0 - horizontal-carousel */}
-                        <div key={lang} className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
+                        <div ref={reviewsRef} key={lang} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme="light"></div>
                     </AnimatedWrapper>
                 </div>
             </section>
+            )}
 
             {/* Main Content: Filters & Grid */}
             <section className="py-20 px-4">

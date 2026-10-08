@@ -6,7 +6,7 @@ import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useConfirmDialog } from '../ConfirmDialog';
 import { useToastContext } from '../../contexts/ToastContext';
-import { validateDateRange } from '../../utils/dateValidation';
+import { validateDateRange, currentYearMonth } from '../../utils/dateValidation';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   DndContext,
@@ -706,6 +706,8 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
     <>
       <Dialog />
       <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-6">
+      {/* Con el formulario abierto el boton de abrirlo sobra (convivia con el de enviar). */}
+      {!isFormOpen && (
       <div className="flex items-center justify-end mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -719,6 +721,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
           </button>
         </div>
       </div>
+      )}
 
       {/* Verification Info Banner - Only show when NOT in wizard mode (onNext is undefined means we're not in wizard) */}
       {education.length > 0 && !onNext && onNavigateToVerifications && (
@@ -777,8 +780,9 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
         </div>
       )}
 
-      {/* Botón Continuar - Solo cuando hay educación y no está abierto el formulario */}
-      {education.length > 0 && !isFormOpen && onNext && (
+      {/* Botón Continuar - siempre que el formulario esté cerrado. Educación es
+          opcional: quien decide si algo bloquea la publicación es el asistente. */}
+      {!isFormOpen && onNext && (
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={onNext}
@@ -861,6 +865,8 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                   <input
                     {...register('start_date')}
                     type="month"
+                    min="1950-01"
+                    max={currentYearMonth()}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
                   />
                 </div>
@@ -873,9 +879,13 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                   {isCurrent && <span className="ml-2 text-xs text-green-600 dark:text-green-400">({translations.common.current})</span>}
                 </label>
                 <div lang={lang === 'es' ? 'es-ES' : 'en-US'}>
+                  {/* Fin: no antes del inicio; puede caer en meses futuros del año en
+                      curso (graduación prevista), igual que acepta validateDateRange. */}
                   <input
                     {...register('end_date')}
                     type="month"
+                    min={watch('start_date') || '1950-01'}
+                    max={`${new Date().getFullYear()}-12`}
                     disabled={isCurrent}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:bg-dark-bg-tertiary dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   />
@@ -1010,7 +1020,7 @@ const EducationSection = forwardRef<EducationSectionHandle, EducationSectionProp
                 type="submit"
                 className="px-6 py-2 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
               >
-                {editingIndex !== null ? modals.update : modals.add} {modals.addEducation.replace('Añadir ', '')}
+                {modals.saveEducation}
               </button>
             </div>
           </form>

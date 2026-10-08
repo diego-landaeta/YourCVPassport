@@ -41,7 +41,8 @@ const EN_TO_ES: Record<string, string> = {
 
 // Mismas rutas que scripts/generate-sitemap.mjs: sin las raíces de sección (/product,
 // /professionals, /companies), que son duplicadas con canonical a otra URL, ni /resources,
-// que está en construcción.
+// que está en construcción. Tampoco /resources/library ni /about/mission: duplican
+// /professionals/templates y /about y redirigen a ellas con 301 (issue #5, B3).
 const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string }> = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/pricing', priority: '1.0', changefreq: 'weekly' },
@@ -59,11 +60,9 @@ const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string 
   { path: '/companies/integrations', priority: '0.8', changefreq: 'weekly' },
   { path: '/companies/security', priority: '0.8', changefreq: 'monthly' },
   { path: '/resources/blog', priority: '0.7', changefreq: 'daily' },
-  { path: '/resources/library', priority: '0.8', changefreq: 'weekly' },
   { path: '/resources/success-stories', priority: '0.7', changefreq: 'monthly' },
   { path: '/resources/status', priority: '0.6', changefreq: 'daily' },
   { path: '/about', priority: '0.7', changefreq: 'monthly' },
-  { path: '/about/mission', priority: '0.6', changefreq: 'monthly' },
   { path: '/about/press', priority: '0.6', changefreq: 'monthly' },
   { path: '/about/contact', priority: '0.8', changefreq: 'monthly' },
   { path: '/jobs', priority: '0.9', changefreq: 'daily' },

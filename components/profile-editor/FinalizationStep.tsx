@@ -23,6 +23,7 @@ import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
 import { activateOnKey } from '../shared/a11y';
 import { handleTemplateImageError } from '../../utils/templateImageFallback';
+import { MIN_SKILLS_TO_PUBLISH } from './SkillsSection';
 
 // Identificadores de plantilla guardados en perfiles antiguos que ya no
 // corresponden a ninguna opcion de este paso. Sin traducirlos, al abrir la
@@ -281,21 +282,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     if (!profile?.summary) validationErrors.push('• Resumen profesional (Identidad)');
     if (!profile?.avatar_url) validationErrors.push('• Foto de perfil (Identidad)');
 
+    // Experiencia y Preferencias ya no se exigen aquí: son opcionales en el
+    // asistente (stepRules de ProfileWizard) y un estudiante sin experiencia debe
+    // poder publicar. Esta comprobación tiene que coincidir con aquella.
+
     // ⚠️ CRITICAL FIX: Query database directly for fresh counts instead of using stale profile context
-    // Validar Experiencia - Query database for actual count
-    const { count: experienceCount, error: expError } = await supabase
-      .from('experiences')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', session.user.id);
-
-    if (expError) {
-      console.error('Error fetching experience count:', expError);
-    }
-
-    if (!experienceCount || experienceCount === 0) {
-      validationErrors.push('• Al menos 1 experiencia laboral (Experiencia)');
-    }
-
     // Validar Habilidades - Query database for actual count
     const { count: skillsCount, error: skillsError } = await supabase
       .from('skills')
@@ -306,13 +297,8 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
       console.error('Error fetching skills count:', skillsError);
     }
 
-    if (!skillsCount || skillsCount < 3) {
-      validationErrors.push(`• Al menos 3 habilidades - tienes ${skillsCount || 0} (Habilidades)`);
-    }
-
-    // Validar Preferencias
-    if (!profile?.job_seeking_status) {
-      validationErrors.push('• Estado de búsqueda de empleo (Preferencias)');
+    if (!skillsCount || skillsCount < MIN_SKILLS_TO_PUBLISH) {
+      validationErrors.push(`• Al menos ${MIN_SKILLS_TO_PUBLISH} habilidades - tienes ${skillsCount || 0} (Habilidades)`);
     }
 
     // Si hay errores de validación, mostrarlos con toast MUY VISIBLE

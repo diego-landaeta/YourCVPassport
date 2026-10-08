@@ -1145,6 +1145,7 @@ export const translations = {
             addExperience: "Add Experience",
             editExperience: "Edit Experience",
             addNewExperience: "Add New Experience",
+            saveExperience: "Save experience",
             title: "Title",
             jobTitle: "Job Title",
             company: "Company",
@@ -1163,6 +1164,7 @@ export const translations = {
             addEducation: "Add Education",
             editEducation: "Edit Education",
             addNewEducation: "Add New Education",
+            saveEducation: "Save education",
             institution: "Institution",
             institutionPlaceholder: "University of Madrid",
             degree: "Degree",
@@ -1435,6 +1437,7 @@ export const translations = {
             contactInfo: "Contact Information",
             changePhoto: "Change",
             country: "Country",
+            countryPlaceholder: "Select a country",
             uploadPhoto: "Upload Photo",
             uploading: "Uploading...",
             photoHelper: "JPG, PNG, GIF or WebP (max 5MB)",
@@ -1522,7 +1525,10 @@ export const translations = {
                 divider: "Or sign up with",
                 sending: "Sending...",
                 welcomeTitle: "Start Your Journey",
-                welcomeSubtitle: "Join thousands of professionals creating outstanding CVs with our AI-powered platform.",
+                // Issue #4 (22): different from the form subtitle so "Join thousands of professionals" is not repeated
+                welcomeSubtitle: "Build an outstanding CV with AI help and share it with a single link.",
+                // Issue #4 (10): full accessible name of the terms checkbox (including the links text)
+                agreeToTermsAccessible: "I agree to the Terms of Service and the Privacy Policy",
                 feature1: "Free to get started",
                 feature2: "No credit card required",
                 feature3: "Setup in under 2 minutes",
@@ -1666,8 +1672,21 @@ export const translations = {
             notificaciones: "Notifications",
             companyDashboard: "Company Dashboard",
             adminPanel: "Admin panel",
-            wizardAlertTitle: "Complete the wizard first",
-            wizardAlertDescription: "You must complete the profile wizard (including the Finalization step) to access all features.",
+            wizardAlertTitle: "Complete your CV first",
+            wizardAlertDescription: "Finish your CV wizard and publish it in the last step («Finalize») to use every feature.",
+            // Issue #4 (13/24): lock notice that says which section and what is missing
+            wizardAlertSection: "«{section}» unlocks when you finish your CV wizard.",
+            wizardAlertMissing: "Still missing:",
+            wizardAlertPublish: "Publish your CV in the last wizard step («Finalize»)",
+            wizardAlertGo: "Go to the wizard",
+            wizardAlertClose: "Close notice",
+            lockedHint: "Locked: complete your CV first",
+            // Issue #4 (18): accessible names of the dashboard controls
+            openMenu: "Open menu",
+            closeMenu: "Close menu",
+            notificationsUnread: "Notifications ({count} unread)",
+            expandSidebar: "Expand sidebar",
+            collapseSidebar: "Collapse sidebar",
             sectionHome: "HOME",
             sectionProfile: "MY PROFILE",
             sectionCommunity: "COMMUNITY",
@@ -2348,7 +2367,7 @@ export const translations = {
         { name: 'For Professionals', href: '#', id: 'professionals', subItems: [
             { name: 'How it Works', href: '#', id: 'professionals/how' },
             { name: 'Templates & Examples', href: '#', id: 'professionals/templates' },
-            { name: 'Find Jobs', href: '#', id: 'jobs' },
+            // 'Find Jobs' (/jobs) hidden from the menu while there are no published jobs (the route stays)
             { name: 'Pricing (Plans)', href: '#', id: 'pricing' },
             { name: 'Help Center', href: '#', id: 'professionals/help' },
         ]},
@@ -2360,12 +2379,13 @@ export const translations = {
         ]},
         { name: 'Resources', href: '#', id: 'resources', subItems: [
             { name: 'Blog / Career Guides', href: '#', id: 'resources/blog' },
-            { name: 'Template Library', href: '#', id: 'resources/library' },
+            // 'Template Library' merged into Professionals > Templates & Examples (301 in config/routeConfig.ts)
             { name: 'Success Stories', href: '#', id: 'resources/success-stories' },
             { name: 'System Status', href: '#', id: 'resources/status' },
         ]},
         { name: 'About Us', href: '#', id: 'about', subItems: [
-            { name: 'Mission & Values', href: '#', id: 'about/mission' },
+            // /about/mission redirects to /about (same page)
+            { name: 'Mission & Values', href: '#', id: 'about' },
             { name: 'Press/Media Kit', href: '#', id: 'about/press' },
             { name: 'Contact', href: '#', id: 'about/contact' },
         ]},
@@ -3749,6 +3769,8 @@ export const translations = {
         },
         skills: {
             aiSuggestionsTitle: 'AI Suggestions',
+            minSkillsHint: 'You need at least {min} skills to publish your CV ({count}/{min})',
+            minSkillsDone: 'You have the minimum {min} skills to publish ({count})',
             skillAlreadyExists: 'This skill already exists in your profile',
             skillSaved: 'Skill saved successfully',
             errorSavingSkill: 'Error saving skill: ',
@@ -3790,6 +3812,10 @@ export const translations = {
         identity: {
             contactInfo: 'Contact Information',
             gender: 'Gender',
+            genderMale: 'Man',
+            genderFemale: 'Woman',
+            genderPreferNot: 'Prefer not to say',
+            genderHint: 'Optional. Only used to match grammatical gender when your CV is translated.',
         },
         languages: {
             title: 'Languages',
@@ -3970,7 +3996,7 @@ export const translations = {
         fullName: 'Full name',
         email: 'Email',
         headline: 'Professional headline',
-        summary: 'Summary',
+        summary: 'About me',
         photo: 'Profile photo',
         atLeastOneExperience: 'At least 1 work experience',
         atLeastThreeSkills: 'At least 3 skills',
@@ -3986,7 +4012,8 @@ export const translations = {
             summaryRequired: 'About me summary is required',
             summaryMax: 'Maximum 500 characters',
             countryRequired: 'You must select a country',
-            genderRequired: 'You must select your gender'
+            genderRequired: 'You must select your gender',
+            genderInvalid: 'Select a valid option'
         },
         experience: {
             positionRequired: 'Position is required',
@@ -4004,6 +4031,7 @@ export const translations = {
             yearInvalid: 'Year must have 4 valid digits (YYYY)',
             yearTooOld: 'Date cannot be before 1950',
             yearFuture: 'Date cannot be in the future',
+            startDateFuture: 'Start date cannot be in the future',
             monthInvalid: 'Month must be between 01 and 12',
             dateFormatInvalid: 'Invalid format. Use YYYY-MM (eg: 2024-03)',
             gpaLabel: 'GPA / Average Grade (Optional)',
@@ -5190,6 +5218,7 @@ export const translations = {
     countrySelector: {
         searchPlaceholder: 'Search country...',
         noResults: 'No countries found',
+        placeholder: 'Select a country',
     },
     monthYearPicker: {
         months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],

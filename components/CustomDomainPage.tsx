@@ -22,6 +22,10 @@ const CustomDomainPage: React.FC = () => {
     const { openModal } = useAuth();
     const t = useTranslations();
     const { lang } = useLanguage();
+    // Tarjeta de visita de ejemplo en el idioma de la página (antes siempre 'Jane Doe')
+    const sampleCard = lang === 'es'
+        ? { name: 'Laura Martín', role: 'Product Manager sénior', slug: 'lauramartin', email: 'laura.martin@email.com' }
+        : { name: 'Jane Doe', role: 'Senior Product Manager', slug: 'janedoe', email: 'jane.doe@email.com' };
 
     const seoTitle = lang === 'es'
         ? 'Dominio Personalizado para tu CV'
@@ -148,8 +152,8 @@ const CustomDomainPage: React.FC = () => {
                              <div className="bg-gray-800 text-white p-6 rounded-lg shadow-inner">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xl font-bold">Jane Doe</p>
-                                        <p className="text-sm text-gray-300">Senior Product Manager</p>
+                                        <p className="text-xl font-bold">{sampleCard.name}</p>
+                                        <p className="text-sm text-gray-300">{sampleCard.role}</p>
                                     </div>
                                     <div className="w-16 h-16 bg-white dark:bg-dark-bg-primary p-1 rounded">
                                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=example.com" alt="QR Code" className="w-full h-full"/>
@@ -159,8 +163,8 @@ const CustomDomainPage: React.FC = () => {
                                     <div className="flex justify-between items-end">
                                         <p className="text-xs text-gray-500 font-mono">ID: a1b2c3d4</p>
                                         <div className="text-right">
-                                            <p className="text-cv-blue font-semibold">yourcvpassport.com/cv/janedoe</p>
-                                            <p className="text-gray-400 dark:text-dark-text-tertiary">jane.doe@email.com</p>
+                                            <p className="text-cv-blue font-semibold">yourcvpassport.com/cv/{sampleCard.slug}</p>
+                                            <p className="text-gray-400 dark:text-dark-text-tertiary">{sampleCard.email}</p>
                                         </div>
                                     </div>
                                 </div>

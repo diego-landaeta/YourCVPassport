@@ -34,7 +34,8 @@ test.use(SAFE_CONTEXT_OPTIONS);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const BASE = 'https://yourcvpassport.com';
-const INDEX_TITLE = 'YourCVPassport - Professional CV Platform';
+// Título por defecto de index.html (en español desde el issue #5)
+const INDEX_TITLE = 'YourCVPassport - Plataforma de CV profesional verificado';
 
 type Lang = 'es' | 'en';
 

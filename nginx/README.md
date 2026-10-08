@@ -48,6 +48,20 @@ El canónico es el **apex** `https://yourcvpassport.com` (sitemap, `canonical`, 
 `http://` (apex y www) y `https://www.` redirigen con **301** al apex conservando la ruta.
 El certificado debe cubrir también `www.yourcvpassport.com`.
 
+## Redirecciones 301 y título de cada página en el HTML
+
+- `map $uri $ycp_redirect` (en ambos sites) responde **301** a:
+  - rutas fusionadas: `/nosotros/mision` → `/nosotros`, `/recursos/biblioteca` → `/profesionales/plantillas` (y sus versiones en inglés);
+  - enlaces antiguos con prefijo de idioma: `/es/pricing` → `/precios`, `/es/companies/plans` → `/empresas/planes`,
+    `/es/companies/security` → `/empresas/seguridad`... y cualquier otro `/es/...` o `/en/...` pierde el prefijo.
+  Es el mismo listado que `routeRedirects` (`config/routeConfig.ts`, la SPA) y `getRedirectPath` (`server.mjs`).
+- `npm run build` ejecuta `scripts/generate-static-meta.mjs`, que escribe `dist/<ruta>/index.html` para cada
+  página pública con su título, descripción, canonical y hreflang (tabla en `seo/static-meta.mjs`).
+  `try_files $uri $uri/ /index.html` ya las sirve (sin redirigir a la barra final); el map de caché les pone
+  `no-cache` como al `index.html` raíz. **Hay que subir `dist/` entero**, subcarpetas incluidas.
+- Comprobar tras desplegar: `curl -sI https://yourcvpassport.com/es/pricing` (301 a `/precios`) y
+  `curl -s https://yourcvpassport.com/precios | grep '<title>'` (título en español).
+
 ## Caché
 
 Se decide en el `map $uri $ycp_cache_control` (un único `add_header` a nivel de server):

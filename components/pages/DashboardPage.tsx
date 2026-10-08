@@ -13,6 +13,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useDashboardTour } from '../../hooks/useDashboardTour';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import { calculateProfileCompleteness } from '../../utils/profileValidation';
+import { isSectionLocked, parseSectionParam, sectionHref } from '../dashboard/dashboardNav';
 
 const DashboardPage: React.FC = () => {
   // ⚠️ ALL hooks must be called before any conditional returns (React Rules of Hooks)
@@ -44,6 +45,15 @@ const DashboardPage: React.FC = () => {
   // Check wizard_completed field in database (set when user completes Finalization step)
   const getInitialSection = () => {
     const hasCompletedWizardInDB = profile?.wizard_completed === true;
+
+    // Enlace directo a un apartado (/dashboard?seccion=ajustes): cada opción del
+    // menú tiene una URL propia que se puede abrir en otra pestaña (issue #4,
+    // punto 25). Un apartado bloqueado por el asistente no se abre por URL.
+    const requested = location.pathname === '/dashboard' ? parseSectionParam(location.search) : null;
+    if (requested && !isSectionLocked(profile, requested) && (hasCompletedWizardInDB || requested !== 'dashboard')) {
+      return requested;
+    }
+
     if (!hasCompletedWizardInDB) return 'mi-perfil';
 
     const searchParams = new URLSearchParams(location.search);
@@ -66,8 +76,11 @@ const DashboardPage: React.FC = () => {
   const changeSectionWithHistory = useCallback((section: string) => {
     setActiveSection(prev => {
       if (prev === section) return prev; // no-op
-      // Push current section so back button can return to it
-      window.history.pushState({ section }, '');
+      // Push current section so back button can return to it. En /dashboard la
+      // URL refleja el apartado (?seccion=) para poder copiarla o compartirla; en
+      // /comunidad la gestiona el efecto de sincronización de más abajo.
+      const url = window.location.pathname === '/dashboard' ? sectionHref(section) : undefined;
+      window.history.pushState({ section }, '', url);
       return section;
     });
   }, []);
@@ -75,7 +88,13 @@ const DashboardPage: React.FC = () => {
   // Set initial history state on mount
   useEffect(() => {
     const initial = getInitialSection();
-    window.history.replaceState({ section: initial }, '');
+    // Si se pidió por URL un apartado que no se puede abrir (bloqueado), la URL
+    // pasa a reflejar el que se muestra de verdad.
+    const requested = parseSectionParam(window.location.search);
+    const url = window.location.pathname === '/dashboard' && requested && requested !== initial
+      ? sectionHref(initial)
+      : undefined;
+    window.history.replaceState({ section: initial }, '', url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -242,7 +261,7 @@ const DashboardPage: React.FC = () => {
       // Use replaceState to avoid remounting DashboardPage (navigate() would unmount/remount
       // the component because /dashboard and /comunidad are separate route configs,
       // which resets activeSection back to 'dashboard').
-      window.history.replaceState({ section: activeSection }, '', '/dashboard');
+      window.history.replaceState({ section: activeSection }, '', sectionHref(activeSection));
     }
   }, [activeSection, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 

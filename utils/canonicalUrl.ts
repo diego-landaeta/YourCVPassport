@@ -12,7 +12,7 @@
  * - Las parejas salen de config/routeConfig.ts (fuente unica de rutas ES/EN) mas las
  *   rutas que App.tsx declara a mano (empleos y comunidad).
  */
-import { routeConfig } from '../config/routeConfig';
+import { routeConfig, routeRedirects } from '../config/routeConfig';
 
 export const BASE_URL = 'https://yourcvpassport.com';
 
@@ -195,4 +195,32 @@ export function getHreflangUrls(path: string): HreflangUrls | null {
   const en = `${BASE_URL}${alternates.en}`;
   const es = `${BASE_URL}${alternates.es}`;
   return { en, es, xDefault: en };
+}
+
+// ---------------------------------------------------------------------------
+// Redirecciones (rutas fusionadas y prefijos /es, /en antiguos)
+// ---------------------------------------------------------------------------
+
+const REDIRECTS: Map<string, string> = new Map(routeRedirects.map(r => [r.from, r.to]));
+
+/** Version antigua en ingles con prefijo de idioma: /es/pricing, /es/companies/plans... */
+const LEGACY_LANG_PREFIX = /^\/(es|en)(\/.*)?$/;
+
+/**
+ * Destino de una ruta que ya no existe, o null si la ruta es valida.
+ * - Rutas fusionadas (config/routeConfig.ts, routeRedirects): /nosotros/mision -> /nosotros.
+ * - Prefijo de idioma de la version antigua: /es/pricing -> /precios,
+ *   /es/companies/plans -> /empresas/planes, /en/precios -> /pricing, /es -> /.
+ *   Si la ruta sin prefijo no tiene pareja en ese idioma, se quita solo el prefijo.
+ */
+export function getRedirectPath(path: string): string | null {
+  const clean = normalizePath(path);
+  const direct = REDIRECTS.get(clean);
+  if (direct) return direct;
+  const match = clean.match(LEGACY_LANG_PREFIX);
+  if (!match) return null;
+  const lang = match[1] as SeoLang;
+  const rest = match[2] || '/';
+  const merged = REDIRECTS.get(rest) ?? rest;
+  return getLocalizedPath(merged, lang) ?? merged;
 }

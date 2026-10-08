@@ -396,15 +396,39 @@ const SITEMAP_EN_TO_ES = {
   '/companies/integrations': '/empresas/integraciones',
   '/companies/security': '/empresas/seguridad',
   '/resources/blog': '/recursos/blog',
-  '/resources/library': '/recursos/biblioteca',
   '/resources/success-stories': '/recursos/exito',
   '/resources/status': '/recursos/estado',
   '/about': '/nosotros',
-  '/about/mission': '/nosotros/mision',
   '/about/press': '/nosotros/prensa',
   '/about/contact': '/nosotros/contacto',
   '/jobs': '/empleos',
 };
+
+// Rutas fusionadas con otra pagina: 301 a la principal. Mismo listado que
+// routeRedirects en config/routeConfig.ts (y el map $ycp_redirect de nginx/*.conf).
+const ROUTE_REDIRECTS = {
+  '/nosotros/mision': '/nosotros',
+  '/about/mission': '/about',
+  '/recursos/biblioteca': '/profesionales/plantillas',
+  '/resources/library': '/professionals/templates',
+};
+const SITEMAP_ES_TO_EN = Object.fromEntries(Object.entries(SITEMAP_EN_TO_ES).map(([en, es]) => [es, en]));
+
+/**
+ * Destino 301 de una ruta retirada, o null. Ademas de las fusionadas, los enlaces de la
+ * version antigua con prefijo de idioma: /es/pricing -> /precios,
+ * /es/companies/plans -> /empresas/planes, /en/precios -> /pricing, /es -> /.
+ */
+function getRedirectPath(pathname) {
+  const clean = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  if (ROUTE_REDIRECTS[clean]) return ROUTE_REDIRECTS[clean];
+  const match = clean.match(/^\/(es|en)(\/.*)?$/);
+  if (!match) return null;
+  const rest = match[2] || '/';
+  const merged = ROUTE_REDIRECTS[rest] || rest;
+  if (match[1] === 'es') return SITEMAP_EN_TO_ES[merged] || merged;
+  return SITEMAP_ES_TO_EN[merged] || merged;
+}
 
 function getEsPath(enPath) {
   if (SITEMAP_EN_TO_ES[enPath]) return SITEMAP_EN_TO_ES[enPath];
@@ -463,9 +487,9 @@ async function generateDynamicSitemap() {
     ['/professionals/help', '0.8', 'weekly'],
     ['/companies/search', '0.9', 'weekly'], ['/companies/plans', '0.9', 'weekly'],
     ['/companies/integrations', '0.8', 'weekly'], ['/companies/security', '0.8', 'monthly'],
-    ['/resources/blog', '0.9', 'daily'], ['/resources/library', '0.8', 'weekly'],
+    ['/resources/blog', '0.9', 'daily'],
     ['/resources/success-stories', '0.7', 'monthly'], ['/resources/status', '0.6', 'daily'],
-    ['/about', '0.7', 'monthly'], ['/about/mission', '0.6', 'monthly'],
+    ['/about', '0.7', 'monthly'],
     ['/about/press', '0.6', 'monthly'], ['/about/contact', '0.8', 'monthly'],
     ['/jobs', '0.9', 'daily'],
   ];
@@ -530,6 +554,15 @@ async function generateDynamicSitemap() {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>`;
 }
 
+// Redirecciones permanentes (antes que los estáticos y el fallback de la SPA)
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const target = getRedirectPath(req.path);
+  if (!target || target === req.path) return next();
+  const qIndex = req.originalUrl.indexOf('?');
+  res.redirect(301, target + (qIndex >= 0 ? req.originalUrl.slice(qIndex) : ''));
+});
+
 app.get('/sitemap.xml', async (req, res) => {
   try {
     const now = Date.now();
@@ -557,11 +590,14 @@ app.get('/sitemap.xml', async (req, res) => {
 // - index.html y sw.js: no-cache (siempre revalidar, si no un deploy no llega a los usuarios).
 // - Resto (favicons, imágenes de public/): caché corta.
 app.use(express.static(DIST_DIR, {
+  // /precios es una carpeta del build (dist/precios/index.html, ver más abajo): sin
+  // esto express.static respondería 301 a /precios/
+  redirect: false,
   setHeaders(res, filePath) {
     const rel = path.relative(DIST_DIR, filePath).split(path.sep).join('/');
     if (rel.startsWith('assets/')) {
       res.set('Cache-Control', 'public, max-age=31536000, immutable');
-    } else if (rel === 'index.html' || rel === 'sw.js') {
+    } else if (rel === 'index.html' || rel.endsWith('/index.html') || rel === 'sw.js') {
       res.set('Cache-Control', 'no-cache');
     } else {
       res.set('Cache-Control', 'public, max-age=86400');
@@ -637,6 +673,22 @@ app.get('/cv/:slug', async (req, res, next) => {
 // Las rutas /api/* que no existen responden 404 JSON, no el index.html de la SPA
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Not found' });
+});
+
+// Páginas públicas con su título y descripción en el HTML (dist/<ruta>/index.html, que
+// genera scripts/generate-static-meta.mjs tras el build). nginx las sirve igual con
+// try_files $uri $uri/ /index.html.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const rel = req.path.replace(/^\/+|\/+$/g, '');
+  if (!rel || rel.includes('..') || rel.includes('\0')) return next();
+  const file = path.join(DIST_DIR, rel, 'index.html');
+  if (!file.startsWith(DIST_DIR + path.sep)) return next();
+  fs.stat(file, (err, stat) => {
+    if (err || !stat.isFile()) return next();
+    res.set('Cache-Control', 'no-cache');
+    res.sendFile(file);
+  });
 });
 
 // Fallback: servir index.html para todas las demás rutas (SPA)

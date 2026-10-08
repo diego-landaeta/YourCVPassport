@@ -79,7 +79,7 @@ test.describe('U2 admin: menu de cuenta y navegacion', () => {
       const drawer = page.locator('div.fixed.inset-y-0.left-0');
       await expect(drawer.getByRole('link', { name: 'Panel admin' })).toBeVisible({ timeout: 45_000 });
       await expect(drawer.getByRole('button', { name: t.logout })).toBeVisible();
-      for (const name of ['Dashboard', 'Mi perfil', 'Ver mi CV', 'Comunidad']) {
+      for (const name of ['Dashboard', 'Panel', 'Mi perfil', 'Ver mi CV', 'Comunidad']) {
         await expect(drawer.getByRole('link', { name, exact: true })).toHaveCount(0);
       }
       await page.screenshot({ path: `${SHOTS}/u02-admin-menu-${testInfo.project.name}.png` });
@@ -92,7 +92,7 @@ test.describe('U2 admin: menu de cuenta y navegacion', () => {
       await expect(menu.getByRole('link', { name: 'Panel admin' })).toBeVisible();
       await expect(menu.getByRole('button', { name: t.logout })).toBeVisible();
       await expect(menu.getByRole('link')).toHaveCount(1);
-      for (const name of ['Dashboard', 'Mi perfil', 'Ver mi CV', 'Comunidad']) {
+      for (const name of ['Dashboard', 'Panel', 'Mi perfil', 'Ver mi CV', 'Comunidad']) {
         await expect(menu.getByText(name, { exact: true })).toHaveCount(0);
       }
       await page.screenshot({ path: `${SHOTS}/u02-admin-menu-${testInfo.project.name}.png` });
@@ -127,7 +127,7 @@ test.describe('U2 professional: sin cambios', () => {
     await expect(page.locator('header nav').getByRole('link', { name: 'Comunidad' })).toBeVisible({ timeout: 45_000 });
     await page.getByRole('button', { name: 'Menú de cuenta' }).click();
     const menu = page.locator('header div.absolute.right-0');
-    await expect(menu.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+    await expect(menu.getByRole('link', { name: 'Panel', exact: true })).toBeVisible();
     await expect(menu.getByRole('link', { name: 'Panel admin' })).toHaveCount(0);
   });
 });

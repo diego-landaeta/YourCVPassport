@@ -40,7 +40,7 @@ const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnu
         : plan.period;
 
     return (
-        <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col relative overflow-hidden ${plan.highlight ? 'border-cv-blue scale-105 bg-white dark:bg-dark-bg-secondary' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg`}>
+        <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col relative overflow-hidden isolate ${plan.highlight ? 'border-cv-blue md:scale-105 bg-white dark:bg-dark-bg-secondary' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg`}>
             {plan.highlight && <div className="absolute top-0 -right-12 transform rotate-45 bg-cv-green text-white text-center font-semibold py-1 w-40">{t.pricingPage.trialLabel}</div>}
             <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{plan.title}</h3>
             <div className="mt-4">
@@ -120,7 +120,8 @@ const PricingPage: React.FC = () => {
             </section>
             
             {/* Pricing Cards */}
-            <section id="pricing" className="py-20 px-4">
+            {/* overflow-x-clip: la cinta diagonal del plan destacado no puede crear scroll horizontal en móvil */}
+            <section id="pricing" className="py-20 px-4 overflow-x-clip">
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
                         <div className="text-center mb-16">

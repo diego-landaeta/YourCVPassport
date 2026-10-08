@@ -41,6 +41,10 @@ export interface SkillsSectionHandle {
   toggleAISuggestions: () => void;
 }
 
+// Mínimo de habilidades para publicar el CV. Lo leen esta sección (aviso junto a
+// la lista) y ProfileWizard (puerta de finalización), para que no diverjan.
+export const MIN_SKILLS_TO_PUBLISH = 3;
+
 // Common skills for autocomplete - Extended with diverse categories (English + Spanish)
 const COMMON_SKILLS = [
   // Programming Languages (EN + ES)
@@ -790,6 +794,30 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </div>
       )}
 
+      {/* Mínimo para publicar, junto a la lista. Antes solo aparecía en el recuadro
+          de la cabecera del asistente y no se veía al ir añadiendo habilidades. */}
+      {isWizardMode && (
+        <p
+          className={`mb-3 text-sm flex items-center gap-2 ${
+            skills.length >= MIN_SKILLS_TO_PUBLISH
+              ? 'text-green-700 dark:text-green-400'
+              : 'text-amber-700 dark:text-amber-400'
+          }`}
+          aria-live="polite"
+          data-testid="skills-min-hint"
+        >
+          <span
+            aria-hidden="true"
+            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+              skills.length >= MIN_SKILLS_TO_PUBLISH ? 'bg-green-600' : 'bg-amber-500'
+            }`}
+          />
+          {(skills.length >= MIN_SKILLS_TO_PUBLISH ? t.minSkillsDone : t.minSkillsHint)
+            .replace(/\{min\}/g, String(MIN_SKILLS_TO_PUBLISH))
+            .replace('{count}', String(skills.length))}
+        </p>
+      )}
+
       {/* Skills Grid with Drag & Drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -844,8 +872,9 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </button>
       )}
 
-      {/* Botón Continuar - Solo cuando hay habilidades y no está abierto el formulario */}
-      {skills.length > 0 && !isFormOpen && onNext && (
+      {/* Botón Continuar - siempre que el formulario esté cerrado. El mínimo de
+          habilidades lo hace cumplir el asistente al finalizar, no este botón. */}
+      {!isFormOpen && onNext && (
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={onNext}

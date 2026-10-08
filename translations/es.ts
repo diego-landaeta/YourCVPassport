@@ -950,7 +950,7 @@ export const translations = {
                 { key: "stats", question: "Enumera algunas estadísticas clave de tu carrera. (una por línea, formato: Valor - Etiqueta)", placeholder: "ej., 8+ - Años de Experiencia", type: "textarea" },
                 { key: "portfolio", question: "Enumera algunos proyectos de tu portafolio. (uno por línea, formato: Título - Categoría - Enlace)", placeholder: "ej., Rediseño de e-commerce - UX/UI - https://proyecto.enlace", type: "textarea" },
                 { key: "location", question: "¿Dónde te encuentras?", placeholder: "ej., Berlín, Alemania" },
-                { key: "availability", question: "¿Cuál es tu disponibilidad?", placeholder: "ej., Disponible para tiempo completo, media jornada, contrato" },
+                { key: "availability", question: "¿Cuál es tu disponibilidad?", placeholder: "ej., Disponible para jornada completa, media jornada, contrato" },
                 { key: "phone", question: "¿Cuál es tu número de teléfono?", placeholder: "ej., +34 123 456 789" },
                 { key: "linkedin", question: "¿Cuál es la URL de tu perfil de LinkedIn?", placeholder: "ej., https://linkedin.com/in/anagarcia" },
                 { key: "github", question: "¿Cuál es la URL de tu GitHub u otro portafolio?", placeholder: "ej., https://github.com/anagarcia" }
@@ -1226,6 +1226,7 @@ export const translations = {
             addExperience: "Añadir experiencia",
             editExperience: "Editar experiencia",
             addNewExperience: "Añadir nueva experiencia",
+            saveExperience: "Guardar experiencia",
             title: "Título",
             jobTitle: "Título del puesto",
             company: "Empresa",
@@ -1244,6 +1245,7 @@ export const translations = {
             addEducation: "Añadir educación",
             editEducation: "Editar educación",
             addNewEducation: "Añadir nueva educación",
+            saveEducation: "Guardar formación",
             institution: "Institución",
             institutionPlaceholder: "Universidad de Madrid",
             degree: "Título / grado",
@@ -1373,7 +1375,7 @@ export const translations = {
             jobPreferences: {
                 title: "Preferencias laborales",
                 seekingStatus: "Estado de búsqueda",
-                seekingStatusDescription: "Indica si estás buscando activamente oportunidades laborales. Solo los que buscan activamente mostrarán el badge de 'Open to opportunities' en su CV público.",
+                seekingStatusDescription: "Indica si estás buscando activamente oportunidades laborales. Solo los que buscan activamente mostrarán la insignia «Abierto a oportunidades» en su CV público.",
                 seekingOpen: "Busco activamente",
                 seekingPassive: "Abierto a ofertas",
                 seekingNotLooking: "No busco actualmente",
@@ -1399,11 +1401,11 @@ export const translations = {
                 selectCity: "Selecciona una ciudad...",
                 firstSelectCountry: "Primero selecciona un país",
                 jobTypes: {
-                    fullTime: "Tiempo completo",
-                    partTime: "Medio tiempo",
+                    fullTime: "Jornada completa",
+                    partTime: "Media jornada",
                     contract: "Contrato",
                     freelance: "Freelance",
-                    internship: "Pasantía",
+                    internship: "Prácticas",
                 },
                 remotePreferences: {
                     remote: "Remoto",
@@ -1415,13 +1417,14 @@ export const translations = {
             saveButton: "Guardar preferencias",
             unsavedChanges: "Tienes cambios sin guardar",
         },
-        opportunities: { jobOpportunities: "Oportunidades laborales", myApplications: "Mis postulaciones", myApplicationsDescription: "Seguimiento completo de tus aplicaciones con estados actualizados", searchJobs: "Buscar vacantes", searchJobsDescription: "Encuentra ofertas personalizadas y gestiona tus favoritas", tabRecommended: "Recomendadas", tabAllJobs: "Todas las ofertas", tabSaved: "Guardadas", tabApplications: "Mis aplicaciones", tabAll: "Todas", descRecommended: "Ofertas con mejor compatibilidad para tu perfil", descAllJobs: "Explora todas las vacantes disponibles", descSaved: "Ofertas que has guardado para revisar más tarde", descApplications: "Seguimiento de tus postulaciones", searchPlaceholder: "Título, palabra clave o empresa...", locationPlaceholder: "Ciudad, país o \"remoto\"...", filters: "Filtros", advancedFilters: "Filtros avanzados", employmentType: "Tipo de empleo", workMode: "Modalidad", experienceLevel: "Nivel de experiencia", clearFilters: "Limpiar filtros", allMasculine: "Todos", allFeminine: "Todas", fullTime: "Tiempo completo", partTime: "Medio tiempo", contract: "Contrato", temporary: "Temporal", internship: "Pasantía", remote: "Remoto", onSite: "Presencial", hybrid: "Híbrido", entryLevel: "Sin experiencia", junior: "Junior", midLevel: "Semi-senior", senior: "Senior", lead: "Lead", executive: "Ejecutivo", salaryFrom: "Desde", salaryUpTo: "Hasta", today: "Hoy", yesterday: "Ayer", daysAgo: (days: number) => `Hace ${days} días`, jobsFound: (count: number) => `vacante${count !== 1 ? 's' : ''} encontrada${count !== 1 ? 's' : ''}`, noJobsFound: "No se encontraron vacantes", noJobsFoundDescription: "Intenta ajustar tus filtros de búsqueda o amplía los criterios", noApplications: "No hay aplicaciones", noApplicationsWithStatus: "No hay aplicaciones con este estado", noApplicationsYet: "Aún no has aplicado a ninguna vacante", noRecommendations: "No hay recomendaciones disponibles", noRecommendationsDescription: "No encontramos vacantes que coincidan con tu perfil en este momento. Explora todas las ofertas disponibles o intenta más tarde.", noSavedJobs: "No tienes ofertas guardadas", noSavedJobsDescription: "Guarda ofertas interesantes para revisarlas más tarde", savedJobsCount: "ofertas guardadas", viewDetails: "Ver detalles", viewJob: "Ver vacante", viewAllJobs: "Ver todas las ofertas", exploreJobs: "Explorar ofertas", save: "Guardar", saved: "Guardada", remove: "Quitar", message: "Mensaje", alreadyApplied: "Ya aplicaste", viewedByCompany: "Vista por empresa", appliedAgo: "Aplicado hace", daysLabel: "días", recommendedJobs: "Ofertas recomendadas", recommendedJobsDescription: (count: number) => `Encontramos ${count} ofertas con alta compatibilidad con tu perfil`, errorLoadingJobs: "Error al cargar vacantes", errorLoadingRecommendations: "Error al cargar recomendaciones", errorLoadingSavedJobs: "Error al cargar ofertas guardadas", errorSavingJob: "Error al guardar", errorRemovingSavedJob: "Error al quitar guardado", errorLoadingApplications: "Error al cargar aplicaciones", jobRemoved: (title: string) => `"${title}" eliminada de guardados`, jobSaved: (title: string) => `"${title}" guardada`, jobRemovedFromSaved: (title: string) => `"${title}" eliminada de guardados`, loadingJobs: "Cargando vacantes...", loadingApplications: "Cargando tus aplicaciones...", loadingRecommendations: "Encontrando las mejores ofertas...", loadingSavedJobs: "Cargando ofertas guardadas...", statsTotal: "Total", statsActive: "Activas", statsInterviews: "Entrevistas", statsOffers: "Ofertas", statsAccepted: "Aceptado", statsRejected: "Rechazadas", filterByStatus: "Filtrar por estado:", filterAll: "Todas", filterActive: "Activas", filterOffers: "Ofertas", filterAccepted: "Aceptado", filterRejected: "Rechazadas" },
+        opportunities: { jobOpportunities: "Oportunidades laborales", myApplications: "Mis postulaciones", myApplicationsDescription: "Seguimiento completo de tus aplicaciones con estados actualizados", searchJobs: "Buscar vacantes", searchJobsDescription: "Encuentra ofertas personalizadas y gestiona tus favoritas", tabRecommended: "Recomendadas", tabAllJobs: "Todas las ofertas", tabSaved: "Guardadas", tabApplications: "Mis aplicaciones", tabAll: "Todas", descRecommended: "Ofertas con mejor compatibilidad para tu perfil", descAllJobs: "Explora todas las vacantes disponibles", descSaved: "Ofertas que has guardado para revisar más tarde", descApplications: "Seguimiento de tus postulaciones", searchPlaceholder: "Título, palabra clave o empresa...", locationPlaceholder: "Ciudad, país o \"remoto\"...", filters: "Filtros", advancedFilters: "Filtros avanzados", employmentType: "Tipo de empleo", workMode: "Modalidad", experienceLevel: "Nivel de experiencia", clearFilters: "Limpiar filtros", allMasculine: "Todos", allFeminine: "Todas", fullTime: "Jornada completa", partTime: "Media jornada", contract: "Contrato", temporary: "Temporal", internship: "Prácticas", remote: "Remoto", onSite: "Presencial", hybrid: "Híbrido", entryLevel: "Sin experiencia", junior: "Junior", midLevel: "Semi-senior", senior: "Senior", lead: "Lead", executive: "Ejecutivo", salaryFrom: "Desde", salaryUpTo: "Hasta", today: "Hoy", yesterday: "Ayer", daysAgo: (days: number) => `Hace ${days} días`, jobsFound: (count: number) => `vacante${count !== 1 ? 's' : ''} encontrada${count !== 1 ? 's' : ''}`, noJobsFound: "No se encontraron vacantes", noJobsFoundDescription: "Intenta ajustar tus filtros de búsqueda o amplía los criterios", noApplications: "No hay aplicaciones", noApplicationsWithStatus: "No hay aplicaciones con este estado", noApplicationsYet: "Aún no has aplicado a ninguna vacante", noRecommendations: "No hay recomendaciones disponibles", noRecommendationsDescription: "No encontramos vacantes que coincidan con tu perfil en este momento. Explora todas las ofertas disponibles o intenta más tarde.", noSavedJobs: "No tienes ofertas guardadas", noSavedJobsDescription: "Guarda ofertas interesantes para revisarlas más tarde", savedJobsCount: "ofertas guardadas", viewDetails: "Ver detalles", viewJob: "Ver vacante", viewAllJobs: "Ver todas las ofertas", exploreJobs: "Explorar ofertas", save: "Guardar", saved: "Guardada", remove: "Quitar", message: "Mensaje", alreadyApplied: "Ya aplicaste", viewedByCompany: "Vista por empresa", appliedAgo: "Aplicado hace", daysLabel: "días", recommendedJobs: "Ofertas recomendadas", recommendedJobsDescription: (count: number) => `Encontramos ${count} ofertas con alta compatibilidad con tu perfil`, errorLoadingJobs: "Error al cargar vacantes", errorLoadingRecommendations: "Error al cargar recomendaciones", errorLoadingSavedJobs: "Error al cargar ofertas guardadas", errorSavingJob: "Error al guardar", errorRemovingSavedJob: "Error al quitar guardado", errorLoadingApplications: "Error al cargar aplicaciones", jobRemoved: (title: string) => `"${title}" eliminada de guardados`, jobSaved: (title: string) => `"${title}" guardada`, jobRemovedFromSaved: (title: string) => `"${title}" eliminada de guardados`, loadingJobs: "Cargando vacantes...", loadingApplications: "Cargando tus aplicaciones...", loadingRecommendations: "Encontrando las mejores ofertas...", loadingSavedJobs: "Cargando ofertas guardadas...", statsTotal: "Total", statsActive: "Activas", statsInterviews: "Entrevistas", statsOffers: "Ofertas", statsAccepted: "Aceptado", statsRejected: "Rechazadas", filterByStatus: "Filtrar por estado:", filterAll: "Todas", filterActive: "Activas", filterOffers: "Ofertas", filterAccepted: "Aceptado", filterRejected: "Rechazadas" },
         identity: {
             title: "Identidad",
             professionalInfo: "Información profesional",
             contactInfo: "Información de contacto",
             changePhoto: "Cambiar",
             country: "País",
+            countryPlaceholder: "Selecciona un país",
             uploadPhoto: "Subir foto",
             uploading: "Subiendo...",
             photoHelper: "JPG, PNG, GIF o WebP (máx 5MB)",
@@ -1509,7 +1512,10 @@ export const translations = {
                 resendFailed: "No hemos podido reenviar el correo. Inténtalo de nuevo en unos minutos.",
                 sending: "Enviando...",
                 welcomeTitle: "Comienza tu viaje",
-                welcomeSubtitle: "Únete a miles de profesionales que crean CVs destacados con nuestra plataforma impulsada por IA.",
+                // Issue #4 (22): distinto del subtítulo del formulario para no repetir «Únete a miles de profesionales»
+                welcomeSubtitle: "Crea un CV destacado con ayuda de la IA y compártelo con un solo enlace.",
+                // Issue #4 (10): nombre accesible completo de la casilla de términos (con el texto de los enlaces)
+                agreeToTermsAccessible: "Acepto los Términos de servicio y la Política de privacidad",
                 feature1: "Gratis para empezar",
                 feature2: "No se requiere tarjeta de crédito",
                 feature3: "Configura en menos de 2 minutos",
@@ -1621,7 +1627,7 @@ export const translations = {
             },
         },
         menu: {
-            dashboard: "Dashboard",
+            dashboard: "Panel",
             myProfile: "Mi perfil",
             template: "Template",
             cvEditor: "Editor de CV",
@@ -1653,8 +1659,21 @@ export const translations = {
             notificaciones: "Notificaciones",
             companyDashboard: "Panel de empresa",
             adminPanel: "Panel admin",
-            wizardAlertTitle: "Completa el wizard primero",
-            wizardAlertDescription: "Debes completar el wizard de perfil (incluyendo el paso de finalización) para acceder a todas las funcionalidades.",
+            wizardAlertTitle: "Completa tu CV primero",
+            wizardAlertDescription: "Termina el asistente de tu CV y publícalo en el último paso («Finalizar») para usar todas las funciones.",
+            // Issue #4 (13/24): aviso de bloqueo que dice qué apartado y qué falta
+            wizardAlertSection: "«{section}» se desbloquea al terminar el asistente de tu CV.",
+            wizardAlertMissing: "Te falta:",
+            wizardAlertPublish: "Publicar tu CV en el último paso del asistente («Finalizar»)",
+            wizardAlertGo: "Ir al asistente",
+            wizardAlertClose: "Cerrar aviso",
+            lockedHint: "Bloqueado: completa tu CV primero",
+            // Issue #4 (18): nombres accesibles de los controles del panel
+            openMenu: "Abrir menú",
+            closeMenu: "Cerrar menú",
+            notificationsUnread: "Notificaciones ({count} sin leer)",
+            expandSidebar: "Desplegar menú lateral",
+            collapseSidebar: "Plegar menú lateral",
             sectionHome: "INICIO",
             sectionProfile: "MI PERFIL",
             sectionCommunity: "COMUNIDAD",
@@ -2335,7 +2354,7 @@ export const translations = {
         { name: 'Profesionales', href: '#', id: 'profesionales', subItems: [
             { name: 'Cómo funciona', href: '#', id: 'profesionales/como-funciona' },
             { name: 'Plantillas y ejemplos', href: '#', id: 'profesionales/plantillas' },
-            { name: 'Buscar empleos', href: '#', id: 'jobs' },
+            // 'Buscar empleos' (/jobs) fuera del menú mientras no haya vacantes publicadas (la ruta sigue activa)
             { name: 'Precios (planes)', href: '#', id: 'precios' },
             { name: 'Centro de ayuda', href: '#', id: 'profesionales/ayuda' },
         ]},
@@ -2347,12 +2366,13 @@ export const translations = {
         ]},
         { name: 'Recursos', href: '#', id: 'recursos', subItems: [
             { name: 'Blog / guías de carrera', href: '#', id: 'recursos/blog' },
-            { name: 'Biblioteca de plantillas', href: '#', id: 'recursos/biblioteca' },
+            // 'Biblioteca de plantillas' fusionada con Profesionales > Plantillas y ejemplos (301 en config/routeConfig.ts)
             { name: 'Casos de éxito', href: '#', id: 'recursos/exito' },
             { name: 'Estado del sistema', href: '#', id: 'recursos/estado' },
         ]},
         { name: 'Nosotros', href: '#', id: 'nosotros', subItems: [
-            { name: 'Misión y valores', href: '#', id: 'nosotros/mision' },
+            // /nosotros/mision redirige a /nosotros (misma página)
+            { name: 'Misión y valores', href: '#', id: 'nosotros' },
             { name: 'Prensa/kit de medios', href: '#', id: 'nosotros/prensa' },
             { name: 'Contacto', href: '#', id: 'nosotros/contacto' },
         ]},
@@ -3363,8 +3383,8 @@ export const translations = {
         subtitle: "Controla qué secciones opcionales se muestran en tu CV público",
         options: {
             availability: {
-                title: "Mostrar badge de disponibilidad",
-                description: "Muestra un indicador de \"Open to opportunities\" en tu CV"
+                title: "Mostrar insignia de disponibilidad",
+                description: "Muestra la insignia «Abierto a oportunidades» en tu CV"
             },
             qrCode: {
                 title: "Mostrar código QR",
@@ -3737,6 +3757,8 @@ export const translations = {
         },
         skills: {
             aiSuggestionsTitle: 'Sugerencias de IA',
+            minSkillsHint: 'Para publicar tu CV necesitas al menos {min} habilidades ({count}/{min})',
+            minSkillsDone: 'Tienes las {min} habilidades mínimas para publicar ({count})',
             skillAlreadyExists: 'Esta habilidad ya existe en tu perfil',
             skillSaved: 'Habilidad guardada correctamente',
             errorSavingSkill: 'Error al guardar la habilidad: ',
@@ -3778,6 +3800,10 @@ export const translations = {
         identity: {
             contactInfo: 'Información de contacto',
             gender: 'Género',
+            genderMale: 'Hombre',
+            genderFemale: 'Mujer',
+            genderPreferNot: 'Prefiero no decirlo',
+            genderHint: 'Opcional. Solo se usa para concordar el género de las traducciones de tu CV.',
         },
         languages: {
             title: 'Idiomas',
@@ -3958,7 +3984,7 @@ export const translations = {
         fullName: 'Nombre completo',
         email: 'Email',
         headline: 'Título profesional',
-        summary: 'Resumen',
+        summary: 'Acerca de mí',
         photo: 'Foto de perfil',
         atLeastOneExperience: 'Al menos 1 experiencia laboral',
         atLeastThreeSkills: 'Al menos 3 habilidades',
@@ -3974,7 +4000,8 @@ export const translations = {
             summaryRequired: 'El resumen "Acerca de mí" es obligatorio',
             summaryMax: 'Máximo 500 caracteres',
             countryRequired: 'Debes seleccionar un país',
-            genderRequired: 'Debes seleccionar tu género'
+            genderRequired: 'Debes seleccionar tu género',
+            genderInvalid: 'Selecciona una opción válida'
         },
         experience: {
             positionRequired: 'El puesto es obligatorio',
@@ -3992,6 +4019,7 @@ export const translations = {
             yearInvalid: 'El año debe tener 4 dígitos válidos (YYYY)',
             yearTooOld: 'La fecha no puede ser anterior a 1950',
             yearFuture: 'La fecha no puede ser posterior al año actual',
+            startDateFuture: 'La fecha de inicio no puede ser futura',
             monthInvalid: 'El mes debe estar entre 01 y 12',
             dateFormatInvalid: 'Formato inválido. Use YYYY-MM (ej: 2024-03)',
             gpaLabel: 'GPA / nota media (opcional)',
@@ -4515,11 +4543,11 @@ export const translations = {
                 allLevels: 'Todos',
                 employmentType: {
                     label: 'Tipo de empleo',
-                    fullTime: 'Tiempo completo',
-                    partTime: 'Medio tiempo',
+                    fullTime: 'Jornada completa',
+                    partTime: 'Media jornada',
                     contract: 'Contrato',
                     temporary: 'Temporal',
-                    internship: 'Pasantía',
+                    internship: 'Prácticas',
                     freelance: 'Freelance'
                 },
                 workMode: {
@@ -4613,11 +4641,11 @@ export const translations = {
             applicationInstructions: 'Instrucciones de aplicación',
             remote: 'Remoto',
             employmentType: {
-                fullTime: 'Tiempo completo',
-                partTime: 'Medio tiempo',
+                fullTime: 'Jornada completa',
+                partTime: 'Media jornada',
                 contract: 'Contrato',
                 temporary: 'Temporal',
-                internship: 'Pasantía',
+                internship: 'Prácticas',
                 freelance: 'Freelance'
             },
             workMode: {
@@ -4708,11 +4736,11 @@ export const translations = {
                 delete: 'Eliminar',
             },
             employmentType: {
-                FULL_TIME: 'Tiempo completo',
-                PART_TIME: 'Medio tiempo',
+                FULL_TIME: 'Jornada completa',
+                PART_TIME: 'Media jornada',
                 CONTRACT: 'Contrato',
                 TEMPORARY: 'Temporal',
-                INTERNSHIP: 'Pasantía',
+                INTERNSHIP: 'Prácticas',
                 FREELANCE: 'Freelance',
             },
             workMode: {
@@ -4788,11 +4816,11 @@ export const translations = {
                 instructionsPlaceholder: 'Instrucciones adicionales para candidatos...',
             },
             employmentTypes: {
-                FULL_TIME: 'Tiempo completo',
-                PART_TIME: 'Medio tiempo',
+                FULL_TIME: 'Jornada completa',
+                PART_TIME: 'Media jornada',
                 CONTRACT: 'Contrato',
                 TEMPORARY: 'Temporal',
-                INTERNSHIP: 'Pasantía',
+                INTERNSHIP: 'Prácticas',
                 FREELANCE: 'Freelance',
             },
             workModes: {
@@ -5079,6 +5107,7 @@ export const translations = {
     countrySelector: {
         searchPlaceholder: 'Buscar pa\u00eds...',
         noResults: 'No se encontraron pa\u00edses',
+        placeholder: 'Selecciona un pa\u00eds',
     },
     monthYearPicker: {
         months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
