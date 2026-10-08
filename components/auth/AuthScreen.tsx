@@ -155,7 +155,9 @@ const AuthScreen: React.FC = () => {
           setIsLoading(false);
           return;
         }
-        navigate('/dashboard');
+        // La navegación la hace el efecto de `user` (arriba) en cuanto hay sesión.
+        // Navegar también aquí, cuando termina signInWithEmail (que además registra
+        // la actividad), devolvía al admin de /admin a /dashboard.
       } catch (err) {
         toast.error(t.errors.serverError);
         setError(t.errors.serverError);

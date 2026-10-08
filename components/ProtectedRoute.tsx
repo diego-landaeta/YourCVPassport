@@ -5,7 +5,7 @@ import { useTranslations } from '../hooks/useTranslations';
 import LoadingSpinner from './shared/LoadingSpinner';
 
 const ProtectedRoute: React.FC = () => {
-  const { session, loading, profile } = useAuth();
+  const { session, loading, profile, profileLoading } = useAuth();
   const location = useLocation();
   const t = useTranslations();
 
@@ -18,9 +18,14 @@ const ProtectedRoute: React.FC = () => {
   }
 
   // Las rutas protegidas de aquí son el área personal (/dashboard y subrutas: visas,
-  // mensajes...). El admin no la usa: va a su panel. Mientras el perfil carga no se
-  // espera aquí (cada página gestiona su carga, p. ej. DashboardPage con su spinner),
-  // así el resto de roles se comporta igual que antes.
+  // mensajes...). El admin no la usa: va a su panel. Se espera al perfil antes de
+  // montar la página: DashboardPage reescribe history.state al montarse y, si el admin
+  // llegaba a montarla, la redirección a /admin se perdía (pantalla en blanco en
+  // /dashboard tras iniciar sesión en producción).
+  if (profileLoading && !profile) {
+    return <LoadingSpinner message={t.loadingMessages.verifyingSession} size="medium" />;
+  }
+
   if (profile?.role === 'admin') {
     return <Navigate to="/admin" replace />;
   }
