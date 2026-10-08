@@ -9,11 +9,16 @@
 //   SENDER_EMAIL   opcional (por defecto no-reply@yourcvpassport.com). Tiene que
 //                  pertenecer a un dominio autenticado en Brevo.
 //
+// Si están EMAIL_RELAY_URL y EMAIL_RELAY_SECRET, el envío va por el relé del
+// servidor web (Brevo rechaza las IPs de las Edge Functions); ver
+// _shared/brevoRequest.ts y deploy/mail-relay/.
+//
 // Nunca se registran ni se devuelven la API key, el destinatario ni el
 // contenido del correo: `detail` solo lleva el status y el código de error de
 // Brevo, pensado para console.error del llamador.
 
-const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email'
+import { brevoConfigured, brevoRequest } from './brevoRequest.ts'
+
 const DEFAULT_SENDER_EMAIL = 'no-reply@yourcvpassport.com'
 const SENDER_NAME = 'YourCVPassport'
 
@@ -56,7 +61,7 @@ function senderEmail(): string {
 // true si hay API key y remitente válido. Útil para fallar antes de tocar la
 // base de datos (p. ej. antes de crear un sello de verificación).
 export function isEmailConfigured(): boolean {
-  return Boolean(Deno.env.get('BREVO_API_KEY')) && isValidSingleEmail(senderEmail())
+  return brevoConfigured() && isValidSingleEmail(senderEmail())
 }
 
 function fail(status: number, code: SendEmailErrorCode, detail: string): SendEmailResult {
@@ -72,9 +77,8 @@ function brevoErrorCode(body: unknown): string {
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const apiKey = Deno.env.get('BREVO_API_KEY')
   const fromEmail = senderEmail()
-  if (!apiKey) return fail(0, 'EMAIL_NOT_CONFIGURED', 'BREVO_API_KEY not set')
+  if (!brevoConfigured()) return fail(0, 'EMAIL_NOT_CONFIGURED', 'BREVO_API_KEY not set')
   if (!isValidSingleEmail(fromEmail)) return fail(0, 'EMAIL_NOT_CONFIGURED', 'SENDER_EMAIL is not a valid address')
 
   const to = typeof input?.to === 'string' ? input.to.trim() : ''
@@ -107,16 +111,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
 
   let response: Response
   try {
-    response = await fetch(BREVO_ENDPOINT, {
-      method: 'POST',
-      signal: AbortSignal.timeout(EMAIL_TIMEOUT_MS),
-      headers: {
-        'accept': 'application/json',
-        'content-type': 'application/json',
-        'api-key': apiKey,
-      },
-      body: JSON.stringify(payload),
-    })
+    response = await brevoRequest('/smtp/email', payload, EMAIL_TIMEOUT_MS)
   } catch (error: unknown) {
     // Timeout (TimeoutError/AbortError) o fallo de red: un fetch colgado también
     // es EMAIL_SEND_FAILED.

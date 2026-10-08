@@ -34,6 +34,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { getCorsHeaders, isAllowedOrigin } from '../_shared/cors.ts';
+import { brevoRequest } from '../_shared/brevoRequest.ts';
 import { pressContactEmail } from '../_shared/emailTemplates.ts';
 import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts';
 
@@ -41,7 +42,6 @@ import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.t
 // CONFIGURACION
 // ==================================================
 
-const BREVO_BASE_URL = 'https://api.brevo.com/v3';
 const BREVO_TIMEOUT_MS = 10_000;
 
 const SITE_ORIGIN = 'https://www.yourcvpassport.com';
@@ -158,16 +158,8 @@ function positiveInt(value: string | undefined): number | null {
 async function brevoPost(path: string, apiKey: string, payload: unknown, tag: string): Promise<{ status: number; code: string | null }> {
   let res: Response;
   try {
-    res = await fetch(`${BREVO_BASE_URL}${path}`, {
-      method: 'POST',
-      signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'api-key': apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
+    // Directo a Brevo o por el relé del servidor web (_shared/brevoRequest.ts).
+    res = await brevoRequest(path, payload, BREVO_TIMEOUT_MS);
   } catch (err) {
     console.error(`[newsletter-contact] ${tag}: Brevo fetch failed:`, (err as Error)?.name);
     throw new HttpError(502, 'SEND_FAILED', 'Could not reach the email provider');
