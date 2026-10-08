@@ -66,7 +66,7 @@ const ATSExportPage: React.FC = () => {
                     <div className="w-96 h-96 bg-cv-green/10 rounded-full filter blur-3xl"></div>
                 </div>
                 <div className="max-w-7xl mx-auto z-10 relative">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary leading-tight">

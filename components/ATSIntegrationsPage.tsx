@@ -63,7 +63,7 @@ const ATSIntegrationsPage: React.FC = () => {
             {/* Hero Section */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
@@ -139,7 +139,7 @@ const ATSIntegrationsPage: React.FC = () => {
             {/* API Documentation Preview */}
             <section className="py-20 px-4">
                 {/* [&>*]:min-w-0: sin esto el bloque de código ensancha la columna y en móvil la página desborda */}
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center [&>*]:min-w-0">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center [&>*]:min-w-0">
                     <AnimatedWrapper>
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.api.title}</h2>

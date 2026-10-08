@@ -259,6 +259,22 @@ test.describe('B2 títulos', () => {
     await expect.poll(() => page.title(), { timeout: 45_000 }).toBe('Iniciar sesión - Accede a tu cuenta | YourCVPassport');
   });
 
+  // nginx redirige /login a /login/ (existe dist/login/index.html). En producción
+  // /login/ mostraba el formulario de registro porque AuthScreen compara '/login'.
+  test('/login/ y /signup/ con barra final: URL sin barra, formulario y título correctos', async ({ page, context }) => {
+    await setup(context, 'es');
+    await page.goto('/login/', { waitUntil: 'domcontentloaded' });
+    await expect.poll(() => new URL(page.url()).pathname, { timeout: 45_000 }).toBe('/login');
+    await expect(page.locator('#confirmPassword')).toHaveCount(0);
+    await expect(page.locator('#fullName')).toHaveCount(0);
+    await expect.poll(() => page.title(), { timeout: 45_000 }).toBe('Iniciar sesión - Accede a tu cuenta | YourCVPassport');
+
+    await page.goto('/signup/', { waitUntil: 'domcontentloaded' });
+    await expect.poll(() => new URL(page.url()).pathname, { timeout: 45_000 }).toBe('/signup');
+    await expect(page.locator('#fullName')).toBeVisible({ timeout: 45_000 });
+    await expect.poll(() => page.title(), { timeout: 45_000 }).toBe('Crear cuenta - Crea tu CV profesional | YourCVPassport');
+  });
+
   test('generador: cada página pública sale con su título, canonical y hreflang', async () => {
     const { renderPage, listPages } = await import(pathToFileURL(path.join(ROOT, 'scripts', 'generate-static-meta.mjs')).href);
     const base = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
