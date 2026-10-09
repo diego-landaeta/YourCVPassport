@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV aplicacion maestria** se
 
 Esta guía completa sobre **CV aplicacion maestria** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV aplicacion maestria](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre CV aplicacion maestria}
+![CV aplicacion maestria](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Guía completa sobre CV aplicacion maestria}
 
 ## 1. CV para maestria vs CV laboral
 2. Perfil academico y calificaciones
@@ -78,7 +78,7 @@ Para destacar en **CV aplicacion maestria** dentro de esta área, aplica estas e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV aplicacion maestria](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV aplicacion maestria}
+![Aspectos avanzados de CV aplicacion maestria](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Aspectos avanzados de CV aplicacion maestria}
 
 ## Aspectos avanzados de CV aplicacion maestria
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **CV aplicacion ma
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV aplicacion maestria](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV aplicacion maestria}
+![Aspectos avanzados de CV aplicacion maestria](https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80){caption:Aspectos avanzados de CV aplicacion maestria}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV aplicacion maestria para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **CV aplicacion maestria** no es solo una ventaja competitiva — es una
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Desarrollo de Carrera",
   is_featured: false,

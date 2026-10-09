@@ -218,7 +218,7 @@ To excel in **resume keywords optimization** within this area, apply these prove
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of resume keywords optimization](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of resume keywords optimization}
+![Advanced aspects of resume keywords optimization](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Advanced aspects of resume keywords optimization}
 
 ## Advanced aspects of resume keywords optimization
 

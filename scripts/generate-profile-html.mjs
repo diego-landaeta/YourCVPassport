@@ -11,7 +11,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,12 +23,15 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+// Solo al ejecutarlo como script: importado (tests) expone injectMetaTags sin tocar Supabase
+const isMain = !!process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isMain && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.error('❌ Error: VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY deben estar definidos en .env.local');
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = isMain ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 async function generateProfileHTML(slug) {
   try {
@@ -37,7 +40,8 @@ async function generateProfileHTML(slug) {
     // Fetch profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
+      // Columnas explícitas: con la anon key, select('*') da 42501 (columnas privadas)
+      .select('id, slug, full_name, headline, summary, location, avatar_url, meta_title, meta_description')
       .eq('slug', slug)
       .single();
 
@@ -98,7 +102,7 @@ async function generateProfileHTML(slug) {
   }
 }
 
-function generateMetaTags(profile, skills, experiences) {
+export function generateMetaTags(profile, skills, experiences) {
   // Title
   const title = profile.meta_title ||
     `${profile.full_name} - ${profile.headline} | YourCVPassport`;
@@ -169,81 +173,51 @@ function generateMetaTags(profile, skills, experiences) {
   };
 }
 
-function injectMetaTags(html, metaTags) {
-  // Escape special characters in content
-  const escape = (str) => str.replace(/"/g, '&quot;');
+export function injectMetaTags(html, metaTags) {
+  // Escapado completo: nombre, titular y demás los escribe el usuario. Antes solo
+  // se escapaban las comillas y un `</title><script>` acababa en el HTML estático.
+  const escape = (str) => String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  // Reemplazo por función: con un string, `$&` o `$'` en los datos del usuario se
+  // interpretarían como patrones de String.replace y reinyectarían HTML.
+  const rep = (pattern, value) => { html = html.replace(pattern, () => value); };
 
   // Replace title
-  html = html.replace(
-    /<title>.*?<\/title>/,
-    `<title>${escape(metaTags.title)}</title>`
-  );
+  rep(/<title>.*?<\/title>/, `<title>${escape(metaTags.title)}</title>`);
 
   // Replace description
-  html = html.replace(
-    /<meta name="description" content=".*?".*?>/,
-    `<meta name="description" content="${escape(metaTags.description)}">`
-  );
+  rep(/<meta name="description" content=".*?".*?>/, `<meta name="description" content="${escape(metaTags.description)}">`);
 
   // Add/replace keywords
   if (html.includes('name="keywords"')) {
-    html = html.replace(
-      /<meta name="keywords" content=".*?".*?>/,
-      `<meta name="keywords" content="${escape(metaTags.keywords)}">`
-    );
+    rep(/<meta name="keywords" content=".*?".*?>/, `<meta name="keywords" content="${escape(metaTags.keywords)}">`);
   } else {
-    html = html.replace(
-      '</head>',
-      `    <meta name="keywords" content="${escape(metaTags.keywords)}">\n</head>`
-    );
+    rep('</head>', `    <meta name="keywords" content="${escape(metaTags.keywords)}">\n</head>`);
   }
 
   // Replace Open Graph tags
-  html = html.replace(
-    /<meta property="og:title" content=".*?".*?>/,
-    `<meta property="og:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:description" content=".*?".*?>/,
-    `<meta property="og:description" content="${escape(metaTags.description)}">`
-  );
-
-  html = html.replace(
-    /<meta property="og:image" content=".*?".*?>/,
-    `<meta property="og:image" content="${metaTags.image}">`
-  );
+  rep(/<meta property="og:title" content=".*?".*?>/, `<meta property="og:title" content="${escape(metaTags.title)}">`);
+  rep(/<meta property="og:description" content=".*?".*?>/, `<meta property="og:description" content="${escape(metaTags.description)}">`);
+  rep(/<meta property="og:image" content=".*?".*?>/, `<meta property="og:image" content="${escape(metaTags.image)}">`);
 
   // Add og:url
   if (html.includes('property="og:url"')) {
-    html = html.replace(
-      /<meta property="og:url" content=".*?".*?>/,
-      `<meta property="og:url" content="${metaTags.url}">`
-    );
+    rep(/<meta property="og:url" content=".*?".*?>/, `<meta property="og:url" content="${escape(metaTags.url)}">`);
   } else {
-    html = html.replace(
-      /<meta property="og:image"/,
-      `<meta property="og:url" content="${metaTags.url}">\n    <meta property="og:image"`
-    );
+    rep(/<meta property="og:image"/, `<meta property="og:url" content="${escape(metaTags.url)}">\n    <meta property="og:image"`);
   }
 
   // Replace Twitter Card tags
-  html = html.replace(
-    /<meta name="twitter:title" content=".*?".*?>/,
-    `<meta name="twitter:title" content="${escape(metaTags.title)}">`
-  );
-
-  html = html.replace(
-    /<meta name="twitter:description" content=".*?".*?>/,
-    `<meta name="twitter:description" content="${escape(metaTags.description)}">`
-  );
+  rep(/<meta name="twitter:title" content=".*?".*?>/, `<meta name="twitter:title" content="${escape(metaTags.title)}">`);
+  rep(/<meta name="twitter:description" content=".*?".*?>/, `<meta name="twitter:description" content="${escape(metaTags.description)}">`);
 
   // Add author meta tag
   if (!html.includes('name="author"')) {
-    html = html.replace(
-      '</head>',
-      `    <meta name="author" content="${escape(metaTags.authorName)}">\n</head>`
-    );
+    rep('</head>', `    <meta name="author" content="${escape(metaTags.authorName)}">\n</head>`);
   }
 
   // Change og:type to profile
@@ -294,24 +268,26 @@ async function generateAllProfiles() {
   console.log('\n' + '='.repeat(50));
 }
 
-// Main execution
-const args = process.argv.slice(2);
+// Main execution (solo al ejecutarlo como script; importado no hace nada)
+if (isMain) {
+  const args = process.argv.slice(2);
 
-if (args.length === 0) {
-  console.error('\n❌ Error: Debes especificar un slug o usar --all\n');
-  console.log('Uso:');
-  console.log('  node scripts/generate-profile-html.mjs emily-harper');
-  console.log('  node scripts/generate-profile-html.mjs --all');
-  process.exit(1);
-}
+  if (args.length === 0) {
+    console.error('\n❌ Error: Debes especificar un slug o usar --all\n');
+    console.log('Uso:');
+    console.log('  node scripts/generate-profile-html.mjs emily-harper');
+    console.log('  node scripts/generate-profile-html.mjs --all');
+    process.exit(1);
+  }
 
-if (args[0] === '--all') {
-  generateAllProfiles();
-} else {
-  const slug = args[0];
-  generateProfileHTML(slug).then(success => {
-    if (!success) {
-      process.exit(1);
-    }
-  });
+  if (args[0] === '--all') {
+    generateAllProfiles();
+  } else {
+    const slug = args[0];
+    generateProfileHTML(slug).then(success => {
+      if (!success) {
+        process.exit(1);
+      }
+    });
+  }
 }

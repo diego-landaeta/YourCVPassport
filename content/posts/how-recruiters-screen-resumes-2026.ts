@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **how recruiters screen resu
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of how recruiters screen resumes](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of how recruiters screen resumes}
+![Advanced aspects of how recruiters screen resumes](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Advanced aspects of how recruiters screen resumes}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your how recruiters screen resumes approach for each company increases your success rate by up to 60%.

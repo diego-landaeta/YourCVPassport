@@ -26,8 +26,9 @@ interface AdminPDFOptions {
  * Fetch complete profile data from Supabase
  */
 async function fetchProfileData(profileId: string): Promise<FullProfileData> {
+  // Admin: perfil completo desde la vista profiles_full (profiles solo expone columnas públicas)
   const { data: profile, error: profileError } = await supabase
-    .from('profiles')
+    .from('profiles_full')
     .select('*')
     .eq('id', profileId)
     .single();

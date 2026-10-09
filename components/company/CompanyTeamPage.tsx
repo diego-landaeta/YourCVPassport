@@ -86,12 +86,13 @@ const CompanyTeamPage: React.FC = () => {
     try {
       setInviting(true);
 
-      // Check if user exists
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', inviteEmail.toLowerCase())
-        .single();
+      // Check if user exists. El email es privado: se busca con una RPC que solo
+      // responde a OWNER/ADMIN de la empresa y devuelve únicamente el id.
+      const { data: foundId, error: userError } = await supabase.rpc('company_find_user_by_email', {
+        p_company_id: company.id,
+        p_email: inviteEmail.toLowerCase(),
+      });
+      const userData = foundId ? { id: foundId as string } : null;
 
       if (userError || !userData) {
         toast.error(t('company.team.userNotFound') || 'User not found. They must be registered on the platform first.');
@@ -104,7 +105,9 @@ const CompanyTeamPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('profile_id', userData.id)
-        .single();
+        // Puede no haber contacto (o haber varios): basta con saber si existe alguno, sin 406
+        .limit(1)
+        .maybeSingle();
 
       if (contactError || !priorContact) {
         toast.error(
@@ -120,7 +123,8 @@ const CompanyTeamPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('user_id', userData.id)
-        .single();
+        // Lo normal es que aún no sea miembro: maybeSingle devuelve null sin 406
+        .maybeSingle();
 
       if (existingMember) {
         toast.error(t('company.team.alreadyMember') || 'User is already a team member');

@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **contratacion basada en habi
 
 Esta guía completa sobre **contratacion basada en habilidades** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![contratacion basada en habilidades](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre contratacion basada en habilidades}
+![contratacion basada en habilidades](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Guía completa sobre contratacion basada en habilidades}
 
 ## 1. Que es la contratacion por habilidades
 2. Empresas abandonan requisitos de titulo
@@ -78,7 +78,7 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
+![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
 
 ## Aspectos avanzados de contratacion basada en habilidades
 
@@ -292,7 +292,7 @@ Dominar **contratacion basada en habilidades** no es solo una ventaja competitiv
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Tendencias Laborales",
   is_featured: false,

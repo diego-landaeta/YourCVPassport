@@ -271,7 +271,7 @@ Cuando hablamos de **brecha salarial genero LATAM** en el contexto de aspectos a
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de brecha salarial genero LATAM](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de brecha salarial genero LATAM}
+![Aspectos avanzados de brecha salarial genero LATAM](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Aspectos avanzados de brecha salarial genero LATAM}
 
 ## Cómo YourCVPassport te ayuda con brecha salarial genero LATAM
 

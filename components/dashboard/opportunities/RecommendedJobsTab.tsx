@@ -16,6 +16,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { activateOnKey } from '../../shared/a11y';
 
 interface RecommendedJob {
   id: string;
@@ -288,7 +289,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
 
             <div className="flex-1">
               {/* Job Title & Company */}
-              <h3
+              <h3 role="link" tabIndex={0} onKeyDown={activateOnKey(() => navigate(`/jobs/${job.slug}`))}
                 onClick={() => navigate(`/jobs/${job.slug}`)}
                 className="text-lg font-bold text-gray-900 dark:text-white mb-1 hover:text-cv-blue dark:hover:text-cv-blue-light cursor-pointer transition-colors"
               >

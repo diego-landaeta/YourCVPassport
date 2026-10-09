@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { formatPersonName, getInitials } from '../../utils/personName';
+import { isSectionLocked, getWizardMissingItems, openSectionInNewTabIfRequested } from './dashboardNav';
 
 interface SidebarProps {
   profile: any;
@@ -42,11 +44,29 @@ const Sidebar: React.FC<SidebarProps> = ({
     } catch (error) {}
   };
 
-  // Wizard lock
-  const wizardCompleted = profile?.wizard_completed === true;
-  const shouldBlockSections = !wizardCompleted;
+  // Bloqueo por asistente sin terminar. Panel, Mi perfil, Notificaciones y
+  // Ajustes nunca se bloquean (reglas compartidas con MobileNav en dashboardNav.ts).
+  const displayName = formatPersonName(profile?.full_name);
+  const initials = getInitials(displayName);
 
-  const [showProfileAlert, setShowProfileAlert] = React.useState(false);
+  // Apartado bloqueado que el usuario ha intentado abrir (null: sin aviso).
+  const [lockedSectionLabel, setLockedSectionLabel] = React.useState<string | null>(null);
+  const lockTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => () => { if (lockTimerRef.current) clearTimeout(lockTimerRef.current); }, []);
+
+  const showLockNotice = (label: string) => {
+    setLockedSectionLabel(label);
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = setTimeout(() => setLockedSectionLabel(null), 10000);
+  };
+
+  const wizardMissing = getWizardMissingItems(profile, {
+    fullName: translations.wizardValidation.fullName,
+    headline: translations.wizardValidation.headline,
+    summary: translations.wizardValidation.summary,
+    photo: translations.wizardValidation.photo,
+    publish: menu.wizardAlertPublish,
+  });
 
   const handleMenuClick = (item: any) => {
     if (item.id === 'mi-perfil') {
@@ -58,11 +78,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       return;
     }
 
-    if (shouldBlockSections) {
-      setShowProfileAlert(true);
-      setTimeout(() => setShowProfileAlert(false), 4000);
+    if (isSectionLocked(profile, item.id)) {
+      showLockNotice(item.label);
       return;
     }
+    setLockedSectionLabel(null);
 
     // "Ver mi CV" opens in a new tab so user doesn't leave the dashboard
     if (item.id === 'ver-cv' && item.link) {
@@ -132,7 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       items: [
         {
           id: 'feed',
-          label: 'Feed',
+          label: menu.feed,
           icon: <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>,
         },
         {
@@ -191,16 +211,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // ── Collapsed item renderer ──
   const renderCollapsedItem = (item: any) => {
-    const blocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
+    const blocked = isSectionLocked(profile, item.id);
     const active = isActive(item.id);
 
     return (
       <li key={item.id} className="relative group">
         <button
-          onClick={() => handleMenuClick(item)}
+          onClick={(e) => { if (!blocked && !item.link && openSectionInNewTabIfRequested(e, item.id)) return; handleMenuClick(item); }}
+          onAuxClick={(e) => { if (!blocked && !item.link) openSectionInNewTabIfRequested(e, item.id); }}
           data-section-btn={item.id}
           data-tour={`sidebar-${item.id}`}
-          title={item.label}
+          title={blocked ? `${item.label} · ${menu.lockedHint}` : item.label}
+          aria-label={blocked ? `${item.label} (${menu.lockedHint})` : item.label}
+          aria-current={active ? 'page' : undefined}
           className={`w-full flex items-center justify-center p-2.5 rounded-xl transition-all duration-200 ${
             blocked
               ? 'opacity-30 text-gray-400 dark:text-gray-600 cursor-not-allowed'
@@ -222,15 +245,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // ── Expanded item renderer ──
   const renderItem = (item: any) => {
-    const blocked = shouldBlockSections && item.id !== 'dashboard' && item.id !== 'mi-perfil';
+    const blocked = isSectionLocked(profile, item.id);
     const active = isActive(item.id);
 
     return (
       <li key={item.id}>
         <button
-          onClick={() => handleMenuClick(item)}
+          // Ctrl/Cmd/clic central abren el apartado en otra pestaña (?seccion=).
+          onClick={(e) => { if (!blocked && !item.link && openSectionInNewTabIfRequested(e, item.id)) return; handleMenuClick(item); }}
+          onAuxClick={(e) => { if (!blocked && !item.link) openSectionInNewTabIfRequested(e, item.id); }}
           data-section-btn={item.id}
           data-tour={`sidebar-${item.id}`}
+          aria-current={active ? 'page' : undefined}
+          title={blocked ? menu.lockedHint : undefined}
           className={`group/item w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-left ${
             blocked
               ? 'opacity-30 text-gray-400 dark:text-gray-600 cursor-not-allowed'
@@ -247,8 +274,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           <span className={`text-[13px] flex-1 ${active ? 'font-semibold' : 'font-medium'}`}>
             {item.label}
           </span>
+          {blocked && <span className="sr-only">({menu.lockedHint})</span>}
           {blocked && (
-            <svg className="w-3.5 h-3.5 ml-auto flex-shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" className="w-3.5 h-3.5 ml-auto flex-shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           )}
@@ -259,30 +287,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`fixed left-0 top-0 h-screen z-50 bg-white dark:bg-dark-bg-secondary border-r border-gray-200 dark:border-dark-border flex flex-col transition-all duration-300 overflow-visible ${collapsed ? 'w-16' : 'w-64'}`} data-tour="sidebar">
-      {/* Profile Completion Alert */}
-      {showProfileAlert && (
-        <div className={`fixed top-20 ${collapsed ? 'left-20' : 'left-72'} z-50 animate-slideInRight`}>
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-4 rounded-xl shadow-xl min-w-[320px] border border-blue-400">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm mb-1">{menu.wizardAlertTitle}</p>
-                <p className="text-xs text-blue-100">{menu.wizardAlertDescription}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ── Collapse toggle (positioned fully outside the sidebar) ── */}
       {onToggleCollapse && (
         <button
           onClick={onToggleCollapse}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={collapsed ? menu.expandSidebar : menu.collapseSidebar}
+          aria-label={collapsed ? menu.expandSidebar : menu.collapseSidebar}
           className={`absolute top-5 -right-4 translate-x-1/2 w-7 h-7 bg-cv-blue text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-110 transition-all z-[60]`}
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -298,9 +308,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex justify-center py-1">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cv-blue to-indigo-600 flex items-center justify-center text-white font-bold text-sm overflow-hidden flex-shrink-0 ring-2 ring-white dark:ring-dark-bg-secondary shadow-md">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile?.full_name || ''} className="w-full h-full object-cover" />
+                <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
               ) : (
-                profile?.full_name?.charAt(0).toUpperCase() || 'U'
+                <span aria-hidden="true">{initials}</span>
               )}
             </div>
           </div>
@@ -308,14 +318,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-white/5">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cv-blue to-indigo-600 flex items-center justify-center text-white font-bold text-base overflow-hidden flex-shrink-0 ring-2 ring-white dark:ring-dark-bg-tertiary shadow-md">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
               ) : (
-                profile?.full_name?.charAt(0).toUpperCase() || 'U'
+                <span aria-hidden="true">{initials}</span>
               )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-gray-900 dark:text-white truncate text-sm leading-tight">
-                {profile?.full_name || menu.user}
+                {displayName || menu.user}
               </p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 leading-tight">
                 {profile?.headline || menu.user}
@@ -357,6 +367,46 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </nav>
+
+      {/* ── Aviso de apartado bloqueado ──
+          Dentro del propio menú (no flotando sobre el contenido) para no tapar el
+          formulario del asistente. Dice qué apartado y qué falta (issue #4, 13/24).
+          Con el menú plegado no cabe: se muestra abajo a la izquierda, junto al menú. */}
+      {lockedSectionLabel && (
+        <div
+          role="status"
+          data-testid="wizard-lock-notice"
+          className={collapsed ? 'fixed bottom-4 left-20 z-50 w-72 animate-fadeIn' : 'mx-3 mb-3'}
+        >
+          <div className="relative bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100 rounded-xl p-3 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setLockedSectionLabel(null)}
+              aria-label={menu.wizardAlertClose}
+              className="absolute top-1.5 right-1.5 p-1 rounded-md text-blue-500 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/50"
+            >
+              <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <p className="font-semibold text-xs pr-5">{menu.wizardAlertTitle}</p>
+            <p className="text-[11px] mt-1 leading-snug">
+              {menu.wizardAlertSection.replace('{section}', lockedSectionLabel)}
+            </p>
+            <p className="text-[11px] font-medium mt-1.5">{menu.wizardAlertMissing}</p>
+            <ul className="list-disc pl-4 text-[11px] leading-snug space-y-0.5">
+              {wizardMissing.map((m) => <li key={m}>{m}</li>)}
+            </ul>
+            <button
+              type="button"
+              onClick={() => { setLockedSectionLabel(null); onSectionChange('mi-perfil:identity'); }}
+              className="mt-2 w-full text-[11px] font-semibold px-2 py-1.5 rounded-lg bg-cv-blue text-white hover:bg-cv-blue-dark transition-colors"
+            >
+              {menu.wizardAlertGo}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Footer ── */}
       {collapsed ? (

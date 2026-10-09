@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **remote work skills employers wan
 
 This comprehensive guide on **remote work skills employers want** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![remote work skills employers want](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Complete guide on remote work skills employers want}
+![remote work skills employers want](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Complete guide on remote work skills employers want}
 
 ## 1. Async communication mastery
 2. Digital project management tools
@@ -78,7 +78,7 @@ To excel in **remote work skills employers want** within this area, apply these 
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of remote work skills employers want](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Advanced aspects of remote work skills employers want}
+![Advanced aspects of remote work skills employers want](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Advanced aspects of remote work skills employers want}
 
 ## Advanced aspects of remote work skills employers want
 
@@ -218,7 +218,7 @@ To excel in **remote work skills employers want** within this area, apply these 
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of remote work skills employers want](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of remote work skills employers want}
+![Advanced aspects of remote work skills employers want](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80){caption:Advanced aspects of remote work skills employers want}
 
 ## Advanced aspects of remote work skills employers want
 
@@ -292,7 +292,7 @@ Mastering **remote work skills employers want** isn't just a competitive advanta
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Freelance & Remote",
   is_featured: false,

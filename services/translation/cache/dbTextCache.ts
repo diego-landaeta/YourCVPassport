@@ -31,13 +31,14 @@ export async function getFromDbCache(
 
     const { data, error } = await supabase
       .from('text_translations')
-      .select('translated_text')
+      .select('original_text, translated_text')
       .eq('text_hash', textHash)
       .eq('source_lang', sourceLang)
       .eq('target_lang', targetLang)
-      .single();
+      // maybeSingle: un texto aún sin traducir es un fallo de caché normal, no un 406
+      .maybeSingle();
 
-    if (error || !data) return null;
+    if (error || !data || data.original_text !== text) return null;
 
     // Increment hit count in background (don't await)
     Promise.resolve(
@@ -56,30 +57,19 @@ export async function getFromDbCache(
 
 /**
  * Save translation to database cache
+ *
+ * YA NO ESCRIBE: el navegador no puede escribir en `text_translations`
+ * (20261005_cerrar_escritura_text_translations.sql). La caché compartida la
+ * mantiene la Edge Function `translate-texts`. Se conserva la firma por
+ * compatibilidad con el código que la importa.
  */
 export async function saveToDbCache(
-  originalText: string,
-  translatedText: string,
-  sourceLang: string,
-  targetLang: string
+  _originalText: string,
+  _translatedText: string,
+  _sourceLang: string,
+  _targetLang: string
 ): Promise<void> {
-  try {
-    const textHash = hashText(originalText);
-
-    await supabase
-      .from('text_translations')
-      .upsert({
-        text_hash: textHash,
-        source_lang: sourceLang,
-        target_lang: targetLang,
-        original_text: originalText,
-        translated_text: translatedText,
-      }, {
-        onConflict: 'text_hash,source_lang,target_lang',
-      });
-  } catch (error) {
-    console.warn('[DbTextCache] Error saving to cache:', error);
-  }
+  // Intencionadamente vacío (ver comentario).
 }
 
 /**
@@ -116,22 +106,21 @@ export async function getBatchFromDbCache(
       return { cached, uncached: texts };
     }
 
-    // Create map of found translations
-    const foundHashes = new Set<string>();
+    // Solo cuenta como acierto si coincide también el texto original
+    // (el hash es de 32 bits: dos textos distintos pueden compartirlo)
+    const requested = new Set(texts);
     data?.forEach(row => {
-      cached.set(row.original_text, row.translated_text);
-      foundHashes.add(row.text_hash);
+      if (requested.has(row.original_text)) {
+        cached.set(row.original_text, row.translated_text);
+      }
     });
 
     // Find uncached texts
     texts.forEach(text => {
-      const hash = hashText(text);
-      if (!foundHashes.has(hash)) {
+      if (!cached.has(text)) {
         uncached.push(text);
       }
     });
-
-    console.log(`[DbTextCache] Cache check: ${cached.size} hits, ${uncached.length} misses`);
 
     return { cached, uncached };
   } catch (error) {
@@ -142,36 +131,13 @@ export async function getBatchFromDbCache(
 
 /**
  * Save batch translations to database cache
+ *
+ * YA NO ESCRIBE (ver saveToDbCache). Firma conservada por compatibilidad.
  */
 export async function saveBatchToDbCache(
-  translations: Map<string, string>,
-  sourceLang: string,
-  targetLang: string
+  _translations: Map<string, string>,
+  _sourceLang: string,
+  _targetLang: string
 ): Promise<void> {
-  if (translations.size === 0) return;
-
-  try {
-    const records = Array.from(translations.entries()).map(([original, translated]) => ({
-      text_hash: hashText(original),
-      source_lang: sourceLang,
-      target_lang: targetLang,
-      original_text: original,
-      translated_text: translated,
-    }));
-
-    // Upsert in batches of 50 to avoid payload limits
-    const batchSize = 50;
-    for (let i = 0; i < records.length; i += batchSize) {
-      const batch = records.slice(i, i + batchSize);
-      await supabase
-        .from('text_translations')
-        .upsert(batch, {
-          onConflict: 'text_hash,source_lang,target_lang',
-        });
-    }
-
-    console.log(`[DbTextCache] Saved ${records.length} translations to DB cache`);
-  } catch (error) {
-    console.warn('[DbTextCache] Error saving batch to cache:', error);
-  }
+  // Intencionadamente vacío: solo la Edge Function translate-texts escribe en la caché compartida.
 }

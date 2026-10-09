@@ -67,43 +67,77 @@ function showBrowserNotification(title: string, body: string, url: string, tag: 
   }
 }
 
+/* ── Caché compartida entre instancias ──────────────────────
+ * El hook se usa a la vez en la barra móvil, la campana, la página de
+ * Notificaciones y en varios componentes del feed. Antes cada instancia lanzaba
+ * su propia consulta y la página mostraba «Cargando...» hasta que acababa la
+ * suya (issue #4, punto 23). Ahora las consultas simultáneas se comparten y la
+ * página pinta al instante lo que ya cargó otra instancia (p. ej. la barra
+ * inferior al entrar al panel) mientras refresca en segundo plano. */
+let listCache: { userId: string; data: FeedNotification[] } | null = null;
+let inflight: { userId: string; promise: Promise<FeedNotification[]> } | null = null;
+
+function loadNotificationList(userId: string): Promise<FeedNotification[]> {
+  if (inflight && inflight.userId === userId) return inflight.promise;
+  const promise = (async () => {
+    const { data, error } = await supabase
+      .from('feed_notifications')
+      .select(`
+        *,
+        actor:profiles!actor_id (full_name, avatar_url, slug),
+        post:feed_posts!post_id (content, content_type)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    const list = (data || []) as FeedNotification[];
+    listCache = { userId, data: list };
+    return list;
+  })();
+  inflight = { userId, promise };
+  promise.then(
+    () => { if (inflight?.promise === promise) inflight = null; },
+    () => { if (inflight?.promise === promise) inflight = null; },
+  );
+  return promise;
+}
+
 /* ─────────────────────────────────────────────────────────── */
 
 export const useNotifications = () => {
   const { session } = useAuth();
-  const [notifications, setNotifications] = useState<FeedNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const hasFetchedRef = useRef(false);
+  const userId = session?.user.id ?? null;
+  const cached = userId && listCache?.userId === userId ? listCache.data : null;
+  const [notifications, setNotifications] = useState<FeedNotification[]>(cached ?? []);
+  const [unreadCount, setUnreadCount] = useState(cached ? cached.filter(n => !n.is_read).length : 0);
+  const [loading, setLoading] = useState(!cached);
+  const fetchedForRef = useRef<string | null>(null);
   const notifDisabledRef = useRef(false);
+  // Canal de tiempo real propio de cada instancia: con el mismo nombre, Supabase
+  // cerraba el canal de las otras instancias al suscribirse una nueva.
+  const channelSuffixRef = useRef(Math.random().toString(36).slice(2, 10));
 
   const fetchNotifications = useCallback(async () => {
     if (!session?.user.id) return;
 
     try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('feed_notifications')
-        .select(`
-          *,
-          actor:profiles!actor_id (full_name, avatar_url, slug),
-          post:feed_posts!post_id (content, content_type)
-        `)
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      if (data) {
-        setNotifications(data as FeedNotification[]);
-        setUnreadCount(data.filter(n => !n.is_read).length);
-      }
+      // Con datos en caché se refresca sin volver a «Cargando...».
+      if (!(listCache && listCache.userId === session.user.id)) setLoading(true);
+      const data = await loadNotificationList(session.user.id);
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.is_read).length);
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false);
     }
   }, [session?.user.id]);
+
+  // Mantiene la caché al día con lo marcado como leído en esta instancia.
+  useEffect(() => {
+    if (userId && !loading) listCache = { userId, data: notifications };
+  }, [userId, loading, notifications]);
 
   const markAsRead = useCallback(async (notificationId: string) => {
     if (!session?.user.id) return;
@@ -163,18 +197,20 @@ export const useNotifications = () => {
   }, [session?.user.id]);
 
   /* ── Initial fetch ───────────────────────────────────────── */
+  // Se marca como hecha solo cuando hay sesión: antes el primer render sin sesión
+  // gastaba el intento y la lista se quedaba en «Cargando...» hasta un evento.
   useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
+    if (!userId || fetchedForRef.current === userId) return;
+    fetchedForRef.current = userId;
     fetchNotifications();
-  }, [fetchNotifications]);
+  }, [userId, fetchNotifications]);
 
   /* ── Real-time subscription + browser notification ──────── */
   useEffect(() => {
     if (!session?.user.id) return;
 
     const channel = supabase
-      .channel(`feed_notifications:${session.user.id}`)
+      .channel(`feed_notifications:${session.user.id}:${channelSuffixRef.current}`)
       .on(
         'postgres_changes',
         {
@@ -203,7 +239,8 @@ export const useNotifications = () => {
                 .from('profiles')
                 .select('full_name')
                 .eq('id', notif.actor_id)
-                .single();
+                // maybeSingle: el actor puede tener el perfil oculto (sin fila visible)
+                .maybeSingle();
               actorName = data?.full_name || '';
             } catch { /* ignore */ }
 

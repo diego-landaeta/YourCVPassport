@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV Republica Dominicana** s
 
 Esta guía completa sobre **CV Republica Dominicana** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV Republica Dominicana](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre CV Republica Dominicana}
+![CV Republica Dominicana](https://images.unsplash.com/photo-1542296332-2e4473faf563?w=800&q=80){caption:Guía completa sobre CV Republica Dominicana}
 
 ## 1. Mercado laboral dominicano
 2. Formato de CV preferido
@@ -78,7 +78,7 @@ Para destacar en **CV Republica Dominicana** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV Republica Dominicana](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV Republica Dominicana}
+![Aspectos avanzados de CV Republica Dominicana](https://images.unsplash.com/photo-1521295121783-8a321d551ad2?w=800&q=80){caption:Aspectos avanzados de CV Republica Dominicana}
 
 ## Aspectos avanzados de CV Republica Dominicana
 
@@ -292,7 +292,7 @@ Dominar **CV Republica Dominicana** no es solo una ventaja competitiva — es un
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "CV por País",
   is_featured: false,

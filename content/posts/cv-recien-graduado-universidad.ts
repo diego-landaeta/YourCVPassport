@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV recien graduado universi
 
 Esta guía completa sobre **CV recien graduado universidad** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV recien graduado universidad](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre CV recien graduado universidad}
+![CV recien graduado universidad](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Guía completa sobre CV recien graduado universidad}
 
 ## 1. Que hace diferente al CV de un graduado
 2. Educacion como protagonista
@@ -78,7 +78,7 @@ Para destacar en **CV recien graduado universidad** dentro de esta área, aplica
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV recien graduado universidad](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV recien graduado universidad}
+![Aspectos avanzados de CV recien graduado universidad](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Aspectos avanzados de CV recien graduado universidad}
 
 ## Aspectos avanzados de CV recien graduado universidad
 
@@ -292,7 +292,7 @@ Dominar **CV recien graduado universidad** no es solo una ventaja competitiva �
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Desarrollo de Carrera",
   is_featured: false,

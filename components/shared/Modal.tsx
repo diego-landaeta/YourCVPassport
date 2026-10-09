@@ -1,4 +1,5 @@
 import React from 'react';
+import { useA11yLabels } from './a11y';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, maxWidth = '4xl' }) => {
+  const a11y = useA11yLabels();
   if (!isOpen) return null;
 
   const maxWidthClasses = {
@@ -38,9 +40,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, maxWidt
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 dark:text-dark-text-tertiary hover:text-gray-600 dark:hover:text-dark-text-primary transition-colors z-10"
-          aria-label="Close modal"
+          aria-label={a11y.close}
         >
-          <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg aria-hidden="true" className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>

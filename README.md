@@ -2,7 +2,7 @@
 
 **Tu CV como Pasaporte Digital para el Mundo**
 
-[![Versión](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/yourusername/yourcvpassport)
+[![Versión](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/esos2dev-oss/YourCVPassport)
 [![Estado](https://img.shields.io/badge/estado-producción-green.svg)](https://yourcvpassport.com)
 [![Licencia](https://img.shields.io/badge/licencia-propietaria-red.svg)](LICENSE)
 

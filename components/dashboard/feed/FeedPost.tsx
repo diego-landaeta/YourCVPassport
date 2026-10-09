@@ -32,6 +32,9 @@ import {
 } from '@heroicons/react/24/solid';
 import { supabase } from '../../../supabase/client';
 import CommentSection from './CommentSection';
+import AutoTranslationNotice from './AutoTranslationNotice';
+import { TranslatedGroupName } from './TranslatedGroupName';
+import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 import ImageGallery from './ImageGallery';
 import PostOptionsMenu from './PostOptionsMenu';
 import ShareModal from './ShareModal';
@@ -208,7 +211,22 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
 
   // Read more state
   const [isExpanded, setIsExpanded] = useState(false);
-  const needsTruncation = localPost.content.length > TRUNCATE_LENGTH;
+
+  // Traducción automática: contenido + encuesta (pregunta y opciones) como una sola unidad.
+  // Si el idioma detectado coincide con el de la interfaz no se traduce nada.
+  const pollForTranslation = post.content_type === 'POLL'
+    ? (post.metadata as { poll?: PollData } | null)?.poll
+    : undefined;
+  const autoTranslation = useAutoTranslation([
+    localPost.content,
+    pollForTranslation?.question,
+    ...(pollForTranslation?.options || []),
+  ]);
+  const shownContent = autoTranslation.texts[0] ?? localPost.content;
+  const shownPollQuestion = autoTranslation.texts[1] || pollForTranslation?.question || '';
+  const shownPollOptions = pollForTranslation?.options.map((opt, i) => autoTranslation.texts[2 + i] || opt) || [];
+
+  const needsTruncation = shownContent.length > TRUNCATE_LENGTH;
 
   // Bookmark state (synced with DB)
   const [isBookmarked, setIsBookmarked] = useState(post.hasBookmarked || false);
@@ -229,10 +247,6 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
   // View tracking
   const articleRef = useRef<HTMLElement>(null);
   const viewTracked = useRef(false);
-
-  // Translation state
-  const [translatedText, setTranslatedText] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
 
   const {
     toggleReaction,
@@ -483,23 +497,6 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     return () => observer.disconnect();
   }, [post.id]);
 
-  // Translation handler
-  const handleTranslate = useCallback(async () => {
-    if (translatedText) { setTranslatedText(null); return; }
-    setIsTranslating(true);
-    try {
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(post.content.slice(0, 500))}&langpair=${lang === 'es' ? 'en|es' : 'es|en'}`);
-      const data = await res.json();
-      if (data?.responseData?.translatedText) {
-        setTranslatedText(data.responseData.translatedText);
-      }
-    } catch {
-      setTranslatedText(lang === 'es' ? '(Error al traducir)' : '(Translation error)');
-    } finally {
-      setIsTranslating(false);
-    }
-  }, [post.content, lang, translatedText]);
-
   const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/p/${post.id}`;
   const shareText = `${post.author?.full_name || ''}: ${post.content.slice(0, 120)}${post.content.length > 120 ? '...' : ''}`;
 
@@ -508,10 +505,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
     `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.full_name || 'U')}&background=3B82F6&color=fff`;
   const profileLink = post.author?.slug ? `/cv/${post.author.slug}` : null;
 
-  // Truncated content for "Read more"
+  // Truncated content for "Read more" (sobre el texto mostrado: traducido u original)
   const displayContent = (!isExpanded && needsTruncation)
-    ? localPost.content.slice(0, TRUNCATE_LENGTH)
-    : localPost.content;
+    ? shownContent.slice(0, TRUNCATE_LENGTH)
+    : shownContent;
 
   // Reaction label helper
   const getReactionLabel = (type: ReactionType) =>
@@ -626,9 +623,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                   {post.group && (
                     <>
                       <span className="text-[11px] text-gray-300 dark:text-gray-600">·</span>
-                      <span className="text-[11px] font-semibold text-cv-blue/80 dark:text-cv-blue/70 truncate max-w-[140px]">
-                        {post.group.name}
-                      </span>
+                      <TranslatedGroupName
+                        name={post.group.name}
+                        className="text-[11px] font-semibold text-cv-blue/80 dark:text-cv-blue/70 truncate max-w-[140px]"
+                      />
                     </>
                   )}
                 </div>
@@ -720,23 +718,8 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
                     {isExpanded ? tp.showLess : tp.readMore}
                   </button>
                 )}
-                {/* Translate button */}
-                {post.content.length > 10 && (
-                  <button
-                    onClick={handleTranslate}
-                    disabled={isTranslating}
-                    className="text-gray-400 dark:text-gray-500 text-xs hover:text-cv-blue transition-colors mt-1.5 block"
-                  >
-                    {isTranslating ? (lang === 'es' ? 'Traduciendo...' : 'Translating...') :
-                     translatedText ? (lang === 'es' ? 'Ver original' : 'See original') :
-                     (lang === 'es' ? 'Ver traducción' : 'See translation')}
-                  </button>
-                )}
-                {translatedText && (
-                  <p className="text-gray-600 dark:text-gray-300 text-[15px] leading-relaxed whitespace-pre-wrap mt-2 pl-3 border-l-2 border-cv-blue/30 italic">
-                    {translatedText}
-                  </p>
-                )}
+                {/* Traducción automática (sustituye al antiguo botón manual de MyMemory) */}
+                <AutoTranslationNotice state={autoTranslation} className="mt-1.5" />
               </div>
             )}
           </div>
@@ -861,9 +844,10 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
 
             return (
               <div className="mb-4 space-y-2">
-                <p className="text-sm font-bold text-gray-800 dark:text-white">{pollData.question}</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-white">{shownPollQuestion}</p>
                 <div className="space-y-1.5">
-                  {pollData.options.map((option, idx) => {
+                  {pollData.options.map((_originalOption, idx) => {
+                    const option = shownPollOptions[idx] ?? _originalOption;
                     const count = getCount(idx);
                     const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                     const isMyVote = localPost.userPollVote === idx;
@@ -1192,7 +1176,7 @@ const FeedPost: React.FC<FeedPostProps> = memo(({ post, currentUserId, onPostUpd
             postId={post.id}
             currentUserId={currentUserId}
             onCommentAdded={() => {
-              setLocalPost(prev => ({ ...prev, comments_count: prev.comments_count + 1 }));
+              // El contador lo fija onCountSync con el número real de comentarios de primer nivel
               if (post.author_id) onNotify?.(post.author_id, 'comment', post.id);
             }}
             onCountSync={(realCount) => {

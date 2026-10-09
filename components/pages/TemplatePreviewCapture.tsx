@@ -448,7 +448,7 @@ const TemplatePreviewCapture: React.FC = () => {
                             </div>
                             <div
                                 id={`template-${id}`}
-                                className="transform scale-75 origin-top"
+                                className="cv-template transform scale-75 origin-top"
                                 style={{ width: '133.33%', height: 'auto' }}
                             >
                                 <Template data={data} color={color} />

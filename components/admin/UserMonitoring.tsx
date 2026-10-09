@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { localDayKeysBetween, localDaysAgo, parseLocalDayKey, toLocalDayKey } from '../../utils/dateKeys';
 import {
   ChartBarIcon,
   UserGroupIcon,
@@ -139,7 +140,7 @@ const UserMonitoring: React.FC = () => {
 
       // Get ALL profile data in ONE query for efficiency (excluding admins)
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('profiles_full') // admin: email es privado
         .select('id, full_name, email, created_at, updated_at, avatar_url, role')
         .neq('role', 'admin');
 
@@ -184,11 +185,10 @@ const UserMonitoring: React.FC = () => {
       // Activity tracking
       const activityMap = new Map<string, { logins: number; registrations: number }>();
 
-      // Initialize the last 30 days
-      for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+      // Initialize the last 30 days (días LOCALES, con 0 por defecto). Con
+      // toISOString/split('T') los días eran los de UTC: un registro a las 23:30
+      // en México contaba en el día siguiente.
+      for (const dateStr of localDayKeysBetween(localDaysAgo(29))) {
         activityMap.set(dateStr, { logins: 0, registrations: 0 });
       }
 
@@ -231,14 +231,14 @@ const UserMonitoring: React.FC = () => {
         }
 
         // Track registrations
-        const createdDateStr = profile.created_at?.split('T')[0];
+        const createdDateStr = profile.created_at ? toLocalDayKey(profile.created_at) : null;
         if (createdDateStr && activityMap.has(createdDateStr)) {
           const current = activityMap.get(createdDateStr)!;
           current.registrations++;
         }
 
         // Track logins (based on updated_at)
-        const updatedDateStr = profile.updated_at?.split('T')[0];
+        const updatedDateStr = profile.updated_at ? toLocalDayKey(profile.updated_at) : null;
         if (updatedDateStr && activityMap.has(updatedDateStr)) {
           const current = activityMap.get(updatedDateStr)!;
           current.logins++;
@@ -465,7 +465,7 @@ const UserMonitoring: React.FC = () => {
                   dataKey="date"
                   stroke="#6b7280"
                   tick={{ fontSize: 10 }}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString(lang, { month: 'short', day: 'numeric' })}
+                  tickFormatter={(value) => parseLocalDayKey(value).toLocaleDateString(lang, { month: 'short', day: 'numeric' })}
                 />
                 <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
                 <Tooltip

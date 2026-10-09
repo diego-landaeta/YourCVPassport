@@ -218,7 +218,7 @@ Para destacar en **plantilla CV ciberseguridad** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV ciberseguridad](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de plantilla CV ciberseguridad}
+![Aspectos avanzados de plantilla CV ciberseguridad](https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80){caption:Aspectos avanzados de plantilla CV ciberseguridad}
 
 ## Aspectos avanzados de plantilla CV ciberseguridad
 
@@ -271,7 +271,7 @@ Cuando hablamos de **plantilla CV ciberseguridad** en el contexto de aspectos av
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV ciberseguridad](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de plantilla CV ciberseguridad}
+![Aspectos avanzados de plantilla CV ciberseguridad](https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80){caption:Aspectos avanzados de plantilla CV ciberseguridad}
 
 ## Cómo YourCVPassport te ayuda con plantilla CV ciberseguridad
 

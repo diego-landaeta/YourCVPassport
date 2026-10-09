@@ -1,14 +1,24 @@
 import { test, expect } from '@playwright/test';
+import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './qa/helpers/supabaseMock';
 
 /**
  * E2E Test Suite: Authentication Flow
  * Tests the login functionality and dashboard redirection
+ *
+ * Supabase mockeado (tests/qa/helpers/supabaseMock.ts): sin sesion y sin salir a la red.
  */
+
+test.use(SAFE_CONTEXT_OPTIONS);
+
+test.beforeEach(async ({ context }) => {
+  await installInitState(context, { sessionProfile: null, language: 'es' });
+  await mockSupabase(context, { profiles: [] });
+});
 
 test.describe('Login Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the login page before each test
-    await page.goto('/login');
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
   });
 
   test('should display login page correctly', async ({ page }) => {
@@ -89,7 +99,7 @@ test.describe('Login Flow', () => {
 test.describe('Protected Routes', () => {
   test('should redirect to login when accessing dashboard without authentication', async ({ page }) => {
     // Try to access the dashboard directly
-    await page.goto('/dashboard');
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
 
     // Should be redirected to login or auth page
     await expect(page).toHaveURL(/.*\/(login|auth|signup)/);

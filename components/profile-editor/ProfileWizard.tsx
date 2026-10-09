@@ -17,11 +17,12 @@ import {
 import IdentitySection from './IdentitySection';
 import ExperienceSection from './ExperienceSection';
 import EducationSection from './EducationSection';
-import SkillsSection from './SkillsSection';
+import SkillsSection, { MIN_SKILLS_TO_PUBLISH } from './SkillsSection';
 import LanguagesSection from './LanguagesSection';
 import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
 import FinalizationStep from './FinalizationStep';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface ProfileWizardProps {
   profile: any;
@@ -62,16 +63,37 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   initialStep,
   onComplete
 }) => {
+  const a11y = useA11yLabels();
   const t = useTranslations();
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const stepRef = React.useRef<any>(null);
   const [showPremiumToast, setShowPremiumToast] = useState(false);
+  // true mientras el foco está en un campo de texto: en móvil se oculta el botón
+  // flotante de IA para que no tape lo que se escribe (issue #4, punto 17).
+  const [isTypingInField, setIsTypingInField] = useState(false);
+  useEffect(() => {
+    const isField = (el: EventTarget | null) =>
+      el instanceof HTMLElement && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select, [contenteditable="true"]');
+    const onFocusIn = (e: FocusEvent) => setIsTypingInField(isField(e.target));
+    const onFocusOut = (e: FocusEvent) => { if (!isField(e.relatedTarget)) setIsTypingInField(false); };
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('focusout', onFocusOut);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
-  const [missingSteps, setMissingSteps] = useState<string[]>([]);
   const [preferencesCompletedInSession, setPreferencesCompletedInSession] = useState(false);
+  // Pasos ya vistos en esta sesion y si se intento finalizar. Un paso obligatorio
+  // incompleto solo se marca en ambar cuando el usuario ya paso por el o intento
+  // publicar: antes Habilidades salia "pendiente" en la barra nada mas entrar.
+  const [visitedSteps, setVisitedSteps] = useState<Set<string>>(() => new Set());
+  const [attemptedFinish, setAttemptedFinish] = useState(false);
+  const stepperRef = React.useRef<HTMLDivElement>(null);
+  const stepItemRefs = React.useRef<Array<HTMLDivElement | null>>([]);
 
 
   // Check if user has completed the wizard
@@ -80,59 +102,71 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   // Ya no usamos localStorage porque debe persistir entre dispositivos y navegadores
   const hasCompletedWizard = profile?.wizard_completed === true;
 
-  // Check if all required steps are completed
-  const checkRequiredSteps = (isCurrentlyLeavingPreferences = false) => {
-    const missing = [];
-    const details: string[] = [];
+  // ---------------------------------------------------------------------------
+  // FUENTE UNICA DE COMPLETITUD
+  //
+  // Antes habia dos criterios distintos y divergian: el check verde del stepper
+  // pintaba Identidad como completa con solo nombre+email, mientras la puerta de
+  // finalizacion exigia ademas titular, resumen y foto. El usuario recorria los
+  // ocho pasos en verde y era rechazado al final. Ahora ambos leen de aqui, asi
+  // que no pueden volver a contradecirse.
+  //
+  // `required`   : bloquea la finalizacion.
+  // `missing`    : lo que falta, en lenguaje del usuario. Vacio = cumplido.
+  // `hasContent` : si el paso tiene algo. Solo para marcar en verde los opcionales.
+  // ---------------------------------------------------------------------------
+  const hasPreferences = Boolean(
+    profile?.job_seeking_status ||
+    profile?.availability ||
+    profile?.salary_min ||
+    profile?.salary_max ||
+    profile?.remote_preference ||
+    profile?.willing_to_relocate ||
+    (profile?.preferred_locations && profile.preferred_locations.length > 0) ||
+    (profile?.job_type && profile.job_type.length > 0)
+  );
 
-    // Validar Identidad - CAMPOS OBLIGATORIOS
-    const identityIssues = [];
-    if (!profile?.full_name) identityIssues.push(t.wizardValidation.fullName);
-    if (!profile?.email) identityIssues.push(t.wizardValidation.email);
-    if (!profile?.headline) identityIssues.push(t.wizardValidation.headline);
-    if (!profile?.summary) identityIssues.push(t.wizardValidation.summary);
-    if (!profile?.avatar_url) identityIssues.push(t.wizardValidation.photo);
-
-    if (identityIssues.length > 0) {
-      missing.push(t.wizardSteps.identity);
-      details.push(...identityIssues.map(item => `• ${item} (${t.wizardSteps.identity})`));
-    }
-
-    // Validar Experiencia - AL MENOS 1
-    if (!experiences || experiences.length === 0) {
-      missing.push(t.wizardSteps.experience);
-      details.push(`• ${t.wizardValidation.atLeastOneExperience}`);
-    }
-
-    // Validar Habilidades - AL MENOS 3
-    if (!skills || skills.length < 3) {
-      missing.push(t.wizardSteps.skills);
-      details.push(`• ${t.wizardValidation.atLeastThreeSkills} (${t.wizardValidation.youHave} ${skills?.length || 0})`);
-    }
-
-    // Validar Preferencias - Debe completarse en esta sesión (pero los campos son opcionales)
-    // Si estamos actualmente saliendo del paso de preferences, considerarlo como completado
-    if (!preferencesCompletedInSession && !isCurrentlyLeavingPreferences) {
-      missing.push(t.wizardSteps.preferences);
-      details.push(`• ${t.wizardValidation.visitPreferences} (${t.wizardSteps.preferences})`);
-    }
-
-    return { sections: missing, details };
+  const stepRules: Record<string, { required: boolean; missing: string[]; hasContent: boolean }> = {
+    identity: {
+      required: true,
+      missing: [
+        !profile?.full_name && t.wizardValidation.fullName,
+        !profile?.email && t.wizardValidation.email,
+        !profile?.headline && t.wizardValidation.headline,
+        !profile?.summary && t.wizardValidation.summary,
+        !profile?.avatar_url && t.wizardValidation.photo,
+      ].filter(Boolean) as string[],
+      hasContent: Boolean(profile?.full_name || profile?.email),
+    },
+    // Experiencia opcional, igual que Educacion: un estudiante o alguien sin
+    // empleo previo tiene que poder publicar. FinalizationStep lo replica.
+    experience: { required: false, missing: [], hasContent: (experiences?.length ?? 0) > 0 },
+    education: { required: false, missing: [], hasContent: (education?.length ?? 0) > 0 },
+    skills: {
+      required: true,
+      missing:
+        !skills || skills.length < MIN_SKILLS_TO_PUBLISH
+          ? [`${t.wizardValidation.atLeastThreeSkills} (${t.wizardValidation.youHave} ${skills?.length || 0})`]
+          : [],
+      hasContent: (skills?.length ?? 0) > 0,
+    },
+    languages: { required: false, missing: [], hasContent: (languages?.length ?? 0) > 0 },
+    portfolio: { required: false, missing: [], hasContent: (portfolio?.length ?? 0) > 0 },
+    // Preferencias ya no bloquea. Antes exigia "haber visitado el paso" mediante
+    // un flag de sesion que se perdia al recargar, y sus campos son opcionales:
+    // era un requisito fantasma imposible de deducir desde la interfaz.
+    preferences: { required: false, missing: [], hasContent: hasPreferences || preferencesCompletedInSession },
+    finalization: { required: false, missing: [], hasContent: Boolean(profile?.template && profile?.slug) },
   };
 
   // Validate before allowing access to finalization step
-  const canAccessFinalization = (isCurrentlyLeavingPreferences = false) => {
+  const canAccessFinalization = () => {
     if (hasCompletedWizard) return false; // Already completed wizard
 
-    const validation = checkRequiredSteps(isCurrentlyLeavingPreferences);
-
-    // Si hay validaciones pendientes, mostrar advertencia
-    if (validation.details.length > 0) {
-      setMissingSteps(validation.details);
+    const blocking = Object.values(stepRules).some(r => r.required && r.missing.length > 0);
+    if (blocking) {
+      setAttemptedFinish(true);
       setShowIncompleteWarning(true);
-      setTimeout(() => {
-        setShowIncompleteWarning(false);
-      }, 10000); // 10 segundos
       return false;
     }
 
@@ -153,7 +187,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
       // If next step is finalization, validate first
       // IMPORTANT: If we're leaving preferences step, consider it as already completed for validation
       if (isNextStepFinalization) {
-        const canAccess = canAccessFinalization(isLeavingPreferences);
+        const canAccess = canAccessFinalization();
         if (!canAccess) {
           return; // Validation failed, warning shown
         }
@@ -228,6 +262,14 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   // Check if user has premium plan (lowercase: 'pro', 'premium', 'enterprise')
   const isPremiumUser = profile?.plan && ['pro', 'premium', 'enterprise'].includes(profile.plan.toLowerCase());
 
+  // En un perfil gestionado, `profile.plan` es el del PERFIL EDITADO, no el del
+  // gestor que lo esta editando. Los perfiles gestionados se crean siempre con
+  // plan 'free' y no tienen login propio, asi que la comprobacion de premium
+  // fallaba siempre y el gestor recibia un "pasate a Pro" que le invitaba a
+  // mejorar el plan de otra persona. Mientras la IA siga gateada por plan del
+  // perfil, en modo gestionado no se ofrece.
+  const isManagedProfile = Boolean(profile?.managed_by);
+
   const handleAIClick = () => {
     // Check if user has premium access
     if (!isPremiumUser) {
@@ -272,70 +314,32 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     }
   }, []);
 
-  // Initialize and update completed steps based on content
-  useEffect(() => {
-    const stepsWithContent: number[] = [];
+  // Estado de cada paso, derivado de stepRules. Ya no es useState + useEffect con
+  // veinte dependencias: al calcularse en el render no puede quedar desincronizado
+  // de la puerta de finalizacion, que lee exactamente las mismas reglas.
+  //
+  // Obligatorio -> verde solo si NO le falta nada.
+  // Opcional    -> verde si tiene contenido; neutro si esta vacio (no bloquea).
+  const completedSteps = steps.reduce<number[]>((acc, step, index) => {
+    const rule = stepRules[step.id];
+    if (!rule) return acc;
+    const done = rule.required ? rule.missing.length === 0 : rule.hasContent;
+    if (done) acc.push(index);
+    return acc;
+  }, []);
 
-    // Check each step for content
-    if (profile?.full_name && profile?.email) {
-      stepsWithContent.push(0); // identity
-    }
-    if (experiences && experiences.length > 0) {
-      stepsWithContent.push(1); // experience
-    }
-    if (education && education.length > 0) {
-      stepsWithContent.push(2); // education
-    }
-    if (skills && skills.length > 0) {
-      stepsWithContent.push(3); // skills
-    }
-    if (languages && languages.length > 0) {
-      stepsWithContent.push(4); // languages
-    }
-    if (portfolio && portfolio.length > 0) {
-      stepsWithContent.push(5); // portfolio
-    }
-    // Preferences is completed if user has at least one preference saved
-    const hasPreferences = profile?.job_seeking_status ||
-                          profile?.availability ||
-                          profile?.salary_min ||
-                          profile?.salary_max ||
-                          profile?.remote_preference ||
-                          profile?.willing_to_relocate ||
-                          (profile?.preferred_locations && profile.preferred_locations.length > 0) ||
-                          (profile?.job_type && profile.job_type.length > 0);
+  // Lo que falta para poder publicar, con el paso al que pertenece cada item para
+  // que el aviso pueda llevar al usuario directamente alli.
+  const missingItems = steps.flatMap((step, index) => {
+    const rule = stepRules[step.id];
+    if (!rule?.required) return [];
+    return rule.missing.map(label => ({ label, stepIndex: index, stepTitle: step.title }));
+  });
 
-    if (hasPreferences || preferencesCompletedInSession) {
-      stepsWithContent.push(6); // preferences
-    }
-    // Finalization step is only completed when user has selected template and slug
-    // Only track if finalization step exists (when wizard not completed)
-    if (!hasCompletedWizard && profile?.template && profile?.slug) {
-      stepsWithContent.push(7); // finalization
-    }
-
-    setCompletedSteps(stepsWithContent);
-  }, [
-    profile?.full_name,
-    profile?.email,
-    profile?.job_seeking_status,
-    profile?.availability,
-    profile?.salary_min,
-    profile?.salary_max,
-    profile?.remote_preference,
-    profile?.willing_to_relocate,
-    profile?.preferred_locations?.length,
-    profile?.job_type?.length,
-    profile?.template,
-    profile?.slug,
-    experiences?.length,
-    education?.length,
-    skills?.length,
-    languages?.length,
-    portfolio?.length,
-    hasCompletedWizard,
-    preferencesCompletedInSession
-  ]);
+  // Lo que falta en el paso que se esta viendo ahora mismo, para avisar in situ en
+  // vez de acumular el diagnostico hasta el final del recorrido.
+  const currentStepMissing = stepRules[steps[currentStep]?.id]?.missing ?? [];
+  const isCurrentStepOptional = stepRules[steps[currentStep]?.id]?.required === false;
 
   // Reset currentStep if it's out of bounds (happens when wizard completes and finalization step is removed)
   useEffect(() => {
@@ -344,60 +348,102 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     }
   }, [currentStep, steps.length]);
 
+  // Al cambiar de paso: registrarlo como visitado y, en movil (la barra hace scroll
+  // horizontal), centrar el paso activo para que no quede fuera de la vista.
+  // Se desplaza solo el contenedor: scrollIntoView movería también la página.
+  const currentStepId = steps[currentStep]?.id;
+  useEffect(() => {
+    if (currentStepId) {
+      setVisitedSteps(prev => (prev.has(currentStepId) ? prev : new Set(prev).add(currentStepId)));
+    }
+    const container = stepperRef.current;
+    const item = stepItemRefs.current[currentStep];
+    if (container && item && container.scrollWidth > container.clientWidth) {
+      const left = item.offsetLeft - (container.clientWidth - item.offsetWidth) / 2;
+      container.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    }
+  }, [currentStep, currentStepId]);
+
   const CurrentComponent = steps[currentStep]?.component as any;
 
   return (
     <div className="max-w-5xl mx-auto">
       {/* Stepper Header */}
-      <div className="mb-8 overflow-x-auto pb-2">
+      <div ref={stepperRef} className="relative mb-8 overflow-x-auto pb-2">
         <div className="flex items-center justify-start sm:justify-center gap-1 sm:gap-0 px-2 sm:px-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
             const isCompleted = completedSteps.includes(index);
+            const rule = stepRules[step.id];
+            // Obligatorio y sin cumplir: se marca en ambar. Antes era gris, igual
+            // que un paso opcional vacio, asi que nada distinguia "te falta esto
+            // para publicar" de "esto puedes saltartelo". Solo una vez visitado o
+            // tras intentar finalizar: antes de eso no es un aviso, es ruido.
+            const needsAttention = Boolean(
+              rule?.required && rule.missing.length > 0 && (visitedSteps.has(step.id) || attemptedFinish)
+            );
+
+            const goToStep = async () => {
+              // Check if trying to access finalization step
+              const isFinalizationStep = step.id === 'finalization';
+
+              if (isFinalizationStep) {
+                // Auto-guardar Preferences si estamos en ese paso
+                const saveSuccess = await handlePreferencesSave();
+
+                // Solo un error real de guardado detiene el avance. Preferencias es
+                // opcional: con el formulario vacio el guardado se resuelve con exito.
+                if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
+                  return; // Error already shown by PreferencesSection
+                }
+
+                const canAccess = canAccessFinalization();
+                if (!canAccess) {
+                  return; // Validation failed, warning already shown
+                }
+              }
+
+              // Allow navigation
+              setCurrentStep(index);
+              window.scrollTo(0, 0);
+            };
 
             return (
-              <div key={step.id} className="flex items-center flex-shrink-0">
-                <div
+              <div key={step.id} ref={(el) => { stepItemRefs.current[index] = el; }} className="flex items-center flex-shrink-0">
+                {/* En movil el titulo de los pasos no activos va oculto: el aria-label
+                    mantiene el nombre accesible del paso. */}
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(goToStep)} aria-current={isActive ? 'step' : undefined} aria-label={step.title}
                   className={`flex flex-col items-center cursor-pointer group transition-all ${
-                    isActive ? 'text-cv-blue' : isCompleted ? 'text-green-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                    isActive
+                      ? 'text-cv-blue'
+                      : isCompleted
+                        ? 'text-green-600'
+                        : needsAttention
+                          ? 'text-amber-600 dark:text-amber-500'
+                          : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
-                  onClick={async () => {
-                    // Check if trying to access finalization step
-                    const isFinalizationStep = step.id === 'finalization';
-
-                    if (isFinalizationStep) {
-                      // Auto-guardar Preferences si estamos en ese paso
-                      const saveSuccess = await handlePreferencesSave();
-
-                      // Si el guardado falló (porque no hay campos llenos), no avanzar
-                      if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
-                        return; // Error already shown by PreferencesSection
-                      }
-
-                      // Validar con Preferences marcado como completado
-                      const canAccess = canAccessFinalization(true);
-                      if (!canAccess) {
-                        return; // Validation failed, warning already shown
-                      }
-                    }
-
-                    // Allow navigation
-                    setCurrentStep(index);
-                    window.scrollTo(0, 0);
-                  }}
+                  onClick={goToStep}
                 >
                   <div className={`
-                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
+                    relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
                     group-hover:scale-110 group-hover:shadow-md
                     ${isActive
                       ? 'border-cv-blue bg-blue-50 dark:bg-blue-900/20'
                       : isCompleted
                         ? 'border-green-600 bg-green-50 dark:bg-green-900/20 group-hover:border-green-700'
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
+                        : needsAttention
+                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 group-hover:border-amber-600'
+                          : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-bg-secondary group-hover:border-gray-400 dark:group-hover:border-gray-500'
                     }
                   `}>
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    {needsAttention && (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-dark-bg-secondary"
+                        title={rule.missing.join(' · ')}
+                      />
+                    )}
                   </div>
                   <span className={`text-[10px] sm:text-xs font-medium mt-1 sm:mt-2 max-w-[50px] sm:max-w-none text-center truncate ${isActive ? '' : 'hidden sm:block'}`}>{step.title}</span>
                 </div>
@@ -408,6 +454,49 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Contexto del paso actual.
+          En movil el stepper solo muestra iconos (los titulos van ocultos salvo el
+          activo), asi que sin esto el usuario no sabe donde esta ni cuanto queda.
+          Tambien es donde se dice si el paso es opcional y que le falta, in situ,
+          en lugar de acumular el diagnostico hasta el final del recorrido. */}
+      <div className="-mt-4 mb-6 px-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm">
+          <span className="text-gray-500 dark:text-gray-400">
+            {t.profileWizard.stepCounter
+              .replace('{n}', String(currentStep + 1))
+              .replace('{total}', String(steps.length))}
+          </span>
+          <span className="font-semibold text-gray-900 dark:text-white">{steps[currentStep]?.title}</span>
+          {isCurrentStepOptional && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+              {t.profileWizard.optional}
+            </span>
+          )}
+        </div>
+
+        {currentStepMissing.length > 0 && (
+          <div className="mt-3 mx-auto max-w-xl rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400 mb-1.5">
+              {t.profileWizard.missingHere}
+            </p>
+            <ul className="space-y-1">
+              {currentStepMissing.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {isCurrentStepOptional && currentStepMissing.length === 0 && (
+          <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">
+            {t.profileWizard.optionalHint}
+          </p>
+        )}
       </div>
 
       {/* Incomplete Warning Toast */}
@@ -437,12 +526,30 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   {t.profileWizard.toCreateCv}
                 </p>
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                  <ul className="space-y-2">
-                    {missingSteps.map((step, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
-                        <span className="text-red-500 mt-0.5">•</span>
-                        <span className="flex-1">{step}</span>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2">
+                  <ul className="space-y-1">
+                    {missingItems.map((item, idx) => (
+                      <li key={idx}>
+                        {/* Cada item lleva a su paso. Antes era texto plano y el
+                            usuario tenia que deducir a que icono corresponder. */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowIncompleteWarning(false);
+                            setCurrentStep(item.stepIndex);
+                            window.scrollTo(0, 0);
+                          }}
+                          className="w-full flex items-start gap-2 text-left text-sm text-gray-800 dark:text-gray-200 rounded-md px-2 py-1.5 hover:bg-white dark:hover:bg-gray-800 hover:text-cv-blue dark:hover:text-blue-400 transition-colors group/item"
+                        >
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                          <span className="flex-1">
+                            {item.label}
+                            <span className="text-gray-400 dark:text-gray-500"> · {item.stepTitle}</span>
+                          </span>
+                          <span className="opacity-0 group-hover/item:opacity-100 transition-opacity text-xs font-medium flex-shrink-0 mt-0.5">
+                            {t.profileWizard.goToFix}
+                          </span>
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -456,11 +563,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   </span>
                 </div>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowIncompleteWarning(false)}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors hover:scale-110 transform"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -496,11 +603,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   {t.profileWizard.viewPlans}
                 </button>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowPremiumToast(false)}
                 className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -511,33 +618,34 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
       {/* AI Optimization Floating Button - Fixed bottom right */}
       {/* Show button based on current section's AI support */}
-      {steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
+      {!isManagedProfile && steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
         (currentStep === 1 && experiences.length > 0) || // Experience has AI
         (currentStep === 2 && education.length > 0) || // Education has AI
         currentStep === 3) && ( // Skills has AI
+        // Issue #4 (17, 18): nombre accesible, sin elementos clicables dentro del
+        // botón y, en móvil, oculto mientras se escribe en un campo para no taparlo.
         <button
           onClick={handleAIClick}
-          className="fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group"
+          aria-label={t.profileWizard.improveWithAi}
+          data-testid="ai-pro-button"
+          className={`fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group${isTypingInField ? ' max-sm:hidden' : ''}`}
           title={t.profileWizard.improveWithAi}
         >
-          {/* Premium Badge */}
+          {/* Premium Badge (decorativo: el botón ya lleva a la función PRO) */}
           <span
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(lang === 'es' ? '/precios' : '/pricing');
-            }}
-            className="absolute -top-1 -right-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-[9px] sm:text-xs font-bold rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1 animate-pulse z-10 cursor-pointer hover:from-amber-500 hover:to-yellow-600 transition-colors"
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-[9px] sm:text-xs font-bold rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1 animate-pulse z-10"
           >
             <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
             PRO
           </span>
-          <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg aria-hidden="true" className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           {/* Tooltip */}
-          <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <span aria-hidden="true" className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             {t.profileWizard.improveWithAi}
           </span>
         </button>

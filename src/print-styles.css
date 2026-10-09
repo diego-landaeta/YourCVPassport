@@ -22,13 +22,24 @@ body {
     padding: 0 !important;
   }
 
-  /* Ocultar toda la interfaz de la app */
-  #root {
+  /*
+   * #root solo se oculta mientras printablePDFGenerator imprime desde #print-mount:
+   * añade `printing-cv` al body justo antes de window.print() y la quita en afterprint
+   * (o si falla). Antes se ocultaba en TODA impresión, así que cualquier otro
+   * window.print() o Ctrl+P de la app salía en blanco (#18).
+   */
+  body.printing-cv #root {
+    display: none !important;
+  }
+
+  /* Fuera de ese flujo, el contenedor vacío no ocupa nada */
+  body:not(.printing-cv) #print-mount,
+  #print-mount:empty {
     display: none !important;
   }
 
   /* Mostrar solo el contenido de impresión */
-  #print-mount {
+  body.printing-cv #print-mount {
     display: block !important;
     position: absolute !important;
     top: 0 !important;

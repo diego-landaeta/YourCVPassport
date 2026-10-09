@@ -168,7 +168,7 @@ const DisplaySettingsSection: React.FC = () => {
               </div>
               
               {/* Toggle Switch */}
-              <button
+              <button role="switch" aria-checked={!!settings[option.key]} aria-label={option.title}
                 onClick={() => handleToggle(option.key)}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cv-blue focus:ring-offset-2 ${
                   settings[option.key]

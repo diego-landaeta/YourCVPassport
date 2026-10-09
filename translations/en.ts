@@ -4,10 +4,10 @@ import { ChangelogEntry, Template, MilestoneItem } from '../types';
 const transparencyIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M15 12a3 3 0 11-6 0 3 3 0 016 0z" }), React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" }));
 const trustIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" }));
 const innovationIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" }));
-const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const inclusivityIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factFoundedIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" }));
 const factUsersIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" }));
-const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8z" }));
+const factCountriesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M12 3c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" }));
 const factTeamIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 21a6 6 0 006-5.197M15 21a6 6 0 00-3-5.197" }));
 const contactSupportIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9 12l2 2 4-4M5 12H3m4 4l-2 2m14-4l2 2m-2-14l2-2m-14 2l-2-2" }));
 const contactSalesIcon = React.createElement('svg', { className: "w-8 h-8 text-cv-blue", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" }, React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", d: "M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" }));
@@ -401,7 +401,7 @@ export const translations = {
                 { title: 'Passport (New)', imageUrl: '/images/templates/passport.png' },
                 { title: 'Classic', imageUrl: '/images/templates/classic.png' },
                 { title: 'Modern Professional', imageUrl: '/images/templates/modern-professional.png' },
-                { title: 'Classic Corporate', imageUrl: '/images/templates/classic-corporate.png' },
+                { title: 'Classic Corporate', imageUrl: '/images/templates/corporate-classic.png' },
                 { title: 'Creative Minimalist', imageUrl: '/images/templates/creative-minimalist.png' },
                 { title: 'Academic Standard', imageUrl: '/images/templates/academic-standard.png' },
                 { title: 'Modern Minimalist', imageUrl: '/images/templates/modern-minimalist.png' },
@@ -747,7 +747,10 @@ export const translations = {
             email: "Email",
             message: "Message",
             submit: "Send Inquiry",
-            alert: "Thank you for your inquiry! Our press team will get back to you soon."
+            alert: "Thank you for your inquiry! Our press team will get back to you soon.",
+            mailSubject: "Press inquiry",
+            mailNotice: "Your inquiry is ready. Open it in your email app to send it to",
+            openMail: "Open in my email"
         }
     },
     contactPage: {
@@ -778,7 +781,8 @@ export const translations = {
             social: ["LinkedIn", "X (Twitter)", "YouTube"]
         },
         faqTitle: "Frequently Asked Questions",
-        mapImageUrl: "https://maps.googleapis.com/maps/api/staticmap?center=Ayuntamiento+de+Valencia,Spain&zoom=15&size=800x600&markers=color:blue%7Clabel:V%7CAyuntamiento+de+Valencia,Spain&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8"
+        // Enlace a Google Maps sin clave de API (la página de contacto pinta el mapa con un iframe embed).
+        mapUrl: "https://www.google.com/maps/search/?api=1&query=Ayuntamiento+de+Valencia,Valencia,Spain"
     },
     successStoriesPage: {
         seo: {
@@ -952,6 +956,11 @@ export const translations = {
             calendarView: "Calendar view",
             less: "Less",
             more: "More",
+            emptyWeekTitle: "No visits in the last 7 days yet",
+            emptyMonthTitle: "No visits this month",
+            emptyHint: "Share your profile link on LinkedIn, in your email signature or in your applications to start getting visits.",
+            emptyCta: "View my public profile",
+            beforeAccount: "before your account was created",
             days: {
                 mon: "Mon",
                 tue: "Tue",
@@ -1136,6 +1145,7 @@ export const translations = {
             addExperience: "Add Experience",
             editExperience: "Edit Experience",
             addNewExperience: "Add New Experience",
+            saveExperience: "Save experience",
             title: "Title",
             jobTitle: "Job Title",
             company: "Company",
@@ -1154,6 +1164,7 @@ export const translations = {
             addEducation: "Add Education",
             editEducation: "Edit Education",
             addNewEducation: "Add New Education",
+            saveEducation: "Save education",
             institution: "Institution",
             institutionPlaceholder: "University of Madrid",
             degree: "Degree",
@@ -1426,6 +1437,7 @@ export const translations = {
             contactInfo: "Contact Information",
             changePhoto: "Change",
             country: "Country",
+            countryPlaceholder: "Select a country",
             uploadPhoto: "Upload Photo",
             uploading: "Uploading...",
             photoHelper: "JPG, PNG, GIF or WebP (max 5MB)",
@@ -1501,8 +1513,22 @@ export const translations = {
                 checkEmail: "Check your email!",
                 checkEmailDesc: "We've sent you a confirmation link to",
                 checkEmailAction: "Please click the link in the email to verify your account.",
+                // Issue #3: the account is kept if the email fails; "Resend" is offered (send-email-confirmation)
+                accountCreatedEmailNotSent: "Your account has been created, but we couldn't send you the confirmation email. Click \"Resend confirmation email\" in a few minutes or sign in with Google or LinkedIn.",
+                alreadyPendingResent: "You already had an account pending confirmation with this email, so we've sent you the link again. Once confirmed, sign in with the password you used when you signed up (or reset it).",
+                alreadyPendingNotSent: "You already had an account pending confirmation with this email, but we couldn't resend the link. Click \"Resend confirmation email\" in a few minutes.",
+                resendButton: "Resend confirmation email",
+                resendSending: "Sending...",
+                resendSent: "If there is an account pending confirmation with this email, we've sent you a new link. Please also check your spam folder.",
+                resendCooldown: "You can resend it again in {seconds} s",
+                resendFailed: "We couldn't resend the email. Please try again in a few minutes.",
+                divider: "Or sign up with",
+                sending: "Sending...",
                 welcomeTitle: "Start Your Journey",
-                welcomeSubtitle: "Join thousands of professionals creating outstanding CVs with our AI-powered platform.",
+                // Issue #4 (22): different from the form subtitle so "Join thousands of professionals" is not repeated
+                welcomeSubtitle: "Build an outstanding CV with AI help and share it with a single link.",
+                // Issue #4 (10): full accessible name of the terms checkbox (including the links text)
+                agreeToTermsAccessible: "I agree to the Terms of Service and the Privacy Policy",
                 feature1: "Free to get started",
                 feature2: "No credit card required",
                 feature3: "Setup in under 2 minutes",
@@ -1522,6 +1548,9 @@ export const translations = {
                 checkEmailDesc: "We've sent a magic link to",
                 checkEmailAction: "Click the link in the email to sign in instantly.",
                 sending: "Sending...",
+                sendButton: "Send Magic Link",
+                emailSentMessage: "We've sent a magic link to",
+                clickLink: "Click the link to sign in securely.",
             },
             recovery: {
                 title: "Reset Password",
@@ -1546,6 +1575,10 @@ export const translations = {
                 sendButton: "Send Reset Link",
                 resetting: "Updating...",
                 resetButton: "Update Password",
+                emailSentMessage: "We've sent password recovery instructions to",
+                resetPassword: "Reset Password",
+                successMessage: "Your password has been successfully reset",
+                loginNow: "Log in now",
             },
             errors: {
                 invalidEmail: "Please enter a valid email address",
@@ -1563,15 +1596,48 @@ export const translations = {
                 tooManyRequests: "Too many requests. Please try again later",
                 networkError: "Network error. Please check your connection",
                 unknownError: "An error occurred. Please try again",
+                sessionExpired: "Your session has expired. Please log in again",
+                unauthorized: "Unauthorized. Please log in",
+                tooManyAttempts: "Too many attempts. Please try again later",
                 serverError: "An unexpected error occurred. Please try again later.",
+                // Errores de las Edge Functions signup / send-password-reset (códigos en utils/authFunctionErrors.ts)
+                invalidInput: "Please check your details: the email or password is not valid",
+                signupEmailSendFailed: "We couldn't send you the confirmation email, so your account was not created. Please try again in a few minutes or sign up with Google or LinkedIn.",
+                signupTimeout: "The server is taking too long to respond. Check your inbox (your account may have been created) or try again in a few minutes.",
+                recoveryEmailSendFailed: "We couldn't send the password reset email. Please try again in a few minutes.",
+                recoveryTimeout: "The server is taking too long to respond. Please try again in a few minutes.",
             },
             success: {
                 signUpSuccess: "Account created successfully!",
                 signInSuccess: "Welcome back!",
+                loginSuccess: "Logged in successfully!",
+                signupSuccess: "Account created successfully! Please check your email to confirm",
                 passwordResetSent: "Password reset link sent!",
                 passwordUpdated: "Password updated successfully!",
                 magicLinkSent: "Magic link sent to your email!",
-            }
+            },
+            // Email links (/confirm, /recovery, /callback with token_hash): utils/emailLinkAuth.ts
+            emailLink: {
+                confirmingTitle: "Confirming Your Email",
+                confirmingDesc: "Please wait while we verify your email address...",
+                confirmedTitle: "Email Confirmed!",
+                confirmedRedirect: "Your email has been confirmed successfully! Taking you to your dashboard...",
+                confirmedLogin: "Your email has been confirmed! You can now log in.",
+                goToLogin: "Go to Login",
+                signingInTitle: "Completing Sign In",
+                signingInDesc: "Please wait while we authenticate you...",
+                verifyingLink: "Verifying your link...",
+                expiredTitle: "This link has expired or has already been used",
+                expiredDesc: "For security, email links can only be used once and expire after a short time. Request a new one and open the most recent email you receive.",
+                failedTitle: "We couldn't verify the link",
+                failedDesc: "Check your connection and open the link in the email again, or request a new one.",
+                authFailedTitle: "Authentication Error",
+                authFailedRedirect: "Authentication failed. Redirecting to login...",
+                noSessionRedirect: "No session found. Redirecting to login...",
+                requestNewAccessLink: "Request a new sign-in link",
+                requestNewRecoveryLink: "Request a new password reset link",
+                backToLogin: "Back to login",
+            },
         },
         menu: {
             dashboard: "Dashboard",
@@ -1605,8 +1671,22 @@ export const translations = {
             canales: "Channels",
             notificaciones: "Notifications",
             companyDashboard: "Company Dashboard",
-            wizardAlertTitle: "Complete the wizard first",
-            wizardAlertDescription: "You must complete the profile wizard (including the Finalization step) to access all features.",
+            adminPanel: "Admin panel",
+            wizardAlertTitle: "Complete your CV first",
+            wizardAlertDescription: "Finish your CV wizard and publish it in the last step («Finalize») to use every feature.",
+            // Issue #4 (13/24): lock notice that says which section and what is missing
+            wizardAlertSection: "«{section}» unlocks when you finish your CV wizard.",
+            wizardAlertMissing: "Still missing:",
+            wizardAlertPublish: "Publish your CV in the last wizard step («Finalize»)",
+            wizardAlertGo: "Go to the wizard",
+            wizardAlertClose: "Close notice",
+            lockedHint: "Locked: complete your CV first",
+            // Issue #4 (18): accessible names of the dashboard controls
+            openMenu: "Open menu",
+            closeMenu: "Close menu",
+            notificationsUnread: "Notifications ({count} unread)",
+            expandSidebar: "Expand sidebar",
+            collapseSidebar: "Collapse sidebar",
             sectionHome: "HOME",
             sectionProfile: "MY PROFILE",
             sectionCommunity: "COMMUNITY",
@@ -2287,7 +2367,7 @@ export const translations = {
         { name: 'For Professionals', href: '#', id: 'professionals', subItems: [
             { name: 'How it Works', href: '#', id: 'professionals/how' },
             { name: 'Templates & Examples', href: '#', id: 'professionals/templates' },
-            { name: 'Find Jobs', href: '#', id: 'jobs' },
+            // 'Find Jobs' (/jobs) hidden from the menu while there are no published jobs (the route stays)
             { name: 'Pricing (Plans)', href: '#', id: 'pricing' },
             { name: 'Help Center', href: '#', id: 'professionals/help' },
         ]},
@@ -2299,12 +2379,13 @@ export const translations = {
         ]},
         { name: 'Resources', href: '#', id: 'resources', subItems: [
             { name: 'Blog / Career Guides', href: '#', id: 'resources/blog' },
-            { name: 'Template Library', href: '#', id: 'resources/library' },
+            // 'Template Library' merged into Professionals > Templates & Examples (301 in config/routeConfig.ts)
             { name: 'Success Stories', href: '#', id: 'resources/success-stories' },
             { name: 'System Status', href: '#', id: 'resources/status' },
         ]},
         { name: 'About Us', href: '#', id: 'about', subItems: [
-            { name: 'Mission & Values', href: '#', id: 'about/mission' },
+            // /about/mission redirects to /about (same page)
+            { name: 'Mission & Values', href: '#', id: 'about' },
             { name: 'Press/Media Kit', href: '#', id: 'about/press' },
             { name: 'Contact', href: '#', id: 'about/contact' },
         ]},
@@ -2314,7 +2395,7 @@ export const translations = {
     PRICING_PLANS: [
         { title: 'Basic Plan', price: 'Free', period: 'Forever', description: 'Start with a professional, verified profile.', features: ['1 Verified Profile', 'Limited Verifications (Stamps)', 'Standard Templates', 'Sharable URL'], cta: 'Get Started for Free' },
         { title: 'Professional Plan', price: '€15', period: '/ month', description: 'Unlock powerful tools to accelerate your career.', features: ['Everything in Basic', 'Unlimited Verifications', 'Premium Templates', 'Custom Domain', 'AI Profile Enhancement', 'Advanced Analytics'], cta: 'Get Started Now', highlight: true },
-        { title: 'Enterprise Plan', price: 'Custom', period: '', description: 'For teams and companies looking to recruit top talent.', features: ['Team Management', 'Advanced Talent Search', 'ATS Integrations', 'Dedicated Support', 'Enhanced Security'], cta: 'Contact Sales' },
+        { contactSales: true, title: 'Enterprise Plan', price: 'Custom', period: '', description: 'For teams and companies looking to recruit top talent.', features: ['Team Management', 'Advanced Talent Search', 'ATS Integrations', 'Dedicated Support', 'Enhanced Security'], cta: 'Contact Sales' },
     ],
     PRICING_PAGE_PLANS: [
       {
@@ -2472,7 +2553,7 @@ export const translations = {
 
         // CVs - Corporate
         { id: 17, title: 'Classic Professional Layout', category: 'CV', imageUrl: '/images/templates/professional-classic.png', industry: 'Corporate', level: 'Executive', downloads: 2100, rating: 4.7 },
-        { id: 18, title: 'Project Manager', category: 'CV', imageUrl: '/images/templates/classic-corporate.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.8 },
+        { id: 18, title: 'Project Manager', category: 'CV', imageUrl: '/images/templates/corporate-classic.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.8 },
         { id: 19, title: 'Financial Analyst', category: 'CV', imageUrl: '/images/templates/classic-sidebar.png', industry: 'Corporate', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
         { id: 20, title: 'Professional Accountant', category: 'CV', imageUrl: '/images/templates/academic-standard.png', industry: 'Corporate', level: 'Senior', downloads: 1234, rating: 4.7 },
         { id: 21, title: 'Business Consultant', category: 'CV', imageUrl: '/images/templates/template-21.png', industry: 'Corporate', level: 'Executive', downloads: 1456, rating: 4.9 },
@@ -2484,7 +2565,7 @@ export const translations = {
         { id: 25, title: 'Healthcare Professional', category: 'CV', imageUrl: '/images/templates/healthcare-professional.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 850, rating: 4.6 },
         { id: 26, title: 'Registered Nurse', category: 'CV', imageUrl: '/images/templates/template-26.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 1456, rating: 4.7 },
         { id: 27, title: 'Medical Specialist', category: 'CV', imageUrl: '/images/templates/template-27.png', industry: 'Healthcare', level: 'Executive', downloads: 1123, rating: 4.9 },
-        { id: 28, title: 'Pharmacist', category: 'CV', imageUrl: '/images/templates/pharmacist.png', industry: 'Healthcare', level: 'Senior', downloads: 890, rating: 4.6 },
+        { id: 28, title: 'Pharmacist', category: 'CV', imageUrl: '/images/templates/template-28.png', industry: 'Healthcare', level: 'Senior', downloads: 890, rating: 4.6 },
         { id: 29, title: 'Physiotherapist', category: 'CV', imageUrl: '/images/templates/template-29.png', industry: 'Healthcare', level: 'Mid-Career', downloads: 756, rating: 4.5 },
         { id: 30, title: 'Lab Technician', category: 'CV', imageUrl: '/images/templates/template-30.png', industry: 'Healthcare', level: 'Entry-Level', downloads: 923, rating: 4.4 },
 
@@ -2501,7 +2582,7 @@ export const translations = {
         // Emails
         { id: 39, title: 'Post-Interview Follow-Up Email', category: 'Email', imageUrl: '/images/templates/template-39.png', industry: 'Technology', level: 'Mid-Career', downloads: 2345, rating: 4.8 },
         { id: 40, title: 'Professional Networking Email', category: 'Email', imageUrl: '/images/templates/template-40.png', industry: 'Corporate', level: 'Senior', downloads: 1890, rating: 4.7 },
-        { id: 41, title: 'Reference Request Email', category: 'Email', imageUrl: '/images/templates/email-reference.png', industry: 'Technology', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
+        { id: 41, title: 'Reference Request Email', category: 'Email', imageUrl: '/images/templates/template-41.png', industry: 'Technology', level: 'Mid-Career', downloads: 1567, rating: 4.6 },
         { id: 42, title: 'Thank You Email', category: 'Email', imageUrl: '/images/templates/template-42.png', industry: 'Corporate', level: 'Entry-Level', downloads: 2456, rating: 4.5 },
         { id: 43, title: 'Freelance Proposal Email', category: 'Email', imageUrl: '/images/templates/template-43.png', industry: 'Creative', level: 'Senior', downloads: 1234, rating: 4.9 },
         { id: 44, title: 'Salary Negotiation Email', category: 'Email', imageUrl: '/images/templates/template-44.png', industry: 'Corporate', level: 'Senior', downloads: 1678, rating: 4.8 },
@@ -3059,6 +3140,13 @@ export const translations = {
             label: "Featured Article"
         },
         searchPlaceholder: "Search articles...",
+        searchLabel: "Search articles",
+        categoriesLabel: "Filter by category",
+        allCategories: "All",
+        noPosts: "No articles available",
+        noResults: "No articles match your search.",
+        showingCount: "Showing {shown} of {total} articles",
+        loadMore: "Load more articles",
         sidebar: {
             popular: {
                 title: "Popular Articles"
@@ -3068,7 +3156,12 @@ export const translations = {
                 subtitle: "Get the latest career tips in your inbox.",
                 placeholder: "Your email address",
                 button: "Subscribe",
-                alert: "Successfully subscribed with"
+                alert: "Successfully subscribed with",
+                mailTo: "support@yourcvpassport.com",
+                mailSubject: "Newsletter subscription",
+                mailBody: "I would like to subscribe to the YourCVPassport newsletter with this email:",
+                notice: "Automatic sign-up is not available yet. To subscribe, send us the prepared email at",
+                openMail: "Open email"
             }
         },
         finalCta: {
@@ -3078,6 +3171,72 @@ export const translations = {
         }
     }
     ,
+    breadcrumbs: {
+        ariaLabel: "Breadcrumb",
+        home: "Home",
+        // Short labels per route (ES and EN paths) from config/routeConfig.ts; NAV_LINKS is not
+        // reused because menu texts are long or contain "/" (e.g. "Press/Media Kit").
+        labels: {
+            "product": "Product",
+            "producto": "Product",
+            "product/overview": "Overview",
+            "producto/resumen": "Overview",
+            "product/stamps": "Verified profiles",
+            "producto/sellos": "Verified profiles",
+            "product/ats": "ATS export",
+            "producto/ats": "ATS export",
+            "product/domain": "Custom domain",
+            "producto/dominio": "Custom domain",
+            "product/analytics": "Profile analytics",
+            "producto/analiticas": "Profile analytics",
+            "product/ai": "AI for CVs and cover letters",
+            "producto/ia": "AI for CVs and cover letters",
+            "companies": "Companies",
+            "empresas": "Companies",
+            "companies/search": "Talent search",
+            "empresas/busqueda": "Talent search",
+            "companies/plans": "Company plan",
+            "empresas/planes": "Company plan",
+            "companies/integrations": "ATS integrations",
+            "empresas/integraciones": "ATS integrations",
+            "companies/security": "Security and compliance",
+            "empresas/seguridad": "Security and compliance",
+            "about": "About us",
+            "nosotros": "About us",
+            "about/mission": "Mission and values",
+            "nosotros/mision": "Mission and values",
+            "about/press": "Press and media kit",
+            "nosotros/prensa": "Press and media kit",
+            "about/contact": "Contact",
+            "nosotros/contacto": "Contact",
+            "professionals": "Professionals",
+            "profesionales": "Professionals",
+            "professionals/how": "How it works",
+            "profesionales/como-funciona": "How it works",
+            "professionals/templates": "Templates and examples",
+            "profesionales/plantillas": "Templates and examples",
+            "professionals/help": "Help center",
+            "profesionales/ayuda": "Help center",
+            "pricing": "Pricing",
+            "precios": "Pricing",
+            "resources": "Resources",
+            "recursos": "Resources",
+            "resources/blog": "Blog",
+            "recursos/blog": "Blog",
+            "resources/library": "Template library",
+            "recursos/biblioteca": "Template library",
+            "resources/success-stories": "Success stories",
+            "recursos/exito": "Success stories",
+            "resources/status": "System status",
+            "recursos/estado": "System status",
+            "profiles": "Profiles",
+            "perfiles": "Profiles",
+            "terms": "Terms and conditions",
+            "terminos": "Terms and conditions",
+            "privacy": "Privacy policy",
+            "privacidad": "Privacy policy"
+        }
+    },
     onboardingWizard: {
         step: "Step",
         of: "of",
@@ -3488,6 +3647,8 @@ export const translations = {
         present: 'Present',
         ongoing: 'Ongoing',
         now: 'Now',
+        availability: 'Availability',
+        openToOpportunities: 'Open to opportunities',
         contactMe: 'Contact Me',
         scheduleMeeting: 'Schedule Meeting',
         messagingNotActivated: 'This user has not activated the messaging feature',
@@ -3608,6 +3769,8 @@ export const translations = {
         },
         skills: {
             aiSuggestionsTitle: 'AI Suggestions',
+            minSkillsHint: 'You need at least {min} skills to publish your CV ({count}/{min})',
+            minSkillsDone: 'You have the minimum {min} skills to publish ({count})',
             skillAlreadyExists: 'This skill already exists in your profile',
             skillSaved: 'Skill saved successfully',
             errorSavingSkill: 'Error saving skill: ',
@@ -3649,6 +3812,10 @@ export const translations = {
         identity: {
             contactInfo: 'Contact Information',
             gender: 'Gender',
+            genderMale: 'Man',
+            genderFemale: 'Woman',
+            genderPreferNot: 'Prefer not to say',
+            genderHint: 'Optional. Only used to match grammatical gender when your CV is translated.',
         },
         languages: {
             title: 'Languages',
@@ -3704,11 +3871,16 @@ export const translations = {
     profileWizard: {
         completeYourProfile: 'Complete your profile',
         toCreateCv: 'To create your professional CV, you need to complete:',
-        navigateToSections: 'Navigate to the corresponding sections using the icons above',
+        navigateToSections: 'Click any item to go straight there and fix it',
         premiumFeature: 'Premium Feature',
         premiumAiDescription: 'AI features are only available for Pro and Premium users. Your current plan is Free.',
         viewPlans: 'View Plans',
         improveWithAi: 'Improve with AI',
+        stepCounter: 'Step {n} of {total}',
+        optional: 'Optional',
+        optionalHint: 'This step is optional: you can skip it and still publish your CV.',
+        missingHere: 'Still missing in this step',
+        goToFix: 'Go',
     },
     preferencesToasts: {
         completePreferences: 'Please complete your job preferences to continue',
@@ -3824,7 +3996,7 @@ export const translations = {
         fullName: 'Full name',
         email: 'Email',
         headline: 'Professional headline',
-        summary: 'Summary',
+        summary: 'About me',
         photo: 'Profile photo',
         atLeastOneExperience: 'At least 1 work experience',
         atLeastThreeSkills: 'At least 3 skills',
@@ -3840,7 +4012,8 @@ export const translations = {
             summaryRequired: 'About me summary is required',
             summaryMax: 'Maximum 500 characters',
             countryRequired: 'You must select a country',
-            genderRequired: 'You must select your gender'
+            genderRequired: 'You must select your gender',
+            genderInvalid: 'Select a valid option'
         },
         experience: {
             positionRequired: 'Position is required',
@@ -3858,6 +4031,7 @@ export const translations = {
             yearInvalid: 'Year must have 4 valid digits (YYYY)',
             yearTooOld: 'Date cannot be before 1950',
             yearFuture: 'Date cannot be in the future',
+            startDateFuture: 'Start date cannot be in the future',
             monthInvalid: 'Month must be between 01 and 12',
             dateFormatInvalid: 'Invalid format. Use YYYY-MM (eg: 2024-03)',
             gpaLabel: 'GPA / Average Grade (Optional)',
@@ -4130,6 +4304,7 @@ export const translations = {
             conversationStarted: 'Conversation started successfully',
             conversationError: 'Error starting conversation',
             creditsRequired: '{credits} credits required to start this conversation',
+            notFound: 'Profile not found',
         },
         credits: {
             title: 'Credits Management',
@@ -4792,6 +4967,16 @@ export const translations = {
         title: 'Community',
         subtitle: 'Share your achievements and connect with other professionals',
         beta: 'Beta',
+        autoTranslation: {
+            translating: 'Translating…',
+            translatedFrom: {
+                en: 'Automatically translated from English',
+                es: 'Automatically translated from Spanish',
+            },
+            translatedShort: 'Translated',
+            seeOriginal: 'See original',
+            seeTranslation: 'See translation',
+        },
         createPost: {
             placeholder: 'What\'s on your mind?',
             publish: 'Publish',
@@ -5033,6 +5218,7 @@ export const translations = {
     countrySelector: {
         searchPlaceholder: 'Search country...',
         noResults: 'No countries found',
+        placeholder: 'Select a country',
     },
     monthYearPicker: {
         months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],

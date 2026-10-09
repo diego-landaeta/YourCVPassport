@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **freelance rates set CV**:
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of freelance rates set CV](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of freelance rates set CV}
+![Advanced aspects of freelance rates set CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of freelance rates set CV}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your freelance rates set CV approach for each company increases your success rate by up to 60%.

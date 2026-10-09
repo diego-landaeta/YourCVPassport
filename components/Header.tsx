@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
 const DarkModeToggle: React.FC = () => {
+    const { lang } = useLanguage();
     const [isDark, setIsDark] = useState(() => {
         return localStorage.theme === 'dark' ||
                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -27,8 +28,10 @@ const DarkModeToggle: React.FC = () => {
     return (
         <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border text-gray-600 dark:text-dark-text-primary focus:outline-none transition-all duration-200"
-            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="p-2 rounded-full bg-white dark:bg-dark-bg-secondary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border text-gray-600 dark:text-dark-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-all duration-200"
+            aria-label={isDark
+                ? (lang === 'es' ? 'Cambiar a modo claro' : 'Switch to light mode')
+                : (lang === 'es' ? 'Cambiar a modo oscuro' : 'Switch to dark mode')}
         >
             {isDark ? (
                 // Sun icon for light mode
@@ -303,6 +306,14 @@ const Header: React.FC = () => {
   const profileEditPath = `/profile/edit`;
   const publicProfilePath = profile?.slug ? `/cv/${profile.slug}` : profileEditPath;
 
+  // El admin no tiene uso social ni perfil propio: su menú de cuenta solo lleva al panel
+  // de administración y a cerrar sesión, y no ve el enlace "Comunidad" de la navegación.
+  const isAdmin = profile?.role === 'admin';
+  const adminPanelLabel = t.dashboard.menu.adminPanel;
+  const navLinks = isAdmin
+    ? t.NAV_LINKS.filter((item) => item.id !== 'comunidad' && item.id !== 'feed')
+    : t.NAV_LINKS;
+
   return (
     <>
     <header className="bg-white/80 dark:bg-dark-bg-primary/95 backdrop-blur-md sticky top-0 z-50 shadow-sm dark:shadow-lg dark:shadow-dark-bg-primary/50 border-b border-transparent dark:border-dark-border">
@@ -314,7 +325,7 @@ const Header: React.FC = () => {
             </Link>
           </div>
           <nav className="hidden lg:flex items-center space-x-0.5 flex-1 justify-center">
-            {t.NAV_LINKS.map((item) => (
+            {navLinks.map((item) => (
               <DesktopNavLink key={item.name} item={item} />
             ))}
           </nav>
@@ -323,7 +334,7 @@ const Header: React.FC = () => {
              <LanguageSwitcher />
             {session ? (
               <div ref={userMenuRef} className="relative">
-                  <button onClick={() => setUserMenuOpen(!isUserMenuOpen)} className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light dark:focus:ring-offset-dark-bg-primary">
+                  <button onClick={() => setUserMenuOpen(!isUserMenuOpen)} aria-label={lang === 'es' ? 'Menú de cuenta' : 'Account menu'} aria-expanded={isUserMenuOpen} className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light dark:focus:ring-offset-dark-bg-primary">
                       {profile?.avatar_url ? (
                           <img src={profile.avatar_url} alt="Profile" className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent dark:ring-dark-border" />
                       ) : (
@@ -335,7 +346,7 @@ const Header: React.FC = () => {
                   {isUserMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-bg-secondary rounded-md shadow-lg dark:shadow-2xl ring-1 ring-black ring-opacity-5 dark:ring-dark-border-light z-20 py-1 border border-transparent dark:border-dark-border">
                           {/* Company credit badge */}
-                          {isCompanyUser && company && company.status === 'APPROVED' && (
+                          {!isAdmin && isCompanyUser && company && company.status === 'APPROVED' && (
                             <>
                               <div className="px-4 py-2 border-b border-gray-200 dark:border-dark-border">
                                 <div className="flex items-center justify-between">
@@ -348,9 +359,9 @@ const Header: React.FC = () => {
                               </Link>
                             </>
                           )}
-                          {profile?.role === 'admin' ? (
+                          {isAdmin ? (
                             <>
-                              <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Admin Panel</Link>
+                              <Link to={adminPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-red-600 dark:text-status-error hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{adminPanelLabel}</Link>
                               <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
                             </>
                           ) : profile?.role === 'profile_manager' ? (
@@ -360,7 +371,7 @@ const Header: React.FC = () => {
                             </>
                           ) : (
                             <>
-                              <Link to={dashboardPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">Dashboard</Link>
+                              <Link to={dashboardPath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.dashboard.menu.dashboard}</Link>
                               <Link to={publicProfilePath} onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.dashboard}</Link>
                               <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors">{t.header.logout}</button>
                             </>
@@ -375,14 +386,40 @@ const Header: React.FC = () => {
               </>
             )}
           </div>
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-1">
+            {/* Cambio rápido de idioma en móvil. Antes era un botón flotante abajo a la
+                derecha que tapaba contenido (títulos, botones de registro). */}
+            <button
+              type="button"
+              onClick={() => setLangWithNav(lang === 'es' ? 'en' : 'es')}
+              aria-label={lang === 'es' ? 'Switch to English' : 'Cambiar a español'}
+              className="inline-flex items-center justify-center w-11 h-11 rounded-md hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light transition-colors touch-manipulation"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <span className="block w-6 h-6 rounded-full overflow-hidden border border-gray-200 dark:border-dark-border shadow-sm" aria-hidden="true">
+                {lang === 'es' ? (
+                  <svg viewBox="0 0 512 512" className="w-full h-full">
+                    <rect fill="#AA151B" width="512" height="512"/>
+                    <rect fill="#F1BF00" y="128" width="512" height="256"/>
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 512 512" className="w-full h-full">
+                    <rect fill="#012169" width="512" height="512"/>
+                    <path fill="#FFF" d="M512 0v64L322 256l190 187v69h-67L254 324 68 512H0v-68l186-187L0 74V0h62l192 188L440 0z"/>
+                    <path fill="#C8102E" d="M184 324l11 34L42 512H0v-3l184-185zm124-12l54 8 150 147v45L308 312zM512 0L320 196l-4-44L466 0h46zM0 1l193 189-59-8L0 49V1z"/>
+                    <path fill="#FFF" d="M176 0v512h160V0H176zM0 176v160h512V176H0z"/>
+                    <path fill="#C8102E" d="M0 208v96h512v-96H0zM208 0v512h96V0h-96z"/>
+                  </svg>
+                )}
+              </span>
+            </button>
             {!isMobileMenuOpen && (
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-dark-text-secondary hover:text-gray-500 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cv-blue dark:focus:ring-cv-blue-light transition-colors"
                 aria-expanded={isMobileMenuOpen}
               >
-                <span className="sr-only">Open main menu</span>
+                <span className="sr-only">{lang === 'es' ? 'Abrir menú principal' : 'Open main menu'}</span>
                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
@@ -422,7 +459,7 @@ const Header: React.FC = () => {
 
             {/* Items de navegación con iconos */}
             <div className="flex-1 py-3 overflow-y-auto">
-              {t.NAV_LINKS.map((item) => (
+              {navLinks.map((item) => (
                 <NavMenuItem key={item.name} item={item} onClick={closeMobileMenu} />
               ))}
             </div>
@@ -452,7 +489,7 @@ const Header: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{profile.full_name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{profile.headline}</p>
-                        {isCompanyUser && company && company.status === 'APPROVED' && (
+                        {!isAdmin && isCompanyUser && company && company.status === 'APPROVED' && (
                           <p className="text-xs text-cv-blue dark:text-cv-blue-light font-semibold mt-1">
                             {company.credit_balance} credits
                           </p>
@@ -460,13 +497,13 @@ const Header: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  {profile?.role === 'admin' ? (
+                  {isAdmin ? (
                     <>
                       <Link to={adminPath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors text-sm font-medium">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
-                        Admin Panel
+                        {adminPanelLabel}
                       </Link>
                       <button onClick={handleLogout} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
                         {t.header.logout}
@@ -495,7 +532,7 @@ const Header: React.FC = () => {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
-                        Dashboard
+                        {t.dashboard.menu.dashboard}
                       </Link>
                       <Link to={publicProfilePath} onClick={closeMobileMenu} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors text-sm">
                         {t.header.dashboard}
@@ -521,32 +558,6 @@ const Header: React.FC = () => {
         </>
       )}
 
-    {/* Indicador de idioma flotante global - solo en móvil */}
-    <div className="lg:hidden fixed bottom-5 right-4 z-[50] pointer-events-none">
-      <button
-        onClick={() => {
-          const newLang = lang === 'es' ? 'en' : 'es';
-          setLangWithNav(newLang);
-        }}
-        className="pointer-events-auto w-9 h-9 rounded-full shadow-lg active:scale-90 transition-transform touch-manipulation overflow-hidden border-2 border-white dark:border-gray-700 bg-gray-100"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
-      >
-        {lang === 'es' ? (
-          <svg viewBox="0 0 512 512" className="w-full h-full">
-            <rect fill="#AA151B" width="512" height="512"/>
-            <rect fill="#F1BF00" y="128" width="512" height="256"/>
-          </svg>
-        ) : (
-          <svg viewBox="0 0 512 512" className="w-full h-full">
-            <rect fill="#012169" width="512" height="512"/>
-            <path fill="#FFF" d="M512 0v64L322 256l190 187v69h-67L254 324 68 512H0v-68l186-187L0 74V0h62l192 188L440 0z"/>
-            <path fill="#C8102E" d="M184 324l11 34L42 512H0v-3l184-185zm124-12l54 8 150 147v45L308 312zM512 0L320 196l-4-44L466 0h46zM0 1l193 189-59-8L0 49V1z"/>
-            <path fill="#FFF" d="M176 0v512h160V0H176zM0 176v160h512V176H0z"/>
-            <path fill="#C8102E" d="M0 208v96h512v-96H0zM208 0v512h96V0h-96z"/>
-          </svg>
-        )}
-      </button>
-    </div>
     </>
   );
 };

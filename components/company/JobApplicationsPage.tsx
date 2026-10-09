@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import {
   BriefcaseIcon,
@@ -60,6 +61,7 @@ interface JobApplication {
 
 const JobApplicationsPage: React.FC = () => {
   const { user } = useAuth();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
 
   const [applications, setApplications] = useState<JobApplication[]>([]);
@@ -96,7 +98,8 @@ const JobApplicationsPage: React.FC = () => {
         .from('company_users')
         .select('company_id')
         .eq('user_id', user.id)
-        .single();
+        // maybeSingle: sin empresa → null (aviso "no encontrada"), sin 406
+        .maybeSingle();
 
       if (companyError || !companyUser) {
         toast.error('Empresa no encontrada');
@@ -105,13 +108,15 @@ const JobApplicationsPage: React.FC = () => {
 
       setCompanyId(companyUser.company_id);
 
-      // Build query
+      // Build query. Del candidato solo se piden columnas públicas de profiles:
+      // email y teléfono son privados (migración 20261006_cerrar_columnas_privadas_profiles_stamps.sql);
+      // cv_url y profile_picture_url no existen en profiles.
       let query = supabase
         .from('job_applications')
         .select(`
           *,
           job_posting:job_postings(id, title, slug, department, employment_type, location_city, location_country),
-          profile:profiles(id, full_name, headline, location, email, phone, cv_url, slug, profile_picture_url)
+          profile:profiles(id, full_name, headline, location, slug, avatar_url)
         `)
         .eq('company_id', companyUser.company_id)
         .order('created_at', { ascending: false });
@@ -200,7 +205,12 @@ const JobApplicationsPage: React.FC = () => {
       setShowDetailsModal(false);
       loadCompanyAndApplications();
     } catch (error: any) {
-      toast.error(error.message || 'Error al actualizar el estado');
+      // 42501: el servidor no reconoce a la sesión como miembro (OWNER/ADMIN/MEMBER) de la empresa
+      toast.error(error?.code === '42501'
+        ? (lang === 'es'
+          ? 'No tienes permiso para cambiar candidaturas de esta empresa.'
+          : 'You are not allowed to update applications for this company.')
+        : (error.message || 'Error al actualizar el estado'));
     } finally {
       setUpdatingStatus(false);
     }

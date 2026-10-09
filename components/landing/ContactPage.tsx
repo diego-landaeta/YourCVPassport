@@ -8,6 +8,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import PageSEO from '../shared/PageSEO';
 import { supabase } from '../../supabase/client';
+import { SOCIAL_LINKS } from '../Footer';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -19,9 +20,9 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 };
 
 const ContactCard: React.FC<{ card: ContactCardItem }> = ({ card }) => {
-    const { lang } = useLanguage();
-    const langPrefix = lang === 'es' ? '/es' : '';
-    const ctaLink = card.isMailLink ? card.ctaLink : `${langPrefix}${card.ctaLink}`.replace(/\/+/g, '/');
+    // ctaLink se usa tal cual: las rutas no llevan prefijo de idioma (ES y EN tienen su propia
+    // ruta en routeConfig) y anteponer "/es" daba 404. Hoy todas las tarjetas son mailto.
+    const { ctaLink } = card;
 
     return (
         <div className="bg-white dark:bg-dark-bg-primary p-8 rounded-lg shadow-lg border border-gray-100 dark:border-dark-border text-center h-full flex flex-col">
@@ -223,16 +224,22 @@ const ContactPage: React.FC = () => {
 
             {/* Office & Social */}
             <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <AnimatedWrapper>
                         <div className="text-center md:text-left">
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.office.title}</h2>
                             <h3 className="mt-4 text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{pageData.office.hq}</h3>
                             <p className="text-gray-600 dark:text-dark-text-secondary">{pageData.office.description}</p>
-                            <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary mt-12">{pageData.connect.title}</h2>
-                            <div className="flex justify-center md:justify-start space-x-6 mt-4">
-                                {pageData.connect.social.map(site => <a key={site} href="#" className="text-gray-500 dark:text-dark-text-tertiary hover:text-cv-blue">{site}</a>)}
-                            </div>
+                            {/* Redes: solo las que tienen URL real (SOCIAL_LINKS en Footer.tsx). Hoy ninguna,
+                                así que el bloque entero no se pinta en vez de enlazar a "#". */}
+                            {SOCIAL_LINKS.length > 0 && (
+                                <>
+                                    <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary mt-12">{pageData.connect.title}</h2>
+                                    <div className="flex justify-center md:justify-start space-x-6 mt-4">
+                                        {SOCIAL_LINKS.map(({ name, url }) => <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="text-gray-500 dark:text-dark-text-tertiary hover:text-cv-blue">{name}</a>)}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </AnimatedWrapper>
                     <AnimatedWrapper delay="duration-1000">

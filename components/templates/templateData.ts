@@ -33,7 +33,7 @@ export const templates: TemplateData[] = [
     {
         id: 'corporate-classic',
         name: { es: 'Corporativo Clásico', en: 'Corporate Classic' },
-        previewImg: '/images/templates/classic-corporate.png',
+        previewImg: '/images/templates/corporate-classic.png',
         isPro: true,
         category: 'CV',
     },

@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **student CV template university**
 
 This comprehensive guide on **student CV template university** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![student CV template university](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Complete guide on student CV template university}
+![student CV template university](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Complete guide on student CV template university}
 
 ## 1. What goes on a student CV
 2. Leading with education
@@ -78,7 +78,7 @@ To excel in **student CV template university** within this area, apply these pro
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of student CV template university](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of student CV template university}
+![Advanced aspects of student CV template university](https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80){caption:Advanced aspects of student CV template university}
 
 ## Advanced aspects of student CV template university
 
@@ -292,7 +292,7 @@ Mastering **student CV template university** isn't just a competitive advantage 
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Education & Academia",
   is_featured: false,

@@ -110,7 +110,7 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
               const isActive = activeTab === tab.id;
 
               return (
-                <button
+                <button aria-label={tab.label[lang]}
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   title={tab.label[lang]}
@@ -123,7 +123,7 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
                     }
                   `}
                 >
-                  <Icon
+                  <Icon aria-hidden="true"
                     className={`
                       w-5 h-5 transition-all
                       ${

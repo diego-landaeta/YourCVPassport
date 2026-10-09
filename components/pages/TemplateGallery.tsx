@@ -4,6 +4,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { templates } from '../templates/templateData';
+import { handleTemplateImageError } from '../../utils/templateImageFallback';
 
 interface TemplateCardProps {
   title: string;
@@ -15,7 +16,7 @@ interface TemplateCardProps {
 
 const TemplateCard: React.FC<TemplateCardProps> = ({ title, imageUrl, isPro, onPreview, onCustomize }) => (
   <div className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[3/4]">
-    <img src={imageUrl} alt={title} className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-500" />
+    <img src={imageUrl} alt={title} onError={handleTemplateImageError} className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-500" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
     {isPro && (
       <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
@@ -173,6 +174,7 @@ const TemplateGallery: React.FC = () => {
                         <div className="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
                             <img
                                 src={previewTemplate.previewImg}
+                                onError={handleTemplateImageError}
                                 alt={previewTemplate.name[lang]}
                                 className="w-full h-auto rounded-lg shadow-lg"
                             />

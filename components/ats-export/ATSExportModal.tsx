@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ATSPDFPreview } from './ATSPDFPreview';
 import { FullProfileData, Stamp } from '../../types';
+import { useA11yLabels } from '../shared/a11y';
 
 interface ATSExportModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const ATSExportModal: React.FC<ATSExportModalProps> = ({
   stamps,
   language = 'en',
 }) => {
+  const a11y = useA11yLabels();
   const [activeTab, setActiveTab] = useState<'export' | 'info'>('export');
 
   if (!isOpen) return null;
@@ -120,11 +122,11 @@ export const ATSExportModal: React.FC<ATSExportModalProps> = ({
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">{t.title}</h2>
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">{t.subtitle}</p>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 dark:text-dark-text-tertiary dark:hover:text-dark-text-secondary transition-colors"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon aria-hidden="true" className="w-6 h-6" />
               </button>
             </div>
 

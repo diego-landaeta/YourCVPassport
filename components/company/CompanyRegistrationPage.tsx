@@ -2,15 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
+import PageSEO from '../shared/PageSEO';
 import { useToastContext } from '../../contexts/ToastContext';
 import { supabase } from '../../supabase/client';
+import { COMPANY_DOCUMENTS_BUCKET, COMPANY_LOGOS_BUCKET } from '../../lib/companyDocuments';
 import type { CreateCompanyInput, CompanySize } from '../../types';
+
+// SEO de /company/register (diccionario local ES/EN). La URL es la misma en ambos idiomas.
+const REGISTRATION_SEO = {
+  es: {
+    title: 'Registro de empresas',
+    description: 'Registra tu empresa en YourCVPassport para publicar ofertas de empleo y buscar profesionales con perfiles verificados.',
+  },
+  en: {
+    title: 'Company registration',
+    description: 'Register your company on YourCVPassport to post job openings and search for professionals with verified profiles.',
+  },
+} as const;
 
 const CompanyRegistrationPage: React.FC = () => {
   const { user, company, companyLoading } = useAuth();
   const translations = useTranslations();
   const navigate = useNavigate();
   const toast = useToastContext();
+  const { lang } = useLanguage();
+  const seo = (
+    <PageSEO
+      title={REGISTRATION_SEO[lang].title}
+      description={REGISTRATION_SEO[lang].description}
+      lang={lang}
+    />
+  );
 
   // Helper function to access translations
   const t = (key: string) => {
@@ -129,14 +152,28 @@ const CompanyRegistrationPage: React.FC = () => {
     }
   };
 
-  const uploadFile = async (file: File, path: string): Promise<string | null> => {
+  /**
+   * Sube un archivo del registro.
+   * - 'logos': bucket público `company-logos`, carpeta <uid>/; devuelve la URL pública.
+   * - 'tax-documents' / 'verification-documents': bucket PRIVADO
+   *   `company-documents`, carpeta <tipo>/<uid>/; devuelve la RUTA (no una URL):
+   *   el panel de admin la abre con una URL firmada (createSignedUrl).
+   * Ver supabase/migrations/20261005_privatizar_company_documents.sql.
+   */
+  const uploadFile = async (
+    file: File,
+    kind: 'logos' | 'tax-documents' | 'verification-documents',
+  ): Promise<string | null> => {
     try {
+      if (!user) return null;
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-      const filePath = `${path}/${fileName}`;
+      const isLogo = kind === 'logos';
+      const bucket = isLogo ? COMPANY_LOGOS_BUCKET : COMPANY_DOCUMENTS_BUCKET;
+      const filePath = isLogo ? `${user.id}/${fileName}` : `${kind}/${user.id}/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
-        .from('company-documents')
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
         .upload(filePath, file);
 
       if (uploadError) {
@@ -144,9 +181,10 @@ const CompanyRegistrationPage: React.FC = () => {
         return null;
       }
 
-      // Get public URL
+      if (!isLogo) return filePath;
+
       const { data: urlData } = supabase.storage
-        .from('company-documents')
+        .from(bucket)
         .getPublicUrl(filePath);
 
       return urlData.publicUrl;
@@ -275,7 +313,9 @@ const CompanyRegistrationPage: React.FC = () => {
           signup_ip: signupIp,
           status: 'PENDING',
         })
-        .select()
+        // Solo columnas públicas: el resto de companies no es legible por authenticated
+        // (20261009b_cerrar_columnas_privadas_companies.sql). Aquí solo hace falta el id.
+        .select('id')
         .single();
 
       if (companyError) {
@@ -341,6 +381,7 @@ const CompanyRegistrationPage: React.FC = () => {
   if (companyLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        {seo}
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white dark:bg-dark-bg-secondary py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -363,6 +404,7 @@ const CompanyRegistrationPage: React.FC = () => {
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        {seo}
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
             <div className="text-center">
@@ -386,6 +428,7 @@ const CompanyRegistrationPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary py-12 px-4 sm:px-6 lg:px-8">
+      {seo}
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

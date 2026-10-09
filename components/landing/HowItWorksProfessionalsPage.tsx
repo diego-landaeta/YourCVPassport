@@ -86,7 +86,7 @@ const HowItWorksProfessionalsPage: React.FC = () => {
                 <div className="max-w-5xl mx-auto mt-16 space-y-16">
                     {pageData.mainSteps.map((step: any, index: number) => (
                          <AnimatedWrapper key={step.title}>
-                            <div className={`grid md:grid-cols-2 gap-12 items-center`}>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center`}>
                                 <div className={`text-center md:text-left ${index === 1 ? 'md:order-last' : ''}`}>
                                     <span className="text-cv-blue font-bold text-lg">{step.stepLabel}</span>
                                     <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary mt-2">{step.title}</h2>

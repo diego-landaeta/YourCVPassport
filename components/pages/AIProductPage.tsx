@@ -75,8 +75,8 @@ const AIProductPage: React.FC = () => {
     const { lang } = useLanguage();
 
     const seoTitle = lang === 'es'
-        ? 'IA que potencia tu perfil profesional - YourCVPassport'
-        : 'AI that powers your professional profile - YourCVPassport';
+        ? 'IA que potencia tu perfil profesional'
+        : 'AI that powers your professional profile';
 
     const seoDescription = lang === 'es'
         ? 'Descubre cómo nuestra IA optimiza tu CV automáticamente: mejora descripciones, genera summaries profesionales, sugiere skills relevantes y valida la calidad de tu perfil.'

@@ -271,7 +271,7 @@ Cuando hablamos de **primer empleo LATAM CV** en el contexto de aspectos avanzad
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de primer empleo LATAM CV](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de primer empleo LATAM CV}
+![Aspectos avanzados de primer empleo LATAM CV](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Aspectos avanzados de primer empleo LATAM CV}
 
 ## Cómo YourCVPassport te ayuda con primer empleo LATAM CV
 

@@ -4,6 +4,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useCompanyUnreadMessages } from '../../hooks/useCompanyUnreadMessages';
 import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser } from '../../types';
+import { localDayKeysBetween, parseLocalDayKey, toLocalDayKey } from '../../utils/dateKeys';
 import {
   MagnifyingGlassIcon,
   CreditCardIcon,
@@ -237,13 +238,14 @@ const CompanyDashboardPage: React.FC = () => {
         creditsUsedThisMonth,
       });
 
-      // Aggregate data by day for chart
+      // Aggregate data by day for chart. Días LOCALES: con toISOString/split('T')
+      // el día era el de UTC (un contacto a las 23:30 en México caía al día
+      // siguiente) y el bucle de 30 días desde "hace 30 días" dejaba fuera hoy.
+      // Se cubre todo el rango consultado, de hace 30 días a hoy, con 0 en los
+      // días sin actividad.
       const dailyData: { [key: string]: ChartDataPoint } = {};
 
-      for (let i = 0; i < 30; i++) {
-        const date = new Date(thirtyDaysAgo);
-        date.setDate(date.getDate() + i);
-        const dateKey = date.toISOString().split('T')[0];
+      for (const dateKey of localDayKeysBetween(thirtyDaysAgo, now)) {
         dailyData[dateKey] = {
           date: dateKey,
           credits: 0,
@@ -253,23 +255,24 @@ const CompanyDashboardPage: React.FC = () => {
       }
 
       viewsData?.forEach((view: any) => {
-        const dateKey = view.created_at.split('T')[0];
+        const dateKey = toLocalDayKey(view.created_at);
         if (dailyData[dateKey]) {
           dailyData[dateKey].views += 1;
         }
       });
 
       contactsData?.forEach((contact: any) => {
-        const dateKey = contact.created_at.split('T')[0];
+        const dateKey = toLocalDayKey(contact.created_at);
         if (dailyData[dateKey]) {
           dailyData[dateKey].contacts += 1;
         }
       });
 
-      // Set chart data
+      // Set chart data (la clave se lee como medianoche local: new Date('YYYY-MM-DD')
+      // es medianoche UTC y en América la etiqueta mostraba el día anterior)
       const chartDataArray = Object.values(dailyData).map((data) => ({
         ...data,
-        date: new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        date: parseLocalDayKey(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       }));
       setChartData(chartDataArray);
 

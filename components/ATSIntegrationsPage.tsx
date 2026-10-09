@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
@@ -31,8 +32,8 @@ const ATSCard: React.FC<{ integration: any }> = ({ integration }) => {
             </div>
             <h3 className="text-xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{integration.name}</h3>
             <p className="mt-2 text-gray-600 dark:text-dark-text-secondary flex-grow">{integration.description}</p>
-            {/* FIX: Correctly reference the translation object for this page. */}
-            <a href="#" className="mt-4 font-semibold text-cv-blue hover:underline">{t.atsIntegrationsPage.learnMore} →</a>
+            {/* No hay ficha propia por ATS: "Saber más" lleva a la página de exportación ATS (antes era "#"). */}
+            <Link to={t.footer.links.ats} className="mt-4 font-semibold text-cv-blue hover:underline">{t.atsIntegrationsPage.learnMore} →</Link>
         </div>
     );
 }
@@ -62,7 +63,7 @@ const ATSIntegrationsPage: React.FC = () => {
             {/* Hero Section */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
@@ -137,7 +138,8 @@ const ATSIntegrationsPage: React.FC = () => {
 
             {/* API Documentation Preview */}
             <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                {/* [&>*]:min-w-0: sin esto el bloque de código ensancha la columna y en móvil la página desborda */}
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center [&>*]:min-w-0">
                     <AnimatedWrapper>
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.api.title}</h2>
@@ -149,14 +151,15 @@ const ATSIntegrationsPage: React.FC = () => {
                                     </li>
                                 ))}
                             </ul>
-                            <a
-                                href="https://github.com/yourusername/yourcvpassport/blob/main/API_DOCUMENTATION.md"
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            {/* No existe documentación pública de la API (el enlace anterior iba a un repo
+                                inexistente, github.com/yourusername). En vez de prometer una documentación que
+                                no hay, el botón lleva a contacto con un texto que dice exactamente eso. */}
+                            <Link
+                                to={t.footer.links.contact}
                                 className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors"
                             >
-                                {pageData.api.cta}
-                            </a>
+                                {lang === 'es' ? 'Consultar sobre la API' : 'Ask us about the API'}
+                            </Link>
                         </div>
                     </AnimatedWrapper>
                     <AnimatedWrapper delay="duration-1000">

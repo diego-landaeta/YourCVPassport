@@ -218,7 +218,7 @@ To excel in **online CV portfolio** within this area, apply these proven strateg
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of online CV portfolio](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of online CV portfolio}
+![Advanced aspects of online CV portfolio](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of online CV portfolio}
 
 ## Advanced aspects of online CV portfolio
 

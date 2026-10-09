@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **CV ejecutivo alt
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
+![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV ejecutivo alta direccion para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -218,7 +218,7 @@ Para destacar en **CV ejecutivo alta direccion** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
+![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
 
 ## Aspectos avanzados de CV ejecutivo alta direccion
 
@@ -271,7 +271,7 @@ Cuando hablamos de **CV ejecutivo alta direccion** en el contexto de aspectos av
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
+![Aspectos avanzados de CV ejecutivo alta direccion](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Aspectos avanzados de CV ejecutivo alta direccion}
 
 ## Cómo YourCVPassport te ayuda con CV ejecutivo alta direccion
 

@@ -218,7 +218,7 @@ To excel in **research profile CV** within this area, apply these proven strateg
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of research profile CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of research profile CV}
+![Advanced aspects of research profile CV](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Advanced aspects of research profile CV}
 
 ## Advanced aspects of research profile CV
 

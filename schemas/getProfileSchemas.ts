@@ -1,12 +1,22 @@
 // @ts-nocheck
 import { z } from 'zod';
 
+// Campos vacios de formulario ('' de un select, NaN de un input numerico vacio,
+// null de la BD) se tratan como "sin valor" para que los opcionales no fallen.
+const emptyToUndefined = (v: unknown) =>
+  v === '' || v === null || (typeof v === 'number' && Number.isNaN(v)) ? undefined : v;
+const emptyToNull = (v: unknown) => (v === '' ? null : v);
+
 // This function creates Zod schemas with translated error messages
+//
+// Zod 4 ignora `required_error` / `invalid_type_error` (eran de Zod 3) y cae en su
+// mensaje por defecto en ingles ("Invalid input"). Aqui se usa `{ error }`, que en
+// Zod 4 cubre tambien el caso de valor ausente o de tipo incorrecto.
 export const getProfileSchemas = (t: any) => {
   const identitySchema = z.object({
-    full_name: z.string().min(2, t.validationErrors.identity.fullNameRequired),
-    headline: z.string().min(5, t.validationErrors.identity.headlineRequired),
-    summary: z.string().min(1, t.validationErrors.identity.summaryRequired).max(500, t.validationErrors.identity.summaryMax),
+    full_name: z.string({ error: t.validationErrors.identity.fullNameRequired }).min(2, t.validationErrors.identity.fullNameRequired),
+    headline: z.string({ error: t.validationErrors.identity.headlineRequired }).min(5, t.validationErrors.identity.headlineRequired),
+    summary: z.string({ error: t.validationErrors.identity.summaryRequired }).min(1, t.validationErrors.identity.summaryRequired).max(500, t.validationErrors.identity.summaryMax),
     country_code: z.union([
       z.string().min(1, t.validationErrors.identity.countryRequired),
       z.null(),
@@ -21,14 +31,19 @@ export const getProfileSchemas = (t: any) => {
     portfolio_url: z.string().optional().nullable(),
     remote: z.boolean().optional().nullable(),
     avatar_url: z.string().optional().nullable(),
-    gender: z.enum(['male', 'female'], { required_error: t.validationErrors?.identity?.genderRequired || 'Gender is required' }),
+    // Genero opcional: solo sirve para concordar el genero gramatical de las
+    // traducciones del CV. Vacio ("Prefiero no decirlo") se guarda como null.
+    gender: z.preprocess(
+      emptyToNull,
+      z.enum(['male', 'female'], { error: t.validationErrors.identity.genderInvalid }).nullable().optional()
+    ),
   });
 
   const experienceSchema = z.object({
     id: z.string().optional(),
-    position: z.string().min(2, t.validationErrors.experience.positionRequired),
-    company_name: z.string().min(2, t.validationErrors.experience.companyRequired),
-    start_date: z.string().min(1, t.validationErrors.experience.startDateRequired),
+    position: z.string({ error: t.validationErrors.experience.positionRequired }).min(2, t.validationErrors.experience.positionRequired),
+    company_name: z.string({ error: t.validationErrors.experience.companyRequired }).min(2, t.validationErrors.experience.companyRequired),
+    start_date: z.string({ error: t.validationErrors.experience.startDateRequired }).min(1, t.validationErrors.experience.startDateRequired),
     end_date: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     achievements: z.array(z.string().max(100, 'Máximo 100 caracteres por logro')).nullable().optional(),
@@ -41,10 +56,10 @@ export const getProfileSchemas = (t: any) => {
 
   const educationSchema = z.object({
     id: z.string().optional(),
-    institution_name: z.string().min(2, t.validationErrors.education.institutionRequired),
-    degree: z.string().min(2, t.validationErrors.education.degreeRequired),
-    field_of_study: z.string().min(2, t.validationErrors.education.fieldRequired),
-    start_date: z.string().min(1, t.validationErrors.education.startDateRequired),
+    institution_name: z.string({ error: t.validationErrors.education.institutionRequired }).min(2, t.validationErrors.education.institutionRequired),
+    degree: z.string({ error: t.validationErrors.education.degreeRequired }).min(2, t.validationErrors.education.degreeRequired),
+    field_of_study: z.string({ error: t.validationErrors.education.fieldRequired }).min(2, t.validationErrors.education.fieldRequired),
+    start_date: z.string({ error: t.validationErrors.education.startDateRequired }).min(1, t.validationErrors.education.startDateRequired),
     end_date: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     grade: z.string().nullable().optional(),
@@ -55,17 +70,17 @@ export const getProfileSchemas = (t: any) => {
 
   const skillSchema = z.object({
     id: z.string().optional(),
-    name: z.string().min(1, t.validationErrors.skills.nameRequired),
+    name: z.string({ error: t.validationErrors.skills.nameRequired }).min(1, t.validationErrors.skills.nameRequired),
     level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT']).optional().nullable(),
-    years_of_experience: z.number({ invalid_type_error: t.validationErrors.skills.yearsInvalid }).min(0).max(50, t.validationErrors.skills.yearsMax).optional().nullable(),
-    percentage: z.number({ invalid_type_error: t.validationErrors.skills.percentageInvalid }).min(0).max(100, t.validationErrors.skills.percentageMax).optional().nullable(),
+    years_of_experience: z.number({ error: t.validationErrors.skills.yearsInvalid }).min(0, t.validationErrors.skills.yearsInvalid).max(50, t.validationErrors.skills.yearsMax).optional().nullable(),
+    percentage: z.number({ error: t.validationErrors.skills.percentageInvalid }).min(0, t.validationErrors.skills.percentageInvalid).max(100, t.validationErrors.skills.percentageMax).optional().nullable(),
     category: z.string().optional().nullable(),
     sort_order: z.number().optional().nullable(),
   }).passthrough();
 
   const languageSchema = z.object({
     id: z.string().optional(),
-    name: z.string().min(1, t.validationErrors.languages.nameRequired),
+    name: z.string({ error: t.validationErrors.languages.nameRequired }).min(1, t.validationErrors.languages.nameRequired),
     level: z.enum(['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'NATIVE', 'Native']),
     percentage: z.number().min(0).max(100).nullable().optional(),
     is_native: z.boolean().nullable().optional(),
@@ -151,14 +166,17 @@ export const getProfileSchemas = (t: any) => {
     is_current: z.boolean().nullable().optional(),
   });
 
+  // Todo el paso es opcional. Los valores llegan del perfil en BD (null si nunca se
+  // rellenaron) o de selects/inputs vacios ('' o NaN): antes un null en cualquiera
+  // de estos campos hacia fallar la validacion en silencio y "Siguiente" no avanzaba.
   const preferencesSchema = z.object({
-    job_seeking_status: z.enum(['OPEN', 'PASSIVE', 'NOT_LOOKING']).optional(),
-    job_type: z.array(z.enum(['full-time', 'part-time', 'contract', 'freelance', 'internship'])).optional(),
-    availability: z.enum(['immediate', '2-weeks', '1-month', '2-months', 'not-looking']).optional(),
-    salary_min: z.number({ invalid_type_error: t.validationErrors.preferences.salaryInvalid }).min(0).max(1000000, t.validationErrors.preferences.salaryMax).optional(),
-    salary_max: z.number({ invalid_type_error: t.validationErrors.preferences.salaryInvalid }).min(0).max(1000000, t.validationErrors.preferences.salaryMax).optional(),
-    salary_currency: z.string().optional(),
-    remote_preference: z.enum(['remote', 'hybrid', 'on-site', 'flexible']).optional(),
+    job_seeking_status: z.preprocess(emptyToNull, z.enum(['OPEN', 'PASSIVE', 'NOT_LOOKING']).nullable().optional()),
+    job_type: z.array(z.enum(['full-time', 'part-time', 'contract', 'freelance', 'internship'])).nullable().optional(),
+    availability: z.preprocess(emptyToNull, z.enum(['immediate', '2-weeks', '1-month', '2-months', 'not-looking']).nullable().optional()),
+    salary_min: z.preprocess(emptyToUndefined, z.number({ error: t.validationErrors.preferences.salaryInvalid }).min(0, t.validationErrors.preferences.salaryInvalid).max(1000000, t.validationErrors.preferences.salaryMax).optional()),
+    salary_max: z.preprocess(emptyToUndefined, z.number({ error: t.validationErrors.preferences.salaryInvalid }).min(0, t.validationErrors.preferences.salaryInvalid).max(1000000, t.validationErrors.preferences.salaryMax).optional()),
+    salary_currency: z.string().nullable().optional(),
+    remote_preference: z.preprocess(emptyToNull, z.enum(['remote', 'hybrid', 'on-site', 'flexible']).nullable().optional()),
     willing_to_relocate: z.boolean().optional().nullable(),
     preferred_locations: z.array(z.string()).optional().nullable(),
   });

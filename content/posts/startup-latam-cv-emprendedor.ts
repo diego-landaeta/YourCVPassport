@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV startup LATAM** se ha co
 
 Esta guía completa sobre **CV startup LATAM** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV startup LATAM](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre CV startup LATAM}
+![CV startup LATAM](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Guía completa sobre CV startup LATAM}
 
 ## 1. Ecosistema startup LATAM 2026
 2. Que buscan las startups
@@ -78,7 +78,7 @@ Para destacar en **CV startup LATAM** dentro de esta área, aplica estas estrate
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV startup LATAM](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV startup LATAM}
+![Aspectos avanzados de CV startup LATAM](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Aspectos avanzados de CV startup LATAM}
 
 ## Aspectos avanzados de CV startup LATAM
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **CV startup LATAM
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV startup LATAM](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV startup LATAM}
+![Aspectos avanzados de CV startup LATAM](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80){caption:Aspectos avanzados de CV startup LATAM}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV startup LATAM para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **CV startup LATAM** no es solo una ventaja competitiva — es una neces
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Tendencias Laborales",
   is_featured: false,

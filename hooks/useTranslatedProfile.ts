@@ -7,10 +7,9 @@ import {
   detectSourceLanguage,
   TranslationLanguage,
   getCachedTranslation,
-  saveCachedTranslation,
+  requestProfileTranslation,
   generateContentHash,
   applyCachedTranslations,
-  extractTranslatedContent,
 } from '../services/translation';
 import { correctGender, correctGenderBatch, inferGenderFromName } from '../utils/genderCorrection';
 
@@ -363,24 +362,14 @@ export function useTranslatedProfile(
           }
         }
 
-        // === STEP 3: Save to profile-level cache for future users ===
-        try {
-          const translatedSkills = (profileData.skills || []).map(skill => ({
-            id: skill.id || '',
-            name: translations.get(skill.name?.trim()) || skill.name,
-          }));
-          const contentToCache = extractTranslatedContent(profileData, translations, translatedSkills);
-          saveCachedTranslation(
-            profileId,
-            lang as TranslationLanguage,
-            contentToCache,
-            contentHash
-          ).catch(err => {
-            console.warn('[useTranslatedProfile] Failed to save profile cache:', err);
-          });
-        } catch (cacheErr) {
-          console.warn('[useTranslatedProfile] Error preparing cache save:', cacheErr);
-        }
+        // === STEP 3: Profile-level cache for future users ===
+        // El navegador ya no escribe en profile_translations: se pide a la Edge
+        // Function translate-profile que traduzca (ella misma) y guarde la
+        // versión pública del perfil. Sin await: si falla, solo se pierde la
+        // caché compartida; esta visita ya tiene su traducción.
+        requestProfileTranslation(profileId, lang as TranslationLanguage).catch(err => {
+          console.warn('[useTranslatedProfile] Failed to request profile cache:', err);
+        });
 
         setApiTranslations(translations);
         lastTranslationKey.current = translationKey;

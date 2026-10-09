@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PUBLIC_PROFILE_COLUMNS } from '../../lib/publicProfileColumns';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useTranslations } from '../../hooks/useTranslations';
@@ -312,15 +313,9 @@ const AdvancedTalentSearchPage: React.FC = () => {
             // Get profiles with complete information, prioritizing premium users
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
-                .select(`
-                    *,
-                    stamps (
-                        id,
-                        type,
-                        status,
-                        verified_at
-                    )
-                `)
+                // Solo columnas públicas (select('*') daría 42501); los sellos se
+                // leen aparte de la vista public_stamps.
+                .select(PUBLIC_PROFILE_COLUMNS)
                 .not('full_name', 'is', null)
                 .not('headline', 'is', null)
                 .not('summary', 'is', null)
@@ -330,7 +325,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 .not('template', 'is', null)
                 // Exclude admin/staff profiles
                 .neq('role', 'admin')
-                .order('plan', { ascending: false, nullsFirst: false })
+                .order('is_premium', { ascending: false, nullsFirst: false })
                 .order('id', { ascending: true })
                 .limit(500);
 
@@ -345,11 +340,22 @@ const AdvancedTalentSearchPage: React.FC = () => {
                     for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
                     return h >>> 0;
                 };
-                profilesData.sort((a, b) => {
-                    const planDiff = (b.plan === a.plan) ? 0 : ((b.plan || '') > (a.plan || '') ? 1 : -1);
+                profilesData.sort((a: any, b: any) => {
+                    const planDiff = Number(!!b.is_premium) - Number(!!a.is_premium);
                     if (planDiff !== 0) return planDiff;
                     return hash(a.id) - hash(b.id);
                 });
+
+                // Sellos verificados (vista pública, sin evidence)
+                const { data: stampsData } = await supabase
+                    .from('public_stamps')
+                    .select('id, profile_id, type, status, verified_at')
+                    .in('profile_id', profilesData.map((p: any) => p.id));
+                const stampsByProfile: Record<string, any[]> = {};
+                (stampsData || []).forEach((s: any) => {
+                    (stampsByProfile[s.profile_id] ||= []).push(s);
+                });
+                profilesData.forEach((p: any) => { p.stamps = stampsByProfile[p.id] || []; });
             }
 
             // Get skills for ALL profiles in ONE query (optimized)
@@ -358,20 +364,39 @@ const AdvancedTalentSearchPage: React.FC = () => {
             if (profilesData && profilesData.length > 0) {
                 const profileIds = profilesData.map(p => p.id);
 
-                // Load ALL skills for all profiles in a SINGLE query
-                // Use a higher limit to ensure we get all skills (Supabase default is 1000)
-                const { data: allSkillsData, error: skillsError } = await supabase
-                    .from('skills')
-                    .select('profile_id, name')
-                    .in('profile_id', profileIds)
-                    .limit(5000);
+                // Se pagina en bloques de 1000.
+                //
+                // Antes se pedia .limit(5000) creyendo que subia el tope, pero el
+                // limite de 1000 filas lo impone el servidor (PostgREST max-rows) y
+                // el cliente no puede superarlo: devolvia exactamente 1000 filas
+                // SIN error. Con 1079 filas en la tabla, 79 se perdian en silencio
+                // y 6 perfiles aparecian en la busqueda sin ninguna habilidad.
+                const TAMANO_BLOQUE = 1000;
+                const allSkillsData: Array<{ profile_id: string; name: string }> = [];
+                let desde = 0;
 
-                if (skillsError) {
-                    console.error('Error loading skills:', skillsError);
+                while (true) {
+                    const { data: bloque, error: skillsError } = await supabase
+                        .from('skills')
+                        .select('profile_id, name')
+                        .in('profile_id', profileIds)
+                        .range(desde, desde + TAMANO_BLOQUE - 1);
+
+                    if (skillsError) {
+                        console.error('Error loading skills:', skillsError);
+                        break;
+                    }
+                    if (!bloque || bloque.length === 0) break;
+
+                    allSkillsData.push(...bloque);
+
+                    // Bloque incompleto: no quedan mas filas.
+                    if (bloque.length < TAMANO_BLOQUE) break;
+                    desde += TAMANO_BLOQUE;
                 }
 
                 // Group skills by profile_id (keep original names, translate later via API)
-                allSkillsData?.forEach(skill => {
+                allSkillsData.forEach(skill => {
                     if (!skillsMap[skill.profile_id]) {
                         skillsMap[skill.profile_id] = [];
                     }
@@ -496,7 +521,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
 
         // Filter by verified (premium users)
         if (filters.verifiedOnly) {
-            filtered = filtered.filter(p => p.plan !== 'Free');
+            filtered = filtered.filter(p => isPremiumProfile(p));
         }
 
         // Filter by skills
@@ -558,7 +583,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
             {/* Hero Section */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
@@ -756,7 +781,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                         </div>
                     </AnimatedWrapper>
 
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="space-y-5">
                                 {pageData.aiMatching.features.map((feature: any) => (
@@ -781,7 +806,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/20 to-purple-500/20 rounded-2xl blur-3xl"></div>
                                 <div className="relative bg-white dark:bg-dark-bg-primary p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700">
                                     <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80" alt="AI matching illustration" className="rounded-lg w-full object-cover" />
-                                    <div className="absolute -bottom-6 -right-6 bg-cv-blue text-white px-6 py-4 rounded-xl shadow-xl">
+                                    <div className="absolute -bottom-6 right-2 sm:-right-6 bg-cv-blue text-white px-6 py-4 rounded-xl shadow-xl">
                                         <div className="text-3xl font-bold">95%</div>
                                         <div className="text-sm opacity-90">Match Score</div>
                                     </div>

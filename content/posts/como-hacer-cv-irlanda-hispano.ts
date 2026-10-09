@@ -218,7 +218,7 @@ Para destacar en **CV trabajar Irlanda hispano** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV trabajar Irlanda hispano](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV trabajar Irlanda hispano}
+![Aspectos avanzados de CV trabajar Irlanda hispano](https://images.unsplash.com/photo-1504150558240-0b4fd8946624?w=800&q=80){caption:Aspectos avanzados de CV trabajar Irlanda hispano}
 
 ## Aspectos avanzados de CV trabajar Irlanda hispano
 
@@ -271,7 +271,7 @@ Cuando hablamos de **CV trabajar Irlanda hispano** en el contexto de aspectos av
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV trabajar Irlanda hispano](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV trabajar Irlanda hispano}
+![Aspectos avanzados de CV trabajar Irlanda hispano](https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80){caption:Aspectos avanzados de CV trabajar Irlanda hispano}
 
 ## Cómo YourCVPassport te ayuda con CV trabajar Irlanda hispano
 

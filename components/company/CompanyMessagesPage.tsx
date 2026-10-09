@@ -101,7 +101,7 @@ const CompanyMessagesPage: React.FC = () => {
         .from('company_conversations')
         .select(`
           *,
-          profile:profiles(*)
+          profile:profiles(id, full_name, avatar_url, title, headline, slug)
         `)
         .eq('company_id', company.id)
         .order('last_message_at', { ascending: false, nullsFirst: false })
@@ -126,7 +126,8 @@ const CompanyMessagesPage: React.FC = () => {
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            // maybeSingle: una conversación aún sin mensajes no es un error (evita el 406)
+            .maybeSingle();
 
           return {
             ...conv,

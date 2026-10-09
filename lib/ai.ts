@@ -1,32 +1,32 @@
 /**
  * AI Helper Library
  *
- * Funciones centralizadas para interactuar con Google Gemini AI
- * Incluye rate limiting, error handling y fallbacks
+ * Funciones centralizadas para las funciones de IA del editor de perfil.
+ *
+ * Las llamadas al modelo (Google Gemini) se hacen en el servidor, en la Edge
+ * Function `ai-cv-assistant`, que guarda la API key como secreto de Supabase,
+ * verifica la sesion y aplica los limites del plan. El navegador solo envia los
+ * datos de cada tarea (nunca un prompt libre ni un modelo) e interpreta el texto
+ * que vuelve. Ninguna clave de IA debe llegar al bundle del cliente.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from '@supabase/supabase-js';
 
 // ==================================================
 // CONFIGURATION
 // ==================================================
 
-// @ts-ignore
-const API_KEY = import.meta.env?.VITE_GOOGLE_AI_API_KEY || '';
+const AI_FUNCTION_NAME = 'ai-cv-assistant';
 
-// Models to try in order of preference (2025 - Updated based on available models)
-// Note: Gemini 1.0 and 1.5 have been RETIRED as of 2025
-const MODELS_TO_TRY = [
-  'gemini-2.5-flash',          // Latest stable fast model (2025)
-  'gemini-2.5-pro',            // Latest stable advanced model (2025)
-  'gemini-2.0-flash',          // Stable fast model
-  'gemini-2.0-flash-exp',      // Experimental model
-  'gemini-exp-1206',           // Experimental variant
-];
-
-const DEFAULT_MODEL = MODELS_TO_TRY[0];
+/**
+ * Interruptor de las funciones de IA en la interfaz. Antes dependia de que hubiera
+ * una API key en el cliente; ahora la IA vive en el servidor y esta activa salvo
+ * que se compile con VITE_AI_ENABLED=false.
+ */
+export const AI_FEATURES_ENABLED = import.meta.env.VITE_AI_ENABLED !== 'false';
 
 // Rate limiting configuration (requests per minute per user)
+// Limite suave en el navegador para evitar rafagas; el limite real esta en el servidor.
 const RATE_LIMIT_RPM = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 
@@ -48,6 +48,14 @@ export interface AIResponse<T = string> {
 }
 
 export type ToneType = 'formal' | 'casual' | 'creative';
+
+/** Tareas admitidas por la Edge Function (lista blanca en el servidor). */
+export type AITask =
+  | 'optimize_experience'
+  | 'optimize_education'
+  | 'generate_summary'
+  | 'optimize_headline'
+  | 'suggest_skills';
 
 // ==================================================
 // RATE LIMITING
@@ -98,73 +106,13 @@ export function getRemainingRequests(userId: string): number {
 }
 
 // ==================================================
-// GEMINI CLIENT
-// ==================================================
-
-let genAI: GoogleGenerativeAI | null = null;
-
-/**
- * Initialize Gemini AI client
- */
-export function initializeAI(): GoogleGenerativeAI | null {
-  if (!API_KEY) {
-    
-    return null;
-  }
-
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(API_KEY);
-  }
-
-  return genAI;
-}
-
-/**
- * Get Gemini model
- */
-export function getModel(modelName: string = DEFAULT_MODEL) {
-  const ai = initializeAI();
-  if (!ai) {
-    throw new Error('AI client not initialized');
-  }
-  return ai.getGenerativeModel({ model: modelName });
-}
-
-/**
- * List available models (for debugging)
- */
-export async function listAvailableModels(): Promise<string[]> {
-  try {
-    const ai = initializeAI();
-    if (!ai) {
-      throw new Error('AI client not initialized');
-    }
-
-    // This endpoint might help identify which models are actually available
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to list models: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const modelNames = data.models?.map((m: any) => m.name) || [];
-    
-    return modelNames;
-  } catch (error) {
-    
-    return [];
-  }
-}
-
-// ==================================================
 // CORE AI FUNCTIONS
 // ==================================================
 
 /**
- * Check if user has access to AI features based on plan and usage limits
+ * Check if user has access to AI features based on plan and usage limits.
+ * Solo se usa para adaptar la interfaz (banner de upgrade); el servidor vuelve a
+ * comprobarlo antes de llamar al modelo.
  */
 export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolean; plan: string | null; remaining?: number | 'unlimited'; reason?: string }> {
   try {
@@ -178,8 +126,9 @@ export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolea
 
     if (limitError) {
       // Fallback to old method if RPC fails
+      // plan es privado: se lee de la vista profiles_full (perfil propio)
       const { data: profile, error } = await supabase
-        .from('profiles')
+        .from('profiles_full')
         .select('plan')
         .eq('id', userId)
         .single();
@@ -203,124 +152,96 @@ export async function checkAIAccess(userId: string): Promise<{ hasAccess: boolea
   }
 }
 
-/**
- * Record AI usage after successful request
- */
-export async function recordAIUsage(userId: string, metadata?: Record<string, unknown>): Promise<boolean> {
-  try {
-    const { supabase } = await import('../supabase/client');
-    const { data, error } = await supabase.rpc('record_usage', {
-      p_user_id: userId,
-      p_feature_type: 'ai_request',
-      p_metadata: metadata || {},
-    });
+const GENERIC_AI_ERROR = 'El servicio de IA no está disponible en este momento. Inténtalo de nuevo en unos minutos.';
+const NETWORK_AI_ERROR = 'No se pudo conectar con el servicio de IA. Revisa tu conexión e inténtalo de nuevo.';
 
-    if (error) {
-      console.error('Error recording AI usage:', error);
-      return false;
+/**
+ * Traduce el error de la Edge Function a un mensaje para el usuario.
+ * Los mensajes de plan/limite son los mismos que se mostraban antes en el cliente.
+ */
+async function describeInvokeError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError) {
+    let body: { code?: string; error?: string; plan?: string | null } = {};
+    try {
+      const context = error.context as Response | undefined;
+      body = (await context?.json()) ?? {};
+    } catch {
+      // Cuerpo no JSON: mensaje generico.
     }
 
-    return data?.success || false;
-  } catch (error) {
-    console.error('Error recording AI usage:', error);
-    return false;
+    const planText = body.plan || 'Free';
+    switch (body.code) {
+      case 'plan_required':
+        if (!body.plan || body.plan === 'free') {
+          return 'Las funcionalidades de IA no están disponibles en el plan Free. Actualiza a Pro para acceder a optimización con IA, sugerencias de habilidades y más.';
+        }
+        return 'Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium.';
+      case 'limit_reached':
+        return `Has alcanzado tu límite mensual de solicitudes de IA (plan ${planText}). Actualiza tu plan para obtener acceso ilimitado.`;
+      case 'rate_limited':
+        return 'Has hecho demasiadas solicitudes de IA seguidas. Espera unos minutos e inténtalo de nuevo.';
+      case 'unauthorized':
+        return 'Tu sesión ha caducado. Vuelve a iniciar sesión para usar la IA.';
+      case 'invalid_input':
+        return body.error ? `No se pudo procesar el texto: ${body.error}` : 'No se pudo procesar el texto enviado a la IA.';
+      case 'payload_too_large':
+        return 'El texto es demasiado largo para la IA. Acórtalo e inténtalo de nuevo.';
+      default:
+        return GENERIC_AI_ERROR;
+    }
   }
+
+  if (error instanceof FunctionsFetchError || error instanceof FunctionsRelayError) {
+    return NETWORK_AI_ERROR;
+  }
+
+  return GENERIC_AI_ERROR;
 }
 
 /**
- * Generate text with Gemini - tries multiple models with fallback
+ * Ejecuta una tarea de IA en el servidor y devuelve el texto generado.
+ * La comprobacion del plan, el registro de uso y la eleccion de modelo se hacen en
+ * la Edge Function.
  */
-export async function generateText(
-  prompt: string,
-  userId?: string,
-  options?: AIGenerationOptions
+async function runAITask(
+  task: AITask,
+  input: Record<string, unknown>,
+  userId?: string
 ): Promise<AIResponse<string>> {
+  // Rate limiting
+  if (userId && !checkRateLimit(userId)) {
+    return {
+      success: false,
+      error: `Has hecho demasiadas solicitudes de IA seguidas. Espera un minuto e inténtalo de nuevo.`,
+    };
+  }
+
   try {
-    // Check AI access for premium users only
+    const { supabase } = await import('../supabase/client');
+    const { data, error } = await supabase.functions.invoke(AI_FUNCTION_NAME, {
+      body: { task, input },
+    });
+
+    if (error) {
+      return { success: false, error: await describeInvokeError(error) };
+    }
+
+    if (!data || data.success !== true || typeof data.text !== 'string' || !data.text.trim()) {
+      return { success: false, error: GENERIC_AI_ERROR };
+    }
+
     if (userId) {
-      const { hasAccess, plan, reason, remaining } = await checkAIAccess(userId);
-      if (!hasAccess) {
-        const planText = plan || 'Free';
-        let errorMessage = reason || `Las funcionalidades de IA están disponibles solo para usuarios Pro y Premium.`;
-
-        if (plan === 'free') {
-          errorMessage = `Las funcionalidades de IA no están disponibles en el plan Free. Actualiza a Pro para acceder a optimización con IA, sugerencias de habilidades y más.`;
-        } else if (remaining === 0) {
-          errorMessage = `Has alcanzado tu límite mensual de solicitudes de IA (plan ${planText}). Actualiza tu plan para obtener acceso ilimitado.`;
-        }
-
-        return {
-          success: false,
-          error: errorMessage,
-        };
-      }
-    }
-
-    // Rate limiting
-    if (userId && !checkRateLimit(userId)) {
-      return {
-        success: false,
-        error: `Rate limit exceeded. Please wait before making more requests. Remaining: ${getRemainingRequests(userId)}`,
-      };
-    }
-
-    let lastError: Error | null = null;
-
-    // Try each model in sequence until one works
-    for (const modelName of MODELS_TO_TRY) {
-      try {
-        
-        const model = getModel(modelName);
-
-        // Generate content
-        const result = await model.generateContent(prompt);
-        const text = result.response.text().trim();
-
-        // Record request (rate limit)
-        if (userId) {
-          recordRequest(userId);
-          // Also record in database for plan limits
-          await recordAIUsage(userId, { model: modelName, prompt_length: prompt.length });
-        }
-
-        return {
-          success: true,
-          data: text,
-        };
-      } catch (error) {
-        
-        lastError = error instanceof Error ? error : new Error(String(error));
-        // Continue to next model
-        continue;
-      }
-    }
-
-    // All models failed
-    throw lastError || new Error('All models failed');
-  } catch (error) {
-    
-
-    let errorMessage = 'Unknown error occurred';
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-
-      // Provide helpful hints for common errors
-      if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-        errorMessage = `No se pudo encontrar un modelo de IA disponible.\n\n` +
-          `Posibles soluciones:\n` +
-          `1. Verifica tu API key en Google AI Studio: https://aistudio.google.com/apikey\n` +
-          `2. Asegúrate de que la API key tenga acceso a los modelos Gemini\n` +
-          `3. Verifica que VITE_GOOGLE_AI_API_KEY esté en tu archivo .env.local\n` +
-          `4. La API key podría tener restricciones geográficas o de cuota`;
-      } else if (errorMessage.includes('API key')) {
-        errorMessage += '\n\nVerifica que VITE_GOOGLE_AI_API_KEY esté configurado correctamente en tu archivo .env.local';
-      }
+      recordRequest(userId);
     }
 
     return {
+      success: true,
+      data: data.text.trim(),
+    };
+  } catch (error) {
+    return {
       success: false,
-      error: errorMessage,
+      error: GENERIC_AI_ERROR,
     };
   }
 }
@@ -339,41 +260,11 @@ export async function optimizeExperience(
   userId?: string,
   achievements?: string[]
 ): Promise<AIResponse<{description: string; achievements: string[]}>> {
-  const achievementsText = achievements && achievements.length > 0
-    ? `\n\nLOGROS ACTUALES:\n${achievements.map((a, i) => `${i + 1}. ${a}`).join('\n')}`
-    : '';
-
-  const prompt = `Actúa como un experto en recursos humanos y redacción de CVs profesionales.
-
-Mejora la siguiente descripción de experiencia laboral:
-
-PUESTO: ${title}
-EMPRESA: ${company}
-DESCRIPCIÓN ORIGINAL:
-${description}${achievementsText}
-
-INSTRUCCIONES:
-- Mejora la redacción para destacar responsabilidades clave
-- Usa verbos de acción al inicio de cada punto
-- Mantén un formato claro con bullets points (usando * para cada punto)
-- Usa **texto** para resaltar palabras clave importantes
-- Optimiza para sistemas ATS
-- Devuelve el resultado en el siguiente formato EXACTO (respeta las etiquetas):
-
-DESCRIPCIÓN:
-[Descripción mejorada aquí con bullets usando *]
-
-LOGROS:
-* Logro 1 mejorado y cuantificado
-* Logro 2 mejorado y cuantificado
-* Logro 3 mejorado y cuantificado
-
-IMPORTANTE:
-- Si no hay logros actuales, sugiere al menos 3 logros basados en las responsabilidades
-- Cuantifica los logros con números, porcentajes o métricas cuando sea posible
-- NO incluyas explicaciones adicionales, solo el formato solicitado`;
-
-  const response = await generateText(prompt, userId);
+  const response = await runAITask(
+    'optimize_experience',
+    { title, company, description, achievements: achievements || [] },
+    userId
+  );
 
   if (!response.success || !response.data) {
     return {
@@ -419,37 +310,11 @@ export async function generateSummary(
   variantsCount: number = 3,
   userId?: string
 ): Promise<AIResponse<string[]>> {
-  const toneInstructions = {
-    formal: 'Usa un tono formal y profesional, adecuado para empresas corporativas',
-    casual: 'Usa un tono cercano y amigable, pero manteniendo profesionalismo',
-    creative: 'Usa un tono creativo e innovador, perfecto para industrias creativas',
-  };
-
-  const prompt = `Actúa como un experto en recursos humanos y redacción de CVs profesionales.
-
-Genera ${variantsCount} versiones diferentes de un resumen profesional basado en:
-
-EXPERIENCIAS: ${experiences.join(', ')}
-HABILIDADES: ${skills.join(', ')}
-${objective ? `OBJETIVO: ${objective}` : ''}
-
-INSTRUCCIONES:
-- ${toneInstructions[tone]}
-- Crea ${variantsCount} versiones diferentes del resumen
-- Cada resumen debe tener 3-4 líneas máximo
-- Destaca logros y habilidades clave
-- Optimiza para sistemas ATS
-- Separa cada variante con "---" (tres guiones)
-- NO incluyas números de versión ni títulos, solo el texto
-
-Formato de salida:
-Resumen 1
----
-Resumen 2
----
-Resumen 3`;
-
-  const response = await generateText(prompt, userId);
+  const response = await runAITask(
+    'generate_summary',
+    { experiences, skills, objective: objective || undefined, tone, variantsCount },
+    userId
+  );
 
   if (!response.success || !response.data) {
     return {
@@ -478,37 +343,7 @@ export async function optimizeHeadline(
   headline: string,
   userId?: string
 ): Promise<AIResponse<string[]>> {
-  const prompt = `Actúa como un experto en recursos humanos y redacción profesional.
-
-Optimiza el siguiente headline profesional, generando 3 versiones diferentes:
-
-HEADLINE ORIGINAL:
-${headline}
-
-INSTRUCCIONES:
-- Genera EXACTAMENTE 3 versiones diferentes del headline
-- Corrige cualquier error ortográfico o gramatical
-- Mejora la redacción para que sea más profesional e impactante
-- Mantén el mensaje y la esencia original
-- Usa verbos de acción y términos profesionales
-- Mantén cada headline conciso (máximo 10-12 palabras)
-- Optimiza para sistemas ATS
-- NO uses frases como "con experiencia en" o "especializado en", ve directo al punto
-- Separa cada variante con "---" (tres guiones)
-- NO incluyas números de versión ni títulos, solo el texto
-
-Ejemplo:
-Input: "desarollador full stack con años de esperiencia"
-Output:
-Full Stack Developer | React, Node.js & Cloud Solutions
----
-Full Stack Engineer | Frontend & Backend Specialist
----
-Software Developer | JavaScript, APIs & Modern Frameworks
-
-Devuelve las 3 variantes separadas por ---:`;
-
-  const response = await generateText(prompt, userId);
+  const response = await runAITask('optimize_headline', { headline }, userId);
 
   if (!response.success || !response.data) {
     return {
@@ -545,30 +380,7 @@ export async function suggestSkills(
   currentSkills: string[],
   userId?: string
 ): Promise<AIResponse<string[]>> {
-  const experiencesText = experiences
-    .map(exp => `- ${exp.title} en ${exp.company}: ${exp.description}`)
-    .join('\n');
-
-  const prompt = `Actúa como un experto en recursos humanos y reclutamiento tecnológico.
-
-Analiza las siguientes experiencias laborales y sugiere habilidades técnicas y blandas que probablemente la persona tenga pero no ha listado:
-
-EXPERIENCIAS:
-${experiencesText}
-
-HABILIDADES YA LISTADAS:
-${currentSkills.join(', ')}
-
-INSTRUCCIONES:
-- Sugiere entre 5-10 habilidades relevantes que faltan
-- Incluye tanto habilidades técnicas como blandas
-- Base tus sugerencias en las responsabilidades y logros descritos
-- NO repitas habilidades ya listadas
-- Devuelve SOLO una lista separada por comas, sin explicaciones
-
-Formato: Habilidad1, Habilidad2, Habilidad3`;
-
-  const response = await generateText(prompt, userId);
+  const response = await runAITask('suggest_skills', { experiences, currentSkills }, userId);
 
   if (!response.success || !response.data) {
     return {
@@ -599,23 +411,11 @@ export async function optimizeEducation(
   description: string,
   userId?: string
 ): Promise<AIResponse<string>> {
-  const prompt = `Actúa como un experto en recursos humanos y redacción de CVs profesionales.
-
-Mejora la siguiente descripción de educación:
-
-TÍTULO: ${degree}
-INSTITUCIÓN: ${institution}
-CAMPO: ${fieldOfStudy}
-DESCRIPCIÓN ORIGINAL:
-${description}
-
-INSTRUCCIONES:
-- Mejora la redacción para destacar logros académicos y proyectos relevantes
-- Menciona honores, reconocimientos o proyectos destacados
-- Mantén un tono profesional
-- Devuelve SOLO el texto mejorado, sin explicaciones adicionales`;
-
-  return generateText(prompt, userId);
+  return runAITask(
+    'optimize_education',
+    { degree, institution, fieldOfStudy, description },
+    userId
+  );
 }
 
 // ==================================================
@@ -753,12 +553,7 @@ export default {
   getRemainingRequests,
 
   // Core functions
-  initializeAI,
-  getModel,
-  generateText,
-  listAvailableModels,
   checkAIAccess,
-  recordAIUsage,
 
   // CV optimization
   optimizeExperience,

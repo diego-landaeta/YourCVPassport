@@ -1,7 +1,8 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Profile } from '../../types';
-import { normalizeUrl } from '../../utils/canonicalUrl';
+import { useLocation } from 'react-router-dom';
+import { normalizeUrl, getCanonicalUrlForPath, getHreflangUrls } from '../../utils/canonicalUrl';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SEOHeadProps {
@@ -26,6 +27,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   profileExperience = []
 }) => {
   const { lang: contextLang } = useLanguage();
+  const location = useLocation();
   const currentLang = contextLang || currentLangProp;
   const baseUrl = 'https://yourcvpassport.com';
 
@@ -39,15 +41,21 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     profileUrl = canonicalUrl || `${baseUrl}/cv/${profilePath}`;
     imageUrl = profile.avatar_url || `${baseUrl}/default-avatar.png`;
   } else {
-    profileUrl = canonicalUrl || baseUrl;
+    // Sin perfil: la propia URL (antes caia en la home y /login se canonicalizaba a /)
+    profileUrl = canonicalUrl || getCanonicalUrlForPath(location.pathname);
   }
 
   // Normalize the canonical URL (remove query strings, trailing slashes, etc.)
   profileUrl = normalizeUrl(profileUrl);
   
   // Generate title and description
-  let title = propTitle || "YourCVPassport - Professional CV Verification";
-  let description = propDescription || "Create, verify, and share your professional CV with YourCVPassport.";
+  // Valores por defecto en el idioma activo (antes siempre en ingles)
+  let title = propTitle || (currentLang === 'es'
+    ? 'YourCVPassport - Plataforma de CV profesional verificado'
+    : 'YourCVPassport - Professional CV Verification');
+  let description = propDescription || (currentLang === 'es'
+    ? 'Crea, verifica y comparte tu CV profesional con YourCVPassport.'
+    : 'Create, verify, and share your professional CV with YourCVPassport.');
 
   if (profile) {
     title = propTitle || profile.meta_title || `${profile.full_name} - ${profile.headline} | YourCVPassport`;
@@ -151,14 +159,9 @@ const SEOHead: React.FC<SEOHeadProps> = ({
     hasCredential: [] // Will be populated with certifications
   } : null;
 
-  // Alternate language URLs
-  const alternateUrls = profile ? {
-    en: `${baseUrl}/cv/${profile.slug}?lang=en`,
-    es: `${baseUrl}/es/cv/${profile.slug}?lang=es`
-  } : {
-    en: `${baseUrl}?lang=en`,
-    es: `${baseUrl}/es?lang=es`
-  };
+  // hreflang: /cv/:slug y las paginas de acceso sirven ambos idiomas en la misma URL
+  // (no existen /es/cv/... ni ?lang=), asi que solo se emiten si la ruta tiene pareja ES/EN.
+  const alternateUrls = profile ? null : getHreflangUrls(location.pathname);
 
   // Generate unique key to force updates
   const helmetKey = profile ? `profile-${profile.slug || profile.id}` : 'default';
@@ -172,9 +175,9 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       {profileUrl && <link rel="canonical" href={profileUrl} />}
       
       {/* Language Alternates */}
-      <link rel="alternate" hrefLang="en" href={alternateUrls.en} />
-      <link rel="alternate" hrefLang="es" href={alternateUrls.es} />
-      <link rel="alternate" hrefLang="x-default" href={alternateUrls.en} />
+      {alternateUrls && <link rel="alternate" hrefLang="en" href={alternateUrls.en} />}
+      {alternateUrls && <link rel="alternate" hrefLang="es" href={alternateUrls.es} />}
+      {alternateUrls && <link rel="alternate" hrefLang="x-default" href={alternateUrls.xDefault} />}
       
       {/* Open Graph Tags */}
       <meta property="og:type" content={profile ? "profile" : "website"} />
