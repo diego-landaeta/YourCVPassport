@@ -131,3 +131,8 @@ nul
 
 # Playwright MCP screenshots
 .playwright-mcp/
+
+# Claves locales: nunca al repositorio (diego-landaeta/CRM#286)
+.env
+.env.local
+.env.*.local
