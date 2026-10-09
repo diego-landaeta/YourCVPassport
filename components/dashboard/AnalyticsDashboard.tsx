@@ -19,6 +19,7 @@ import { supabase } from '../../supabase/client';
 import CompanyVisibilityWidget from './analytics/CompanyVisibilityWidget';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { localDayKeysBetween, localDaysAgo, toLocalDayKey } from '../../utils/dateKeys';
 
 interface AnalyticsDashboardProps {
   profileId: string;
@@ -44,11 +45,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
   const { lang } = useLanguage();
   const a = t.dashboard.analytics;
 
-  // Helper to get date range
+  // Rango: los últimos `days` días naturales contando hoy, desde la medianoche
+  // LOCAL (así la serie tiene exactamente `days` puntos y ninguno a medias).
   const getDateRange = () => {
     const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+    const startDate = localDaysAgo(days - 1, endDate);
     return { startDate, endDate };
   };
 
@@ -80,10 +81,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       // Calculate unique visitors (based on visitor_id)
       const uniqueVisitors = new Set((views || []).map(v => v.visitor_id)).size;
 
-      // Process views by day for time series
+      // Process views by day for time series. Se agrupa por día LOCAL (con
+      // toISOString una visita a las 23:30 en México caía en el día siguiente) y
+      // se rellenan con 0 los días sin actividad: sin ellos, dos visitas separadas
+      // por una semana se dibujaban como días consecutivos.
       const viewsByDay: { [key: string]: { views: number; clicks: number; date: string } } = {};
+      for (const date of localDayKeysBetween(startDate)) {
+        viewsByDay[date] = { date, views: 0, clicks: 0 };
+      }
       (views || []).forEach((view) => {
-        const date = new Date(view.viewed_at).toISOString().split('T')[0];
+        const date = toLocalDayKey(view.viewed_at);
         if (!viewsByDay[date]) {
           viewsByDay[date] = { date, views: 0, clicks: 0 };
         }
@@ -91,7 +98,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
       });
 
       (clicks || []).forEach((click) => {
-        const date = new Date(click.clicked_at).toISOString().split('T')[0];
+        const date = toLocalDayKey(click.clicked_at);
         if (viewsByDay[date]) {
           viewsByDay[date].clicks++;
         }

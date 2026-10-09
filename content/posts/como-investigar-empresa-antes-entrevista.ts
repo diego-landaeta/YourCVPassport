@@ -218,7 +218,7 @@ Para destacar en **investigar empresa antes entrevista** dentro de esta área, a
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de investigar empresa antes entrevista](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de investigar empresa antes entrevista}
+![Aspectos avanzados de investigar empresa antes entrevista](https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80){caption:Aspectos avanzados de investigar empresa antes entrevista}
 
 ## Aspectos avanzados de investigar empresa antes entrevista
 
@@ -271,7 +271,7 @@ Cuando hablamos de **investigar empresa antes entrevista** en el contexto de asp
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de investigar empresa antes entrevista](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de investigar empresa antes entrevista}
+![Aspectos avanzados de investigar empresa antes entrevista](https://images.unsplash.com/photo-1565688534245-05d6b5be184a?w=800&q=80){caption:Aspectos avanzados de investigar empresa antes entrevista}
 
 ## Cómo YourCVPassport te ayuda con investigar empresa antes entrevista
 

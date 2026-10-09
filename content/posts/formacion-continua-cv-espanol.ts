@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **formacion contin
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
+![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de formacion continua CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -218,7 +218,7 @@ Para destacar en **formacion continua CV** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
+![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
 
 ## Aspectos avanzados de formacion continua CV
 
@@ -271,7 +271,7 @@ Cuando hablamos de **formacion continua CV** en el contexto de aspectos avanzado
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
+![Aspectos avanzados de formacion continua CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de formacion continua CV}
 
 ## Cómo YourCVPassport te ayuda con formacion continua CV
 

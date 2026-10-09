@@ -4,9 +4,10 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, requireLiveEdgeProject } from './test-config';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+// Edge Functions reales: solo con RUN_LIVE_EDGE_TESTS=1 y un proyecto de pruebas.
+requireLiveEdgeProject();
 
 test.describe('Get Public Profile Function', () => {
   test('get-public-profile - should handle request with slug', async ({ request }) => {

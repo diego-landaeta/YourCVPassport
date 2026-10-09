@@ -64,7 +64,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                 </p>
                 {profile.country_code && (
                     <div className="mt-4 flex items-center justify-center gap-2">
-                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                     </div>
                 )}
                 {/* Contact Buttons */}
@@ -187,7 +187,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                     </svg>
                                 </div>
                                 <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">
-                                    {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                    {t.cvSections.certifications}
                                 </h2>
                             </div>
                             <div className="space-y-6">
@@ -243,7 +243,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                     </svg>
                                 </div>
                                 <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white">
-                                    {t.cvSections?.collaborations || 'Collaborations'}
+                                    {t.cvSections.collaborations}
                                 </h2>
                             </div>
                             <div className="space-y-6">
@@ -259,7 +259,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, color }) => {
                                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                                 {collab.start_date && formatDate(collab.start_date)}
                                                 {collab.end_date && !collab.is_current && ` - ${formatDate(collab.end_date)}`}
-                                                {collab.is_current && ' - Present'}
+                                                {collab.is_current && ` - ${t.cvSections.present}`}
                                             </p>
                                             {collab.description && (
                                                 <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">

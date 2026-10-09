@@ -1,8 +1,10 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
-import { EnvelopeIcon, PhoneIcon, AcademicCapIcon, BriefcaseIcon, BeakerIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, LinkIcon, AcademicCapIcon, BriefcaseIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail, safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface HealthcareProfessionalTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,9 @@ interface HealthcareProfessionalTemplateProps {
 const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#0EA5E9'; // Default to sky-500 (medical blue)
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     return (
         <div className="font-sans bg-white dark:bg-dark-bg-primary">
@@ -40,21 +45,21 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                         <p className="text-2xl mb-4 font-medium" style={{ color: accentColor }}>{profile.headline}</p>
                         {profile.country_code && (
                             <div className="flex items-center gap-2 mb-4">
-                                <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                                <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                             </div>
                         )}
                         <div className="flex flex-wrap gap-6 text-sm text-gray-700 dark:text-gray-300">
-                            {profile.meta_description && (
+                            {email && (
                                 <div className="flex items-center gap-2">
                                     <EnvelopeIcon className="w-5 h-5" style={{ color: accentColor }} />
-                                    <span className="font-medium">{profile.meta_description}</span>
+                                    <span className="font-medium">{email}</span>
                                 </div>
                             )}
-                            {profile.linkedin_url && (
-                                <div className="flex items-center gap-2">
-                                    <PhoneIcon className="w-5 h-5" style={{ color: accentColor }} />
+                            {linkedinUrl && (
+                                <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="flex items-center gap-2 hover:underline">
+                                    <LinkIcon className="w-5 h-5" style={{ color: accentColor }} />
                                     <span className="font-medium">LinkedIn</span>
-                                </div>
+                                </a>
                             )}
                         </div>
                         {/* Contact Buttons */}
@@ -78,7 +83,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <BeakerIcon className="w-6 h-6" style={{ color: accentColor }} />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">PERFIL PROFESIONAL</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase">{L.professionalProfile}</h2>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base whitespace-pre-wrap">
                         {profile.summary}
@@ -91,7 +96,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <BriefcaseIcon className="w-6 h-6" style={{ color: accentColor }} />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">EXPERIENCIA PROFESIONAL</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase">{L.professionalExperience}</h2>
                     </div>
                     <div className="space-y-8">
                         {experiences.map(exp => (
@@ -103,7 +108,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                     <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap ml-4"
                                           style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
-                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Actual'}
+                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present}
                                     </span>
                                 </div>
                                 <p className="font-bold text-gray-600 dark:text-gray-400 mb-3">{exp.company_name}</p>
@@ -121,7 +126,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}15` }}>
                             <AcademicCapIcon className="w-6 h-6" style={{ color: accentColor }} />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">FORMACIÓN ACADÉMICA</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase">{L.academicEducation}</h2>
                     </div>
                     <div className="space-y-6">
                         {education.map(edu => (
@@ -133,7 +138,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
                                     <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap ml-4"
                                           style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
-                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Actual'}
+                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : L.present}
                                     </span>
                                 </div>
                                 <p className="font-bold text-gray-600 dark:text-gray-400">{edu.institution_name}</p>
@@ -144,7 +149,7 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
 
                 {/* Skills & Competencies */}
                 <section>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">COMPETENCIAS PROFESIONALES</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 uppercase">{L.professionalCompetencies}</h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {skills.map(skill => (
                             <div

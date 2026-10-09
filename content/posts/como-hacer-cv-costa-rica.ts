@@ -271,7 +271,7 @@ Cuando hablamos de **CV para trabajar en Costa Rica** en el contexto de aspectos
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV para trabajar en Costa Rica](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Costa Rica}
+![Aspectos avanzados de CV para trabajar en Costa Rica](https://images.unsplash.com/photo-1521295121783-8a321d551ad2?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Costa Rica}
 
 ## Cómo YourCVPassport te ayuda con CV para trabajar en Costa Rica
 

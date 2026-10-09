@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **palabras clave c
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
+![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de palabras clave curriculum optimizacion para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.

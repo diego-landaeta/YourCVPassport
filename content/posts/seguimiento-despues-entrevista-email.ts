@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **seguimiento despues entrevi
 
 Esta guía completa sobre **seguimiento despues entrevista email** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![seguimiento despues entrevista email](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre seguimiento despues entrevista email}
+![seguimiento despues entrevista email](https://images.unsplash.com/photo-1565688534245-05d6b5be184a?w=800&q=80){caption:Guía completa sobre seguimiento despues entrevista email}
 
 ## 1. Por que el seguimiento importa
 2. Agradecimiento en 24 horas
@@ -78,7 +78,7 @@ Para destacar en **seguimiento despues entrevista email** dentro de esta área, 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de seguimiento despues entrevista email](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de seguimiento despues entrevista email}
+![Aspectos avanzados de seguimiento despues entrevista email](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Aspectos avanzados de seguimiento despues entrevista email}
 
 ## Aspectos avanzados de seguimiento despues entrevista email
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **seguimiento desp
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de seguimiento despues entrevista email](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de seguimiento despues entrevista email}
+![Aspectos avanzados de seguimiento despues entrevista email](https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80){caption:Aspectos avanzados de seguimiento despues entrevista email}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de seguimiento despues entrevista email para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **seguimiento despues entrevista email** no es solo una ventaja competit
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Entrevista y Empleo",
   is_featured: false,

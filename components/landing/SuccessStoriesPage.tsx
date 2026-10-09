@@ -8,6 +8,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
+import { useOpynioWidget, OPYNIO_BUSINESS_ID } from '../../hooks/useOpynioWidget';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -61,8 +62,10 @@ const SuccessStoriesPage: React.FC = () => {
     const t = useTranslations();
     const pageData = t.successStoriesPage;
     const { lang } = useLanguage();
-    const [activeIndustry, setActiveIndustry] = useState('All');
-    const [activeGoal, setActiveGoal] = useState('All');
+    // '' = sin filtro. La primera opción de cada lista ('Todo' / 'All') es la de 'todas':
+    // antes se comparaba con 'All' y en español 'Todo' no devolvía ninguna historia.
+    const [activeIndustry, setActiveIndustry] = useState('');
+    const [activeGoal, setActiveGoal] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedStory, setSelectedStory] = useState<SuccessStory | null>(null);
     const [storyForm, setStoryForm] = useState({ name: '', email: '', message: '' });
@@ -73,14 +76,14 @@ const SuccessStoriesPage: React.FC = () => {
         loadStoriesFromDB();
     }, []);
 
+    // Las opciones cambian con el idioma: un filtro elegido en el otro idioma ya no existe
     useEffect(() => {
-        const existing = document.querySelector('script[src*="opynio.com/widget"]');
-        if (existing) existing.remove();
-        const script = document.createElement('script');
-        script.src = 'https://web.opynio.com/widget.js';
-        script.async = true;
-        document.head.appendChild(script);
+        setActiveIndustry('');
+        setActiveGoal('');
     }, [lang]);
+
+    // Reseñas de Opynio: si no hay (API vacía o caída) se oculta su sección entera
+    const { ref: reviewsRef, status: reviewsStatus } = useOpynioWidget(lang);
 
     const loadStoriesFromDB = async () => {
         try {
@@ -135,8 +138,8 @@ const SuccessStoriesPage: React.FC = () => {
 
     const filteredStories = useMemo(() => {
         return allStories
-            .filter(story => activeIndustry === 'All' || story.industry === activeIndustry)
-            .filter(story => activeGoal === 'All' || story.goal === activeGoal);
+            .filter(story => !activeIndustry || story.industry === activeIndustry)
+            .filter(story => !activeGoal || story.goal === activeGoal);
     }, [activeIndustry, activeGoal, allStories]);
 
     const handleReadMore = (story: SuccessStory) => {
@@ -224,18 +227,20 @@ const SuccessStoriesPage: React.FC = () => {
                 </section>
             )}
 
-            {/* Opynio Reviews Widget */}
-            <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary">
+            {/* Opynio Reviews Widget: el título solo se enseña cuando hay reseñas */}
+            {reviewsStatus !== 'empty' && (
+            <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary" aria-busy={reviewsStatus !== 'ready'}>
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
-                        <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8">
+                        <h2 className={`text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8 ${reviewsStatus === 'ready' ? '' : 'invisible'}`}>
                             {pageData.whatUsersSay}
                         </h2>
                         {/* Opynio Widget v6.0 - horizontal-carousel */}
-                        <div key={lang} className="opynio-widget" data-business-id="cee0e351-db95-4024-a5e0-2646e49b2756" data-type="horizontal-carousel" data-theme="light"></div>
+                        <div ref={reviewsRef} key={lang} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme="light"></div>
                     </AnimatedWrapper>
                 </div>
             </section>
+            )}
 
             {/* Main Content: Filters & Grid */}
             <section className="py-20 px-4">
@@ -243,15 +248,15 @@ const SuccessStoriesPage: React.FC = () => {
                     <AnimatedWrapper>
                         <div className="flex flex-col md:flex-row justify-center items-center gap-6 mb-12">
                             <div className="flex items-center gap-2">
-                                <label className="font-semibold">{pageData.filters.industry}:</label>
-                                <select value={activeIndustry} onChange={e => setActiveIndustry(e.target.value)} className="p-2 border border-gray-300 dark:border-dark-border-light rounded-md bg-white dark:bg-dark-bg-primary">
-                                    {t.STORY_INDUSTRIES.map(ind => <option key={ind} value={ind}>{ind}</option>)}
+                                <label htmlFor="stories-industry" className="font-semibold">{pageData.filters.industry}:</label>
+                                <select id="stories-industry" value={activeIndustry} onChange={e => setActiveIndustry(e.target.value)} className="p-2 border border-gray-300 dark:border-dark-border-light rounded-md bg-white dark:bg-dark-bg-primary">
+                                    {t.STORY_INDUSTRIES.map((ind, i) => <option key={ind} value={i === 0 ? '' : ind}>{ind}</option>)}
                                 </select>
                             </div>
                             <div className="flex items-center gap-2">
-                                <label className="font-semibold">{pageData.filters.goal}:</label>
-                                <select value={activeGoal} onChange={e => setActiveGoal(e.target.value)} className="p-2 border border-gray-300 dark:border-dark-border-light rounded-md bg-white dark:bg-dark-bg-primary">
-                                    {t.STORY_GOALS.map(goal => <option key={goal} value={goal}>{goal}</option>)}
+                                <label htmlFor="stories-goal" className="font-semibold">{pageData.filters.goal}:</label>
+                                <select id="stories-goal" value={activeGoal} onChange={e => setActiveGoal(e.target.value)} className="p-2 border border-gray-300 dark:border-dark-border-light rounded-md bg-white dark:bg-dark-bg-primary">
+                                    {t.STORY_GOALS.map((goal, i) => <option key={goal} value={i === 0 ? '' : goal}>{goal}</option>)}
                                 </select>
                             </div>
                         </div>

@@ -218,7 +218,7 @@ To excel in **international freelancer CV** within this area, apply these proven
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of international freelancer CV](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Advanced aspects of international freelancer CV}
+![Advanced aspects of international freelancer CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of international freelancer CV}
 
 ## Advanced aspects of international freelancer CV
 

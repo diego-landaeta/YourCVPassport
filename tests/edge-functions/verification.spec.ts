@@ -7,16 +7,17 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, TEST_EMAIL, requireLiveEdgeProject, requireTestEmail } from './test-config';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+// Edge Functions reales: solo con RUN_LIVE_EDGE_TESTS=1 y un proyecto de pruebas.
+requireLiveEdgeProject();
 
-// Test data
-const TEST_EMAIL = '';
-const TEST_PHONE = '+';
+// Telefono de pruebas (los tests de SMS estan en describe.skip).
+const TEST_PHONE = process.env.EDGE_TEST_PHONE || '';
 
 test.describe('Email Verification Functions', () => {
   test('send-verification-email - should handle request (may fail without real user)', async ({ request }) => {
+    requireTestEmail();
     const response = await request.post(`${SUPABASE_URL}/functions/v1/send-verification-email`, {
       headers: {
         'Content-Type': 'application/json',

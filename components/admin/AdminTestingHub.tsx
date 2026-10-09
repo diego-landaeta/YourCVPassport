@@ -295,7 +295,7 @@ const AdminTestingHub: React.FC = () => {
   const loadProfiles = async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_full') // admin: incluye email (privado)
         .select('id, full_name, headline, email, avatar_url, template, slug')
         .order('created_at', { ascending: false })
         .limit(100);
@@ -313,7 +313,7 @@ const AdminTestingHub: React.FC = () => {
 
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+        .from('profiles_full') // admin: perfil completo
         .select('*')
         .eq('id', profileId)
         .single();
@@ -575,7 +575,7 @@ const AdminTestingHub: React.FC = () => {
                 📊 Origen de Datos
               </label>
               <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700 ${useSampleData ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600'}">
+                <label className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${useSampleData ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                   <input
                     type="radio"
                     checked={useSampleData}
@@ -590,7 +590,7 @@ const AdminTestingHub: React.FC = () => {
                     <div className="text-xs text-gray-600 dark:text-gray-400">Perfil ficticio completo</div>
                   </div>
                 </label>
-                <label className="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700 ${!useSampleData ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600'}">
+                <label className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${!useSampleData ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                   <input
                     type="radio"
                     checked={!useSampleData}
@@ -751,7 +751,10 @@ const AdminTestingHub: React.FC = () => {
               </div>
 
               <div className="p-6 bg-gray-50 dark:bg-gray-900">
-                <div className={previewTheme === 'dark' ? 'dark' : ''}>
+                {/* `cv-force-light` anula las variantes dark: aunque <html> tenga `.dark`
+                    (ver darkMode en tailwind.config.js); `text-black` corta la herencia del color
+                    de texto claro de la pagina oscura. `dark` fuerza el oscuro aunque la pagina este en claro. */}
+                <div className={previewTheme === 'dark' ? 'dark' : 'cv-force-light text-black'}>
                   <div
                     ref={cvRef}
                     className="cv-template bg-white dark:bg-gray-800 shadow-2xl mx-auto"

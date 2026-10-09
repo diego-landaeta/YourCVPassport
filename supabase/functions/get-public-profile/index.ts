@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4';
 import { Redis } from 'https://esm.sh/@upstash/redis@1.34.3';
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@2.0.3';
+import { PUBLIC_PROFILE_COLUMNS } from '../_shared/publicProfileColumns.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,8 +13,6 @@ interface ProfileResponse {
   id: string;
   handle: string;
   full_name: string;
-  email?: string;
-  phone?: string;
   summary?: string;
   avatar_url?: string;
   experience?: any[];
@@ -21,7 +20,7 @@ interface ProfileResponse {
   skills?: string[];
   languages?: any[];
   certifications?: any[];
-  is_public: boolean;
+  is_public?: boolean;
   custom_domain?: string;
   created_at: string;
   updated_at: string;
@@ -167,7 +166,8 @@ serve(async (req) => {
     }
 
     // Try to get from cache first (1 hour TTL)
-    const cacheKey = `profile:${handle}`;
+    // v2: las entradas antiguas podían incluir columnas privadas
+    const cacheKey = `profile:v2:${handle}`;
     let profile = await cacheGet<ProfileResponse>(cacheKey);
 
     if (profile) {
@@ -198,11 +198,17 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Fetch profile from database
+    // Respuesta pública: solo columnas públicas (antes select('*') con service_role
+    // devolvía email, teléfono, plan...). La columna is_public no existe en
+    // profiles: se usa el mismo criterio de publicación que la RLS (slug, no
+    // oculto, no suspendido).
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select(PUBLIC_PROFILE_COLUMNS)
       .eq('handle', handle)
-      .eq('is_public', true)
+      .not('slug', 'is', null)
+      .eq('profile_hidden', false)
+      .eq('is_active', true)
       .single();
 
     if (error) {
@@ -265,6 +271,6 @@ serve(async (req) => {
  * Call this when a profile is updated
  */
 export async function invalidateProfileCache(handle: string): Promise<void> {
-  const cacheKey = `profile:${handle}`;
+  const cacheKey = `profile:v2:${handle}`;
   await cacheDel(cacheKey);
 }

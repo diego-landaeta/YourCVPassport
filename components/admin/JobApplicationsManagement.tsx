@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
+import { fetchPrivateProfileFields } from '../../lib/privateProfileFields';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
   DocumentTextIcon,
@@ -148,14 +149,18 @@ const JobApplicationsManagement: React.FC = () => {
             )
           ),
           profiles (
-            full_name,
-            email,
-            phone
+            full_name
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      // email y phone son privados: se leen de profiles_full (admin)
+      const contacts = await fetchPrivateProfileFields<{ email: string | null; phone: string | null }>(
+        (apps || []).map((app: any) => app.profile_id),
+        'email, phone',
+      );
 
       // Format data
       const formattedApps = apps?.map(app => ({
@@ -163,8 +168,8 @@ const JobApplicationsManagement: React.FC = () => {
         job_title: app.job_postings?.title || 'Unknown Job',
         company_name: app.job_postings?.companies?.company_name || 'Unknown Company',
         applicant_name: app.profiles?.full_name || 'Unknown User',
-        applicant_email: app.profiles?.email || '',
-        applicant_phone: app.profiles?.phone || ''
+        applicant_email: contacts.get(app.profile_id)?.email || '',
+        applicant_phone: contacts.get(app.profile_id)?.phone || ''
       })) || [];
 
       setApplications(formattedApps);
@@ -449,6 +454,7 @@ const JobApplicationsManagement: React.FC = () => {
                           }}
                           className="p-2 text-cv-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           title={t.viewDetails}
+                          aria-label={t.viewDetails}
                         >
                           <EyeIcon className="h-5 w-5" />
                         </button>
@@ -457,6 +463,7 @@ const JobApplicationsManagement: React.FC = () => {
                             onClick={() => handleUpdateStatus(application.id, 'reviewing')}
                             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title={t.markReviewing}
+                            aria-label={t.markReviewing}
                           >
                             <DocumentTextIcon className="h-5 w-5" />
                           </button>
@@ -467,6 +474,7 @@ const JobApplicationsManagement: React.FC = () => {
                               onClick={() => handleUpdateStatus(application.id, 'accepted')}
                               className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                               title={t.approve}
+                              aria-label={t.approve}
                             >
                               <CheckCircleIcon className="h-5 w-5" />
                             </button>
@@ -474,6 +482,7 @@ const JobApplicationsManagement: React.FC = () => {
                               onClick={() => handleUpdateStatus(application.id, 'rejected')}
                               className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                               title={t.reject}
+                              aria-label={t.reject}
                             >
                               <XCircleIcon className="h-5 w-5" />
                             </button>
@@ -504,10 +513,12 @@ const JobApplicationsManagement: React.FC = () => {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowDetailModal(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                 >
-                  <XCircleIcon className="h-6 w-6" />
+                  <XCircleIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
               </div>
             </div>

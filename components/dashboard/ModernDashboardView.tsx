@@ -42,33 +42,65 @@ interface CompletionNotification {
   message: string;
 }
 
-// Generar datos semanales REALES a partir de visitsData
-const generateWeeklyDataFromReal = (visitsData: { name: string; visits: number }[] | undefined): number[] => {
-  if (!visitsData || visitsData.length === 0) {
-    // Generate demo data for the last 7 days
-    return [
-      Math.floor(Math.random() * 4) + 2,  // Mon
-      Math.floor(Math.random() * 6) + 3,  // Tue
-      Math.floor(Math.random() * 5) + 2,  // Wed
-      Math.floor(Math.random() * 8) + 4,  // Thu
-      Math.floor(Math.random() * 6) + 2,  // Fri
-      Math.floor(Math.random() * 4) + 1,  // Sat
-      Math.floor(Math.random() * 10) + 5, // Sun (highest for visual impact)
-    ];
-  }
+// ── Visitas: solo datos REALES ──
+// Antes había ramas que inventaban visitas con Math.random() cuando no había
+// datos (cuenta nueva o sin visitas en 30 días). Se eliminaron: sin visitas se
+// muestran ceros y un estado vacío.
 
-  // Tomar los últimos 7 días de datos reales
-  const last7Days = visitsData.slice(-7);
+type VisitsPoint = { name: string; visits: number };
+type DayKey = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+const DAY_KEYS: DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const EMPTY_VISITS: VisitsPoint[] = [];
 
-  // Si hay menos de 7 días, rellenar con 0s al inicio
-  const result = new Array(7).fill(0);
-  const startIndex = 7 - last7Days.length;
+/** 'YYYY-MM-DD' con la fecha LOCAL (no UTC). */
+const toDateKey = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  last7Days.forEach((day, index) => {
-    result[startIndex + index] = day.visits;
+/** Inicio del día local de una fecha ISO; null si no es válida. */
+const startOfLocalDay = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+};
+
+/** Mapa fecha → visitas. Las claves de visitsData ya vienen como 'YYYY-MM-DD'. */
+const buildVisitsMap = (visitsData: VisitsPoint[]): Map<string, number> => {
+  const map = new Map<string, number>();
+  visitsData.forEach(({ name, visits }) => {
+    if (!name) return;
+    const key = name.slice(0, 10);
+    map.set(key, (map.get(key) || 0) + (Number(visits) || 0));
   });
+  return map;
+};
 
-  return result;
+interface WeekDay {
+  key: string;
+  dayKey: DayKey;
+  visits: number;
+  /** Día anterior a la creación de la cuenta: no hay datos posibles. */
+  beforeAccount: boolean;
+}
+
+/** Últimos 7 días naturales (hoy incluido), rellenando con 0 los días sin visitas. */
+const buildLast7Days = (visitsData: VisitsPoint[], accountCreatedAt?: string | null): WeekDay[] => {
+  const visitsMap = buildVisitsMap(visitsData);
+  const createdDay = startOfLocalDay(accountCreatedAt);
+  const today = new Date();
+  const days: WeekDay[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+    const key = toDateKey(d);
+    const beforeAccount = !!createdDay && d < createdDay;
+    days.push({
+      key,
+      dayKey: DAY_KEYS[d.getDay()],
+      visits: beforeAccount ? 0 : (visitsMap.get(key) || 0),
+      beforeAccount,
+    });
+  }
+  return days;
 };
 
 // First Login Welcome Component (inline)
@@ -94,9 +126,9 @@ const FirstLoginWelcome: React.FC<{
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-        aria-label="Cerrar"
+        aria-label={translations.common.close}
       >
-        <X size={20} />
+        <X size={20} aria-hidden="true" />
       </button>
 
       <div className="flex items-start gap-4">
@@ -162,7 +194,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
   visas = [],
   languages = [],
   certifications = [],
-  visitsData = [],
+  visitsData = EMPTY_VISITS,
   isMobileMenuOpen,
   onOpenMobileMenu,
 }) => {
@@ -204,17 +236,19 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
     setTimeout(() => setShowBlockAlert(false), 4000);
   };
 
-  // Usar datos REALES de visitas
-  const weeklyData = generateWeeklyDataFromReal(visitsData);
+  // Datos REALES de los últimos 7 días (memoizados: no cambian entre renders)
+  const weeklyDays = React.useMemo(
+    () => buildLast7Days(visitsData, profile?.created_at),
+    [visitsData, profile?.created_at]
+  );
+  const weeklyData = React.useMemo(() => weeklyDays.map(d => d.visits), [weeklyDays]);
+  const weeklyLabels = weeklyDays.map(d => t.weeklyVisits.days[d.dayKey]);
 
-  // Calculate total visits (use real data if available, otherwise calculate from demo data)
-  const totalVisitsDisplay = React.useMemo(() => {
-    if (stats.visits > 0) {
-      return stats.visits;
-    }
-    // If no real visits, calculate from demo weekly data
-    return weeklyData.reduce((sum, visits) => sum + visits, 0);
-  }, [stats.visits, weeklyData]);
+  // Total de la vista "Últimos 7 días": suma real de esos 7 días (0 si no hay visitas)
+  const totalVisitsDisplay = React.useMemo(
+    () => weeklyData.reduce((sum, visits) => sum + visits, 0),
+    [weeklyData]
+  );
 
   // Handle first login welcome message
   React.useEffect(() => {
@@ -781,7 +815,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                 <div className="flex items-center gap-4">
                   {/* Chart Type Toggle */}
                   <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                    <button
+                    <button aria-label={t.weeklyVisits.calendarView}
                       onClick={() => setChartType('calendar')}
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                         chartType === 'calendar'
@@ -790,11 +824,11 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                       }`}
                       title={t.weeklyVisits.calendarView}
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </button>
-                    <button
+                    <button aria-label={t.modernView.chartTitles.barChart}
                       onClick={() => setChartType('bar')}
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                         chartType === 'bar'
@@ -803,11 +837,11 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                       }`}
                       title={t.modernView.chartTitles.barChart}
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </button>
-                    <button
+                    <button aria-label={t.modernView.chartTitles.pieChart}
                       onClick={() => setChartType('pie')}
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                         chartType === 'pie'
@@ -816,7 +850,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                       }`}
                       title={t.modernView.chartTitles.pieChart}
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                       </svg>
@@ -824,10 +858,10 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                   </div>
                   {chartType !== 'calendar' && (
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{totalVisitsDisplay}</p>
+                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400" data-testid="weekly-visits-total">{totalVisitsDisplay}</p>
                       {totalVisitsDisplay > 0 && (
                         <p className="text-xs text-green-600 dark:text-green-400 flex items-center justify-end gap-1">
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                           </svg>
                           {t.weeklyVisits.active}
@@ -838,26 +872,42 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                 </div>
               </div>
 
+              {/* Estado vacío (7 días sin visitas): nada de barras/sectores ficticios */}
+              {chartType !== 'calendar' && totalVisitsDisplay === 0 && (
+                <VisitsEmptyState
+                  title={t.weeklyVisits.emptyWeekTitle}
+                  hint={t.weeklyVisits.emptyHint}
+                  ctaLabel={t.weeklyVisits.emptyCta}
+                  ctaHref={profile?.slug ? `/cv/${profile.slug}` : undefined}
+                />
+              )}
+
               {/* Bar Chart */}
-              {chartType === 'bar' && (
-                <div className="h-56 flex items-end justify-between gap-3 px-2">
-                  {weeklyData.map((value, i) => {
+              {chartType === 'bar' && totalVisitsDisplay > 0 && (
+                <div className="h-56 flex items-end justify-between gap-3 px-2" data-testid="weekly-bar-chart">
+                  {weeklyDays.map((day, i) => {
+                    const value = day.visits;
                     const maxValue = Math.max(...weeklyData, 1);
                     const heightPercent = (value / maxValue) * 100;
                     return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
+                      <div key={day.key} className="flex-1 flex flex-col items-center gap-3 group">
                         <div className="relative w-full">
                           <div
-                            className="w-full bg-gradient-to-t from-blue-600 to-blue-400 dark:from-blue-500 dark:to-blue-300 rounded-t-lg hover:from-blue-700 hover:to-blue-500 transition-all cursor-pointer relative"
-                            style={{ height: `${Math.max(heightPercent * 1.8, 20)}px` }}
+                            className={`w-full rounded-t-lg transition-all relative ${
+                              value > 0
+                                ? 'bg-gradient-to-t from-blue-600 to-blue-400 dark:from-blue-500 dark:to-blue-300 hover:from-blue-700 hover:to-blue-500'
+                                : 'bg-gray-200 dark:bg-gray-700'
+                            }`}
+                            style={{ height: value > 0 ? `${Math.max(heightPercent * 1.8, 12)}px` : '4px' }}
+                            title={`${weeklyLabels[i]}: ${value} ${t.weeklyVisits.visits}`}
                           >
                             <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-700 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               {value} {t.weeklyVisits.visits}
                             </span>
                           </div>
                         </div>
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                          {[t.weeklyVisits.days.mon, t.weeklyVisits.days.tue, t.weeklyVisits.days.wed, t.weeklyVisits.days.thu, t.weeklyVisits.days.fri, t.weeklyVisits.days.sat, t.weeklyVisits.days.sun][i]}
+                        <span className={`text-xs font-medium ${day.beforeAccount ? 'text-gray-300 dark:text-gray-600' : 'text-gray-600 dark:text-gray-400'}`}>
+                          {weeklyLabels[i]}
                         </span>
                       </div>
                     );
@@ -866,14 +916,19 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
               )}
 
               {/* Pie Chart */}
-              {chartType === 'pie' && (
+              {chartType === 'pie' && totalVisitsDisplay > 0 && (
                 <div className="h-56 flex items-center justify-center gap-8">
                   <div className="relative w-48 h-48">
-                    <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                    <svg viewBox="0 0 100 100" className="transform -rotate-90" aria-hidden="true">
                       {weeklyData.map((value, i) => {
-                        const total = weeklyData.reduce((a, b) => a + b, 0) || 1;
+                        const total = totalVisitsDisplay || 1;
                         const percentage = (value / total) * 100;
                         const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
+
+                        // Un único día con todas las visitas: el arco degenera, se pinta un círculo
+                        if (value > 0 && percentage >= 99.999) {
+                          return <circle key={i} cx="50" cy="50" r="40" fill={colors[i]} />;
+                        }
 
                         let cumulativePercent = 0;
                         for (let j = 0; j < i; j++) {
@@ -903,16 +958,16 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.visits}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalVisitsDisplay}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{t.weeklyVisits.total}</p>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    {[t.weeklyVisits.days.mon, t.weeklyVisits.days.tue, t.weeklyVisits.days.wed, t.weeklyVisits.days.thu, t.weeklyVisits.days.fri, t.weeklyVisits.days.sat, t.weeklyVisits.days.sun].map((day, i) => {
+                    {weeklyLabels.map((day, i) => {
                       const colors = ['#3B82F6', '#6366F1', '#8B5CF6', '#A855F7', '#C026D3', '#DB2777', '#F43F5E'];
                       return weeklyData[i] > 0 ? (
-                        <div key={i} className="flex items-center gap-2">
+                        <div key={weeklyDays[i].key} className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[i] }}></div>
                           <span className="text-sm text-gray-700 dark:text-gray-300">{day}</span>
                           <span className="text-sm font-semibold text-gray-900 dark:text-white ml-auto">{weeklyData[i]}</span>
@@ -927,6 +982,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
               {chartType === 'calendar' && (
                 <CalendarView
                   visitsData={visitsData}
+                  accountCreatedAt={profile?.created_at}
+                  profileUrl={profile?.slug ? `/cv/${profile.slug}` : undefined}
                   selectedMonth={selectedMonth}
                   selectedYear={selectedYear}
                   onMonthChange={(month, year) => {
@@ -1136,9 +1193,44 @@ const QuickActionCard: React.FC<{
   </button>
 ));
 
+// Estado vacío de visitas (sin datos inventados)
+const VisitsEmptyState: React.FC<{
+  title: string;
+  hint: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  compact?: boolean;
+}> = ({ title, hint, ctaLabel, ctaHref, compact = false }) => (
+  <div
+    role="status"
+    data-testid="visits-empty-state"
+    className={`flex flex-col items-center justify-center text-center gap-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 px-4 ${compact ? 'py-3' : 'h-56'}`}
+  >
+    <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+    <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{title}</p>
+    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">{hint}</p>
+    {ctaLabel && ctaHref && (
+      <a
+        href={ctaHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+      >
+        {ctaLabel}
+      </a>
+    )}
+  </div>
+);
+
 // Calendar View Component
 interface CalendarViewProps {
-  visitsData: { name: string; visits: number }[];
+  visitsData: VisitsPoint[];
+  /** profile.created_at: los días anteriores no tienen datos posibles */
+  accountCreatedAt?: string | null;
+  profileUrl?: string;
   selectedMonth: number;
   selectedYear: number;
   onMonthChange: (month: number, year: number) => void;
@@ -1147,14 +1239,16 @@ interface CalendarViewProps {
 
 const CalendarView: React.FC<CalendarViewProps> = ({
   visitsData,
+  accountCreatedAt,
+  profileUrl,
   selectedMonth,
   selectedYear,
   onMonthChange,
-  lang,
 }) => {
   const translations = useTranslations();
   const t = translations.dashboard;
   const currentDate = new Date();
+  const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
   const monthNames = t.modernView.calendar.monthNames;
   const dayNames = t.modernView.calendar.dayNames;
 
@@ -1164,42 +1258,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const daysInMonth = lastDay.getDate();
   const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday
 
-  // Create a map of dates to visits
-  const viewsMap = new Map<string, number>();
-  const hasRealData = visitsData && visitsData.length > 0;
+  const createdDay = React.useMemo(() => startOfLocalDay(accountCreatedAt), [accountCreatedAt]);
 
-  if (hasRealData) {
-    // Use real data
-    visitsData.forEach(({ name, visits }) => {
-      const dateObj = new Date(name);
-      if (dateObj.getMonth() === selectedMonth && dateObj.getFullYear() === selectedYear) {
-        viewsMap.set(name, visits);
-      }
+  // Solo visitas REALES del mes seleccionado (claves 'YYYY-MM-DD', sin pasar por new Date() para evitar desfases UTC)
+  const viewsMap = React.useMemo(() => {
+    const monthPrefix = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-`;
+    const map = new Map<string, number>();
+    buildVisitsMap(visitsData).forEach((visits, key) => {
+      if (key.startsWith(monthPrefix)) map.set(key, visits);
     });
-  } else {
-    // Generate demo data for current month only
-    const today = new Date();
-    if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) {
-      // Generate some random visits for demo purposes (last 2 weeks)
-      const demoVisits = [
-        { day: today.getDate(), visits: Math.floor(Math.random() * 5) + 1 }, // Today
-        { day: today.getDate() - 1, visits: Math.floor(Math.random() * 8) + 2 },
-        { day: today.getDate() - 2, visits: Math.floor(Math.random() * 6) + 1 },
-        { day: today.getDate() - 3, visits: Math.floor(Math.random() * 4) + 1 },
-        { day: today.getDate() - 5, visits: Math.floor(Math.random() * 7) + 2 },
-        { day: today.getDate() - 7, visits: Math.floor(Math.random() * 10) + 3 },
-        { day: today.getDate() - 9, visits: Math.floor(Math.random() * 5) + 1 },
-        { day: today.getDate() - 12, visits: Math.floor(Math.random() * 8) + 2 },
-      ];
-
-      demoVisits.forEach(({ day, visits }) => {
-        if (day > 0 && day <= daysInMonth) {
-          const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          viewsMap.set(dateStr, visits);
-        }
-      });
-    }
-  }
+    return map;
+  }, [visitsData, selectedMonth, selectedYear]);
 
   const maxViews = Math.max(...Array.from(viewsMap.values()), 1);
   const totalViews = Array.from(viewsMap.values()).reduce((sum, views) => sum + views, 0);
@@ -1231,6 +1300,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const isNextDisabled = selectedYear === currentDate.getFullYear() && selectedMonth === currentDate.getMonth();
+  // No navegar a meses anteriores a la creación de la cuenta (no puede haber datos)
+  const isPrevDisabled = !!createdDay &&
+    (selectedYear < createdDay.getFullYear() ||
+      (selectedYear === createdDay.getFullYear() && selectedMonth <= createdDay.getMonth()));
 
   return (
     <div className="space-y-3">
@@ -1238,10 +1311,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       <div className="flex items-center justify-between px-2">
         <button
           onClick={handlePrevMonth}
-          className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
+          disabled={isPrevDisabled}
+          className={`p-2 rounded-lg transition-all duration-200 group ${
+            isPrevDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'
+          }`}
           title={t.modernView.calendar.previousMonth}
+          aria-label={t.modernView.calendar.previousMonth}
         >
-          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-4 h-4 transition-colors ${
+            isPrevDisabled
+              ? 'text-gray-400 dark:text-gray-600'
+              : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -1251,8 +1332,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             {monthNames[selectedMonth]} {selectedYear}
           </h4>
           <div className="flex items-center justify-center gap-1.5 mt-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse"></div>
-            <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
+            <div className={`w-1.5 h-1.5 rounded-full ${totalViews > 0 ? 'bg-blue-500 dark:bg-blue-400 animate-pulse' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+            <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-400" data-testid="monthly-visits-total">
               {totalViews} {t.modernView.calendar.visits}
             </p>
           </div>
@@ -1267,12 +1348,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               : 'hover:bg-blue-50 dark:hover:bg-blue-900/20'
           }`}
           title={t.modernView.calendar.nextMonth}
+          aria-label={t.modernView.calendar.nextMonth}
         >
           <svg className={`w-4 h-4 transition-colors ${
             isNextDisabled
               ? 'text-gray-400 dark:text-gray-600'
               : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400'
-          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -1296,19 +1378,41 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           {/* Days of the month */}
           {Array.from({ length: daysInMonth }).map((_, index) => {
             const day = index + 1;
-            const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const views = viewsMap.get(dateStr) || 0;
-            const isToday = day === currentDate.getDate() &&
-                          selectedMonth === currentDate.getMonth() &&
-                          selectedYear === currentDate.getFullYear();
+            const cellDate = new Date(selectedYear, selectedMonth, day);
+            const dateStr = toDateKey(cellDate);
+            // Días sin datos posibles: anteriores a la cuenta o futuros
+            const beforeAccount = !!createdDay && cellDate < createdDay;
+            const isFuture = cellDate > today;
+            const unavailable = beforeAccount || isFuture;
+            const views = unavailable ? 0 : (viewsMap.get(dateStr) || 0);
+            const isToday = cellDate.getTime() === today.getTime();
+            const cellTitle = beforeAccount
+              ? `${day} ${monthNames[selectedMonth]}: ${t.weeklyVisits.beforeAccount}`
+              : `${day} ${monthNames[selectedMonth]}: ${views} ${t.modernView.calendar.visits}`;
+
+            if (unavailable) {
+              return (
+                <div
+                  key={day}
+                  data-date={dateStr}
+                  data-unavailable="true"
+                  className="aspect-square rounded-md flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700"
+                  title={isFuture ? undefined : cellTitle}
+                >
+                  <span className="text-[10px] font-medium text-gray-300 dark:text-gray-600">{day}</span>
+                </div>
+              );
+            }
 
             return (
               <div
                 key={day}
-                className={`aspect-square rounded-md flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md border-2 relative group ${
+                data-date={dateStr}
+                data-visits={views}
+                className={`aspect-square rounded-md flex flex-col items-center justify-center cursor-default transition-all duration-200 hover:scale-110 hover:shadow-md border-2 relative group ${
                   getIntensityColor(views)
                 } ${isToday ? 'ring-2 ring-offset-1 ring-blue-500 dark:ring-blue-400 shadow-lg' : ''}`}
-                title={`${day} ${monthNames[selectedMonth]}: ${views} ${t.modernView.calendar.visits}`}
+                title={cellTitle}
               >
                 <span className={`text-[10px] font-bold ${views > 0 ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                   {day}
@@ -1327,6 +1431,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           })}
         </div>
       </div>
+
+      {/* Estado vacío del mes (sin visitas reales) */}
+      {totalViews === 0 && (
+        <VisitsEmptyState
+          compact
+          title={t.weeklyVisits.emptyMonthTitle}
+          hint={t.weeklyVisits.emptyHint}
+          ctaLabel={t.weeklyVisits.emptyCta}
+          ctaHref={profileUrl}
+        />
+      )}
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-3 px-2">

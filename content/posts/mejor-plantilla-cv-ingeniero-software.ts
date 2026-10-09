@@ -218,7 +218,7 @@ Para destacar en **plantilla CV ingeniero software** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV ingeniero software](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de plantilla CV ingeniero software}
+![Aspectos avanzados de plantilla CV ingeniero software](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Aspectos avanzados de plantilla CV ingeniero software}
 
 ## Aspectos avanzados de plantilla CV ingeniero software
 
@@ -271,7 +271,7 @@ Cuando hablamos de **plantilla CV ingeniero software** en el contexto de aspecto
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV ingeniero software](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de plantilla CV ingeniero software}
+![Aspectos avanzados de plantilla CV ingeniero software](https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80){caption:Aspectos avanzados de plantilla CV ingeniero software}
 
 ## Cómo YourCVPassport te ayuda con plantilla CV ingeniero software
 

@@ -1,10 +1,12 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
+import { companyDocumentPath, getCompanyDocumentSignedUrl } from '../../lib/companyDocuments';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import type { Company, CompanyUser } from '../../types';
+import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import {
   BuildingOfficeIcon,
   CheckCircleIcon,
@@ -22,8 +24,15 @@ interface CompanyWithUsers extends Company {
 
 const CompanyManagementSection: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { lang } = useLanguage();
   const toast = useToastContext();
+
+  // approve_company / reject_company comprueban en el servidor que quien llama
+  // (auth.uid()) es admin; p_admin_id se sigue enviando pero se ignora.
+  // Un 42501 (PostgREST 403) significa que la sesión no es de un admin.
+  const notAdminMessage = lang === 'es'
+    ? 'Solo un administrador puede aprobar o rechazar empresas. Vuelve a iniciar sesión con una cuenta de administrador.'
+    : 'Only an administrator can approve or reject companies. Sign in again with an administrator account.';
 
   const [companies, setCompanies] = useState<CompanyWithUsers[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +45,19 @@ const CompanyManagementSection: React.FC = () => {
   const [approvalNotes, setApprovalNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [documentToView, setDocumentToView] = useState<string | null>(null);
+  const [documentIsPdf, setDocumentIsPdf] = useState(false);
+
+  // company-documents es privado: se abre con una URL firmada (1 h). Acepta la
+  // ruta guardada por el registro nuevo y las URLs públicas antiguas.
+  const openDocument = async (stored: string) => {
+    const signed = await getCompanyDocumentSignedUrl(stored);
+    if (!signed) {
+      toast.error('No se pudo abrir el documento');
+      return;
+    }
+    setDocumentIsPdf((companyDocumentPath(stored) || '').toLowerCase().endsWith('.pdf'));
+    setDocumentToView(signed);
+  };
 
   // Stats
   const [stats, setStats] = useState({
@@ -54,12 +76,12 @@ const CompanyManagementSection: React.FC = () => {
     try {
       setLoading(true);
 
+      // Columnas privadas (email, CIF, documentos, notas...): vista companies_full (admin)
       let query = supabase
-        .from('companies')
-        .select(`
-          *,
-          company_users(*)
-        `)
+        .from('companies_full')
+        // Sin embed company_users: no se usaba y, desde una vista, depende de que
+        // PostgREST deduzca la relación
+        .select(COMPANY_FULL_COLUMNS)
         .order('created_at', { ascending: false });
 
       // Apply filter
@@ -68,8 +90,11 @@ const CompanyManagementSection: React.FC = () => {
       }
 
       // Apply search
-      if (searchTerm.trim()) {
-        query = query.or(`company_name.ilike.%${searchTerm}%,company_email.ilike.%${searchTerm}%,tax_id.ilike.%${searchTerm}%`);
+      // Sin caracteres de sintaxis de PostgREST: comas, paréntesis o comillas en la
+      // búsqueda alterarían el filtro .or()
+      const term = searchTerm.replace(/[,()"\\*]/g, ' ').trim();
+      if (term) {
+        query = query.or(`company_name.ilike.%${term}%,company_email.ilike.%${term}%,tax_id.ilike.%${term}%`);
       }
 
       const { data, error } = await query;
@@ -80,7 +105,7 @@ const CompanyManagementSection: React.FC = () => {
 
       // Calculate stats
       const allCompanies = await supabase
-        .from('companies')
+        .from('companies_full')
         .select('status');
 
       if (allCompanies.data) {
@@ -118,7 +143,7 @@ const CompanyManagementSection: React.FC = () => {
     try {
       const { data, error } = await supabase.rpc('approve_company', {
         p_company_id: selectedCompany.id,
-        p_admin_id: user.id,
+        p_admin_id: user.id, // ignorado en el servidor (se usa auth.uid())
         p_notes: approvalNotes || null
       });
 
@@ -148,7 +173,7 @@ const CompanyManagementSection: React.FC = () => {
       setApprovalNotes('');
     } catch (error: any) {
       console.error('Error approving company:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(error?.code === '42501' ? notAdminMessage : `Error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
@@ -165,7 +190,7 @@ const CompanyManagementSection: React.FC = () => {
     try {
       const { data, error } = await supabase.rpc('reject_company', {
         p_company_id: selectedCompany.id,
-        p_admin_id: user.id,
+        p_admin_id: user.id, // ignorado en el servidor (se usa auth.uid())
         p_reason: rejectReason
       });
 
@@ -196,7 +221,7 @@ const CompanyManagementSection: React.FC = () => {
       setRejectReason('');
     } catch (error: any) {
       console.error('Error rejecting company:', error);
-      toast.error(`Error: ${error.message}`);
+      toast.error(error?.code === '42501' ? notAdminMessage : `Error: ${error.message}`);
     } finally {
       setProcessing(false);
     }
@@ -262,6 +287,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'ALL' ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
           }`}
           onClick={() => setFilter('ALL')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'ALL'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('ALL'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -283,6 +312,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'PENDING' ? 'ring-2 ring-yellow-500 dark:ring-yellow-400' : ''
           }`}
           onClick={() => setFilter('PENDING')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'PENDING'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('PENDING'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -304,6 +337,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'APPROVED' ? 'ring-2 ring-green-500 dark:ring-green-400' : ''
           }`}
           onClick={() => setFilter('APPROVED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'APPROVED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('APPROVED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -325,6 +362,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'REJECTED' ? 'ring-2 ring-red-500 dark:ring-red-400' : ''
           }`}
           onClick={() => setFilter('REJECTED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'REJECTED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('REJECTED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -346,6 +387,10 @@ const CompanyManagementSection: React.FC = () => {
             filter === 'SUSPENDED' ? 'ring-2 ring-orange-500 dark:ring-orange-400' : ''
           }`}
           onClick={() => setFilter('SUSPENDED')}
+          role="button"
+          tabIndex={0}
+          aria-pressed={filter === 'SUSPENDED'}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFilter('SUSPENDED'); } }}
         >
           <div className="p-5">
             <div className="flex items-center">
@@ -485,10 +530,12 @@ const CompanyManagementSection: React.FC = () => {
                     Company Details
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setShowDetailsModal(false)}
-                    className="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300"
+                    aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                    className="text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -582,7 +629,7 @@ const CompanyManagementSection: React.FC = () => {
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Tax Document (CIF/NIF)</p>
                           {selectedCompany.tax_document_url ? (
                             <button
-                              onClick={() => setDocumentToView(selectedCompany.tax_document_url!)}
+                              onClick={() => openDocument(selectedCompany.tax_document_url!)}
                               className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
                             >
                               <EyeIcon className="h-4 w-4 mr-1" />
@@ -597,7 +644,7 @@ const CompanyManagementSection: React.FC = () => {
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Business License</p>
                           {selectedCompany.verification_document_url ? (
                             <button
-                              onClick={() => setDocumentToView(selectedCompany.verification_document_url!)}
+                              onClick={() => openDocument(selectedCompany.verification_document_url!)}
                               className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
                             >
                               <EyeIcon className="h-4 w-4 mr-1" />
@@ -641,14 +688,14 @@ const CompanyManagementSection: React.FC = () => {
                   <button
                     onClick={handleApprove}
                     disabled={processing}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                   >
                     {processing ? 'Processing...' : 'Approve Company'}
                   </button>
                   <button
                     onClick={() => setShowRejectModal(true)}
                     disabled={processing}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
                   >
                     Reject
                   </button>
@@ -695,7 +742,7 @@ const CompanyManagementSection: React.FC = () => {
                 <button
                   onClick={handleReject}
                   disabled={processing || !rejectReason.trim()}
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
                 >
                   {processing ? 'Processing...' : 'Confirm Rejection'}
                 </button>
@@ -705,7 +752,7 @@ const CompanyManagementSection: React.FC = () => {
                     setRejectReason('');
                   }}
                   disabled={processing}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-600 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Cancel
                 </button>
@@ -728,14 +775,16 @@ const CompanyManagementSection: React.FC = () => {
                     Document Preview
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setDocumentToView(null)}
-                    className="text-gray-400 hover:text-gray-500"
+                    aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                    className="text-gray-400 hover:text-gray-500 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
                 <div className="mt-4">
-                  {documentToView.endsWith('.pdf') ? (
+                  {documentIsPdf ? (
                     <div className="text-center py-8">
                       <p className="text-gray-600 mb-4">PDF Preview</p>
                       <a

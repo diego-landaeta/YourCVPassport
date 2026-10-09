@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **research assistant CV** has beco
 
 This comprehensive guide on **research assistant CV** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![research assistant CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Complete guide on research assistant CV}
+![research assistant CV](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Complete guide on research assistant CV}
 
 ## 1. What PIs look for
 2. Technical and lab skills
@@ -78,7 +78,7 @@ To excel in **research assistant CV** within this area, apply these proven strat
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of research assistant CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of research assistant CV}
+![Advanced aspects of research assistant CV](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Advanced aspects of research assistant CV}
 
 ## Advanced aspects of research assistant CV
 
@@ -292,7 +292,7 @@ Mastering **research assistant CV** isn't just a competitive advantage — it's 
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Education & Academia",
   is_featured: false,

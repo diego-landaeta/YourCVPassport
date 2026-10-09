@@ -17,10 +17,13 @@ import { useTranslations } from '../../hooks/useTranslations';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { canChangeSlug, getNextSlugChangeDate } from '../../utils/slugValidation';
-import { sanitizeSlug } from '../../utils/slugUtils';
+import { sanitizeSlug, checkSlugAvailability } from '../../utils/slugUtils';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeBoldTemplate from '../templates/CreativeBoldTemplate';
+import { activateOnKey } from '../shared/a11y';
+import { handleTemplateImageError } from '../../utils/templateImageFallback';
+import { MIN_SKILLS_TO_PUBLISH } from './SkillsSection';
 
 // Identificadores de plantilla guardados en perfiles antiguos que ya no
 // corresponden a ninguna opcion de este paso. Sin traducirlos, al abrir la
@@ -227,21 +230,10 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
 
     setIsCheckingSlug(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('slug', slug)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        // No rows found - slug is available
-        setIsSlugValid(true);
-        return true;
-      }
-
-      // Slug already exists
-      setIsSlugValid(false);
-      return false;
+      // Helper común (maybeSingle): sin 406 en la red; un error real cuenta como ocupado
+      const available = await checkSlugAvailability(slug, session?.user?.id);
+      setIsSlugValid(available);
+      return available;
     } catch (err) {
       setIsSlugValid(false);
       return false;
@@ -277,16 +269,6 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     }
   };
 
-  // Get theme-appropriate preview image
-  const getTemplatePreviewImage = (templateId: string) => {
-    // Check if dark mode is enabled
-    const isDark = document.documentElement.classList.contains('dark');
-    const theme = isDark ? 'dark' : 'light';
-
-    // Try to load theme-specific image, fallback to default
-    return `/images/templates/${templateId}-${theme}.png`;
-  };
-
   const handleSaveAndComplete = async (redirectToCV = false) => {
     if (!session?.user?.id) return;
 
@@ -300,21 +282,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
     if (!profile?.summary) validationErrors.push('• Resumen profesional (Identidad)');
     if (!profile?.avatar_url) validationErrors.push('• Foto de perfil (Identidad)');
 
+    // Experiencia y Preferencias ya no se exigen aquí: son opcionales en el
+    // asistente (stepRules de ProfileWizard) y un estudiante sin experiencia debe
+    // poder publicar. Esta comprobación tiene que coincidir con aquella.
+
     // ⚠️ CRITICAL FIX: Query database directly for fresh counts instead of using stale profile context
-    // Validar Experiencia - Query database for actual count
-    const { count: experienceCount, error: expError } = await supabase
-      .from('experiences')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', session.user.id);
-
-    if (expError) {
-      console.error('Error fetching experience count:', expError);
-    }
-
-    if (!experienceCount || experienceCount === 0) {
-      validationErrors.push('• Al menos 1 experiencia laboral (Experiencia)');
-    }
-
     // Validar Habilidades - Query database for actual count
     const { count: skillsCount, error: skillsError } = await supabase
       .from('skills')
@@ -325,13 +297,8 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
       console.error('Error fetching skills count:', skillsError);
     }
 
-    if (!skillsCount || skillsCount < 3) {
-      validationErrors.push(`• Al menos 3 habilidades - tienes ${skillsCount || 0} (Habilidades)`);
-    }
-
-    // Validar Preferencias
-    if (!profile?.job_seeking_status) {
-      validationErrors.push('• Estado de búsqueda de empleo (Preferencias)');
+    if (!skillsCount || skillsCount < MIN_SKILLS_TO_PUBLISH) {
+      validationErrors.push(`• Al menos ${MIN_SKILLS_TO_PUBLISH} habilidades - tienes ${skillsCount || 0} (Habilidades)`);
     }
 
     // Si hay errores de validación, mostrarlos con toast MUY VISIBLE
@@ -490,19 +457,14 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
               )}
 
               {/* Template Preview - Theme-aware Image */}
-              <div className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setPreviewTemplate(template.id))} className="mb-4 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-inner relative group cursor-pointer"
                    onClick={() => setPreviewTemplate(template.id)}>
                 <img
-                  src={getTemplatePreviewImage(template.id)}
+                  // No hay variantes -light/-dark de las miniaturas: se usa la imagen de la plantilla
+                  src={template.previewImage}
                   alt={`${template.name} template preview`}
                   className="w-full h-48 object-cover object-top"
-                  onError={(e) => {
-                    // Fallback to default image if theme-specific not found
-                    const target = e.target as HTMLImageElement;
-                    if (!target.src.endsWith(template.previewImage)) {
-                      target.src = template.previewImage;
-                    }
-                  }}
+                  onError={handleTemplateImageError}
                 />
                 {/* Hover Overlay for Preview */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
@@ -587,11 +549,11 @@ const FinalizationStep: React.FC<FinalizationStepProps> = ({
                 >
                   Usar esta plantilla
                 </button>
-                <button
+                <button aria-label={translations.common.close}
                   onClick={() => setPreviewTemplate(null)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>

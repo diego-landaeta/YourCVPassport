@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
-import { getPageCanonicalUrl, normalizeUrl, getCanonicalPath, getHreflangUrls } from '../../utils/canonicalUrl';
+import { getCanonicalUrlForPath, normalizeUrl, getHreflangUrls, type HreflangUrls } from '../../utils/canonicalUrl';
 
 interface PageSEOProps {
   title: string;
@@ -10,6 +10,11 @@ interface PageSEOProps {
   ogImage?: string;
   lang?: 'en' | 'es';
   keywords?: string;
+  /**
+   * URLs hreflang explicitas. Por defecto se calculan a partir de la ruta actual
+   * (pareja ES/EN de config/routeConfig.ts); `null` no emite hreflang.
+   */
+  alternates?: HreflangUrls | null;
 }
 
 const PageSEO: React.FC<PageSEOProps> = ({
@@ -18,22 +23,20 @@ const PageSEO: React.FC<PageSEOProps> = ({
   canonical,
   ogImage = 'https://yourcvpassport.com/og-image.png',
   lang = 'en',
-  keywords
+  keywords,
+  alternates
 }) => {
   const location = useLocation();
-  const baseUrl = 'https://yourcvpassport.com';
 
-  // Use provided canonical, or auto-generate from current page (maps ES to EN)
+  // Canonical: el indicado o la propia URL en su idioma (principal en rutas duplicadas).
+  // Nunca se apunta una pagina en espanol a su version inglesa.
   const canonicalUrl = canonical
     ? normalizeUrl(canonical)
-    : getPageCanonicalUrl();
+    : getCanonicalUrlForPath(location.pathname);
   const fullTitle = `${title} - YourCVPassport`;
 
-  // Get hreflang URLs for alternate language versions
-  const canonicalPath = typeof window !== 'undefined'
-    ? getCanonicalPath(window.location.pathname)
-    : '/';
-  const hreflangUrls = getHreflangUrls(canonicalPath);
+  // hreflang reciprocos es/en/x-default (solo si la ruta tiene version en ambos idiomas)
+  const hreflangUrls = alternates === undefined ? getHreflangUrls(location.pathname) : alternates;
 
   // Ensure description is max 160 characters
   const metaDescription = description.length > 160
@@ -49,9 +52,9 @@ const PageSEO: React.FC<PageSEOProps> = ({
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Hreflang Tags for Multilingual SEO */}
-      <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
-      <link rel="alternate" hrefLang="es" href={hreflangUrls.es} />
-      <link rel="alternate" hrefLang="x-default" href={hreflangUrls.xDefault} />
+      {hreflangUrls && <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />}
+      {hreflangUrls && <link rel="alternate" hrefLang="es" href={hreflangUrls.es} />}
+      {hreflangUrls && <link rel="alternate" hrefLang="x-default" href={hreflangUrls.xDefault} />}
 
       {/* Open Graph Tags */}
       <meta property="og:type" content="website" />

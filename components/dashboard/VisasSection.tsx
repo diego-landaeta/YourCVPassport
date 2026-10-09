@@ -3,6 +3,7 @@ import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { Visa } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useA11yLabels } from '../shared/a11y';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   PlusIcon,
@@ -43,6 +44,7 @@ interface SortableVisaCardProps {
 }
 
 const SortableVisaCard: React.FC<SortableVisaCardProps> = ({ visa, onEdit, onDelete, deleting, t }) => {
+  const a11y = useA11yLabels();
   const {
     attributes,
     listeners,
@@ -72,9 +74,9 @@ const SortableVisaCard: React.FC<SortableVisaCardProps> = ({ visa, onEdit, onDel
           {...attributes}
           {...listeners}
           className="p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg cursor-grab active:cursor-grabbing transition-colors"
-          aria-label="Drag to reorder"
+          aria-label={a11y.dragToReorder}
         >
-          <Bars3Icon className="w-5 h-5 text-gray-400" />
+          <Bars3Icon aria-hidden="true" className="w-5 h-5 text-gray-400" />
         </button>
         <div className="flex-1">
           {/* Image Preview with Lazy Loading */}
@@ -352,7 +354,6 @@ const VisasSection: React.FC = () => {
         <button
           onClick={handleCreateClick}
           className="inline-flex items-center gap-2 px-4 py-2 bg-cv-blue hover:bg-opacity-90 text-white rounded-lg font-semibold transition-colors shadow-md"
-          aria-label="Create new visa"
         >
           <PlusIcon className="w-5 h-5" aria-hidden="true" />
           {t.newVisa}

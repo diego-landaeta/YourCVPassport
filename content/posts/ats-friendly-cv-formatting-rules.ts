@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **ATS friendly CV format** has bec
 
 This comprehensive guide on **ATS friendly CV format** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![ATS friendly CV format](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Complete guide on ATS friendly CV format}
+![ATS friendly CV format](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Complete guide on ATS friendly CV format}
 
 ## 1. Font choices ATS can read
 2. Header and section naming conventions
@@ -82,7 +82,7 @@ To excel in **ATS friendly CV format** within this area, apply these proven stra
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of ATS friendly CV format](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of ATS friendly CV format}
+![Advanced aspects of ATS friendly CV format](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of ATS friendly CV format}
 
 ## Advanced aspects of ATS friendly CV format
 
@@ -296,7 +296,7 @@ Mastering **ATS friendly CV format** isn't just a competitive advantage — it's
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "ATS & Technology",
   is_featured: false,

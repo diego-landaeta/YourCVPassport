@@ -271,7 +271,7 @@ Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avan
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
+![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
 
 ## Cómo YourCVPassport te ayuda con como reclutadores leen CV
 

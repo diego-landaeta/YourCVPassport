@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import { applyBlogImageFallback, handleBlogImageError } from '../../utils/blogImageFallback';
+import NotFoundPage from '../../pages/NotFoundPage';
 
 
 interface BlogPost {
@@ -27,7 +29,20 @@ const BlogPostPage: React.FC = () => {
     const t = useTranslations();
     const [post, setPost] = useState<BlogPost | null>(null);
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+
+    // Las imagenes del cuerpo llegan como HTML (dangerouslySetInnerHTML), asi que el
+    // fallback se engancha con un listener nativo en fase de captura (error no burbujea).
+    const contentRef = useCallback((node: HTMLDivElement | null) => {
+        if (!node) return;
+        node.addEventListener('error', (event) => {
+            if (event.target instanceof HTMLImageElement) applyBlogImageFallback(event.target);
+        }, true);
+        node.querySelectorAll('img').forEach(img => {
+            if (img.complete && img.naturalWidth === 0) applyBlogImageFallback(img);
+        });
+    }, []);
 
     // Determine the blog list path based on language
     const blogListPath = lang === 'es' ? '/recursos/blog' : '/resources/blog';
@@ -40,6 +55,7 @@ const BlogPostPage: React.FC = () => {
 
     const fetchPost = async () => {
         setLoading(true);
+        setNotFound(false);
 
         // 1. Try static blog posts first (individual .ts files)
         try {
@@ -62,9 +78,15 @@ const BlogPostPage: React.FC = () => {
             .from('blog_posts')
             .select('*')
             .eq('slug', slug)
-            .single();
+            // maybeSingle: un slug inexistente es "no encontrado", no un 406 (PGRST116)
+            .maybeSingle();
 
-        if (error) {navigate('/blog');
+        if (error) {
+            console.error('Error loading blog post:', error);
+            navigate(blogListPath, { replace: true });
+        } else if (!data) {
+            setPost(null);
+            setNotFound(true);
         } else {
             setPost(data as BlogPost);
             fetchRelatedPosts(data.category, data.id);
@@ -91,6 +113,10 @@ const BlogPostPage: React.FC = () => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cv-blue"></div>
             </div>
         );
+    }
+
+    if (notFound) {
+        return <NotFoundPage />;
     }
 
     if (!post) {
@@ -149,6 +175,7 @@ const BlogPostPage: React.FC = () => {
                         <img
                             src={post.image_url}
                             alt={post.title}
+                            onError={handleBlogImageError}
                             className="w-full h-96 object-cover rounded-xl mb-8"
                         />
                     </div>
@@ -159,6 +186,7 @@ const BlogPostPage: React.FC = () => {
                     <div className="bg-white dark:bg-dark-bg-primary rounded-xl p-8 md:p-12 shadow-lg">
                         <div className="prose prose-lg dark:prose-invert max-w-none blog-content">
                             <div
+                                ref={contentRef}
                                 className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-6"
                                 dangerouslySetInnerHTML={{
                                     __html: post.content
@@ -346,6 +374,8 @@ const BlogPostPage: React.FC = () => {
                                         <img
                                             src={relatedPost.image_url}
                                             alt={relatedPost.title}
+                                            loading="lazy"
+                                            onError={handleBlogImageError}
                                             className="w-full h-48 object-cover"
                                         />
                                         <div className="p-4">

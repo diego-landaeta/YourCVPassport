@@ -20,6 +20,7 @@ import {
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface Lead {
   id: string;
@@ -51,6 +52,7 @@ interface Message {
 }
 
 const LeadsInboxModern: React.FC = () => {
+  const a11y = useA11yLabels();
   const { user, profile } = useAuth();
   const t = useTranslations();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -352,11 +354,11 @@ const LeadsInboxModern: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4">
               {/* Back button for mobile */}
-              <button
+              <button aria-label={a11y.back}
                 onClick={() => setSelectedLead(null)}
                 className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors"
               >
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -380,12 +382,12 @@ const LeadsInboxModern: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
+              <button aria-label={a11y.viewDetails}
                 onClick={() => setShowLeadDetails(!showLeadDetails)}
                 className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary rounded-lg transition-colors hidden md:block"
                 title="Detalles"
               >
-                <EllipsisVerticalIcon className="w-6 h-6" />
+                <EllipsisVerticalIcon aria-hidden="true" className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -508,8 +510,8 @@ const LeadsInboxModern: React.FC = () => {
               disabled={!newMessage.trim() || sending}
               className="px-4 md:px-6 py-2.5 md:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
             >
-              <PaperAirplaneIcon className="w-5 h-5" />
-              <span className="hidden sm:inline">{t.leadsInbox.actions.send}</span>
+              <PaperAirplaneIcon aria-hidden="true" className="w-5 h-5" />
+              <span className="sr-only sm:not-sr-only">{t.leadsInbox.actions.send}</span>
             </button>
           </div>
         </div>
@@ -598,7 +600,7 @@ const LeadsInboxModern: React.FC = () => {
                     const isUnread = !lead.read_at || (lead.unread_count && lead.unread_count > 0);
 
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setSelectedLead(lead))}
                         key={lead.id}
                         onClick={() => setSelectedLead(lead)}
                         className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all relative group cursor-pointer ${
@@ -742,7 +744,7 @@ const LeadsInboxModern: React.FC = () => {
                 const isSelected = selectedLead?.id === lead.id;
 
                 return (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setSelectedLead(lead))} aria-current={isSelected ? true : undefined}
                     key={lead.id}
                     onClick={() => setSelectedLead(lead)}
                     className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-all relative group cursor-pointer ${
@@ -797,12 +799,12 @@ const LeadsInboxModern: React.FC = () => {
                       </div>
 
                       {/* Star */}
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => toggleStar(lead.id))} aria-label={a11y.star} aria-pressed={starred.has(lead.id)}
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStar(lead.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer focus-visible:opacity-100"
                       >
                         {starred.has(lead.id) ? (
                           <StarSolidIcon className="w-5 h-5 text-yellow-500" />

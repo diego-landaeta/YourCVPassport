@@ -1,8 +1,10 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
-import { EnvelopeIcon, PhoneIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface GreenMinimalTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,8 @@ interface GreenMinimalTemplateProps {
 const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color }) => {
     const { profile, stats = [] } = data || {};
     const accentColor = color || '#059669'; // Default to green-600
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-dark-bg-primary dark:to-dark-bg-secondary font-sans">
@@ -42,7 +46,7 @@ const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color
                     </span>
                     {profile.country_code && (
                         <div className="flex items-center justify-center gap-2 mt-6">
-                            <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                            <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                         </div>
                     )}
                     {/* Contact Buttons */}
@@ -58,11 +62,15 @@ const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color
 
                 <div className="w-20 h-1.5 mx-auto my-20 rounded-full shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #2DD4BF)` }}></div>
 
-                <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-12 shadow-xl hover:shadow-2xl transition-all mb-16">
-                    <p className="text-4xl leading-relaxed text-center font-light text-gray-800 dark:text-gray-200">
-                       <span dangerouslySetInnerHTML={{ __html: profile.summary || "I'm a <strong>full stack engineer</strong> who builds scalable web applications."}}></span>
-                    </p>
-                </div>
+                {/* El resumen se pinta como texto: antes iba con dangerouslySetInnerHTML
+                    (HTML del usuario sin sanear) y con un texto de relleno inventado. */}
+                {profile.summary && (
+                    <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-12 shadow-xl hover:shadow-2xl transition-all mb-16">
+                        <p className="text-4xl leading-relaxed text-center font-light text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                            {profile.summary}
+                        </p>
+                    </div>
+                )}
 
                 {stats.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
@@ -86,12 +94,12 @@ const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color
                         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     </div>
                     <div className="relative">
-                        <h2 className="text-4xl font-bold mb-6 text-center">Let's Work Together</h2>
+                        <h2 className="text-4xl font-bold mb-6 text-center">{L.letsWorkTogether}</h2>
                         <div className="text-center mb-8">
-                            {profile.meta_description && (
-                                <a href={`mailto:${profile.meta_description}`} className="text-2xl hover:underline flex items-center justify-center gap-3 mb-4">
+                            {email && (
+                                <a href={`mailto:${email}`} className="text-2xl hover:underline flex items-center justify-center gap-3 mb-4">
                                     <EnvelopeIcon className="w-6 h-6" />
-                                    {profile.meta_description}
+                                    {email}
                                 </a>
                             )}
                             {profile.phone && (
@@ -100,17 +108,6 @@ const GreenMinimalTemplate: React.FC<GreenMinimalTemplateProps> = ({ data, color
                                     {profile.phone}
                                 </div>
                             )}
-                        </div>
-                        <div className="flex justify-center gap-5">
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-gray-900 transition-all shadow-lg group">
-                                <GlobeAltIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            </div>
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-gray-900 transition-all shadow-lg group">
-                                <EnvelopeIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            </div>
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center cursor-pointer hover:bg-white hover:text-gray-900 transition-all shadow-lg group">
-                                <PhoneIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            </div>
                         </div>
                     </div>
                 </div>

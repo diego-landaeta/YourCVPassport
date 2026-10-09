@@ -6,6 +6,7 @@ import { getProfileSchemas } from '../../schemas/getProfileSchemas';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useA11yLabels } from '../shared/a11y';
 
 interface PreferencesSectionProps {
   initialData?: Partial<PreferencesFormData>;
@@ -17,7 +18,28 @@ const JOB_SEEKING_STATUS_OPTIONS = ['OPEN', 'PASSIVE', 'NOT_LOOKING'] as const;
 const JOB_TYPES = ['full-time', 'part-time', 'contract', 'freelance', 'internship'] as const;
 const AVAILABILITY_OPTIONS = ['immediate', '2-weeks', '1-month', '2-months', 'not-looking'] as const;
 const REMOTE_PREFERENCES = ['remote', 'hybrid', 'on-site', 'flexible'] as const;
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR'];
+const CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR'];
+
+// Países que usan el euro (eurozona + microestados y territorios con euro).
+const EURO_COUNTRIES = new Set([
+  'AT', 'BE', 'BG', 'HR', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT', 'LV', 'LT',
+  'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES', 'AD', 'MC', 'SM', 'VA', 'ME', 'XK',
+]);
+const COUNTRY_CURRENCY: Record<string, string> = {
+  US: 'USD', GB: 'GBP', CA: 'CAD', AU: 'AUD', JP: 'JPY', CN: 'CNY', IN: 'INR',
+};
+
+/**
+ * Moneda que se preselecciona si el perfil aún no tiene una. Antes no había
+ * preselección y USD encabezaba la lista, aunque la mayoría de usuarios están en
+ * España. Eurozona (o país sin indicar) -> EUR; país con moneda de la lista -> esa;
+ * resto -> sin preselección.
+ */
+function defaultCurrencyFor(countryCode?: string | null): string {
+  const code = (countryCode || '').toUpperCase();
+  if (!code || EURO_COUNTRIES.has(code)) return 'EUR';
+  return COUNTRY_CURRENCY[code] || '';
+}
 
 // Ciudades organizadas por país
 const CITIES_BY_COUNTRY: Record<string, string[]> = {
@@ -81,6 +103,7 @@ const CITIES_BY_COUNTRY: Record<string, string[]> = {
 };
 
 const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, onSave, onNext }) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const { lang, setLang } = useLanguage();
   const toast = useToastContext();
@@ -89,6 +112,15 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
 
   // Get schema with translated error messages
   const { preferencesSchema } = useMemo(() => getProfileSchemas(translations), [translations]);
+
+  // initialData es el perfil completo: trae country_code aunque el tipo no lo declare.
+  const toFormValues = (data?: Partial<PreferencesFormData>) => ({
+    ...data,
+    salary_currency: data?.salary_currency || defaultCurrencyFor((data as any)?.country_code),
+    preferred_locations: Array.isArray(data?.preferred_locations)
+      ? data.preferred_locations
+      : [],
+  });
 
   const {
     register,
@@ -99,24 +131,16 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
     reset,
     getValues,
   } = useForm<PreferencesFormData>({
-    resolver: zodResolver(preferencesSchema),
-    defaultValues: {
-      ...initialData,
-      preferred_locations: Array.isArray(initialData?.preferred_locations)
-        ? initialData.preferred_locations
-        : [],
-    },
+    // Cast: los z.preprocess del esquema tipan su entrada como unknown y no casan con
+    // PreferencesFormData, aunque la salida validada es la misma.
+    resolver: zodResolver(preferencesSchema as any),
+    defaultValues: toFormValues(initialData),
   });
 
   // Update form when initialData changes
   React.useEffect(() => {
     if (initialData) {
-      reset({
-        ...initialData,
-        preferred_locations: Array.isArray(initialData.preferred_locations)
-          ? initialData.preferred_locations
-          : [],
-      });
+      reset(toFormValues(initialData));
     }
   }, [initialData, reset]);
 
@@ -125,27 +149,20 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
     const handleAutoSave = async () => {
       const formValues = getValues();
 
-      // VALIDACIÓN: Al menos un campo debe estar lleno
-      const hasAtLeastOneField =
-        formValues.job_seeking_status ||
-        formValues.availability ||
-        formValues.salary_min ||
-        formValues.salary_max ||
-        formValues.willing_to_relocate ||
-        (formValues.preferred_locations && formValues.preferred_locations.length > 0);
-
-      if (!hasAtLeastOneField) {
-        // Mostrar error si no hay ningún campo lleno
-        toast.error(translations.preferencesToasts.completePreferences);
-        // Lanzar evento de error para que el wizard no marque como completado
+      // El paso es opcional (el asistente lo marca así): ya no se exige rellenar
+      // al menos un campo. Antes "Finalizar" quedaba bloqueado con un toast si el
+      // usuario no tocaba nada, contradiciendo la etiqueta «Opcional».
+      try {
+        // Solo guardar si hay cambios pendientes
+        if (isDirty) {
+          await onSave(formValues);
+          toast.success(translations.preferencesToasts.savedAutomatically);
+        }
+      } catch (error) {
+        console.error('Error auto-saving preferences:', error);
+        toast.error(translations.preferencesToasts.errorSaving);
         window.dispatchEvent(new CustomEvent('auto-save-preferences-error'));
         return;
-      }
-
-      // Solo guardar si hay cambios pendientes
-      if (isDirty) {
-        await onSave(formValues);
-        toast.success(translations.preferencesToasts.savedAutomatically);
       }
 
       // Lanzar evento de éxito
@@ -412,7 +429,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                                 className="inline-flex items-center gap-1 px-3 py-1 bg-cv-blue text-white rounded-full text-sm"
                               >
                                 {location}
-                                <button
+                                <button aria-label={`${a11y.remove}: ${location}`}
                                   type="button"
                                   onClick={() => {
                                     const updated = selectedLocations.filter((_: string, i: number) => i !== index);
@@ -420,7 +437,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
                                   }}
                                   className="ml-1 hover:bg-cv-blue-dark rounded-full p-0.5"
                                 >
-                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 </button>

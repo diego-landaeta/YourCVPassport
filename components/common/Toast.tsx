@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { CheckCircleIcon, XCircleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useA11yLabels } from '../shared/a11y';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -11,6 +12,7 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }) => {
+  const a11y = useA11yLabels();
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -44,11 +46,11 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
     <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${bgColors[type]} animate-slide-in-right`}>
       {icons[type]}
       <p className={`text-sm font-medium ${textColors[type]}`}>{message}</p>
-      <button
+      <button aria-label={a11y.closeNotification}
         onClick={onClose}
         className={`ml-2 ${textColors[type]} hover:opacity-70 transition-opacity`}
       >
-        <XMarkIcon className="w-5 h-5" />
+        <XMarkIcon aria-hidden="true" className="w-5 h-5" />
       </button>
     </div>
   );

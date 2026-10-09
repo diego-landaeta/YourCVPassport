@@ -26,7 +26,7 @@ const EN_TO_ES: Record<string, string> = {
   '/companies': '/empresas',
   '/resources/blog': '/recursos/blog',
   '/resources/library': '/recursos/biblioteca',
-  '/resources/success': '/recursos/exito',
+  '/resources/success-stories': '/recursos/exito',
   '/resources/status': '/recursos/estado',
   '/resources': '/recursos',
   '/about': '/nosotros',
@@ -34,8 +34,15 @@ const EN_TO_ES: Record<string, string> = {
   '/about/press': '/nosotros/prensa',
   '/about/contact': '/nosotros/contacto',
   '/jobs': '/empleos',
+  '/feed': '/comunidad',
+  '/terms': '/terminos',
+  '/privacy': '/privacidad',
 };
 
+// Mismas rutas que scripts/generate-sitemap.mjs: sin las raíces de sección (/product,
+// /professionals, /companies), que son duplicadas con canonical a otra URL, ni /resources,
+// que está en construcción. Tampoco /resources/library ni /about/mission: duplican
+// /professionals/templates y /about y redirigen a ellas con 301 (issue #5, B3).
 const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string }> = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/pricing', priority: '1.0', changefreq: 'weekly' },
@@ -45,26 +52,23 @@ const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string 
   { path: '/product/domain', priority: '0.9', changefreq: 'weekly' },
   { path: '/product/analytics', priority: '0.9', changefreq: 'weekly' },
   { path: '/product/ai', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product', priority: '0.9', changefreq: 'weekly' },
   { path: '/professionals/how', priority: '0.9', changefreq: 'weekly' },
   { path: '/professionals/templates', priority: '0.9', changefreq: 'weekly' },
   { path: '/professionals/help', priority: '0.8', changefreq: 'weekly' },
-  { path: '/professionals', priority: '0.9', changefreq: 'weekly' },
   { path: '/companies/search', priority: '0.9', changefreq: 'weekly' },
   { path: '/companies/plans', priority: '0.9', changefreq: 'weekly' },
   { path: '/companies/integrations', priority: '0.8', changefreq: 'weekly' },
   { path: '/companies/security', priority: '0.8', changefreq: 'monthly' },
-  { path: '/companies', priority: '0.9', changefreq: 'weekly' },
   { path: '/resources/blog', priority: '0.7', changefreq: 'daily' },
-  { path: '/resources/library', priority: '0.8', changefreq: 'weekly' },
-  { path: '/resources/success', priority: '0.7', changefreq: 'monthly' },
+  { path: '/resources/success-stories', priority: '0.7', changefreq: 'monthly' },
   { path: '/resources/status', priority: '0.6', changefreq: 'daily' },
-  { path: '/resources', priority: '0.7', changefreq: 'weekly' },
   { path: '/about', priority: '0.7', changefreq: 'monthly' },
-  { path: '/about/mission', priority: '0.6', changefreq: 'monthly' },
   { path: '/about/press', priority: '0.6', changefreq: 'monthly' },
   { path: '/about/contact', priority: '0.8', changefreq: 'monthly' },
   { path: '/jobs', priority: '0.9', changefreq: 'daily' },
+  { path: '/feed', priority: '0.6', changefreq: 'daily' },
+  { path: '/terms', priority: '0.3', changefreq: 'yearly' },
+  { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
 ];
 
 function getSpanishPath(enPath: string): string | null {
@@ -102,9 +106,12 @@ async function generateSitemap(): Promise<string> {
   }
 
   // Blog posts — alphabetical by slug
-  for (const post of blogPosts as Array<{ slug: string; published_at: string }>) {
+  // Cada artículo solo bajo la ruta de su idioma (como scripts/generate-sitemap.mjs):
+  // un post en español bajo /resources/blog/ duplicaba una URL no canónica.
+  for (const post of blogPosts as Array<{ slug: string; published_at: string; lang?: string }>) {
     const lastmod = post.published_at.split('T')[0];
-    blogEntries.push({ path: `/resources/blog/${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
+    const base = post.lang === 'en' ? '/resources/blog/' : '/recursos/blog/';
+    blogEntries.push({ path: `${base}${post.slug}`, lastmod, priority: '0.7', changefreq: 'monthly' });
   }
   blogEntries.sort((a, b) => a.path.localeCompare(b.path));
 

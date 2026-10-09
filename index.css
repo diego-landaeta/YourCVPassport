@@ -27,21 +27,26 @@ body {
 
 /* Print Styles - Only show CV content with colors */
 @media print {
-  /* Hide everything by default */
-  body * {
+  /*
+   * Si la página contiene un CV (.cv-template), se imprime solo el CV.
+   * Las reglas van condicionadas con :has() para que el resto de impresiones de la app
+   * (p. ej. el panel de analíticas) no salgan en blanco (#18). En navegadores sin :has()
+   * se ignoran y se imprime la página completa, sin la navegación.
+   */
+  body:has(.cv-template) * {
     visibility: hidden;
   }
 
-  /* Hide header, footer, navigation, and other UI elements */
-  header,
-  nav,
-  footer,
+  /* Hide the site header, footer, navigation and other UI elements (not the CV's own) */
+  header:not(.cv-template header),
+  nav:not(.cv-template nav),
+  footer:not(.cv-template footer),
   .no-print,
   [class*="header"]:not(.cv-template *),
-  [class*="navigation"],
-  [class*="navbar"],
-  [class*="sidebar"],
-  [class*="menu"],
+  [class*="navigation"]:not(.cv-template *),
+  [class*="navbar"]:not(.cv-template *),
+  [class*="sidebar"]:not(.cv-template *),
+  [class*="menu"]:not(.cv-template *),
   button:not(.cv-template button),
   .print-hide {
     display: none !important;
@@ -54,14 +59,39 @@ body {
     visibility: visible !important;
   }
 
-  /* Position CV template at top of page */
   .cv-template {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  /*
+   * Window.print() / Ctrl+P sobre una página con CV (fuera del flujo de #print-mount):
+   * se retira del flujo todo lo que no es el CV ni lo contiene, y los contenedores que
+   * lo envuelven se neutralizan (sin alto fijo, overflow, rejilla ni márgenes), para
+   * que el CV empiece arriba de la primera página y pagine con normalidad.
+   * Sustituye al antiguo `position: absolute; top: 0`, que dejaba páginas en blanco
+   * con el alto del resto de la app y recortaba el CV en Firefox.
+   */
+  body:not(.printing-cv):has(.cv-template) :not(.cv-template):not(.cv-template *):not(:has(.cv-template)) {
+    display: none !important;
+  }
+
+  body:not(.printing-cv):has(.cv-template) :has(.cv-template):not(.cv-template):not(.cv-template *) {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    transform: none !important;
   }
 
   /* CRITICAL: Force color printing - MUST enable "Background graphics" in print dialog */
@@ -99,11 +129,55 @@ body {
     size: A4 portrait;
   }
 
-  /* Ensure proper page breaks */
+  /*
+   * Saltos de página: el CV entero sí puede partirse (antes llevaba `avoid`, que en un
+   * CV de varias páginas no se puede cumplir), pero no sus bloques: líneas de un mismo
+   * párrafo, ítems de lista, títulos (que además no quedan solos al pie), filas, imágenes
+   * y lo marcado con [data-pdf-avoid-break] / .keep-together (tarjetas e ítems que
+   * marca printablePDFGenerator). Un bloque más alto que una página se parte igualmente.
+   */
   .cv-template {
-    page-break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
     page-break-before: auto;
     page-break-after: auto;
+  }
+
+  .cv-template p,
+  .cv-template li,
+  .cv-template h1,
+  .cv-template h2,
+  .cv-template h3,
+  .cv-template h4,
+  .cv-template h5,
+  .cv-template h6,
+  .cv-template tr,
+  .cv-template dt,
+  .cv-template dd,
+  .cv-template figure,
+  .cv-template blockquote,
+  .cv-template pre,
+  .cv-template svg,
+  .cv-template [data-pdf-avoid-break],
+  .cv-template .keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .cv-template h1,
+  .cv-template h2,
+  .cv-template h3,
+  .cv-template h4,
+  .cv-template h5,
+  .cv-template h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .cv-template p,
+  .cv-template li {
+    orphans: 3;
+    widows: 3;
   }
 
   /* Remove transitions and animations for print */

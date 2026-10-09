@@ -3,12 +3,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getLocalizedPath } from '../../utils/canonicalUrl';
 
 const Pricing: React.FC = () => {
   const { openModal } = useAuth();
   const t = useTranslations();
   const { lang } = useLanguage();
-  const langPrefix = lang === 'es' ? '/es' : '';
+  // Rutas en el idioma activo (antes '/es' + ruta inglesa, que daba 404)
+  const plansPath = getLocalizedPath('/companies/plans', lang) ?? '/companies/plans';
+  const pricingPath = getLocalizedPath('/pricing', lang) ?? '/pricing';
   const [isAnnual, setIsAnnual] = useState(false);
 
   return (
@@ -78,8 +81,8 @@ const Pricing: React.FC = () => {
                   </li>
                 ))}
               </ul>
-              {plan.cta === 'Contact Sales' || plan.cta === 'Contactar Ventas' ? (
-                <Link to={`${langPrefix}/companies/plans`} className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light shadow-md' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-bg-primary border border-transparent dark:border-dark-border'}`}>
+              {plan.contactSales ? (
+                <Link to={plansPath} className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light shadow-md' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-bg-primary border border-transparent dark:border-dark-border'}`}>
                     {plan.cta}
                 </Link>
               ) : (
@@ -92,7 +95,7 @@ const Pricing: React.FC = () => {
           })}
         </div>
         <div className="mt-16 text-center">
-            <Link to={`${langPrefix}/pricing`} className="inline-block bg-cv-light-gray dark:bg-dark-bg-secondary text-gray-800 dark:text-dark-text-primary px-8 py-4 rounded-lg text-lg font-semibold border-2 border-gray-200 dark:border-dark-border hover:bg-gray-200 dark:hover:bg-dark-bg-tertiary hover:border-gray-300 dark:hover:border-dark-border-light transition-all duration-300 shadow-sm">
+            <Link to={pricingPath} className="inline-block bg-cv-light-gray dark:bg-dark-bg-secondary text-gray-800 dark:text-dark-text-primary px-8 py-4 rounded-lg text-lg font-semibold border-2 border-gray-200 dark:border-dark-border hover:bg-gray-200 dark:hover:bg-dark-bg-tertiary hover:border-gray-300 dark:hover:border-dark-border-light transition-all duration-300 shadow-sm">
                 {t.pricing.compareCta}
             </Link>
         </div>

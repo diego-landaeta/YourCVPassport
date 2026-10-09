@@ -474,6 +474,7 @@ const JobPostingsManagement: React.FC = () => {
                           }}
                           className="p-2 text-cv-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           title={t.viewDetails}
+                          aria-label={t.viewDetails}
                         >
                           <EyeIcon className="h-5 w-5" />
                         </button>
@@ -482,6 +483,7 @@ const JobPostingsManagement: React.FC = () => {
                             onClick={() => handleCloseJob(job.id)}
                             className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title={t.closeJob}
+                            aria-label={t.closeJob}
                           >
                             <XCircleIcon className="h-5 w-5" />
                           </button>
@@ -491,6 +493,7 @@ const JobPostingsManagement: React.FC = () => {
                             onClick={() => handleReactivateJob(job.id)}
                             className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                             title={t.reactivate}
+                            aria-label={t.reactivate}
                           >
                             <CheckCircleIcon className="h-5 w-5" />
                           </button>
@@ -520,10 +523,12 @@ const JobPostingsManagement: React.FC = () => {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowDetailModal(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                 >
-                  <XCircleIcon className="h-6 w-6" />
+                  <XCircleIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
               </div>
             </div>

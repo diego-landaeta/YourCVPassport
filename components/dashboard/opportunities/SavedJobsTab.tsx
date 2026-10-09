@@ -14,6 +14,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTranslations } from '../../../hooks/useTranslations';
 import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { activateOnKey } from '../../shared/a11y';
 
 interface SavedJob {
   saved_id: string;
@@ -169,7 +170,7 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
 
             <div className="flex-1">
               {/* Job Title & Company */}
-              <h3
+              <h3 role="link" tabIndex={0} onKeyDown={activateOnKey(() => navigate(`/jobs/${job.job_slug}`))}
                 onClick={() => navigate(`/jobs/${job.job_slug}`)}
                 className="text-lg font-bold text-gray-900 dark:text-white mb-1 hover:text-cv-blue dark:hover:text-cv-blue-light cursor-pointer transition-colors"
               >

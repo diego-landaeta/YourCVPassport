@@ -271,7 +271,7 @@ Cuando hablamos de **CV practicas profesionales pasantia** en el contexto de asp
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV practicas profesionales pasantia](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV practicas profesionales pasantia}
+![Aspectos avanzados de CV practicas profesionales pasantia](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Aspectos avanzados de CV practicas profesionales pasantia}
 
 ## Cómo YourCVPassport te ayuda con CV practicas profesionales pasantia
 

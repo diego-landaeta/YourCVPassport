@@ -218,7 +218,7 @@ Para destacar en **plantilla CV arquitecto** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV arquitecto](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de plantilla CV arquitecto}
+![Aspectos avanzados de plantilla CV arquitecto](https://images.unsplash.com/photo-1486718448742-163732cd1544?w=800&q=80){caption:Aspectos avanzados de plantilla CV arquitecto}
 
 ## Aspectos avanzados de plantilla CV arquitecto
 
@@ -271,7 +271,7 @@ Cuando hablamos de **plantilla CV arquitecto** en el contexto de aspectos avanza
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV arquitecto](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de plantilla CV arquitecto}
+![Aspectos avanzados de plantilla CV arquitecto](https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80){caption:Aspectos avanzados de plantilla CV arquitecto}
 
 ## Cómo YourCVPassport te ayuda con plantilla CV arquitecto
 

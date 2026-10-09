@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **manejar rechazo laboral** s
 
 Esta guía completa sobre **manejar rechazo laboral** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![manejar rechazo laboral](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Guía completa sobre manejar rechazo laboral}
+![manejar rechazo laboral](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Guía completa sobre manejar rechazo laboral}
 
 ## 1. El rechazo es parte del proceso
 2. Solicitar feedback constructivo
@@ -78,7 +78,7 @@ Para destacar en **manejar rechazo laboral** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
+![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
 
 ## Aspectos avanzados de manejar rechazo laboral
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **manejar rechazo 
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
+![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1484981138541-3d074aa97716?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de manejar rechazo laboral para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -218,7 +218,7 @@ Para destacar en **manejar rechazo laboral** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
+![Aspectos avanzados de manejar rechazo laboral](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de manejar rechazo laboral}
 
 ## Aspectos avanzados de manejar rechazo laboral
 
@@ -292,7 +292,7 @@ Dominar **manejar rechazo laboral** no es solo una ventaja competitiva — es un
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Entrevista y Empleo",
   is_featured: false,

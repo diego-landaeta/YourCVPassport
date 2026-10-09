@@ -20,16 +20,18 @@ if (metaStart === -1) {
 }
 const block = source.slice(metaStart);
 
-const re = /"slug":\s*"([^"]+)"[\s\S]*?"published_at":\s*"([^"]+)"/g;
+// Un objeto por entrada: slug, fecha e idioma. Cada artículo vive solo bajo la ruta de
+// su idioma (/resources/blog/ en, /recursos/blog/ es), igual que el sitemap estático.
+const entries = block.split(/\n  \},?/);
+const field = (text, name) => (text.match(new RegExp(`"${name}":\\s*"([^"]+)"`)) || [])[1];
 const now = new Date();
 const out = [];
-let m;
-while ((m = re.exec(block)) !== null) {
-  const slug = m[1];
-  const publishedAt = m[2];
+for (const entry of entries) {
+  const slug = field(entry, 'slug');
+  const publishedAt = field(entry, 'published_at');
   if (!slug || !publishedAt) continue;
   if (new Date(publishedAt) > now) continue;
-  out.push({ slug, published_at: publishedAt });
+  out.push({ slug, published_at: publishedAt, lang: field(entry, 'lang') === 'en' ? 'en' : 'es' });
 }
 
 writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf-8');

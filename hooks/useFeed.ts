@@ -66,11 +66,15 @@ export const useFeed = (filterType: FeedContentType | 'ALL' = 'ALL', searchTerm:
       let pollVoteCountsMap: Record<string, { option_index: number; count: number }[]> = {};
       let topReactionsMap: Record<string, ReactionType[]> = {};
       let realLikesCount: Record<string, number> = {};
+      let realCommentsCount: Record<string, number> = {};
+      // Solo se corrigen los contadores si la consulta real ha ido bien
+      let likesCountReliable = false;
+      let commentsCountReliable = false;
       let groupMap: Record<string, { id: string; name: string; metadata?: Record<string, unknown> }> = {};
 
       if (postIds.length > 0) {
         // Core queries — these tables always exist
-        const [likesRes, repostsRes, allReactionsRes] = await Promise.all([
+        const [likesRes, repostsRes, allReactionsRes, topCommentsRes] = await Promise.all([
           supabase
             .from('feed_likes')
             .select('post_id, reaction_type')
@@ -86,7 +90,20 @@ export const useFeed = (filterType: FeedContentType | 'ALL' = 'ALL', searchTerm:
             .from('feed_likes')
             .select('post_id, reaction_type')
             .in('post_id', postIds),
+          // Comentarios reales de primer nivel visibles (lo mismo que muestra CommentSection)
+          supabase
+            .from('feed_comments')
+            .select('post_id')
+            .in('post_id', postIds)
+            .is('parent_id', null)
+            .eq('is_hidden', false),
         ]);
+
+        likesCountReliable = !allReactionsRes.error;
+        commentsCountReliable = !topCommentsRes.error;
+        for (const c of topCommentsRes.data || []) {
+          realCommentsCount[c.post_id] = (realCommentsCount[c.post_id] || 0) + 1;
+        }
 
         // Build reaction maps from already-fetched data
         for (const l of likesRes.data || []) {
@@ -156,12 +173,14 @@ export const useFeed = (filterType: FeedContentType | 'ALL' = 'ALL', searchTerm:
 
       // Mark liked / reposted / bookmarked posts with reaction type + poll data
       const processedPosts = postsData?.map(post => {
-        // Use real likes count from feed_likes if available, otherwise keep denormalized
-        const realCount = realLikesCount[post.id];
-        const correctedLikesCount = realCount !== undefined ? realCount : post.likes_count;
+        // Contadores reales: si la consulta fue bien y no hay filas, el valor es 0
+        // (antes se dejaba pasar el valor sembrado en la columna desnormalizada).
+        const correctedLikesCount = likesCountReliable ? (realLikesCount[post.id] || 0) : post.likes_count;
+        const correctedCommentsCount = commentsCountReliable ? (realCommentsCount[post.id] || 0) : post.comments_count;
         return {
           ...post,
           likes_count: correctedLikesCount,
+          comments_count: correctedCommentsCount,
           hasLiked: !!userReactions[post.id],
           hasReposted: userReposts.includes(post.id),
           hasBookmarked: userBookmarks.includes(post.id),
@@ -284,7 +303,8 @@ export const useFeed = (filterType: FeedContentType | 'ALL' = 'ALL', searchTerm:
               .from('profiles')
               .select('id, full_name, headline, avatar_url, slug')
               .eq('id', newPost.author_id)
-              .single();
+              // maybeSingle: si el perfil del autor no es visible, el post se muestra sin autor
+              .maybeSingle();
 
             setPosts(prev => {
               if (prev.some(p => p.id === newPost.id)) return prev;

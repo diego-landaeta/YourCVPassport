@@ -1,6 +1,6 @@
 import { writeFileSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 
@@ -10,9 +10,10 @@ const __dirname = dirname(__filename);
 // Load environment variables
 dotenv.config({ path: join(__dirname, '..', '.env.local') });
 
+// Dominio canonico: apex, sin www
 const BASE_URL = 'https://yourcvpassport.com';
 
-// Supabase client for fetching dynamic content
+// Supabase client for fetching dynamic content (solo lecturas GET con la clave publica)
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
@@ -24,124 +25,126 @@ const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
-// English-to-Spanish route mapping for hreflang
-const EN_TO_ES_MAPPING = {
-  '/': '/',
-  '/product/overview': '/producto/resumen',
-  '/product/stamps': '/producto/sellos',
-  '/product/ats': '/producto/ats',
-  '/product/domain': '/producto/dominio',
-  '/product/analytics': '/producto/analiticas',
-  '/product/ai': '/producto/ia',
-  '/product': '/producto',
-  '/professionals/how': '/profesionales/como-funciona',
-  '/professionals/templates': '/profesionales/plantillas',
-  '/professionals/help': '/profesionales/ayuda',
-  '/professionals': '/profesionales',
-  '/companies/search': '/empresas/busqueda',
-  '/companies/plans': '/empresas/planes',
-  '/companies/integrations': '/empresas/integraciones',
-  '/companies/security': '/empresas/seguridad',
-  '/companies': '/empresas',
-  '/resources/blog': '/recursos/blog',
-  '/resources/library': '/recursos/biblioteca',
-  '/resources/success': '/recursos/exito',
-  '/resources/status': '/recursos/estado',
-  '/resources': '/recursos',
-  '/about': '/nosotros',
-  '/about/mission': '/nosotros/mision',
-  '/about/press': '/nosotros/prensa',
-  '/about/contact': '/nosotros/contacto',
-  '/pricing': '/precios',
-  '/jobs': '/empleos',
-};
-
-// Static routes (English canonical only - NO /login, /signup, /profiles, /perfiles)
-const staticRoutes = [
-  // Home Page (highest priority)
-  { path: '/', priority: '1.0', changefreq: 'daily' },
-
-  // Pricing Page
-  { path: '/pricing', priority: '1.0', changefreq: 'weekly' },
-
-  // Product Pages
-  { path: '/product/overview', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product/stamps', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product/ats', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product/domain', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product/analytics', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product/ai', priority: '0.9', changefreq: 'weekly' },
-  { path: '/product', priority: '0.9', changefreq: 'weekly' },
-
-  // Professionals Pages
-  { path: '/professionals/how', priority: '0.9', changefreq: 'weekly' },
-  { path: '/professionals/templates', priority: '0.9', changefreq: 'weekly' },
-  { path: '/professionals/help', priority: '0.8', changefreq: 'weekly' },
-  { path: '/professionals', priority: '0.9', changefreq: 'weekly' },
-
-  // Companies Pages
-  { path: '/companies/search', priority: '0.9', changefreq: 'weekly' },
-  { path: '/companies/plans', priority: '0.9', changefreq: 'weekly' },
-  { path: '/companies/integrations', priority: '0.8', changefreq: 'weekly' },
-  { path: '/companies/security', priority: '0.8', changefreq: 'monthly' },
-  { path: '/companies', priority: '0.9', changefreq: 'weekly' },
-
-  // Resources Pages
-  { path: '/resources/blog', priority: '0.7', changefreq: 'daily' },
-  { path: '/resources/library', priority: '0.8', changefreq: 'weekly' },
-  { path: '/resources/success', priority: '0.7', changefreq: 'monthly' },
-  { path: '/resources/status', priority: '0.6', changefreq: 'daily' },
-  { path: '/resources', priority: '0.7', changefreq: 'weekly' },
-
-  // About Pages
-  { path: '/about', priority: '0.7', changefreq: 'monthly' },
-  { path: '/about/mission', priority: '0.6', changefreq: 'monthly' },
-  { path: '/about/press', priority: '0.6', changefreq: 'monthly' },
-  { path: '/about/contact', priority: '0.8', changefreq: 'monthly' },
-
-  // Jobs listing page
-  { path: '/jobs', priority: '0.9', changefreq: 'daily' },
-];
+// Paginas que no se indexan: /resources y /recursos solo muestran "pagina en construccion"
+const EXCLUDED_COMPONENTS = new Set(['UnderConstructionPage']);
 
 /**
- * Get Spanish path for an English path
+ * Rutas ES/EN desde config/routeConfig.ts (fuente unica, la misma que usan la app y
+ * utils/canonicalUrl.ts). Se lee el texto del fichero porque este script es Node puro
+ * y no puede importar TS. En rutas duplicadas (mismo componente con varias URLs, p. ej.
+ * /product y /product/overview) solo entra la principal: la primera que aparece, que es
+ * a la que apunta su canonical.
  */
-function getSpanishPath(enPath) {
-  if (EN_TO_ES_MAPPING[enPath]) {
-    return EN_TO_ES_MAPPING[enPath];
+function readRoutePairs() {
+  const source = readFileSync(join(__dirname, '..', 'config', 'routeConfig.ts'), 'utf-8');
+  const re = /\{\s*en:\s*'([^']+)',\s*es:\s*'([^']+)',\s*componentName:\s*'([^']+)'(?:,\s*props:\s*(\{[^}]*\}))?/g;
+  const seen = new Set();
+  const pairs = [];
+  let m;
+  while ((m = re.exec(source)) !== null) {
+    const [, en, es, componentName, props = ''] = m;
+    if (en.startsWith('dev/') || EXCLUDED_COMPONENTS.has(componentName)) continue;
+    const key = `${componentName}|${props}`;
+    if (seen.has(key)) continue; // duplicada: su canonical apunta a la principal
+    seen.add(key);
+    pairs.push({ en: `/${en}`, es: `/${es}` });
   }
-  // Dynamic routes
-  if (enPath.startsWith('/resources/blog/')) {
-    return enPath.replace('/resources/blog/', '/recursos/blog/');
+  if (pairs.length < 20) {
+    throw new Error(`[Sitemap] Solo se leyeron ${pairs.length} rutas de config/routeConfig.ts; revisa el formato.`);
   }
-  if (enPath.startsWith('/jobs/')) {
-    return enPath.replace('/jobs/', '/empleos/');
+  return pairs;
+}
+
+// Rutas bilingues declaradas a mano en App.tsx (fuera de routeConfig)
+const EXTRA_ROUTE_PAIRS = [
+  { en: '/jobs', es: '/empleos' },
+  { en: '/feed', es: '/comunidad' },
+];
+
+// Prioridad y frecuencia por ruta inglesa (la espanola hereda las mismas)
+const ROUTE_META = {
+  '/pricing': { priority: '1.0', changefreq: 'weekly' },
+  '/product/overview': { priority: '0.9', changefreq: 'weekly' },
+  '/product/stamps': { priority: '0.9', changefreq: 'weekly' },
+  '/product/ats': { priority: '0.9', changefreq: 'weekly' },
+  '/product/domain': { priority: '0.9', changefreq: 'weekly' },
+  '/product/analytics': { priority: '0.9', changefreq: 'weekly' },
+  '/product/ai': { priority: '0.9', changefreq: 'weekly' },
+  '/professionals/how': { priority: '0.9', changefreq: 'weekly' },
+  '/professionals/templates': { priority: '0.9', changefreq: 'weekly' },
+  '/professionals/help': { priority: '0.8', changefreq: 'weekly' },
+  '/companies/search': { priority: '0.9', changefreq: 'weekly' },
+  '/companies/plans': { priority: '0.9', changefreq: 'weekly' },
+  '/companies/integrations': { priority: '0.8', changefreq: 'weekly' },
+  '/companies/security': { priority: '0.8', changefreq: 'monthly' },
+  '/resources/blog': { priority: '0.7', changefreq: 'daily' },
+  '/resources/success-stories': { priority: '0.7', changefreq: 'monthly' },
+  '/resources/status': { priority: '0.6', changefreq: 'daily' },
+  '/about': { priority: '0.7', changefreq: 'monthly' },
+  '/about/press': { priority: '0.6', changefreq: 'monthly' },
+  '/about/contact': { priority: '0.8', changefreq: 'monthly' },
+  '/jobs': { priority: '0.9', changefreq: 'daily' },
+  '/feed': { priority: '0.6', changefreq: 'daily' },
+  '/terms': { priority: '0.3', changefreq: 'yearly' },
+  '/privacy': { priority: '0.3', changefreq: 'yearly' },
+};
+const DEFAULT_META = { priority: '0.7', changefreq: 'weekly' };
+
+/**
+ * Paginas estaticas: la home (misma URL para ambos idiomas, sin hreflang) y cada
+ * pareja ES/EN como dos <url> con alternates es/en/x-default reciprocos.
+ * Sin /login, /signup, /profiles ni /perfiles (esta ultima es duplicada de /companies/search).
+ */
+function buildStaticRoutes() {
+  const routes = [{ path: '/', priority: '1.0', changefreq: 'daily', alternates: null }];
+  for (const pair of [...readRoutePairs(), ...EXTRA_ROUTE_PAIRS]) {
+    const meta = ROUTE_META[pair.en] || DEFAULT_META;
+    routes.push({ path: pair.en, ...meta, alternates: pair });
+    routes.push({ path: pair.es, ...meta, alternates: pair });
   }
-  // CV profiles and other routes without Spanish equivalents
-  return null;
+  return routes;
+}
+
+/** Escapa los caracteres reservados de XML. */
+function xmlEscape(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 /**
- * Generate hreflang XML for a URL entry
+ * hreflang de una entrada. `alternates` = { en, es } para paginas con version en ambos
+ * idiomas; `selfLang` para contenido en un solo idioma (articulos del blog). Sin
+ * ninguno de los dos (home, /cv/:slug) no se emite hreflang.
  */
-function generateHreflang(enPath) {
-  const enUrl = `${BASE_URL}${enPath}`;
-  const esPath = getSpanishPath(enPath);
-
-  let hreflang = '';
-  hreflang += `    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}" />\n`;
-  if (esPath) {
-    const esUrl = `${BASE_URL}${esPath}`;
-    hreflang += `    <xhtml:link rel="alternate" hreflang="es" href="${esUrl}" />\n`;
+function generateHreflang(route) {
+  if (route.alternates) {
+    const enUrl = xmlEscape(`${BASE_URL}${route.alternates.en}`);
+    const esUrl = xmlEscape(`${BASE_URL}${route.alternates.es}`);
+    return [
+      `    <xhtml:link rel="alternate" hreflang="en" href="${enUrl}" />`,
+      `    <xhtml:link rel="alternate" hreflang="es" href="${esUrl}" />`,
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrl}" />`,
+    ].join('\n');
   }
-  hreflang += `    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrl}" />`;
-  return hreflang;
+  if (route.selfLang) {
+    return `    <xhtml:link rel="alternate" hreflang="${route.selfLang}" href="${xmlEscape(`${BASE_URL}${route.path}`)}" />`;
+  }
+  return '';
+}
+
+/** Ruta del blog segun el idioma del articulo: cada post vive solo bajo la suya. */
+function blogPostPath(slug, lang) {
+  return lang === 'en' ? `/resources/blog/${slug}` : `/recursos/blog/${slug}`;
 }
 
 /**
  * Read static blog posts from content/posts/index.ts.
- * Posts live as TS files (not in Supabase). We extract slug + published_at
- * pairs with a regex over the allPostsMeta block — robust against any
+ * Posts live as TS files (not in Supabase). We extract slug + published_at + lang
+ * from each object of the allPostsMeta block with a regex — robust against any
  * stray characters inside titles/summaries that would break strict JSON.
  */
 function readStaticBlogPosts() {
@@ -156,16 +159,19 @@ function readStaticBlogPosts() {
     }
     const block = source.slice(metaStart);
 
-    const re = /"slug":\s*"([^"]+)"[\s\S]*?"published_at":\s*"([^"]+)"/g;
+    // Cada objeto de allPostsMeta va de "{" a "}" sin llaves internas
+    const objRe = /\{[^{}]*"slug":\s*"[^"]+"[^{}]*\}/g;
     const now = new Date();
     const out = [];
     let m;
-    while ((m = re.exec(block)) !== null) {
-      const slug = m[1];
-      const publishedAt = m[2];
+    while ((m = objRe.exec(block)) !== null) {
+      const obj = m[0];
+      const slug = obj.match(/"slug":\s*"([^"]+)"/)?.[1];
+      const publishedAt = obj.match(/"published_at":\s*"([^"]+)"/)?.[1];
+      const lang = obj.match(/"lang":\s*"([^"]+)"/)?.[1] === 'en' ? 'en' : 'es';
       if (!slug || !publishedAt) continue;
       if (new Date(publishedAt) > now) continue;
-      out.push({ slug, lastmod: publishedAt.split('T')[0] });
+      out.push({ slug, lang, lastmod: publishedAt.split('T')[0] });
     }
     return out;
   } catch (err) {
@@ -180,12 +186,19 @@ function readStaticBlogPosts() {
 async function fetchSupabaseBlogPosts() {
   if (!supabase) return [];
 
+  const query = (columns) => supabase
+    .from('blog_posts')
+    .select(columns)
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false });
+
   try {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('slug, updated_at, published_at')
-      .not('published_at', 'is', null)
-      .order('published_at', { ascending: false });
+    let { data, error } = await query('slug, updated_at, published_at, lang');
+    if (error) {
+      // Compatibilidad: sin la columna lang los posts de la tabla son en espanol (su DEFAULT)
+      console.warn('[Sitemap] blog_posts sin columna lang, se asume "es":', error.message);
+      ({ data, error } = await query('slug, updated_at, published_at'));
+    }
 
     if (error) {
       console.error('[Sitemap] Error fetching blog posts:', error.message);
@@ -194,6 +207,7 @@ async function fetchSupabaseBlogPosts() {
 
     return (data || []).map(post => ({
       slug: post.slug,
+      lang: post.lang === 'en' ? 'en' : 'es',
       lastmod: (post.updated_at || post.published_at || new Date().toISOString()).split('T')[0],
     }));
   } catch (err) {
@@ -214,10 +228,11 @@ async function fetchBlogPosts() {
   for (const p of staticPosts) bySlug.set(p.slug, p); // static overrides
 
   return Array.from(bySlug.values()).map(p => ({
-    path: `/resources/blog/${p.slug}`,
+    path: blogPostPath(p.slug, p.lang),
     priority: '0.7',
     changefreq: 'monthly',
     lastmod: p.lastmod,
+    selfLang: p.lang,
   }));
 }
 
@@ -273,12 +288,17 @@ async function fetchJobPostings() {
       return [];
     }
 
-    return (data || []).map(job => ({
-      path: `/jobs/${job.slug}`,
-      priority: '0.7',
-      changefreq: 'weekly',
-      lastmod: (job.updated_at || job.published_at || new Date().toISOString()).split('T')[0],
-    }));
+    // Cada oferta existe en /jobs/:slug y /empleos/:slug con hreflang reciprocos
+    return (data || []).flatMap(job => {
+      const pair = { en: `/jobs/${job.slug}`, es: `/empleos/${job.slug}` };
+      const base = {
+        priority: '0.7',
+        changefreq: 'weekly',
+        lastmod: (job.updated_at || job.published_at || new Date().toISOString()).split('T')[0],
+        alternates: pair,
+      };
+      return [{ ...base, path: pair.en }, { ...base, path: pair.es }];
+    });
   } catch (err) {
     console.error('[Sitemap] Error fetching job postings:', err.message);
     return [];
@@ -287,6 +307,7 @@ async function fetchJobPostings() {
 
 async function generateSitemap() {
   const currentDate = new Date().toISOString().split('T')[0];
+  const staticRoutes = buildStaticRoutes();
 
   // Fetch dynamic content in parallel
   const [blogPosts, cvProfiles, jobPostings] = await Promise.all([
@@ -305,15 +326,14 @@ async function generateSitemap() {
 
   const urlEntries = allRoutes.map(route => {
     const lastmod = route.lastmod || currentDate;
-    const hreflang = generateHreflang(route.path);
+    const hreflang = generateHreflang(route);
 
     return `  <url>
-    <loc>${BASE_URL}${route.path}</loc>
+    <loc>${xmlEscape(`${BASE_URL}${route.path}`)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
-${hreflang}
-  </url>`;
+${hreflang ? `${hreflang}\n` : ''}  </url>`;
   }).join('\n');
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -329,10 +349,22 @@ ${urlEntries}
   return { sitemap, totalStatic: staticRoutes.length, totalBlog: blogPosts.length, totalCV: cvProfiles.length, totalJobs: jobPostings.length };
 }
 
+/**
+ * Ruta de salida: por defecto public/sitemap.xml (la que usan el build y el workflow
+ * diario). Para validar sin tocar el fichero publicado:
+ *   node scripts/generate-sitemap.mjs --output=/ruta/temporal/sitemap.xml
+ *   SITEMAP_OUTPUT=/ruta/temporal/sitemap.xml node scripts/generate-sitemap.mjs
+ */
+function resolveOutputPath() {
+  const arg = process.argv.slice(2).find(a => a.startsWith('--output='));
+  const custom = arg ? arg.slice('--output='.length) : process.env.SITEMAP_OUTPUT;
+  return custom ? resolve(custom) : join(__dirname, '..', 'public', 'sitemap.xml');
+}
+
 // Generate and save sitemap
 try {
   const { sitemap, totalStatic, totalBlog, totalCV, totalJobs } = await generateSitemap();
-  const sitemapPath = join(__dirname, '..', 'public', 'sitemap.xml');
+  const sitemapPath = resolveOutputPath();
 
   writeFileSync(sitemapPath, sitemap, 'utf-8');
   console.log('Sitemap generated successfully at:', sitemapPath);

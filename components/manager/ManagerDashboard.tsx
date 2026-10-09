@@ -223,7 +223,7 @@ const ManagerDashboard: React.FC = () => {
     setLoadError(false);
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('profiles_full') // email y managed_by son privados
         .select('id, full_name, headline, email, summary, slug, avatar_url, template, created_at')
         .eq('managed_by', session.user.id)
         .order('created_at', { ascending: false });

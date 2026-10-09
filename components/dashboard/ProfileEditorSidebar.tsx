@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircleIcon, CircleStackIcon, LockClosedIcon } from '@heroicons/react/24/solid';
 import { useTranslations } from '../../hooks/useTranslations';
+import { AI_FEATURES_ENABLED } from '../../lib/ai';
 
 interface ProfileEditorSidebarProps {
   activeSubsection: string | null;
@@ -37,9 +38,8 @@ const ProfileEditorSidebar: React.FC<ProfileEditorSidebarProps> = ({
   const translations = useTranslations();
   const t = translations.dashboard.editor;
 
-  // Check if AI is available
-  // @ts-ignore
-  const isAIAvailable = Boolean(import.meta.env?.VITE_GOOGLE_AI_API_KEY);
+  // La IA se sirve desde la Edge Function ai-cv-assistant (sin clave en el cliente).
+  const isAIAvailable = AI_FEATURES_ENABLED;
 
   const subsections: SubsectionItem[] = [
     {

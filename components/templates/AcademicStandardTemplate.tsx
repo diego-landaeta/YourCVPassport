@@ -2,6 +2,8 @@ import React from 'react';
 import { FullProfileData } from '../../types';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface AcademicStandardTemplateProps {
     data: FullProfileData;
@@ -11,6 +13,8 @@ interface AcademicStandardTemplateProps {
 const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#059669'; // Academic green
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     return (
         <div className="font-serif bg-white dark:bg-dark-bg-secondary">
@@ -36,14 +40,17 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                     <p className="text-lg text-gray-600 dark:text-gray-400 mb-3">{profile.headline}</p>
                     {profile.country_code && (
                         <div className="flex items-center justify-center gap-2 mb-3">
-                            <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                            <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                         </div>
                     )}
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <span>{profile.meta_description || 'N/A'}</span>
-                        <span className="mx-2">|</span>
-                        <span>Location</span>
-                    </div>
+                    {/* Antes: 'N/A' y el literal "Location" en lugar de los datos */}
+                    {(email || profile.location) && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {email && <span>{email}</span>}
+                            {email && profile.location && <span className="mx-2">|</span>}
+                            {profile.location && <span>{profile.location}</span>}
+                        </div>
+                    )}
                     {/* Contact Buttons */}
                     <div className="mt-4 flex justify-center">
                         <ProfileContactButtons
@@ -59,7 +66,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                 <section className="mb-8">
                     <h2 className="text-xl font-bold mb-3 uppercase tracking-wide pb-2 border-b-2"
                         style={{ borderColor: accentColor, color: accentColor }}>
-                        Perfil Académico
+                        {L.academicProfile}
                     </h2>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-justify whitespace-pre-wrap">{profile.summary}</p>
                 </section>
@@ -68,7 +75,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                 <section className="mb-8">
                     <h2 className="text-xl font-bold mb-3 uppercase tracking-wide pb-2 border-b-2"
                         style={{ borderColor: accentColor, color: accentColor }}>
-                        Formación Académica
+                        {L.academicEducation}
                     </h2>
                     <div className="space-y-4">
                         {education.map(edu => (
@@ -76,7 +83,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                                 <div className="flex justify-between items-baseline">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                                        {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Presente'}
+                                        {new Date(edu.start_date).getFullYear()} - {edu.end_date ? new Date(edu.end_date).getFullYear() : L.present}
                                     </p>
                                 </div>
                                 <p className="text-gray-700 dark:text-gray-300 italic">{edu.institution_name}</p>
@@ -92,7 +99,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                 <section className="mb-8">
                     <h2 className="text-xl font-bold mb-3 uppercase tracking-wide pb-2 border-b-2"
                         style={{ borderColor: accentColor, color: accentColor }}>
-                        Experiencia Profesional
+                        {L.professionalExperience}
                     </h2>
                     <div className="space-y-4">
                         {experiences.map(exp => (
@@ -100,7 +107,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                                 <div className="flex justify-between items-baseline">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap ml-4">
-                                        {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : 'Presente'}
+                                        {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present}
                                     </p>
                                 </div>
                                 <p className="text-gray-700 dark:text-gray-300 italic">{exp.company_name}</p>
@@ -114,7 +121,7 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                 <section className="mb-8">
                     <h2 className="text-xl font-bold mb-3 uppercase tracking-wide pb-2 border-b-2"
                         style={{ borderColor: accentColor, color: accentColor }}>
-                        Competencias y Habilidades
+                        {L.competencies}
                     </h2>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                         {skills.map(skill => (
@@ -130,10 +137,10 @@ const AcademicStandardTemplate: React.FC<AcademicStandardTemplateProps> = ({ dat
                 <section>
                     <h2 className="text-xl font-bold mb-3 uppercase tracking-wide pb-2 border-b-2"
                         style={{ borderColor: accentColor, color: accentColor }}>
-                        Información Adicional
+                        {L.additionalInfo}
                     </h2>
                     <p className="text-gray-600 dark:text-gray-400 text-sm italic">
-                        Referencias disponibles a petición.
+                        {L.referencesOnRequest}
                     </p>
                 </section>
             </div>

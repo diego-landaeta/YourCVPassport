@@ -5,10 +5,14 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../contexts/ToastContext';
 import OAuthButtons from './OAuthButtons';
 
+type FieldId = 'fullName' | 'email' | 'password' | 'confirmPassword' | 'agreeToTerms';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const AuthScreen: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signInWithEmail, signUpWithEmail, user } = useAuth();
+  const { signInWithEmail, signUpWithEmail, resendConfirmationEmail, user } = useAuth();
   const translations = useTranslations();
   const t = translations.dashboard.auth;
   const toast = useToastContext();
@@ -22,12 +26,32 @@ const AuthScreen: React.FC = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Campo al que se refiere el error de validación (aria-invalid + foco).
+  const [errorField, setErrorField] = useState<FieldId | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  // Issue #3: cuenta creada pero pendiente (correo no enviado o alta repetida).
+  const [pendingNotice, setPendingNotice] = useState<string | null>(null);
+  // Email al que se ofrece "Reenviar correo de confirmación" (null: no se ofrece).
+  const [resendEmail, setResendEmail] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendFeedback, setResendFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const formLocked = isLoading || !!successMessage || !!pendingNotice;
 
   // Update view when route changes
   useEffect(() => {
     setIsLoginView(location.pathname === '/login');
+    setPendingNotice(null);
+    setResendEmail(null);
+    setResendFeedback(null);
   }, [location.pathname]);
+
+  // Cuenta atrás entre reenvíos (el servidor limita a 3 cada 15 min por email).
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -44,22 +68,73 @@ const AuthScreen: React.FC = () => {
     return hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
   };
 
+  // Traduce el `code` de la Edge Function `signup` (ver utils/authFunctionErrors.ts).
+  const signupErrorMessage = (err: { code?: string } | null | undefined): string => {
+    switch (err?.code) {
+      case 'EMAIL_ALREADY_REGISTERED': return t.errors.emailAlreadyExists;
+      case 'WEAK_PASSWORD': return t.errors.weakPassword;
+      case 'INVALID_INPUT': return t.errors.invalidInput;
+      case 'EMAIL_SEND_FAILED': return t.errors.signupEmailSendFailed;
+      case 'RATE_LIMITED': return t.errors.tooManyRequests;
+      case 'TIMEOUT': return t.errors.signupTimeout;
+      case 'NETWORK_ERROR': return t.errors.networkError;
+      default: return t.errors.serverError;
+    }
+  };
+
+  // "Reenviar correo de confirmación": la función responde lo mismo exista o no
+  // una cuenta pendiente, así que el texto de éxito es neutro.
+  const handleResend = async () => {
+    if (!resendEmail || isResending || resendCooldown > 0) return;
+    setIsResending(true);
+    setResendFeedback(null);
+    const { error: resendError } = await resendConfirmationEmail(resendEmail);
+    setIsResending(false);
+    if (!resendError) {
+      setResendFeedback({ ok: true, text: t.signup.resendSent });
+      setResendCooldown(60);
+      return;
+    }
+    const code = resendError?.code;
+    const text = code === 'RATE_LIMITED' ? t.errors.tooManyRequests
+      : code === 'NETWORK_ERROR' ? t.errors.networkError
+      : t.signup.resendFailed;
+    setResendFeedback({ ok: false, text });
+    if (code === 'RATE_LIMITED') setResendCooldown(60);
+  };
+
+  // Validación propia, en el orden visual del formulario. El formulario lleva
+  // noValidate: la validación nativa del navegador (required / type=email)
+  // bloqueaba el envío sin mostrar nuestro mensaje traducido y además se saltaba
+  // «Nombre completo», que no tenía required (issue #4, puntos 8 y 9).
+  const validateForm = (): { field: FieldId; message: string } | null => {
+    if (!isLoginView && !fullName.trim()) return { field: 'fullName', message: t.errors.fullNameRequired };
+    if (!email.trim()) return { field: 'email', message: t.errors.emailRequired };
+    if (!EMAIL_RE.test(email.trim())) return { field: 'email', message: t.errors.invalidEmail };
+    if (!password) return { field: 'password', message: t.errors.passwordRequired };
+    if (isLoginView) return null;
+    if (password.length < 8) return { field: 'password', message: t.errors.passwordTooShort };
+    if (!validatePassword(password)) return { field: 'password', message: t.errors.weakPassword };
+    if (password !== confirmPassword) return { field: 'confirmPassword', message: t.errors.passwordsNotMatch };
+    if (!agreeToTerms) return { field: 'agreeToTerms', message: t.errors.termsRequired };
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorField(null);
     setSuccessMessage(null);
+    setPendingNotice(null);
+    setResendEmail(null);
+    setResendFeedback(null);
 
-    // Basic validation
-    if (!email) {
-      setError(t.errors.emailRequired);
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError(t.errors.invalidEmail);
-      return;
-    }
-    if (!password) {
-      setError(t.errors.passwordRequired);
+    const invalid = validateForm();
+    if (invalid) {
+      setError(invalid.message);
+      setErrorField(invalid.field);
+      // Lleva el foco al campo que falla (el aviso se anuncia por role="alert").
+      document.getElementById(invalid.field)?.focus();
       return;
     }
 
@@ -67,62 +142,56 @@ const AuthScreen: React.FC = () => {
       // Login flow
       setIsLoading(true);
       try {
-        const { error: authError } = await signInWithEmail(email, password);
+        const { error: authError } = await signInWithEmail(email.trim(), password);
         if (authError) {
           if (authError.message?.includes('Invalid login credentials')) {
             setError(t.errors.invalidCredentials);
           } else if (authError.message?.includes('Email not confirmed')) {
-            setError('Please confirm your email before logging in');
+            setError(t.errors.emailNotConfirmed);
+            setResendEmail(email.trim().toLowerCase());
           } else {
             setError(t.errors.serverError);
           }
           setIsLoading(false);
           return;
         }
-        navigate('/dashboard');
+        // La navegación la hace el efecto de `user` (arriba) en cuanto hay sesión.
+        // Navegar también aquí, cuando termina signInWithEmail (que además registra
+        // la actividad), devolvía al admin de /admin a /dashboard.
       } catch (err) {
         toast.error(t.errors.serverError);
         setError(t.errors.serverError);
         setIsLoading(false);
       }
     } else {
-      // Signup flow
-      if (!fullName.trim()) {
-        setError(t.errors.fullNameRequired);
-        return;
-      }
-      if (password.length < 8) {
-        setError(t.errors.passwordTooShort);
-        return;
-      }
-      if (!validatePassword(password)) {
-        setError(t.errors.weakPassword);
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError(t.errors.passwordsNotMatch);
-        return;
-      }
-      if (!agreeToTerms) {
-        setError(t.errors.termsRequired);
-        return;
-      }
-
+      // Signup flow (ya validado arriba)
       setIsLoading(true);
       try {
-        const { error: authError } = await signUpWithEmail(email, password, {
+        const { data: signUpData, error: authError } = await signUpWithEmail(email.trim(), password, {
           full_name: fullName.trim(),
         });
 
         if (authError) {
-          if (authError.message?.includes('already registered')) {
-            setError(t.errors.emailAlreadyExists);
-          } else if (authError.message?.includes('Password')) {
-            setError(t.errors.passwordTooShort); // Fallback to passwordTooShort if weakPassword missing
-            // Show the actual error message from the server/edge function
-            const errorMsg = authError.message || t.errors.serverError;
-            setError(errorMsg);
-          }
+          // Todo error del alta se muestra (formulario + toast); antes casi todos se tragaban.
+          const msg = signupErrorMessage(authError);
+          setError(msg);
+          toast.error(msg, 8000);
+          setIsLoading(false);
+          return;
+        }
+
+        // Cuenta pendiente sin correo, o alta repetida de una cuenta sin
+        // confirmar: sin redirección, con aviso y botón "Reenviar".
+        if (signUpData?.emailSent === false || signUpData?.alreadyPending) {
+          const notice = !signUpData.alreadyPending ? t.signup.accountCreatedEmailNotSent
+            : signUpData.emailSent ? t.signup.alreadyPendingResent
+            : t.signup.alreadyPendingNotSent;
+          setPendingNotice(notice);
+          setResendEmail(email.trim().toLowerCase());
+          // Si el correo acaba de salir, no se ofrece reenviar enseguida.
+          if (signUpData.emailSent) setResendCooldown(60);
+          if (signUpData.emailSent) toast.success(notice, 8000);
+          else toast.warning(notice, 8000);
           setIsLoading(false);
           return;
         }
@@ -142,6 +211,10 @@ const AuthScreen: React.FC = () => {
     }
   };
 
+  // aria-invalid / aria-describedby del campo que tiene el error de validación.
+  const fieldA11y = (field: FieldId) =>
+    errorField === field ? { 'aria-invalid': true as const, 'aria-describedby': 'auth-form-error' } : {};
+
   const formUI = (
     <div className="w-full">
       <div className="mb-6">
@@ -155,7 +228,7 @@ const AuthScreen: React.FC = () => {
 
       {/* Error & Success Messages */}
       {error && (
-        <div className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
+        <div id="auth-form-error" role="alert" className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
           <p className="text-xs text-red-700 dark:text-red-400">{error}</p>
         </div>
       )}
@@ -164,9 +237,38 @@ const AuthScreen: React.FC = () => {
           <p className="text-xs text-green-700 dark:text-green-400">{successMessage}</p>
         </div>
       )}
+      {pendingNotice && (
+        <div role="status" className="mb-4 p-2.5 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded">
+          <p className="text-xs text-amber-800 dark:text-amber-300">{pendingNotice}</p>
+        </div>
+      )}
+      {resendEmail && (
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isResending || resendCooldown > 0}
+            className="w-full px-3 py-2 text-sm font-medium border border-cv-blue text-cv-blue dark:text-blue-300 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isResending ? t.signup.resendSending : t.signup.resendButton}
+          </button>
+          <div aria-live="polite">
+            {resendFeedback && (
+              <p className={`mt-2 text-xs ${resendFeedback.ok ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                {resendFeedback.text}
+              </p>
+            )}
+          </div>
+          {resendCooldown > 0 && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {t.signup.resendCooldown.replace('{seconds}', String(resendCooldown))}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Full Name (Signup only) */}
         {!isLoginView && (
           <div>
@@ -178,9 +280,11 @@ const AuthScreen: React.FC = () => {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              autoComplete="name"
+              {...fieldA11y('fullName')}
               className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
-              placeholder="John Doe"
-              disabled={isLoading || !!successMessage}
+              placeholder={t.signup.fullNamePlaceholder}
+              disabled={formLocked}
             />
           </div>
         )}
@@ -197,9 +301,10 @@ const AuthScreen: React.FC = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            {...fieldA11y('email')}
             className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
-            placeholder="name@example.com"
-            disabled={isLoading || !!successMessage}
+            placeholder={isLoginView ? t.login.emailPlaceholder : t.signup.emailPlaceholder}
+            disabled={formLocked}
           />
         </div>
 
@@ -216,9 +321,10 @@ const AuthScreen: React.FC = () => {
             minLength={isLoginView ? 1 : 8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            {...fieldA11y('password')}
             className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
             placeholder="••••••••"
-            disabled={isLoading || !!successMessage}
+            disabled={formLocked}
           />
           {!isLoginView && (
             <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -241,9 +347,10 @@ const AuthScreen: React.FC = () => {
               minLength={8}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              {...fieldA11y('confirmPassword')}
               className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
               placeholder="••••••••"
-              disabled={isLoading || !!successMessage}
+              disabled={formLocked}
             />
           </div>
         )}
@@ -277,8 +384,12 @@ const AuthScreen: React.FC = () => {
               type="checkbox"
               checked={agreeToTerms}
               onChange={(e) => setAgreeToTerms(e.target.checked)}
+              // Nombre accesible completo: algunos lectores de pantalla omiten el
+              // texto de los enlaces dentro del <label> y leían «Acepto los y».
+              aria-label={t.signup.agreeToTermsAccessible}
+              {...fieldA11y('agreeToTerms')}
               className="h-3.5 w-3.5 mt-0.5 text-cv-blue focus:ring-cv-blue border-gray-300 dark:border-dark-border dark:bg-dark-bg-tertiary rounded cursor-pointer"
-              disabled={isLoading || !!successMessage}
+              disabled={formLocked}
             />
             <label htmlFor="agreeToTerms" className="text-gray-600 dark:text-gray-400 cursor-pointer leading-tight">
               {t.signup.agreeToTerms}{' '}
@@ -296,7 +407,7 @@ const AuthScreen: React.FC = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isLoading || !!successMessage}
+          disabled={formLocked}
           className="w-full bg-cv-blue hover:bg-cv-blue-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
         >
           {isLoading ? (
@@ -337,6 +448,7 @@ const AuthScreen: React.FC = () => {
           to={isLoginView ? '/signup' : '/login'}
           onClick={() => {
             setError(null);
+            setErrorField(null);
             setSuccessMessage(null);
             setEmail('');
             setPassword('');

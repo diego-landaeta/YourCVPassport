@@ -218,7 +218,7 @@ Para destacar en **CV beca universitaria** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV beca universitaria](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV beca universitaria}
+![Aspectos avanzados de CV beca universitaria](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Aspectos avanzados de CV beca universitaria}
 
 ## Aspectos avanzados de CV beca universitaria
 
@@ -271,7 +271,7 @@ Cuando hablamos de **CV beca universitaria** en el contexto de aspectos avanzado
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV beca universitaria](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de CV beca universitaria}
+![Aspectos avanzados de CV beca universitaria](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Aspectos avanzados de CV beca universitaria}
 
 ## Cómo YourCVPassport te ayuda con CV beca universitaria
 

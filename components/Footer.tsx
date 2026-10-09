@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import { useTranslations } from '../hooks/useTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 
+// Redes sociales oficiales. Solo se pintan las que tienen URL real: hoy no hay
+// ninguna confirmada, así que la lista va vacía y no se muestra nada (antes eran
+// enlaces a "#"). Para activar una, añádela aquí: { name: 'LinkedIn', url: 'https://...' }.
+// La usan el pie de página y la página de contacto.
+export const SOCIAL_LINKS: ReadonlyArray<{ name: string; url: string }> = [];
+
 const Footer: React.FC = () => {
   const t = useTranslations();
   const { lang } = useLanguage();
@@ -53,11 +59,13 @@ const Footer: React.FC = () => {
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 dark:border-dark-border flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-400 dark:text-dark-text-tertiary">&copy; {new Date().getFullYear()} YourCVPassport. {t.footer.rights}</p>
-          <div className="flex space-x-6 mt-4 sm:mt-0">
-             <a href="#" className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">LinkedIn</a>
-             <a href="#" className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">X</a>
-             <a href="#" className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">YouTube</a>
-          </div>
+          {SOCIAL_LINKS.length > 0 && (
+            <div className="flex space-x-6 mt-4 sm:mt-0">
+              {SOCIAL_LINKS.map(({ name, url }) => (
+                <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">{name}</a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </footer>

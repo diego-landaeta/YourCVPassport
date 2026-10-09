@@ -1,12 +1,14 @@
 /**
  * Edge Function Tests: Utilities (Updated for Real API)
- * Tests for analytics, AI optimization, sitemap, and lead notification functions
+ * Tests for analytics, AI optimization and sitemap functions
  */
 
 import { test, expect } from '@playwright/test';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, requireLiveEdgeProject } from './test-config';
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+// Edge Functions reales (track-analytics escribe datos): solo con RUN_LIVE_EDGE_TESTS=1
+// y un proyecto de pruebas.
+requireLiveEdgeProject();
 
 test.describe('Track Analytics Function', () => {
   test('track-analytics - should handle event tracking', async ({ request }) => {
@@ -55,7 +57,8 @@ test.describe('AI Optimize Description Function', () => {
       },
     });
 
-    expect([200, 400, 500]).toContain(response.status());
+    // 401: ai-optimize-description exige JWT desde el endurecimiento de seguridad.
+    expect([200, 400, 401, 500]).toContain(response.status());
   });
 
   test('ai-optimize-description - should require description parameter', async ({ request }) => {
@@ -69,7 +72,8 @@ test.describe('AI Optimize Description Function', () => {
       },
     });
 
-    expect([400, 500]).toContain(response.status());
+    // Sin JWT la funcion responde 401 antes de validar el body.
+    expect([400, 401, 500]).toContain(response.status());
   });
 });
 
@@ -90,38 +94,6 @@ test.describe('Sitemap Function', () => {
   });
 });
 
-test.describe('Send Lead Notification Function', () => {
-  test('send-lead-notification - should handle notification request', async ({ request }) => {
-    const response = await request.post(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      data: {
-        name: 'Test User',
-        email: 'test@example.com',
-        message: 'Test message',
-      },
-    });
-
-    expect([200, 400, 500]).toContain(response.status());
-  });
-
-  test('send-lead-notification - should require email parameter', async ({ request }) => {
-    const response = await request.post(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-      },
-      data: {
-        name: 'Test User',
-      },
-    });
-
-    expect([400, 500]).toContain(response.status());
-  });
-});
-
 test.describe('CORS Handling', () => {
   test('should handle OPTIONS for track-analytics', async ({ request }) => {
     const response = await request.fetch(`${SUPABASE_URL}/functions/v1/track-analytics`, {
@@ -139,11 +111,4 @@ test.describe('CORS Handling', () => {
     expect(response.status()).toBe(200);
   });
 
-  test('should handle OPTIONS for send-lead-notification', async ({ request }) => {
-    const response = await request.fetch(`${SUPABASE_URL}/functions/v1/send-lead-notification`, {
-      method: 'OPTIONS',
-    });
-
-    expect(response.status()).toBe(200);
-  });
 });

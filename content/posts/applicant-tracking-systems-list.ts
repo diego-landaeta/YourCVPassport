@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **list of ATS systems 2026**
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of list of ATS systems 2026](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of list of ATS systems 2026}
+![Advanced aspects of list of ATS systems 2026](https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80){caption:Advanced aspects of list of ATS systems 2026}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your list of ATS systems 2026 approach for each company increases your success rate by up to 60%.

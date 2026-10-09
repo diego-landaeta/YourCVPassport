@@ -1,63 +1,54 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright Configuration for YourCVPassport E2E Tests
- * See https://playwright.dev/docs/test-configuration
+ * Config raiz de Playwright: specs antiguos de tests/*.spec.ts contra la app local
+ * (Vite) con Supabase mockeado (tests/qa/helpers/supabaseMock.ts).
+ *
+ *   npx playwright test
+ *   PW_PORT=5190 npx playwright test
+ *
+ * - tests/qa tiene su propia config (tests/qa/playwright.qa.config.ts): ver tests/qa/README.md.
+ * - tests/edge-functions llama a Edge Functions REALES y envia correos: queda fuera
+ *   por defecto. Solo se incluye con RUN_LIVE_EDGE_TESTS=1 y un proyecto de PRUEBAS
+ *   (EDGE_TEST_SUPABASE_URL / EDGE_TEST_SUPABASE_ANON_KEY); ver tests/edge-functions/test-config.ts.
+ * - Sin cabeceras globales: nada de claves de Supabase en las peticiones de los tests.
  */
+const port = Number(process.env.PW_PORT || 5173);
+// 127.0.0.1 y no localhost: en Windows localhost puede resolver a ::1 y el webServer
+// no detecta Vite levantado.
+const localURL = `http://127.0.0.1:${port}`;
+const runLiveEdge = process.env.RUN_LIVE_EDGE_TESTS === '1';
+
 export default defineConfig({
   testDir: './tests',
+  // Playwright compara testIgnore con la ruta absoluta: de ahi el `**/tests/` delante.
+  testIgnore: ['**/tests/qa/**', ...(runLiveEdge ? [] : ['**/tests/edge-functions/**'])],
 
-  // Maximum time one test can run for
-  timeout: 30 * 1000,
-
-  // Test artifacts
-  outputDir: './test-results',
-
-  // Run tests in files in parallel
+  timeout: 60 * 1000,
+  expect: { timeout: 10 * 1000 },
+  outputDir: './test-results/root',
   fullyParallel: true,
-
-  // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  reporter: [['list'], ['html', { outputFolder: './playwright-report/root', open: 'never' }]],
 
-  // Retry on CI only
-  retries: process.env.CI ? 2 : 0,
-
-  // Opt out of parallel tests on CI
-  workers: process.env.CI ? 1 : undefined,
-
-  // Reporter to use
-  reporter: 'html',
-
-  // Shared settings for all the projects below
   use: {
-    // Base URL to use in actions like `await page.goto('/')`
-    baseURL: 'http://localhost:3000',
-
-    // Collect trace when retrying the failed test
-    trace: 'on-first-retry',
-
-    // Screenshot on failure
+    baseURL: localURL,
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-
-    // Pass environment variables to tests
-    extraHTTPHeaders: {
-      'x-supabase-url': process.env.VITE_SUPABASE_URL || '',
-      'x-supabase-key': process.env.VITE_SUPABASE_ANON_KEY || '',
-    },
+    // En WebKit las peticiones que pasan por el Service Worker de la app se saltan
+    // page.route y llegarian a la Supabase real.
+    serviceWorkers: 'block',
   },
 
-  // Configure projects for major browsers
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
 
-  // Run your local dev server before starting the tests
+  // Vite (vite.config.ts) y no server.mjs (puerto 3000, sirve un dist/ que puede estar viejo).
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: `npx vite --host 127.0.0.1 --port ${port} --strictPort`,
+    url: localURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

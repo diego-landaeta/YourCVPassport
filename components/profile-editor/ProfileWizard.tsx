@@ -17,11 +17,12 @@ import {
 import IdentitySection from './IdentitySection';
 import ExperienceSection from './ExperienceSection';
 import EducationSection from './EducationSection';
-import SkillsSection from './SkillsSection';
+import SkillsSection, { MIN_SKILLS_TO_PUBLISH } from './SkillsSection';
 import LanguagesSection from './LanguagesSection';
 import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
 import FinalizationStep from './FinalizationStep';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface ProfileWizardProps {
   profile: any;
@@ -62,14 +63,37 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   initialStep,
   onComplete
 }) => {
+  const a11y = useA11yLabels();
   const t = useTranslations();
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const stepRef = React.useRef<any>(null);
   const [showPremiumToast, setShowPremiumToast] = useState(false);
+  // true mientras el foco está en un campo de texto: en móvil se oculta el botón
+  // flotante de IA para que no tape lo que se escribe (issue #4, punto 17).
+  const [isTypingInField, setIsTypingInField] = useState(false);
+  useEffect(() => {
+    const isField = (el: EventTarget | null) =>
+      el instanceof HTMLElement && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]), textarea, select, [contenteditable="true"]');
+    const onFocusIn = (e: FocusEvent) => setIsTypingInField(isField(e.target));
+    const onFocusOut = (e: FocusEvent) => { if (!isField(e.relatedTarget)) setIsTypingInField(false); };
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('focusout', onFocusOut);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
   const [currentStep, setCurrentStep] = useState(0);
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
   const [preferencesCompletedInSession, setPreferencesCompletedInSession] = useState(false);
+  // Pasos ya vistos en esta sesion y si se intento finalizar. Un paso obligatorio
+  // incompleto solo se marca en ambar cuando el usuario ya paso por el o intento
+  // publicar: antes Habilidades salia "pendiente" en la barra nada mas entrar.
+  const [visitedSteps, setVisitedSteps] = useState<Set<string>>(() => new Set());
+  const [attemptedFinish, setAttemptedFinish] = useState(false);
+  const stepperRef = React.useRef<HTMLDivElement>(null);
+  const stepItemRefs = React.useRef<Array<HTMLDivElement | null>>([]);
 
 
   // Check if user has completed the wizard
@@ -114,16 +138,14 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
       ].filter(Boolean) as string[],
       hasContent: Boolean(profile?.full_name || profile?.email),
     },
-    experience: {
-      required: true,
-      missing: !experiences || experiences.length === 0 ? [t.wizardValidation.atLeastOneExperience] : [],
-      hasContent: (experiences?.length ?? 0) > 0,
-    },
+    // Experiencia opcional, igual que Educacion: un estudiante o alguien sin
+    // empleo previo tiene que poder publicar. FinalizationStep lo replica.
+    experience: { required: false, missing: [], hasContent: (experiences?.length ?? 0) > 0 },
     education: { required: false, missing: [], hasContent: (education?.length ?? 0) > 0 },
     skills: {
       required: true,
       missing:
-        !skills || skills.length < 3
+        !skills || skills.length < MIN_SKILLS_TO_PUBLISH
           ? [`${t.wizardValidation.atLeastThreeSkills} (${t.wizardValidation.youHave} ${skills?.length || 0})`]
           : [],
       hasContent: (skills?.length ?? 0) > 0,
@@ -143,6 +165,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
     const blocking = Object.values(stepRules).some(r => r.required && r.missing.length > 0);
     if (blocking) {
+      setAttemptedFinish(true);
       setShowIncompleteWarning(true);
       return false;
     }
@@ -325,12 +348,28 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     }
   }, [currentStep, steps.length]);
 
+  // Al cambiar de paso: registrarlo como visitado y, en movil (la barra hace scroll
+  // horizontal), centrar el paso activo para que no quede fuera de la vista.
+  // Se desplaza solo el contenedor: scrollIntoView movería también la página.
+  const currentStepId = steps[currentStep]?.id;
+  useEffect(() => {
+    if (currentStepId) {
+      setVisitedSteps(prev => (prev.has(currentStepId) ? prev : new Set(prev).add(currentStepId)));
+    }
+    const container = stepperRef.current;
+    const item = stepItemRefs.current[currentStep];
+    if (container && item && container.scrollWidth > container.clientWidth) {
+      const left = item.offsetLeft - (container.clientWidth - item.offsetWidth) / 2;
+      container.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    }
+  }, [currentStep, currentStepId]);
+
   const CurrentComponent = steps[currentStep]?.component as any;
 
   return (
     <div className="max-w-5xl mx-auto">
       {/* Stepper Header */}
-      <div className="mb-8 overflow-x-auto pb-2">
+      <div ref={stepperRef} className="relative mb-8 overflow-x-auto pb-2">
         <div className="flex items-center justify-start sm:justify-center gap-1 sm:gap-0 px-2 sm:px-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
@@ -339,12 +378,42 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
             const rule = stepRules[step.id];
             // Obligatorio y sin cumplir: se marca en ambar. Antes era gris, igual
             // que un paso opcional vacio, asi que nada distinguia "te falta esto
-            // para publicar" de "esto puedes saltartelo".
-            const needsAttention = Boolean(rule?.required && rule.missing.length > 0);
+            // para publicar" de "esto puedes saltartelo". Solo una vez visitado o
+            // tras intentar finalizar: antes de eso no es un aviso, es ruido.
+            const needsAttention = Boolean(
+              rule?.required && rule.missing.length > 0 && (visitedSteps.has(step.id) || attemptedFinish)
+            );
+
+            const goToStep = async () => {
+              // Check if trying to access finalization step
+              const isFinalizationStep = step.id === 'finalization';
+
+              if (isFinalizationStep) {
+                // Auto-guardar Preferences si estamos en ese paso
+                const saveSuccess = await handlePreferencesSave();
+
+                // Solo un error real de guardado detiene el avance. Preferencias es
+                // opcional: con el formulario vacio el guardado se resuelve con exito.
+                if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
+                  return; // Error already shown by PreferencesSection
+                }
+
+                const canAccess = canAccessFinalization();
+                if (!canAccess) {
+                  return; // Validation failed, warning already shown
+                }
+              }
+
+              // Allow navigation
+              setCurrentStep(index);
+              window.scrollTo(0, 0);
+            };
 
             return (
-              <div key={step.id} className="flex items-center flex-shrink-0">
-                <div
+              <div key={step.id} ref={(el) => { stepItemRefs.current[index] = el; }} className="flex items-center flex-shrink-0">
+                {/* En movil el titulo de los pasos no activos va oculto: el aria-label
+                    mantiene el nombre accesible del paso. */}
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(goToStep)} aria-current={isActive ? 'step' : undefined} aria-label={step.title}
                   className={`flex flex-col items-center cursor-pointer group transition-all ${
                     isActive
                       ? 'text-cv-blue'
@@ -354,29 +423,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                           ? 'text-amber-600 dark:text-amber-500'
                           : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
-                  onClick={async () => {
-                    // Check if trying to access finalization step
-                    const isFinalizationStep = step.id === 'finalization';
-
-                    if (isFinalizationStep) {
-                      // Auto-guardar Preferences si estamos en ese paso
-                      const saveSuccess = await handlePreferencesSave();
-
-                      // Si el guardado falló (porque no hay campos llenos), no avanzar
-                      if (!saveSuccess && steps[currentStep]?.id === 'preferences') {
-                        return; // Error already shown by PreferencesSection
-                      }
-
-                      const canAccess = canAccessFinalization();
-                      if (!canAccess) {
-                        return; // Validation failed, warning already shown
-                      }
-                    }
-
-                    // Allow navigation
-                    setCurrentStep(index);
-                    window.scrollTo(0, 0);
-                  }}
+                  onClick={goToStep}
                 >
                   <div className={`
                     relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all
@@ -516,11 +563,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   </span>
                 </div>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowIncompleteWarning(false)}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors hover:scale-110 transform"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -556,11 +603,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
                   {t.profileWizard.viewPlans}
                 </button>
               </div>
-              <button
+              <button aria-label={a11y.close}
                 onClick={() => setShowPremiumToast(false)}
                 className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -575,29 +622,30 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
         (currentStep === 1 && experiences.length > 0) || // Experience has AI
         (currentStep === 2 && education.length > 0) || // Education has AI
         currentStep === 3) && ( // Skills has AI
+        // Issue #4 (17, 18): nombre accesible, sin elementos clicables dentro del
+        // botón y, en móvil, oculto mientras se escribe en un campo para no taparlo.
         <button
           onClick={handleAIClick}
-          className="fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group"
+          aria-label={t.profileWizard.improveWithAi}
+          data-testid="ai-pro-button"
+          className={`fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group${isTypingInField ? ' max-sm:hidden' : ''}`}
           title={t.profileWizard.improveWithAi}
         >
-          {/* Premium Badge */}
+          {/* Premium Badge (decorativo: el botón ya lleva a la función PRO) */}
           <span
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(lang === 'es' ? '/precios' : '/pricing');
-            }}
-            className="absolute -top-1 -right-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-[9px] sm:text-xs font-bold rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1 animate-pulse z-10 cursor-pointer hover:from-amber-500 hover:to-yellow-600 transition-colors"
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 px-1.5 sm:px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 text-[9px] sm:text-xs font-bold rounded-full shadow-lg flex items-center gap-0.5 sm:gap-1 animate-pulse z-10"
           >
             <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
             PRO
           </span>
-          <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg aria-hidden="true" className="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           {/* Tooltip */}
-          <span className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <span aria-hidden="true" className="absolute right-full mr-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             {t.profileWizard.improveWithAi}
           </span>
         </button>

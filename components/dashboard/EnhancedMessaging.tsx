@@ -18,6 +18,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import './messaging-styles.css';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface Message {
   id: string;
@@ -50,6 +51,7 @@ interface Lead {
 }
 
 const EnhancedMessaging: React.FC = () => {
+  const a11y = useA11yLabels();
   const { user, profile } = useAuth();
   const t = useTranslations();
   const { lang } = useLanguage();
@@ -394,7 +396,7 @@ const EnhancedMessaging: React.FC = () => {
           {/* Leads List with Cards */}
           <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
             {leads.map((lead) => (
-              <div
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => setSelectedLead(lead))} aria-current={selectedLead?.id === lead.id ? true : undefined}
                 key={lead.id}
                 onClick={() => setSelectedLead(lead)}
                 className={`group relative p-5 rounded-xl border-2 cursor-pointer transition-all transform hover:scale-102 ${
@@ -522,11 +524,11 @@ const EnhancedMessaging: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(selectedLead.status)}
-                      <button
+                      <button aria-label={a11y.close}
                         onClick={() => setSelectedLead(null)}
                         className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors lg:hidden"
                       >
-                        <XMarkIcon className="w-5 h-5 text-gray-500" />
+                        <XMarkIcon aria-hidden="true" className="w-5 h-5 text-gray-500" />
                       </button>
                     </div>
                   </div>
@@ -629,14 +631,14 @@ const EnhancedMessaging: React.FC = () => {
                       onKeyPress={handleKeyPress}
                       placeholder={t.contactLeadModal.form.messagePlaceholder}
                       rows={2}
-                      className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary text-gray-900 dark:text-white text-sm resize-none focus:outline-none focus:border-cv-blue transition-colors"
+                      className="flex-1 px-3 py-2 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary text-gray-900 dark:text-white text-sm resize-none focus:outline-none focus:border-cv-blue focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light transition-colors"
                     />
-                    <button
+                    <button aria-label={a11y.sendMessage}
                       onClick={sendMessage}
                       disabled={!newMessage.trim() || sending}
                       className="p-2.5 bg-cv-blue hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      <PaperAirplaneIcon className="w-5 h-5" />
+                      <PaperAirplaneIcon aria-hidden="true" className="w-5 h-5" />
                     </button>
                   </div>
 

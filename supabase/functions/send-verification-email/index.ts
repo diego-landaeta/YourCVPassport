@@ -1,39 +1,85 @@
 // Supabase Edge Function: send-verification-email
-// Sends email verification code using Resend
+// Sends email verification code via Brevo (_shared/email.ts)
+//
+// Seguridad (auditoría 2026-10-05, U4): ver _shared/stampVerification.ts.
+//   - JWT obligatorio (desplegar SIN --no-verify-jwt). La identidad sale del
+//     token; `userId` del body es opcional y solo vale si es el propio perfil, un
+//     perfil gestionado por el llamante (managed_by) o si el llamante es admin.
+//   - Código con crypto.getRandomValues; en stamps.evidence solo su HMAC.
+//
+// Contrato:
+//   POST { email, userId? }  ->  200 { success, message, stampId, emailId }
+//   400 INVALID_INPUT, 401 UNAUTHORIZED, 403 FORBIDDEN, 413 PAYLOAD_TOO_LARGE,
+//   429 RATE_LIMITED (Upstash) / RATE_LIMIT_EXCEEDED (3 por hora y perfil),
+//   500 INTERNAL_ERROR (sin detalles internos).
+//
+// Rate limit (Upstash, fail open si no está configurado):
+//   - por IP: 5/min (config 'auth')
+//   - por usuario llamante y por email destino (hash SHA-256): 3 cada 15 min
+//     (config 'authEmail'): nadie puede bombardear un buzón ajeno.
+//   - y el de siempre en BD: 3 envíos por hora y perfil (verification_attempts).
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getCorsHeaders } from '../_shared/cors.ts'
+import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.ts'
+import {
+  HttpError,
+  authenticate,
+  createAdminClient,
+  errorResponse,
+  findPendingStamp,
+  generateCode,
+  hashCode,
+  jsonResponse,
+  readJsonBody,
+  resolveTargetProfile,
+} from '../_shared/stampVerification.ts'
+import { isEmailConfigured, sendEmail } from '../_shared/email.ts'
+import { verificationCodeEmail } from '../_shared/emailTemplates.ts'
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface VerificationRequest {
-  email: string
-  userId: string
-}
+const CODE_TTL_MS = 15 * 60 * 1000
+// Mismo criterio que el modal (acepta p. ej. o'connor@...). El email solo va en
+// `to` y en la BD, nunca dentro del HTML.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req)
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Get request body
-    const { email, userId }: VerificationRequest = await req.json()
-
-    if (!email || !userId) {
-      throw new Error('Email and userId are required')
+    if (req.method !== 'POST') {
+      throw new HttpError(405, 'METHOD_NOT_ALLOWED', 'Method not allowed')
     }
 
-    // Create Supabase client
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    const supabase = createAdminClient()
+
+    // Identidad: siempre del JWT
+    const caller = await authenticate(req, supabase)
+
+    const ip = getClientIp(req)
+    if (ip) {
+      const limited = await enforceRateLimit('auth', [`stamp-email:ip:${ip}`], corsHeaders)
+      if (limited) return limited
+    }
+
+    const payload = await readJsonBody(req)
+    const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
+    if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
+      throw new HttpError(400, 'INVALID_INPUT', 'A valid email is required')
+    }
+
+    // Perfil destino: el propio, uno gestionado o (admin) cualquiera
+    const userId = await resolveTargetProfile(supabase, caller.id, payload.userId)
+
+    const limited = await enforceRateLimit('authEmail', [
+      `stamp-email:user:${caller.id}`,
+      `stamp-email:dest:${await sha256Hex(email)}`,
+    ], corsHeaders)
+    if (limited) return limited
 
     // Check rate limiting - max 3 attempts per hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
@@ -47,64 +93,32 @@ serve(async (req: Request) => {
     if (countError) throw countError
 
     if (recentAttempts && recentAttempts.length >= 3) {
-      return new Response(
-        JSON.stringify({
-          error: 'Rate limit exceeded. Please wait before requesting another code.',
-          code: 'RATE_LIMIT_EXCEEDED'
-        }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+      throw new HttpError(429, 'RATE_LIMIT_EXCEEDED', 'Rate limit exceeded. Please wait before requesting another code.')
     }
 
-    // Check for required environment variables
-    
-    
-    if (!RESEND_API_KEY) {
-      
+    // Antes de crear el sello: sin BREVO_API_KEY no se podría mandar el código.
+    if (!isEmailConfigured()) {
       throw new Error('Server configuration error: Missing email provider key')
     }
 
-    // Get sender email from env or use default
-    // Note: onboarding@resend.dev only works for testing if sending to the registered admin email
-    const SENDER_EMAIL = Deno.env.get('SENDER_EMAIL') || 'onboarding@resend.dev'
-    const SENDER_NAME = 'YourCVPassport'
-
-    // Generate 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
-
-    // Store verification code with 15-minute expiration
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
-
-    // Check if there's an existing pending stamp
-    const { data: existingStamp, error: stampCheckError } = await supabase
-      .from('stamps')
-      .select('id')
-      .eq('profile_id', userId)
-      .eq('type', 'EMAIL')
-      .eq('status', 'PENDING')
-      .single()
-
-    if (stampCheckError && stampCheckError.code !== 'PGRST116') {
-      throw stampCheckError
+    // Código de 6 dígitos con CSPRNG; en BD solo se guarda su HMAC
+    const verificationCode = generateCode()
+    const evidence = {
+      email,
+      code_hash: await hashCode('EMAIL', userId, email, verificationCode),
+      expires_at: new Date(Date.now() + CODE_TTL_MS).toISOString(),
+      attempts: 0,
     }
+
+    // Reutiliza el sello PENDING más reciente o crea uno
+    const existingStamp = await findPendingStamp(supabase, userId, 'EMAIL')
 
     let stampId: string
 
     if (existingStamp) {
-      // Update existing stamp
       const { data: updatedStamp, error: updateError } = await supabase
         .from('stamps')
-        .update({
-          evidence: {
-            email,
-            verification_code: verificationCode,
-            expires_at: expiresAt,
-            attempts: 0
-          }
-        })
+        .update({ evidence })
         .eq('id', existingStamp.id)
         .select('id')
         .single()
@@ -112,20 +126,14 @@ serve(async (req: Request) => {
       if (updateError) throw updateError
       stampId = updatedStamp.id
     } else {
-      // Create new stamp
       const { data: newStamp, error: createError } = await supabase
         .from('stamps')
         .insert({
           profile_id: userId,
           type: 'EMAIL',
           status: 'PENDING',
-          evidence: {
-            email,
-            verification_code: verificationCode,
-            expires_at: expiresAt,
-            attempts: 0
-          },
-          provider: 'resend'
+          evidence,
+          provider: 'brevo'
         })
         .select('id')
         .single()
@@ -144,112 +152,33 @@ serve(async (req: Request) => {
         metadata: { email }
       })
 
-    // Get user profile for personalization
+    // Get user profile for personalization (va dentro del HTML: escapado)
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
-    const userName = profile?.full_name || 'Usuario'
-
-    
-
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`
-      },
-      body: JSON.stringify({
-        from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
-        to: email,
-        subject: 'Verifica tu email - YourCVPassport',
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Verificación de Email</title>
-            </head>
-            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0; font-size: 28px;">YourCVPassport</h1>
-              </div>
-
-              <div style="background: #f9fafb; padding: 40px 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
-                <h2 style="color: #1f2937; margin-top: 0;">¡Hola ${userName}!</h2>
-
-                <p style="font-size: 16px; color: #4b5563;">
-                  Has solicitado verificar tu dirección de email. Usa el siguiente código para completar la verificación:
-                </p>
-
-                <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
-                  <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
-                    Código de Verificación
-                  </div>
-                  <div style="font-size: 36px; font-weight: bold; color: #667eea; letter-spacing: 8px; font-family: 'Courier New', monospace;">
-                    ${verificationCode}
-                  </div>
-                </div>
-
-                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                  <p style="margin: 0; color: #92400e; font-size: 14px;">
-                    ⏰ <strong>Este código expira en 15 minutos</strong>
-                  </p>
-                </div>
-
-                <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">
-                  Si no solicitaste esta verificación, puedes ignorar este email de forma segura.
-                </p>
-
-                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-                <p style="font-size: 12px; color: #9ca3af; text-align: center; margin: 0;">
-                  © 2025 YourCVPassport. Todos los derechos reservados.<br>
-                  Este es un email automático, por favor no respondas a este mensaje.
-                </p>
-              </div>
-            </body>
-          </html>
-        `
-      })
+    // Envío vía Brevo (_shared/email.ts)
+    const emailResult = await sendEmail({
+      to: email,
+      ...verificationCodeEmail({ name: profile?.full_name, code: verificationCode }),
+      tags: ['verification-code'],
     })
 
-    if (!resendResponse.ok) {
-      const error = await resendResponse.json()
-      
-      throw new Error(`Resend error: ${JSON.stringify(error)}`)
+    if (!emailResult.ok) {
+      console.error('[send-verification-email] email send failed:', emailResult.code, emailResult.status, emailResult.detail)
+      throw new Error(`Email send failed: ${emailResult.code}`)
     }
 
-    const resendData = await resendResponse.json()
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Verification code sent successfully',
-        stampId,
-        emailId: resendData.id
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+    return jsonResponse(200, {
+      success: true,
+      message: 'Verification code sent successfully',
+      stampId,
+      emailId: emailResult.messageId
+    }, corsHeaders)
 
   } catch (error) {
-    
-    return new Response(
-      JSON.stringify({
-        error: (error as any).message || 'An error occurred',
-        code: 'INTERNAL_ERROR',
-        details: (error as any).toString()
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+    return errorResponse(error, corsHeaders, 'send-verification-email')
   }
 })

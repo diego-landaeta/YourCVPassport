@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **remote work CV tips** has become
 
 This comprehensive guide on **remote work CV tips** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![remote work CV tips](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Complete guide on remote work CV tips}
+![remote work CV tips](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Complete guide on remote work CV tips}
 
 ## 1. Remote work job market 2026
 2. Key skills to highlight
@@ -78,7 +78,7 @@ To excel in **remote work CV tips** within this area, apply these proven strateg
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of remote work CV tips](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of remote work CV tips}
+![Advanced aspects of remote work CV tips](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Advanced aspects of remote work CV tips}
 
 ## Advanced aspects of remote work CV tips
 
@@ -292,7 +292,7 @@ Mastering **remote work CV tips** isn't just a competitive advantage — it's an
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Freelance & Remote",
   is_featured: false,

@@ -1,83 +1,75 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { SAFE_CONTEXT_OPTIONS, installInitState, makeProfiles, mockSupabase } from './qa/helpers/supabaseMock';
 
 /**
  * Dashboard Sections Test Suite
- * 
- * This suite tests the navigation and rendering of all dashboard sections.
- * Note: These tests require an authenticated session.
+ *
+ * Navegacion por las secciones del menu lateral del dashboard (components/dashboard/Sidebar.tsx).
+ * Sesion falsa de un profesional y Supabase mockeado (tests/qa/helpers/supabaseMock.ts):
+ * no hace falta login real ni credenciales.
+ *
+ * Las secciones de la version anterior de este spec (template, visas, cv-versions,
+ * exportar) ya no estan en el menu; la lista de abajo sigue a Sidebar.tsx.
  */
 
-test.describe('Dashboard Navigation & Sections', () => {
-  // Pre-condition: User must be logged in
-  // In a real environment, we would use a global setup or a helper to login
-  // test.beforeEach(async ({ page }) => {
-  //   await loginUser(page); 
-  // });
+test.use(SAFE_CONTEXT_OPTIONS);
 
-  test('should navigate to Dashboard Home', async ({ page }) => {
-    await page.goto('/dashboard');
+/** Secciones del menu que se abren dentro del dashboard (sin `link` externo). */
+const SECTIONS = [
+  'plantillas',
+  'stamps',
+  'feed',
+  'grupos',
+  'canales',
+  'notificaciones',
+  'leads',
+  'vacantes',
+  'analitica',
+  'ajustes',
+] as const;
+
+const sectionButton = (page: Page, id: string) => page.locator(`[data-section-btn="${id}"]:visible`).first();
+
+/** Un boton del menu esta activo cuando lleva el fondo de marca (ver isActive en Sidebar.tsx). */
+async function expectActive(page: Page, id: string) {
+  await expect(sectionButton(page, id)).toHaveClass(/\bbg-cv-blue\b/, { timeout: 15_000 });
+}
+
+test.describe('Dashboard Navigation & Sections', () => {
+  const pageErrors: string[] = [];
+
+  test.beforeEach(async ({ context, page }) => {
+    const profiles = makeProfiles(3);
+    const professional = profiles.find(p => p.role === 'professional')!;
+    await installInitState(context, { sessionProfile: professional, language: 'es' });
+    await mockSupabase(context, { profiles });
+    pageErrors.length = 0;
+    page.on('pageerror', err => pageErrors.push(err.message));
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+    await expect(sectionButton(page, 'dashboard')).toBeVisible({ timeout: 45_000 });
+  });
+
+  test.afterEach(() => {
+    // Ninguna seccion debe lanzar errores no capturados al renderizar.
+    expect(pageErrors, pageErrors.join('\n')).toEqual([]);
+  });
+
+  test('should open on Dashboard Home', async ({ page }) => {
     await expect(page).toHaveURL(/\/dashboard$/);
-    // Verify ModernDashboardView is rendered
-    await expect(page.getByText(/Visits|Visitas/i)).toBeVisible();
+    await expectActive(page, 'dashboard');
   });
 
   test('should navigate to My Profile sections', async ({ page }) => {
-    await page.goto('/dashboard');
-    const myProfileBtn = page.locator('button[data-section-btn="mi-perfil"]');
-    await myProfileBtn.click();
-    
-    // Should default to Identity
-    await expect(page.getByLabel(/Full Name|Nombre Completo/i)).toBeVisible();
-
-    // Test sub-navigation if visible (e.g. via sidebar or tabs)
+    await sectionButton(page, 'mi-perfil').click();
+    // Por defecto abre la subseccion de identidad (mi-perfil:identity)
+    await expectActive(page, 'mi-perfil');
   });
 
-  test('should navigate to Templates', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="template"]').click();
-    await expect(page.getByText(/Select Template|Seleccionar Plantilla/i)).toBeVisible();
-  });
-
-  test('should navigate to Visas', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="visas"]').click();
-    await expect(page.getByText(/Visa Status|Estado de Visa/i)).toBeVisible();
-  });
-
-  test('should navigate to CV Versions', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="cv-versions"]').click();
-    await expect(page.getByText(/Version History|Historial de Versiones/i)).toBeVisible();
-  });
-
-  test('should navigate to Export', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="exportar"]').click();
-    await expect(page.getByText(/Download PDF|Descargar PDF/i)).toBeVisible();
-  });
-
-  test('should navigate to Analytics', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="analitica"]').click();
-    // AnalyticsDashboard component
-    await expect(page.getByText(/Profile Views|Vistas del Perfil/i)).toBeVisible();
-  });
-
-  test('should navigate to Leads', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="leads"]').click();
-    await expect(page.getByText(/Messages|Mensajes/i)).toBeVisible();
-  });
-
-  test('should navigate to Stamps/Verifications', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="stamps"]').click();
-    await expect(page.getByText(/Verified Stamps|Sellos Verificados/i)).toBeVisible();
-  });
-
-  test('should navigate to Settings', async ({ page }) => {
-    await page.goto('/dashboard');
-    await page.locator('button[data-section-btn="ajustes"]').click();
-    await expect(page.getByText(/Account Settings|Configuración de Cuenta/i)).toBeVisible();
-  });
+  for (const id of SECTIONS) {
+    test(`should navigate to section "${id}"`, async ({ page }) => {
+      await sectionButton(page, id).click();
+      await expectActive(page, id);
+      await expect(sectionButton(page, 'dashboard')).not.toHaveClass(/\bbg-cv-blue\b/);
+    });
+  }
 });

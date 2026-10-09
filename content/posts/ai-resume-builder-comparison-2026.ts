@@ -271,7 +271,7 @@ When discussing **AI resume builder comparison** in the context of advanced aspe
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of AI resume builder comparison](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of AI resume builder comparison}
+![Advanced aspects of AI resume builder comparison](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80){caption:Advanced aspects of AI resume builder comparison}
 
 ## How YourCVPassport helps you with AI resume builder comparison
 

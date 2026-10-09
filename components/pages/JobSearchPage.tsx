@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
 import {
@@ -18,6 +18,20 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
+
+// SEO del listado de empleos. /jobs es la version inglesa y /empleos la espanola.
+const JOBS_SEO = {
+  es: {
+    title: 'Buscar empleo - Encuentra tu próxima oportunidad',
+    description: 'Consulta ofertas de empleo de empresas verificadas. Filtra por ubicación, nivel de experiencia y modalidad, y postúlate con tu perfil de CV verificado.',
+    keywords: 'buscar empleo, ofertas de trabajo, empleo remoto, empresas verificadas, oportunidades profesionales',
+  },
+  en: {
+    title: 'Job Search - Find Your Next Opportunity',
+    description: 'Browse job opportunities from verified companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile.',
+    keywords: 'job search, job opportunities, remote jobs, verified employers, career opportunities',
+  },
+} as const;
 
 interface JobPosting {
   id: string;
@@ -48,9 +62,20 @@ interface JobPosting {
 
 const JobSearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const t = useTranslations();
+
+  // /empleos fija el espanol y /jobs el ingles (estas rutas no estan en routeConfig,
+  // asi que LanguageContext no las detecta por la URL).
+  const pathLang = location.pathname.startsWith('/empleos') ? 'es' : 'en';
+  useEffect(() => {
+    if (lang !== pathLang) setLang(pathLang);
+    // Solo al entrar en la ruta: el selector de idioma puede cambiarlo despues.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathLang]);
+  const jobsBasePath = pathLang === 'es' ? '/empleos' : '/jobs';
 
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
@@ -193,11 +218,10 @@ const JobSearchPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cv-light-gray dark:bg-dark-bg-primary">
       <PageSEO
-        title="Job Search - Find Your Next Opportunity"
-        description="Browse verified job opportunities from top companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile."
-        keywords="job search, job opportunities, remote jobs, verified employers, career opportunities"
-        lang={lang}
-        canonical="https://yourcvpassport.com/jobs"
+        title={JOBS_SEO[pathLang].title}
+        description={JOBS_SEO[pathLang].description}
+        keywords={JOBS_SEO[pathLang].keywords}
+        lang={pathLang}
       />
       {/* Hero Section */}
       <section className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border">
@@ -431,7 +455,7 @@ const JobSearchPage: React.FC = () => {
             {jobs.map((job, index) => (
               <React.Fragment key={job.id}>
                 <div
-                  onClick={() => navigate(`/jobs/${job.slug}`)}
+                  onClick={() => navigate(`${jobsBasePath}/${job.slug}`)}
                   className={`group bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-lg shadow-lg dark:shadow-2xl hover:shadow-xl dark:hover:shadow-cv-blue-light/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer p-6 ${
                     !user && index >= 5 ? 'opacity-60 blur-sm pointer-events-none' : ''
                   }`}

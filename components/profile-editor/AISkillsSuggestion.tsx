@@ -2,7 +2,7 @@
  * AI Skills Suggestion Component
  *
  * Sugiere habilidades faltantes basadas en las experiencias del usuario
- * usando inteligencia artificial (Gemini)
+ * usando inteligencia artificial (Gemini, via la Edge Function ai-cv-assistant)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -252,11 +252,12 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
       )}
 
       {/* Header & Analyze Button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <SparklesIcon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-          <div>
-            <div className="flex items-center gap-2">
+      {/* En movil se apila: en fila, el boton se salia de la tarjeta y quedaba tapado. */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <SparklesIcon className="w-7 h-7 flex-shrink-0 text-purple-600 dark:text-purple-400" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
                 {t.profileEditor.aiSkills.title}
               </h3>
@@ -278,7 +279,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
         <button
           onClick={analyzeSuggestSkills}
           disabled={isAnalyzing || (aiAccessInfo?.remaining === 0)}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+          className={`flex flex-shrink-0 items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
             aiAccessInfo?.remaining === 0
               ? 'bg-gray-400 cursor-not-allowed text-gray-200'
               : 'bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600'
@@ -310,7 +311,7 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
+        <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4">
           <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
         </div>
       )}

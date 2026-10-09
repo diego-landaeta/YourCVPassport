@@ -9,6 +9,7 @@ import PageSEO from './shared/PageSEO';
 import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 import HeroImage from './landing/HeroImage';
+import { activateOnKey } from './shared/a11y';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -20,7 +21,7 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 };
 
 const TemplateCard: React.FC<{ title: string; imageUrl: string; onClick: () => void }> = ({ title, imageUrl, onClick }) => (
-  <div
+  <div role="button" tabIndex={0} onKeyDown={activateOnKey(onClick)}
     onClick={onClick}
     className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-[3/4] cursor-pointer"
   >
@@ -65,7 +66,7 @@ const ATSExportPage: React.FC = () => {
                     <div className="w-96 h-96 bg-cv-green/10 rounded-full filter blur-3xl"></div>
                 </div>
                 <div className="max-w-7xl mx-auto z-10 relative">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary leading-tight">
@@ -306,7 +307,7 @@ const ATSExportPage: React.FC = () => {
                         {/* Template title */}
                         <div className="bg-gradient-to-r from-cv-blue to-cv-blue-dark p-6">
                             <h3 className="text-2xl font-bold text-white">{selectedTemplate.title}</h3>
-                            <p className="text-white/80 mt-1">Click en la imagen para descargar o cerrar para volver</p>
+                            <p className="text-white/80 mt-1">{lang === 'es' ? 'Haz clic en la imagen para descargarla o cierra para volver' : 'Click the image to download it or close to go back'}</p>
                         </div>
 
                         {/* Template image */}

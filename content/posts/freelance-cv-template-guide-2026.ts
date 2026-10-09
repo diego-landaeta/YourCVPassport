@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **freelance CV template**:
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of freelance CV template](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Advanced aspects of freelance CV template}
+![Advanced aspects of freelance CV template](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of freelance CV template}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your freelance CV template approach for each company increases your success rate by up to 60%.
@@ -271,7 +271,7 @@ When discussing **freelance CV template** in the context of advanced aspects of 
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of freelance CV template](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of freelance CV template}
+![Advanced aspects of freelance CV template](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Advanced aspects of freelance CV template}
 
 ## How YourCVPassport helps you with freelance CV template
 

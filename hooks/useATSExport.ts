@@ -7,13 +7,23 @@
  */
 
 import { useState } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { Document, Packer } from 'docx';
-import { saveAs } from 'file-saver';
 import { supabase } from '../supabase/client';
 import { ATSTemplateType } from '../types/ats-export.types';
-import { FullProfileData, Stamp } from '../types';
-import { generateDOCX, generateDOCXFileName } from '../utils/docx/templates';
+
+// @react-pdf/renderer (~1,6 MB), docx y file-saver se importan bajo demanda, al exportar:
+// importarlos arriba los metia en el chunk del dashboard (DashboardContent ->
+// CVVersionsSection -> este hook) aunque el usuario nunca exportase.
+
+/** URL base de las Edge Functions, sacada del cliente de Supabase (supabase/client.ts). */
+function getFunctionsBaseUrl(): string {
+  // supabase-js no la expone publicamente; functions.invoke no sirve aqui porque
+  // devolveria el DOCX como texto. Si algun dia cambia, se cae al export en cliente.
+  const functionsUrl = (supabase as unknown as { functionsUrl?: URL }).functionsUrl;
+  if (!functionsUrl?.href) {
+    throw new Error('Supabase functions URL not available');
+  }
+  return functionsUrl.href.replace(/\/$/, '');
+}
 
 interface UseATSExportOptions {
   preferServerSide?: boolean; // Use server-side generation if available
@@ -59,7 +69,7 @@ export function useATSExport(options: UseATSExportOptions = {}) {
 
     // Call Edge Function
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${endpoint}`,
+      `${getFunctionsBaseUrl()}/${endpoint}`,
       {
         method: 'POST',
         headers: {
@@ -106,6 +116,7 @@ export function useATSExport(options: UseATSExportOptions = {}) {
     setProgress(20);
 
     // Generate PDF blob
+    const { pdf } = await import('@react-pdf/renderer');
     const blob = await pdf(document).toBlob();
 
     setProgress(100);
@@ -124,6 +135,10 @@ export function useATSExport(options: UseATSExportOptions = {}) {
     setProgress(20);
 
     // Generate DOCX document
+    const [{ Packer }, { generateDOCX }] = await Promise.all([
+      import('docx'),
+      import('../utils/docx/templates'),
+    ]);
     const doc = generateDOCX(processedData, template, language);
 
     setProgress(60);
@@ -211,7 +226,8 @@ export function useATSExport(options: UseATSExportOptions = {}) {
   /**
    * Download file (PDF or DOCX)
    */
-  const downloadFile = (blob: Blob, fileName: string) => {
+  const downloadFile = async (blob: Blob, fileName: string) => {
+    const { saveAs } = await import('file-saver');
     saveAs(blob, fileName);
   };
 
@@ -236,13 +252,14 @@ export function useATSExport(options: UseATSExportOptions = {}) {
       fileName
     );
 
-    downloadFile(blob, generatedFileName);
+    await downloadFile(blob, generatedFileName);
   };
 
   /**
    * Get preview URL (client-side only)
    */
   const getPreviewURL = async (document: React.ReactElement): Promise<string> => {
+    const { pdf } = await import('@react-pdf/renderer');
     const blob = await pdf(document).toBlob();
     return URL.createObjectURL(blob);
   };
