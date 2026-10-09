@@ -126,3 +126,8 @@ playwright-report/
 
 # Windows null device artifact
 nul
+
+# Claves locales: nunca al repositorio (#286)
+.env
+.env.local
+.env.*.local

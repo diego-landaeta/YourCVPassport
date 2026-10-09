@@ -41,7 +41,7 @@ echo ""
 # Ve a: Project Settings > Edge Functions > Manage secrets
 
 echo "Setting RESEND_API_KEY..."
-supabase secrets set RESEND_API_KEY=re_Ancd1uP3_2VPxp32mKewFD61LvVPPny61
+supabase secrets set RESEND_API_KEY="${RESEND_API_KEY:?Pon RESEND_API_KEY en el entorno}"
 
 echo "Setting SENDER_EMAIL..."
 supabase secrets set SENDER_EMAIL=no-reply@yourcvpassport.com
@@ -50,7 +50,7 @@ echo "Setting SUPABASE_URL..."
 supabase secrets set SUPABASE_URL=https://djehzlzombqrzzuchcef.supabase.co
 
 echo "Setting SUPABASE_SERVICE_ROLE_KEY..."
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqZWh6bHpvbWJxcnp6dWNoY2VmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDYwMDY0NCwiZXhwIjoyMDc2MTc2NjQ0fQ.hOg6MReR79s7UmrTtTa05etDbF3kdbDC3fjb5ndoLwg
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY="${SUPABASE_SERVICE_ROLE_KEY:?Pon SUPABASE_SERVICE_ROLE_KEY en el entorno}"
 
 echo ""
 echo "🎉 Signup function deployed and configured!"
