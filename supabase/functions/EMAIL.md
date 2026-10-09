@@ -8,6 +8,25 @@ Antes se usaba Resend, pero el dominio nunca llegó a verificarse allí y todos 
 envíos fallaban (errores #1 y #12 del informe de testeo). Ya no queda ninguna
 referencia a Resend ni a `RESEND_API_KEY` en las funciones.
 
+## Cómo salen los correos (producción, 2026-10-08)
+
+```
+Edge Functions ──> _shared/email.ts ──> relé del servidor web (deploy/mail-relay/) ──> Brevo
+Supabase Auth ──(Send Email Hook)──> send-auth-email ──┘
+```
+
+- **Relé:** Brevo tiene activada la lista de IPs autorizadas y rechaza las IPs de
+  las Edge Functions (`401 unrecognised IP address`). El servidor web
+  (72.60.90.135) sí está autorizado; las funciones envían a
+  `https://yourcvpassport.com/api/mail-relay` (secretos `EMAIL_RELAY_URL` y
+  `EMAIL_RELAY_SECRET`). Sin esos secretos, `_shared/brevoRequest.ts` llama a
+  Brevo directamente. Detalle en `deploy/mail-relay/README.md`.
+- **Supabase Auth** ya no usa SMTP: el *Send Email Hook* llama a `send-auth-email`
+  (firma Standard Webhooks, secreto `SEND_EMAIL_HOOK_SECRET`), que manda con las
+  plantillas de la marca: alta, invitación, recuperación, magic link, cambio de
+  email (dos correos en modo seguro), reautenticación y avisos de seguridad.
+  Desplegar con `--no-verify-jwt`. Resend ya no se usa en ningún sitio.
+
 ## Correos (plantillas)
 
 Seis correos, todos sobre la misma plantilla base (`_shared/emailLayout.ts`:
@@ -23,6 +42,7 @@ datos escapados y URLs solo http(s)/mailto). El contenido de cada uno está en
 | Código del sello de correo | `verificationCodeEmail` | `send-verification-email` |
 | Empresa aprobada / rechazada | `companyApprovedEmail` / `companyRejectedEmail` | `company-registration-email` |
 | Consulta de prensa (interno) | `pressContactEmail` | `newsletter-contact` |
+| Correos propios de Supabase Auth (invitación, cambio de email, reautenticación, avisos) | `inviteEmail`, `emailChangeEmail`, `reauthenticationEmail`, `accountNoticeEmail` | `send-auth-email` |
 
 Retiradas (2026-10-08): `send-email` (8 plantillas que disparaban triggers de
 Postgres vía `send_email_notification()`, que necesita `app.settings.*` y no
