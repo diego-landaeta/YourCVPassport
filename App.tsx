@@ -1,6 +1,6 @@
 
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,8 +8,10 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
-import { routeConfig } from './config/routeConfig';
+import { routeConfig, routeRedirects } from './config/routeConfig';
+import { getRedirectPath } from './utils/canonicalUrl';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import Breadcrumbs from './components/shared/Breadcrumbs';
 import { QueryProvider } from './hooks/useQueryClient';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
@@ -40,6 +42,10 @@ const ConfirmPage = lazy(() => import('./pages/auth/ConfirmPage'));
 
 // Manager pages (rol profile_manager: gestiona varios perfiles)
 const ManagerProtectedRoute = lazy(() => import('./components/manager/ManagerProtectedRoute'));
+const ManagerLayout = lazy(() => import('./components/manager/ManagerLayout'));
+const ManagerAnalytics = lazy(() => import('./components/manager/ManagerAnalytics'));
+const ManagerProfileAnalytics = lazy(() => import('./components/manager/ManagerProfileAnalytics'));
+const ManagerBatchReview = lazy(() => import('./components/manager/ManagerBatchReview'));
 const ManagerDashboard = lazy(() => import('./components/manager/ManagerDashboard'));
 const ManagedProfileEditor = lazy(() => import('./components/manager/ManagedProfileEditor'));
 
@@ -77,6 +83,36 @@ const CommunityRoute: React.FC = () => {
   return <PublicFeedPage />;
 };
 
+// El admin no tiene uso social: /comunidad, /feed y las vistas de publicaciones le
+// llevan a su panel. Al resto (y a visitantes sin sesión) no les cambia nada.
+const NoAdminSocialRoute: React.FC = () => {
+  const { session, profile, profileLoading } = useAuth();
+  // Con sesión y rol aún desconocido se muestra la carga (como CommunityRoute) para
+  // que el admin no vea un instante la comunidad o la publicación.
+  if (session && profileLoading && !profile) return <LoadingSpinner />;
+  if (session && profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <Outlet />;
+};
+
+// /dashboard/<lo-que-sea> no existe: 404 para todos salvo el admin, que va a su panel.
+// Mientras el rol es desconocido se muestra la carga para no enseñar el 404 al admin.
+const DashboardFallbackRoute: React.FC = () => {
+  const { session, profile, profileLoading } = useAuth();
+  if (session && profileLoading && !profile) return <LoadingSpinner />;
+  if (session && profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <NotFoundPage />;
+};
+
+// Rutas fusionadas (/nosotros/mision) y enlaces antiguos con prefijo de idioma
+// (/es/pricing, /es/companies/plans...): redireccion a la ruta vigente conservando
+// query y hash. En produccion nginx/server.mjs ya responden 301 antes de llegar aqui.
+const RedirectRoute: React.FC = () => {
+  const { pathname, search, hash } = useLocation();
+  const target = getRedirectPath(pathname);
+  if (!target || target === pathname) return <NotFoundPage />;
+  return <Navigate to={`${target}${search}${hash}`} replace />;
+};
+
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
     // The useLanguage hook will ensure the correct content is rendered based on the URL prefix.
@@ -100,7 +136,7 @@ const AppContent: React.FC = () => {
           <Route path="/confirm" element={<ConfirmPage />} />
 
           {/* Product pages */}
-          <Route path="/product/ai" element={<AIProductPage />} />
+          <Route path="/product/ai" element={<><Breadcrumbs /><AIProductPage /></>} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
@@ -109,6 +145,7 @@ const AppContent: React.FC = () => {
             <Route path="/dashboard/visas/:id/edit" element={<VisaFormPage />} />
             <Route path="/dashboard/leads" element={<LeadsPage />} />
           </Route>
+          <Route path="/dashboard/*" element={<DashboardFallbackRoute />} />
 
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
@@ -117,18 +154,25 @@ const AppContent: React.FC = () => {
 
           {/* Manager routes (rol profile_manager: gestiona varios perfiles) */}
           <Route element={<ManagerProtectedRoute />}>
-            <Route path="/manager" element={<ManagerDashboard />} />
-            <Route path="/manager/edit/:profileId" element={<ManagedProfileEditor />} />
+            <Route element={<ManagerLayout />}>
+              <Route path="/manager" element={<ManagerDashboard />} />
+              <Route path="/manager/analiticas" element={<ManagerAnalytics />} />
+              <Route path="/manager/analiticas/:profileId" element={<ManagerProfileAnalytics />} />
+              <Route path="/manager/revision" element={<ManagerBatchReview />} />
+              <Route path="/manager/edit/:profileId" element={<ManagedProfileEditor />} />
+            </Route>
           </Route>
 
-          {/* Community: full dashboard for logged-in users, public page otherwise */}
-          <Route path="/feed" element={<CommunityRoute />} />
-          <Route path="/comunidad" element={<CommunityRoute />} />
+          <Route element={<NoAdminSocialRoute />}>
+            {/* Community: full dashboard for logged-in users, public page otherwise */}
+            <Route path="/feed" element={<CommunityRoute />} />
+            <Route path="/comunidad" element={<CommunityRoute />} />
 
-          {/* Individual post view — public, noindex */}
-          <Route path="/feed/post/:id" element={<PostViewPage />} />
-          <Route path="/comunidad/post/:id" element={<PostViewPage />} />
-          <Route path="/p/:id" element={<PostViewPage />} />
+            {/* Individual post view — public, noindex */}
+            <Route path="/feed/post/:id" element={<PostViewPage />} />
+            <Route path="/comunidad/post/:id" element={<PostViewPage />} />
+            <Route path="/p/:id" element={<PostViewPage />} />
+          </Route>
 
           {/* Public Job Search */}
           <Route path="/jobs" element={<JobSearchPage />} />
@@ -155,7 +199,9 @@ const AppContent: React.FC = () => {
             <Route path="/company/jobs/applications" element={<JobApplicationsPage />} />
           </Route>
 
-          {/* Dynamically generated routes from routeConfig */}
+          {/* Dynamically generated routes from routeConfig.
+              Breadcrumbs se pinta una sola vez aqui para todas las paginas de marketing
+              (devuelve null en rutas internas como dev/*). */}
           {uniqueRoutes.map((route) => {
             const Component = route.component;
             const routeProps = route.props || {};
@@ -163,11 +209,18 @@ const AppContent: React.FC = () => {
               <React.Fragment key={route.path}>
                 <Route
                   path={`/${route.path}`}
-                  element={<Component {...routeProps} />}
+                  element={<><Breadcrumbs /><Component {...routeProps} /></>}
                 />
               </React.Fragment>
             );
           })}
+
+          {/* Rutas fusionadas y prefijos /es, /en de la version antigua */}
+          {routeRedirects.map(({ from }) => (
+            <Route key={from} path={from} element={<RedirectRoute />} />
+          ))}
+          <Route path="/es/*" element={<RedirectRoute />} />
+          <Route path="/en/*" element={<RedirectRoute />} />
 
           {/* Public CV Route */}
           <Route path="/cv/:slug" element={<ProfileViewPage />} />

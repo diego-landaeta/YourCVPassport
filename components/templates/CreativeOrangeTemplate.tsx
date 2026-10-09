@@ -1,8 +1,10 @@
 import React from 'react';
 import { FullProfileData } from '../../types';
-import { SparklesIcon, FolderIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { FolderIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { HOVER_ONLY_EXPORT_VISIBLE } from './templateHelpers';
 
 interface CreativeOrangeTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,7 @@ interface CreativeOrangeTemplateProps {
 const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, color }) => {
     const { profile, portfolioItems = [] } = data || {};
     const accentColor = color || '#EA580C'; // Default to orange-600
+    const { L, lang } = useTemplateLabels();
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-dark-bg-primary dark:to-dark-bg-secondary font-sans">
@@ -22,14 +25,14 @@ const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, c
                             {profile.headline}
                         </span>
                         <h1 className="text-7xl lg:text-8xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
-                            Hi, I'm<br/>
+                            {L.hiIm}<br/>
                             <span className="bg-gradient-to-r bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(135deg, ${accentColor}, #FBBF24)` }}>
                                 {profile.full_name?.split(' ')[0]}
                             </span>
                         </h1>
                         {profile.country_code && (
                             <div className="flex items-center justify-center md:justify-start gap-2">
-                                <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                                <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                             </div>
                         )}
                         <p className="text-2xl leading-relaxed text-gray-700 dark:text-gray-300 font-light">
@@ -63,23 +66,18 @@ const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, c
                                 </div>
                             )}
                         </div>
-                        <div className="absolute top-16 left-0 bg-white dark:bg-dark-bg-secondary px-10 py-6 rounded-2xl shadow-2xl font-black text-2xl text-gray-900 dark:text-white flex items-center gap-3 hover:-translate-y-1 transition-transform">
-                            <TrophyIcon className="w-8 h-8" style={{ color: accentColor }} />
-                            10+ Years
-                        </div>
-                        <div className="absolute bottom-32 right-0 bg-white dark:bg-dark-bg-secondary px-10 py-6 rounded-2xl shadow-2xl font-black text-2xl text-gray-900 dark:text-white flex items-center gap-3 hover:-translate-y-1 transition-transform">
-                            <SparklesIcon className="w-8 h-8" style={{ color: accentColor }} />
-                            50+ Awards
-                        </div>
+                        {/* Antes había dos insignias fijas ("10+ Years", "50+ Awards") que
+                            atribuían a todos los perfiles datos inventados: se han quitado. */}
                     </div>
                 </div>
 
+                {portfolioItems.length > 0 && (
                 <div className="mb-16">
                     <div className="flex items-center justify-center gap-4 mb-12">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #FBBF24)` }}>
                             <FolderIcon className="w-6 h-6 text-white" />
                         </div>
-                        <h2 className="text-5xl font-black text-gray-900 dark:text-white">Featured Projects</h2>
+                        <h2 className="text-5xl font-black text-gray-900 dark:text-white">{L.featuredProjects}</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {portfolioItems.map((item, i) => (
@@ -101,7 +99,7 @@ const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, c
                                         }}
                                     ></div>
                                 )}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 backdrop-blur-sm">
+                                <div className={`absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 backdrop-blur-sm ${HOVER_ONLY_EXPORT_VISIBLE}`}>
                                     <div className="text-2xl font-bold mb-3">{item.title}</div>
                                     <div className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ backgroundColor: `${accentColor}`, color: 'white' }}>
                                         {item.category}
@@ -111,6 +109,7 @@ const CreativeOrangeTemplate: React.FC<CreativeOrangeTemplateProps> = ({ data, c
                         ))}
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );

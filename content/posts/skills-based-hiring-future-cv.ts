@@ -271,7 +271,7 @@ When discussing **skills based hiring CV** in the context of advanced aspects of
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of skills based hiring CV](https://images.unsplash.com/photo-1537432376149-e84978a29b46?w=800&q=80){caption:Advanced aspects of skills based hiring CV}
+![Advanced aspects of skills based hiring CV](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Advanced aspects of skills based hiring CV}
 
 ## How YourCVPassport helps you with skills based hiring CV
 

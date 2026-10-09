@@ -84,11 +84,14 @@ interface CountrySelectorProps {
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   value,
   onChange,
-  placeholder = 'Select country',
+  placeholder: placeholderProp,
   lang = 'es',
   className = ''
 }) => {
   const t = useTranslations();
+  // Sin placeholder explícito se usa el traducido (antes caía en 'Select country'
+  // fijo en inglés, también cuando el llamador pasaba una clave inexistente).
+  const placeholder = placeholderProp || t.countrySelector.placeholder;
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);

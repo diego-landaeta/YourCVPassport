@@ -11,7 +11,7 @@ In the competitive 2026 job market, mastering **side hustle on CV** has become e
 
 This comprehensive guide on **side hustle on CV** provides you with proven strategies, practical examples, and the tools you need to transform your job search. According to LinkedIn data, professionals who apply these techniques receive 60% more recruiter contacts.
 
-![side hustle on CV](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Complete guide on side hustle on CV}
+![side hustle on CV](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Complete guide on side hustle on CV}
 
 ## 1. When a side hustle strengthens your CV
 2. When to leave it off
@@ -78,7 +78,7 @@ To excel in **side hustle on CV** within this area, apply these proven strategie
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of side hustle on CV](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of side hustle on CV}
+![Advanced aspects of side hustle on CV](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Advanced aspects of side hustle on CV}
 
 ## Advanced aspects of side hustle on CV
 
@@ -292,7 +292,7 @@ Mastering **side hustle on CV** isn't just a competitive advantage — it's an a
 
 Remember: the key to success lies in constant personalization, concrete data backing your achievements, and continuous profile improvement. Your next big career move starts with an exceptional CV that reflects your true value.
 `,
-  image_url: "https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Freelance & Remote",
   is_featured: false,

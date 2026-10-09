@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase/client';
+import { PUBLIC_STAMP_COLUMNS } from '../lib/publicProfileColumns';
 import { Stamp, StampType } from '../types';
 import {
     CheckBadgeIcon,
@@ -40,8 +41,8 @@ const VerifiedStampsBadge: React.FC<VerifiedStampsBadgeProps> = ({
         try {
             setLoading(true);
             const { data, error } = await supabase
-                .from('stamps')
-                .select('*')
+                .from('public_stamps')
+                .select(PUBLIC_STAMP_COLUMNS)
                 .eq('profile_id', profileId)
                 .eq('status', 'VERIFIED')
                 .or('expires_at.is.null,expires_at.gt.now()');

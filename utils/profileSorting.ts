@@ -5,6 +5,8 @@
 
 export interface SortableProfile {
   id: string;
+  /** Columna pública generada (plan distinto de free). El plan exacto es privado. */
+  is_premium?: boolean | null;
   plan?: string | null;
   stamps?: Array<{ status: string }> | null;
   [key: string]: any;
@@ -15,6 +17,8 @@ export interface SortableProfile {
  * Premium plans are anything other than 'free' or null
  */
 export const isPremiumProfile = (profile: SortableProfile): boolean => {
+  // Lecturas públicas: is_premium (el plan ya no se puede leer de perfiles ajenos)
+  if (typeof profile.is_premium === 'boolean') return profile.is_premium;
   if (!profile.plan) return false;
   const planLower = profile.plan.toLowerCase();
   return planLower !== 'free' && planLower !== '';

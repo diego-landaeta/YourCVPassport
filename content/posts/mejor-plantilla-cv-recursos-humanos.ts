@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **plantilla CV recursos human
 
 Esta guía completa sobre **plantilla CV recursos humanos** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV recursos humanos](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre plantilla CV recursos humanos}
+![plantilla CV recursos humanos](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Guía completa sobre plantilla CV recursos humanos}
 
 ## 1. CV especializado para RRHH
 2. Secciones: herramientas, certificaciones, metricas
@@ -78,7 +78,7 @@ Para destacar en **plantilla CV recursos humanos** dentro de esta área, aplica 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV recursos humanos](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de plantilla CV recursos humanos}
+![Aspectos avanzados de plantilla CV recursos humanos](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Aspectos avanzados de plantilla CV recursos humanos}
 
 ## Aspectos avanzados de plantilla CV recursos humanos
 
@@ -292,7 +292,7 @@ Dominar **plantilla CV recursos humanos** no es solo una ventaja competitiva —
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Guías Profesionales",
   is_featured: false,

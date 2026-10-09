@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './shared/PageSEO';
@@ -57,7 +58,7 @@ const SecurityCompliancePage: React.FC = () => {
             {/* Hero Section */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
@@ -196,9 +197,12 @@ const SecurityCompliancePage: React.FC = () => {
                         <p className="mt-4 text-lg text-gray-600 dark:text-dark-text-secondary">
                            {pageData.finalCta.subtitle}
                         </p>
-                        <a href="#" className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
-                            {pageData.finalCta.button}
-                        </a>
+                        {/* No existe un "Centro de Confianza" como página propia (el botón iba a "#"):
+                            lleva a la política de privacidad, que es donde están las políticas publicadas,
+                            y el texto del botón dice a dónde va. */}
+                        <Link to={lang === 'es' ? '/privacidad' : '/privacy'} className="mt-8 inline-block bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-colors">
+                            {lang === 'es' ? 'Ver la política de privacidad' : 'Read the privacy policy'}
+                        </Link>
                     </AnimatedWrapper>
                 </div>
             </section>

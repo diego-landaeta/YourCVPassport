@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **academic CV guide**:
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of academic CV guide](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of academic CV guide}
+![Advanced aspects of academic CV guide](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80){caption:Advanced aspects of academic CV guide}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your academic CV guide approach for each company increases your success rate by up to 60%.

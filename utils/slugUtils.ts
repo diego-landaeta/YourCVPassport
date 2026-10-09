@@ -147,14 +147,17 @@ export const checkSlugAvailability = async (
     query.neq('id', currentUserId);
   }
 
-  const { data, error } = await query.single();
+  // maybeSingle: que no exista ninguna fila con ese slug es el caso normal
+  // (slug disponible) y no debe provocar un 406 (PGRST116) en la red.
+  const { data, error } = await query.maybeSingle();
 
-  // If error is PGRST116, it means no rows found (slug is available)
-  if (error && error.code === 'PGRST116') {
-    return true;
+  // Error real (red, permisos, varias filas...): no se puede asegurar que esté libre
+  if (error) {
+    console.warn('[slugUtils] Error checking slug availability:', error);
+    return false;
   }
 
-  // If there's data, slug is taken
+  // Sin fila = disponible; con fila = ocupado
   return !data;
 };
 

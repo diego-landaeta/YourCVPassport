@@ -218,7 +218,7 @@ To excel in **digital nomad CV guide** within this area, apply these proven stra
 - **Optimize for ATS**: Include exact keywords from the job posting
 - **Review and refine**: A single typo can cost you the interview
 
-![Advanced aspects of digital nomad CV guide](https://images.unsplash.com/photo-1587825140708-dfaf18c91193?w=800&q=80){caption:Advanced aspects of digital nomad CV guide}
+![Advanced aspects of digital nomad CV guide](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Advanced aspects of digital nomad CV guide}
 
 ## Advanced aspects of digital nomad CV guide
 

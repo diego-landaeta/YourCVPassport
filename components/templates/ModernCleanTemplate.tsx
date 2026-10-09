@@ -4,6 +4,8 @@ import { EnvelopeIcon, MapPinIcon, BriefcaseIcon, AcademicCapIcon } from '@heroi
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface ModernCleanTemplateProps {
     data: FullProfileData;
@@ -14,6 +16,8 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#6366F1'; // Default to indigo-500
     const t = useTranslations();
+    const { lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -36,57 +40,64 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
 
     return (
         <div className="min-h-screen font-sans bg-gray-50 dark:bg-dark-bg-primary">
-            <header className="relative overflow-hidden shadow-2xl" style={{ background: gradient }}>
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                </div>
-                <div className="relative p-20 text-white text-center">
-                    <div className="relative group inline-block mb-8">
-                        <div className="absolute inset-0 rounded-full blur-xl opacity-50 bg-white"></div>
-                        <div className="relative w-48 h-48 rounded-full border-6 border-white/30 shadow-2xl overflow-hidden">
-                            {profile.avatar_url ? (
-                                <img
-                                    src={profile.avatar_url}
-                                    alt={profile.full_name}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-7xl font-bold">
-                                    {profile.full_name?.charAt(0).toUpperCase()}
+            {/* El degradado va en un div interior y no en <header>: el generador de PDF
+                fuerza fondo blanco en los <header> y el texto blanco quedaba invisible. */}
+            <header className="relative">
+                <div className="relative overflow-hidden shadow-2xl" style={{ background: gradient }}>
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                    </div>
+                    <div className="relative p-20 text-white text-center">
+                        <div className="relative group inline-block mb-8">
+                            <div className="absolute inset-0 rounded-full blur-xl opacity-50 bg-white"></div>
+                            <div className="relative w-48 h-48 rounded-full border-6 border-white/30 shadow-2xl overflow-hidden">
+                                {profile.avatar_url ? (
+                                    <img
+                                        src={profile.avatar_url}
+                                        alt={profile.full_name}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-7xl font-bold">
+                                        {profile.full_name?.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <h1 className="text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{profile.full_name}</h1>
+                        <p className="text-2xl font-light opacity-95 mb-6 drop-shadow-md">{profile.headline}</p>
+                        {profile.country_code && (
+                            <div className="flex items-center justify-center gap-2 mb-6">
+                                <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
+                            </div>
+                        )}
+                        <div className="flex justify-center gap-8 flex-wrap text-base">
+                            {email && (
+                                <div className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                                    <EnvelopeIcon className="w-5 h-5" />
+                                    <span>{email}</span>
+                                </div>
+                            )}
+                            {/* Antes salía "Remote" inventado cuando no había ubicación */}
+                            {profile.location && (
+                                <div className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                                    <MapPinIcon className="w-5 h-5" />
+                                    <span>{profile.location}</span>
                                 </div>
                             )}
                         </div>
-                    </div>
-                    <h1 className="text-6xl font-extrabold mb-4 tracking-tight drop-shadow-lg">{profile.full_name}</h1>
-                    <p className="text-2xl font-light opacity-95 mb-6 drop-shadow-md">{profile.headline}</p>
-                    {profile.country_code && (
-                        <div className="flex items-center justify-center gap-2 mb-6">
-                            <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                        {/* Contact Buttons */}
+                        <div className="mt-8">
+                            <ProfileContactButtons
+                                profileId={profile.id}
+                                profileEmail={profile.email}
+                                variant="compact"
+                                accentColor={accentColor}
+                                showDownload={false}
+                            />
                         </div>
-                    )}
-                    <div className="flex justify-center gap-8 flex-wrap text-base">
-                        {profile.meta_description && (
-                            <div className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                                <EnvelopeIcon className="w-5 h-5" />
-                                <span>{profile.meta_description}</span>
-                            </div>
-                        )}
-                        <div className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                            <MapPinIcon className="w-5 h-5" />
-                            <span>{profile.location || 'Remote'}</span>
-                        </div>
-                    </div>
-                    {/* Contact Buttons */}
-                    <div className="mt-8">
-                        <ProfileContactButtons
-                            profileId={profile.id}
-                            profileEmail={profile.email}
-                            variant="compact"
-                            accentColor={accentColor}
-                            showDownload={false}
-                        />
                     </div>
                 </div>
             </header>
@@ -185,7 +196,7 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                                     </svg>
                                 </div>
                                 <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                                    {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                    {t.cvSections.certifications}
                                 </h2>
                             </div>
                             <div className="space-y-6">

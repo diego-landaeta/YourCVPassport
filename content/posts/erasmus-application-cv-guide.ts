@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **Erasmus application CV**:
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of Erasmus application CV](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of Erasmus application CV}
+![Advanced aspects of Erasmus application CV](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Advanced aspects of Erasmus application CV}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your Erasmus application CV approach for each company increases your success rate by up to 60%.

@@ -3,6 +3,8 @@ import { FullProfileData } from '../../types';
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail } from './templateHelpers';
 
 interface CreativeMinimalistTemplateProps {
     data: FullProfileData;
@@ -13,6 +15,8 @@ const CreativeMinimalistTemplate: React.FC<CreativeMinimalistTemplateProps> = ({
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#EC4899'; // Creative pink/magenta
     const t = useTranslations();
+    const { lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -42,17 +46,20 @@ const CreativeMinimalistTemplate: React.FC<CreativeMinimalistTemplateProps> = ({
                             <p className="text-xl text-gray-600 dark:text-gray-400 font-light">{profile.headline}</p>
                             {profile.country_code && (
                                 <div className="flex items-center gap-2 mt-3">
-                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400 font-light">
-                        <span>{profile.meta_description || 'N/A'}</span>
-                        <span>•</span>
-                        <span>{t.cvSections.location}</span>
-                    </div>
+                    {/* Antes: 'N/A' y la etiqueta "Ubicación" en lugar de los datos */}
+                    {(email || profile.location) && (
+                        <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400 font-light">
+                            {email && <span>{email}</span>}
+                            {email && profile.location && <span>•</span>}
+                            {profile.location && <span>{profile.location}</span>}
+                        </div>
+                    )}
                     {/* Contact Buttons */}
                     <div className="mt-6">
                         <ProfileContactButtons
@@ -96,7 +103,7 @@ const CreativeMinimalistTemplate: React.FC<CreativeMinimalistTemplateProps> = ({
                 {certifications.length > 0 && (
                     <section className="mb-12">
                         <h2 className="text-sm uppercase tracking-widest font-bold mb-6 text-gray-400">
-                            {t.cvSections?.certifications || 'Certificaciones'}
+                            {t.cvSections.certifications}
                         </h2>
                         <div className="space-y-6">
                             {certifications.map((cert, index) => (

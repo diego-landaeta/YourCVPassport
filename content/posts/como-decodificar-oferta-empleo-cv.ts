@@ -271,7 +271,7 @@ Cuando hablamos de **decodificar oferta empleo adaptar CV** en el contexto de as
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de decodificar oferta empleo adaptar CV](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de decodificar oferta empleo adaptar CV}
+![Aspectos avanzados de decodificar oferta empleo adaptar CV](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80){caption:Aspectos avanzados de decodificar oferta empleo adaptar CV}
 
 ## Cómo YourCVPassport te ayuda con decodificar oferta empleo adaptar CV
 

@@ -4,6 +4,8 @@ import { EnvelopeIcon, PhoneIcon, MapPinIcon, LinkIcon } from '@heroicons/react/
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail, safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface ProfessionalClassicTemplateProps {
     data: FullProfileData;
@@ -14,6 +16,9 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#1F2937'; // Default to gray-800
     const t = useTranslations();
+    const { lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -52,21 +57,21 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                 <p className="text-2xl text-gray-600 dark:text-gray-400 mb-4 font-light">{profile.headline}</p>
                 {profile.country_code && (
                     <div className="flex items-center justify-center gap-2 mb-6">
-                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang="es" />
+                        <CountryBadge countryCode={profile.country_code} size="md" showName={true} lang={lang} />
                     </div>
                 )}
                 <div className="flex justify-center flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
-                    {profile.meta_description && (
+                    {email && (
                         <div className="flex items-center gap-2">
                             <EnvelopeIcon className="w-4 h-4" style={{ color: accentColor }} />
-                            <span>{profile.meta_description}</span>
+                            <span>{email}</span>
                         </div>
                     )}
-                    {profile.linkedin_url && (
-                        <div className="flex items-center gap-2">
+                    {linkedinUrl && (
+                        <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="flex items-center gap-2 hover:underline">
                             <LinkIcon className="w-4 h-4" style={{ color: accentColor }} />
                             <span>LinkedIn</span>
-                        </div>
+                        </a>
                     )}
                 </div>
                 {/* Contact Buttons */}
@@ -175,7 +180,7 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                                 <div className="w-6 h-6 rounded-full" style={{ backgroundColor: accentColor }}></div>
                             </div>
                             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                                {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                {t.cvSections.certifications}
                             </h2>
                         </div>
                         <div className="space-y-6 pl-16">

@@ -202,10 +202,10 @@ export async function checkHandleAvailability(
       .from('profiles')
       .select('id, slug')
       .eq('slug', normalizedHandle)
-      .single();
+      // maybeSingle: si nadie usa el handle no hay fila, y eso no es un error (evita el 406)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 es el código cuando no se encuentra ningún resultado
+    if (error) {
       throw error;
     }
 

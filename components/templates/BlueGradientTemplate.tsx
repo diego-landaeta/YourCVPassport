@@ -2,21 +2,38 @@ import React, { useState } from 'react';
 import { FullProfileData } from '../../types';
 import { UserIcon, BriefcaseIcon, AcademicCapIcon, EnvelopeIcon, FolderIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useTemplateLabels } from './templateLabels';
+import { safeExternalUrl, publicContactEmail, EXTERNAL_LINK_PROPS, TAB_PANEL_INACTIVE, TAB_PANEL_EXPORT_GAP, TAB_EXPORT_TITLE, TAB_CONTROLS } from './templateHelpers';
 
 interface BlueGradientTemplateProps {
     data: FullProfileData;
     color?: string | null;
 }
 
+const TABS = ['about', 'resume', 'projects', 'contact'] as const;
+type Tab = typeof TABS[number];
+
 const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color }) => {
     const { profile, skills = [], experiences = [], education = [], portfolioItems = [] } = data || {};
-    const [activeTab, setActiveTab] = useState('About');
+    const [activeTab, setActiveTab] = useState<Tab>('about');
     const accentColor = color || '#6366F1'; // Default to indigo-500
     const t = useTranslations();
+    const { L } = useTemplateLabels();
 
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'Resume':
+    const tabLabels: Record<Tab, string> = {
+        about: L.tabAbout,
+        resume: L.tabResume,
+        projects: L.tabProjects,
+        contact: L.tabContact,
+    };
+
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
+    const githubUrl = safeExternalUrl(profile.github_url);
+    const email = publicContactEmail(profile.meta_description);
+
+    const renderContent = (tab: Tab) => {
+        switch (tab) {
+            case 'resume':
                 return (
                     <div className="grid md:grid-cols-2 gap-8">
                         <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
@@ -27,7 +44,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.experience}</h2>
                             </div>
                             <div className="space-y-6">
-                                {experiences.length > 0 ? experiences.map((exp, index) => (
+                                {experiences.length > 0 ? experiences.map((exp) => (
                                     <div key={exp.id} className="relative pl-8 pb-6 border-l-2 border-gray-200 dark:border-gray-700 last:border-l-0 last:pb-0">
                                         <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full ring-4 ring-white dark:ring-dark-bg-secondary -translate-x-[9px] shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}></div>
                                         <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-6 hover:shadow-md transition-all">
@@ -41,7 +58,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                             )}
                                         </div>
                                     </div>
-                                )) : <p className="text-gray-500 dark:text-gray-400">No experience listed.</p>}
+                                )) : <p className="text-gray-500 dark:text-gray-400">{L.noExperience}</p>}
                             </div>
                         </section>
                         <section className="bg-white dark:bg-dark-bg-secondary rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all">
@@ -65,57 +82,74 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                             </p>
                                         </div>
                                     </div>
-                                )) : <p className="text-gray-500 dark:text-gray-400">No education listed.</p>}
+                                )) : <p className="text-gray-500 dark:text-gray-400">{L.noEducation}</p>}
                             </div>
                         </section>
                     </div>
                 );
-            case 'Projects':
+            case 'projects':
                 return (
                     <div>
                         <div className="flex items-center justify-center gap-3 mb-12">
                             <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
                                 <FolderIcon className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white">My Projects</h2>
+                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white">{L.myProjects}</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {portfolioItems.length > 0 ? portfolioItems.map(item => (
-                                <a href={item.link || '#'} target="_blank" rel="noopener noreferrer" key={item.id} className="block bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden group">
-                                    {item.image_url && (
-                                        <div className="aspect-video w-full overflow-hidden">
-                                            <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                                        </div>
-                                    )}
-                                    <div className="p-6">
-                                        <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</div>
-                                        <div className="px-4 py-1.5 rounded-lg text-sm font-semibold mb-3 inline-block" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
-                                            {item.category}
-                                        </div>
-                                        {item.description && (
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">{item.description}</p>
+                            {portfolioItems.length > 0 ? portfolioItems.map(item => {
+                                const href = safeExternalUrl(item.link || item.url);
+                                const cardClass = 'block bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-xl overflow-hidden group';
+                                const body = (
+                                    <>
+                                        {item.image_url && (
+                                            <div className="aspect-video w-full overflow-hidden">
+                                                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                                            </div>
                                         )}
-                                        <span className="text-sm font-medium hover:underline" style={{ color: accentColor }}>View Project →</span>
+                                        <div className="p-6">
+                                            <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</div>
+                                            {item.category && (
+                                                <div className="px-4 py-1.5 rounded-lg text-sm font-semibold mb-3 inline-block" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
+                                                    {item.category}
+                                                </div>
+                                            )}
+                                            {item.description && (
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">{item.description}</p>
+                                            )}
+                                            {href && (
+                                                <span className="text-sm font-medium hover:underline" style={{ color: accentColor }}>{L.viewProject} →</span>
+                                            )}
+                                        </div>
+                                    </>
+                                );
+                                return href ? (
+                                    <a href={href} {...EXTERNAL_LINK_PROPS} key={item.id} className={`${cardClass} hover:shadow-2xl transition-all hover:-translate-y-1`}>
+                                        {body}
+                                    </a>
+                                ) : (
+                                    <div key={item.id} className={cardClass}>
+                                        {body}
                                     </div>
-                                </a>
-                            )) : <p className="text-center text-gray-500 dark:text-gray-400 col-span-full">No projects to display.</p>}
+                                );
+                            }) : <p className="text-center text-gray-500 dark:text-gray-400 col-span-full">{L.noProjects}</p>}
                         </div>
                     </div>
                 );
-            case 'Contact':
+            case 'contact':
                 return (
                     <div className="text-center max-w-2xl mx-auto">
                         <div className="bg-white dark:bg-dark-bg-secondary p-10 rounded-2xl shadow-xl">
                             <div className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
                                 <EnvelopeIcon className="w-8 h-8 text-white" />
                             </div>
-                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Get in Touch</h2>
+                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">{L.getInTouch}</h2>
                             <div className="space-y-4 text-lg text-gray-700 dark:text-gray-300">
-                                {profile.meta_description && (
+                                {email && (
                                     <p className="flex items-center justify-center gap-2">
                                         <strong>{t.cvSections.email}:</strong>
-                                        <a href={`mailto:${profile.meta_description}`} className="hover:underline" style={{ color: accentColor }}>
-                                            {profile.meta_description}
+                                        <a href={`mailto:${email}`} className="hover:underline" style={{ color: accentColor }}>
+                                            {email}
                                         </a>
                                     </p>
                                 )}
@@ -124,23 +158,23 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                         <strong>{t.cvSections.phone}:</strong> {profile.phone}
                                     </p>
                                 )}
-                                {profile.linkedin_url && (
+                                {linkedinUrl && (
                                     <p className="flex items-center justify-center gap-2">
                                         <strong>LinkedIn:</strong>
-                                        <a href={profile.linkedin_url} className="hover:underline" style={{ color: accentColor }}>Profile</a>
+                                        <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="hover:underline" style={{ color: accentColor }}>{L.profileLink}</a>
                                     </p>
                                 )}
-                                {profile.github_url && (
+                                {githubUrl && (
                                     <p className="flex items-center justify-center gap-2">
                                         <strong>GitHub:</strong>
-                                        <a href={profile.github_url} className="hover:underline" style={{ color: accentColor }}>Profile</a>
+                                        <a href={githubUrl} {...EXTERNAL_LINK_PROPS} className="hover:underline" style={{ color: accentColor }}>{L.profileLink}</a>
                                     </p>
                                 )}
                             </div>
                         </div>
                     </div>
                 );
-            case 'About':
+            case 'about':
             default:
                 return (
                      <>
@@ -149,7 +183,7 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                                 <UserIcon className="w-8 h-8 text-white" />
                             </div>
                             <h2 className="text-4xl mb-6 text-gray-900 dark:text-white font-bold">
-                                Hello, I'm {profile.full_name?.split(' ')[0]}
+                                {L.helloIm(profile.full_name?.split(' ')[0] || '')}
                             </h2>
                             <p className="text-xl leading-relaxed text-gray-700 dark:text-gray-300">{profile.summary}</p>
                         </div>
@@ -201,27 +235,46 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
                     </div>
                 </div>
 
-                <div className="flex justify-center gap-4 md:gap-6 mb-16 p-3 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-xl">
-                    {['About', 'Resume', 'Projects', 'Contact'].map(tab => (
-                        <div
+                {/* Pestañas: en pantalla, una a la vez; al imprimir/exportar se ocultan
+                    y se muestran todas las secciones seguidas (ver templateHelpers). */}
+                <div role="tablist" className={`flex flex-wrap justify-center gap-4 md:gap-6 mb-16 p-3 bg-white dark:bg-dark-bg-secondary rounded-2xl shadow-xl ${TAB_CONTROLS}`}>
+                    {TABS.map(tab => (
+                        <button
                             key={tab}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeTab === tab}
+                            aria-controls={`gradient-blue-panel-${tab}`}
                             onClick={() => setActiveTab(tab)}
                             className={`text-lg font-bold cursor-pointer transition-all px-6 py-4 rounded-xl ${
                                 activeTab === tab
                                     ? 'shadow-lg'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                             style={activeTab === tab ? {
                                 background: `linear-gradient(135deg, ${accentColor}, #818CF8)`,
                                 color: 'white'
                             } : {}}
                         >
-                            {tab}
-                        </div>
+                            {tabLabels[tab]}
+                        </button>
                     ))}
                 </div>
 
-                {renderContent()}
+                {TABS.map(tab => (
+                    <div
+                        key={tab}
+                        id={`gradient-blue-panel-${tab}`}
+                        role="tabpanel"
+                        data-cv-tab={tab}
+                        className={`${activeTab === tab ? '' : TAB_PANEL_INACTIVE} ${TAB_PANEL_EXPORT_GAP}`}
+                    >
+                        <h2 className={`${TAB_EXPORT_TITLE} text-3xl font-extrabold mb-8 pb-3 border-b-4 text-gray-900 dark:text-white`} style={{ borderColor: accentColor }}>
+                            {tabLabels[tab]}
+                        </h2>
+                        {renderContent(tab)}
+                    </div>
+                ))}
             </div>
         </div>
     );

@@ -222,7 +222,8 @@ export async function loadManagedProfileData(profileId: string) {
     { data: visas },
     { data: certifications },
   ] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', profileId).single(),
+    // Perfil gestionado completo (email, phone, salario...): vista profiles_full
+    supabase.from('profiles_full').select('*').eq('id', profileId).single(),
     supabase.from('experiences').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
     supabase.from('education').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
     supabase.from('skills').select('*').eq('profile_id', profileId).order('created_at', { ascending: false }),

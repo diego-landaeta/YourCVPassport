@@ -1,0 +1,65 @@
+name: QA (tipos y Playwright)
+
+# Comprobaciones sin secretos y sin tocar produccion:
+# - tsc --noEmit
+# - specs antiguos de tests/*.spec.ts (config raiz, Supabase mockeado)
+# - suite QA tests/qa en Chromium, SOLO los *.local.spec.ts (Supabase mockeado).
+#   Los *.prod.spec.ts (GET contra produccion) no se ejecutan en CI.
+# Ver tests/qa/README.md.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'trabajo/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
+
+      - name: Instalar Chromium de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Comprobar tipos
+        id: tipos
+        run: npx tsc --noEmit
+
+      - name: Specs de la config raiz (Supabase mockeado)
+        run: npx playwright test
+
+      - name: Suite QA local en Chromium (sin *.prod.spec.ts)
+        # Se ejecuta aunque falle el paso anterior: asi el informe trae las dos suites.
+        if: ${{ !cancelled() && steps.tipos.outcome == 'success' }}
+        run: npx playwright test -c tests/qa/playwright.qa.config.ts --project=chromium 'local\.spec\.ts'
+
+      - name: Subir informe de Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore

@@ -22,6 +22,10 @@ const CustomDomainPage: React.FC = () => {
     const { openModal } = useAuth();
     const t = useTranslations();
     const { lang } = useLanguage();
+    // Tarjeta de visita de ejemplo en el idioma de la página (antes siempre 'Jane Doe')
+    const sampleCard = lang === 'es'
+        ? { name: 'Laura Martín', role: 'Product Manager sénior', slug: 'lauramartin', email: 'laura.martin@email.com' }
+        : { name: 'Jane Doe', role: 'Senior Product Manager', slug: 'janedoe', email: 'jane.doe@email.com' };
 
     const seoTitle = lang === 'es'
         ? 'Dominio Personalizado para tu CV'
@@ -46,7 +50,7 @@ const CustomDomainPage: React.FC = () => {
             {/* Hero Section */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4 overflow-hidden">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                         <AnimatedWrapper>
                             <div className="text-center md:text-left">
                                 <h1 className="text-4xl md:text-5xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">
@@ -63,7 +67,7 @@ const CustomDomainPage: React.FC = () => {
                         </AnimatedWrapper>
                         <AnimatedWrapper delay="duration-1000">
                             <HeroImage
-                                src="https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&h=600&fit=crop"
+                                src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&h=600&fit=crop"
                                 alt={t.customDomain.heroImageAlt}
                                 position="center"
                             />
@@ -74,7 +78,7 @@ const CustomDomainPage: React.FC = () => {
 
             {/* Why it matters */}
             <section className="py-20 px-4">
-                <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <AnimatedWrapper>
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{t.customDomain.standOutTitle}</h2>
@@ -130,7 +134,7 @@ const CustomDomainPage: React.FC = () => {
 
             {/* QR Code & Business Card */}
             <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <AnimatedWrapper>
                         <div>
                             <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{t.customDomain.qrTitle}</h2>
@@ -148,8 +152,8 @@ const CustomDomainPage: React.FC = () => {
                              <div className="bg-gray-800 text-white p-6 rounded-lg shadow-inner">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xl font-bold">Jane Doe</p>
-                                        <p className="text-sm text-gray-300">Senior Product Manager</p>
+                                        <p className="text-xl font-bold">{sampleCard.name}</p>
+                                        <p className="text-sm text-gray-300">{sampleCard.role}</p>
                                     </div>
                                     <div className="w-16 h-16 bg-white dark:bg-dark-bg-primary p-1 rounded">
                                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=example.com" alt="QR Code" className="w-full h-full"/>
@@ -159,8 +163,8 @@ const CustomDomainPage: React.FC = () => {
                                     <div className="flex justify-between items-end">
                                         <p className="text-xs text-gray-500 font-mono">ID: a1b2c3d4</p>
                                         <div className="text-right">
-                                            <p className="text-cv-blue font-semibold">yourcvpassport.com/cv/janedoe</p>
-                                            <p className="text-gray-400 dark:text-dark-text-tertiary">jane.doe@email.com</p>
+                                            <p className="text-cv-blue font-semibold">yourcvpassport.com/cv/{sampleCard.slug}</p>
+                                            <p className="text-gray-400 dark:text-dark-text-tertiary">{sampleCard.email}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -172,7 +176,7 @@ const CustomDomainPage: React.FC = () => {
             
             {/* Analytics & SEO */}
             <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20 px-4">
-                 <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <AnimatedWrapper>
                          <div className="bg-white dark:bg-dark-bg-primary p-6 rounded-lg shadow-xl">
                             <h2 className="text-2xl font-bold text-cv-dark-gray dark:text-dark-text-primary mb-4 text-center">{t.customDomain.analyticsTitle}</h2>

@@ -26,6 +26,7 @@ import {
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useA11yLabels } from '../shared/a11y';
 
 // Lazy load AISkillsSuggestion
 const AISkillsSuggestion = lazy(() => import('./AISkillsSuggestion'));
@@ -39,6 +40,10 @@ interface SkillsSectionProps {
 export interface SkillsSectionHandle {
   toggleAISuggestions: () => void;
 }
+
+// Mínimo de habilidades para publicar el CV. Lo leen esta sección (aviso junto a
+// la lista) y ProfileWizard (puerta de finalización), para que no diverjan.
+export const MIN_SKILLS_TO_PUBLISH = 3;
 
 // Common skills for autocomplete - Extended with diverse categories (English + Spanish)
 const COMMON_SKILLS = [
@@ -412,6 +417,7 @@ interface SortableSkillItemProps {
 }
 
 const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, onDelete, translations }) => {
+  const a11y = useA11yLabels();
   const modals = translations.dashboard.modals;
   const { lang } = useLanguage();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -451,13 +457,13 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
       style={style}
       className="bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg p-3 border border-gray-200 dark:border-dark-border flex items-center gap-2"
     >
-      <button
+      <button aria-label={a11y.dragToReorder}
         type="button"
         {...attributes}
         {...listeners}
         className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
         </svg>
       </button>
@@ -474,13 +480,13 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
       </div>
 
       <div className="flex gap-1">
-        <button type="button" onClick={onEdit} className="text-cv-blue hover:text-cv-blue-dark p-1">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button aria-label={a11y.edit} type="button" onClick={onEdit} className="text-cv-blue hover:text-cv-blue-dark p-1">
+          <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </button>
-        <button type="button" onClick={onDelete} className="text-red-500 hover:text-red-700 p-1">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button aria-label={a11y.delete} type="button" onClick={onDelete} className="text-red-500 hover:text-red-700 p-1">
+          <svg aria-hidden="true" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -490,6 +496,7 @@ const SortableSkillItem: React.FC<SortableSkillItemProps> = ({ skill, onEdit, on
 };
 
 const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ initialData = [], onSave, onNext }, ref) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const modals = translations.dashboard.modals;
   const t = translations.profileEditor.skills;
@@ -764,11 +771,11 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
                 {t.aiSuggestionsTitle}
               </h3>
             </div>
-            <button
+            <button aria-label={a11y.close}
               onClick={() => setShowAISuggestions(false)}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -785,6 +792,30 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
             />
           </Suspense>
         </div>
+      )}
+
+      {/* Mínimo para publicar, junto a la lista. Antes solo aparecía en el recuadro
+          de la cabecera del asistente y no se veía al ir añadiendo habilidades. */}
+      {isWizardMode && (
+        <p
+          className={`mb-3 text-sm flex items-center gap-2 ${
+            skills.length >= MIN_SKILLS_TO_PUBLISH
+              ? 'text-green-700 dark:text-green-400'
+              : 'text-amber-700 dark:text-amber-400'
+          }`}
+          aria-live="polite"
+          data-testid="skills-min-hint"
+        >
+          <span
+            aria-hidden="true"
+            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+              skills.length >= MIN_SKILLS_TO_PUBLISH ? 'bg-green-600' : 'bg-amber-500'
+            }`}
+          />
+          {(skills.length >= MIN_SKILLS_TO_PUBLISH ? t.minSkillsDone : t.minSkillsHint)
+            .replace(/\{min\}/g, String(MIN_SKILLS_TO_PUBLISH))
+            .replace('{count}', String(skills.length))}
+        </p>
       )}
 
       {/* Skills Grid with Drag & Drop */}
@@ -841,8 +872,9 @@ const SkillsSection = forwardRef<SkillsSectionHandle, SkillsSectionProps>(({ ini
         </button>
       )}
 
-      {/* Botón Continuar - Solo cuando hay habilidades y no está abierto el formulario */}
-      {skills.length > 0 && !isFormOpen && onNext && (
+      {/* Botón Continuar - siempre que el formulario esté cerrado. El mínimo de
+          habilidades lo hace cumplir el asistente al finalizar, no este botón. */}
+      {!isFormOpen && onNext && (
         <div className="flex justify-end mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
           <button
             onClick={onNext}

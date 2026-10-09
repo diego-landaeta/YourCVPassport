@@ -2,14 +2,11 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import { useLanguage } from '../../contexts/LanguageContext';
 
 const Hero: React.FC = () => {
   const { openModal, user } = useAuth();
   const t = useTranslations();
-  const { lang } = useLanguage();
   const navigate = useNavigate();
-  const langPrefix = lang === 'es' ? '/es' : '';
 
   const handleAuthRedirect = (defaultAction?: () => void) => {
     if (user) {

@@ -6,14 +6,51 @@
  * Endpoint: POST /functions/v1/export-docx
  */
 
-declare const Deno: any;
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4';
+import { getCorsHeaders } from '../_shared/cors.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Seguridad (auditoría 2026-10-05, U4). Antes: CORS '*' y, si profileId no era
+// el del usuario, solo se comprobaba que el perfil existiera y se exportaba
+// completo con service role (IDOR: cualquier usuario descargaba el CV de otro,
+// con email, teléfono, etc.). Ahora solo se exporta:
+//   - el perfil propio,
+//   - un perfil gestionado por el llamante (profiles.managed_by = user.id,
+//     mismo criterio que is_managed_profile),
+//   - cualquiera si el llamante es admin (mismo criterio que current_user_is_admin).
+// Si no -> 403 FORBIDDEN (también si el perfil no existe: no revela ids).
+// Errores { error, code } sin detalles internos: 400 INVALID_INPUT,
+// 401 UNAUTHORIZED, 403 FORBIDDEN, 404 NOT_FOUND (admin), 500 INTERNAL_ERROR.
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TEMPLATES = ['classic', 'modern', 'minimal'];
+const LANGUAGES = ['en', 'es'];
+
+class HttpError extends Error {
+  status: number;
+  code: string;
+  constructor(status: number, code: string, message: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+// ¿Puede el llamante exportar este perfil?
+async function assertCanExport(supabase: any, callerId: string, profileId: string): Promise<void> {
+  if (profileId === callerId) return;
+  const [{ data: target }, { data: caller }] = await Promise.all([
+    supabase.from('profiles').select('id, managed_by').eq('id', profileId).maybeSingle(),
+    supabase.from('profiles').select('role').eq('id', callerId).maybeSingle(),
+  ]);
+  if (target && target.managed_by && target.managed_by === callerId) return;
+  const isAdmin = typeof caller?.role === 'string' && caller.role.toLowerCase() === 'admin';
+  if (isAdmin) {
+    if (!target) throw new HttpError(404, 'NOT_FOUND', 'Profile not found');
+    return;
+  }
+  throw new HttpError(403, 'FORBIDDEN', 'Not allowed to export this profile');
+}
 
 interface ExportDOCXRequest {
   profileId: string;
@@ -31,52 +68,56 @@ interface ExportDOCXRequest {
 }
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
+    if (req.method !== 'POST') {
+      throw new HttpError(405, 'METHOD_NOT_ALLOWED', 'Method not allowed');
     }
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     // Verify JWT token
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
+    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      throw new HttpError(401, 'UNAUTHORIZED', 'Missing authorization');
+    }
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    const user = authData?.user;
     if (authError || !user) {
-      throw new Error('Unauthorized');
+      throw new HttpError(401, 'UNAUTHORIZED', 'Invalid or expired session');
     }
 
     // Parse request body
-    const body: ExportDOCXRequest = await req.json();
-    const { profileId, template = 'modern', language = 'en', options = {} } = body;
+    let body: ExportDOCXRequest;
+    try {
+      body = await req.json();
+    } catch {
+      throw new HttpError(400, 'INVALID_INPUT', 'Invalid JSON body');
+    }
+    const { profileId, template = 'modern', language = 'en' } = body ?? ({} as ExportDOCXRequest);
+    const options = body?.options && typeof body.options === 'object' ? body.options : {};
 
     // Validate request
-    if (!profileId) {
-      throw new Error('Profile ID is required');
+    if (typeof profileId !== 'string' || !UUID_RE.test(profileId)) {
+      throw new HttpError(400, 'INVALID_INPUT', 'Profile ID is required');
+    }
+    if (!TEMPLATES.includes(template) || !LANGUAGES.includes(language)) {
+      throw new HttpError(400, 'INVALID_INPUT', 'Invalid template or language');
     }
 
-    // Verify user owns this profile or is admin
-    if (profileId !== user.id) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', profileId)
-        .single();
-
-      if (!profile) {
-        throw new Error('Profile not found or access denied');
-      }
-    }
+    // Solo perfil propio, gestionado o (admin) cualquiera
+    await assertCanExport(supabase, user.id, profileId);
 
     // Fetch full profile data
     const fullProfile = await fetchFullProfile(supabase, profileId);
@@ -90,16 +131,10 @@ serve(async (req: Request) => {
       .order('created_at', { ascending: false });
 
     // Generate DOCX (placeholder - return mock binary)
-    const docxBuffer = await generateDOCXBuffer(
-      fullProfile,
-      stamps || [],
-      template,
-      language,
-      options
-    );
+    const docxBuffer = await generateDOCXBuffer(fullProfile, stamps || [], template, language, options);
 
     // Generate filename
-    const fileName = generateFileName(fullProfile.profile.full_name, template);
+    const fileName = generateFileName(fullProfile.profile.full_name || 'perfil', template);
 
     // Log export event for analytics
     await logExportEvent(supabase, profileId, template, docxBuffer.length, 'docx');
@@ -115,15 +150,15 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    
+    const httpError = error instanceof HttpError
+      ? error
+      : new HttpError(500, 'INTERNAL_ERROR', 'Internal server error');
+    if (!(error instanceof HttpError)) console.error('[export-docx] error interno:', (error as Error)?.message);
 
     return new Response(
-      JSON.stringify({
-        error: error.message || 'Internal server error',
-        details: error.toString()
-      }),
+      JSON.stringify({ error: httpError.message, code: httpError.code }),
       {
-        status: error.message === 'Unauthorized' ? 401 : 400,
+        status: httpError.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

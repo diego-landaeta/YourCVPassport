@@ -1,5 +1,6 @@
 import React from 'react';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useA11yLabels } from './shared/a11y';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   type = 'warning'
 }) => {
+  const a11y = useA11yLabels();
   if (!isOpen) return null;
 
   const getColors = () => {
@@ -64,11 +66,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               </h3>
             </div>
           </div>
-          <button
+          <button aria-label={a11y.close}
             onClick={onCancel}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon aria-hidden="true" className="w-5 h-5" />
           </button>
         </div>
 

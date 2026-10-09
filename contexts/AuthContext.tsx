@@ -3,8 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../supabase/client';
 import { Profile, Company, CompanyUser } from '../types';
+import { invokeAuthFunction } from '../utils/authFunctionErrors';
+import { COMPANY_FULL_COLUMNS } from '../lib/companyColumns';
+import { formatPersonName } from '../utils/personName';
 
 type AuthMode = 'login' | 'signup';
+
+// Resultado del alta (Edge Function `signup`).
+export interface SignUpResult {
+  user: null;
+  session: null;
+  /** false: cuenta creada y pendiente, pero el correo de confirmación no salió. */
+  emailSent?: boolean;
+  /** true: el email ya tenía una cuenta sin confirmar; se reenvió el enlace. */
+  alreadyPending?: boolean;
+}
 
 interface AuthContextType {
   session: Session | null;
@@ -26,7 +39,8 @@ interface AuthContextType {
   refetchCompany: () => Promise<void>;
   // Auth methods
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ error: any }>;
+  signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ data?: SignUpResult; error: any }>;
+  resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithLinkedIn: () => Promise<{ error: any }>;
   sendMagicLink: (email: string) => Promise<{ error: any }>;
@@ -107,33 +121,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       setProfileLoading(true);
       try {
+        // Perfil propio con todas sus columnas (email, plan...): vista profiles_full.
+        // `profiles` solo deja leer columnas públicas (privilegios por columna).
         let { data, error } = await supabase
-          .from('profiles')
+          .from('profiles_full')
           .select('*')
           .eq('id', user.id)
           .limit(1)
-          .single();
+          // maybeSingle: si aún no hay perfil, data = null sin 406 (PGRST116) en la red
+          .maybeSingle();
 
         // If profile doesn't exist (e.g., user signed up before trigger was in place), create one.
-        if (error && error.code === 'PGRST116') {
-          const { data: newProfile, error: insertError } = await supabase
+        if (!error && !data) {
+          // Sin .select() tras el insert: el RETURNING pediría columnas privadas de profiles.
+          const { error: insertError } = await supabase
             .from('profiles')
             .insert({
               id: user.id,
-              full_name: user.user_metadata?.full_name || null,
+              // Google/LinkedIn a veces dan el nombre en minúsculas («manuel casas»).
+              full_name: formatPersonName(user.user_metadata?.full_name || user.user_metadata?.name) || null,
               email: user.email,
               // ❌ REMOVED: slug assignment - users must create their URL in Display Settings after completing wizard
               // Previously: slug: user.id, which auto-assigned a UUID and broke the intended workflow
-            })
-            .select()
-            .single();
+            });
 
           if (insertError) {
             throw insertError;
           }
+          const { data: newProfile, error: reloadError } = await supabase
+            .from('profiles_full')
+            .select('*')
+            .eq('id', user.id)
+            // maybeSingle: si la fila recién creada aún no es visible, el perfil queda en null (igual que antes)
+            .maybeSingle();
+          if (reloadError) {
+            throw reloadError;
+          }
           data = newProfile;
         } else if (error) {
           throw error;
+        }
+
+        // El trigger handle_new_user copia tal cual el nombre de Google/LinkedIn,
+        // que puede venir en minúsculas («manuel casas»). Si el nombre del perfil
+        // sigue siendo exactamente ese y está todo en minúsculas, se muestra con
+        // mayúscula inicial; el asistente lo precarga así y se guarda al guardar
+        // Identidad. Un nombre que el usuario ya editó no se toca (issue #4, 27).
+        const oauthName = String(user.user_metadata?.full_name || user.user_metadata?.name || '').trim();
+        const currentName = typeof data?.full_name === 'string' ? data.full_name.trim() : '';
+        if (data && currentName && currentName === currentName.toLocaleLowerCase()
+          && currentName.toLocaleLowerCase() === oauthName.toLocaleLowerCase()) {
+          data = { ...data, full_name: formatPersonName(currentName) };
         }
 
         setProfile(data as Profile | null);
@@ -207,12 +245,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setCompanyUser(companyUserData as CompanyUser);
 
-      // Fetch company details
+      // Fetch company details (columnas privadas: vista companies_full, solo miembros/creador/admin)
       const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .select('*')
+        .from('companies_full')
+        .select(COMPANY_FULL_COLUMNS)
         .eq('id', companyUserData.company_id)
-        .single();
+        // maybeSingle: si la empresa ya no existe o no es visible, company = null sin 406
+        .maybeSingle();
 
       if (companyError) {
         console.error('Error fetching company:', companyError);
@@ -221,7 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      setCompany(companyData as Company);
+      setCompany((companyData as Company | null) ?? null);
     } catch (error) {
       console.error('Error in fetchCompany:', error);
       setCompanyUser(null);
@@ -284,50 +323,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, password: string, userData: { full_name: string }) => {
     try {
-      // Use Edge Function to create user and send custom confirmation email via Resend
-      const { data: funcData, error: funcError } = await supabase.functions.invoke('signup', {
-        body: {
-          email,
-          password,
-          full_name: userData.full_name,
-          redirectTo: `${window.location.origin}/confirm`
-        }
+      // Use Edge Function to create user and send custom confirmation email via Brevo.
+      // invokeAuthFunction aplica timeout (20 s) y devuelve un AuthFunctionError con
+      // `code` (EMAIL_ALREADY_REGISTERED, WEAK_PASSWORD, EMAIL_SEND_FAILED, TIMEOUT...).
+      const { data: funcData, error: funcError } = await invokeAuthFunction('signup', {
+        email: email.trim().toLowerCase(),
+        password,
+        full_name: userData.full_name,
+        redirectTo: `${window.location.origin}/confirm`
       });
 
       if (funcError) {
-        let errorMessage = funcError.message;
-        // Try to parse the response body if available
-        if (funcError instanceof Error && 'context' in funcError) {
-          try {
-            const response = (funcError as any).context as Response;
-            if (response && typeof response.json === 'function') {
-              const errorBody = await response.json();
-              if (errorBody && errorBody.error) {
-                errorMessage = errorBody.error;
-              }
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-        return { data: { user: null, session: null }, error: new Error(errorMessage) };
+        console.error('[signup] Edge Function error:', funcError.code, funcError.status, funcError.message);
+        return { data: { user: null, session: null }, error: funcError };
       }
 
-      if (funcData?.error) {
-        return { data: { user: null, session: null }, error: new Error(funcData.error) };
-      }
-
-      // Return structure mimicking supabase.auth.signUp
-      return { 
-        data: { 
-          user: funcData.user, 
-          session: null // Session is null because email confirmation is required
-        }, 
-        error: null 
+      // emailSent: false → cuenta creada y pendiente pero sin correo (Brevo
+      // caído...); alreadyPending → el email ya tenía una cuenta sin confirmar
+      // y se ha reenviado el enlace. La UI ofrece "Reenviar" en ambos casos.
+      return {
+        data: {
+          user: null,
+          session: null, // Session is null because email confirmation is required
+          emailSent: funcData?.emailSent !== false,
+          alreadyPending: funcData?.alreadyPending === true,
+        },
+        error: null
       };
     } catch (error) {
       return { data: { user: null, session: null }, error };
     }
+  };
+
+  // "Reenviar correo de confirmación". La función responde lo mismo exista o no
+  // una cuenta pendiente; errores normalizados con `code` (RATE_LIMITED,
+  // EMAIL_SEND_FAILED, TIMEOUT...).
+  const resendConfirmationEmail = async (email: string) => {
+    const { error } = await invokeAuthFunction('send-email-confirmation', {
+      email: email.trim().toLowerCase(),
+      redirectTo: `${window.location.origin}/confirm`
+    });
+    if (error) console.error('[send-email-confirmation] Edge Function error:', error.code, error.status, error.message);
+    return { error };
   };
 
   const signInWithGoogle = async () => {
@@ -360,7 +397,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMagicLink = async (email: string) => {
     try {
-      // Use Edge Function to send custom magic link via Resend
+      // Use Edge Function to send custom magic link via Brevo
       const { data, error } = await supabase.functions.invoke('send-magic-link', {
         body: {
           email,
@@ -398,34 +435,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      // Use Edge Function to bypass Supabase Auth rate limits and use custom email template
-      const { data, error } = await supabase.functions.invoke('send-password-reset', {
-        body: { 
-          email,
-          redirectTo: `${window.location.origin}/recovery`
-        }
+      // Use Edge Function to bypass Supabase Auth rate limits and use custom email template.
+      // Errores normalizados con `code` (EMAIL_SEND_FAILED, TIMEOUT, NETWORK_ERROR...).
+      const { error } = await invokeAuthFunction('send-password-reset', {
+        email: email.trim().toLowerCase(),
+        redirectTo: `${window.location.origin}/recovery`
       });
 
       if (error) {
-        let errorMessage = error.message;
-        if (error instanceof Error && 'context' in error) {
-          try {
-            const response = (error as any).context as Response;
-            if (response && typeof response.json === 'function') {
-              const errorBody = await response.json();
-              if (errorBody && errorBody.error) {
-                errorMessage = errorBody.error;
-              }
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-        return { error: new Error(errorMessage) };
-      }
-
-      if (data?.error) {
-        return { error: new Error(data.error) };
+        console.error('[send-password-reset] Edge Function error:', error.code, error.status, error.message);
+        return { error };
       }
 
       return { error: null };
@@ -476,6 +495,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Auth methods
     signInWithEmail,
     signUpWithEmail,
+    resendConfirmationEmail,
     signInWithGoogle,
     signInWithLinkedIn,
     sendMagicLink,

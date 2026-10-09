@@ -70,6 +70,8 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
+.env.local
+.env.*.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -126,3 +128,6 @@ playwright-report/
 
 # Windows null device artifact
 nul
+
+# Playwright MCP screenshots
+.playwright-mcp/

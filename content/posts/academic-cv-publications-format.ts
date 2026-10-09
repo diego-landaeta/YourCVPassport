@@ -271,7 +271,7 @@ When discussing **academic CV publications format** in the context of advanced a
 
 The key is combining flawless visual presentation with strategic content that demonstrates your real value. Let's look at the specific aspects you need to master.
 
-![Advanced aspects of academic CV publications format](https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&q=80){caption:Advanced aspects of academic CV publications format}
+![Advanced aspects of academic CV publications format](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Advanced aspects of academic CV publications format}
 
 ## How YourCVPassport helps you with academic CV publications format
 

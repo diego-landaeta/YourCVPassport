@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import { MagnifyingGlassIcon, ArrowLeftIcon, ChatBubbleLeftIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { useA11yLabels } from '../shared/a11y';
 
 type CommunityMember = {
   id: string;
@@ -18,6 +19,7 @@ const MEMBERS_PER_PAGE = 20;
 const CommunityProfilesSection: React.FC<{
   onSectionChange?: (section: string) => void;
 }> = ({ onSectionChange }) => {
+  const a11y = useA11yLabels();
   const { lang } = useLanguage();
   const [members, setMembers] = useState<CommunityMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,11 +130,11 @@ const CommunityProfilesSection: React.FC<{
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button
+        <button aria-label={a11y.back}
           onClick={() => onSectionChange?.('feed')}
           className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary transition-colors"
         >
-          <ArrowLeftIcon className="w-5 h-5" />
+          <ArrowLeftIcon aria-hidden="true" className="w-5 h-5" />
         </button>
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">

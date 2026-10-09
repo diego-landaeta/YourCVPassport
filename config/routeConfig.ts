@@ -8,7 +8,6 @@ const CustomDomainPage = lazy(() => import('../components/CustomDomainPage'));
 const ProfileAnalyticsPage = lazy(() => import('../components/pages/ProfileAnalyticsPage'));
 const AIProductPage = lazy(() => import('../components/pages/AIProductPage'));
 const AdvancedTalentSearchPage = lazy(() => import('../components/pages/AdvancedTalentSearchPage'));
-const AboutUs = lazy(() => import('../components/landing/AboutUs'));
 const MissionAndValuesPage = lazy(() => import('../components/landing/MissionAndValuesPage'));
 const PressKitPage = lazy(() => import('../components/landing/PressKitPage'));
 const ContactPage = lazy(() => import('../components/landing/ContactPage'));
@@ -20,7 +19,6 @@ const CompanyPlansPage = lazy(() => import('../components/CompanyPlansPage'));
 const ATSIntegrationsPage = lazy(() => import('../components/ATSIntegrationsPage'));
 const SecurityCompliancePage = lazy(() => import('../components/SecurityCompliancePage'));
 const BlogPage = lazy(() => import('../components/pages/BlogPage'));
-const TemplateLibraryPage = lazy(() => import('../components/pages/TemplateLibraryPage'));
 const SystemStatusPage = lazy(() => import('../components/pages/SystemStatusPage'));
 const SuccessStoriesPage = lazy(() => import('../components/landing/SuccessStoriesPage'));
 const UnderConstructionPage = lazy(() => import('../components/UnderConstructionPage'));
@@ -44,7 +42,6 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   ProfileAnalyticsPage,
   AIProductPage,
   AdvancedTalentSearchPage,
-  AboutUs,
   MissionAndValuesPage,
   PressKitPage,
   ContactPage,
@@ -56,7 +53,6 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   ATSIntegrationsPage,
   SecurityCompliancePage,
   BlogPage,
-  TemplateLibraryPage,
   SystemStatusPage,
   SuccessStoriesPage,
   UnderConstructionPage,
@@ -74,8 +70,8 @@ const pathMappings = [
   { en: 'product/analytics', es: 'producto/analiticas', componentName: 'ProfileAnalyticsPage' },
   { en: 'product/ai', es: 'producto/ia', componentName: 'AIProductPage' },
   { en: 'companies/search', es: 'empresas/busqueda', componentName: 'AdvancedTalentSearchPage' },
-  { en: 'about', es: 'nosotros', componentName: 'AboutUs' },
-  { en: 'about/mission', es: 'nosotros/mision', componentName: 'MissionAndValuesPage' },
+  // /nosotros reune quienes somos, mision y valores (antes duplicado en /nosotros/mision)
+  { en: 'about', es: 'nosotros', componentName: 'MissionAndValuesPage' },
   { en: 'about/press', es: 'nosotros/prensa', componentName: 'PressKitPage' },
   { en: 'about/contact', es: 'nosotros/contacto', componentName: 'ContactPage' },
   { en: 'professionals/how', es: 'profesionales/como-funciona', componentName: 'HowItWorksProfessionalsPage' },
@@ -86,7 +82,6 @@ const pathMappings = [
   { en: 'companies/integrations', es: 'empresas/integraciones', componentName: 'ATSIntegrationsPage' },
   { en: 'companies/security', es: 'empresas/seguridad', componentName: 'SecurityCompliancePage' },
   { en: 'resources/blog', es: 'recursos/blog', componentName: 'BlogPage' },
-  { en: 'resources/library', es: 'recursos/biblioteca', componentName: 'TemplateLibraryPage' },
   { en: 'resources/success-stories', es: 'recursos/exito', componentName: 'SuccessStoriesPage' },
   { en: 'resources/status', es: 'recursos/estado', componentName: 'SystemStatusPage' },
   { en: 'product', es: 'producto', componentName: 'ProductOverviewPage' },
@@ -98,6 +93,19 @@ const pathMappings = [
   { en: 'profiles', es: 'perfiles', componentName: 'AdvancedTalentSearchPage' },
   { en: 'terms', es: 'terminos', componentName: 'TermsPage' },
   { en: 'privacy', es: 'privacidad', componentName: 'PrivacyPage' },
+];
+
+/**
+ * Rutas retiradas o fusionadas con otra pagina: redireccion permanente a la principal
+ * (canonical unico, sin dividir el SEO entre dos URLs con el mismo contenido).
+ * La SPA las redirige en App.tsx; nginx (map $ycp_redirect) y server.mjs responden 301.
+ * Si cambias esta lista, cambia tambien esos dos sitios.
+ */
+export const routeRedirects: ReadonlyArray<{ from: string; to: string }> = [
+  { from: '/nosotros/mision', to: '/nosotros' },
+  { from: '/about/mission', to: '/about' },
+  { from: '/recursos/biblioteca', to: '/profesionales/plantillas' },
+  { from: '/resources/library', to: '/professionals/templates' },
 ];
 
 export const routeConfig: RouteConfig[] = pathMappings.map(route => ({

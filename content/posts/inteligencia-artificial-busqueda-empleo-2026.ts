@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **inteligencia artificial bus
 
 Esta guía completa sobre **inteligencia artificial busqueda empleo** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Guía completa sobre inteligencia artificial busqueda empleo}
+![inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80){caption:Guía completa sobre inteligencia artificial busqueda empleo}
 
 ## 1. IA en el proceso de seleccion
 2. Herramientas de IA para CVs
@@ -78,7 +78,7 @@ Para destacar en **inteligencia artificial busqueda empleo** dentro de esta áre
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=800&q=80){caption:Aspectos avanzados de inteligencia artificial busqueda empleo}
+![Aspectos avanzados de inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80){caption:Aspectos avanzados de inteligencia artificial busqueda empleo}
 
 ## Aspectos avanzados de inteligencia artificial busqueda empleo
 
@@ -150,7 +150,7 @@ Evita estos errores que cometen la mayoría de candidatos con **inteligencia art
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de inteligencia artificial busqueda empleo}
+![Aspectos avanzados de inteligencia artificial busqueda empleo](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80){caption:Aspectos avanzados de inteligencia artificial busqueda empleo}
 
 :::warning
 No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de inteligencia artificial busqueda empleo para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
@@ -292,7 +292,7 @@ Dominar **inteligencia artificial busqueda empleo** no es solo una ventaja compe
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1517245386747-bb4c01f7629d?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Tendencias Laborales",
   is_featured: false,

@@ -3,6 +3,8 @@ import { FullProfileData } from '../../types';
 import { EnvelopeIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { CountryBadge } from '../shared/CountrySelector';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { safeExternalUrl, publicContactEmail, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface CreativeBoldTemplateProps {
     data: FullProfileData;
@@ -12,6 +14,9 @@ interface CreativeBoldTemplateProps {
 const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color }) => {
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#3B82F6'; // Default to blue-500
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     return (
         <div className="font-sans bg-white dark:bg-dark-bg-primary">
@@ -42,18 +47,18 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                             <p className="text-2xl text-gray-200 mb-4">{profile.headline}</p>
                             {profile.country_code && (
                                 <div className="flex items-center gap-2 mb-4">
-                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                                    <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                                 </div>
                             )}
                             <div className="flex gap-6 text-sm">
-                                {profile.meta_description && (
-                                    <a href={`mailto:${profile.meta_description}`} className="flex items-center gap-2 text-gray-300 hover:text-white">
+                                {email && (
+                                    <a href={`mailto:${email}`} className="flex items-center gap-2 text-gray-300 hover:text-white">
                                         <EnvelopeIcon className="w-4 h-4" />
-                                        <span>{profile.meta_description}</span>
+                                        <span>{email}</span>
                                     </a>
                                 )}
-                                {profile.linkedin_url && (
-                                    <a href={profile.linkedin_url} className="flex items-center gap-2 text-gray-300 hover:text-white">
+                                {linkedinUrl && (
+                                    <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="flex items-center gap-2 text-gray-300 hover:text-white">
                                         <LinkIcon className="w-4 h-4" />
                                         <span>LinkedIn</span>
                                     </a>
@@ -78,7 +83,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                 <section className="mb-14">
                     <div className="mb-8">
                         <div className="inline-block px-6 py-2 rounded-lg mb-4" style={{ backgroundColor: `${accentColor}20` }}>
-                            <h2 className="text-2xl font-bold" style={{ color: accentColor }}>PERFIL PROFESIONAL</h2>
+                            <h2 className="text-2xl font-bold uppercase" style={{ color: accentColor }}>{L.professionalProfile}</h2>
                         </div>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg whitespace-pre-wrap">
@@ -90,7 +95,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                 <section className="mb-14">
                     <div className="mb-8">
                         <div className="inline-block px-6 py-2 rounded-lg mb-4" style={{ backgroundColor: `${accentColor}20` }}>
-                            <h2 className="text-2xl font-bold" style={{ color: accentColor }}>EXPERIENCIA</h2>
+                            <h2 className="text-2xl font-bold uppercase" style={{ color: accentColor }}>{L.experience}</h2>
                         </div>
                     </div>
                     <div className="space-y-8">
@@ -102,7 +107,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                                 <div className="flex justify-between items-baseline mb-2">
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                     <span className="text-sm font-semibold whitespace-nowrap ml-4" style={{ color: accentColor }}>
-                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : 'PRESENTE'}
+                                        {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present.toUpperCase()}
                                     </span>
                                 </div>
                                 <p className="font-bold text-gray-600 dark:text-gray-400 mb-3 text-lg">{exp.company_name}</p>
@@ -120,7 +125,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                     <section>
                         <div className="mb-8">
                             <div className="inline-block px-6 py-2 rounded-lg mb-4" style={{ backgroundColor: `${accentColor}20` }}>
-                                <h2 className="text-2xl font-bold" style={{ color: accentColor }}>EDUCACIÓN</h2>
+                                <h2 className="text-2xl font-bold uppercase" style={{ color: accentColor }}>{L.education}</h2>
                             </div>
                         </div>
                         <div className="space-y-6">
@@ -129,7 +134,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{edu.degree}</h3>
                                     <p className="font-semibold text-gray-600 dark:text-gray-400 mb-1">{edu.institution_name}</p>
                                     <p className="text-sm font-semibold" style={{ color: accentColor }}>
-                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : 'Presente'}
+                                        {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : L.present}
                                     </p>
                                 </div>
                             ))}
@@ -140,7 +145,7 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                     <section>
                         <div className="mb-8">
                             <div className="inline-block px-6 py-2 rounded-lg mb-4" style={{ backgroundColor: `${accentColor}20` }}>
-                                <h2 className="text-2xl font-bold" style={{ color: accentColor }}>HABILIDADES</h2>
+                                <h2 className="text-2xl font-bold uppercase" style={{ color: accentColor }}>{L.skills}</h2>
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-3">

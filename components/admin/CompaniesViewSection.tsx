@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../supabase/client';
 import { Company } from '../../types';
+import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const CompaniesViewSection: React.FC = () => {
@@ -108,8 +109,8 @@ const CompaniesViewSection: React.FC = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('companies')
-        .select('*')
+        .from('companies_full')
+        .select(COMPANY_FULL_COLUMNS)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -332,10 +333,12 @@ const CompaniesViewSection: React.FC = () => {
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSelectedCompany(null)}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
                 >
-                  <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                  <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" aria-hidden="true" />
                 </button>
               </div>
 

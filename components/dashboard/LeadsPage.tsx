@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import { Lead, LeadNote, LeadStatus, LeadFilters } from '../../types';
+import { activateOnKey } from '../shared/a11y';
 
 const LeadsPage: React.FC = () => {
   const { profile } = useAuth();
@@ -330,7 +331,7 @@ const LeadsPage: React.FC = () => {
               ) : (
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredLeads.map((lead) => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => handleSelectLead(lead))} aria-current={selectedLead?.id === lead.id ? true : undefined}
                       key={lead.id}
                       onClick={() => handleSelectLead(lead)}
                       className={`p-4 cursor-pointer transition-colors ${

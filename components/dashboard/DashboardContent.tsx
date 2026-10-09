@@ -5,10 +5,11 @@ import { getAnalyticsStats } from '../../hooks/useAnalytics';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
+import { AI_FEATURES_ENABLED } from '../../lib/ai';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 import { canChangeSlug, getNextSlugChangeDate, updateSlugWithValidation } from '../../utils/slugValidation';
-import { sanitizeSlug } from '../../utils/slugUtils';
+import { sanitizeSlug, checkSlugAvailability as isSlugAvailable } from '../../utils/slugUtils';
 import ModernDashboardView from './ModernDashboardView';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { CVVersionsSection } from './CVVersionsSection';
@@ -17,7 +18,6 @@ import Modal from '../shared/Modal';
 // Lazy load heavy components for better performance
 
 const TemplateSelector = lazy(() => import('../profile-editor/TemplateSelector'));
-const OnboardingWizard = lazy(() => import('../OnboardingWizard'));
 const AIQuestionnaireAssistant = lazy(() => import('../AIQuestionnaireAssistant'));
 
 const ProfileWizard = lazy(() => import('../profile-editor/ProfileWizard')); // New Wizard Component
@@ -107,6 +107,9 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   const [isSaving, setIsSaving] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  // Último valor escrito y temporizador del debounce de la comprobación
+  const latestSlugRef = useRef(currentSlug);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { canChange, daysRemaining } = canChangeSlug(lastChangedAt);
   const nextChangeDate = getNextSlugChangeDate(lastChangedAt);
@@ -131,19 +134,12 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
 
     setIsCheckingAvailability(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('slug', slug)
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        setIsAvailable(true);
-      } else if (data) {
-        setIsAvailable(false);
-      }
+      // Helper común (maybeSingle): sin 406 en la red y un error real no se toma por "libre"
+      const available = await isSlugAvailable(slug, userId);
+      // Si mientras tanto se ha escrito otra cosa, este resultado ya no aplica
+      if (latestSlugRef.current === slug) setIsAvailable(available);
     } catch {
-      setIsAvailable(false);
+      if (latestSlugRef.current === slug) setIsAvailable(false);
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -152,13 +148,20 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   const handleSlugChange = (value: string) => {
     const sanitized = sanitizeSlug(value);
     setSlugValue(sanitized);
+    latestSlugRef.current = sanitized;
 
-    // Debounce availability check
+    // Debounce availability check. El `return () => clearTimeout` de antes no hacía
+    // nada (un manejador de evento no tiene limpieza): el temporizador de un valor
+    // anterior seguía disparándose.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     if (sanitized !== currentSlug) {
-      const timeoutId = setTimeout(() => {
+      debounceRef.current = setTimeout(() => {
         checkSlugAvailability(sanitized);
       }, 500);
-      return () => clearTimeout(timeoutId);
+    } else {
+      // Volver al slug propio: no está ocupado. Sin esto quedaba el "ocupado" del
+      // valor anterior y el botón Guardar seguía deshabilitado.
+      setIsAvailable(null);
     }
   };
 
@@ -200,6 +203,8 @@ const SlugEditor: React.FC<SlugEditorProps> = ({ currentSlug, lastChangedAt, use
   };
 
   const handleCancel = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    latestSlugRef.current = currentSlug;
     setSlugValue(currentSlug);
     setIsEditing(false);
     setIsAvailable(null);
@@ -341,9 +346,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
   const [showExportLimitModal, setShowExportLimitModal] = useState(false);
   const [exportLimitInfo, setExportLimitInfo] = useState<FeatureLimitCheck | null>(null);
 
-  // Check if AI is available
-  // @ts-ignore
-  const isAIAvailable = Boolean(import.meta.env?.VITE_GOOGLE_AI_API_KEY);
+  // La IA se sirve desde la Edge Function ai-cv-assistant (sin clave en el cliente).
+  const isAIAvailable = AI_FEATURES_ENABLED;
 
   // Check if AI is available
 

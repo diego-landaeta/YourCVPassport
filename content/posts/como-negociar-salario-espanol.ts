@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **como negociar salario** se 
 
 Esta guía completa sobre **como negociar salario** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![como negociar salario](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre como negociar salario}
+![como negociar salario](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Guía completa sobre como negociar salario}
 
 ## 1. Cuando empezar la negociacion
 2. Investigar tu valor de mercado
@@ -78,7 +78,7 @@ Para destacar en **como negociar salario** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de como negociar salario](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de como negociar salario}
+![Aspectos avanzados de como negociar salario](https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80){caption:Aspectos avanzados de como negociar salario}
 
 ## Aspectos avanzados de como negociar salario
 
@@ -292,7 +292,7 @@ Dominar **como negociar salario** no es solo una ventaja competitiva — es una 
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Tendencias Laborales",
   is_featured: false,

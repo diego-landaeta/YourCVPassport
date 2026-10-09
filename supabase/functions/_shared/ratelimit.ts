@@ -39,6 +39,12 @@ export const rateLimitConfigs = {
     requests: 5,
     window: '1 m',
   },
+  // Correos de auth por destinatario (send-password-reset): 3 cada 15 min por
+  // email, para que nadie pueda bombardear un buzón ajeno cambiando de IP.
+  authEmail: {
+    requests: 3,
+    window: '15 m',
+  },
   // Analytics: 30 req/min per IP
   analytics: {
     requests: 30,
@@ -78,13 +84,20 @@ export function getIdentifier(req: Request, userId?: string): string {
   }
 
   // Fall back to IP address
-  const ip =
+  return `ip:${getClientIp(req) ?? 'unknown'}`;
+}
+
+/**
+ * IP del cliente según las cabeceras del proxy (mismo orden que getIdentifier).
+ * null si no viene ninguna.
+ */
+export function getClientIp(req: Request): string | null {
+  return (
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip') ||
     req.headers.get('cf-connecting-ip') || // Cloudflare
-    'unknown';
-
-  return `ip:${ip}`;
+    null
+  );
 }
 
 /**
@@ -163,6 +176,75 @@ export async function withRateLimit(
       headers: {},
     };
   }
+}
+
+/**
+ * Rate limit para las funciones de auth (signup, send-password-reset).
+ *
+ * A diferencia de withRateLimit:
+ * - Comprueba varias claves a la vez (p. ej. IP y email); basta con que una
+ *   esté agotada para devolver 429.
+ * - El 429 sigue el contrato de las funciones de auth: { error, code:
+ *   'RATE_LIMITED' } con Retry-After y las cabeceras CORS que se le pasen.
+ * - Sin Upstash configurado falla en abierto (como el resto del repo) y lo
+ *   avisa una sola vez por instancia; si Upstash falla, también deja pasar.
+ *
+ * Devuelve la Response 429 o null si la petición puede seguir.
+ */
+let warnedRateLimitDisabled = false;
+
+export async function enforceRateLimit(
+  type: keyof typeof rateLimitConfigs,
+  identifiers: string[],
+  corsHeaders: Record<string, string>
+): Promise<Response | null> {
+  if (!Deno.env.get('UPSTASH_REDIS_REST_URL') || !Deno.env.get('UPSTASH_REDIS_REST_TOKEN')) {
+    if (!warnedRateLimitDisabled) {
+      warnedRateLimitDisabled = true;
+      console.warn('[ratelimit] UPSTASH_REDIS_REST_URL/TOKEN no configurados: rate limit desactivado (fail open)');
+    }
+    return null;
+  }
+
+  const results = await Promise.allSettled(
+    identifiers.map((identifier) => checkRateLimit(type, identifier))
+  );
+
+  let blockedUntil = 0;
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      // Solo el mensaje: nunca la URL ni el token de Upstash.
+      console.warn('[ratelimit] Upstash falló, se deja pasar:', (result.reason as Error)?.message);
+      continue;
+    }
+    if (!result.value.success) blockedUntil = Math.max(blockedUntil, result.value.reset);
+  }
+
+  if (!blockedUntil) return null;
+
+  const retryAfter = Math.max(1, Math.ceil((blockedUntil - Date.now()) / 1000));
+  return new Response(
+    JSON.stringify({ error: 'Too many requests. Please try again later.', code: 'RATE_LIMITED' }),
+    {
+      status: 429,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+        'Retry-After': String(retryAfter),
+      },
+    }
+  );
+}
+
+/**
+ * SHA-256 en hex. Para usar emails como clave de rate limit sin guardarlos en
+ * claro en Upstash.
+ */
+export async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**

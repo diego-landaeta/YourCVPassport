@@ -6,6 +6,7 @@ import Modal from '../shared/Modal';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { handleTemplateImageError } from '../../utils/templateImageFallback';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -32,9 +33,11 @@ const TemplateCard: React.FC<{ template: Template; onPreview: () => void; }> = (
                             className={`w-full h-80 object-cover object-top transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                             loading="lazy"
                             onLoad={() => setImgLoaded(true)}
+                            onError={handleTemplateImageError}
                         />
+                        {/* Superpuesto a la imagen (no debajo) para no duplicar la altura de la tarjeta mientras carga */}
                         {!imgLoaded && (
-                            <div className="w-full h-80 bg-gray-200 dark:bg-dark-bg-secondary animate-pulse" />
+                            <div className="absolute inset-0 bg-gray-200 dark:bg-dark-bg-secondary animate-pulse" />
                         )}
                     </>
                 )}
@@ -99,7 +102,7 @@ const TemplateLibraryPage: React.FC = () => {
             {isModalOpen && selectedTemplate && (
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                     <div className="p-4 sm:p-6 bg-white dark:bg-dark-bg-primary max-h-[90vh] overflow-y-auto">
-                        <img src={selectedTemplate.imageUrl} alt={selectedTemplate.title} className="w-full h-auto object-contain rounded-lg shadow-lg border"/>
+                        <img src={selectedTemplate.imageUrl} alt={selectedTemplate.title} onError={handleTemplateImageError} className="w-full h-auto object-contain rounded-lg shadow-lg border"/>
                         <div className="mt-4 text-center">
                             <h2 className="text-2xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{selectedTemplate.title}</h2>
                             <button onClick={() => openModal('signup')} className="mt-4 bg-cv-blue text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90">

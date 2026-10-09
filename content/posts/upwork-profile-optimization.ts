@@ -150,7 +150,7 @@ Avoid these mistakes that most candidates make with **Upwork profile optimizatio
 - Ignoring document formatting and readability
 - Not including keywords that ATS systems automatically scan for
 
-![Advanced aspects of Upwork profile optimization](https://images.unsplash.com/photo-1612831455740-a2f6212eefc0?w=800&q=80){caption:Advanced aspects of Upwork profile optimization}
+![Advanced aspects of Upwork profile optimization](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Advanced aspects of Upwork profile optimization}
 
 :::warning
 Don't make the mistake of using the same generic CV for every application. Customizing your Upwork profile optimization approach for each company increases your success rate by up to 60%.

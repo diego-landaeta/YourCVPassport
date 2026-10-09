@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTranslations } from '../../../hooks/useTranslations';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { getAnalyticsStats } from '../../../hooks/useAnalytics';
 import {
   ArrowTopRightOnSquareIcon,
@@ -34,6 +35,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onSectionChange,
 }) => {
   const t = useTranslations();
+  const { lang } = useLanguage();
   const tp = t.feed.profileCard;
   const [collapsed, setCollapsed] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -66,6 +68,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       {collapsed ? (
         <button
           onClick={() => setCollapsed(false)}
+          aria-expanded={false}
           className="w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
         >
           <img
@@ -88,7 +91,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
             <button
               onClick={() => setCollapsed(true)}
-              className="absolute top-1.5 right-1.5 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors"
+              aria-label={lang === 'es' ? 'Contraer tarjeta de perfil' : 'Collapse profile card'}
+              aria-expanded={true}
+              className="absolute top-1.5 right-1.5 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <ChevronUpIcon className="w-4 h-4 text-white" />
             </button>

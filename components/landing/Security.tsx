@@ -3,11 +3,12 @@ import React from 'react';
 import { useTranslations } from '../../hooks/useTranslations';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getLocalizedPath } from '../../utils/canonicalUrl';
 
 const Security: React.FC = () => {
     const t = useTranslations();
     const { lang } = useLanguage();
-    const langPrefix = lang === 'es' ? '/es' : '';
+    const securityPath = getLocalizedPath('/companies/security', lang) ?? '/companies/security';
 
     return (
         <section className="bg-gray-900 dark:bg-dark-bg-primary text-white py-20 border-y border-transparent dark:border-dark-border">
@@ -19,7 +20,7 @@ const Security: React.FC = () => {
                     <p className="mt-4 text-lg text-gray-300 dark:text-dark-text-secondary">
                         {t.security.subtitle}
                     </p>
-                    <Link to={`${langPrefix}/companies/security`} className="mt-8 inline-block bg-cv-blue dark:bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light transition-all shadow-lg">
+                    <Link to={securityPath} className="mt-8 inline-block bg-cv-blue dark:bg-cv-blue text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light transition-all shadow-lg">
                         {t.security.cta}
                     </Link>
                 </div>

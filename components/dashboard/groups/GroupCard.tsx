@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Group } from '../../../types/groups';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { ShareIcon, CheckIcon, UserGroupIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
+import AutoTranslationNotice from '../feed/AutoTranslationNotice';
+import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 
 interface GroupCardProps {
   group: Group;
@@ -17,6 +19,11 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
   const [copied, setCopied] = useState(false);
 
   const isChannel = group.metadata?.type === 'channel';
+
+  // Nombre y descripción en el idioma de la interfaz (traducción automática por lotes)
+  const groupTranslation = useAutoTranslation([group.name, group.description]);
+  const shownName = groupTranslation.texts[0] || group.name;
+  const shownDescription = groupTranslation.texts[1] || group.description || '';
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -76,8 +83,11 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
         {/* Share button */}
         <button
           onClick={handleShare}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
           title={isEs ? 'Compartir' : 'Share'}
+          aria-label={copied
+            ? (isEs ? 'Enlace copiado' : 'Link copied')
+            : `${isEs ? 'Compartir' : 'Share'} ${shownName}`}
         >
           {copied ? (
             <CheckIcon className="w-3.5 h-3.5 text-green-300" />
@@ -114,9 +124,9 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
           }`}
         >
           {group.avatar_url ? (
-            <img src={group.avatar_url} alt={group.name} className="w-full h-full object-cover" />
+            <img src={group.avatar_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            group.name.charAt(0).toUpperCase()
+            <span aria-hidden="true">{shownName.charAt(0).toUpperCase()}</span>
           )}
         </div>
         {/* Member / follower count pill */}
@@ -131,13 +141,14 @@ const GroupCard: React.FC<GroupCardProps> = ({ group, onJoin, onLeave, onOpen, l
       {/* Info */}
       <div className="px-4 pb-4">
         <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-tight truncate mb-0.5 group-hover:text-cv-blue transition-colors">
-          {group.name}
+          {shownName}
         </h3>
         {group.description && (
           <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-            {group.description}
+            {shownDescription}
           </p>
         )}
+        <AutoTranslationNotice state={groupTranslation} compact className="mt-1" />
         {group.post_count > 0 && (
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
             {group.post_count} posts

@@ -13,6 +13,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import type { FeedComment } from '../../../types/feed';
+import AutoTranslationNotice from './AutoTranslationNotice';
+import { useAutoTranslation } from '../../../hooks/useAutoTranslation';
 
 interface CommentItemProps {
   comment: FeedComment;
@@ -53,6 +55,11 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
   const editInputRef = useRef<HTMLTextAreaElement>(null);
 
   const isOwner = currentUserId === comment.author_id;
+
+  // Traducción automática del comentario (no aplica a GIFs)
+  const isGif = comment.content.startsWith('GIF:');
+  const commentTranslation = useAutoTranslation([comment.content], { enabled: !isGif });
+  const shownCommentContent = commentTranslation.texts[0] || comment.content;
 
   const timeAgo = formatDistanceToNow(new Date(comment.created_at), {
     addSuffix: true,
@@ -131,9 +138,9 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
 
         {/* Bubble */}
         {isEditing ? (
-          <div className="bg-white dark:bg-dark-bg-secondary border border-cv-blue/40 rounded-2xl rounded-tl-sm shadow-sm px-3.5 py-2.5">
+          <div className="bg-white dark:bg-dark-bg-secondary border border-cv-blue/40 rounded-2xl rounded-tl-sm shadow-sm px-3.5 py-2.5 focus-within:border-cv-blue dark:focus-within:border-cv-blue-light focus-within:ring-2 focus-within:ring-cv-blue/40 dark:focus-within:ring-cv-blue-light/40">
             <p className="font-semibold text-xs text-gray-900 dark:text-white mb-1.5">
-              {comment.author?.full_name || 'Usuario'}
+              {comment.author?.full_name || (lang === 'es' ? 'Usuario' : 'User')}
             </p>
             <textarea
               ref={editInputRef}
@@ -142,6 +149,7 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
               rows={2}
               maxLength={500}
               autoFocus
+              aria-label={lang === 'es' ? 'Editar comentario' : 'Edit comment'}
               className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none focus:outline-none leading-relaxed"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleEditSubmit(); }
@@ -177,7 +185,7 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
             group-hover/comment:border-gray-200 dark:group-hover/comment:border-dark-border
           `}>
             <p className="font-semibold text-xs text-gray-900 dark:text-white leading-tight">
-              {comment.author?.full_name || 'Usuario'}
+              {comment.author?.full_name || (lang === 'es' ? 'Usuario' : 'User')}
             </p>
             {comment.content.startsWith('GIF:') ? (
               <div className="mt-1.5 rounded-lg overflow-hidden max-w-[240px]">
@@ -189,9 +197,12 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                 />
               </div>
             ) : (
-              <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed mt-0.5">
-                {comment.content}
-              </p>
+              <>
+                <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed mt-0.5">
+                  {shownCommentContent}
+                </p>
+                <AutoTranslationNotice state={commentTranslation} compact className="mt-1" />
+              </>
             )}
           </div>
         )}
@@ -217,6 +228,8 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                   : 'text-gray-400 dark:text-gray-500 hover:text-rose-400'
               }`}
               title={comment.hasLiked ? (lang === 'es' ? 'Quitar me gusta' : 'Unlike') : (lang === 'es' ? 'Me gusta' : 'Like')}
+              aria-label={`${comment.hasLiked ? (lang === 'es' ? 'Quitar me gusta' : 'Unlike') : (lang === 'es' ? 'Me gusta' : 'Like')}${comment.likes_count > 0 ? ` (${comment.likes_count})` : ''}`}
+              aria-pressed={!!comment.hasLiked}
             >
               {comment.hasLiked ? (
                 <HeartSolidIcon className="w-3.5 h-3.5" />
@@ -244,6 +257,7 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                   onClick={() => { setIsEditing(true); setTimeout(() => editInputRef.current?.focus(), 50); }}
                   className="flex items-center gap-1 text-[11px] text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors"
                   title={lang === 'es' ? 'Editar' : 'Edit'}
+                  aria-label={lang === 'es' ? 'Editar comentario' : 'Edit comment'}
                 >
                   <PencilSquareIcon className="w-3.5 h-3.5" />
                 </button>
@@ -251,6 +265,7 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                   onClick={() => onDelete(comment.id)}
                   className="flex items-center gap-1 text-[11px] text-gray-300 dark:text-gray-600 hover:text-red-400 transition-colors"
                   title={lang === 'es' ? 'Eliminar' : 'Delete'}
+                  aria-label={lang === 'es' ? 'Eliminar comentario' : 'Delete comment'}
                 >
                   <TrashIcon className="w-3.5 h-3.5" />
                 </button>
@@ -275,6 +290,7 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 placeholder={tc.replyPlaceholder}
+                aria-label={tc.replyPlaceholder}
                 maxLength={300}
                 className="flex-1 px-3 py-2 bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-200 dark:border-dark-border rounded-full text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-cv-blue/40 focus:border-cv-blue transition-all min-w-0"
                 onKeyDown={(e) => {
@@ -291,7 +307,8 @@ const CommentItem: React.FC<CommentItemProps> = memo(({
               </button>
               <button
                 onClick={() => { setShowReplyInput(false); setReplyContent(''); }}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0"
+                aria-label={lang === 'es' ? 'Cancelar respuesta' : 'Cancel reply'}
+                className="p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-cv-blue-light"
               >
                 <XMarkIcon className="w-3.5 h-3.5" />
               </button>

@@ -107,9 +107,15 @@ export const useGroupDetail = (groupId: string | null) => {
           .from('groups')
           .select('*, owner:profiles!owner_id(full_name, avatar_url, slug)')
           .eq('id', groupId)
-          .single();
+          // maybeSingle: un grupo borrado o inexistente es "no encontrado" (group = null), no un 406
+          .maybeSingle();
 
-        if (!groupData || cancelled) return;
+        if (cancelled) return;
+        if (!groupData) {
+          setGroup(null);
+          setMembers([]);
+          return;
+        }
 
         let isMember = false;
         let role: Group['role'] = undefined;

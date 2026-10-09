@@ -12,13 +12,8 @@ import {
   ChatBubbleLeftRightIcon,
   BoltIcon,
 } from '@heroicons/react/24/outline';
-import { FullProfileData } from '../../types';
 import {
-  translateBatch,
-  detectSourceLanguage,
-  saveCachedTranslation,
-  generateContentHash,
-  extractTranslatedContent,
+  requestProfileTranslation,
   TranslationLanguage,
 } from '../../services/translation';
 
@@ -309,10 +304,8 @@ const TranslationCacheManagement: React.FC = () => {
 
     setDeleting(id);
     try {
-      const { error } = await supabase
-        .from('profile_translations')
-        .delete()
-        .eq('id', id);
+      // El navegador no puede borrar en profile_translations: RPC que exige admin
+      const { error } = await supabase.rpc('admin_delete_profile_translations', { p_id: id });
 
       if (error) throw error;
 
@@ -333,10 +326,8 @@ const TranslationCacheManagement: React.FC = () => {
 
     setClearingAll(true);
     try {
-      const { error } = await supabase
-        .from('profile_translations')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+      // RPC que exige admin (el navegador no tiene DELETE sobre la tabla)
+      const { error } = await supabase.rpc('admin_delete_profile_translations', { p_all: true });
 
       if (error) throw error;
 
@@ -407,121 +398,25 @@ const TranslationCacheManagement: React.FC = () => {
   };
 
   /**
-   * Fetch full profile data for a single profile
+   * Pide a la Edge Function translate-profile que traduzca y cachee un perfil.
+   * El navegador ya no escribe en profile_translations: la función lee la
+   * versión pública del perfil, traduce ella misma y guarda.
+   * Si la función devuelve 429 (rate limit), espera y reintenta una vez.
    */
-  const fetchFullProfile = async (profileId: string): Promise<FullProfileData | null> => {
-    const [
-      { data: profile },
-      { data: experiences },
-      { data: education },
-      { data: skills },
-      { data: portfolioItems },
-      { data: languages },
-      { data: stamps },
-    ] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', profileId).single(),
-      supabase.from('experiences').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
-      supabase.from('education').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }),
-      supabase.from('skills').select('*').eq('profile_id', profileId),
-      supabase.from('portfolio_items').select('*').eq('profile_id', profileId),
-      supabase.from('languages').select('*').eq('profile_id', profileId),
-      supabase.from('stamps').select('*').eq('profile_id', profileId).eq('status', 'VERIFIED'),
-    ]);
-
-    if (!profile) return null;
-
-    return {
-      profile,
-      experiences: experiences || [],
-      education: education || [],
-      skills: skills || [],
-      portfolioItems: portfolioItems || [],
-      portfolio: portfolioItems?.filter((item: any) => item.type === 'PROJECT' || !item.type),
-      certifications: portfolioItems?.filter((item: any) => item.type === 'CERTIFICATION') || [],
-      collaborations: portfolioItems?.filter((item: any) => item.type === 'COLLABORATION'),
-      languages: languages || [],
-      services: [],
-      stats: [],
-      stamps: stamps || [],
-    };
-  };
-
-  /**
-   * Extract translatable texts from profile (same logic as useTranslatedProfile)
-   */
-  const extractTexts = (data: FullProfileData): string[] => {
-    const texts: string[] = [];
-    if (data.profile.headline) texts.push(data.profile.headline);
-    if (data.profile.summary) texts.push(data.profile.summary);
-    data.experiences?.forEach(exp => {
-      if (exp.position) texts.push(exp.position);
-      if (exp.description) texts.push(exp.description);
-      exp.achievements?.forEach((a: string | null) => a && texts.push(a));
-    });
-    data.education?.forEach(edu => {
-      if (edu.degree) texts.push(edu.degree);
-      if (edu.field_of_study) texts.push(edu.field_of_study);
-      if (edu.description) texts.push(edu.description);
-      if (edu.grade) texts.push(edu.grade);
-    });
-    data.portfolioItems?.forEach(item => {
-      if (item.title) texts.push(item.title);
-      if (item.description) texts.push(item.description);
-    });
-    data.skills?.forEach(skill => {
-      if (skill.name) texts.push(skill.name);
-    });
-    data.certifications?.forEach(cert => {
-      const c = cert as any;
-      if (c.name) texts.push(c.name);
-      if (c.title) texts.push(c.title);
-      if (c.description) texts.push(c.description);
-    });
-    return texts.filter(t => t && t.trim() !== '');
-  };
-
-  /**
-   * Translate a single profile to a target language and save to cache
-   */
-  const translateProfile = async (profileData: FullProfileData, targetLang: TranslationLanguage): Promise<boolean> => {
-    try {
-      const allTexts = extractTexts(profileData);
-      if (allTexts.length === 0) return true;
-
-      // Separate texts by detected language
-      const textsInSpanish: string[] = [];
-      const textsInEnglish: string[] = [];
-      allTexts.forEach(text => {
-        const textLang = detectSourceLanguage(text);
-        if (textLang === 'es') textsInSpanish.push(text);
-        else textsInEnglish.push(text);
-      });
-
-      // Determine what needs translation
-      const textsToTranslate = targetLang === 'en' ? textsInSpanish : textsInEnglish;
-      const sourceLang: TranslationLanguage = targetLang === 'en' ? 'es' : 'en';
-      const uniqueTexts = [...new Set(textsToTranslate)].map(t => t.trim());
-
-      if (uniqueTexts.length === 0) return true;
-
-      const translations = await translateBatch(uniqueTexts, targetLang, sourceLang);
-
-      // Build skills translation array
-      const translatedSkills = (profileData.skills || []).map(skill => ({
-        id: skill.id || '',
-        name: translations.get(skill.name?.trim()) || skill.name,
-      }));
-
-      // Save to cache
-      const contentHash = generateContentHash(profileData);
-      const contentToCache = extractTranslatedContent(profileData, translations, translatedSkills);
-      await saveCachedTranslation(profileData.profile.id, targetLang, contentToCache, contentHash);
-
-      return true;
-    } catch (err) {
-      console.error(`[BulkTranslate] Error translating profile ${profileData.profile.full_name}:`, err);
+  const translateProfile = async (profileId: string, targetLang: TranslationLanguage): Promise<boolean> => {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const result = await requestProfileTranslation(profileId, targetLang);
+      if (result.ok) return result.status !== 'partial';
+      // 404: el perfil no es público (sin slug); no hay nada que cachear
+      if (result.httpStatus === 404) return true;
+      if (result.httpStatus === 429 && attempt === 0 && !abortRef.current) {
+        const waitSeconds = Math.min(result.retryAfterSeconds ?? 30, 60);
+        await new Promise(resolve => setTimeout(resolve, waitSeconds * 1000));
+        continue;
+      }
       return false;
     }
+    return false;
   };
 
   /**
@@ -557,15 +452,9 @@ const TranslationCacheManagement: React.FC = () => {
         const profile = profiles[i];
         setBulkProgress({ current: i + 1, total, currentName: profile.full_name || '', errors: errorCount });
 
-        const fullProfile = await fetchFullProfile(profile.id);
-        if (!fullProfile) {
-          errorCount++;
-          continue;
-        }
-
-        // Translate to both languages
-        const esOk = await translateProfile(fullProfile, 'es');
-        const enOk = await translateProfile(fullProfile, 'en');
+        // Traducir a ambos idiomas (lo hace el servidor)
+        const esOk = await translateProfile(profile.id, 'es');
+        const enOk = await translateProfile(profile.id, 'en');
 
         if (esOk && enOk) successCount++;
         else errorCount++;
@@ -627,8 +516,8 @@ const TranslationCacheManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary flex items-center gap-2">
             <LanguageIcon className="h-6 w-6" />
             {translations_t.title}
@@ -637,7 +526,7 @@ const TranslationCacheManagement: React.FC = () => {
             {translations_t.subtitle}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
               fetchTranslations();
@@ -718,17 +607,19 @@ const TranslationCacheManagement: React.FC = () => {
             {`${bulkResult.success} ${translations_t.bulk.profilesTranslated}${bulkResult.errors > 0 ? `, ${bulkResult.errors} ${translations_t.bulk.errors}` : ''}`}
           </p>
           <button
+            type="button"
             onClick={() => setBulkResult(null)}
+            aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
             className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
       )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-dark-border">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
             onClick={() => { setActiveTab('profiles'); setSearchQuery(''); }}
             className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${

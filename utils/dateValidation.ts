@@ -15,6 +15,13 @@ export interface DateValidationTranslations {
   monthInvalid: string;
   endDateBeforeStart: string;
   dateRangeTooLong: string;
+  startDateFuture?: string;
+}
+
+/** Mes actual en formato YYYY-MM (hora local): limite superior de una fecha de inicio. */
+export function currentYearMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
 /**
@@ -117,6 +124,15 @@ export function validateDateRange(
   const startValidation = validateDate(startDate, 'Start date', t);
   if (!startValidation.isValid) {
     return startValidation;
+  }
+
+  // validateDate solo compara el año: un inicio en un mes posterior del año en curso
+  // pasaba. Algo que aun no ha empezado no puede figurar como experiencia o formacion.
+  if (startDate && startDate.substring(0, 7) > currentYearMonth()) {
+    return {
+      isValid: false,
+      error: t?.startDateFuture || t?.yearFuture || 'Start date cannot be in the future'
+    };
   }
 
   // Si es trabajo/estudio actual, no validar fecha fin

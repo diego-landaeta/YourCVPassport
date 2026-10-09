@@ -11,7 +11,7 @@ En el competitivo mercado laboral de 2026, dominar **CV despues de despido** se 
 
 Esta guía completa sobre **CV despues de despido** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV despues de despido](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Guía completa sobre CV despues de despido}
+![CV despues de despido](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Guía completa sobre CV despues de despido}
 
 ## 1. Manejar el impacto emocional
 2. Como describir la situacion
@@ -78,7 +78,7 @@ Para destacar en **CV despues de despido** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV despues de despido](https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80){caption:Aspectos avanzados de CV despues de despido}
+![Aspectos avanzados de CV despues de despido](https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80){caption:Aspectos avanzados de CV despues de despido}
 
 ## Aspectos avanzados de CV despues de despido
 
@@ -292,7 +292,7 @@ Dominar **CV despues de despido** no es solo una ventaja competitiva — es una 
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
-  image_url: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1200&h=630&fit=crop&q=80",
+  image_url: "https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=1200&h=630&fit=crop&q=80",
   author_name: 'YourCVPassport Team',
   category: "Desarrollo de Carrera",
   is_featured: false,

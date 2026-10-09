@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+// Antes de createClient: guarda el #type=… de los enlaces antiguos de auth, que
+// supabase-js borra al abrir la sesión (ver utils/initialAuthUrl.ts).
+import '../utils/initialAuthUrl';
 
 // --- INSTRUCCIONES IMPORTANTES ---
 // Para que la aplicación funcione, necesitas reemplazar los siguientes valores

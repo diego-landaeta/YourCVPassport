@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../../supabase/client';
+import { PUBLIC_PROFILE_COLUMNS, PUBLIC_STAMP_COLUMNS } from '../../lib/publicProfileColumns';
 import { FullProfileData, Profile, Experience, Education, Skill, Service, Stat, PortfolioItem } from '../../types';
 import { useAnalytics } from '../../hooks/useAnalytics';
 import { useAuth } from '../../contexts/AuthContext';
@@ -74,18 +75,21 @@ const ProfileViewPage: React.FC = () => {
 
             try {
                 setLoading(true);
-                // Try to find profile by slug first, fallback to id for backward compatibility
+                // Try to find profile by slug first, fallback to id for backward compatibility.
+                // Solo columnas públicas: email, teléfono, plan, etc. no se leen en el CV público.
                 let { data: profile, error: profileError } = await supabase
                     .from('profiles')
-                    .select('*')
+                    .select(PUBLIC_PROFILE_COLUMNS)
                     .eq('slug', slug)
                     .maybeSingle();
 
-                // If not found by slug, try by id (for backward compatibility)
-                if (!profile) {
+                // If not found by slug, try by id (for backward compatibility).
+                // Solo si parece un UUID: con un slug normal, comparar con id (uuid) da error 22P02.
+                const looksLikeUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+                if (!profile && looksLikeUuid) {
                     const { data: profileById, error: idError } = await supabase
                         .from('profiles')
-                        .select('*')
+                        .select(PUBLIC_PROFILE_COLUMNS)
                         .eq('id', slug)
                         .maybeSingle();
 
@@ -111,7 +115,8 @@ const ProfileViewPage: React.FC = () => {
                     supabase.from('skills').select('*').eq('profile_id', profile.id).order('sort_order', { ascending: true }),
                     supabase.from('portfolio_items').select('*').eq('profile_id', profile.id).order('sort_order', { ascending: true }),
                     supabase.from('languages').select('*').eq('profile_id', profile.id).order('sort_order', { ascending: true }),
-                    supabase.from('stamps').select('*').eq('profile_id', profile.id).eq('status', 'VERIFIED').order('verified_at', { ascending: false }),
+                    // Vista pública de sellos: sin evidence / admin_notes / verified_by
+                    supabase.from('public_stamps').select(PUBLIC_STAMP_COLUMNS).eq('profile_id', profile.id).eq('status', 'VERIFIED').order('verified_at', { ascending: false }),
                 ]);
 
                 setProfileData({
@@ -126,7 +131,8 @@ const ProfileViewPage: React.FC = () => {
                     certifications: (portfolioItems || []).filter(item => item.type === 'CERTIFICATION'),
                     collaborations: (portfolioItems || []).filter(item => item.type === 'COLLABORATION'),
                     languages: languages || [],
-                    stamps: stamps || [],
+                    // public_stamps no trae evidence (privado): ningún template lo usa
+                    stamps: (stamps || []) as unknown as FullProfileData['stamps'],
                 });
 
             } catch (err: any) {
@@ -161,8 +167,12 @@ const ProfileViewPage: React.FC = () => {
     const renderTemplate = () => {
         if (!displayData) return null;
         const color = displayData.profile.template_color;
-        // If admin and selected a template, use that; otherwise use profile's default
-        const templateToRender = isAdmin && selectedTemplate ? selectedTemplate : displayData.profile.template;
+        // If admin and selected a template, use that; otherwise use profile's default.
+        // El fallback a 'passport' es necesario: los perfiles gestionados creados
+        // antes de que la Edge Function fijara la plantilla tienen template = NULL,
+        // y el .startsWith() de abajo lanzaria TypeError sobre ellos.
+        const templateToRender =
+            (isAdmin && selectedTemplate ? selectedTemplate : displayData.profile.template) || 'passport';
 
         // Check if it's an admin template
         if (templateToRender.startsWith('admin-')) {

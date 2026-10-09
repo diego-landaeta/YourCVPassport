@@ -4,6 +4,8 @@ import { EnvelopeIcon, LinkIcon, BriefcaseIcon, AcademicCapIcon } from '@heroico
 import { CountryBadge } from '../shared/CountrySelector';
 import { useTranslations } from '../../hooks/useTranslations';
 import { ProfileContactButtons } from './ProfileContactButtons';
+import { useTemplateLabels } from './templateLabels';
+import { publicContactEmail, safeExternalUrl, EXTERNAL_LINK_PROPS } from './templateHelpers';
 
 interface ProfessionalBlueTemplateProps {
     data: FullProfileData;
@@ -14,6 +16,9 @@ const ProfessionalBlueTemplate: React.FC<ProfessionalBlueTemplateProps> = ({ dat
     const { profile, experiences = [], education = [], skills = [] } = data || {};
     const accentColor = color || '#0284C7'; // default to sky-600
     const t = useTranslations();
+    const { L, lang } = useTemplateLabels();
+    const email = publicContactEmail(profile.meta_description);
+    const linkedinUrl = safeExternalUrl(profile.linkedin_url);
 
     // Use portfolioItems if available (full array), otherwise fallback to portfolio (legacy projects only)
     const portfolioItems = data.portfolioItems || data.portfolio || [];
@@ -64,7 +69,7 @@ const ProfessionalBlueTemplate: React.FC<ProfessionalBlueTemplateProps> = ({ dat
                 </p>
                 {profile.country_code && (
                     <div className="flex items-center justify-center gap-2 mb-6">
-                        <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang="es" />
+                        <CountryBadge countryCode={profile.country_code} size="sm" showName={true} lang={lang} />
                     </div>
                 )}
                 {/* Contact Buttons */}
@@ -86,10 +91,10 @@ const ProfessionalBlueTemplate: React.FC<ProfessionalBlueTemplateProps> = ({ dat
                             <h2 className="font-black text-lg uppercase tracking-wider text-gray-900 dark:text-white">{t.cvSections.contact}</h2>
                         </div>
                         <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
-                            {profile.meta_description && (
+                            {email && (
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-500 font-semibold mb-1 text-xs uppercase tracking-wide">{t.cvSections.email}</p>
-                                    <p className="break-all">{profile.meta_description}</p>
+                                    <p className="break-all">{email}</p>
                                 </div>
                             )}
                             {profile.phone && (
@@ -98,11 +103,11 @@ const ProfessionalBlueTemplate: React.FC<ProfessionalBlueTemplateProps> = ({ dat
                                     <p>{profile.phone}</p>
                                 </div>
                             )}
-                            {profile.linkedin_url && (
+                            {linkedinUrl && (
                                 <div>
                                     <p className="text-gray-500 dark:text-gray-500 font-semibold mb-1 text-xs uppercase tracking-wide">LinkedIn</p>
-                                    <a href={profile.linkedin_url} className="hover:underline break-all" style={{ color: accentColor }}>
-                                        View Profile
+                                    <a href={linkedinUrl} {...EXTERNAL_LINK_PROPS} className="hover:underline break-all" style={{ color: accentColor }}>
+                                        {L.viewProfile}
                                     </a>
                                 </div>
                             )}
@@ -206,7 +211,7 @@ const ProfessionalBlueTemplate: React.FC<ProfessionalBlueTemplateProps> = ({ dat
                                 </svg>
                             </div>
                             <h2 className="text-4xl font-black text-gray-900 dark:text-white">
-                                {t.cvSections?.certifications || 'Certificaciones Profesionales'}
+                                {t.cvSections.certifications}
                             </h2>
                         </div>
                         <div className="space-y-6">

@@ -61,8 +61,7 @@ const ExportsHistoryPage: React.FC = () => {
           profiles (
             id,
             full_name,
-            email,
-            professional_title
+            title
           )
         `)
         .eq('company_id', company.id)

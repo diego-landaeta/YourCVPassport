@@ -13,6 +13,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { generateSummary, optimizeHeadline } from '../../lib/ai';
 import CountrySelector from '../shared/CountrySelector';
 import PhotoPreviewModal, { CropData } from '../PhotoPreviewModal';
+import { useA11yLabels, activateOnKey } from '../shared/a11y';
 
 interface IdentitySectionProps {
   profile: any;
@@ -25,6 +26,7 @@ export interface WizardStepHandle {
 }
 
 const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ profile: initialData, onSave, onNext }, ref) => {
+  const a11y = useA11yLabels();
   const translations = useTranslations();
   const { lang } = useLanguage();
   const t = translations.dashboard.identity;
@@ -330,8 +332,10 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
       const response = await optimizeHeadline(currentHeadline, session.user.id);
 
       if (response.success && response.data) {
-        setValue('headline', response.data, { shouldDirty: true });
-        toast.success('Headline optimizado con IA');
+        // optimizeHeadline devuelve 3 variantes: se ofrecen en el modal en lugar de
+        // escribir el array directamente en el campo.
+        setAiHeadlineVariants(response.data);
+        setShowHeadlineModal(true);
       } else {
         toast.error(response.error || 'Error al optimizar el headline');
       }
@@ -462,7 +466,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
             {/* Avatar */}
             <div className="flex flex-col items-center gap-2 pt-1 flex-shrink-0">
               <div className="relative group">
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(handleAvatarClick)} aria-label={a11y.changePhoto}
                   onClick={handleAvatarClick}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-200 dark:border-gray-600 shadow-sm group-hover:border-cv-blue transition-colors"
                 >
@@ -474,7 +478,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                     </svg>
                   )}
                 </div>
-                <div
+                <div aria-hidden="true"
                   className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   onClick={handleAvatarClick}
                 >
@@ -510,7 +514,8 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {t.fullNameRequired} <span className="text-red-500">*</span>
+                    {/* fullName y no fullNameRequired: esa clave ya trae su "*" y salía duplicado */}
+                    {t.fullName} <span className="text-red-500">*</span>
                   </label>
                   <span className="text-xs text-gray-400">
                     {watch('full_name')?.length || 0}/50
@@ -533,7 +538,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {t.headlineRequired} <span className="text-red-500">*</span>
+                    {t.headline} <span className="text-red-500">*</span>
                   </label>
                   <span className="text-xs text-gray-400">
                     {watch('headline')?.length || 0}/150
@@ -573,39 +578,28 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
               )}
             </div>
 
-            {/* Gender Selection */}
+            {/* Gender Selection
+                Opcional. Antes era obligatorio y solo ofrecía M/F (letras sin
+                traducir ni nombre accesible). Solo se usa para concordar el género
+                gramatical de las traducciones del CV; "Prefiero no decirlo" = null. */}
             <div className="col-span-1 sm:col-span-3">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {translations.profileEditor.identity.gender} <span className="text-red-500">*</span>
+              <label htmlFor="identity-gender" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {translations.profileEditor.identity.gender}
               </label>
-              <div className="flex gap-1">
-                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
-                  watch('gender') === 'male'
-                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
-                }`}>
-                  <input
-                    type="radio"
-                    {...register('gender')}
-                    value="male"
-                    className="sr-only"
-                  />
-                  <span>M</span>
-                </label>
-                <label className={`flex-1 flex items-center justify-center py-[9px] rounded-lg border cursor-pointer transition-all text-sm ${
-                  watch('gender') === 'female'
-                    ? 'border-cv-blue bg-cv-blue/10 text-cv-blue font-medium'
-                    : 'border-gray-300 dark:border-gray-600 hover:border-cv-blue/50 text-gray-700 dark:text-gray-300'
-                }`}>
-                  <input
-                    type="radio"
-                    {...register('gender')}
-                    value="female"
-                    className="sr-only"
-                  />
-                  <span>F</span>
-                </label>
-              </div>
+              <select
+                id="identity-gender"
+                {...register('gender')}
+                aria-describedby="identity-gender-hint"
+                title={translations.profileEditor.identity.genderHint}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
+              >
+                <option value="">{translations.profileEditor.identity.genderPreferNot}</option>
+                <option value="female">{translations.profileEditor.identity.genderFemale}</option>
+                <option value="male">{translations.profileEditor.identity.genderMale}</option>
+              </select>
+              <p id="identity-gender-hint" className="sr-only">
+                {translations.profileEditor.identity.genderHint}
+              </p>
               {errors.gender && (
                 <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
               )}
@@ -690,7 +684,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('linkedin_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="linkedin.com/in/user"
+                      placeholder={translations.aiQuestionnaire.identity.linkedinPlaceholder}
                     />
                   </div>
                   {errors.linkedin_url && (
@@ -712,7 +706,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('github_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="github.com/user"
+                      placeholder={translations.aiQuestionnaire.identity.githubPlaceholder}
                     />
                   </div>
                   {errors.github_url && (
@@ -734,7 +728,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                       {...register('portfolio_url')}
                       type="url"
                       className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:text-white text-sm"
-                      placeholder="yourportfolio.com"
+                      placeholder={translations.aiQuestionnaire.identity.portfolioPlaceholder}
                     />
                   </div>
                   {errors.portfolio_url && (
@@ -838,14 +832,14 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                   Selecciona un resumen profesional
                 </h3>
-                <button
+                <button aria-label={translations.common.close}
                   onClick={() => {
                     setShowAIModal(false);
                     setAiSummaryVariants([]);
                   }}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg aria-hidden="true" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -857,7 +851,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
             <div className="p-6 space-y-4">
               {aiSummaryVariants.map((variant, index) => (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => handleSelectSummaryVariant(variant))}
                   key={index}
                   className="border border-gray-200 dark:border-dark-border rounded-lg p-4 hover:border-cv-blue dark:hover:border-cv-blue transition-colors cursor-pointer"
                   onClick={() => handleSelectSummaryVariant(variant)}
@@ -925,7 +919,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
 
               {/* Optimized Headline Variants */}
               {aiHeadlineVariants.map((variant, index) => (
-                <div
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey(() => handleSelectHeadlineVariant(variant))}
                   key={index}
                   className="border-2 border-cv-blue rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10 hover:border-purple-600 transition-colors cursor-pointer group"
                   onClick={() => handleSelectHeadlineVariant(variant)}

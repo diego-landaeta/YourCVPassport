@@ -53,13 +53,18 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
       const { error: authError } = await resetPassword(email);
 
       if (authError) {
-        if (authError.message?.includes('rate limit')) {
-          setError(errors.tooManyRequests);
-          toast.error(errors.tooManyRequests, 5000);
-        } else {
-          setError(errors.serverError);
-          toast.error(errors.serverError, 5000);
+        // `code` de la Edge Function send-password-reset (ver utils/authFunctionErrors.ts).
+        let msg: string;
+        switch (authError.code) {
+          case 'EMAIL_SEND_FAILED': msg = errors.recoveryEmailSendFailed; break;
+          case 'INVALID_INPUT': msg = errors.invalidEmail; break;
+          case 'RATE_LIMITED': msg = errors.tooManyRequests; break;
+          case 'TIMEOUT': msg = errors.recoveryTimeout; break;
+          case 'NETWORK_ERROR': msg = errors.networkError; break;
+          default: msg = errors.serverError;
         }
+        setError(msg);
+        toast.error(msg, 8000);
         setIsLoading(false);
         return;
       }
@@ -233,7 +238,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div role="alert" className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
@@ -296,7 +301,7 @@ const PasswordRecoveryForm: React.FC<PasswordRecoveryFormProps> = ({ mode = 'req
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div role="alert" className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}

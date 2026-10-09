@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { supabase } from '../../supabase/client';
+import { PUBLIC_PROFILE_COLUMNS } from '../../lib/publicProfileColumns';
 import type { Company, CompanyUser, Profile } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   LockClosedIcon,
   EnvelopeIcon,
@@ -29,6 +31,13 @@ const CompanyProfileViewPage: React.FC = () => {
   const translations = useTranslations();
   const navigate = useNavigate();
   const toast = useToastContext();
+  const { lang } = useLanguage();
+
+  // Las RPC de créditos validan en el servidor que p_user_id es la sesión y
+  // que pertenece a la empresa; si no, responden 42501 (PostgREST 403).
+  const forbiddenMessage = lang === 'es'
+    ? 'No tienes permiso para hacer esto en nombre de esta empresa. Vuelve a iniciar sesión.'
+    : 'You are not allowed to do this on behalf of this company. Please sign in again.';
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,9 +69,11 @@ const CompanyProfileViewPage: React.FC = () => {
   const fetchProfile = async () => {
     try {
       // Try to fetch by slug first, then by handle, then by ID
+      // Solo columnas públicas: email/teléfono son privados y una empresa no los
+      // puede leer de profiles (pendiente: RPC de contacto tras desbloqueo).
       let query = supabase
         .from('profiles')
-        .select('*')
+        .select(PUBLIC_PROFILE_COLUMNS)
         .neq('role', 'admin');
 
       // Check if profileId looks like a UUID
@@ -71,14 +82,22 @@ const CompanyProfileViewPage: React.FC = () => {
       if (isUUID) {
         query = query.eq('id', profileId);
       } else {
+        // El parámetro de la URL va dentro de un filtro .or() de PostgREST: con comas,
+        // paréntesis o puntos podría añadir condiciones. Solo se aceptan slugs/handles.
+        if (!/^[a-z0-9][a-z0-9_-]{0,99}$/i.test(profileId || '')) {
+          setProfile(null);
+          return;
+        }
         // Try slug first, then handle
         query = query.or(`slug.eq.${profileId},handle.eq.${profileId}`);
       }
 
-      const { data, error } = await query.single();
+      // maybeSingle: un slug/id inexistente o un perfil no visible deja profile = null
+      // (pantalla "no encontrado") en lugar de un 406 tratado como error de carga
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error(t('company.profile.fetchError') || 'Error al cargar el perfil');
@@ -96,7 +115,9 @@ const CompanyProfileViewPage: React.FC = () => {
         .select('*')
         .eq('company_id', company.id)
         .eq('profile_id', profileId)
-        .single();
+        // Lo normal es que aún no esté desbloqueado: maybeSingle devuelve null sin 406
+        .limit(1)
+        .maybeSingle();
 
       if (viewData) {
         setIsUnlocked(true);
@@ -108,7 +129,8 @@ const CompanyProfileViewPage: React.FC = () => {
         .select('id')
         .eq('company_id', company.id)
         .eq('profile_id', profileId)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (contactData) {
         setHasContacted(true);
@@ -155,7 +177,7 @@ const CompanyProfileViewPage: React.FC = () => {
       window.location.reload();
     } catch (error: any) {
       console.error('Error unlocking profile:', error);
-      toast.error(error.message || t('company.profile.unlockError') || 'Error al desbloquear perfil');
+      toast.error(error?.code === '42501' ? forbiddenMessage : (error.message || t('company.profile.unlockError') || 'Error al desbloquear perfil'));
     } finally {
       setLoading(false);
     }
@@ -246,7 +268,7 @@ const CompanyProfileViewPage: React.FC = () => {
       setHasContacted(true);
     } catch (error: any) {
       console.error('Error sending contact:', error);
-      toast.error(error.message || 'Error al enviar mensaje');
+      toast.error(error?.code === '42501' ? forbiddenMessage : (error.message || 'Error al enviar mensaje'));
     } finally {
       setSendingContact(false);
     }
@@ -295,7 +317,7 @@ const CompanyProfileViewPage: React.FC = () => {
                   }}
                 />
                 {/* Premium Badge */}
-                {profile.plan && profile.plan !== 'Free' && (
+                {profile.is_premium && (
                   <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-cv-green rounded-full flex items-center justify-center border-2 border-white dark:border-dark-bg-secondary shadow-sm">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

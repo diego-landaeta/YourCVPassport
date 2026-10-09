@@ -8,6 +8,66 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 
+/** Clase del body mientras se imprime desde #print-mount (ver src/print-styles.css). */
+const PRINTING_CLASS = 'printing-cv';
+
+/** Si el navegador nunca emite `afterprint`, se limpia igualmente pasado este tiempo. */
+const PRINT_CLEANUP_FALLBACK_MS = 60_000;
+
+/** Deja la página como estaba: sin modo impresión, #print-mount vacío y sin los estilos copiados del iframe. */
+function cleanupPrintMode(): void {
+  document.body.classList.remove(PRINTING_CLASS);
+  const printMount = document.getElementById('print-mount');
+  if (printMount) {
+    printMount.innerHTML = '';
+  }
+  document.head.querySelectorAll('[data-from-iframe]').forEach((el) => el.remove());
+}
+
+/**
+ * Alto máximo (px del iframe de 1200 px de ancho) de un bloque que se mantiene entero
+ * al imprimir. Al imprimir en A4 (~794 px de ancho) el texto se reparte en más líneas y
+ * el bloque crece; con 700 px sigue cabiendo en una página (~1123 px).
+ */
+const KEEP_TOGETHER_MAX_PX = 700;
+
+/** Ítems que las plantillas suelen nombrar así, además de las tarjetas con fondo/borde/sombra. */
+const KEEP_TOGETHER_HINTS = '[class*="experience"], [class*="trabajo"], [class*="education"], [class*="educacion"], div:has(> h3), [data-pdf-avoid-break]';
+
+/**
+ * Marca con `keep-together` en el clon los bloques que no deben partirse entre páginas.
+ * `original` y `clone` tienen el mismo árbol (el clon aún no se ha modificado), así que
+ * sus elementos se emparejan por orden.
+ */
+function markKeepTogether(original: Element, clone: Element): void {
+  const view = original.ownerDocument.defaultView;
+  const originals = original.querySelectorAll('*');
+  const clones = clone.querySelectorAll('*');
+  if (!view || originals.length !== clones.length) return;
+  originals.forEach((el, i) => {
+    if (el.closest('svg') && el.tagName.toLowerCase() !== 'svg') return;
+    const height = el.getBoundingClientRect().height;
+    if (height <= 0 || height > KEEP_TOGETHER_MAX_PX) return;
+    let keep = false;
+    try {
+      keep = el.matches(KEEP_TOGETHER_HINTS);
+    } catch {
+      // Navegadores sin :has(): se queda con la detección por estilos
+      keep = el.matches('[class*="experience"], [class*="trabajo"], [class*="education"], [class*="educacion"], [data-pdf-avoid-break]');
+    }
+    if (!keep) {
+      const cs = view.getComputedStyle(el);
+      const hasBackground = cs.backgroundImage !== 'none' || !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor);
+      const hasBorder =
+        (parseFloat(cs.borderTopWidth) > 0 && cs.borderTopStyle !== 'none') ||
+        (parseFloat(cs.borderBottomWidth) > 0 && cs.borderBottomStyle !== 'none');
+      const hasShadow = !!cs.boxShadow && cs.boxShadow !== 'none';
+      keep = hasBackground || hasBorder || hasShadow;
+    }
+    if (keep) clones[i].classList.add('keep-together');
+  });
+}
+
 interface PrintablePDFOptions {
   profileSlug: string;
   profileId: string;
@@ -29,8 +89,9 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       throw new Error('Contenedor #print-mount no encontrado');
     }
 
-    // Construir URL del CV
-    const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}`;
+    // Construir URL del CV (`?export=1`: carga de exportación, no una visita real; la
+    // analítica de visitas debe ignorarlo, lo implementa otra unidad)
+    const cvUrl = `${window.location.origin}/cv/${profileSlug || profileId}?export=1`;
 
     // Crear iframe temporal para cargar el CV
     const iframe = document.createElement('iframe');
@@ -69,8 +130,15 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
     }
 
     // Buscar el contenedor del CV
-    // Primero intentar con .cv-template, si no existe usar body completo
+    // Los datos del perfil llegan después del onload: esperar (hasta 15 s) a que la
+    // plantilla esté pintada en vez de fiarse solo de la espera fija de 2 s.
+    // Si no aparece, usar el body completo
+    const waitStart = Date.now();
     let cvContainer = iframeDoc.querySelector('.cv-template');
+    while ((!cvContainer || cvContainer.childElementCount === 0) && Date.now() - waitStart < 15000) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      cvContainer = iframeDoc.querySelector('.cv-template');
+    }
 
     if (!cvContainer) {
       console.warn('⚠️ .cv-template no encontrado, usando body completo');
@@ -94,19 +162,20 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
       })
     );
 
+    // Las plantillas pueden reaccionar a la exportación (p. ej. mostrar todas las pestañas)
+    if (cvContainer !== iframeDoc.body) {
+      cvContainer.setAttribute('data-pdf-export', 'true');
+    }
+
     // Clonar el contenido del CV completo
     const cvClone = cvContainer.cloneNode(true) as HTMLElement;
 
-    // Agregar clases para evitar cortes de página
-    const experienceItems = cvClone.querySelectorAll('[class*="experience"], [class*="trabajo"], div:has(> h3)');
-    experienceItems.forEach((item: any) => {
-      item.classList.add('keep-together');
-    });
-
-    const educationItems = cvClone.querySelectorAll('[class*="education"], [class*="educacion"]');
-    educationItems.forEach((item: any) => {
-      item.classList.add('keep-together');
-    });
+    // Evitar cortes de página dentro de tarjetas e ítems (clase keep-together →
+    // break-inside: avoid en src/print-styles.css). Se mide en el original, que sí está
+    // maquetado: solo se marcan los bloques bajos; uno más alto que una página se
+    // partiría igualmente y antes dejaría un hueco en blanco al saltar de página.
+    // Párrafos, li, títulos y filas los cubre el @media print de index.css.
+    markKeepTogether(cvContainer, cvClone);
 
     // Forzar tema claro y limpiar clases oscuras SOLO del body/container principal
     cvClone.classList.remove('dark');
@@ -298,26 +367,44 @@ export async function generatePrintablePDF(options: PrintablePDFOptions): Promis
     // Esperar un momento para que el DOM se actualice
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Abrir diálogo de impresión
-    window.print();
-
-    // Limpiar después de cerrar el diálogo de impresión
-    setTimeout(() => {
-      printMount.innerHTML = '';
-
+    // Solo mientras dure esta impresión, el CSS de impresión oculta #root y muestra
+    // #print-mount (src/print-styles.css). La limpieza va en afterprint: en Chrome y
+    // Firefox window.print() bloquea hasta cerrar el diálogo, pero en Safari/iOS vuelve
+    // enseguida y limpiar con un temporizador corto imprimiría la página vacía.
+    let cleanedUp = false;
+    const stopListening = () => {
+      cleanedUp = true;
+      window.removeEventListener('afterprint', finish);
+      clearTimeout(fallbackTimer);
+    };
+    const finish = () => {
+      if (cleanedUp) return;
+      stopListening();
+      cleanupPrintMode();
       if (onSuccess) {
         onSuccess();
       }
-    }, 1000);
+    };
+    window.addEventListener('afterprint', finish);
+    // Red de seguridad si el navegador no emite afterprint
+    const fallbackTimer = setTimeout(finish, PRINT_CLEANUP_FALLBACK_MS);
+
+    document.body.classList.add(PRINTING_CLASS);
+
+    // Abrir diálogo de impresión
+    try {
+      window.print();
+    } catch (printError) {
+      // El catch de abajo limpia y avisa con onError (sin onSuccess)
+      stopListening();
+      throw printError;
+    }
 
   } catch (error) {
     console.error('❌ Error generando PDF imprimible:', error);
 
     // Limpiar en caso de error
-    const printMount = document.getElementById('print-mount');
-    if (printMount) {
-      printMount.innerHTML = '';
-    }
+    cleanupPrintMode();
 
     if (onError) {
       onError(error instanceof Error ? error : new Error('Error desconocido'));

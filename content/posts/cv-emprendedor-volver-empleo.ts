@@ -271,7 +271,7 @@ Cuando hablamos de **CV emprendedor a empleado** en el contexto de aspectos avan
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV emprendedor a empleado](https://images.unsplash.com/photo-1529390079861-591f39a1e508?w=800&q=80){caption:Aspectos avanzados de CV emprendedor a empleado}
+![Aspectos avanzados de CV emprendedor a empleado](https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=800&q=80){caption:Aspectos avanzados de CV emprendedor a empleado}
 
 ## Cómo YourCVPassport te ayuda con CV emprendedor a empleado
 

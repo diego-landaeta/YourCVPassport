@@ -38,7 +38,7 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
         : billing.perMonthShort;
 
     return (
-        <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col ${plan.highlight ? 'border-cv-blue dark:border-cv-blue-light scale-105 bg-white dark:bg-dark-bg-secondary ring-2 ring-cv-blue/20 dark:ring-cv-blue-light/30' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg dark:shadow-2xl`}>
+        <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col ${plan.highlight ? 'border-cv-blue dark:border-cv-blue-light md:scale-105 bg-white dark:bg-dark-bg-secondary ring-2 ring-cv-blue/20 dark:ring-cv-blue-light/30' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg dark:shadow-2xl`}>
             <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{plan.title}</h3>
             <p className="mt-2 text-gray-500 dark:text-dark-text-tertiary">{plan.description}</p>
             <div className="mt-4">
