@@ -10,8 +10,9 @@
  * las suyas (no quedan duplicadas).
  *
  * Quién las sirve:
- *   - nginx (yourcvpassport-with-ssr.conf): `try_files $uri $uri/ /index.html` encuentra
- *     dist/precios/ y sirve su index.html (sin redirigir a /precios/).
+ *   - nginx (yourcvpassport-with-ssr.conf): `try_files $uri $uri/index.html /index.html`
+ *     sirve dist/precios/index.html en /precios. Con `$uri/` nginx redirigiría con 301
+ *     a /precios/, que no es la URL canónica.
  *   - server.mjs: middleware antes del fallback de la SPA.
  * Si el servidor de producción no tiene `$uri/` en try_files, sigue sirviendo el
  * index.html raíz (título genérico en español): nada se rompe.
@@ -21,7 +22,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join, resolve, sep } from 'path';
 import { fileURLToPath } from 'url';
-import { STATIC_META_PAIRS, STATIC_META_SINGLE } from '../seo/static-meta.mjs';
+import { STATIC_META_ALIASES, STATIC_META_PAIRS, STATIC_META_SINGLE } from '../seo/static-meta.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_URL = 'https://yourcvpassport.com';
@@ -48,9 +49,10 @@ function replaceTag(html, pattern, tag, label) {
 }
 
 /** HTML de una página: index.html con su idioma, título, descripción, canonical y hreflang. */
-export function renderPage(baseHtml, { path, lang, title, description, alternates }) {
+export function renderPage(baseHtml, { path, lang, title, description, alternates, canonical }) {
   const e = escapeHtml;
-  const url = `${BASE_URL}${path}`;
+  // canonical: solo en las raíces duplicadas (STATIC_META_ALIASES), que apuntan a su principal.
+  const url = `${BASE_URL}${canonical ?? path}`;
   let html = baseHtml;
   html = replaceTag(html, /<html lang="[^"]*">/, `<html lang="${lang}">`, '<html lang>');
   html = replaceTag(html, /<title>[\s\S]*?<\/title>/, `<title>${e(title)}</title>`, '<title>');
@@ -85,6 +87,11 @@ export function listPages() {
   }
   for (const single of STATIC_META_SINGLE) {
     pages.push({ path: single.path, lang: 'es', title: single.title, description: single.description, alternates: null });
+  }
+  for (const alias of STATIC_META_ALIASES) {
+    const principal = pages.find(p => p.path === alias.of);
+    if (!principal) throw new Error(`[static-meta] Alias ${alias.path} apunta a una ruta sin meta: ${alias.of}`);
+    pages.push({ ...principal, path: alias.path, canonical: principal.path });
   }
   return pages;
 }

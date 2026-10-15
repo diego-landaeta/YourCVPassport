@@ -27,6 +27,7 @@ export const translations = {
         to: 'hasta',
         next: 'Siguiente',
         backToHome: 'Volver al inicio',
+        back: 'Volver',
         contactSupport: 'Contactar soporte',
         loading: 'Cargando...',
         saving: 'Guardando...',
@@ -132,9 +133,9 @@ export const translations = {
         logos: [
             { name: "ISEIE", url: "https://iseie.com/", logoUrl: "https://iseie.com/wp-content/uploads/2024/11/LOGO-PAIS-BANDERA-ESPANA-0-00-00-00-e1738499416780.png" },
             { name: "Psiko Aprende", url: "https://psikoaprende.com/", logoUrl: "https://psikoaprende.com/wp-content/uploads/2024/11/LOGO-PSIKO-APRENDE-PNG-1-e1730841803106.png", logoUrlLight: "https://psikoaprende.com/wp-content/uploads/2024/03/LOGO-PSIKO-APRENDE-PNG-2-e1730843042102.png" },
-            { name: "Navalis University", url: "https://navalis.university/", logoUrl: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-logo-scaled.png", logoUrlLight: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-Logo-Negro-1024x1024.png" },
-            { name: "ISEIH", url: "https://iseih.com/", logoUrl: "https://iseih.com/wp-content/uploads/2025/08/ISEIH-LOGOTIPO-3.png" },
-            { name: "CETLAT", url: "https://cetlat.org/", logoUrl: "https://cetlat.org/wp-content/uploads/2025/05/cetlat-horizontal-nuevo-logo.webp" }
+            { name: "Navalis University", url: "https://navalis.university/", logoUrl: "/partners/navalis.webp", logoUrlLight: "/partners/navalis-negro.webp" },
+            { name: "ISEIH", url: "https://iseih.com/", logoUrl: "/partners/iseih.webp" },
+            { name: "CETLAT", url: "https://cetlat.org/", logoUrl: "/partners/cetlat.webp" }
         ],
     },
     features: {
@@ -192,6 +193,28 @@ export const translations = {
         subtitle: '¿Listo para dar el siguiente paso en tu carrera? Crea tu CV verificado y desbloquea nuevas oportunidades.',
         button: 'Crea tu CV ahora',
     },
+    // Aviso y configuración de cookies (components/legal/CookieConsent.tsx, lib/consent.ts)
+    cookieConsent: {
+        title: 'Tu privacidad, tu decisión',
+        text: 'Solo usamos lo imprescindible para que la web funcione. Si lo aceptas, también medimos las visitas a los CV públicos y mostramos reseñas de Opynio. Nunca publicidad.',
+        accept: 'Aceptar todo',
+        reject: 'Rechazar',
+        settings: 'Configurar',
+        policyLink: 'Política de cookies',
+        dialogTitle: 'Configurar cookies',
+        dialogIntro: 'Elige qué permites. Puedes cambiarlo cuando quieras desde «Configurar cookies», en el pie de la web.',
+        necessaryTitle: 'Necesarias',
+        necessaryText: 'Mantienen tu sesión iniciada, tu idioma y tema, los borradores del asistente de CV y esta misma decisión. Sin ellas la web no funciona.',
+        alwaysOn: 'Siempre activas',
+        analyticsTitle: 'Analítica',
+        analyticsText: 'Estadísticas propias de visitas a los CV públicos para sus dueños. Guarda un identificador de visitante en tu navegador. No se comparte con terceros.',
+        thirdPartyTitle: 'Contenido de terceros',
+        thirdPartyText: 'Muestra las reseñas de usuarios con el widget de Opynio (web.opynio.com), que se carga desde su dominio.',
+        save: 'Guardar selección',
+        close: 'Cerrar',
+        reviewsBlocked: 'Las reseñas las muestra Opynio, un servicio externo. Actívalo para verlas.',
+        reviewsEnable: 'Mostrar reseñas',
+    },
     footer: {
         tagline: 'Tu identidad profesional verificada.',
         rights: 'Todos los derechos reservados.',
@@ -199,7 +222,11 @@ export const translations = {
         solutions: { title: 'Soluciones', professionals: 'Para profesionales', companies: 'Para empresas', pricing: 'Precios' },
         resources: { title: 'Recursos', blog: 'Blog', help: 'Centro de ayuda', status: 'Estado del sistema' },
         company: { title: 'Empresa', about: 'Sobre nosotros', press: 'Prensa', contact: 'Contacto' },
+        legal: { title: 'Legal', privacy: 'Privacidad', terms: 'Términos', cookies: 'Cookies', settings: 'Configurar cookies' },
         links: {
+            privacy: '/privacidad',
+            terms: '/terminos',
+            cookies: '/politica-de-cookies',
             overview: '/producto/resumen',
             stamps: '/producto/sellos',
             ats: '/producto/ats',
@@ -3222,7 +3249,9 @@ export const translations = {
             "terms": "Términos y condiciones",
             "terminos": "Términos y condiciones",
             "privacy": "Política de privacidad",
-            "privacidad": "Política de privacidad"
+            "privacidad": "Política de privacidad",
+            "cookie-policy": "Política de cookies",
+            "politica-de-cookies": "Política de cookies"
         }
     },
     onboardingWizard: {

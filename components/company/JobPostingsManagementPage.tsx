@@ -429,7 +429,7 @@ const JobPostingsManagementPage: React.FC = () => {
                     {posting.status === 'PUBLISHED' && (
                       <>
                         <button
-                          onClick={() => navigate(`/company/jobs/${posting.id}/applications`)}
+                          onClick={() => navigate(`/company/jobs/applications?job=${encodeURIComponent(posting.id)}`)}
                           className="px-4 py-2 text-sm bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           {translations.actions.viewApplications}
