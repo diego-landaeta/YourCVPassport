@@ -367,10 +367,11 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   const CurrentComponent = steps[currentStep]?.component as any;
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto pb-24">
       {/* Stepper Header */}
       <div ref={stepperRef} className="relative mb-8 overflow-x-auto pb-2">
-        <div className="flex items-center justify-start sm:justify-center gap-1 sm:gap-0 px-2 sm:px-4">
+        {/* w-max + min-w-full: centrada si cabe; si no, empieza en el borde y se desplaza (antes el centrado dejaba el primer paso fuera, sin poder llegar a él). */}
+        <div className="flex w-max min-w-full items-center justify-start sm:justify-center gap-1 sm:gap-0 px-2 sm:px-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = index === currentStep;
@@ -578,7 +579,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
       {/* Premium Toast Notification */}
       {showPremiumToast && (
-        <div className="fixed bottom-8 right-28 z-[60] animate-fadeIn max-w-sm">
+        <div className="fixed bottom-36 lg:bottom-8 left-4 right-4 sm:left-auto sm:right-8 lg:right-28 z-[60] animate-fadeIn max-w-sm">
           <div className="bg-gradient-to-r from-cv-blue to-purple-600 text-white px-6 py-4 rounded-xl shadow-2xl border border-blue-400/30">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -628,7 +629,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
           onClick={handleAIClick}
           aria-label={t.profileWizard.improveWithAi}
           data-testid="ai-pro-button"
-          className={`fixed bottom-20 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group${isTypingInField ? ' max-sm:hidden' : ''}`}
+          className={`fixed bottom-20 lg:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-cv-blue to-purple-600 text-white rounded-full hover:from-cv-blue-dark hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center z-50 group${isTypingInField ? ' max-sm:hidden' : ''}`}
           title={t.profileWizard.improveWithAi}
         >
           {/* Premium Badge (decorativo: el botón ya lleva a la función PRO) */}

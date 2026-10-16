@@ -262,7 +262,9 @@ const ProfileViewPage: React.FC = () => {
                         ) : (
                             <>
                                 <h1 className="text-3xl font-bold text-red-600 mb-4">{t.cvSections.profileNotFound}</h1>
-                                <p className="text-gray-600 dark:text-dark-text-secondary mb-6">{error}</p>
+                                <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
+                                    {lang === 'es' ? 'Este CV no existe o ya no es público.' : 'This CV does not exist or is no longer public.'}
+                                </p>
                                 <Link
                                     to="/"
                                     className="inline-block px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"

@@ -614,7 +614,7 @@ const IdentitySection = forwardRef<WizardStepHandle, IdentitySectionProps>(({ pr
                   id="remote-check"
                   className="w-4 h-4 text-cv-blue border-gray-300 rounded focus:ring-cv-blue"
                 />
-                <label htmlFor="remote-check" className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 cursor-pointer whitespace-nowrap">
+                <label htmlFor="remote-check" className="ml-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 cursor-pointer sm:whitespace-nowrap">
                   {t.remoteWork}
                 </label>
               </div>

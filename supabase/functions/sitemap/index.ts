@@ -37,6 +37,7 @@ const EN_TO_ES: Record<string, string> = {
   '/feed': '/comunidad',
   '/terms': '/terminos',
   '/privacy': '/privacidad',
+  '/cookie-policy': '/politica-de-cookies',
 };
 
 // Mismas rutas que scripts/generate-sitemap.mjs: sin las raíces de sección (/product,
@@ -69,6 +70,7 @@ const STATIC_ROUTES: Array<{ path: string; priority: string; changefreq: string 
   { path: '/feed', priority: '0.6', changefreq: 'daily' },
   { path: '/terms', priority: '0.3', changefreq: 'yearly' },
   { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+  { path: '/cookie-policy', priority: '0.3', changefreq: 'yearly' },
 ];
 
 function getSpanishPath(enPath: string): string | null {

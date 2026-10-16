@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -63,10 +63,12 @@ const JobApplicationsPage: React.FC = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  // ?job=<id>: candidaturas de una vacante (botón «Ver aplicaciones» de /company/jobs).
+  const selectedJobId = searchParams.get('job');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
@@ -253,7 +255,7 @@ const JobApplicationsPage: React.FC = () => {
       ];
 
       // Prepare CSV rows
-      const rows = filteredApplications.map(app => [
+      const rows = applications.map(app => [
         app.profile.full_name || 'N/A',
         app.profile.email || 'N/A',
         app.profile.phone || 'N/A',
@@ -366,7 +368,7 @@ const JobApplicationsPage: React.FC = () => {
 
           <button
             onClick={exportToCSV}
-            disabled={filteredApplications.length === 0}
+            disabled={applications.length === 0}
             className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowDownTrayIcon className="h-5 w-5" />

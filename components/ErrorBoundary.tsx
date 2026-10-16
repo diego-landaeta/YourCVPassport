@@ -64,6 +64,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render() {
     if (this.state.hasError) {
+      // Fuera de los providers no hay contexto de idioma: se lee el que guarda
+      // LanguageContext (por defecto, español).
+      let es = true;
+      try { es = localStorage.getItem('language') !== 'en'; } catch { /* sin almacenamiento */ }
+
       // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
@@ -94,13 +99,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             {/* Error Title */}
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4">
-              Oops! Something went wrong
+              {es ? 'Algo ha fallado' : 'Oops! Something went wrong'}
             </h1>
 
             {/* Error Message */}
             <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
-              We encountered an unexpected error while loading this section.
-              Please try refreshing the page or navigating to a different section.
+              {es
+                ? 'Ha ocurrido un error inesperado al cargar esta sección. Prueba a recargar la página o a ir a otra sección.'
+                : 'We encountered an unexpected error while loading this section. Please try refreshing the page or navigating to a different section.'}
             </p>
 
             {/* Error Details (Development Only) */}
@@ -134,19 +140,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 onClick={this.handleReset}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                Try Again
+                {es ? 'Reintentar' : 'Try again'}
               </button>
               <button
                 onClick={this.handleGoToDashboard}
                 className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
               >
-                Go to Dashboard
+                {es ? 'Ir al panel' : 'Go to dashboard'}
               </button>
               <button
                 onClick={this.handleRefresh}
                 className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
               >
-                Refresh Page
+                {es ? 'Recargar la página' : 'Refresh page'}
               </button>
             </div>
           </div>

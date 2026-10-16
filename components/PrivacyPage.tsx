@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import SeoLinks from './shared/SeoLinks';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LEGAL_LAST_UPDATED, formatLegalDate } from './TermsPage';
 
@@ -36,6 +37,7 @@ const PrivacyPage: React.FC = () => {
   const c = CONTENT[lang] ?? CONTENT.en;
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <SeoLinks />
       <Helmet>
         <title>{`${c.title} | YourCVPassport`}</title>
         <meta name="description" content={c.metaDescription} />
