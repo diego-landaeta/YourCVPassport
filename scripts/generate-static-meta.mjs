@@ -77,6 +77,36 @@ export function renderPage(baseHtml, { path, lang, title, description, alternate
   return replaceTag(html, /<\/head>/i, `    ${extra.join('\n    ')}\n  </head>`, '</head>');
 }
 
+/**
+ * Artículos del blog (content/posts/index.ts, `allPostsMeta`): cada uno existe en un
+ * solo idioma (/recursos/blog/<slug> o /resources/blog/<slug>), con canonical propio y
+ * sin hreflang. Título y descripción como los pinta BlogPostPage con PageSEO
+ * («<meta_title> - YourCVPassport» y la descripción recortada a 160). Antes los 300
+ * artículos llegaban a Google con el título genérico de index.html (auditoría 15/10/2026).
+ */
+export function listBlogPages() {
+  const src = readFileSync(join(__dirname, '..', 'content', 'posts', 'index.ts'), 'utf-8');
+  const at = src.indexOf('allPostsMeta');
+  const start = src.indexOf('[', src.indexOf('=', at));
+  let depth = 0, end = start;
+  for (; end < src.length; end++) {
+    if (src[end] === '[') depth++;
+    else if (src[end] === ']' && --depth === 0) break;
+  }
+  const posts = JSON.parse(src.slice(start, end + 1));
+  return posts.map((post) => {
+    const lang = post.lang === 'en' ? 'en' : 'es';
+    const description = post.meta_description || post.summary || '';
+    return {
+      path: `${lang === 'es' ? '/recursos/blog/' : '/resources/blog/'}${post.slug}`,
+      lang,
+      title: `${post.meta_title || post.title} - YourCVPassport`,
+      description: description.length > 160 ? `${description.substring(0, 157)}...` : description,
+      alternates: null,
+    };
+  });
+}
+
 /** Lista de páginas a generar ({ path, lang, title, description, alternates }). */
 export function listPages() {
   const pages = [];
@@ -93,6 +123,7 @@ export function listPages() {
     if (!principal) throw new Error(`[static-meta] Alias ${alias.path} apunta a una ruta sin meta: ${alias.of}`);
     pages.push({ ...principal, path: alias.path, canonical: principal.path });
   }
+  pages.push(...listBlogPages());
   return pages;
 }
 
