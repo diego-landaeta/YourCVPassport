@@ -696,7 +696,9 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 ) : (
                                     <>
                                         {/* Results Header */}
-                                        <div className="mb-6 flex items-center justify-between bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm">
+                                        {/* flex-wrap: en móvil «Traduciendo…» + «Actualizar» no caben junto al contador
+                                            y desbordaban la página mientras se traducía (+94 px a 320). */}
+                                        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-cv-blue/10 rounded-lg">
                                                     <svg className="w-5 h-5 text-cv-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -710,7 +712,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                                 {/* Translation Indicator */}
                                                 {isTranslating && (
                                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full border border-purple-200 dark:border-purple-700/50 animate-pulse">
