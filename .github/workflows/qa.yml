@@ -53,7 +53,14 @@ jobs:
       - name: Suite QA local en Chromium (sin *.prod.spec.ts)
         # Se ejecuta aunque falle el paso anterior: asi el informe trae las dos suites.
         if: ${{ !cancelled() && steps.tipos.outcome == 'success' }}
-        run: npx playwright test -c tests/qa/playwright.qa.config.ts --project=chromium 'local\.spec\.ts'
+        # Contra el build de produccion (vite build + preview) y no contra el servidor de
+        # desarrollo: en dev, Helmet a veces no pinta canonical/hreflang y la suite falla en CI.
+        # El config reutiliza el servidor que ya escucha en el puerto 5300.
+        run: |
+          npm run build
+          npx vite preview --host 127.0.0.1 --port 5300 --strictPort &
+          npx wait-on http://127.0.0.1:5300 --timeout 60000
+          npx playwright test -c tests/qa/playwright.qa.config.ts --project=chromium 'local\.spec\.ts'
 
       - name: Subir informe de Playwright
         if: ${{ !cancelled() }}
