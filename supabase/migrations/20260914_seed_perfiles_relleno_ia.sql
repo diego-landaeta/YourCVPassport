@@ -206,56 +206,56 @@ INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
 -- 4. ANDRÉS ACOSTA · Psicología + IA · vertical "psychologist.ai"
 -- ═══════════════════════════════════════════════════════════════════════
 UPDATE profiles SET
-  full_name = 'Andres Acosta',
-  headline = 'Psychologist - Human-AI Interaction - Clinical oversight of mental health conversational assistants',
-  summary = 'Psychologist whose career sits at the intersection of clinical practice and the design and supervision of conversational systems applied to mental health. The starting point is the consulting room: years of cognitive behavioural therapy with adults, working with anxiety, mood disorders, work-related stress and difficulties in emotional regulation. That clinical grounding is what underpins his second line of work, the supervision of conversational assistants for emotional support, where he handles the decisions that determine whether a tool of this kind helps or harms: designing the protocols for detecting suicide risk and for urgent referral to a human professional, setting explicit boundaries on what the system must not do, reviewing the tone and framing of its responses, and systematically evaluating the cases where the model exceeds its competence or reinforces a maladaptive belief held by the user. He holds a clear position on this ground: a conversational system can be useful as psychoeducational support, as companionship between sessions or as a first orienting contact, but it does not replace a therapeutic process, and any product that suggests otherwise creates real risk for the user. His profile is completed with training in research methodology and in the evaluation of psychological interventions.',
+  full_name = 'Andrés Acosta',
+  headline = 'Psicólogo · Interacción humano-IA · Supervisión clínica de asistentes conversacionales de salud mental',
+  summary = 'Psicólogo con una trayectoria que cruza la práctica clínica con el diseño y la supervisión de sistemas conversacionales aplicados a la salud mental. Su punto de partida es la consulta: años de atención psicológica en terapia cognitivo-conductual con adultos, trabajando ansiedad, estado de ánimo, estrés laboral y dificultades de regulación emocional. Esa experiencia clínica es la que sostiene su segunda línea de trabajo, la supervisión de asistentes conversacionales de apoyo emocional, donde se ocupa de las decisiones que determinan si una herramienta de este tipo ayuda o perjudica: el diseño de los protocolos de detección de riesgo suicida y de derivación urgente a un profesional humano, la delimitación explícita de lo que el sistema no debe hacer, la revisión del tono y del encuadre de las respuestas, y la evaluación sistemática de los casos en que el modelo excede sus competencias o refuerza creencias desadaptativas del usuario. Sostiene una posición clara sobre este terreno: un sistema conversacional puede ser útil como apoyo psicoeducativo, de acompañamiento entre sesiones o de primer contacto orientador, pero no sustituye un proceso terapéutico, y cualquier producto que insinúe lo contrario genera un riesgo real para el usuario. Formado y afincado en el Reino Unido, completa su perfil con formación en metodología de investigación y evaluación de intervenciones psicológicas.',
   role = 'professional', plan = 'pro',
   template = 'passport', template_color = '#0052FF',
-  location = 'London, United Kingdom', country_code = 'GB',
+  location = 'Londres, Reino Unido', country_code = 'GB',
   slug = 'andres-acosta', is_active = true,
   job_seeking_status = 'NOT_LOOKING', is_open_to_messages = false,
   wizard_completed = true, first_login_completed = true, dashboard_tour_completed = true,
-  meta_title = 'Andres Acosta - Psychologist - Human-AI Interaction and Digital Mental Health',
-  meta_description = 'Psychologist specialising in the clinical oversight of mental health conversational assistants: risk protocols, tool boundaries, referral to human professionals and evaluation of human-AI interaction.'
+  meta_title = 'Andrés Acosta · Psicólogo · Interacción humano-IA y salud mental digital',
+  meta_description = 'Psicólogo especializado en la supervisión clínica de asistentes conversacionales de salud mental: protocolos de riesgo, límites de la herramienta, derivación a profesional y evaluación de la interacción humano-IA.'
 WHERE id = p4;
 
 INSERT INTO experiences (profile_id, company_name, position, start_date, end_date, is_current, description, sort_order) VALUES
-  (p4, 'Digital mental health projects', 'Psychologist - Clinical oversight of conversational assistants', '2022-06-15', NULL, true, 'Clinical supervision of AI-based conversational assistants for emotional support. Design of risk detection protocols covering suicidal ideation, self-harm, violence and acute decompensation, together with the escalation pathways to a human professional and to emergency services. Explicit definition of the boundaries of the tool and of the situations in which it must stop the conversation and refer. Systematic review of transcripts to detect responses that exceed the competence of the system, reinforce maladaptive beliefs or suggest a therapeutic bond that does not exist. Drafting of the disclosures and framing the user must receive about what the tool is and what it is not.', 1),
-  (p4, 'Private psychology practice', 'Psychologist - Cognitive behavioural therapy with adults', '2017-01-15', NULL, true, 'Psychology practice with an adult population from a cognitive behavioural approach. Assessment and intervention in anxiety disorders, mood disorders, work-related stress and burnout, and difficulties in emotional regulation. Design of goal-based treatment plans, progress monitoring with standardised measures and relapse prevention work.', 2),
-  (p4, 'Psychological care centre', 'Psychologist - Clinical team', '2014-09-15', '2016-12-15', false, 'Psychological care within a multidisciplinary team. Assessment, diagnosis and individual intervention, case coordination with the rest of the team and participation in group programmes for anxiety and stress management.', 3);
+  (p4, 'Proyectos de salud mental digital', 'Psicólogo - Supervisión clínica de asistentes conversacionales', '2022-06-15', NULL, true, 'Supervisión clínica de asistentes conversacionales de apoyo emocional basados en inteligencia artificial. Diseño de los protocolos de detección de riesgo -ideación suicida, autolesión, violencia, descompensación aguda- y de los circuitos de derivación urgente a profesional humano y a recursos de emergencia. Definición explícita de los límites de la herramienta y de las situaciones en las que debe detener la conversación y derivar. Revisión sistemática de transcripciones para detectar respuestas que excedan la competencia del sistema, que refuercen creencias desadaptativas o que sugieran un vínculo terapéutico inexistente. Elaboración de los avisos y el encuadre que el usuario debe recibir sobre qué es y qué no es la herramienta.', 1),
+  (p4, 'Consulta privada de psicología', 'Psicólogo - Terapia cognitivo-conductual con adultos', '2017-01-15', NULL, true, 'Consulta de psicología con población adulta desde un enfoque cognitivo-conductual. Evaluación e intervención en trastornos de ansiedad, estado de ánimo, estrés laboral y burnout, y dificultades de regulación emocional. Diseño de planes de tratamiento por objetivos, seguimiento de la evolución con medidas estandarizadas y trabajo de prevención de recaídas.', 2),
+  (p4, 'Centro de atención psicológica', 'Psicólogo del equipo clínico', '2014-09-15', '2016-12-15', false, 'Atención psicológica en centro con equipo multidisciplinar. Evaluación, diagnóstico e intervención individual, coordinación de casos con el resto del equipo y participación en programas grupales de gestión de la ansiedad y del estrés.', 3);
 
 INSERT INTO education (profile_id, institution_name, degree, field_of_study, start_date, end_date, sort_order) VALUES
-  (p4, 'UK university', 'MSc in Research Methods in Behavioural Sciences', 'Research Methods and Evaluation of Interventions', '2019-09-15', '2020-07-15', 1),
-  (p4, 'UK university', 'MSc in Clinical Psychology', 'Clinical Psychology', '2012-09-15', '2014-06-15', 2),
-  (p4, 'UK university', 'BSc (Hons) in Psychology', 'Psychology', '2008-09-15', '2012-06-15', 3);
+  (p4, 'Universidad británica', 'Máster en Métodos de Investigación en Ciencias del Comportamiento (MSc)', 'Métodos de Investigación y Evaluación de Intervenciones', '2019-09-15', '2020-07-15', 1),
+  (p4, 'Universidad británica', 'Máster en Psicología Clínica (MSc)', 'Psicología Clínica', '2012-09-15', '2014-06-15', 2),
+  (p4, 'Universidad británica', 'Grado en Psicología (BSc Hons)', 'Psicología', '2008-09-15', '2012-06-15', 3);
 
 INSERT INTO skills (profile_id, name, level, sort_order) VALUES
-  (p4, 'Cognitive behavioural therapy', 'EXPERT', 1),
-  (p4, 'Assessment and intervention in anxiety and mood disorders', 'EXPERT', 2),
-  (p4, 'Suicide risk detection and management protocols', 'EXPERT', 3),
-  (p4, 'Clinical oversight of conversational assistants', 'ADVANCED', 4),
-  (p4, 'Design of referral pathways to human professionals', 'ADVANCED', 5),
-  (p4, 'Human-AI interaction in mental health', 'ADVANCED', 6),
-  (p4, 'Defining boundaries and framing of digital tools', 'ADVANCED', 7),
-  (p4, 'Emotional regulation', 'EXPERT', 8),
-  (p4, 'Work-related stress and burnout', 'ADVANCED', 9),
-  (p4, 'Assessment with standardised measures', 'ADVANCED', 10),
-  (p4, 'Research methodology in behavioural sciences', 'ADVANCED', 11),
-  (p4, 'Relapse prevention', 'ADVANCED', 12);
+  (p4, 'Terapia cognitivo-conductual', 'EXPERT', 1),
+  (p4, 'Evaluación e intervención en ansiedad y estado de ánimo', 'EXPERT', 2),
+  (p4, 'Protocolos de detección y manejo del riesgo suicida', 'EXPERT', 3),
+  (p4, 'Supervisión clínica de asistentes conversacionales', 'ADVANCED', 4),
+  (p4, 'Diseño de circuitos de derivación a profesional', 'ADVANCED', 5),
+  (p4, 'Interacción humano-IA aplicada a salud mental', 'ADVANCED', 6),
+  (p4, 'Definición de límites y encuadre de herramientas digitales', 'ADVANCED', 7),
+  (p4, 'Regulación emocional', 'EXPERT', 8),
+  (p4, 'Estrés laboral y burnout', 'ADVANCED', 9),
+  (p4, 'Evaluación con medidas estandarizadas', 'ADVANCED', 10),
+  (p4, 'Metodología de investigación en ciencias del comportamiento', 'ADVANCED', 11),
+  (p4, 'Prevención de recaídas', 'ADVANCED', 12);
 
 INSERT INTO languages (profile_id, name, level, is_native, sort_order) VALUES
-  (p4, 'English', 'Native', true, 1),
-  (p4, 'Spanish', 'B2', false, 2);
+  (p4, 'Inglés', 'Native', true, 1),
+  (p4, 'Castellano', 'B2', false, 2);
 
 INSERT INTO portfolio_items (profile_id, title, description, type, tags, sort_order) VALUES
-  (p4, 'Risk Detection Protocol for Conversational Assistants', 'Detection and response system for suicidal ideation, self-harm, violence or acute decompensation in AI conversations, with escalation pathways to a human professional and to emergency services.', 'PROJECT', ARRAY['Suicide Risk','Digital Mental Health','Protocol'], 1),
-  (p4, 'Ethical Boundaries Framework for AI in Mental Health', 'Explicit definition of what a conversational assistant must not do: the framing the user receives, prevention of a simulated therapeutic bond, and review of responses that reinforce maladaptive beliefs.', 'PROJECT', ARRAY['Ethics','AI','Mental Health'], 2),
-  (p4, 'Anxiety and Work Stress Management Programme', 'Structured cognitive behavioural intervention for anxiety, work-related stress and burnout, with measurable goals, follow-up through standardised scales and a relapse prevention module.', 'PROJECT', ARRAY['CBT','Anxiety','Burnout'], 3);
+  (p4, 'Protocolo de Detección de Riesgo en Asistentes Conversacionales', 'Sistema de detección y respuesta ante ideación suicida, autolesión, violencia o descompensación aguda en conversaciones con IA, con circuitos de derivación urgente a profesional humano y a recursos de emergencia.', 'PROJECT', ARRAY['Riesgo Suicida','Salud Mental Digital','Protocolo'], 1),
+  (p4, 'Marco de Límites Éticos para IA en Salud Mental', 'Definición explícita de lo que un asistente conversacional no debe hacer: encuadre que recibe el usuario, prevención del vínculo terapéutico simulado y revisión de respuestas que refuercen creencias desadaptativas.', 'PROJECT', ARRAY['Ética','IA','Salud Mental'], 2),
+  (p4, 'Programa de Gestión de Ansiedad y Estrés Laboral', 'Intervención cognitivo-conductual estructurada para ansiedad, estrés laboral y burnout, con objetivos medibles, seguimiento mediante escalas estandarizadas y módulo de prevención de recaídas.', 'PROJECT', ARRAY['TCC','Ansiedad','Burnout'], 3);
 
 INSERT INTO portfolio_items (profile_id, title, issuer, type, sort_order) VALUES
-  (p4, 'Suicide Prevention and Intervention', 'Specialist clinical training', 'CERTIFICATION', 100),
-  (p4, 'Applied Cognitive Behavioural Therapy', 'Postgraduate training', 'CERTIFICATION', 101),
-  (p4, 'Ethics and Digital Mental Health', 'Continuing professional development', 'CERTIFICATION', 102);
+  (p4, 'Prevención e Intervención en Conducta Suicida', 'Formación de especialización clínica', 'CERTIFICATION', 100),
+  (p4, 'Terapia Cognitivo-Conductual Aplicada', 'Formación de posgrado', 'CERTIFICATION', 101),
+  (p4, 'Ética y Salud Mental Digital', 'Formación continuada', 'CERTIFICATION', 102);
 
 END $$;
 

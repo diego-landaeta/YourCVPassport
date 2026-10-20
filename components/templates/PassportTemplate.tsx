@@ -155,7 +155,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                   </div>
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t.cvSections.about}</h2>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg text-justify">
                   {profile.summary}
                 </p>
               </section>
@@ -185,7 +185,7 @@ const PassportTemplate: React.FC<PassportTemplateProps> = ({ data, color = '#005
                           {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : t.cvSections.present}
                         </p>
                         {exp.description && (
-                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-justify">
                             {exp.description}
                           </p>
                         )}

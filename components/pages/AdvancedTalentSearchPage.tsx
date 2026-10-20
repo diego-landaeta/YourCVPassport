@@ -325,6 +325,10 @@ const AdvancedTalentSearchPage: React.FC = () => {
                 .not('template', 'is', null)
                 // Exclude admin/staff profiles
                 .neq('role', 'admin')
+                // Ocultos o suspendidos por moderación: la RLS ya los quita a
+                // anon, pero un admin los vería en la búsqueda.
+                .eq('profile_hidden', false)
+                .not('is_active', 'is', false)
                 .order('is_premium', { ascending: false, nullsFirst: false })
                 .order('id', { ascending: true })
                 .limit(500);
