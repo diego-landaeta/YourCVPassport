@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import SEOHead from '../../components/shared/SEOHead';
+import { useLanguage } from '../../contexts/LanguageContext';
 import EmailLinkError from '../../components/auth/EmailLinkError';
 import { useTranslations } from '../../hooks/useTranslations';
 import {
@@ -20,6 +21,7 @@ import {
 const ConfirmPage: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations().dashboard.auth.emailLink;
+  const es = useLanguage().lang === 'es';
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [hasSession, setHasSession] = useState(false);
   const [errorKind, setErrorKind] = useState<EmailLinkErrorKind>('expired');
@@ -81,8 +83,8 @@ const ConfirmPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="Email Confirmation - YourCVPassport"
-        description="Confirming your email address"
+        title={es ? 'Confirmación de correo - YourCVPassport' : 'Email Confirmation - YourCVPassport'}
+        description={es ? 'Confirmando tu correo electrónico' : 'Confirming your email address'}
       />
       <div className="min-h-screen bg-gradient-to-br from-cv-blue/5 via-white to-cv-blue/5 dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg flex items-center justify-center">
         {status === 'error' ? (

@@ -4,6 +4,7 @@ import PasswordRecoveryForm from '../../components/auth/PasswordRecoveryForm';
 import EmailLinkError from '../../components/auth/EmailLinkError';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import SEOHead from '../../components/shared/SEOHead';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import {
   readEmailLinkParams,
@@ -20,6 +21,8 @@ import { consumeInitialAuthHashType } from '../../utils/initialAuthUrl';
 //   - Enlace antiguo: #access_token=…&type=recovery (supabase-js abre la sesión solo).
 const RecoveryPage: React.FC = () => {
   const location = useLocation();
+  const { lang } = useLanguage();
+  const es = lang === 'es';
   const t = useTranslations().dashboard.auth.emailLink;
   // Se lee en el primer render, antes de que el efecto limpie la URL.
   const [link] = useState(() => readEmailLinkParams(window.location.search));
@@ -73,8 +76,12 @@ const RecoveryPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title={mode === 'reset' ? 'Reset Password - YourCVPassport' : 'Recover Password - YourCVPassport'}
-        description={mode === 'reset' ? 'Set your new password' : 'Recover your YourCVPassport account password'}
+        title={mode === 'reset'
+          ? (es ? 'Nueva contraseña - YourCVPassport' : 'Reset Password - YourCVPassport')
+          : (es ? 'Recuperar contraseña - YourCVPassport' : 'Recover Password - YourCVPassport')}
+        description={mode === 'reset'
+          ? (es ? 'Elige tu nueva contraseña' : 'Set your new password')
+          : (es ? 'Recupera la contraseña de tu cuenta de YourCVPassport' : 'Recover your YourCVPassport account password')}
       />
       <div className="min-h-screen bg-gradient-to-br from-cv-blue/5 via-white to-cv-blue/5 dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         {linkState === 'verifying' ? (

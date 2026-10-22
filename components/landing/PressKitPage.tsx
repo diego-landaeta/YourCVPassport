@@ -238,11 +238,11 @@ const PressKitPage: React.FC = () => {
                 <div className="max-w-5xl mx-auto">
                     <AnimatedWrapper>
                         <h2 className="text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-12">{pageData.factsTitle}</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
                             {t.COMPANY_FACTS.map(fact => (
-                                <div key={fact.label} className="bg-white dark:bg-dark-bg-primary p-6 rounded-lg shadow-md">
+                                <div key={fact.label} className="min-w-0 break-words bg-white dark:bg-dark-bg-primary p-4 sm:p-6 rounded-lg shadow-md">
                                     <div className="flex justify-center mb-3">{fact.icon}</div>
-                                    <p className="text-4xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{fact.value}</p>
+                                    <p className="text-3xl sm:text-4xl font-extrabold text-cv-dark-gray dark:text-dark-text-primary">{fact.value}</p>
                                     <p className="mt-1 text-gray-600 dark:text-dark-text-secondary">{fact.label}</p>
                                 </div>
                             ))}

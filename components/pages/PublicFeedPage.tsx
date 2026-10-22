@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import SeoLinks from '../shared/SeoLinks';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -732,6 +733,7 @@ const PublicFeedPage: React.FC = () => {
 
   return (
     <>
+      <SeoLinks />
       <Helmet>
         <title>{lang === 'es' ? 'Comunidad — YourCVPassport' : 'Community — YourCVPassport'}</title>
         <meta

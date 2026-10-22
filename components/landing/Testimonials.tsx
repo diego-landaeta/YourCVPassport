@@ -3,6 +3,7 @@ import { Testimonial } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useOpynioWidget, OPYNIO_BUSINESS_ID } from '../../hooks/useOpynioWidget';
+import ThirdPartyPlaceholder from '../legal/ThirdPartyPlaceholder';
 
 const isDarkTheme = () =>
   typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -29,7 +30,8 @@ const Testimonials: React.FC<{title?: string, description?: string, testimonials
   // el título. Mientras carga, el título queda oculto (sin mover el diseño) para no
   // acabar en "título sin contenido".
   if (status === 'empty') return null;
-  const ready = status === 'ready';
+  const blocked = status === 'blocked';
+  const ready = status === 'ready' || blocked;
 
   return (
     <section className="bg-cv-light-gray dark:bg-dark-bg-secondary py-20" data-testid="testimonials-section" aria-busy={!ready}>
@@ -44,7 +46,9 @@ const Testimonials: React.FC<{title?: string, description?: string, testimonials
         </div>
         {/* Opynio Widget v6.0 - horizontal-carousel */}
         <div className="mt-12">
-          <div ref={widgetRef} key={widgetKey} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme={theme}></div>
+          {blocked
+            ? <ThirdPartyPlaceholder />
+            : <div ref={widgetRef} key={widgetKey} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme={theme}></div>}
         </div>
       </div>
     </section>

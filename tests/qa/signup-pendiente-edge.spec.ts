@@ -187,7 +187,9 @@ test.beforeEach(({}, testInfo) => {
   } satisfies StubState;
 });
 
-test.afterEach(() => {
+test.afterEach(({}, testInfo) => {
+  // En los demás proyectos el test se salta en beforeEach y no hay estado que revisar.
+  if (testInfo.project.name !== 'chromium') return;
   expect(st().externalFetches, 'ninguna petición sale a la red').toEqual([]);
 });
 
