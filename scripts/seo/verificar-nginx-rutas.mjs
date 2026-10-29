@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Comprueba nginx/yourcvpassport-static.conf SIN nginx (no hace falta tenerlo instalado):
+ * Comprueba nginx/yourcvpassport.com.produccion.conf SIN nginx (no hace falta tenerlo instalado):
  *
  *   1. Lint básico del fichero: llaves equilibradas, cada directiva acaba en «;», las location con
  *      nombre (@...) que se usan están definidas, las regex compilan, los snippets incluidos existen
@@ -23,7 +23,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CONF = join(raiz, 'nginx', 'yourcvpassport-static.conf');
+const CONF = join(raiz, 'nginx', 'yourcvpassport.com.produccion.conf');
 const conf = readFileSync(CONF, 'utf8').replace(/\r\n/g, '\n');
 const fallos = [];
 const fallo = (m) => fallos.push(m);
@@ -264,7 +264,7 @@ for (const [ruta, st, to] of esperado) {
 }
 
 // ---------- salida ----------
-console.log('==== nginx/yourcvpassport-static.conf: lint y cobertura de rutas ====');
+console.log('==== nginx/yourcvpassport.com.produccion.conf: lint y cobertura de rutas ====');
 console.log(`Rutas de routeConfig.ts: ${rutas.length} pares ES/EN -> cubiertas por copia estática: ${cobertura['copia estática']}, lista blanca: ${cobertura['SPA (lista blanca)']}, redirección: ${cobertura.redirect}`);
 console.log(`Copias estáticas simuladas: ${copias.size} (${slugsBlog.es.length} artículos ES + ${slugsBlog.en.length} EN, ${padres.size} carpetas intermedias)`);
 console.log(`Entradas map: $ycp_redirect ${mapRedirect.exactas.size} exactas + ${mapRedirect.regex.length} regex; $ycp_app_route ${mapApp.regex.length} regex`);

@@ -11,3 +11,8 @@ Sin Brotli (el servidor no tiene el módulo). Copia anterior en el servidor: `yo
 Si se añade una ruta a la SPA sin copia estática, hay que añadirla a `$ycp_app_route`
 (`node scripts/seo/verificar-nginx-rutas.mjs` lo comprueba contra routeConfig).
 Vuelta atrás: restaurar la copia, `nginx -t` y `nginx -s reload`.
+
+Nota: `scripts/seo/verificar-nginx-rutas.mjs` se escribió para una configuración reescrita (snippets propios, sin `add_header`
+en las `location`, Brotli). Contra este archivo real avisa de esos estilos y de que `/es/resources` y `/en/resources` hacen dos
+saltos (a `/resources` y luego a `/resources/blog`); la cobertura de rutas sí es correcta. Pendiente, de bajo riesgo: añadir
+esas dos entradas exactas al mapa `$ycp_redirect` en la próxima recarga de nginx.
