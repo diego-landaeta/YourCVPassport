@@ -63,7 +63,7 @@ const AlertUnsubscribePage: React.FC = () => {
   const text = phase === 'done' ? tx.doneText : phase === 'notfound' ? tx.notFoundText : phase === 'invalid' ? tx.invalidText : phase === 'error' ? tx.errorText : '';
 
   return (
-    <main className="min-h-[60vh] bg-slate-50 px-4 py-16 dark:bg-dark-bg-primary sm:px-6">
+    <div className="min-h-[60vh] bg-slate-50 px-4 py-16 dark:bg-dark-bg-primary sm:px-6">
       <PageSEO title={tx.seoTitle} description={tx.seoDescription} lang={lang} noindex alternates={null} />
       <div className={`${SURFACE} mx-auto max-w-xl p-8 text-center sm:p-10`} data-testid="unsub-card" data-phase={phase}>
         <Icon className={`mx-auto h-12 w-12 ${tone}`} aria-hidden="true" />
@@ -87,7 +87,7 @@ const AlertUnsubscribePage: React.FC = () => {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 
