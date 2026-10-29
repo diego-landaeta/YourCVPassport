@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslations } from '../hooks/useTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { openCookieSettings } from '../lib/consent';
+import { useJobsNavText } from './jobs/textosNav';
 
 // Redes sociales oficiales. Solo se pintan las que tienen URL real: hoy no hay
 // ninguna confirmada, así que la lista va vacía y no se muestra nada (antes eran
@@ -13,6 +14,7 @@ export const SOCIAL_LINKS: ReadonlyArray<{ name: string; url: string }> = [];
 const Footer: React.FC = () => {
   const t = useTranslations();
   const { lang } = useLanguage();
+  const jobsNav = useJobsNavText();
 
   const getPath = (path: string) => path.startsWith('/') ? path : `/${path}`;
 
@@ -37,6 +39,7 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.solutions.title}</h4>
             <ul className="mt-3 space-y-1 text-sm">
               <li><Link to={getPath(t.footer.links.professionals)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.professionals}</Link></li>
+              <li><Link to={getPath(jobsNav.id)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{jobsNav.label}</Link></li>
               <li><Link to={getPath(t.footer.links.companies)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.companies}</Link></li>
               <li><Link to={getPath(t.footer.links.pricing)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.pricing}</Link></li>
             </ul>

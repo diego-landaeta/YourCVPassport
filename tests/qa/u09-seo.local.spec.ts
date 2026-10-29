@@ -34,6 +34,7 @@ test.use(SAFE_CONTEXT_OPTIONS);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const BASE = 'https://yourcvpassport.com';
+const PAIRS: Array<{ es: string; en: string }> = JSON.parse(fs.readFileSync(path.join(ROOT, 'seo', 'blog-translations.json'), 'utf8')).pairs;
 // Título por defecto de index.html (en español desde el issue #5)
 const INDEX_TITLE = 'YourCVPassport - Plataforma de CV profesional verificado';
 
@@ -229,7 +230,9 @@ test.describe('U9 SEO por idioma', () => {
     await setup(context, 'es');
     await page.goto('/recursos/blog/como-hacer-cv-para-emigrar-europa', { waitUntil: 'domcontentloaded' });
     const head = await readHead(page, `${BASE}/recursos/blog/como-hacer-cv-para-emigrar-europa`);
-    expect(head.hreflangCount).toBe(0);
+    // Sin par traducido: sin hreflang; con par (seo/blog-translations.json): es, en y x-default
+    const paired = PAIRS.some(x => x.es === 'como-hacer-cv-para-emigrar-europa');
+    expect(head.hreflangCount).toBe(paired ? 3 : 0);
   });
 
   test('AboutUs en espanol enlaza a /nosotros/... sin prefijo /es', async ({ page, context }) => {
@@ -302,7 +305,14 @@ test.describe('U9 sitemap', () => {
       const other = `${BASE}${p.lang === 'en' ? '/recursos/blog/' : '/resources/blog/'}${p.slug}`;
       expect(locs.has(own), own).toBe(true);
       expect(locs.has(other), other).toBe(false);
-      expect(byLoc.get(own)!.alternates).toEqual({ [p.lang]: own });
+      // Solo su idioma, salvo los pares es/en declarados en seo/blog-translations.json (hallazgo 16 de la auditoria del 25/10)
+      const pair = PAIRS.find(x => (p.lang === 'es' ? x.es : x.en) === p.slug);
+      if (pair) {
+        const es = `${BASE}/recursos/blog/${pair.es}`; const en = `${BASE}/resources/blog/${pair.en}`;
+        expect(byLoc.get(own)!.alternates).toEqual({ es, en, 'x-default': en });
+      } else {
+        expect(byLoc.get(own)!.alternates).toEqual({ [p.lang]: own });
+      }
     }
 
     // Todas las URLs cargan en local (SPA) sin la pagina 404 y sin redirigir

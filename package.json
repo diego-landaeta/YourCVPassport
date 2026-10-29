@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate-sitemap && vite build && npm run generate-static-meta",
-    "build:seo": "npm run build && npm run generate-profile-seo",
+    "build": "npm run generate-sitemap && vite build && npm run generate-static-meta && npm run generate-profile-seo -- --optional",
+    "build:seo": "npm run generate-sitemap && vite build && npm run generate-static-meta && npm run generate-profile-seo",
     "preview": "vite preview",
     "server": "node server.mjs",
     "start": "npm run build && npm run server",
@@ -21,7 +21,9 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "capture-templates": "node scripts/capture-template-previews.js"
+    "capture-templates": "node scripts/capture-template-previews.js",
+    "test:sql": "node supabase/tests/run-all.mjs",
+    "test:functions": "node supabase/tests/run-functions.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -55,7 +57,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite": "^0.5.13",
     "@playwright/test": "^1.56.1",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@types/file-saver": "^2.0.7",

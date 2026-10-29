@@ -26,9 +26,10 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
     return (
         <div className="font-sans bg-white dark:bg-dark-bg-secondary">
             {/* Header with modern sidebar design */}
-            <div className="flex min-h-screen">
+            {/* Dos columnas desde 640 px; por debajo, apiladas (hallazgo SEO 13: desbordaba a 375 px) */}
+            <div className="flex min-h-screen flex-col sm:flex-row">
                 {/* Left sidebar */}
-                <div className="w-1/3" style={{ backgroundColor: accentColor }}>
+                <div className="w-full sm:w-1/3" style={{ backgroundColor: accentColor }}>
                     <div className="p-8 text-white">
                         {profile.avatar_url && (
                             <div className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white bg-cover bg-center"
@@ -127,7 +128,7 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                 </div>
 
                 {/* Right content */}
-                <div className="w-2/3 p-12 bg-gray-50 dark:bg-dark-bg-tertiary">
+                <div className="w-full min-w-0 sm:w-2/3 p-6 sm:p-12 bg-gray-50 dark:bg-dark-bg-tertiary">
                     <section className="mb-10">
                         <h2 className="text-3xl font-bold uppercase tracking-wider mb-4" style={{ color: accentColor }}>{t.cvSections.profile}</h2>
                         <div className="h-1 w-20 mb-6" style={{ backgroundColor: accentColor }}></div>

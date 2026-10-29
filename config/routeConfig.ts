@@ -125,6 +125,12 @@ export const routeConfig: RouteConfig[] = pathMappings.map(route => ({
  * cliente (replace) a la canonica cuando la oferta tiene pais. El formato lo construye
  * `jobPath()` en `lib/jobsFormat.ts`.
  */
+/**
+ * Baja de alertas de ofertas desde el correo (`?token=`). Rutas publicas pero NO de marketing: no
+ * van en `pathMappings` para que no entren en el sitemap ni en el hreflang; la pagina lleva noindex.
+ */
+export const alertUnsubscribeRoutes = ['/alertas/baja', '/alerts/unsubscribe'] as const;
+
 export const jobDetailRoutes = {
   canonical: ['/:cc/ofertas/:slug', '/:cc/jobs/:slug'],
   legacy: ['/empleos/:slug', '/jobs/:slug'],

@@ -2,7 +2,7 @@
 // supabase/functions/sitemap/blog-posts-data.json so the Edge Function
 // can bundle the same 300 blogs the static sitemap has.
 
-import { readFileSync, writeFileSync } from 'fs';
+import { copyFileSync, readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -36,3 +36,10 @@ for (const entry of entries) {
 
 writeFileSync(outPath, JSON.stringify(out, null, 2), 'utf-8');
 console.log(`Wrote ${out.length} blog post entries to ${outPath}`);
+
+// Lista de perfiles excluidos del sitemap (perfiles de prueba o internos): la Edge Function no
+// puede leer ../../seo, asi que lleva su copia junto a blog-posts-data.json.
+const excludedFrom = join(__dirname, '..', 'seo', 'excluded-profiles.json');
+const excludedTo = join(__dirname, '..', 'supabase', 'functions', 'sitemap', 'excluded-profiles.json');
+copyFileSync(excludedFrom, excludedTo);
+console.log(`Copied excluded-profiles.json to ${excludedTo}`);

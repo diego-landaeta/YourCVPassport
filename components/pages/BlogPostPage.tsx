@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../supabase/client';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { applyBlogImageFallback, handleBlogImageError } from '../../utils/blogImageFallback';
 import NotFoundPage from '../../pages/NotFoundPage';
+import { BASE_URL, getCanonicalUrlForPath } from '../../utils/canonicalUrl';
+import { blogPostingJsonLd, breadcrumbListJsonLd, toIsoDate } from '../../lib/seoJsonLd';
 
 
 interface BlogPost {
@@ -20,12 +22,28 @@ interface BlogPost {
     published_at: string;
     meta_title: string;
     meta_description: string;
+    author_name?: string | null;
+    /** Solo las entradas de Supabase (blog_posts) la traen. */
+    updated_at?: string | null;
+    lang?: string;
 }
+
+/**
+ * El titulo del articulo ya es el H1 de la cabecera: la primera linea "# <titulo>" del cuerpo
+ * se quita para no tener dos H1 identicos (auditoria SEO 25/10/2026, hallazgo 5). Cualquier
+ * otro "# " del cuerpo se pinta como h2 (con la clase blog-h1 conserva el aspecto del antiguo h1).
+ */
+const normalizeHeading = (text: string) => text.replace(/\s+/g, ' ').trim().toLowerCase();
+const stripLeadingTitle = (content: string, title: string): string => {
+    const match = content.match(/^\s*# ([^\n]*)\n+/);
+    return match && normalizeHeading(match[1]) === normalizeHeading(title) ? content.slice(match[0].length) : content;
+};
 
 const BlogPostPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { lang } = useLanguage();
+    const { pathname } = useLocation();
     const t = useTranslations();
     const [post, setPost] = useState<BlogPost | null>(null);
     const [loading, setLoading] = useState(true);
@@ -127,6 +145,30 @@ const BlogPostPage: React.FC = () => {
         ? `${post.category}, blog, artículo, carrera profesional, YourCVPassport, consejos, desarrollo, CV, currículum`
         : `${post.category}, blog, article, professional career, YourCVPassport, advice, development, CV, resume`;
 
+    const postLang: 'es' | 'en' = post.lang === 'en' ? 'en' : post.lang === 'es' ? 'es' : lang;
+    const canonicalUrl = getCanonicalUrlForPath(pathname);
+    const publishedIso = toIsoDate(post.published_at);
+    const modifiedIso = toIsoDate(post.updated_at) || publishedIso;
+    const imageUrl = post.image_url?.startsWith('/') ? `${BASE_URL}${post.image_url}` : post.image_url;
+    const jsonLd = [
+        blogPostingJsonLd({
+            url: canonicalUrl,
+            headline: post.title,
+            description: post.meta_description || post.summary,
+            image: imageUrl,
+            lang: postLang,
+            authorName: post.author_name,
+            category: post.category,
+            datePublished: publishedIso,
+            dateModified: modifiedIso,
+        }),
+        breadcrumbListJsonLd([
+            { name: t.breadcrumbs.home, url: `${BASE_URL}/` },
+            { name: 'Blog', url: `${BASE_URL}${blogListPath}` },
+            { name: post.title, url: canonicalUrl },
+        ]),
+    ];
+
     return (
         <>
             <PageSEO
@@ -134,6 +176,10 @@ const BlogPostPage: React.FC = () => {
                 description={post.meta_description || post.summary}
                 lang={lang}
                 keywords={seoKeywords}
+                ogType="article"
+                articlePublishedTime={publishedIso}
+                articleModifiedTime={modifiedIso}
+                jsonLd={jsonLd}
             />
             <div className="bg-cv-light-gray dark:bg-dark-bg-secondary min-h-screen">
                 {/* Hero Section */}
@@ -189,7 +235,7 @@ const BlogPostPage: React.FC = () => {
                                 ref={contentRef}
                                 className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-6"
                                 dangerouslySetInnerHTML={{
-                                    __html: post.content
+                                    __html: stripLeadingTitle(post.content, post.title)
                                         // Cajas especiales (antes de los headers)
                                         .replace(/:::tip\s+(.*?)\s+:::/gs, '<div class="info-box tip-box"><div class="info-box-icon">💡</div><div class="info-box-content"><strong>CONSEJO PRO</strong><p>$1</p></div></div>')
                                         .replace(/:::info\s+(.*?)\s+:::/gs, '<div class="info-box info-box-blue"><div class="info-box-icon">ℹ️</div><div class="info-box-content"><strong>INFORMACIÓN</strong><p>$1</p></div></div>')
@@ -203,7 +249,7 @@ const BlogPostPage: React.FC = () => {
                                         // Headers
                                         .replace(/### (.*?)(\n|$)/g, '<h3 class="blog-h3">$1</h3>')
                                         .replace(/## (.*?)(\n|$)/g, '<h2 class="blog-h2">$1</h2>')
-                                        .replace(/# (.*?)(\n|$)/g, '<h1 class="blog-h1">$1</h1>')
+                                        .replace(/# (.*?)(\n|$)/g, '<h2 class="blog-h1">$1</h2>')
 
                                         // Listas
                                         .replace(/\n- (.*?)(?=\n|$)/g, '<li class="blog-li">$1</li>')

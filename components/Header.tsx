@@ -4,6 +4,7 @@ import { NavItem } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase/client';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useJobsNavText } from './jobs/textosNav';
 import { useTranslations } from '../hooks/useTranslations';
 
 const DarkModeToggle: React.FC = () => {
@@ -192,7 +193,7 @@ const DesktopNavLink: React.FC<{ item: NavItem }> = ({ item }) => {
     return (
       <Link
         to={getPath(item.id)}
-        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-1.5 min-[1340px]:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
       >
         {item.name}
       </Link>
@@ -202,7 +203,7 @@ const DesktopNavLink: React.FC<{ item: NavItem }> = ({ item }) => {
   return (
     <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <button
-        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center focus:outline-none"
+        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-1.5 min-[1340px]:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center focus:outline-none"
       >
         {item.name}
         <svg className={`ml-1 h-4 w-4 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -310,9 +311,16 @@ const Header: React.FC = () => {
   // de administración y a cerrar sesión, y no ve el enlace "Comunidad" de la navegación.
   const isAdmin = profile?.role === 'admin';
   const adminPanelLabel = t.dashboard.menu.adminPanel;
-  const navLinks = isAdmin
+  // «Empleos» / «Jobs»: enlace visible al listado público de ofertas, justo antes de Comunidad.
+  const jobsNav = useJobsNavText();
+  const jobsItem: NavItem = { name: jobsNav.label, href: '#', id: jobsNav.id };
+  const baseLinks = isAdmin
     ? t.NAV_LINKS.filter((item) => item.id !== 'comunidad' && item.id !== 'feed')
     : t.NAV_LINKS;
+  const communityIdx = baseLinks.findIndex((item) => item.id === 'comunidad' || item.id === 'feed');
+  const navLinks: NavItem[] = communityIdx >= 0
+    ? [...baseLinks.slice(0, communityIdx), jobsItem, ...baseLinks.slice(communityIdx)]
+    : [...baseLinks, jobsItem];
 
   return (
     <>
@@ -325,7 +333,7 @@ const Header: React.FC = () => {
             </Link>
           </div>
           {/* Menú de escritorio desde xl (1280 px): con lg (1024) la cabecera medía unos 1.265 px y desbordaba ~240 px en tablet (issue #11, YCV-006). Por debajo, menú hamburguesa. */}
-          <nav className="hidden xl:flex items-center space-x-0.5 flex-1 justify-center">
+          <nav className="hidden xl:flex items-center space-x-0 min-[1340px]:space-x-0.5 flex-1 justify-center min-w-0">
             {navLinks.map((item) => (
               <DesktopNavLink key={item.name} item={item} />
             ))}

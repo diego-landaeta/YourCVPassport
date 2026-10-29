@@ -55,6 +55,17 @@
     <!-- Robots -->
     <meta name="robots" content="index, follow" />
 
+    <!-- Las etiquetas de arriba son los valores por defecto: react-helmet-async solo sustituye las
+         que llevan data-rh. Se marcan aquí (el HTML que genera scripts/generate-static-meta.mjs las
+         conserva tal cual) para que Helmet las REEMPLACE y el DOM renderizado tenga una sola
+         meta robots, una sola description, un solo og:* y un solo twitter:* (auditoría SEO, hallazgo 14). -->
+    <script>
+      (function () {
+        var tags = document.head.querySelectorAll('meta[name="description"],meta[name="robots"],meta[property^="og:"],meta[name^="twitter:"]');
+        for (var i = 0; i < tags.length; i++) tags[i].setAttribute('data-rh', 'true');
+      })();
+    </script>
+
     <!-- El widget de Opynio (https://web.opynio.com/widget.js) lo inyectan bajo demanda
          Testimonials.tsx y SuccessStoriesPage.tsx: no se carga globalmente en todas las páginas -->
 </head>

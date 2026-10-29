@@ -260,8 +260,8 @@ type CrumbCase = { path: string; lang: Lang; items: { text: string; href?: strin
 const CRUMBS: CrumbCase[] = [
   { path: '/empresas/seguridad', lang: 'es', items: [{ text: 'Inicio', href: '/' }, { text: 'Empresas' }, { text: 'Seguridad y cumplimiento' }] },
   { path: '/companies/security', lang: 'en', items: [{ text: 'Home', href: '/' }, { text: 'Companies' }, { text: 'Security and compliance' }] },
-  { path: '/producto/sellos', lang: 'es', items: [{ text: 'Inicio', href: '/' }, { text: 'Producto', href: '/producto' }, { text: 'Perfiles verificados' }] },
-  { path: '/product/stamps', lang: 'en', items: [{ text: 'Home', href: '/' }, { text: 'Product', href: '/product' }, { text: 'Verified profiles' }] },
+  { path: '/producto/sellos', lang: 'es', items: [{ text: 'Inicio', href: '/' }, { text: 'Producto', href: '/producto/resumen' }, { text: 'Perfiles verificados' }] },
+  { path: '/product/stamps', lang: 'en', items: [{ text: 'Home', href: '/' }, { text: 'Product', href: '/product/overview' }, { text: 'Verified profiles' }] },
   { path: '/nosotros/prensa', lang: 'es', items: [{ text: 'Inicio', href: '/' }, { text: 'Nosotros', href: '/nosotros' }, { text: 'Prensa y kit de medios' }] },
   { path: '/about/press', lang: 'en', items: [{ text: 'Home', href: '/' }, { text: 'About us', href: '/about' }, { text: 'Press and media kit' }] },
   { path: '/recursos/blog', lang: 'es', items: [{ text: 'Inicio', href: '/' }, { text: 'Recursos' }, { text: 'Blog' }] },

@@ -1,0 +1,7 @@
+{
+  "_comment": "Perfiles que NO deben indexarse: fuera del sitemap y con meta robots noindex en su copia estatica (hallazgo 09 de la auditoria del 25/10/2026). Lo leen scripts/generate-sitemap.mjs, scripts/generate-profile-html.mjs y la Edge Function sitemap (copia en supabase/functions/sitemap/excluded-profiles.json; se regenera con scripts/generate-edge-function-data.mjs). Ademas se excluye cualquier perfil con is_test o is_internal a true si la columna existe.",
+  "slugs": [
+    "diana-ziegler",
+    "support-yourcvpassport-com"
+  ]
+}

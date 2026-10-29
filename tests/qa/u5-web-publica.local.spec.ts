@@ -143,13 +143,15 @@ test.describe('A1-A4 enlaces', () => {
     });
   }
 
-  test('menú: sin «Buscar empleos» ni «Biblioteca de plantillas»; Misión y valores lleva a /nosotros', async ({ page, context }) => {
+  test('menú: «Empleos» visible (cierre F-6), sin «Buscar empleos» ni «Biblioteca de plantillas»; Misión y valores lleva a /nosotros', async ({ page, context }) => {
     await setup(context, 'es');
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('header')).toBeVisible({ timeout: 45_000 });
     const header = page.locator('header');
     // Los submenús pueden estar cerrados: se mira el DOM y el diccionario a la vez
-    await expect(header.locator('a[href="/jobs"], a[href="/empleos"]')).toHaveCount(0);
+    // F-6: ya hay vacantes y la bolsa es parte del producto: UN enlace «Empleos» (/empleos) en la cabecera, fuera del diccionario NAV_LINKS
+    await expect(header.locator('a[href="/jobs"], a[href="/empleos"]')).toHaveCount(1);
+    await expect(header.getByRole('link', { name: 'Buscar empleos' })).toHaveCount(0);
     await expect(header.locator('a[href="/recursos/biblioteca"], a[href="/nosotros/mision"]')).toHaveCount(0);
     const es = fs.readFileSync(path.join(ROOT, 'translations', 'es.ts'), 'utf8');
     const nav = es.slice(es.indexOf('NAV_LINKS'), es.indexOf('PRICING_PLANS'));
@@ -285,14 +287,14 @@ test.describe('B2 títulos', () => {
     const precios = pages.find(p => p.path === '/precios')!;
     const html = renderPage(base, precios) as string;
     expect(html).toContain('<html lang="es">');
-    expect(html).toContain('<title>Precios y Planes - YourCVPassport</title>');
+    expect(html).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
     expect(html).toContain('<link rel="canonical" href="https://yourcvpassport.com/precios" data-rh="true" />');
     expect(html).toContain('<link rel="alternate" hreflang="en" href="https://yourcvpassport.com/pricing" data-rh="true" />');
     expect(html.match(/<meta name="description"/g)).toHaveLength(1);
     expect(html.match(/<title>/g)).toHaveLength(1);
     const pricing = renderPage(base, pages.find(p => p.path === '/pricing')!) as string;
     expect(pricing).toContain('<html lang="en">');
-    expect(pricing).toContain('<title>Pricing and Plans - YourCVPassport</title>');
+    expect(pricing).toContain('<title>Pricing and Plans for Every Career Stage - YourCVPassport</title>');
     // Ninguna página en español con el título genérico ni textos en inglés de index.html
     for (const p of pages.filter(x => x.lang === 'es')) expect(p.title).not.toMatch(/Professional CV Platform|Sign Up|Sign In/);
   });
@@ -437,10 +439,10 @@ test.describe('server.mjs', () => {
 
   test('cada página pública llega con su título en el HTML; el resto, con el de index.html', async () => {
     const precios = await (await fetch(`${base}/precios`)).text();
-    expect(precios).toContain('<title>Precios y Planes - YourCVPassport</title>');
+    expect(precios).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
     expect(precios).toContain('<link rel="canonical" href="https://yourcvpassport.com/precios" data-rh="true" />');
     const planes = await (await fetch(`${base}/empresas/planes`)).text();
-    expect(planes).toContain('<title>Planes para Empresas - YourCVPassport</title>');
+    expect(planes).toContain('<title>Planes de Reclutamiento para Empresas - YourCVPassport</title>');
     const pricing = await (await fetch(`${base}/pricing`)).text();
     expect(pricing).toContain('<html lang="en">');
     // Ruta sin página propia (y la barra final no redirige a /precios/)
@@ -464,7 +466,7 @@ test.describe('server.mjs', () => {
     // /empresas es una raíz duplicada (STATIC_META_ALIASES): llega con el título,
     // canonical y hreflang de su principal, /empresas/busqueda.
     const empresas = await (await fetch(`${base}/empresas`)).text();
-    expect(empresas).toContain('<title>Búsqueda Avanzada de Talento - YourCVPassport</title>');
+    expect(empresas).toContain('<title>Búsqueda Avanzada de Talento Verificado - YourCVPassport</title>');
     expect(empresas).toContain('<link rel="canonical" href="https://yourcvpassport.com/empresas/busqueda" data-rh="true" />');
     expect(empresas).toContain('<link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/search" data-rh="true" />');
   });

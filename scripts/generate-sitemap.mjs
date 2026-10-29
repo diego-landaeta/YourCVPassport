@@ -3,6 +3,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { fetchPublicProfiles, isExcludedProfile, loadExcludedSlugs } from '../seo/profile-seo.mjs';
+import { blogPath, loadTranslationPairs, readPostsMeta } from '../seo/blog-seo.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,16 +19,28 @@ const BASE_URL = 'https://yourcvpassport.com';
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+// Modo fixture (pruebas y revisión local, sin Supabase): --fixture=<carpeta> o $SEO_FIXTURE_DIR.
+// Lee <carpeta>/profiles.json y <carpeta>/<jobs>.json (--fixture-jobs=<fichero>, por defecto jobs.json).
+// Exige --output: nunca escribe en public/sitemap.xml con datos simulados.
+const cliArg = (name) => process.argv.slice(2).find(a => a.startsWith('--' + name + '='))?.slice(name.length + 3);
+const FIXTURE_DIR = cliArg('fixture') || process.env.SEO_FIXTURE_DIR || '';
+const FIXTURE_JOBS = cliArg('fixture-jobs') || 'jobs.json';
+const readFixture = (file) => JSON.parse(readFileSync(join(resolve(FIXTURE_DIR), file), 'utf-8'));
+
+if (!FIXTURE_DIR && (!supabaseUrl || !supabaseKey)) {
   console.warn('[Sitemap] WARNING: Supabase credentials not found. Dynamic URLs (blog, CV, jobs) will be skipped.');
 }
 
 // Sin credenciales o con una lectura fallida el sitemap saldría sin CV, blog u ofertas.
 // En ese caso no se sobrescribe public/sitemap.xml: se conserva el último completo
 // (15/10/2026: una build local sin .env dejó un sitemap con 113 URLs menos).
-let incomplete = !supabaseUrl || !supabaseKey;
+let incomplete = !FIXTURE_DIR && (!supabaseUrl || !supabaseKey);
 
-const supabase = supabaseUrl && supabaseKey
+// true solo cuando se leyeron las ofertas publicadas sin error: con 0 ofertas /empleos y /jobs
+// no entran en el sitemap (auditoría 25/10/2026, hallazgo 08); si no se pudo leer, se dejan.
+let jobsKnown = !!FIXTURE_DIR;
+
+const supabase = !FIXTURE_DIR && supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
@@ -236,49 +250,61 @@ async function fetchBlogPosts() {
   for (const p of dbPosts) bySlug.set(p.slug, p);
   for (const p of staticPosts) bySlug.set(p.slug, p); // static overrides
 
+  // Artículos traducidos (seo/blog-translations.json): hreflang es/en/x-default recíproco
+  let pairs = [];
+  try {
+    pairs = loadTranslationPairs(readPostsMeta());
+  } catch (err) {
+    console.warn('[Sitemap] No se pudieron leer los pares traducidos del blog:', err.message);
+  }
+  const alternatesOf = new Map();
+  for (const pair of pairs) {
+    if (!bySlug.has(pair.es) || !bySlug.has(pair.en)) continue;
+    const alt = { es: blogPath(pair.es, 'es'), en: blogPath(pair.en, 'en') };
+    alternatesOf.set(pair.es, alt);
+    alternatesOf.set(pair.en, alt);
+  }
+
   return Array.from(bySlug.values()).map(p => ({
     path: blogPostPath(p.slug, p.lang),
     priority: '0.7',
     changefreq: 'monthly',
     lastmod: p.lastmod,
     selfLang: p.lang,
+    alternates: alternatesOf.get(p.slug) ?? null,
   }));
 }
 
 /**
- * Fetch public, completed CV profiles from Supabase
+ * Perfiles CV públicos y completos (Supabase, o profiles.json en modo fixture) sin los de prueba
+ * o internos: seo/excluded-profiles.json y las marcas is_test / is_internal (hallazgo 09).
  */
 async function fetchCVProfiles() {
-  if (!supabase) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('slug, updated_at')
-      .eq('is_active', true)
-      .eq('profile_hidden', false)
-      .not('full_name', 'is', null)
-      .not('headline', 'is', null)
-      .not('slug', 'is', null)
-      .order('updated_at', { ascending: false });
-
-    if (error) {
-      console.error('[Sitemap] Error fetching CV profiles:', error.message);
+  let rows;
+  if (FIXTURE_DIR) {
+    rows = readFixture('profiles.json');
+  } else {
+    if (!supabase) return [];
+    const res = await fetchPublicProfiles(supabase);
+    if (res.error) {
+      console.error('[Sitemap] Error fetching CV profiles:', res.error.message);
       incomplete = true;
       return [];
     }
-
-    return (data || []).map(profile => ({
-      path: `/cv/${profile.slug}`,
-      priority: '0.6',
-      changefreq: 'weekly',
-      lastmod: (profile.updated_at || new Date().toISOString()).split('T')[0],
-    }));
-  } catch (err) {
-    console.error('[Sitemap] Error fetching CV profiles:', err.message);
-    incomplete = true;
-    return [];
+    rows = res.profiles;
   }
+  const excluded = loadExcludedSlugs();
+  const kept = rows
+    .filter(p => p.slug && p.full_name && p.headline && !isExcludedProfile(p, excluded))
+    .sort((x, y) => String(y.updated_at ?? '').localeCompare(String(x.updated_at ?? '')));
+  const skipped = rows.length - kept.length;
+  if (skipped > 0) console.log('[Sitemap] ' + skipped + ' perfiles fuera del sitemap (de prueba, internos o incompletos)');
+  return kept.map(profile => ({
+    path: '/cv/' + profile.slug,
+    priority: '0.6',
+    changefreq: 'weekly',
+    lastmod: (profile.updated_at || new Date().toISOString()).split('T')[0],
+  }));
 }
 
 /**
@@ -333,16 +359,21 @@ function jobPaths(slug, countryCode) {
  * (/mx/empleos...: en espanol, sin pareja inglesa).
  */
 async function fetchJobPostings() {
-  if (!supabase) return [];
+  if (!FIXTURE_DIR && !supabase) return [];
 
   try {
     let jobs;
-    try {
-      jobs = await fetchAllPublicJobs();
-    } catch (rpcErr) {
-      console.warn('[Sitemap] search_public_jobs_v2 no disponible, se usa la tabla:', rpcErr.message);
-      jobs = await fetchJobsFromTable();
+    if (FIXTURE_DIR) {
+      jobs = readFixture(FIXTURE_JOBS);
+    } else {
+      try {
+        jobs = await fetchAllPublicJobs();
+      } catch (rpcErr) {
+        console.warn('[Sitemap] search_public_jobs_v2 no disponible, se usa la tabla:', rpcErr.message);
+        jobs = await fetchJobsFromTable();
+      }
     }
+    jobsKnown = true;
 
     const routes = jobs.filter(j => j.slug).flatMap(job => {
       const pair = jobPaths(job.slug, job.country_code);
@@ -378,9 +409,16 @@ async function generateSitemap() {
     fetchJobPostings(),
   ]);
 
+  // Sin ofertas publicadas, los listados /empleos y /jobs no se indexan: fuera del sitemap
+  const noJobs = jobsKnown && jobPostings.length === 0;
+  const listedStatic = noJobs
+    ? staticRoutes.filter(r => r.path !== '/empleos' && r.path !== '/jobs')
+    : staticRoutes;
+  if (noJobs) console.log('[Sitemap] 0 ofertas publicas: /empleos y /jobs fuera del sitemap');
+
   // Combine all routes
   const allRoutes = [
-    ...staticRoutes.map(r => ({ ...r, lastmod: currentDate })),
+    ...listedStatic.map(r => ({ ...r, lastmod: currentDate })),
     ...blogPosts,
     ...cvProfiles,
     ...jobPostings,
@@ -408,7 +446,7 @@ ${urlEntries}
 </urlset>
 `;
 
-  return { sitemap, totalStatic: staticRoutes.length, totalBlog: blogPosts.length, totalCV: cvProfiles.length, totalJobs: jobPostings.length };
+  return { sitemap, totalStatic: listedStatic.length, totalBlog: blogPosts.length, totalCV: cvProfiles.length, totalJobs: jobPostings.length };
 }
 
 /**
@@ -420,6 +458,9 @@ ${urlEntries}
 function resolveOutputPath() {
   const arg = process.argv.slice(2).find(a => a.startsWith('--output='));
   const custom = arg ? arg.slice('--output='.length) : process.env.SITEMAP_OUTPUT;
+  if (FIXTURE_DIR && !custom) {
+    throw new Error('Con --fixture hay que indicar --output=<fichero>: nunca se escribe public/sitemap.xml con datos simulados.');
+  }
   return custom ? resolve(custom) : join(__dirname, '..', 'public', 'sitemap.xml');
 }
 

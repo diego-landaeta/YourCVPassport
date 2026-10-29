@@ -30,6 +30,7 @@ import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate'
 import UrbanTemplate from '../templates/UrbanTemplate';
 import { AdminTemplateLoader, adminTemplatesList } from '../templates/AdminTemplateLoader';
 import SEOHead from '../shared/SEOHead';
+import excludedProfiles from '../../seo/excluded-profiles.json';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslatedProfile } from '../../hooks/useTranslatedProfile';
 import { TranslationProgressIndicator } from '../TranslationProgressIndicator';
@@ -302,6 +303,7 @@ const ProfileViewPage: React.FC = () => {
         <>
             {profileData && (
                 <SEOHead
+                    noindex={excludedProfiles.slugs.includes(String(profileData.profile?.slug || '').toLowerCase())}
                     profile={profileData.profile}
                     currentLang={lang}
                     canonicalUrl={canonicalUrl}
