@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useCompanyUnreadMessages } from '../../hooks/useCompanyUnreadMessages';
 import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser } from '../../types';
@@ -65,6 +66,7 @@ interface ChartDataPoint {
 const CompanyDashboardPage: React.FC = () => {
   const { company, companyUser } = useOutletContext<{ company: Company; companyUser: CompanyUser }>();
   const translations = useTranslations();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const { unreadCount: unreadMessages } = useCompanyUnreadMessages(company?.id);
 
@@ -272,14 +274,14 @@ const CompanyDashboardPage: React.FC = () => {
       // es medianoche UTC y en América la etiqueta mostraba el día anterior)
       const chartDataArray = Object.values(dailyData).map((data) => ({
         ...data,
-        date: parseLocalDayKey(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        date: parseLocalDayKey(data.date).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' }),
       }));
       setChartData(chartDataArray);
 
       // Process credit history for chart
       if (creditsHistory && creditsHistory.length > 0) {
         const creditChartData = creditsHistory.map((record: any) => ({
-          date: new Date(record.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          date: new Date(record.created_at).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' }),
           balance: record.balance_after,
           change: record.amount,
         }));
@@ -314,7 +316,7 @@ const CompanyDashboardPage: React.FC = () => {
           chartData: chartDataArray,
           creditHistoryData: creditHistoryData && creditHistoryData.length > 0
             ? creditHistoryData.map((record: any) => ({
-                date: new Date(record.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                date: new Date(record.created_at).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' }),
                 balance: record.balance_after,
                 change: record.amount,
               }))

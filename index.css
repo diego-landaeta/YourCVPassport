@@ -394,3 +394,19 @@ button, a, input, textarea, select {
 /* Sin excepciones por tamano de letra: se justifica todo el texto del CV,
    metadatos y titulares incluidos. La unica alineacion que sigue mandando es
    la que el propio markup declara (text-center / text-right), arriba. */
+
+/* Aviso de cookies (components/legal/CookieConsent.tsx): entrada suave desde abajo.
+   Sin animacion si el usuario pide reducir el movimiento. */
+@keyframes ycp-consent-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ycp-consent-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.ycp-consent-in { animation: ycp-consent-in 0.3s ease-out both; }
+.ycp-consent-fade { animation: ycp-consent-fade 0.2s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .ycp-consent-in, .ycp-consent-fade { animation: none; }
+}

@@ -26,6 +26,7 @@ const TemplatePreviewCapture = lazy(() => import('../components/pages/TemplatePr
 const AllTemplatesPreview = lazy(() => import('../components/pages/AllTemplatesPreview'));
 const TermsPage = lazy(() => import('../components/TermsPage'));
 const PrivacyPage = lazy(() => import('../components/PrivacyPage'));
+const CookiePolicyPage = lazy(() => import('../components/CookiePolicyPage'));
 
 interface RouteConfig {
   path_en: string;
@@ -60,6 +61,7 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   AllTemplatesPreview,
   TermsPage,
   PrivacyPage,
+  CookiePolicyPage,
 };
 
 const pathMappings = [
@@ -93,6 +95,7 @@ const pathMappings = [
   { en: 'profiles', es: 'perfiles', componentName: 'AdvancedTalentSearchPage' },
   { en: 'terms', es: 'terminos', componentName: 'TermsPage' },
   { en: 'privacy', es: 'privacidad', componentName: 'PrivacyPage' },
+  { en: 'cookie-policy', es: 'politica-de-cookies', componentName: 'CookiePolicyPage' },
 ];
 
 /**

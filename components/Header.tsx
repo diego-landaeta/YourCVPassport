@@ -324,12 +324,13 @@ const Header: React.FC = () => {
               YourCVPassport
             </Link>
           </div>
-          <nav className="hidden lg:flex items-center space-x-0.5 flex-1 justify-center">
+          {/* Menú de escritorio desde xl (1280 px): con lg (1024) la cabecera medía unos 1.265 px y desbordaba ~240 px en tablet (issue #11, YCV-006). Por debajo, menú hamburguesa. */}
+          <nav className="hidden xl:flex items-center space-x-0.5 flex-1 justify-center">
             {navLinks.map((item) => (
               <DesktopNavLink key={item.name} item={item} />
             ))}
           </nav>
-          <div className="hidden lg:flex items-center space-x-2 flex-shrink-0">
+          <div className="hidden xl:flex items-center space-x-2 flex-shrink-0">
              <DarkModeToggle />
              <LanguageSwitcher />
             {session ? (
@@ -386,7 +387,7 @@ const Header: React.FC = () => {
               </>
             )}
           </div>
-          <div className="lg:hidden flex items-center gap-1">
+          <div className="xl:hidden flex items-center gap-1">
             {/* Cambio rápido de idioma en móvil. Antes era un botón flotante abajo a la
                 derecha que tapaba contenido (títulos, botones de registro). */}
             <button
@@ -436,13 +437,13 @@ const Header: React.FC = () => {
         {/* Overlay oscuro */}
         <div
           onClick={closeMobileMenu}
-          className="lg:hidden fixed inset-0 bg-black/50 z-[9998]"
+          className="xl:hidden fixed inset-0 bg-black/50 z-[9998]"
           style={{ animation: 'fadeIn 0.2s ease-in-out' }}
         />
 
         {/* Sidebar deslizante desde la izquierda */}
         <div
-          className="lg:hidden fixed inset-y-0 left-0 w-72 bg-white dark:bg-[#0f0f0f] shadow-2xl z-[9999] overflow-y-auto flex flex-col"
+          className="xl:hidden fixed inset-y-0 left-0 w-72 bg-white dark:bg-[#0f0f0f] shadow-2xl z-[9999] overflow-y-auto flex flex-col"
           style={{ animation: 'slideInLeft 0.3s ease-out' }}
         >
             {/* Header del sidebar con logo y botón cerrar */}
