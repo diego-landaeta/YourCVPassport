@@ -50,6 +50,8 @@ export interface JobSearchParams {
   postedWithinDays?: number | null;
   /** Ofertas que piden como mucho X años de experiencia (o ninguna). */
   maxExperienceYears?: number | null;
+  /** `affinity` = «Más afines» (solo con sesión de candidato; sin sesión la base cae a `recent`). */
+  sort?: 'recent' | 'affinity';
   search?: string | null;
   city?: string | null;
   limit?: number;
@@ -235,7 +237,7 @@ export function errorCode(error: unknown): string {
 // ---------------------------------------------------------------------------
 
 export async function searchPublicJobs(p: JobSearchParams): Promise<{ rows: PublicJobRow[]; total: number }> {
-  const { data, error } = await supabase.rpc('search_public_jobs_v2', {
+  const args = {
     p_country: p.country || null,
     p_category: p.category || null,
     p_work_mode: p.workMode || null,
@@ -248,7 +250,12 @@ export async function searchPublicJobs(p: JobSearchParams): Promise<{ rows: Publ
     p_city: p.city?.trim() || null,
     p_limit: p.limit ?? 20,
     p_offset: p.offset ?? 0,
-  });
+  };
+  // p_sort solo se envía para «Más afines»: el orden por defecto no cambia la llamada de siempre.
+  // Si la base aún no tiene el parámetro (migración 20261035 sin aplicar), se repite sin él.
+  let res = p.sort === 'affinity' ? await supabase.rpc('search_public_jobs_v2', { ...args, p_sort: 'affinity' }) : await supabase.rpc('search_public_jobs_v2', args);
+  if (res.error && p.sort === 'affinity') res = await supabase.rpc('search_public_jobs_v2', args);
+  const { data, error } = res;
   if (error) throw error;
   const rows = (data || []) as PublicJobRow[];
   return { rows, total: rows.length ? Number(rows[0].total_count) : 0 };
@@ -405,46 +412,86 @@ export async function toggleSavedJob(jobId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function fetchMyAlert(userId: string): Promise<JobAlertSubscription | null> {
+/** Máximo de alertas por perfil (lo limita también un trigger en la base). */
+export const MAX_JOB_ALERTS = 5;
+
+const ALERT_COLUMNS = 'id, profile_id, categories, country, keywords, frequency, active, last_sent_at';
+
+/** Alertas del usuario, de la más antigua a la más reciente (hasta 5). */
+export async function fetchMyAlerts(userId: string): Promise<JobAlertSubscription[]> {
   const { data, error } = await supabase
     .from('job_alert_subscriptions')
-    .select('id, profile_id, categories, country, keywords, frequency, active, last_sent_at')
+    .select(ALERT_COLUMNS)
     .eq('profile_id', userId)
-    .maybeSingle();
+    .order('created_at', { ascending: true })
+    .limit(MAX_JOB_ALERTS + 5);
   if (error) throw error;
-  return (data as JobAlertSubscription) || null;
+  return (Array.isArray(data) ? data : []) as JobAlertSubscription[];
 }
 
-export async function saveMyAlert(a: JobAlertSubscription): Promise<void> {
-  const fields = {
-    categories: a.categories,
-    country: a.country || null,
-    keywords: a.keywords,
-    frequency: a.frequency,
-    active: a.active,
-  };
-  // No se usa upsert: UPDATE no tiene privilegio sobre profile_id y PostgREST lo incluiria
-  // en el DO UPDATE. Primero UPDATE (sin profile_id); si no habia fila, INSERT.
-  const { data: updated, error: updErr } = await supabase
-    .from('job_alert_subscriptions')
-    .update(fields)
-    .eq('profile_id', a.profile_id)
-    .select('id');
-  if (updErr) throw updErr;
-  if (updated && updated.length > 0) return;
-  const { error } = await supabase.from('job_alert_subscriptions').insert({ profile_id: a.profile_id, ...fields });
+/** Primera alerta del usuario (compatibilidad: solo sirve para saber si ya tiene alguna). */
+export async function fetchMyAlert(userId: string): Promise<JobAlertSubscription | null> {
+  return (await fetchMyAlerts(userId))[0] ?? null;
+}
+
+const alertFields = (a: JobAlertSubscription) => ({
+  categories: a.categories,
+  country: a.country || null,
+  keywords: a.keywords,
+  frequency: a.frequency,
+  active: a.active,
+});
+
+/** Crea una alerta. Con 5 ya creadas la base responde con error (trigger de tope). */
+export async function createMyAlert(a: JobAlertSubscription): Promise<void> {
+  const { error } = await supabase.from('job_alert_subscriptions').insert({ profile_id: a.profile_id, ...alertFields(a) });
   if (error) throw error;
+}
+
+/** Actualiza UNA alerta por su id (sin tocar profile_id: UPDATE no tiene privilegio sobre él). */
+export async function updateMyAlert(id: string, a: JobAlertSubscription): Promise<void> {
+  const { error } = await supabase.from('job_alert_subscriptions').update(alertFields(a)).eq('id', id);
+  if (error) throw error;
+}
+
+/** Borra UNA alerta por su id. */
+export async function deleteMyAlertById(id: string): Promise<void> {
+  const { error } = await supabase.from('job_alert_subscriptions').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/** Guarda: actualiza si trae id y crea si no. */
+export async function saveMyAlert(a: JobAlertSubscription): Promise<void> {
+  if (a.id) return updateMyAlert(a.id, a);
+  return createMyAlert(a);
+}
+
+/**
+ * Baja de las alertas desde el enlace del correo: la RPC es pública (anon) y se identifica con el
+ * token de la alerta. Devuelve true si desactivó alguna; false si el token no existe o ya estaba de baja.
+ */
+export async function unsubscribeJobAlerts(token: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('unsubscribe_job_alerts', { p_token: token });
+  if (error) throw error;
+  return data === true;
 }
 
 /**
  * Casilla opcional «alertas_novedades» del registro (F15): crea la alerta de ofertas del usuario
- * (sin filtros, semanal) si aun no tiene ninguna. Nunca pisa una alerta existente y NUNCA lanza:
- * si la tabla aun no existe (migracion 20261031 sin aplicar) o falla, simplemente no se crea.
+ * (semanal, del país de su perfil si lo tiene, sin más filtros) si aun no tiene ninguna. Nunca pisa
+ * una alerta existente y NUNCA lanza: si la tabla aun no existe (migracion 20261031 sin aplicar) o
+ * falla, simplemente no se crea.
  */
 export async function ensureAlertSubscription(userId: string): Promise<boolean> {
   try {
-    if (await fetchMyAlert(userId)) return false;
-    await saveMyAlert({ profile_id: userId, categories: [], country: null, keywords: [], frequency: 'WEEKLY', active: true });
+    if ((await fetchMyAlerts(userId)).length > 0) return false;
+    let country: string | null = null;
+    try {
+      const { data } = await supabase.from('profiles_full').select('country_code').eq('id', userId).maybeSingle();
+      const cc = (data as { country_code?: string | null } | null)?.country_code;
+      country = cc ? String(cc).toUpperCase() : null;
+    } catch { /* sin país: cualquier país */ }
+    await createMyAlert({ profile_id: userId, categories: [], country, keywords: [], frequency: 'WEEKLY', active: true });
     return true;
   } catch (e) {
     console.warn('[alertas_novedades] no se pudo crear la alerta:', e);
@@ -452,6 +499,7 @@ export async function ensureAlertSubscription(userId: string): Promise<boolean> 
   }
 }
 
+/** Borra TODAS las alertas del usuario (compatibilidad). */
 export async function deleteMyAlert(userId: string): Promise<void> {
   const { error } = await supabase.from('job_alert_subscriptions').delete().eq('profile_id', userId);
   if (error) throw error;

@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  ArrowLeftIcon, BanknotesIcon, BookmarkIcon, BriefcaseIcon, BuildingOffice2Icon, CalendarDaysIcon, CheckCircleIcon,
-  ClockIcon, ExclamationTriangleIcon, FlagIcon, GlobeAltIcon, MapPinIcon, ShieldCheckIcon, UserGroupIcon, XCircleIcon,
+  ArrowLeftIcon, ArrowTrendingUpIcon, ArrowsRightLeftIcon, BanknotesIcon, BookmarkIcon, BriefcaseIcon, BuildingOffice2Icon, CalendarDaysIcon,
+  CheckBadgeIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, FlagIcon, GlobeAltIcon, HomeIcon, MapPinIcon, TagIcon,
+  UserGroupIcon, XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,9 +15,10 @@ import JobRichText from '../jobs/JobRichText';
 import ApplyModal from '../jobs/ApplyModal';
 import ReportJobModal from '../jobs/ReportJobModal';
 import CompanyMark from '../jobs/ui/CompanyMark';
+import BrandBand from '../jobs/ui/BrandBand';
 import { FOCUS_RING } from '../jobs/ApplyDialog';
 import {
-  BulletList, DetailSkeleton, DetailStyles, KeyFacts, ReadSection, SimilarRows, catText, contractText, friendly,
+  BenefitsGrid, BulletList, DetailSkeleton, DetailStyles, KeyFacts, ReadSection, SimilarRows, SkillChips, catText, contractText, friendly,
   type KeyFact,
 } from '../jobs/DetailParts';
 import { useDetailText } from '../jobs/DetailTextos';
@@ -262,7 +264,7 @@ const JobDetailPage: React.FC = () => {
   const facts: KeyFact[] = [
     { key: 'salary', label: tx.detailSalary, value: salary || tx.salaryNotShown, icon: <BanknotesIcon />, muted: !salary },
     ...(contracts.length ? [{ key: 'contract', label: tx.detailContract, value: contracts.join(', '), icon: <BriefcaseIcon /> }] : []),
-    ...(job.work_mode ? [{ key: 'mode', label: tx.detailWorkMode, value: workModeLabel(job.work_mode, pathLang), icon: <BuildingOffice2Icon /> }] : []),
+    ...(job.work_mode ? [{ key: 'mode', label: tx.detailWorkMode, value: workModeLabel(job.work_mode, pathLang), icon: job.work_mode === 'REMOTE' ? <HomeIcon /> : job.work_mode === 'HYBRID' ? <ArrowsRightLeftIcon /> : <BuildingOffice2Icon /> }] : []),
     ...(job.schedule ? [{ key: 'schedule', label: tx.detailSchedule, value: scheduleLabel(job.schedule, pathLang), icon: <ClockIcon /> }] : []),
   ];
 
@@ -279,11 +281,14 @@ const JobDetailPage: React.FC = () => {
     [tx.sectionResponsibilities, job.responsibilities],
     [tx.sectionRequirements, job.requirements],
     [tx.sectionNiceToHave, job.nice_to_have],
-    [tx.sectionBenefits, job.benefits],
   ] as Array<[string, string[] | null]>)
     .map(([title, items]) => [title, (items || []).filter((i) => i && i.trim())] as [string, string[]])
     .filter(([, items]) => items.length > 0);
-  const skills = [...(job.required_skills || []), ...(job.optional_skills || [])].filter((s) => s && s.trim());
+  const benefits = (job.benefits || []).filter((b) => b && b.trim());
+  const reqSkills = (job.required_skills || []).filter((x) => x && x.trim());
+  const optSkills = (job.optional_skills || []).filter((x) => x && x.trim());
+  const hasSkills = reqSkills.length + optSkills.length > 0;
+  const experienceText = job.experience_years == null ? '' : job.experience_years <= 0 ? dx.experienceNone : fmt(dx.experienceYearsHeader, { n: job.experience_years });
 
   const metaRows = (
     <ul className="space-y-3 text-sm">
@@ -376,38 +381,58 @@ const JobDetailPage: React.FC = () => {
       />
 
       {/* Cabecera */}
-      <div className="border-b border-slate-200 dark:border-dark-border bg-blue-50/70 dark:bg-dark-bg-secondary">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-8 sm:pb-10">
+      <div className="relative isolate overflow-hidden border-b border-slate-200 dark:border-dark-border bg-blue-50/70 dark:bg-dark-bg-secondary">
+        <BrandBand name={job.company_name} />
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-8 sm:pb-10">
           <Link to={listPath} className={`inline-flex min-h-11 items-center gap-2 text-sm text-slate-600 dark:text-dark-text-secondary hover:text-slate-900 dark:hover:text-dark-text-primary transition-colors duration-150 rounded-md ${FOCUS_RING}`}>
             <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
             {tx.back}
           </Link>
 
-          <header className="jd-rise mt-6 flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
-            <CompanyMark name={job.company_name} logoUrl={logoUrl} size="xl" className="bg-white shadow-sm" />
+          <header className="jd-rise mt-6 flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-7">
+            <CompanyMark
+              name={job.company_name} logoUrl={logoUrl} size="xl" eager
+              className="!ring-2 !ring-white dark:!ring-white/20 shadow-[0_1px_2px_rgba(15,23,42,.08),0_14px_28px_-12px_rgba(15,23,42,.35)]"
+            />
             <div className="min-w-0">
               <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight leading-[1.1] text-balance text-slate-900 dark:text-dark-text-primary">{job.title}</h1>
-              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-lg text-slate-700 dark:text-dark-text-secondary">
+              <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-lg text-slate-700 dark:text-dark-text-secondary">
                 {website ? (
                   <a href={website} target="_blank" rel="noopener noreferrer nofollow" className={`font-medium hover:text-cv-blue dark:hover:text-cv-blue-light underline-offset-2 hover:underline rounded ${FOCUS_RING}`}>{job.company_name}</a>
                 ) : (
                   <span className="font-medium">{job.company_name}</span>
                 )}
-                <span className="inline-flex items-center gap-1 text-[13px] font-medium text-green-700 dark:text-green-400">
-                  <ShieldCheckIcon className="h-4 w-4" aria-hidden="true" />{dx.verifiedCompany}
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[13px] font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/25">
+                  <CheckBadgeIcon className="h-[18px] w-[18px]" aria-hidden="true" />{dx.verifiedCompany}
                 </span>
               </p>
-              {(place || postedText) && (
-                <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-slate-600 dark:text-dark-text-secondary">
-                  {place && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPinIcon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />{place}
-                    </span>
-                  )}
-                  {place && postedText && <span aria-hidden="true">·</span>}
-                  {postedText && <span className="tabular-nums">{postedText}</span>}
-                </p>
-              )}
+              <ul className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[15px] text-slate-700 dark:text-dark-text-secondary">
+                {place && (
+                  <li className="inline-flex items-center gap-1.5">
+                    <MapPinIcon className="h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />{place}
+                  </li>
+                )}
+                {job.category && (
+                  <li className="inline-flex items-center gap-1.5">
+                    <TagIcon className="h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />{catText(job.category, pathLang)}
+                  </li>
+                )}
+                {experienceText && (
+                  <li className="inline-flex items-center gap-1.5">
+                    <ArrowTrendingUpIcon className="h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />{experienceText}
+                  </li>
+                )}
+                {vacanciesText && (
+                  <li className="inline-flex items-center gap-1.5 tabular-nums">
+                    <UserGroupIcon className="h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />{vacanciesText}
+                  </li>
+                )}
+                {postedText && (
+                  <li className="inline-flex items-center gap-1.5 tabular-nums">
+                    <CalendarDaysIcon className="h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />{postedText}
+                  </li>
+                )}
+              </ul>
             </div>
           </header>
         </div>
@@ -445,13 +470,16 @@ const JobDetailPage: React.FC = () => {
               </ReadSection>
             ))}
 
-            {skills.length > 0 && (
+            {hasSkills && (
               <ReadSection title={tx.sectionSkills}>
-                <ul className="flex flex-wrap gap-2">
-                  {skills.map((s) => (
-                    <li key={s} className="rounded-lg border border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg-secondary px-3 py-1.5 text-sm text-slate-700 dark:text-dark-text-secondary">{s}</li>
-                  ))}
-                </ul>
+                <SkillChips required={reqSkills} optional={optSkills} dx={dx} />
+              </ReadSection>
+            )}
+
+            {benefits.length > 0 && (
+              <ReadSection id="sec-work-here" title={dx.workHereTitle}>
+                <p className="-mt-2 mb-5 max-w-[68ch] text-[15px] text-slate-600 dark:text-dark-text-secondary">{fmt(dx.workHereLead, { company: job.company_name })}</p>
+                <BenefitsGrid items={benefits} />
               </ReadSection>
             )}
 
@@ -475,14 +503,19 @@ const JobDetailPage: React.FC = () => {
             )}
 
             <ReadSection id="sec-company" title={tx.sectionAboutCompany}>
-              <div className="flex items-start gap-4">
-                <CompanyMark name={job.company_name} logoUrl={logoUrl} size="md" />
+              <div className="flex flex-col items-start gap-5 sm:flex-row sm:gap-6">
+                <CompanyMark name={job.company_name} logoUrl={logoUrl} size="xl" className="shadow-[0_1px_2px_rgba(15,23,42,.06),0_10px_22px_-12px_rgba(15,23,42,.3)]" />
                 <div className="min-w-0">
-                  <p className="text-base font-semibold text-slate-900 dark:text-dark-text-primary">{job.company_name}</p>
-                  {job.company_description && <p className="mt-1.5 max-w-[68ch] whitespace-pre-line text-[15px] leading-[1.65] text-slate-700 dark:text-dark-text-secondary">{job.company_description}</p>}
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+                    {job.company_name}
+                    <span className="inline-flex items-center gap-1 text-[13px] font-medium text-emerald-700 dark:text-emerald-300">
+                      <CheckBadgeIcon className="h-[18px] w-[18px]" aria-hidden="true" />{dx.verifiedCompany}
+                    </span>
+                  </p>
+                  {job.company_description && <p className="mt-2 max-w-[68ch] whitespace-pre-line text-[15px] leading-[1.65] text-slate-700 dark:text-dark-text-secondary">{job.company_description}</p>}
                   {website && (
-                    <a href={website} target="_blank" rel="noopener noreferrer nofollow" className={`mt-3 inline-flex items-center gap-2 text-[15px] text-cv-blue dark:text-cv-blue-light underline underline-offset-2 break-all rounded ${FOCUS_RING}`}>
-                      <GlobeAltIcon className="h-4 w-4 shrink-0" aria-hidden="true" />{hostOf(website)}
+                    <a href={website} target="_blank" rel="noopener noreferrer nofollow" className={`mt-3 inline-flex min-h-11 items-center gap-2 text-[15px] font-medium text-cv-blue dark:text-cv-blue-light underline underline-offset-2 break-all rounded sm:min-h-0 ${FOCUS_RING}`}>
+                      <GlobeAltIcon className="h-5 w-5 shrink-0" aria-hidden="true" /><span className="sr-only">{dx.companyWebsite}: </span>{hostOf(website)}
                     </a>
                   )}
                 </div>

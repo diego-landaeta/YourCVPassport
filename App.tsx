@@ -8,7 +8,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
-import { jobDetailRoutes, routeConfig, routeRedirects } from './config/routeConfig';
+import { alertUnsubscribeRoutes, jobDetailRoutes, routeConfig, routeRedirects } from './config/routeConfig';
 import { getRedirectPath } from './utils/canonicalUrl';
 import { consumePostLoginReturn, isSafeReturnPath, setPostLoginReturn } from './lib/jobsReturn';
 import LoadingSpinner from './components/shared/LoadingSpinner';
@@ -72,6 +72,7 @@ const JobDetailPage = lazy(() => import('./components/pages/JobDetailPage'));
 
 // 404 Not Found page
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const AlertUnsubscribePage = lazy(() => import('./components/alerts/AlertUnsubscribePage'));
 
 // Dev tools
 const TemplatePreviewCapture = lazy(() => import('./components/pages/TemplatePreviewCapture'));
@@ -211,6 +212,10 @@ const AppContent: React.FC = () => {
             <Route key={path} path={path} element={<JobDetailPage />} />
           ))}
           <Route path="/empleos" element={<JobSearchPage />} />
+          {/* Baja de alertas desde el correo: publica, sin sesion, noindex */}
+          {alertUnsubscribeRoutes.map((path) => (
+            <Route key={path} path={path} element={<AlertUnsubscribePage />} />
+          ))}
           {/* Listado por pais: /es/empleos, /mx/empleos... (pais = codigo ISO en minuscula; JobSearchPage
               responde NotFound si no esta en la tabla countries). Gana a /es/* y /en/* por ser mas especifica. */}
           <Route path="/:country/empleos" element={<JobSearchPage />} />

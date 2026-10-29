@@ -9,7 +9,7 @@ import { openCookieSettings } from '../lib/consent';
 // 15/10/2026): si se añade almacenamiento nuevo, hay que reflejarlo aquí y en
 // lib/consent.ts. Pendiente de revisión legal (issue #10).
 
-const POLICY_LAST_UPDATED = '2026-10-15';
+const POLICY_LAST_UPDATED = '2026-10-29';
 
 type Row = [name: string, purpose: string, duration: string];
 
@@ -18,7 +18,7 @@ const CONTENT = {
     title: 'Política de cookies',
     metaDescription: 'Qué guarda YourCVPassport en tu navegador, para qué y cómo cambiar tu decisión.',
     lastUpdated: 'Última actualización',
-    date: '15 de octubre de 2026',
+    date: '29 de octubre de 2026',
     intro: 'YourCVPassport no usa cookies de publicidad ni herramientas de analítica de terceros. Guardamos en tu navegador (almacenamiento local) lo imprescindible para que la web funcione y, solo si lo aceptas, un identificador para nuestras estadísticas de visitas y las reseñas de un servicio externo.',
     settingsButton: 'Configurar cookies',
     headers: ['Nombre', 'Para qué sirve', 'Duración'],
@@ -26,7 +26,11 @@ const CONTENT = {
     necessaryText: 'Sin ellas la web no funciona. No necesitan tu consentimiento.',
     necessary: [
       ['yourcvpassport-auth', 'Mantener tu sesión iniciada', 'Hasta que cierres sesión'],
-      ['language, theme', 'Recordar tu idioma y el tema claro u oscuro', 'Persistente'],
+      ['language, language_manual, theme', 'Recordar tu idioma (y si lo elegiste tú) y el tema claro u oscuro', 'Persistente'],
+      ['ycvp_jobs_country', 'Recordar el país elegido en el listado de ofertas de empleo', 'Persistente'],
+      ['ycvp_post_login_return', 'Volver a la oferta que estabas viendo después de iniciar sesión', 'Hasta cerrar la pestaña'],
+      ['ycvp.underage-notice', 'Mostrar el aviso de edad mínima tras cerrar la sesión de un menor de 16 años', 'Hasta cerrar la pestaña'],
+      ['ycvp.legal-notice-dismissed', 'Recordar que has cerrado el aviso de una nueva versión de las condiciones', 'Hasta cerrar la pestaña'],
       ['ycp_cookie_consent', 'Guardar tu decisión sobre cookies', 'Hasta que la cambies'],
       ['yourcvpassport_translation_cache', 'Guardar traducciones ya hechas para no repetirlas', 'Persistente'],
       ['identity_draft, experience_draft, education_draft', 'Borradores del asistente de CV para no perder lo escrito', 'Hasta que guardes'],
@@ -50,7 +54,7 @@ const CONTENT = {
     title: 'Cookie policy',
     metaDescription: 'What YourCVPassport stores in your browser, why, and how to change your choice.',
     lastUpdated: 'Last updated',
-    date: 'October 15, 2026',
+    date: 'October 29, 2026',
     intro: 'YourCVPassport does not use advertising cookies or third-party analytics tools. We store in your browser (local storage) what the site needs to work and, only if you accept, an identifier for our own visit statistics and the reviews from an external service.',
     settingsButton: 'Cookie settings',
     headers: ['Name', 'Purpose', 'Duration'],
@@ -58,7 +62,11 @@ const CONTENT = {
     necessaryText: 'The site does not work without them. They do not require your consent.',
     necessary: [
       ['yourcvpassport-auth', 'Keep you signed in', 'Until you sign out'],
-      ['language, theme', 'Remember your language and light or dark theme', 'Persistent'],
+      ['language, language_manual, theme', 'Remember your language (and whether you chose it yourself) and the light or dark theme', 'Persistent'],
+      ['ycvp_jobs_country', 'Remember the country chosen in the job listing', 'Persistent'],
+      ['ycvp_post_login_return', 'Return to the job you were viewing after signing in', 'Until you close the tab'],
+      ['ycvp.underage-notice', 'Show the minimum-age notice after signing out an under-16 account', 'Until you close the tab'],
+      ['ycvp.legal-notice-dismissed', 'Remember that you closed the new-terms-version notice', 'Until you close the tab'],
       ['ycp_cookie_consent', 'Store your cookie choice', 'Until you change it'],
       ['yourcvpassport_translation_cache', 'Store translations already made so they are not repeated', 'Persistent'],
       ['identity_draft, experience_draft, education_draft', 'CV wizard drafts so you do not lose your text', 'Until you save'],

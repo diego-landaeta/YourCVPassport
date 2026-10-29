@@ -80,12 +80,16 @@ interface RegistroAceptacionMeta {
 const FRESH_ACCOUNT_MS = 24 * 60 * 60 * 1000;
 
 const LegalGate: React.FC<LegalGateProps> = ({ scope, companyId = null, children }) => {
-  const { user, signOut } = useAuth();
+  const { user, profile, profileLoading, signOut } = useAuth();
   const { lang } = useLanguage();
   const tx = useLegalText();
   const nx = useNoticeText();
 
   const userId = user?.id ?? null;
+  // Cuenta de EMPRESA (role employer o alta con tipo=empresa): a sus miembros NO se les pide la fecha de
+  // nacimiento (el control de edad es de candidatos). Se espera a conocer el perfil para no pedirla por error.
+  const isCompanyAccount = profile?.role === 'employer' || (user?.user_metadata as { tipo?: string } | undefined)?.tipo === 'empresa';
+  const accountReady = !profileLoading || !!profile || (user?.user_metadata as { tipo?: string } | undefined)?.tipo === 'empresa';
   const cacheKey = userId ? `${userId}:${scope}:${companyId ?? ''}` : '';
 
   const [status, setStatus] = useState<'checking' | 'ready' | 'birth' | 'underage' | 'blocked'>(
@@ -133,12 +137,13 @@ const LegalGate: React.FC<LegalGateProps> = ({ scope, companyId = null, children
       setStatus('ready');
       return;
     }
+    if (!accountReady) return; // el perfil aún carga: se vuelve a lanzar al llegar
     let cancelled = false;
     setStatus('checking');
 
     (async () => {
-      // 1. Edad: si falta la fecha de nacimiento se pide antes que las condiciones.
-      if (!birthDoneRef.current) {
+      // 1. Edad: si falta la fecha de nacimiento se pide antes que las condiciones (no a cuentas de empresa).
+      if (!birthDoneRef.current && !isCompanyAccount) {
         const stored = await fetchMyBirthDate(userId);
         if (cancelled) return;
         if (stored === null) {
@@ -222,7 +227,7 @@ const LegalGate: React.FC<LegalGateProps> = ({ scope, companyId = null, children
     };
     // user?.app_metadata cambia solo con la sesión; la clave ya incluye el usuario.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cacheKey, scope, companyId, recheck]);
+  }, [cacheKey, scope, companyId, recheck, accountReady, isCompanyAccount]);
 
   useEffect(() => {
     if (status === 'blocked' || status === 'birth' || status === 'underage') headingRef.current?.focus();

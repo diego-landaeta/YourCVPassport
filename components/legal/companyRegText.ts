@@ -41,12 +41,18 @@ export const useCompanyRegText = defineBolsaText({
     errSize: 'Selecciona el tamaño de la empresa.',
     errContactName: 'Indica el nombre de la persona de contacto.',
     errConsents: 'Marca todas las casillas obligatorias para registrar la empresa.',
+    errTaxDuplicate: 'Ya hay una empresa registrada con este identificador fiscal. Si es la tuya, pide acceso a quien la administra o escríbenos a support@yourcvpassport.com.',
+    errEmailDuplicate: 'Ya hay una empresa registrada con este correo. Usa otro correo de la empresa o escríbenos a support@yourcvpassport.com.',
+    errDuplicateInsert: 'Ya existe una empresa con ese identificador fiscal o ese correo, así que no hemos creado nada. Revisa los datos o escríbenos a support@yourcvpassport.com.',
+    errLinkFailed: 'No hemos podido terminar el registro y lo hemos deshecho para que no quede nada a medias. Inténtalo de nuevo; si se repite, escríbenos a support@yourcvpassport.com.',
 
     acceptSaveFailed:
       'La empresa se ha registrado, pero no pudimos guardar tu aceptación de las condiciones. Te la pediremos al entrar en el panel.',
     successVerified: 'Tu empresa ha sido verificada. Ya puedes preparar y publicar ofertas.',
     successPending:
       'Hemos recibido el registro. Tu empresa está en revisión: puedes preparar borradores de ofertas, pero no publicarlas hasta que la verifiquemos.',
+    successChecking:
+      'Hemos recibido el registro y estamos revisando tu empresa. Si la revisión tarda un poco, no pasa nada: te avisaremos por correo en cuanto esté verificada. Mientras tanto puedes preparar borradores de ofertas.',
 
     // Banner del panel de empresa mientras está PENDING
     pendingBannerTitle: 'Tu empresa está en revisión',
@@ -107,12 +113,18 @@ export const useCompanyRegText = defineBolsaText({
     errSize: 'Select the company size.',
     errContactName: 'Enter the name of the contact person.',
     errConsents: 'Tick all the required boxes to register the company.',
+    errTaxDuplicate: 'A company is already registered with this tax ID. If it is yours, ask whoever manages it for access or write to support@yourcvpassport.com.',
+    errEmailDuplicate: 'A company is already registered with this email. Use another company email or write to support@yourcvpassport.com.',
+    errDuplicateInsert: 'A company with that tax ID or email already exists, so nothing was created. Check the details or write to support@yourcvpassport.com.',
+    errLinkFailed: 'We could not finish the registration and we undid it so nothing is left half done. Please try again; if it keeps happening, write to support@yourcvpassport.com.',
 
     acceptSaveFailed:
       'The company has been registered, but we could not save your acceptance of the terms. We will ask for it when you enter the dashboard.',
     successVerified: 'Your company has been verified. You can now prepare and publish job offers.',
     successPending:
       'We have received your registration. Your company is under review: you can prepare draft job offers, but you cannot publish them until we verify it.',
+    successChecking:
+      'We have received your registration and we are reviewing your company. If the review takes a little while, that is fine: we will email you as soon as it is verified. Meanwhile you can prepare draft job offers.',
 
     pendingBannerTitle: 'Your company is under review',
     pendingBannerBody:

@@ -109,14 +109,14 @@ export async function loadOfferList(companyId: string): Promise<OfferListItem[]>
   return (data || []) as OfferListItem[];
 }
 
-/** Última versión vigente de las condiciones del empleador en el idioma (o en español). */
-export async function loadEmployerTerms(lang: 'es' | 'en'): Promise<LegalDoc | null> {
+/** Última versión vigente de un tipo de condiciones en el idioma (o en español). */
+async function loadVigenteTerms(tipo: 'terminos_empleador' | 'condiciones_publicacion', lang: 'es' | 'en'): Promise<LegalDoc | null> {
   const nowIso = new Date().toISOString();
   for (const idioma of lang === 'es' ? ['es'] : ['en', 'es']) {
     const { data, error } = await supabase
       .from('documentos_legales')
       .select('id, tipo, version, idioma, titulo, texto, casillas_obligatorias, borrador')
-      .eq('tipo', 'terminos_empleador')
+      .eq('tipo', tipo)
       .eq('idioma', idioma)
       .lte('vigente_desde', nowIso)
       .order('vigente_desde', { ascending: false })
@@ -126,6 +126,20 @@ export async function loadEmployerTerms(lang: 'es' | 'en'): Promise<LegalDoc | n
     if (row) return { ...row, casillas_obligatorias: Array.isArray(row.casillas_obligatorias) ? row.casillas_obligatorias : [] };
   }
   return null;
+}
+
+/** Condiciones del registro de empresa (`terminos_empleador`). */
+export function loadEmployerTerms(lang: 'es' | 'en'): Promise<LegalDoc | null> {
+  return loadVigenteTerms('terminos_empleador', lang);
+}
+
+/**
+ * Condiciones que se aceptan AL PUBLICAR una oferta: `condiciones_publicacion` si hay una versión vigente
+ * (el servidor la exige entonces en `submit_job_for_review`) y, si no existe, `terminos_empleador` como hasta ahora.
+ */
+export async function loadPublishTerms(lang: 'es' | 'en'): Promise<LegalDoc | null> {
+  const publication = await loadVigenteTerms('condiciones_publicacion', lang);
+  return publication ?? loadVigenteTerms('terminos_empleador', lang);
 }
 
 export interface SaveResult {
@@ -176,39 +190,73 @@ export async function saveJob(
   return { id: id!, status, questions };
 }
 
+/** Normaliza una fila de pregunta (la cargada o la que saldría del borrador) para compararlas. */
+function comparableQuestion(r: Record<string, any>): string {
+  const options = Array.isArray(r.options) ? r.options.filter((o: unknown) => typeof o === 'string') : [];
+  return JSON.stringify([
+    String(r.question_text ?? '').trim(),
+    String(r.question_type ?? ''),
+    options,
+    !!r.is_required,
+    !!r.is_knockout,
+    r.expected_answer ? String(r.expected_answer).trim() : '',
+    Number(r.order_index ?? 0),
+  ]);
+}
+
+/** true si el borrador no cambia nada respecto a la fila ya guardada (no hay que enviar UPDATE). */
+export function questionUnchanged(draft: QuestionDraft, saved: QuestionRow | undefined, jobId: string, index: number): boolean {
+  if (!saved) return false;
+  return comparableQuestion(questionToRow(draft, jobId, index)) === comparableQuestion(saved);
+}
+
+/**
+ * Las preguntas de una oferta publicada o con respuestas están protegidas en la base
+ * (QUESTIONS_LOCKED / QUESTION_HAS_ANSWERS). Se garantiza que el código quede al
+ * principio del mensaje para que `parseRpcError` lo reconozca y la interfaz muestre
+ * el texto claro (`err_QUESTIONS_LOCKED` / `err_QUESTION_HAS_ANSWERS`).
+ */
+function questionsError(error: { message?: string } | null | undefined): Error {
+  const raw = String(error?.message || '');
+  const m = /(QUESTIONS_LOCKED|QUESTION_HAS_ANSWERS)/.exec(raw);
+  const message = m && !raw.trimStart().startsWith(m[1]) ? `${m[1]}: ${raw}` : raw || 'QUESTIONS_ERROR';
+  return Object.assign(new Error(message), error, { message });
+}
+
 /**
  * Deja en la base exactamente las preguntas del formulario. Orden: primero se
  * borran las quitadas (el tope de 5 se comprueba al insertar), luego se
- * actualizan las existentes y por último se insertan las nuevas.
+ * actualizan SOLO las que han cambiado y por último se insertan las nuevas.
+ * Una pregunta sin cambios no genera ninguna petición: así editar el salario
+ * o el cierre de una oferta publicada no choca con el bloqueo de preguntas.
  */
 async function syncQuestions(jobId: string, drafts: QuestionDraft[], isNewJob: boolean): Promise<QuestionDraft[]> {
-  let existingIds: string[] = [];
-  if (!isNewJob) {
-    const rows = await loadQuestionRows(jobId);
-    existingIds = rows.map((r) => r.id as string);
-  }
+  let saved: QuestionRow[] = [];
+  if (!isNewJob) saved = await loadQuestionRows(jobId);
+  const savedById = new Map(saved.map((r) => [r.id as string, r]));
   const keepIds = new Set(drafts.filter((d) => d.id).map((d) => d.id as string));
-  const toDelete = existingIds.filter((id) => !keepIds.has(id));
+  const toDelete = saved.map((r) => r.id as string).filter((id) => !keepIds.has(id));
   if (toDelete.length) {
     const { error } = await supabase.from('job_posting_questions').delete().in('id', toDelete);
-    if (error) throw error;
+    if (error) throw questionsError(error);
   }
 
   const result: QuestionDraft[] = drafts.map((d) => ({ ...d }));
   for (let i = 0; i < drafts.length; i++) {
     const d = drafts[i];
     if (!d.id) continue;
+    if (questionUnchanged(d, savedById.get(d.id), jobId, i)) continue;
     const { job_posting_id: _omit, ...row } = questionToRow(d, jobId, i);
     void _omit;
     const { error } = await supabase.from('job_posting_questions').update(row).eq('id', d.id);
-    if (error) throw error;
+    if (error) throw questionsError(error);
   }
 
   const fresh = drafts.map((d, i) => ({ d, i })).filter(({ d }) => !d.id);
   if (fresh.length) {
     const rows = fresh.map(({ d, i }) => questionToRow(d, jobId, i));
     const { data, error } = await supabase.from('job_posting_questions').insert(rows).select('id, order_index');
-    if (error) throw error;
+    if (error) throw questionsError(error);
     for (const r of (data || []) as { id: string; order_index: number }[]) {
       if (result[r.order_index]) result[r.order_index].id = r.id;
     }

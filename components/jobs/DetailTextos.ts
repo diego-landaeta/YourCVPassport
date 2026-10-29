@@ -30,6 +30,12 @@ const es = {
   successNext1: 'La empresa revisa tu perfil y tus respuestas.',
   successNext2: 'Verás el estado de tu candidatura paso a paso y podrás retirarla cuando quieras.',
   similarWhen: 'Publicada {when}',
+  workHereTitle: 'Cómo es trabajar aquí',
+  workHereLead: 'Lo que ofrece {company} a quien se incorpora.',
+  skillRequired: 'Imprescindible',
+  skillNice: 'Se valora',
+  experienceYearsHeader: '{n} años de experiencia',
+  experienceNone: 'Sin experiencia previa',
 };
 
 const en: typeof es = {
@@ -57,6 +63,12 @@ const en: typeof es = {
   successNext1: 'The company reviews your profile and your answers.',
   successNext2: 'You will see your application status step by step and can withdraw it whenever you want.',
   similarWhen: 'Posted {when}',
+  workHereTitle: 'What it is like to work here',
+  workHereLead: 'What {company} offers to people who join.',
+  skillRequired: 'Required',
+  skillNice: 'Nice to have',
+  experienceYearsHeader: '{n} years of experience',
+  experienceNone: 'No previous experience needed',
 };
 
 export const useDetailText = defineBolsaText({ es, en });

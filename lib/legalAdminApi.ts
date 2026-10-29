@@ -12,7 +12,7 @@ import { supabase } from '../supabase/client';
 import type { LegalTipo } from './legal';
 
 export const LEGAL_MIN_NOTICE_DAYS = 15;
-export const LEGAL_TIPOS: readonly LegalTipo[] = ['terminos_candidato', 'terminos_empleador', 'privacidad', 'cookies'];
+export const LEGAL_TIPOS: readonly LegalTipo[] = ['terminos_candidato', 'terminos_empleador', 'condiciones_publicacion', 'privacidad', 'cookies'];
 export const LEGAL_IDIOMAS = ['es', 'en'] as const;
 export type LegalIdioma = (typeof LEGAL_IDIOMAS)[number];
 
@@ -20,6 +20,8 @@ export type LegalIdioma = (typeof LEGAL_IDIOMAS)[number];
 export const CASILLAS_POR_TIPO: Record<LegalTipo, string[]> = {
   terminos_candidato: ['acepto_condiciones_privacidad', 'datos_verdaderos'],
   terminos_empleador: ['poder_representacion', 'ofertas_reales_no_discriminatorias', 'anexo_encargo_tratamiento'],
+  // Condiciones de publicación de ofertas (migración 20261035): casilla propia, se acepta en cada publicación.
+  condiciones_publicacion: ['acepto_condiciones_publicacion'],
   privacidad: [],
   cookies: [],
 };

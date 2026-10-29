@@ -109,7 +109,7 @@ const ApplicationCard: React.FC<{ app: JobApplication; onChanged: () => void }> 
   return (
     <article className={`${SURFACE} ${LIFT} p-5`} aria-labelledby={`app-t-${app.id}`}>
       <div className="flex items-start gap-4">
-        <CompanyMark name={company?.company_name || title} logoUrl={company?.logo_url} size="md" />
+        <CompanyMark name={company?.company_name || title} logoUrl={company?.logo_url} size="card" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
             <div className="min-w-0">

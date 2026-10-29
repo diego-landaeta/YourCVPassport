@@ -1,98 +1,90 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { CheckIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import { BTN_GHOST, BTN_PRIMARY, FIELD_CLS, PanelError, PanelSkeleton, TEXT_META, TEXT_STRONG, notifyError } from '../../jobs/PanelBits';
+import { BellAlertIcon, CheckIcon, InformationCircleIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { BTN_DANGER_OUTLINE, BTN_GHOST, BTN_PRIMARY, BTN_SECONDARY, FIELD_CLS, PanelError, PanelSkeleton, SURFACE, TEXT_META, TEXT_STRONG, notifyError } from '../../jobs/PanelBits';
 import { fmt } from '../../../lib/bolsaText';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { usePanelText } from '../../jobs/textosPanel';
 import { useJobCountries } from '../../jobs/useJobCountries';
 import { JOB_CATEGORIES } from '../../../lib/jobsCatalog';
-import { deleteMyAlert, fetchMyAlert, saveMyAlert, type JobAlertSubscription } from '../../../lib/jobsApi';
+import {
+  MAX_JOB_ALERTS, createMyAlert, deleteMyAlertById, fetchMyAlerts, updateMyAlert, type JobAlertSubscription,
+} from '../../../lib/jobsApi';
 
 interface JobAlertsTabProps {
   profileId?: string;
 }
+
+type PanelTx = ReturnType<typeof usePanelText>;
+type Countries = ReturnType<typeof useJobCountries>;
 
 const MAX_ITEMS = 20;
 
 const parseKeywords = (raw: string): string[] =>
   Array.from(new Set(raw.split(',').map((k) => k.trim()).filter(Boolean)));
 
+/** El tope de 5 alertas lo hace cumplir un trigger: su error llega como texto del servidor. */
+const isLimitError = (e: unknown): boolean =>
+  /ALERTS?_LIMIT|MAX_ALERTS|ALERT_LIMIT|limit/i.test(String((e as { message?: string } | null)?.message ?? ''));
+
+function summary(a: JobAlertSubscription, tx: PanelTx, lang: 'es' | 'en', countries: Countries): string {
+  const cats = a.categories?.length ? (a.categories.length === 1 ? tx.alertsSumCat1 : fmt(tx.alertsSumCats, { n: a.categories.length })) : tx.alertsSumAnyCat;
+  const c = a.country ? countries.find((x) => x.code === a.country) : null;
+  const country = a.country ? (c ? (lang === 'en' ? c.name_en : c.name_es) : a.country) : tx.alertsAnyCountry;
+  const kw = a.keywords?.length ? fmt(tx.alertsSumKw, { kw: a.keywords.slice(0, 3).join(', ') + (a.keywords.length > 3 ? '…' : '') }) : '';
+  return [cats, country, a.frequency === 'DAILY' ? tx.freqDaily : tx.freqWeekly, kw].filter(Boolean).join(' · ');
+}
+
 /**
- * Alertas de ofertas (fase 4): una suscripcion por perfil en job_alert_subscriptions.
- * Solo guarda las preferencias; el envio por correo aun no esta activo (queue_job_alerts()
- * encola en email_outbox y un worker lo enviara mas adelante).
+ * Alertas de ofertas (fase 4): hasta 5 por perfil en job_alert_subscriptions. Cada una con sus
+ * categorías, país, palabras clave y frecuencia; se pueden crear, editar, pausar y eliminar por
+ * separado. El país por defecto de una alerta nueva es el del perfil. Solo guarda las preferencias:
+ * el envío lo hace `send-outbox` a partir de `queue_job_alerts()`.
  */
 const JobAlertsTab: React.FC<JobAlertsTabProps> = ({ profileId }) => {
   const tx = usePanelText();
   const { lang } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const countries = useJobCountries();
   const uid = user?.id || profileId || null;
+  const profileCountry = (profile?.country_code || '').toUpperCase();
 
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [exists, setExists] = useState(false);
-  const [active, setActive] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [country, setCountry] = useState('');
-  const [keywordsRaw, setKeywordsRaw] = useState('');
-  const [frequency, setFrequency] = useState<'DAILY' | 'WEEKLY'>('WEEKLY');
-  const [saving, setSaving] = useState(false);
+  const [alerts, setAlerts] = useState<JobAlertSubscription[]>([]);
+  /** null = lista; 'new' = alta; id = edición de esa alerta. */
+  const [editing, setEditing] = useState<string | null>(null);
+  const [askDelete, setAskDelete] = useState<string | null>(null);
+
+  const reload = useCallback(async () => {
+    if (!uid) return [];
+    const list = await fetchMyAlerts(uid);
+    setAlerts(list);
+    return list;
+  }, [uid]);
 
   useEffect(() => {
     if (!uid) return;
     let alive = true;
     setState('loading');
-    fetchMyAlert(uid)
-      .then((a) => {
+    reload()
+      .then((list) => {
         if (!alive) return;
-        if (a) {
-          setExists(true);
-          setActive(a.active);
-          setCategories(a.categories || []);
-          setCountry(a.country || '');
-          setKeywordsRaw((a.keywords || []).join(', '));
-          setFrequency(a.frequency);
-        }
+        // Sin alertas se abre directamente el alta.
+        if (list.length === 0) setEditing('new');
         setState('ready');
       })
       .catch(() => { if (alive) setState('error'); });
     return () => { alive = false; };
-  }, [uid]);
+  }, [uid, reload]);
 
-  const toggleCategory = (key: string) =>
-    setCategories((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
-
-  const keywords = parseKeywords(keywordsRaw);
-  const tooMany = categories.length > MAX_ITEMS || keywords.length > MAX_ITEMS;
-
-  const save = async () => {
-    if (!uid || tooMany) return;
-    setSaving(true);
+  const remove = async (a: JobAlertSubscription) => {
+    if (!a.id) return;
     try {
-      const sub: JobAlertSubscription = {
-        profile_id: uid, categories, country: country || null, keywords, frequency, active,
-      };
-      await saveMyAlert(sub);
-      setExists(true);
-      toast.success(tx.alertsSaved);
-    } catch {
-      notifyError(tx.alertsSaveError, tx.closeNotice);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const remove = async () => {
-    if (!uid) return;
-    try {
-      await deleteMyAlert(uid);
-      setExists(false);
-      setActive(false);
-      setCategories([]);
-      setCountry('');
-      setKeywordsRaw('');
+      await deleteMyAlertById(a.id);
+      setAskDelete(null);
+      const list = await reload();
+      if (list.length === 0) setEditing('new');
       toast.success(tx.alertsDeleted);
     } catch {
       notifyError(tx.alertsSaveError, tx.closeNotice);
@@ -103,8 +95,11 @@ const JobAlertsTab: React.FC<JobAlertsTabProps> = ({ profileId }) => {
   if (state === 'loading') return <PanelSkeleton rows={2} label={tx.alertsLoading} />;
   if (state === 'error') return <PanelError message={tx.alertsError} />;
 
+  const atLimit = alerts.length >= MAX_JOB_ALERTS;
+  const editingAlert = editing && editing !== 'new' ? alerts.find((a) => a.id === editing) ?? null : null;
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); void save(); }} className="max-w-3xl space-y-8">
+    <div className="max-w-3xl space-y-8">
       <div>
         <h2 className={`text-xl font-bold ${TEXT_STRONG}`}>{tx.alertsTitle}</h2>
         <p className={`mt-1 max-w-prose text-[15px] leading-relaxed ${TEXT_META}`}>{tx.alertsText}</p>
@@ -114,6 +109,143 @@ const JobAlertsTab: React.FC<JobAlertsTabProps> = ({ profileId }) => {
         <InformationCircleIcon className="mt-0.5 h-5 w-5 shrink-0 text-slate-500 dark:text-dark-text-secondary" aria-hidden="true" />
         {tx.alertsNotice}
       </p>
+
+      {alerts.length > 0 && (
+        <section aria-labelledby="al-list-h" data-testid="alerts-list">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 id="al-list-h" className={`text-base font-semibold tabular-nums ${TEXT_STRONG}`}>
+              {fmt(tx.alertsCount, { n: alerts.length, max: MAX_JOB_ALERTS })}
+            </h3>
+            <button
+              type="button"
+              onClick={() => { setAskDelete(null); setEditing('new'); }}
+              disabled={atLimit || editing === 'new'}
+              className={BTN_SECONDARY}
+              data-testid="alert-new"
+            >
+              <PlusIcon className="h-5 w-5" aria-hidden="true" />{tx.alertsNew}
+            </button>
+          </div>
+          {atLimit && <p className={`mt-2 text-sm ${TEXT_META}`} data-testid="alerts-limit">{fmt(tx.alertsLimit, { max: MAX_JOB_ALERTS })}</p>}
+
+          <ul className="mt-4 space-y-3">
+            {alerts.map((a, i) => (
+              <li key={a.id} className={`${SURFACE} p-4`} data-testid="alert-item">
+                <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+                  <div className="min-w-0">
+                    <p className={`flex flex-wrap items-center gap-x-2 text-[15px] font-semibold ${TEXT_STRONG}`}>
+                      <BellAlertIcon className="h-5 w-5 shrink-0 text-cv-blue dark:text-cv-blue-light" aria-hidden="true" />
+                      {fmt(tx.alertsItem, { n: i + 1 })}
+                      <span className={`text-xs font-semibold ${a.active ? 'text-green-700 dark:text-green-400' : TEXT_META}`}>
+                        {a.active ? tx.alertsOn : tx.alertsOff}
+                      </span>
+                    </p>
+                    <p className={`mt-1 text-sm ${TEXT_META}`}>{summary(a, tx, lang, countries)}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {askDelete === a.id ? (
+                      <>
+                        <span className={`text-sm ${TEXT_STRONG}`} role="alert">{tx.alertsAskDelete}</span>
+                        <button type="button" onClick={() => void remove(a)} className={BTN_DANGER_OUTLINE} data-testid="alert-delete-confirm">{tx.alertsConfirmDelete}</button>
+                        <button type="button" onClick={() => setAskDelete(null)} className={BTN_GHOST}>{tx.alertsCancel}</button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button" onClick={() => { setAskDelete(null); setEditing(a.id ?? null); }} className={BTN_SECONDARY} aria-label={`${tx.alertsEdit}: ${fmt(tx.alertsItem, { n: i + 1 })}`}>{tx.alertsEdit}</button>
+                        <button type="button" onClick={() => setAskDelete(a.id ?? null)} className={BTN_GHOST} aria-label={`${tx.alertsDelete}: ${fmt(tx.alertsItem, { n: i + 1 })}`} data-testid="alert-delete">{tx.alertsDelete}</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {alerts.length === 0 && editing !== 'new' && (
+        <div className={`${SURFACE} p-6 text-center`}>
+          <p className={`font-semibold ${TEXT_STRONG}`}>{tx.alertsEmptyTitle}</p>
+          <p className={`mx-auto mt-1 max-w-prose text-sm ${TEXT_META}`}>{tx.alertsEmptyText}</p>
+        </div>
+      )}
+
+      {editing && (editing === 'new' || editingAlert) && (
+        <AlertForm
+          key={editing}
+          tx={tx}
+          lang={lang}
+          countries={countries}
+          uid={uid}
+          initial={editingAlert}
+          defaultCountry={profileCountry}
+          canCancel={alerts.length > 0}
+          onCancel={() => setEditing(null)}
+          onSaved={async () => {
+            await reload();
+            setEditing(null);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+interface AlertFormProps {
+  tx: PanelTx;
+  lang: 'es' | 'en';
+  countries: Countries;
+  uid: string;
+  initial: JobAlertSubscription | null;
+  defaultCountry: string;
+  canCancel: boolean;
+  onCancel: () => void;
+  onSaved: () => Promise<void>;
+}
+
+const AlertForm: React.FC<AlertFormProps> = ({ tx, lang, countries, uid, initial, defaultCountry, canCancel, onCancel, onSaved }) => {
+  const [active, setActive] = useState(initial ? initial.active : true);
+  const [categories, setCategories] = useState<string[]>(initial?.categories || []);
+  const [country, setCountry] = useState(initial ? initial.country || '' : defaultCountry);
+  const [keywordsRaw, setKeywordsRaw] = useState((initial?.keywords || []).join(', '));
+  const [frequency, setFrequency] = useState<'DAILY' | 'WEEKLY'>(initial?.frequency || 'WEEKLY');
+  const [saving, setSaving] = useState(false);
+
+  // El país del perfil puede llegar cuando el alta ya está abierta (carga del perfil): se aplica una vez.
+  useEffect(() => {
+    if (!initial && defaultCountry) setCountry((c) => c || defaultCountry);
+  }, [initial, defaultCountry]);
+
+  const toggleCategory = (key: string) =>
+    setCategories((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  const keywords = parseKeywords(keywordsRaw);
+  const tooMany = categories.length > MAX_ITEMS || keywords.length > MAX_ITEMS;
+
+  const save = async () => {
+    if (tooMany) return;
+    setSaving(true);
+    try {
+      const sub: JobAlertSubscription = { profile_id: uid, categories, country: country || null, keywords, frequency, active };
+      if (initial?.id) await updateMyAlert(initial.id, sub);
+      else await createMyAlert(sub);
+      toast.success(tx.alertsSaved);
+      await onSaved();
+    } catch (e) {
+      notifyError(isLimitError(e) ? fmt(tx.alertsLimitError, { max: MAX_JOB_ALERTS }) : tx.alertsSaveError, tx.closeNotice);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); void save(); }}
+      className="space-y-8 border-t border-slate-200 pt-8 dark:border-dark-border"
+      aria-label={initial ? tx.alertsEditTitle : tx.alertsNewTitle}
+      data-testid="alert-form"
+    >
+      <h3 className={`text-lg font-bold ${TEXT_STRONG}`}>{initial ? tx.alertsEditTitle : tx.alertsNewTitle}</h3>
 
       <label className="flex cursor-pointer items-center justify-between gap-4 border-y border-slate-200 py-4 dark:border-dark-border">
         <span className="min-w-0">
@@ -183,13 +315,11 @@ const JobAlertsTab: React.FC<JobAlertsTabProps> = ({ profileId }) => {
       {tooMany && <p role="alert" className="text-sm font-medium text-red-700 dark:text-red-400">{tx.alertsTooMany}</p>}
 
       <div className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6 dark:border-dark-border">
-        <button type="submit" disabled={saving || tooMany} className={BTN_PRIMARY}>
+        <button type="submit" disabled={saving || tooMany} className={BTN_PRIMARY} data-testid="alert-save">
           {saving ? tx.alertsSaving : tx.alertsSave}
         </button>
-        {exists && (
-          <button type="button" onClick={() => void remove()} className={BTN_GHOST}>
-            {tx.alertsDelete}
-          </button>
+        {canCancel && (
+          <button type="button" onClick={onCancel} className={BTN_GHOST}>{tx.alertsCancel}</button>
         )}
       </div>
     </form>

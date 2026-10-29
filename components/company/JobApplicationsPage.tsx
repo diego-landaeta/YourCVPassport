@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { ArrowDownTrayIcon, BriefcaseIcon, StarIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, BriefcaseIcon, CheckCircleIcon, ExclamationTriangleIcon, StarIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { fmt } from '../../lib/bolsaText';
 import { downloadCsv, toCsv } from '../../lib/jobsCsv';
 import { formatDate } from '../../lib/jobsFormat';
-import { COMPANY_APPLICATION_COLUMNS, markApplicationViewed } from '../../lib/jobsApi';
+import { COMPANY_APPLICATION_COLUMNS, fetchJobQuestionsForCompany, markApplicationViewed } from '../../lib/jobsApi';
 import { ckey, useCompanyAppsText } from '../jobs/textosEmpresa';
 import ApplicantDrawer from '../jobs/ApplicantDrawer';
-import { STATUS_TONE, currentRole, matchCls, totalYears, type CompanyApp, type JobLite } from '../jobs/ApplicantShared';
+import { STATUS_TONE, currentRole, keyAnswers, matchCls, meetsRequirements, totalYears, type CompanyApp, type JobLite, type KeyQuestion } from '../jobs/ApplicantShared';
 import {
   BTN_GHOST, BTN_SECONDARY, FIELD_CLS, FOCUS, H1_CLS, PanelEmpty, PanelError, PanelSkeleton, PanelTabs, PersonAvatar,
   SearchBox, StatusDot, SURFACE, TEXT_META, TEXT_STRONG, norm, notifyError, useReveal,
@@ -44,6 +44,8 @@ const JobApplicationsPage: React.FC = () => {
 
   const [apps, setApps] = useState<CompanyApp[]>([]);
   const [jobs, setJobs] = useState<Map<string, JobLite>>(new Map());
+  // Preguntas imprescindibles por oferta (para resumir las respuestas clave en cada fila).
+  const [questions, setQuestions] = useState<Map<string, KeyQuestion[]>>(new Map());
   const [state, setState] = useState<'loading' | 'ready' | 'error' | 'nocompany'>('loading');
   const [jobFilter, setJobFilter] = useState(searchParams.get('job') || '');
   const [tab, setTab] = useState<TabKey>('received');
@@ -79,6 +81,24 @@ const JobApplicationsPage: React.FC = () => {
   }, [user, companyId]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Las preguntas se piden aparte y sin bloquear la lista: si fallan, las filas salen sin resumen.
+  useEffect(() => {
+    if (state !== 'ready') return;
+    const ids = [...new Set(apps.map((a) => a.job_posting_id))].slice(0, 30).filter((id) => !questions.has(id));
+    if (ids.length === 0) return;
+    let alive = true;
+    void Promise.all(
+      ids.map((id) =>
+        fetchJobQuestionsForCompany(id)
+          .then((q) => [id, q as unknown as KeyQuestion[]] as const)
+          .catch(() => [id, [] as KeyQuestion[]] as const),
+      ),
+    ).then((pairs) => {
+      if (alive) setQuestions((prev) => new Map([...prev, ...pairs]));
+    });
+    return () => { alive = false; };
+  }, [state, apps, questions]);
 
   const scoped = useMemo(() => (jobFilter ? apps.filter((a) => a.job_posting_id === jobFilter) : apps), [apps, jobFilter]);
   const counts = useMemo(() => {
@@ -252,6 +272,9 @@ const JobApplicationsPage: React.FC = () => {
                 const isNew = !a.viewed_by_company;
                 const name = nameOf(a);
                 const sub = role ? fmt(tx.currentRole, { role }) : snap?.profile?.headline || '';
+                const jobQuestions = questions.get(a.job_posting_id);
+                const meets = meetsRequirements(a, jobQuestions);
+                const key = keyAnswers(jobQuestions, a.answers, lang);
                 const yearsText = years > 0 ? (years === 1 ? tx.yearShort : fmt(tx.yearsShort, { n: years })) : '';
                 return (
                   <li key={a.id} className={`relative transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-white/5 ${selected.has(a.id) ? 'bg-blue-50/60 dark:bg-cv-blue/10' : ''}`}>
@@ -279,6 +302,25 @@ const JobApplicationsPage: React.FC = () => {
                             {isNew && <span className="sr-only sm:hidden">{tx.newBadge}</span>}
                           </p>
                           {sub && <p className={`mt-0.5 truncate text-[13px] ${TEXT_META}`}>{sub}{yearsText && <span className="hidden sm:inline"> · {yearsText}</span>}</p>}
+                          {(meets !== null || key.length > 0) && (
+                            <p className={`mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] ${TEXT_META}`} data-testid="key-answers">
+                              {meets !== null && (
+                                <span
+                                  className={`inline-flex shrink-0 items-center gap-1 font-semibold ${meets ? 'text-green-700 dark:text-green-400' : 'text-amber-800 dark:text-amber-300'}`}
+                                  data-testid="meets-mark"
+                                  title={meets ? tx.meetsAria : tx.notMetAria}
+                                >
+                                  {meets ? <CheckCircleIcon className="h-4 w-4" aria-hidden="true" /> : <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />}
+                                  <span aria-label={meets ? tx.meetsAria : tx.notMetAria}>{meets ? tx.meets : tx.notMet}</span>
+                                </span>
+                              )}
+                              {key.map((k) => (
+                                <span key={k.id} className="min-w-0 max-w-full truncate" title={`${k.question}: ${k.answer}`}>
+                                  <span>{k.question}:</span> <span className={`font-medium ${TEXT_STRONG}`}>{k.answer}</span>
+                                </span>
+                              ))}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <p className={`col-span-2 col-start-2 row-start-2 truncate text-sm lg:col-span-1 lg:col-start-3 lg:row-start-1 ${TEXT_META}`}>{jobs.get(a.job_posting_id)?.title}</p>

@@ -87,6 +87,9 @@ const JobPostingsManagement: React.FC = () => {
   const [noteError, setNoteError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  // Huella del texto moderado tal como estaba al abrir el detalle (null = la RPC no respondió).
+  // Se envía al aprobar: si el texto cambió entre la lectura y la aprobación, el servidor responde HASH_MISMATCH.
+  const hashes = useRef<Record<string, string | null>>({});
 
   const load = useCallback(async () => {
     setState((s) => (s === 'ready' ? s : 'loading'));
@@ -151,10 +154,21 @@ const JobPostingsManagement: React.FC = () => {
   }, [visible, tab]);
 
   // --- Detalle --------------------------------------------------------------------------
+  /** Lee la huella actual del texto moderado. Si la RPC no existe o falla, null (se aprueba sin comprobarla). */
+  const readHash = async (jobId: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.rpc('get_job_moderation_hash', { p_job_id: jobId });
+      return !error && typeof data === 'string' && data ? data : null;
+    } catch {
+      return null;
+    }
+  };
+
   const openDetail = async (job: AdminJob) => {
     setSelected(job);
     setHistory(null);
     setPanel(null);
+    hashes.current[job.id] = await readHash(job.id);
     const { data, error } = await supabase
       .from('job_posting_status_history')
       .select('id, from_status, to_status, source, reason, created_at')
@@ -191,13 +205,25 @@ const JobPostingsManagement: React.FC = () => {
   const moderate = async (job: AdminJob, decision: 'PUBLISHED' | 'MANUAL_REVIEW' | 'REJECTED', motivo: string | null) => {
     setBusy(job.id);
     try {
-      const { error } = await supabase.rpc('moderar_oferta', { p_job_id: job.id, p_decision: decision, p_motivo: motivo });
+      const args: Record<string, unknown> = { p_job_id: job.id, p_decision: decision, p_motivo: motivo };
+      const expected = hashes.current[job.id];
+      if (decision === 'PUBLISHED' && expected) args.p_expected_hash = expected;
+      const { error } = await supabase.rpc('moderar_oferta', args);
       if (error) throw error;
+      delete hashes.current[job.id];
       toast.success(decision === 'PUBLISHED' ? t.t_approved : decision === 'REJECTED' ? t.t_rejected : t.t_manual);
       closeDetail();
       await load();
     } catch (err) {
-      failToast(err);
+      if (parseRpcError(err).code === 'HASH_MISMATCH') {
+        // El texto cambió tras abrirlo: se recarga todo, se vuelve a abrir con la huella nueva y se avisa.
+        toast.error(t.t_hash_changed);
+        await load();
+        const { data: fresh } = await supabase.from('job_postings').select(ADMIN_JOB_COLUMNS).eq('id', job.id).maybeSingle();
+        if (fresh) await openDetail(fresh as unknown as AdminJob);
+      } else {
+        failToast(err);
+      }
     } finally {
       setBusy(null);
     }
@@ -275,7 +301,15 @@ const JobPostingsManagement: React.FC = () => {
     return (
       <div className="flex flex-wrap gap-2">
         {(inQueue || j.status === 'REJECTED') && (
-          <button type="button" disabled={disabled} onClick={() => moderate(j, 'PUBLISHED', null)} className={`${base} bg-green-600 text-white hover:bg-green-700`} aria-label={`${t.approve}: ${j.title}`}>
+          <button type="button" disabled={disabled} onClick={() => {
+              // Aprobar exige haber abierto el detalle (así se tiene la huella de lo que se leyó).
+              if (!(j.id in hashes.current)) {
+                toast(t.t_review_first);
+                void openDetail(j);
+                return;
+              }
+              void moderate(j, 'PUBLISHED', null);
+            }} className={`${base} bg-green-600 text-white hover:bg-green-700`} aria-label={`${t.approve}: ${j.title}`}>
             {t.approve}
           </button>
         )}

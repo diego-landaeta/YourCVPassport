@@ -25,6 +25,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Perfiles publicos (auditoria SEO 25/10/2026, hallazgo 13): el nombre de un CV, que las plantillas
+ * pintan en un H1 de 48-96 px, se parte donde haga falta en lugar de ensanchar la pagina en movil
+ * ("YourCVPassport Support" a 375 px). `anywhere` (y no `break-word`) tambien reduce el ancho minimo
+ * del elemento, asi que un h1 dentro de un flex no empuja a su columna fuera de la pantalla.
+ */
+.cv-template h1 {
+  overflow-wrap: anywhere;
+}
+
 /* Print Styles - Only show CV content with colors */
 @media print {
   /*

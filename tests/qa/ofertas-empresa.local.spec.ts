@@ -54,6 +54,19 @@ const TERMS = {
   borrador: true,
 };
 
+const PUB_DOC_ID = '00000000-0000-4000-8000-0000000000d9';
+// Condiciones de publicación (migración 20261035): si hay una vigente, se aceptan al publicar en lugar de las del empleador.
+const PUBLICATION_TERMS = {
+  id: PUB_DOC_ID,
+  tipo: 'condiciones_publicacion',
+  version: '1.0',
+  idioma: 'es',
+  titulo: 'Condiciones de publicación de ofertas',
+  texto: 'Cada oferta debe ser real y no discriminatoria. Texto de prueba.',
+  casillas_obligatorias: ['acepto_condiciones_publicacion'],
+  borrador: true,
+};
+
 const CORS = {
   'access-control-allow-origin': '*',
   'access-control-allow-headers': '*',
@@ -136,6 +149,8 @@ interface Opts {
   /** Respuesta de submit_job_for_review: estado o error. */
   submit?: { status: 'AI_REVIEW' | 'MANUAL_REVIEW' } | { error: { code: string; message: string; details?: string } };
   newApplications?: { job_posting_id: string }[];
+  /** Hay unas condiciones de publicación (condiciones_publicacion) vigentes. */
+  publicationTerms?: boolean;
 }
 
 interface Calls {
@@ -204,7 +219,11 @@ async function isolate(page: Page, opts: Opts = {}): Promise<Calls> {
     if (path === '/rest/v1/companies') return reply(route, 200, [{ id: COMPANY_ID, company_name: 'Empresa Prueba', logo_url: null }]);
     if (path === '/rest/v1/profiles_full') return reply(route, 200, [PROFILE]);
     if (path === '/rest/v1/countries') return reply(route, 200, COUNTRIES);
-    if (path === '/rest/v1/documentos_legales') return reply(route, 200, [TERMS]);
+    if (path === '/rest/v1/documentos_legales') {
+      const tipo = (url.searchParams.get('tipo') || '').replace('eq.', '');
+      if (tipo === 'condiciones_publicacion') return reply(route, 200, opts.publicationTerms ? [PUBLICATION_TERMS] : []);
+      return reply(route, 200, [TERMS]);
+    }
     if (path === '/rest/v1/job_applications') return reply(route, 200, opts.newApplications ?? []);
 
     if (path === '/rest/v1/job_posting_questions') {
@@ -485,6 +504,75 @@ test.describe('asistente de ofertas', () => {
   });
 });
 
+test.describe('editar una oferta publicada con preguntas (F-1)', () => {
+  const QUESTION = { id: 'q-1', job_posting_id: JOB_ID, question_text: '¿Tienes carné de conducir?', question_type: 'YES_NO', options: null, is_required: true, is_knockout: true, expected_answer: 'YES', order_index: 0 };
+
+  test('guardar cambios sin tocar las preguntas NO envía ni UPDATE ni DELETE de preguntas', async ({ page }) => {
+    const calls = await isolate(page, { jobs: [completeJob({ status: 'PUBLISHED', published_at: '2026-10-02T10:00:00Z' })], questions: [QUESTION] });
+    await page.goto(`/company/jobs/edit/${JOB_ID}?paso=5`);
+    await expect(page.getByTestId('publish-button')).toBeVisible({ timeout: 90_000 });
+    await page.getByTestId('publish-button').click();
+    await expect.poll(() => calls.jobWrites.filter((w) => w.method === 'PATCH').length, { timeout: 30_000 }).toBeGreaterThan(0);
+    // La oferta sí se actualiza; las preguntas, que no han cambiado, no se tocan.
+    await page.waitForTimeout(500);
+    expect(calls.questionWrites).toEqual([]);
+  });
+
+  test('si la base responde QUESTIONS_LOCKED, el mensaje es claro y en español', async ({ page }) => {
+    const calls = await isolate(page, { jobs: [completeJob({ status: 'PUBLISHED', published_at: '2026-10-02T10:00:00Z' })], questions: [QUESTION] });
+    // Se fuerza un cambio real de la pregunta y la base la rechaza.
+    await page.route('**/rest/v1/job_posting_questions*', async (route) => {
+      if (route.request().method() === 'PATCH') {
+        calls.questionWrites.push({ method: 'PATCH', body: null, query: '' });
+        return route.fulfill({ status: 400, headers: CORS, body: JSON.stringify({ code: 'P0001', message: 'QUESTIONS_LOCKED: oferta publicada', details: null, hint: null }) });
+      }
+      return route.fallback();
+    });
+    await page.goto(`/company/jobs/edit/${JOB_ID}?paso=4`);
+    await expect(page.locator('#q0-text')).toBeVisible({ timeout: 90_000 });
+    await page.locator('#q0-text').fill('¿Tienes carné de conducir B?');
+    await page.getByTestId('next-step').click();
+    await page.getByTestId('publish-button').click();
+    await expect(page.getByText('Las preguntas de una oferta publicada no se pueden cambiar').first()).toBeVisible({ timeout: 30_000 });
+    expect(calls.questionWrites.some((w) => w.method === 'PATCH')).toBe(true);
+  });
+});
+
+test.describe('F-10: condiciones de publicación', () => {
+  test('con condiciones_publicacion vigentes se aceptan ESAS (con respaldo a terminos_empleador si no existen)', async ({ page }) => {
+    const calls = await isolate(page, { jobs: [completeJob()], publicationTerms: true });
+    await page.goto(`/company/jobs/edit/${JOB_ID}?paso=5`);
+    const publish = page.getByTestId('publish-button');
+    await expect(page.locator('[data-casilla="acepto_condiciones_publicacion"]')).toBeVisible({ timeout: 90_000 });
+    // Solo la casilla de las condiciones de publicación; las del registro de empresa no se piden aquí.
+    await expect(page.locator('[data-casilla="poder_representacion"]')).toHaveCount(0);
+    await expect(page.getByText('He leído y acepto las condiciones de publicación de ofertas.')).toBeVisible();
+    await expect(publish).toBeDisabled();
+    await page.locator('[data-casilla="acepto_condiciones_publicacion"]').check();
+    await expect(publish).toBeEnabled();
+    await publish.click();
+    await expect(page.getByTestId('publish-result')).toBeVisible();
+    const names = calls.rpc.map((c) => c.fn);
+    expect(names.indexOf('registrar_aceptacion')).toBeLessThan(names.indexOf('submit_job_for_review'));
+    expect(lastRpc(calls, 'registrar_aceptacion')!.body).toMatchObject({
+      p_documento_ids: [PUB_DOC_ID],
+      p_contexto: 'publicacion',
+      p_oferta_id: JOB_ID,
+      p_casillas: { acepto_condiciones_publicacion: true },
+    });
+    // Las condiciones de publicación se piden primero y las del empleador solo como respaldo.
+  });
+
+  test('sin condiciones_publicacion vigentes se usan las del empleador', async ({ page }) => {
+    const calls = await isolate(page, { jobs: [completeJob()], publicationTerms: false });
+    await page.goto(`/company/jobs/edit/${JOB_ID}?paso=5`);
+    for (const key of TERMS.casillas_obligatorias) await page.locator(`[data-casilla="${key}"]`).check({ timeout: 90_000 });
+    await page.getByTestId('publish-button').click();
+    await expect(page.getByTestId('publish-result')).toBeVisible();
+    expect(lastRpc(calls, 'registrar_aceptacion')!.body).toMatchObject({ p_documento_ids: [DOC_ID], p_contexto: 'publicacion' });
+  });
+});
+
 test.describe('Mis ofertas', () => {
   const JOBS = [
     completeJob({ id: 'j-draft', title: 'Borrador de prueba', status: 'DRAFT', created_at: '2026-10-01T10:00:00Z' }),
@@ -625,9 +713,68 @@ test.describe('panel de administración', () => {
     await expect.poll(() => rpc.length).toBe(1);
     expect(rpc[0].body).toEqual({ p_job_id: JOB_ID, p_decision: 'REJECTED', p_motivo: 'Pide contactar por WhatsApp' });
 
-    // Aprobar desde la tabla.
+    // Aprobar desde la tabla: obliga a abrir y leer el detalle (huella); se aprueba desde ahí.
     await table.getByRole('button', { name: /^Aprobar: Oferta dudosa/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    expect(rpc).toHaveLength(1);
+    await page.getByRole('dialog').getByRole('button', { name: /^Aprobar/ }).click();
     await expect.poll(() => rpc.length).toBe(2);
     expect(rpc[1].body).toEqual({ p_job_id: JOB_ID, p_decision: 'PUBLISHED', p_motivo: null });
+  });
+
+  test('F-2: aprobar envía la huella leída al abrir el detalle y, si el texto cambió, recarga y avisa', async ({ context, page }) => {
+    const profiles = makeProfiles(5);
+    const admin = profiles.find((p) => p.id === ADMIN_ID)!;
+    await installInitState(context, { sessionProfile: admin, language: 'es' });
+    await mockSupabase(context, { profiles });
+
+    let hash = 'huella-1';
+    const hashReads: string[] = [];
+    const approvals: any[] = [];
+    await context.route('**/rest/v1/rpc/get_job_moderation_hash', async (route) => {
+      hashReads.push(hash);
+      return route.fulfill({ status: 200, headers: CORS, body: JSON.stringify(hash) });
+    });
+    await context.route('**/rest/v1/rpc/moderar_oferta', async (route) => {
+      const body = route.request().postDataJSON();
+      approvals.push(body);
+      // La primera vez el texto ya ha cambiado en el servidor.
+      if (approvals.length === 1) {
+        hash = 'huella-2';
+        return route.fulfill({ status: 400, headers: CORS, body: JSON.stringify({ code: 'P0001', message: 'HASH_MISMATCH: el texto ha cambiado', details: null, hint: null }) });
+      }
+      return route.fulfill({ status: 200, headers: CORS, body: JSON.stringify({ job_id: JOB_ID, status: 'PUBLISHED' }) });
+    });
+    await context.route('**/rest/v1/job_postings*', async (route) => {
+      if (route.request().method() !== 'GET') return route.fallback();
+      const accept = route.request().headers()['accept'] || '';
+      const rows = [QUEUED];
+      return route.fulfill({ status: 200, headers: CORS, body: JSON.stringify(accept.includes('vnd.pgrst.object') ? rows[0] : rows) });
+    });
+    await context.route('**/rest/v1/job_reports*', (route) => (route.request().method() === 'GET' ? route.fulfill({ status: 200, headers: CORS, body: '[]' }) : route.fallback()));
+
+    await page.goto('/admin');
+    await page.getByRole('button', { name: /Aprobar Vacantes/ }).click({ timeout: 90_000 });
+    const table = page.getByTestId('admin-jobs-table');
+
+    // Aprobar sin haber abierto el detalle no aprueba: abre el detalle.
+    await table.getByRole('button', { name: /^Aprobar: Oferta dudosa/ }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    expect(approvals).toHaveLength(0);
+    expect(hashReads).toEqual(['huella-1']);
+
+    // Con el detalle abierto: se envía la huella leída; el servidor dice HASH_MISMATCH.
+    await page.getByRole('dialog').getByRole('button', { name: /^Aprobar/ }).click();
+    await expect.poll(() => approvals.length).toBe(1);
+    expect(approvals[0]).toEqual({ p_job_id: JOB_ID, p_decision: 'PUBLISHED', p_motivo: null, p_expected_hash: 'huella-1' });
+    await expect(page.getByText('El texto de la oferta cambió mientras la revisabas').first()).toBeVisible();
+    // Se recarga: huella nueva leída y detalle abierto otra vez.
+    await expect.poll(() => hashReads).toContain('huella-2');
+    await expect(page.getByRole('dialog')).toBeVisible();
+
+    // Segunda aprobación con la huella nueva: pasa.
+    await page.getByRole('dialog').getByRole('button', { name: /^Aprobar/ }).click();
+    await expect.poll(() => approvals.length).toBe(2);
+    expect(approvals[1].p_expected_hash).toBe('huella-2');
   });
 });

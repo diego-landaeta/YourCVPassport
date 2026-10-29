@@ -145,7 +145,7 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId, onCount }) => {
               <li key={job.saved_id}>
                 <article className={`${SURFACE} ${LIFT} p-5`} aria-labelledby={`sv-${job.saved_id}`}>
                   <div className="flex items-start gap-4">
-                    <CompanyMark name={job.company_name} logoUrl={job.company_logo_url} size="md" />
+                    <CompanyMark name={job.company_name} logoUrl={job.company_logo_url} size="card" />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                         <div className="min-w-0">

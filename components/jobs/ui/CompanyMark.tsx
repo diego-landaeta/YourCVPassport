@@ -33,9 +33,26 @@ export function toneIndexOf(name: string): number {
   return h % TONES.length;
 }
 
+/**
+ * Color de cada tono para decorar con el (patron de la cabecera de la ficha). Mismo orden que TONES:
+ * clase de texto del color (el SVG usa currentColor) para claro y oscuro.
+ */
+export const TONE_ACCENTS = [
+  'text-blue-600 dark:text-blue-400',
+  'text-emerald-600 dark:text-emerald-400',
+  'text-amber-600 dark:text-amber-400',
+  'text-rose-600 dark:text-rose-400',
+  'text-violet-600 dark:text-violet-400',
+  'text-cyan-600 dark:text-cyan-400',
+  'text-slate-500 dark:text-slate-400',
+  'text-orange-600 dark:text-orange-400',
+] as const;
+
 const SIZES = {
   sm: 'h-10 w-10 rounded-xl text-sm',
   md: 'h-12 w-12 rounded-xl text-base',
+  /** 56 px: la marca protagonista de las tarjetas del listado. */
+  card: 'h-14 w-14 rounded-2xl text-lg',
   lg: 'h-16 w-16 rounded-2xl text-xl',
   xl: 'h-20 w-20 rounded-2xl text-2xl',
 } as const;
@@ -45,15 +62,18 @@ interface Props {
   logoUrl?: string | null;
   size?: keyof typeof SIZES;
   className?: string;
+  /** La imagen es la protagonista de la pagina: sin carga diferida. */
+  eager?: boolean;
 }
 
-const CompanyMark: React.FC<Props> = ({ name, logoUrl, size = 'md', className = '' }) => {
+const CompanyMark: React.FC<Props> = ({ name, logoUrl, size = 'md', className = '', eager = false }) => {
   const [broken, setBroken] = React.useState(false);
-  const base = `${SIZES[size]} shrink-0 inline-flex items-center justify-center overflow-hidden ring-1 ring-black/5 dark:ring-white/10 select-none`;
+  const base = `${SIZES[size]} shrink-0 inline-flex items-center justify-center overflow-hidden ring-1 ring-slate-900/10 dark:ring-white/15 select-none`;
   if (logoUrl && !broken) {
     return (
-      <span className={`${base} bg-white dark:bg-slate-800 ${className}`}>
-        <img src={logoUrl} alt="" loading="lazy" onError={() => setBroken(true)} className="h-full w-full object-contain p-1.5" />
+      // Fondo blanco con margen en los dos temas: un logo trae sus propios colores y sobre un fondo oscuro se perderia
+      <span className={`${base} bg-white ${className}`}>
+        <img src={logoUrl} alt="" loading={eager ? 'eager' : 'lazy'} decoding="async" onError={() => setBroken(true)} className="h-full w-full object-contain p-1.5" />
       </span>
     );
   }

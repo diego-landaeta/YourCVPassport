@@ -45,7 +45,7 @@ function app(id: string, i: number, over: Row = {}): Row {
   };
 }
 
-async function setupCompany(context: BrowserContext, page: Page, rpcOver: Record<string, unknown> = {}) {
+async function setupCompany(context: BrowserContext, page: Page, rpcOver: Record<string, unknown> = {}, appsOver?: Row[]) {
   const profile = { id: EMP_USER, email: 'rrhh@hospital-norte.example', full_name: 'Persona RRHH', role: 'employer', plan: 'free', wizard_completed: true, first_login_completed: true };
   await installInitState(context, { sessionProfile: profile, language: 'es', theme: 'light' });
   const rpcCalls: Record<string, any[]> = {};
@@ -57,7 +57,7 @@ async function setupCompany(context: BrowserContext, page: Page, rpcOver: Record
     profiles: [profile],
     company_users: [{ id: uuid(902), company_id: COMPANY_ID, user_id: EMP_USER, role: 'OWNER' }],
     companies: [{ id: COMPANY_ID, company_name: 'Hospital Universitario Norte', legal_name: 'Hospital Universitario Norte, S.A.', tax_id: 'A11111111', company_email: 'rrhh@hospital-norte.example', status: 'APPROVED', credit_balance: 0, total_credits_purchased: 0, total_credits_used: 0, country_code: 'ES', logo_url: null, created_at: ago(90), updated_at: ago(90) }],
-    job_applications: [app(APP_NEW, 0), app(APP_RATED, 1, { rating: 3 })],
+    job_applications: appsOver ?? [app(APP_NEW, 0), app(APP_RATED, 1, { rating: 3 })],
     job_postings: [JOB],
     countries: [{ code: 'ES', name_es: 'España', name_en: 'Spain', currency: 'EUR', active: true }],
   }, {
@@ -149,6 +149,52 @@ test.describe('panel de la empresa', () => {
     const drawer = await openDrawer(page, /Abrir candidatura de Lucía/);
     await expect(drawer.getByRole('button', { name: /Te llamamos.*Enviado/ })).toBeDisabled();
     await expect(drawer.getByText('Correo «Te llamamos» enviado')).toBeVisible();
+  });
+});
+
+test.describe('F-3: respuestas clave y «Cumple / No cumple» en la fila', () => {
+  const Q1 = uuid(2001);
+  const Q2 = uuid(2002);
+  const Q3 = uuid(2003);
+  const QUESTIONS = [
+    { id: Q1, job_posting_id: JOB.id, question_text: '¿Tienes el título de enfermería?', question_type: 'YES_NO', options: null, is_required: true, order_index: 0, is_knockout: true, expected_answer: 'YES' },
+    { id: Q2, job_posting_id: JOB.id, question_text: '¿Años de experiencia en UCI?', question_type: 'NUMBER', options: null, is_required: true, order_index: 1, is_knockout: true, expected_answer: '>=3' },
+    { id: Q3, job_posting_id: JOB.id, question_text: '¿Puedes empezar ya?', question_type: 'YES_NO', options: null, is_required: true, order_index: 2, is_knockout: true, expected_answer: 'YES' },
+    { id: uuid(2004), job_posting_id: JOB.id, question_text: 'Comentarios', question_type: 'TEXT', options: null, is_required: false, order_index: 3, is_knockout: false, expected_answer: null },
+  ];
+
+  test('muestra las 2 primeras respuestas imprescindibles resumidas y la marca Cumple / No cumple', async ({ context, page }) => {
+    await setupCompany(context, page, { get_job_questions_for_company: QUESTIONS }, [
+      app(APP_NEW, 0, { answers: { [Q1]: 'YES', [Q2]: '5', [Q3]: 'NO', otro: 'x' } }),
+      app(APP_RATED, 1, { status: 'NOT_QUALIFIED', descartada_auto: true, metadata: { failed_questions: [Q1] }, answers: { [Q1]: 'NO', [Q2]: '1' } }),
+    ]);
+    await page.goto('/company/jobs/applications', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { level: 1, name: 'Candidaturas recibidas' }).waitFor({ timeout: 90_000 });
+
+    // «Recibidas»: Lucía cumple; solo 2 respuestas (las de las dos primeras imprescindibles), nunca la tercera ni la de texto libre.
+    const row = page.locator('li', { hasText: 'Lucía Fernández' }).first();
+    const keys = row.getByTestId('key-answers');
+    await expect(keys).toContainText('Cumple');
+    await expect(row.getByTestId('meets-mark')).toHaveAttribute('title', 'Cumple las preguntas imprescindibles');
+    await expect(keys).toContainText('Tienes el título de enfermería: Sí');
+    await expect(keys).toContainText('Años de experiencia en UCI: 5');
+    await expect(keys).not.toContainText('empezar');
+    await expect(keys).not.toContainText('Comentarios');
+
+    // «No cumple requisitos»: Javier no cumple.
+    await page.getByRole('tab', { name: /No cumple requisitos/ }).click();
+    const row2 = page.locator('li', { hasText: 'Javier Santos' }).first();
+    await expect(row2.getByTestId('meets-mark')).toContainText('No cumple');
+    await expect(row2.getByTestId('meets-mark')).toHaveAttribute('title', 'No cumple alguna pregunta imprescindible');
+    await expect(row2.getByTestId('key-answers')).toContainText('Tienes el título de enfermería: No');
+  });
+
+  test('sin preguntas imprescindibles no hay marca ni resumen', async ({ context, page }) => {
+    await setupCompany(context, page, { get_job_questions_for_company: [QUESTIONS[3]] });
+    await page.goto('/company/jobs/applications', { waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { level: 1, name: 'Candidaturas recibidas' }).waitFor({ timeout: 90_000 });
+    await expect(page.locator('li', { hasText: 'Lucía Fernández' }).first()).toBeVisible();
+    await expect(page.getByTestId('key-answers')).toHaveCount(0);
   });
 });
 

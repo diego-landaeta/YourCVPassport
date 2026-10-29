@@ -61,3 +61,53 @@ export const matchCls = (score: number) =>
     : score >= 60
       ? 'text-slate-900 dark:text-dark-text-primary'
       : 'text-slate-600 dark:text-dark-text-secondary';
+
+/** Pregunta imprescindible tal como la devuelve `get_job_questions_for_company`. */
+export interface KeyQuestion {
+  id: string;
+  question_text: string;
+  is_knockout: boolean | null;
+  order_index: number | null;
+}
+
+const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
+
+/** Respuesta en texto corto (SÍ/NO traducidos, listas separadas por coma). */
+export function shortAnswer(v: unknown, lang: 'es' | 'en'): string {
+  if (v == null) return '';
+  const raw = Array.isArray(v) ? v.join(', ') : String(v);
+  const s = raw === 'YES' ? (lang === 'es' ? 'Sí' : 'Yes') : raw === 'NO' ? 'No' : raw;
+  return clip(s.replace(/\s+/g, ' ').trim(), 28);
+}
+
+/**
+ * Las dos primeras respuestas clave de la candidatura: las de las preguntas imprescindibles
+ * (en el orden de la oferta), resumidas. Si la oferta no tiene ninguna, no hay nada que resumir.
+ */
+export function keyAnswers(
+  questions: readonly KeyQuestion[] | undefined,
+  answers: Record<string, unknown> | null,
+  lang: 'es' | 'en',
+  max = 2,
+): Array<{ id: string; question: string; answer: string }> {
+  return (questions || [])
+    .filter((q) => q.is_knockout)
+    .slice()
+    .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+    .slice(0, max)
+    .map((q) => ({ id: q.id, question: clip(q.question_text.replace(/\s+/g, ' ').trim().replace(/[¿?]/g, ''), 34), answer: shortAnswer(answers?.[q.id], lang) || '—' }));
+}
+
+/**
+ * «Cumple» / «No cumple» respecto a las preguntas imprescindibles. null = la oferta no tiene
+ * ninguna (no hay nada que comprobar). «No cumple» si el sistema la descartó o la empresa la
+ * movió a «No cumple requisitos».
+ */
+export function meetsRequirements(
+  app: Pick<CompanyApp, 'status' | 'descartada_auto' | 'metadata'>,
+  questions: readonly KeyQuestion[] | undefined,
+): boolean | null {
+  const failed = (app.metadata?.failed_questions || []).length > 0;
+  if (app.descartada_auto || failed || app.status === 'NOT_QUALIFIED') return false;
+  return (questions || []).some((q) => q.is_knockout) ? true : null;
+}

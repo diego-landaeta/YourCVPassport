@@ -135,9 +135,9 @@ const LeftProfileCard: React.FC<{ session: Session | null; lang: string }> = ({ 
 /* ── Left sidebar: explore nav ──────────────────────────── */
 const ExploreCard: React.FC<{ lang: string }> = ({ lang }) => {
   const nav = [
-    { label: lang === 'es' ? 'Profesionales' : 'Professionals', icon: UserGroupIcon,          to: lang === 'es' ? '/profesionales' : '/professionals' },
+    { label: lang === 'es' ? 'Profesionales' : 'Professionals', icon: UserGroupIcon,          to: lang === 'es' ? '/profesionales/como-funciona' : '/professionals/how' },
     { label: lang === 'es' ? 'Empleos' : 'Jobs',                icon: BriefcaseIcon,          to: lang === 'es' ? '/empleos' : '/jobs' },
-    { label: lang === 'es' ? 'Empresas' : 'Companies',          icon: BuildingOffice2Icon,    to: lang === 'es' ? '/empresas/busqueda' : '/companies' },
+    { label: lang === 'es' ? 'Empresas' : 'Companies',          icon: BuildingOffice2Icon,    to: lang === 'es' ? '/empresas/busqueda' : '/companies/search' },
     { label: lang === 'es' ? 'Blog' : 'Blog',                   icon: BookOpenIcon,           to: lang === 'es' ? '/recursos/blog' : '/resources/blog' },
     { label: lang === 'es' ? 'Precios' : 'Pricing',             icon: TagIcon,                to: lang === 'es' ? '/precios' : '/pricing' },
     { label: lang === 'es' ? 'Comunidad' : 'Community',         icon: ChatBubbleLeftRightIcon, to: lang === 'es' ? '/comunidad' : '/feed' },

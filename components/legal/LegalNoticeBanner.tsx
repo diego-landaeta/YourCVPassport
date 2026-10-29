@@ -54,6 +54,7 @@ export function useLegalNotices(scope: 'candidato' | 'empleador' | 'todos' | nul
 /** Página donde se lee cada tipo de documento. */
 export function noticePagePath(tipo: LegalTipo, lang: string): string {
   if (tipo === 'privacidad') return legalPagePath('privacy', lang);
+  if (tipo === 'condiciones_publicacion') return legalPagePath('terms', lang, '?tipo=publicacion');
   return legalPagePath('terms', lang, tipo === 'terminos_empleador' ? '?tipo=empleador' : '');
 }
 

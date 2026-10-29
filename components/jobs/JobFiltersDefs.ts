@@ -47,5 +47,20 @@ export function optionLabel(def: JobFilterDef, value: string): string {
   return w.charAt(0).toUpperCase() + w.slice(1);
 }
 
+/** Orden del listado: `recent` (por defecto) o `affinity` («Más afines», solo con sesión de candidato). */
+export type JobSortKey = 'recent' | 'affinity';
+
+export function buildSortOptions(tx: JobsText): Array<{ value: JobSortKey; label: string }> {
+  return [
+    { value: 'recent', label: tx.sortRecent },
+    { value: 'affinity', label: tx.sortAffinity },
+  ];
+}
+
+/** Valor de `?sort=` de la URL: cualquier cosa que no sea `affinity` es el orden por defecto. */
+export function parseSort(raw: string | null): JobSortKey {
+  return raw === 'affinity' ? 'affinity' : 'recent';
+}
+
 /** Estilos comunes del anillo de foco de los controles del listado sobre el fondo azul tenue de la banda. */
 export const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 focus-visible:ring-offset-blue-50 dark:focus-visible:ring-offset-dark-bg-secondary';

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -15,8 +15,15 @@ import { CONSENT_OPEN_EVENT, setConsent } from '../../lib/consent';
 //   de cookies (openCookieSettings).
 // - No se muestra en las rutas internas de captura de plantillas (/dev/...), que
 //   se usan para generar imágenes.
+// - Mientras el aviso está visible publica su alto en la variable CSS `--cookie-banner-h`
+//   (en px, sobre <html>) y la deja en `0px` al decidir o cerrarlo. Las barras fijas de la parte
+//   inferior (p. ej. la barra «Inscribirme» de la ficha de oferta en móvil) deben usar
+//   `bottom: var(--cookie-banner-h, 0px)` para no quedar tapadas por el aviso (z-index 90).
 
 const HIDDEN_PREFIXES = ['/dev/'];
+
+/** Variable CSS (sobre <html>) con el alto en px del aviso de cookies visible; 0px si no se ve. */
+export const COOKIE_BANNER_HEIGHT_VAR = '--cookie-banner-h';
 
 const ShieldIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -34,6 +41,7 @@ const CookieConsent: React.FC = () => {
   const [choice, setChoice] = useState({ analytics: false, thirdParty: false });
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<Element | null>(null);
+  const bannerRef = useRef<HTMLElement>(null);
 
   const policyPath = lang === 'es' ? '/politica-de-cookies' : '/cookie-policy';
 
@@ -73,7 +81,30 @@ const CookieConsent: React.FC = () => {
     return () => document.removeEventListener('keydown', onKey);
   }, [dialogOpen, closeDialog]);
 
-  if (HIDDEN_PREFIXES.some(p => location.pathname.startsWith(p))) return null;
+  const hiddenRoute = HIDDEN_PREFIXES.some(p => location.pathname.startsWith(p));
+  const bannerVisible = !consent && !dialogOpen && !hiddenRoute;
+
+  // Publica el alto del aviso en --cookie-banner-h mientras se ve y lo pone a 0px al decidir/cerrar.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!bannerVisible || !el) {
+      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, '0px');
+      return;
+    }
+    const publish = () => root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, `${Math.ceil(el.getBoundingClientRect().height)}px`);
+    publish();
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(publish) : null;
+    observer?.observe(el);
+    window.addEventListener('resize', publish);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', publish);
+      root.style.setProperty(COOKIE_BANNER_HEIGHT_VAR, '0px');
+    };
+  }, [bannerVisible]);
+
+  if (hiddenRoute) return null;
 
   const decide = (next: { analytics: boolean; thirdParty: boolean }) => {
     setConsent(next);
@@ -113,6 +144,7 @@ const CookieConsent: React.FC = () => {
     <>
       {!consent && !dialogOpen && (
         <section
+          ref={bannerRef}
           role="region"
           aria-label={t.title}
           data-testid="cookie-banner"

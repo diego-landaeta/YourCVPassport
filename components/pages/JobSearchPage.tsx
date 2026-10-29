@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   ArrowsUpDownIcon, BriefcaseIcon, ChevronDownIcon, ExclamationTriangleIcon, GlobeEuropeAfricaIcon,
   MagnifyingGlassIcon, MapPinIcon,
@@ -11,7 +12,7 @@ import NotFoundPage from '../../pages/NotFoundPage';
 import JobCard from '../jobs/JobCard';
 import JobFiltersBar from '../jobs/JobFiltersBar';
 import JobFiltersChips, { type JobFilterChip } from '../jobs/JobFiltersChips';
-import { buildFilterDefs, optionLabel, type JobFilterValues } from '../jobs/JobFiltersDefs';
+import { buildFilterDefs, buildSortOptions, optionLabel, parseSort, type JobFilterValues } from '../jobs/JobFiltersDefs';
 import JobListMotion from '../jobs/JobListMotion';
 import JobListPagination from '../jobs/JobListPagination';
 import JobListSkeleton from '../jobs/JobListSkeleton';
@@ -22,7 +23,8 @@ import { fmt } from '../../lib/bolsaText';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { countryCurrency, countryName, isKnownCountry } from '../../lib/jobsCatalog';
 import { jobsCountryPath, readSavedCountry, resolveDefaultCountry, saveCountry } from '../../lib/jobsFormat';
-import { fetchMyApplicationStatuses, searchPublicJobs, type CandidateStatus, type PublicJobRow } from '../../lib/jobsApi';
+import { fetchMyApplicationStatuses, fetchSavedJobIds, searchPublicJobs, toggleSavedJob, type CandidateStatus, type PublicJobRow } from '../../lib/jobsApi';
+import { loginUrlWithReturn, setPostLoginReturn } from '../../lib/jobsReturn';
 
 const PAGE_SIZE = 20;
 const ALL = 'ALL';
@@ -91,6 +93,11 @@ const JobSearchPage: React.FC = () => {
   const maxExperience = /^\d{1,2}$/.test(expRaw) && Number(expRaw) <= 60 ? Number(expRaw) : null;
   const exp = maxExperience === null ? '' : String(maxExperience);
   const page = Math.max(1, Number(params.get('page')) || 1);
+  // Orden: «Más afines» solo con sesión de candidato (la base cae a «recientes» sin sesión); la URL puede traer
+  // sort=affinity de un enlace compartido y entonces simplemente no se aplica.
+  const canSortByAffinity = !!user && profile?.role !== 'employer' && profile?.role !== 'admin';
+  const sortWanted = parseSort(params.get('sort'));
+  const sort = canSortByAffinity ? sortWanted : 'recent';
 
   const [qInput, setQInput] = useState(params.get('q') || '');
   const [cityInput, setCityInput] = useState(params.get('city') || '');
@@ -129,6 +136,8 @@ const JobSearchPage: React.FC = () => {
       const next = new URLSearchParams();
       const c = prev.get('country');
       if (c) next.set('country', c);
+      const s = prev.get('sort');
+      if (s) next.set('sort', s);
       return next;
     }, { replace: true });
   };
@@ -164,6 +173,7 @@ const JobSearchPage: React.FC = () => {
         minSalary,
         postedWithinDays: days ? Number(days) : null,
         maxExperienceYears: maxExperience,
+        sort,
         search: q || null,
         city: city || null,
         limit: PAGE_SIZE,
@@ -181,7 +191,7 @@ const JobSearchPage: React.FC = () => {
     } finally {
       if (id === requestId.current) setLoading(false);
     }
-  }, [country, category, workMode, contract, schedule, minSalary, days, maxExperience, q, city, page]);
+  }, [country, category, workMode, contract, schedule, minSalary, days, maxExperience, sort, q, city, page]);
 
   useEffect(() => {
     if (!authReady) return;
@@ -195,6 +205,34 @@ const JobSearchPage: React.FC = () => {
     fetchMyApplicationStatuses().then((m) => { if (alive) setApplied(m); }).catch(() => { /* la RPC ya marca los inscritos */ });
     return () => { alive = false; };
   }, [user]);
+
+  // Ofertas guardadas del usuario (boton «Guardar» de cada tarjeta)
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!user) { setSavedIds(new Set()); return; }
+    let alive = true;
+    fetchSavedJobIds(user.id).then((ids) => { if (alive) setSavedIds(ids); }).catch(() => { /* sin guardadas: el boton sigue funcionando */ });
+    return () => { alive = false; };
+  }, [user]);
+
+  const onToggleSave = useCallback(async (job: PublicJobRow) => {
+    if (!user) {
+      const ret = `${location.pathname}${location.search}`;
+      setPostLoginReturn(ret);
+      navigate(loginUrlWithReturn(ret));
+      return;
+    }
+    const wasSaved = savedIds.has(job.id);
+    // Optimista: el boton responde al instante y se deshace si la RPC falla
+    setSavedIds((prev) => { const n = new Set(prev); if (wasSaved) n.delete(job.id); else n.add(job.id); return n; });
+    try {
+      await toggleSavedJob(job.id);
+      toast.success(wasSaved ? tx.saveRemoved : tx.saved);
+    } catch {
+      setSavedIds((prev) => { const n = new Set(prev); if (wasSaved) n.add(job.id); else n.delete(job.id); return n; });
+      toast.error(tx.saveError);
+    }
+  }, [user, savedIds, location.pathname, location.search, navigate, tx]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const goPage = (p: number) => {
@@ -236,11 +274,16 @@ const JobSearchPage: React.FC = () => {
   const seoTitle = seoByCountry ? fmt(tx.seoTitleCountry, { country: countryLabel }) : tx.seoTitle;
   const seoDescription = seoByCountry ? fmt(tx.seoDescriptionCountry, { country: countryLabel }) : tx.seoDescription;
   // Busquedas filtradas y paginas sucesivas no se indexan (contenido duplicado)
-  const noindex = hasFilters || page > 1 || queryCountry === 'all';
+  const noindexFiltered = hasFilters || page > 1 || queryCountry === 'all' || sortWanted !== 'recent';
+  // Listado vacio SIN filtros (aun no hay ofertas publicas): no se indexa, pero se siguen sus enlaces.
+  // Con ofertas la pagina es indexable. Mientras carga o si falla la carga no se decide: no se
+  // desindexa una portada por un error pasajero (auditoria SEO 25/10/2026, hallazgo 8).
+  const noindexEmpty = !noindexFiltered && !loading && !error && total === 0;
+  const noindex = noindexFiltered || noindexEmpty;
 
   return (
     <div className="min-h-screen bg-cv-light-gray accent-cv-blue selection:bg-cv-blue/20 dark:bg-dark-bg-primary dark:selection:bg-cv-blue/40">
-      <PageSEO title={seoTitle} description={seoDescription} lang={pathLang} noindex={noindex} />
+      <PageSEO title={seoTitle} description={seoDescription} lang={pathLang} noindex={noindex} followLinks={noindexEmpty} />
       <JobListMotion />
 
       <section className="border-b border-blue-100 bg-blue-50/70 dark:border-dark-border dark:bg-dark-bg-secondary">
@@ -319,11 +362,25 @@ const JobSearchPage: React.FC = () => {
                 </>
               )}
             </p>
-            {!loading && !error && rows.length > 1 && (
-              <p className="hidden items-center gap-1.5 text-sm text-slate-600 sm:inline-flex dark:text-dark-text-secondary">
-                <ArrowsUpDownIcon className="h-4 w-4" aria-hidden="true" />
-                <span>{tx.sortLabel}: {tx.sortRecent}</span>
-              </p>
+            {!loading && !error && (rows.length > 1 || sort !== 'recent') && (
+              <div className="inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-dark-text-secondary">
+                <ArrowsUpDownIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <label htmlFor="jf-sort" className="shrink-0">{tx.sortLabel}:</label>
+                <select
+                  id="jf-sort"
+                  value={sort}
+                  onChange={(e) => setParam({ sort: e.target.value === 'affinity' ? 'affinity' : null })}
+                  aria-describedby={canSortByAffinity ? undefined : 'jf-sort-hint'}
+                  title={canSortByAffinity ? undefined : tx.sortAffinityHint}
+                  data-testid="job-sort"
+                  className="h-9 cursor-pointer rounded-lg border border-slate-300 bg-white py-0 pl-2.5 pr-8 text-sm font-medium text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cv-light-gray dark:border-dark-border dark:bg-dark-bg-secondary dark:text-dark-text-primary dark:focus-visible:ring-offset-dark-bg-primary"
+                >
+                  {buildSortOptions(tx).map((o) => (
+                    <option key={o.value} value={o.value} disabled={o.value === 'affinity' && !canSortByAffinity}>{o.label}</option>
+                  ))}
+                </select>
+                {!canSortByAffinity && <span id="jf-sort-hint" className="sr-only">{tx.sortAffinityHint}</span>}
+              </div>
             )}
           </div>
           <JobFiltersChips chips={chips} onClear={clearFilters} />
@@ -372,7 +429,7 @@ const JobSearchPage: React.FC = () => {
                 const appliedStatus = st === 'WITHDRAWN' ? 'WITHDRAWN' : st || job.already_applied ? 'APPLIED' : null;
                 return (
                   <li key={job.id}>
-                    <JobCard job={job} lang={pathLang} countries={countries} appliedStatus={appliedStatus} index={i} />
+                    <JobCard job={job} lang={pathLang} countries={countries} appliedStatus={appliedStatus} index={i} saved={savedIds.has(job.id)} onToggleSave={onToggleSave} />
                   </li>
                 );
               })}

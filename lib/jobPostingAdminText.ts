@@ -96,6 +96,8 @@ const es = {
   t_auto_error: 'La revisión automática no está disponible. Revisa la oferta a mano.',
   t_report_done: 'Denuncia actualizada.',
   t_error: 'No se ha podido completar la acción.',
+  t_hash_changed: 'El texto de la oferta cambió mientras la revisabas. Hemos recargado la versión actual: vuélvela a revisar antes de aprobarla.',
+  t_review_first: 'Abre y lee la oferta antes de aprobarla.',
 };
 
 type Dict = { [K in keyof typeof es]: string };
@@ -192,6 +194,8 @@ const en: Dict = {
   t_auto_error: 'Automatic review is not available. Review the posting by hand.',
   t_report_done: 'Report updated.',
   t_error: 'The action could not be completed.',
+  t_hash_changed: 'The posting text changed while you were reviewing it. We reloaded the current version: review it again before approving.',
+  t_review_first: 'Open and read the posting before approving it.',
 };
 
 export type JobAdminText = Dict;

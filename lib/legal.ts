@@ -12,7 +12,7 @@
 import { supabase } from '../supabase/client';
 import { getLocalizedPath } from '../utils/canonicalUrl';
 
-export type LegalTipo = 'terminos_candidato' | 'terminos_empleador' | 'privacidad' | 'cookies';
+export type LegalTipo = 'terminos_candidato' | 'terminos_empleador' | 'condiciones_publicacion' | 'privacidad' | 'cookies';
 export type LegalLang = 'es' | 'en';
 export type LegalContexto = 'registro' | 'inscripcion' | 'publicacion' | 'nueva_version';
 export type LegalAudiencia = 'todos' | 'candidato' | 'empleador';
@@ -288,7 +288,7 @@ export interface LegalNotice {
   dias_restantes: number;
 }
 
-const LEGAL_TIPOS: ReadonlySet<string> = new Set(['terminos_candidato', 'terminos_empleador', 'privacidad', 'cookies']);
+const LEGAL_TIPOS: ReadonlySet<string> = new Set(['terminos_candidato', 'terminos_empleador', 'condiciones_publicacion', 'privacidad', 'cookies']);
 
 /**
  * Avisos de versiones proximas para el usuario con sesion. Falla EN SILENCIO (devuelve []): si la RPC
@@ -310,7 +310,7 @@ export async function fetchLegalNotices(): Promise<LegalNotice[]> {
 
 /** Tipos de documento que afectan a cada ambito (los mismos que pide la puerta de aceptacion). */
 export const noticeTiposFor = (scope: 'candidato' | 'empleador'): LegalTipo[] =>
-  scope === 'candidato' ? ['terminos_candidato', 'privacidad'] : ['terminos_empleador', 'privacidad'];
+  scope === 'candidato' ? ['terminos_candidato', 'privacidad'] : ['terminos_empleador', 'condiciones_publicacion', 'privacidad'];
 
 export const noticeKey = (n: Pick<LegalNotice, 'tipo' | 'version' | 'idioma'>): string => `${n.tipo}:${n.version}:${n.idioma}`;
 

@@ -62,6 +62,8 @@ export const useLegalText = defineBolsaText({
     optContact: 'Permito que las empresas me encuentren y me contacten.',
     optAlerts: 'Quiero recibir alertas de ofertas y novedades.',
     optNews: 'Quiero recibir novedades comerciales.',
+    publicationAccept: 'He leído y acepto las condiciones de publicación de ofertas.',
+    genericAccept: 'Acepto esta condición.',
     errMandatory: 'Marca todas las casillas obligatorias para continuar.',
     errTruthful: 'Debes declarar que los datos de tu perfil son verdaderos.',
 
@@ -162,6 +164,8 @@ export const useLegalText = defineBolsaText({
     optContact: 'I allow companies to find and contact me.',
     optAlerts: 'I want to receive job alerts and news.',
     optNews: 'I want to receive commercial news.',
+    publicationAccept: 'I have read and accept the job posting conditions.',
+    genericAccept: 'I accept this condition.',
     errMandatory: 'Tick all the required boxes to continue.',
     errTruthful: 'You must declare that the data in your profile is true.',
 
@@ -233,7 +237,10 @@ export function casillaLabel(tx: ReturnType<typeof useLegalText>, key: string): 
       return tx.optAlerts;
     case 'novedades_comerciales':
       return tx.optNews;
+    case 'acepto_condiciones_publicacion':
+      return tx.publicationAccept;
     default:
-      return key;
+      // Casilla desconocida (documento nuevo): nunca se pinta el código crudo.
+      return tx.genericAccept;
   }
 }

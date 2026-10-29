@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CheckIcon, GiftIcon, PlusIcon } from '@heroicons/react/24/outline';
 import type { PublicJobRow } from '../../lib/jobsApi';
 import {
   categoryLabel, contractLabel, countryName, type JobCountry, type JobLang,
@@ -62,21 +63,58 @@ export interface KeyFact { key: string; label: string; value: string; icon: Reac
 
 const COLS: Record<number, string> = { 1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4' };
 
-/** Tira de datos clave: celdas con icono y valor grande separadas por filetes (no chips). */
+/** Tira de datos clave: celdas con icono en baldosa y valor grande separadas por filetes (no chips). */
 export const KeyFacts: React.FC<{ facts: KeyFact[]; label: string }> = ({ facts, label }) => (
-  <dl aria-label={label} className={`grid grid-cols-2 ${COLS[Math.min(4, Math.max(1, facts.length))]} gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-dark-border bg-slate-200 dark:bg-dark-border`}>
+  <dl aria-label={label} className={`grid grid-cols-2 ${COLS[Math.min(4, Math.max(1, facts.length))]} gap-px overflow-hidden rounded-2xl border border-slate-200 dark:border-dark-border bg-slate-200 dark:bg-dark-border shadow-[0_1px_2px_rgba(15,23,42,.04)]`}>
     {facts.map((f) => (
-      <div key={f.key} className="bg-white dark:bg-dark-bg-secondary px-4 py-4 sm:px-5 [&:last-child:nth-child(odd)]:col-span-2 lg:[&:last-child:nth-child(odd)]:col-span-1">
-        <dt className="flex items-center gap-2 text-[13px] text-slate-600 dark:text-dark-text-secondary">
-          <span className="text-slate-500 dark:text-dark-text-tertiary [&>svg]:h-[18px] [&>svg]:w-[18px]" aria-hidden="true">{f.icon}</span>
-          {f.label}
-        </dt>
-        <dd className={`mt-1.5 text-base sm:text-lg leading-snug tabular-nums ${f.muted ? 'font-medium text-slate-500 dark:text-dark-text-tertiary' : 'font-semibold text-slate-900 dark:text-dark-text-primary'}`}>
-          {f.value}
-        </dd>
+      <div key={f.key} className="flex flex-col items-start gap-2.5 bg-white dark:bg-dark-bg-secondary px-4 py-4 sm:flex-row sm:items-start sm:gap-3.5 sm:px-5 [&:last-child:nth-child(odd)]:col-span-2 lg:[&:last-child:nth-child(odd)]:col-span-1">
+        <span
+          aria-hidden="true"
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl [&>svg]:h-6 [&>svg]:w-6 ${f.muted ? 'bg-slate-100 text-slate-500 dark:bg-dark-bg-tertiary dark:text-dark-text-tertiary' : 'bg-blue-50 text-cv-blue dark:bg-cv-blue/15 dark:text-blue-300'}`}
+        >
+          {f.icon}
+        </span>
+        <div className="min-w-0">
+          <dt className="text-[13px] text-slate-600 dark:text-dark-text-secondary">{f.label}</dt>
+          <dd className={`mt-0.5 break-words text-base sm:text-lg leading-snug tabular-nums ${f.muted ? 'font-medium text-slate-500 dark:text-dark-text-tertiary' : 'font-semibold text-slate-900 dark:text-dark-text-primary'}`}>
+            {f.value}
+          </dd>
+        </div>
       </div>
     ))}
   </dl>
+);
+
+/** Habilidades como chips con icono: con marca de verificacion las imprescindibles, con «+» las que se valoran. */
+export const SkillChips: React.FC<{ required: string[]; optional: string[]; dx: DetailText }> = ({ required, optional, dx }) => (
+  <ul className="flex flex-wrap gap-2">
+    {required.map((s) => (
+      <li key={`r-${s}`} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white py-1.5 pl-2 pr-3 text-sm font-medium text-slate-800 dark:border-dark-border dark:bg-dark-bg-secondary dark:text-dark-text-primary">
+        <CheckIcon className="h-4 w-4 shrink-0 stroke-[2.5] text-cv-blue dark:text-blue-300" aria-hidden="true" />
+        {s}<span className="sr-only"> ({dx.skillRequired})</span>
+      </li>
+    ))}
+    {optional.map((s) => (
+      <li key={`o-${s}`} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 py-1.5 pl-2 pr-3 text-sm text-slate-700 dark:border-dark-border-light dark:bg-transparent dark:text-dark-text-secondary">
+        <PlusIcon className="h-4 w-4 shrink-0 stroke-2 text-slate-500 dark:text-dark-text-tertiary" aria-hidden="true" />
+        {s}<span className="sr-only"> ({dx.skillNice})</span>
+      </li>
+    ))}
+  </ul>
+);
+
+/** «Cómo es trabajar aquí»: los beneficios como lista de dos columnas con icono (sin tarjetas). */
+export const BenefitsGrid: React.FC<{ items: string[] }> = ({ items }) => (
+  <ul className="grid max-w-3xl grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+    {items.map((i, idx) => (
+      <li key={idx} className="flex items-start gap-3 text-[15px] leading-snug text-slate-700 dark:text-dark-text-secondary">
+        <span aria-hidden="true" className="mt-px flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-cv-blue dark:bg-cv-blue/15 dark:text-blue-300">
+          <GiftIcon className="h-4 w-4" />
+        </span>
+        <span className="pt-0.5">{i}</span>
+      </li>
+    ))}
+  </ul>
 );
 
 /** Esqueleto con la misma forma que la ficha. */
@@ -134,7 +172,7 @@ export const SimilarRows: React.FC<SimilarProps> = ({ rows, lang, countries, tx,
             to={jobHref(s, lang)}
             className={`group flex items-center gap-4 py-4 px-1 -mx-1 rounded-xl transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-dark-bg-secondary ${FOCUS_RING}`}
           >
-            <CompanyMark name={s.company_name} logoUrl={s.company_logo_url} size="sm" />
+            <CompanyMark name={s.company_name} logoUrl={s.company_logo_url} size="md" />
             <span className="min-w-0 flex-1">
               <h3 className="text-base font-semibold leading-snug text-slate-900 dark:text-dark-text-primary truncate group-hover:underline underline-offset-2 decoration-slate-400">{s.title}</h3>
               <span className="mt-0.5 block text-sm text-slate-600 dark:text-dark-text-secondary truncate">{meta}</span>

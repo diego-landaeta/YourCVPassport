@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
@@ -102,6 +102,13 @@ const CompanyRegistrationPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  // La revisión automática sigue en marcha tras mostrar el éxito.
+  const [reviewing, setReviewing] = useState(false);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
   // Resultado de la revisión automática: verified (APPROVED al momento) o pending (revisión manual).
   const [outcome, setOutcome] = useState<'verified' | 'pending'>('pending');
   const [consents, setConsents] = useState<Casillas>(() =>
@@ -326,13 +333,32 @@ const CompanyRegistrationPage: React.FC = () => {
     }
   };
 
-  /** Revisión por reglas (Edge company-review-ai). Nunca bloquea el registro. */
+  /**
+   * ¿Ya existe una empresa con este identificador fiscal o este correo? (RPC company_duplicate_hint).
+   * Devuelve solo si están ocupados, nunca de quién. Si la RPC no existe o falla, no impide el registro:
+   * la revisión de la empresa y la base lo comprueban igualmente.
+   */
+  const checkDuplicateHint = async (): Promise<{ tax: boolean; email: boolean }> => {
+    try {
+      const { data, error } = await supabase.rpc('company_duplicate_hint', {
+        p_tax_id: formData.tax_id?.trim() || '',
+        p_company_email: formData.company_email?.trim() || '',
+      });
+      if (error || !data) return { tax: false, email: false };
+      const row = (Array.isArray(data) ? data[0] : data) as { tax_id_taken?: boolean; email_taken?: boolean } | undefined;
+      return { tax: row?.tax_id_taken === true, email: row?.email_taken === true };
+    } catch {
+      return { tax: false, email: false };
+    }
+  };
+
+  /**
+   * Revisión por reglas (Edge company-review-ai). Nunca bloquea el registro ni la pantalla de éxito:
+   * se lanza en segundo plano y, si llega a tiempo, la pantalla pasa de «revisando» a «verificada».
+   */
   const runCompanyReview = async (companyId: string): Promise<'verified' | 'pending'> => {
     try {
-      const res = await Promise.race([
-        supabase.functions.invoke('company-review-ai', { body: { companyId } }),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
-      ]);
+      const res = await supabase.functions.invoke('company-review-ai', { body: { companyId } });
       return (res.data as { status?: string } | null)?.status === 'APPROVED' ? 'verified' : 'pending';
     } catch (e) {
       console.warn('company-review-ai no respondió; queda en revisión manual:', e);
@@ -364,6 +390,20 @@ const CompanyRegistrationPage: React.FC = () => {
     setError(null);
 
     try {
+      // 0. Duplicados: se avisa ANTES de subir archivos o crear nada (sin revelar de quién es el otro registro).
+      const dup = await checkDuplicateHint();
+      if (dup.tax || dup.email) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          ...(dup.tax ? { tax_id: tx.errTaxDuplicate } : {}),
+          ...(dup.email ? { company_email: tx.errEmailDuplicate } : {}),
+        }));
+        setError(dup.tax ? tx.errTaxDuplicate : tx.errEmailDuplicate);
+        setLoading(false);
+        window.setTimeout(() => document.querySelector('.text-red-600')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0);
+        return;
+      }
+
       // 1. Upload logo if provided
       let logoUrl: string | null = null;
       if (logoFile) {
@@ -427,6 +467,15 @@ const CompanyRegistrationPage: React.FC = () => {
       if (companyError) {
         console.error('Company insert error:', companyError);
 
+        // 23505: otra empresa tiene ya ese identificador fiscal o ese correo (carrera con la comprobación previa
+        // o RPC no disponible). No se ha creado nada: se explica en el campo, sin decir de quién es.
+        if (companyError.code === '23505') {
+          const blob = `${companyError.message || ''} ${companyError.details || ''}`.toLowerCase();
+          const field = /tax/.test(blob) ? 'tax_id' : /email|correo/.test(blob) ? 'company_email' : null;
+          if (field) setValidationErrors((prev) => ({ ...prev, [field]: field === 'tax_id' ? tx.errTaxDuplicate : tx.errEmailDuplicate }));
+          throw new Error(tx.errDuplicateInsert);
+        }
+
         // Check for specific RLS errors
         if (companyError.code === '42501') {
           toast.error('Database permissions error. Please contact support.');
@@ -455,6 +504,11 @@ const CompanyRegistrationPage: React.FC = () => {
       if (companyUserError) {
         console.error('Company user insert error:', companyUserError);
 
+        // La empresa ya se creó pero no se pudo vincular al usuario: se intenta deshacer para no dejar una
+        // empresa huérfana (si la política no deja borrar, quedará PENDING sin miembros y la revisará un admin).
+        await supabase.from('companies').delete().eq('id', company.id);
+        if (companyUserError.code !== '42501') throw new Error(tx.errLinkFailed);
+
         // Check for specific RLS errors
         if (companyUserError.code === '42501') {
           toast.error('Database permissions error for company users. Please contact support.');
@@ -473,7 +527,14 @@ const CompanyRegistrationPage: React.FC = () => {
 
       // 8. Revisión automática (reglas). Sin incidencias -> APPROVED al momento; con
       //    dudas o ante cualquier error la empresa queda PENDING (revisión manual).
-      setOutcome(await runCompanyReview(company.id));
+      //    En segundo plano: la pantalla de éxito sale ya («te avisaremos») y pasa a «verificada» si llega a tiempo.
+      setOutcome('pending');
+      setReviewing(true);
+      void runCompanyReview(company.id).then((result) => {
+        if (!mountedRef.current) return;
+        setOutcome(result);
+        setReviewing(false);
+      });
 
       // Success!
       setSuccess(true);
@@ -575,7 +636,7 @@ const CompanyRegistrationPage: React.FC = () => {
           </span>
           <h1 className="text-balance text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{t('company.registration.success')}</h1>
           <p role="status" className="mt-3 text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
-            {verified ? tx.successVerified : tx.successPending}
+            {verified ? tx.successVerified : reviewing ? tx.successChecking : tx.successPending}
           </p>
           {!verified && (
             <div className="mt-7 border-t border-slate-200 pt-6 dark:border-dark-border">

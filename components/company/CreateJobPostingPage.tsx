@@ -33,7 +33,7 @@ import {
   loadCompanyContext,
   loadCompanyCountry,
   loadCountries,
-  loadEmployerTerms,
+  loadPublishTerms,
   loadJobRow,
   loadOfferList,
   loadQuestionRows,
@@ -288,7 +288,7 @@ const CreateJobPostingPage: React.FC = () => {
     if (phase !== 'wizard' || step !== 'review' || !draftLike || termsRequested.current) return;
     termsRequested.current = true;
     setTermsState('loading');
-    loadEmployerTerms(lang)
+    loadPublishTerms(lang)
       .then((doc) => {
         setTerms(doc);
         setTermsState(doc ? 'ready' : 'error');

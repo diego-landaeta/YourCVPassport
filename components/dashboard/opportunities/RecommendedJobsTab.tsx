@@ -153,7 +153,7 @@ const RecommendedJobsTab: React.FC<RecommendedJobsTabProps> = ({ profileId, onSw
               <li key={job.job_posting_id}>
                 <article className={`${SURFACE} ${LIFT} p-5`} aria-labelledby={`rec-${job.job_posting_id}`}>
                   <div className="flex items-start gap-4">
-                    <CompanyMark name={job.company_name} logoUrl={job.company_logo_url} size="md" />
+                    <CompanyMark name={job.company_name} logoUrl={job.company_logo_url} size="card" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">

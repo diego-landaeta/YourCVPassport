@@ -40,7 +40,8 @@ const LegalDocPage: React.FC<LegalDocPageProps> = ({ kind, fallback, fallbackDat
   const tx = useLegalText();
   const [params, setParams] = useSearchParams();
   const employer = kind === 'terms' && params.get('tipo') === 'empleador';
-  const tipo: LegalTipo = kind === 'privacy' ? 'privacidad' : employer ? 'terminos_empleador' : 'terminos_candidato';
+  const publication = kind === 'terms' && params.get('tipo') === 'publicacion';
+  const tipo: LegalTipo = kind === 'privacy' ? 'privacidad' : publication ? 'condiciones_publicacion' : employer ? 'terminos_empleador' : 'terminos_candidato';
 
   const nx = useNoticeText();
   const noticeDate = useNoticeDate();
