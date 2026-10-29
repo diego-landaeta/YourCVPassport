@@ -78,7 +78,39 @@ export type Block =
   /** Texto pequeño y gris. */
   | { type: 'small'; text: string }
 
+/** Idioma de los textos FIJOS de la plantilla (firma, pie, enlace del botón). Por defecto 'es'. */
+export type EmailLang = 'es' | 'en'
+
+const FIXED_TEXT: Record<EmailLang, {
+  noButton: string
+  signoff: string
+  automatic: string
+  help: string
+  privacy: string
+  terms: string
+}> = {
+  es: {
+    noButton: '¿No funciona el botón? Copia este enlace en tu navegador:',
+    signoff: 'Un saludo,',
+    automatic: 'Mensaje automático, no respondas a esta dirección. ¿Necesitas ayuda? Escríbenos a',
+    help: 'Ayuda',
+    privacy: 'Privacidad',
+    terms: 'Términos',
+  },
+  en: {
+    noButton: "Button not working? Copy this link into your browser:",
+    signoff: 'Kind regards,',
+    automatic: 'Automated message, please do not reply to this address. Need help? Write to us at',
+    help: 'Help',
+    privacy: 'Privacy',
+    terms: 'Terms',
+  },
+}
+const teamName = (lang: EmailLang) => (lang === 'en' ? `The ${BRAND.name} team` : `El equipo de ${BRAND.name}`)
+
 export interface EmailContent {
+  /** Idioma de los textos fijos (firma, pie...). Los textos propios de cada correo los pone quien lo construye. */
+  lang?: EmailLang
   /** Texto de vista previa en la bandeja de entrada (no se ve en el cuerpo). */
   preheader: string
   /** Etiqueta pequeña sobre el titular (tipo de correo o estado). */
@@ -140,7 +172,7 @@ ${items.map((item, i) => `  <tr>
 </table>`
 }
 
-function renderBlock(block: Block): string {
+function renderBlock(block: Block, lang: EmailLang = 'es'): string {
   switch (block.type) {
     case 'p':
       return `<p style="${P}">${multiline(block.text)}</p>`
@@ -160,7 +192,7 @@ function renderBlock(block: Block): string {
 </table>`
       if (block.fallback === false) return button
       return button + `
-<p style="margin:0 0 32px;font-size:13px;line-height:1.6;color:${C.muted};">¿No funciona el botón? Copia este enlace en tu navegador:<br>
+<p style="margin:0 0 32px;font-size:13px;line-height:1.6;color:${C.muted};">${FIXED_TEXT[lang].noButton}<br>
 <a href="${url}" target="_blank" style="font-family:${MONO};font-size:12px;color:${C.blue};text-decoration:none;word-break:break-all;">${url}</a></p>`
     }
 
@@ -252,11 +284,13 @@ function blockText(block: Block): string {
  */
 export function renderEmailCard(content: EmailContent): string {
   const year = new Date().getFullYear()
+  const lang: EmailLang = content.lang === 'en' ? 'en' : 'es'
+  const T = FIXED_TEXT[lang]
   const hero = HEROES[content.hero ?? 'brand']
   const link = `color:${C.muted};text-decoration:underline;`
   const signoff = content.signoff === false
     ? ''
-    : `<p style="margin:12px 0 0;font-size:16px;line-height:1.7;color:${C.text};">Un saludo,<br><strong style="color:${C.ink};">El equipo de ${BRAND.name}</strong></p>`
+    : `<p style="margin:12px 0 0;font-size:16px;line-height:1.7;color:${C.text};">${T.signoff}<br><strong style="color:${C.ink};">${teamName(lang)}</strong></p>`
 
   return `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;font-family:${FONT};">
@@ -278,7 +312,7 @@ export function renderEmailCard(content: EmailContent): string {
         <tr>
           <td class="px" style="padding:40px 48px 44px;">
             ${content.greeting ? `<p style="${P}">${escapeHtml(content.greeting)}</p>` : ''}
-            ${content.blocks.map(renderBlock).join('\n')}
+            ${content.blocks.map((b) => renderBlock(b, lang)).join('\n')}
             ${signoff}
           </td>
         </tr>
@@ -288,17 +322,17 @@ export function renderEmailCard(content: EmailContent): string {
   <tr>
     <td class="px" align="center" style="padding:28px 32px 4px;font-size:13px;line-height:1.7;color:${C.muted};">
       ${content.footerReason ? `<p style="margin:0 0 10px;">${escapeHtml(content.footerReason)}</p>` : ''}
-      <p style="margin:0 0 10px;">Mensaje automático, no respondas a esta dirección. ¿Necesitas ayuda? Escríbenos a <a href="mailto:${BRAND.supportEmail}" style="${link}">${BRAND.supportEmail}</a></p>
-      <p style="margin:0;color:${C.faint};"><a href="${BRAND.helpUrl}" style="${link}">Ayuda</a> &nbsp;·&nbsp; <a href="${BRAND.privacyUrl}" style="${link}">Privacidad</a> &nbsp;·&nbsp; <a href="${BRAND.termsUrl}" style="${link}">Términos</a><br>© ${year} ${BRAND.name}</p>
+      <p style="margin:0 0 10px;">${T.automatic} <a href="mailto:${BRAND.supportEmail}" style="${link}">${BRAND.supportEmail}</a></p>
+      <p style="margin:0;color:${C.faint};"><a href="${BRAND.helpUrl}" style="${link}">${T.help}</a> &nbsp;·&nbsp; <a href="${BRAND.privacyUrl}" style="${link}">${T.privacy}</a> &nbsp;·&nbsp; <a href="${BRAND.termsUrl}" style="${link}">${T.terms}</a><br>© ${year} ${BRAND.name}</p>
     </td>
   </tr>
 </table>`
 }
 
 /** Documento HTML completo (head, estilos responsive y fondo) alrededor de `inner`. */
-export function wrapEmailDocument(title: string, preheader: string, inner: string): string {
+export function wrapEmailDocument(title: string, preheader: string, inner: string, lang: EmailLang = 'es'): string {
   return `<!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="${lang}" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -330,6 +364,8 @@ ${inner}
 
 export function renderEmailText(content: EmailContent): string {
   const year = new Date().getFullYear()
+  const lang: EmailLang = content.lang === 'en' ? 'en' : 'es'
+  const T = FIXED_TEXT[lang]
   return [
     BRAND.name,
     '',
@@ -338,17 +374,17 @@ export function renderEmailText(content: EmailContent): string {
     '',
     ...(content.greeting ? [content.greeting, ''] : []),
     ...content.blocks.map((b) => blockText(b)).filter(Boolean).flatMap((t) => [t, '']),
-    ...(content.signoff === false ? [] : [`Un saludo,\nEl equipo de ${BRAND.name}`, '']),
+    ...(content.signoff === false ? [] : [`${T.signoff}\n${teamName(lang)}`, '']),
     '--',
     content.footerReason,
-    `Mensaje automático, no respondas a esta dirección. ¿Necesitas ayuda? Escríbenos a ${BRAND.supportEmail}`,
+    `${T.automatic} ${BRAND.supportEmail}`,
     `© ${year} ${BRAND.name} · ${BRAND.url}`,
   ].filter((l) => l !== undefined && l !== null).join('\n').replace(/\n{3,}/g, '\n\n')
 }
 
 export function renderEmail(content: EmailContent): { html: string; text: string } {
   return {
-    html: wrapEmailDocument(content.heading, content.preheader, renderEmailCard(content)),
+    html: wrapEmailDocument(content.heading, content.preheader, renderEmailCard(content), content.lang === 'en' ? 'en' : 'es'),
     text: renderEmailText(content),
   }
 }

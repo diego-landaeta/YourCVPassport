@@ -18,6 +18,35 @@
 //   - alreadyPending: true → el email ya tenía una cuenta sin confirmar: no se
 //     crea otra ni se cambia su password, solo se reenvía la confirmación.
 //
+// Bolsa de empleo, fase 1 (#6). El cuerpo admite además:
+//   registro_idioma   'es' | 'en' (idioma de la interfaz al registrarse; se guarda
+//                     en user_metadata y handle_new_user lo copia a
+//                     profiles.registro_idioma; si falta o es raro se ignora)
+//   tipo              'empresa' (solo si llega EXACTAMENTE así); cualquier otra
+//                     cosa (ausente, vacío, desconocido, otro tipo de dato) se
+//                     trata como 'candidato': el tipo no sirve para esquivar la
+//                     edad ni las casillas (auditoría 29/10/2026, S4).
+//   fecha_nacimiento  AAAA-MM-DD; OBLIGATORIA para todo lo que no sea 'empresa'.
+//                     Menores de 16 no se registran (400 INVALID_INPUT, mensaje
+//                     UNDERAGE). En 'empresa' es opcional, pero si llega se
+//                     valida igual (un menor de 16 se rechaza). Va a
+//                     user_metadata y handle_new_user la copia a
+//                     profiles.fecha_nacimiento. Los accesos que no pasan por
+//                     aquí (OAuth, GoTrue directo) los cubre el servidor: RPC
+//                     set_my_birth_date y UNDERAGE en apply_to_job / envío de ofertas.
+//   casillas          { clave: boolean }. Candidato: acepto_condiciones_privacidad
+//                     y datos_verdaderos deben venir a true (y autorizacion_tutores
+//                     si tiene 16 o 17 años); el resto de opcionales se guardan.
+// Como el alta exige verificar el correo antes de tener sesión, la aceptación NO
+// se puede registrar aquí (registrar_aceptacion pide un usuario autenticado):
+// las casillas validadas, las versiones vigentes que se mostraron y el instante
+// declarado (`aceptado_en`, ISO UTC, hora del servidor) se guardan en
+// app_metadata.registro_aceptacion (solo escribe service_role; el usuario no lo
+// puede editar) y components/legal/LegalGate.tsx las registra con
+// registrar_aceptacion en el primer acceso con sesión, copiando `aceptado_en` a
+// aceptaciones.aceptado_declarado_en (la IP y la hora de la fila son las del
+// primer acceso, no las del alta: esto conserva la hora real de la aceptación).
+//
 // Rate limit (Upstash, fail open si no está configurado): 5/min por IP (config
 // 'auth') y 3 cada 15 min por email (config 'authEmail', hash SHA-256, cubo
 // compartido con send-email-confirmation).
@@ -48,6 +77,45 @@ interface SignupRequest {
   password: string
   full_name?: string
   redirectTo?: string
+  registro_idioma?: string
+  tipo?: string
+  fecha_nacimiento?: string
+  casillas?: Record<string, unknown>
+}
+
+// Claves de casillas del contrato SQL (20261029_legal_aceptaciones_idioma.sql).
+const CANDIDATE_REQUIRED = ['acepto_condiciones_privacidad', 'datos_verdaderos']
+const CANDIDATE_OPTIONAL = ['perfil_publico', 'aparecer_google', 'empresas_contacto', 'alertas_novedades']
+const GUARDIAN_KEY = 'autorizacion_tutores'
+const MIN_AGE = 16
+const ADULT_AGE = 18
+
+// AAAA-MM-DD real (no 2026-02-31), desde 1900 y no futura. Null si no vale.
+function parseBirthDate(value: unknown): { y: number; m: number; d: number } | null {
+  if (typeof value !== 'string') return null
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  if (!match) return null
+  const y = Number(match[1])
+  const m = Number(match[2])
+  const d = Number(match[3])
+  const date = new Date(Date.UTC(y, m - 1, d))
+  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null
+  if (y < 1900 || date.getTime() > Date.now()) return null
+  return { y, m, d }
+}
+
+function ageFrom(b: { y: number; m: number; d: number }, now = new Date()): number {
+  let age = now.getUTCFullYear() - b.y
+  const before = now.getUTCMonth() + 1 < b.m || (now.getUTCMonth() + 1 === b.m && now.getUTCDate() < b.d)
+  if (before) age -= 1
+  return age
+}
+
+// 'es' | 'en' | otro código ISO de 2-3 letras; cualquier otra cosa se ignora.
+function normalizeLang(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const base = value.trim().toLowerCase().split('-')[0]
+  return /^[a-z]{2,3}$/.test(base) ? base : undefined
 }
 
 // Error con status HTTP y código estable para el cliente.
@@ -142,6 +210,44 @@ serve(async (req: Request) => {
       throw new HttpError(400, 'WEAK_PASSWORD', 'Password must be at least 8 characters and include uppercase, lowercase and a number')
     }
 
+    // --- Bolsa de empleo, fase 1 (#6): camino, idioma, edad y casillas ---------
+    // Solo 'empresa' EXPLÍCITO sale del camino de candidato. Ausente, vacío,
+    // desconocido o de otro tipo = candidato (con edad y casillas obligatorias).
+    const tipo: 'candidato' | 'empresa' = payload?.tipo === 'empresa' ? 'empresa' : 'candidato'
+    const registroIdioma = normalizeLang(payload?.registro_idioma)
+
+    let fechaNacimiento: string | undefined
+    let acceptedBoxes: Record<string, boolean> | undefined
+    // Edad: obligatoria salvo 'empresa'; en 'empresa', si viene, se valida igual.
+    const hasBirth = payload?.fecha_nacimiento !== undefined && payload?.fecha_nacimiento !== null && payload?.fecha_nacimiento !== ''
+    let age = 0
+    if (tipo !== 'empresa' || hasBirth) {
+      const birth = parseBirthDate(payload?.fecha_nacimiento)
+      if (!birth) {
+        throw new HttpError(400, 'INVALID_INPUT', 'A valid fecha_nacimiento (YYYY-MM-DD) is required')
+      }
+      age = ageFrom(birth)
+      if (age < MIN_AGE) {
+        throw new HttpError(400, 'INVALID_INPUT', 'UNDERAGE: you must be at least 16 years old to register')
+      }
+      fechaNacimiento = payload.fecha_nacimiento as string
+    }
+    if (tipo === 'candidato') {
+      const raw = payload?.casillas
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        throw new HttpError(400, 'INVALID_INPUT', 'casillas is required')
+      }
+      const allowed = [...CANDIDATE_REQUIRED, ...CANDIDATE_OPTIONAL, GUARDIAN_KEY]
+      acceptedBoxes = {}
+      for (const key of allowed) acceptedBoxes[key] = (raw as Record<string, unknown>)[key] === true
+      for (const key of CANDIDATE_REQUIRED) {
+        if (!acceptedBoxes[key]) throw new HttpError(400, 'INVALID_INPUT', `CASILLA_OBLIGATORIA: ${key}`)
+      }
+      if (age < ADULT_AGE && !acceptedBoxes[GUARDIAN_KEY]) {
+        throw new HttpError(400, 'INVALID_INPUT', 'CASILLA_OBLIGATORIA: autorizacion_tutores')
+      }
+    }
+
     // Rate limit por destinatario, compartido con send-email-confirmation
     // ("Reenviar"): evita bombardear un buzón ajeno cambiando de IP.
     const emailLimited = await enforceRateLimit('authEmail', [`confirm:email:${await sha256Hex(email)}`], corsHeaders)
@@ -150,12 +256,53 @@ serve(async (req: Request) => {
     // Create Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+    // Versiones vigentes de los textos que se aceptaron en el formulario (las que
+    // lee el servidor, no las que diga el cliente). Si la tabla aún no existe o la
+    // consulta falla, no se bloquea el alta: LegalGate pedirá la aceptación.
+    let registroAceptacion: Record<string, unknown> | undefined
+    if (tipo === 'candidato' && acceptedBoxes) {
+      const versiones: Record<string, string> = {}
+      try {
+        const { data: docs, error: docsError } = await supabase
+          .from('documentos_legales')
+          .select('tipo, version, idioma, vigente_desde')
+          .in('tipo', ['terminos_candidato', 'privacidad'])
+          .lte('vigente_desde', new Date().toISOString())
+          .order('vigente_desde', { ascending: false })
+        if (docsError) throw docsError
+        for (const t of ['terminos_candidato', 'privacidad']) {
+          const wanted = registroIdioma ?? 'es'
+          const doc = (docs ?? []).find((d: any) => d.tipo === t && d.idioma === wanted)
+            ?? (docs ?? []).find((d: any) => d.tipo === t && d.idioma === 'es')
+          if (doc) versiones[t] = String(doc.version)
+        }
+      } catch (e: any) {
+        console.warn('[signup] no se pudieron leer las versiones vigentes:', e?.message)
+      }
+      registroAceptacion = {
+        tipo,
+        casillas: acceptedBoxes,
+        versiones,
+        // Hora del SERVIDOR en el alta (ISO UTC); LegalGate la copia a
+        // aceptaciones.aceptado_declarado_en al registrar la aceptación.
+        aceptado_en: new Date().toISOString(),
+      }
+    }
+
     // Create user
     const { error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: false, // Require email confirmation
-      user_metadata: { full_name }
+      // handle_new_user lee registro_idioma y fecha_nacimiento de estos metadatos.
+      user_metadata: {
+        full_name,
+        tipo,
+        ...(registroIdioma ? { registro_idioma: registroIdioma } : {}),
+        ...(fechaNacimiento ? { fecha_nacimiento: fechaNacimiento } : {}),
+      },
+      // Solo service_role escribe app_metadata: el usuario no puede falsear la aceptación.
+      ...(registroAceptacion ? { app_metadata: { registro_aceptacion: registroAceptacion } } : {}),
     })
 
     let alreadyPending = false

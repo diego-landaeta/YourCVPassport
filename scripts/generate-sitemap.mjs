@@ -271,34 +271,84 @@ async function fetchCVProfiles() {
 }
 
 /**
- * Fetch published job postings from Supabase
+ * Ofertas publicadas: las mismas que ve el listado publico (search_public_jobs_v2 filtra
+ * PUBLISHED, vigentes y de empresas verificadas). Pagina de 50 en 50 (tope de la RPC).
+ * Si la RPC aun no existe (migracion 20261030 sin aplicar) se cae a la tabla.
+ */
+async function fetchAllPublicJobs() {
+  const PAGE = 50;
+  const MAX = 5000;
+  const out = [];
+  for (let offset = 0; offset < MAX; offset += PAGE) {
+    const { data, error } = await supabase.rpc('search_public_jobs_v2', { p_limit: PAGE, p_offset: offset });
+    if (error) throw error;
+    out.push(...(data || []));
+    const total = Number(data?.[0]?.total_count ?? 0);
+    if (!data || data.length === 0 || offset + PAGE >= total) break;
+  }
+  return out.map(j => ({ slug: j.slug, country_code: j.country_code, lastmod: j.published_at }));
+}
+
+async function fetchJobsFromTable() {
+  const { data, error } = await supabase
+    .from('job_postings')
+    .select('slug, updated_at, published_at, application_deadline')
+    .eq('status', 'PUBLISHED')
+    .order('published_at', { ascending: false });
+  if (error) throw error;
+  const now = Date.now();
+  return (data || [])
+    .filter(j => !j.application_deadline || new Date(j.application_deadline).getTime() > now)
+    .map(j => ({ slug: j.slug, country_code: null, lastmod: j.updated_at || j.published_at }));
+}
+
+/**
+ * URL canonica de la ficha de una oferta (misma regla que jobPath() de lib/jobsFormat.ts y
+ * que supabase/functions/sitemap/jobPaths.ts; jobPaths.test.mjs comprueba que coinciden):
+ *   con country_code (2 letras): es /<cc>/ofertas/<slug>, en /<cc>/jobs/<slug> (cc en minuscula)
+ *   sin country_code:            es /empleos/<slug>,      en /jobs/<slug>      (solo alternativa)
+ */
+function jobPaths(slug, countryCode) {
+  const s = encodeURIComponent(slug);
+  const cc = String(countryCode ?? '').trim().toLowerCase();
+  return /^[a-z]{2}$/.test(cc)
+    ? { es: `/${cc}/ofertas/${s}`, en: `/${cc}/jobs/${s}` }
+    : { es: `/empleos/${s}`, en: `/jobs/${s}` };
+}
+
+/**
+ * Fichas de oferta (/<cc>/ofertas/:slug y /<cc>/jobs/:slug con hreflang reciprocos; sin
+ * pais, /empleos/:slug y /jobs/:slug) y el listado de cada pais que tenga ofertas
+ * (/mx/empleos...: en espanol, sin pareja inglesa).
  */
 async function fetchJobPostings() {
   if (!supabase) return [];
 
   try {
-    const { data, error } = await supabase
-      .from('job_postings')
-      .select('slug, updated_at, published_at')
-      .eq('status', 'PUBLISHED')
-      .order('published_at', { ascending: false });
-
-    if (error) {
-      console.error('[Sitemap] Error fetching job postings:', error.message);
-      return [];
+    let jobs;
+    try {
+      jobs = await fetchAllPublicJobs();
+    } catch (rpcErr) {
+      console.warn('[Sitemap] search_public_jobs_v2 no disponible, se usa la tabla:', rpcErr.message);
+      jobs = await fetchJobsFromTable();
     }
 
-    // Cada oferta existe en /jobs/:slug y /empleos/:slug con hreflang reciprocos
-    return (data || []).flatMap(job => {
-      const pair = { en: `/jobs/${job.slug}`, es: `/empleos/${job.slug}` };
+    const routes = jobs.filter(j => j.slug).flatMap(job => {
+      const pair = jobPaths(job.slug, job.country_code);
       const base = {
         priority: '0.7',
         changefreq: 'weekly',
-        lastmod: (job.updated_at || job.published_at || new Date().toISOString()).split('T')[0],
+        lastmod: (job.lastmod || new Date().toISOString()).split('T')[0],
         alternates: pair,
       };
       return [{ ...base, path: pair.en }, { ...base, path: pair.es }];
     });
+
+    const countries = [...new Set(jobs.map(j => (j.country_code || '').toLowerCase()).filter(c => /^[a-z]{2}$/.test(c)))];
+    for (const cc of countries) {
+      routes.push({ path: `/${cc}/empleos`, priority: '0.8', changefreq: 'daily', selfLang: 'es', lastmod: new Date().toISOString().split('T')[0] });
+    }
+    return routes;
   } catch (err) {
     console.error('[Sitemap] Error fetching job postings:', err.message);
     return [];

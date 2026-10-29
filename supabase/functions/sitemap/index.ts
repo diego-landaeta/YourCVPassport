@@ -2,6 +2,7 @@ declare const Deno: any;
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import blogPosts from './blog-posts-data.json' with { type: 'json' };
+import { jobPaths } from './jobPaths.ts';
 
 const BASE_URL = 'https://yourcvpassport.com';
 
@@ -94,6 +95,7 @@ async function generateSitemap(): Promise<string> {
   const staticEntries: Entry[] = [];
   const blogEntries: Entry[] = [];
   const cvEntries: Entry[] = [];
+  const jobEntries: Entry[] = [];
 
   // Static pages — keep declared order so jerarchy reads naturally (home → pricing → product → ...).
   // Each EN entry is followed immediately by its ES counterpart when one exists.
@@ -141,7 +143,41 @@ async function generateSitemap(): Promise<string> {
     // Continue without CV profiles if the DB query fails.
   }
 
-  const rendered = [...staticEntries, ...blogEntries, ...cvEntries].map(renderEntry);
+  // Ofertas publicadas (PUBLISHED, vigentes, empresa verificada): las mismas que el listado
+  // publico. search_public_jobs_v2 pagina de 50 en 50; si aun no existe (migracion 20261030
+  // sin aplicar) se omiten las ofertas en vez de romper el sitemap.
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
+    const PAGE = 50;
+    const countries = new Set<string>();
+    for (let offset = 0; offset < 5000; offset += PAGE) {
+      const { data, error } = await supabase.rpc('search_public_jobs_v2', { p_limit: PAGE, p_offset: offset });
+      if (error || !data || data.length === 0) break;
+      for (const j of data as Array<{ slug: string; published_at: string; country_code: string | null; total_count: number }>) {
+        if (!j.slug) continue;
+        const lastmod = j.published_at ? j.published_at.split('T')[0] : today;
+        // URL canonica: /<cc>/ofertas/<slug> (es) y /<cc>/jobs/<slug> (en); sin pais, la
+        // alternativa /empleos/<slug> y /jobs/<slug>.
+        const paths = jobPaths(j.slug, j.country_code);
+        jobEntries.push({ path: paths.en, lastmod, priority: '0.7', changefreq: 'weekly' });
+        jobEntries.push({ path: paths.es, lastmod, priority: '0.7', changefreq: 'weekly' });
+        if (paths.cc) countries.add(paths.cc);
+      }
+      if (offset + PAGE >= Number(data[0].total_count ?? 0)) break;
+    }
+    // Listado de cada pais con ofertas (/mx/empleos): solo en espanol
+    for (const cc of countries) {
+      jobEntries.push({ path: `/${cc}/empleos`, lastmod: today, priority: '0.8', changefreq: 'daily' });
+    }
+    jobEntries.sort((a, b) => a.path.localeCompare(b.path));
+  } catch (_err) {
+    // Continue without job postings if the DB query fails.
+  }
+
+  const rendered = [...staticEntries, ...blogEntries, ...cvEntries, ...jobEntries].map(renderEntry);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
