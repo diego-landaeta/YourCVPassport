@@ -77,6 +77,8 @@ export type Block =
   | { type: 'quote'; text: string; caption?: string }
   /** Texto pequeño y gris. */
   | { type: 'small'; text: string }
+  /** Lista de enlaces (una oferta por línea, baja de una alerta...). `meta` va en gris tras el enlace. */
+  | { type: 'links'; title?: string; items: { label: string; url: string; meta?: string }[] }
 
 /** Idioma de los textos FIJOS de la plantilla (firma, pie, enlace del botón). Por defecto 'es'. */
 export type EmailLang = 'es' | 'en'
@@ -241,6 +243,16 @@ ${rows.map(([k, v], i) => `  <tr>
 </table>`
     }
 
+    case 'links': {
+      if (!block.items.length) return ''
+      return `${block.title ? `<p style="${SUBTITLE}">${escapeHtml(block.title)}</p>` : ''}
+<table ${TABLE} style="margin:0 0 28px;">
+${block.items.map((it, i) => `  <tr>
+    <td style="padding:12px 0;font-size:16px;line-height:1.5;color:${C.text};${i ? `border-top:1px solid ${C.line};` : ''}"><a href="${escapeHtml(safeUrl(it.url))}" target="_blank" style="font-weight:700;color:${C.blue};text-decoration:none;">${escapeHtml(it.label)}</a>${it.meta ? `<br><span style="font-size:14px;color:${C.muted};">${escapeHtml(it.meta)}</span>` : ''}</td>
+  </tr>`).join('\n')}
+</table>`
+    }
+
     case 'quote':
       return `
 <table ${TABLE} style="margin:0 0 28px;">
@@ -273,6 +285,8 @@ function blockText(block: Block): string {
       const rows = block.rows.filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== '')
       return [block.title, ...rows.map(([k, v]) => `${k}: ${v}`)].filter(Boolean).join('\n')
     }
+    case 'links':
+      return [block.title, ...block.items.map((it) => `- ${it.label}${it.meta ? ` (${it.meta})` : ''}: ${safeUrl(it.url)}`)].filter(Boolean).join('\n')
     case 'quote':
       return [block.caption, block.text.split(/\r?\n/).map((l) => `> ${l}`).join('\n')].filter(Boolean).join('\n')
   }

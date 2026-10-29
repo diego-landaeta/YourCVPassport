@@ -20,14 +20,20 @@
 //     job_rejected                oferta rechazada
 //     job_expiring                faltan 3 días para el cierre
 //     job_expired                 oferta cerrada por fecha
-//     application_received_company  nueva candidatura
+//     application_received_company  nueva candidatura (aviso individual: solo frecuencia inmediata)
+//     application_digest              resumen diario de candidaturas nuevas (queue_application_digests)
+//                                     (payload: job_title, company_name, total, date, panel_path y
+//                                     candidates [{name, date, affinity}] SIN correo del candidato)
 //   Destinatario: el candidato (idioma del perfil)
 //     application_received_candidate  candidatura enviada
 //     application_status_candidate    cambio de estado
 //     application_message             plantilla «Descartado» / «Te llamamos» de la empresa
-//     job_alert                       alertas de ofertas nuevas
+//     job_alert                       alertas de ofertas nuevas (payload: frequency, total, unsubscribe_token y
+//                                     jobs [{title, slug, country_code, company_name}], máx. 8)
 //     legal_version_notice            aviso de una nueva versión de términos / privacidad
-//                                     (payload: tipo, version, titulo, vigente_desde, url_path)
+//                                     (payload: tipo, version, titulo, vigente_desde; el enlace lo decide el
+//                                     tipo: terminos_candidato / terminos_empleador / condiciones_publicacion
+//                                     -> /terminos, privacidad -> /privacidad, cookies -> /politica-de-cookies)
 //
 // URL de la ficha de una oferta (misma regla que jobPath() de lib/jobsFormat.ts):
 //   con country_code   -> /<cc>/ofertas/<slug> (es) y /<cc>/jobs/<slug> (en), cc en minúscula
@@ -67,6 +73,7 @@ export const OUTBOX_KINDS = [
   'job_expiring',
   'job_expired',
   'application_received_company',
+  'application_digest',
   'application_received_candidate',
   'application_status_candidate',
   'application_message',
@@ -153,6 +160,12 @@ const R: Record<OutboxKind, Renderer> = {
     const name = str(p.company_name, 150) || 'Empresa'
     const resultado = str(p.resultado, 20)
     const motivos = strList(p.motivos, 12, 300)
+    // Referencias de AMBAS empresas: solo en este aviso interno (nunca en la respuesta al cliente).
+    const dups = (Array.isArray(p.duplicates) ? (p.duplicates as Payload[]) : []).slice(0, 10).map((d) => {
+      const names: Record<string, string> = { tax_id: 'NIF', email: 'correo', domain: 'dominio' }
+      const by = strList(d?.matches, 4, 20).map((m) => names[m] ?? m).join(', ')
+      return `${str(d?.company_name, 100) || 'Empresa'} (ref. ${str(d?.id, 60)}, ${str(d?.status, 20) || '?'})${by ? `: coincide en ${by}` : ''}`
+    })
     return build('es', `[Revisión] Empresa pendiente de revisión manual: ${name}`, {
       preheader: `La revisión automática de ${name} no pudo aprobarla (${resultado || 'dudosa'}).`,
       eyebrow: 'Aviso interno',
@@ -164,6 +177,7 @@ const R: Record<OutboxKind, Renderer> = {
         { type: 'p', text: `La empresa ${name} sigue pendiente (resultado: ${resultado || 'dudosa'}). Revisa los motivos y decide en el panel de administración.` },
         { type: 'details', title: 'Datos registrados', rows: [
           ['Empresa', name],
+          ['Referencia', str(p.company_id, 60)],
           ['Razón social', str(p.legal_name, 150)],
           ['Identificador fiscal', str(p.tax_id, 40)],
           ['País', str(p.country_code, 4)],
@@ -171,6 +185,7 @@ const R: Record<OutboxKind, Renderer> = {
           ['Web', str(p.website_url, 200)],
         ] },
         ...(motivos.length ? [{ type: 'checks', title: 'Motivos', items: motivos } as Block] : []),
+        ...(dups.length ? [{ type: 'checks', title: 'Coincide con otras empresas (solo para soporte)', items: dups } as Block] : []),
         { type: 'button', label: 'Abrir el panel de administración', url: `${BRAND.url}/admin`, fallback: false },
       ],
       signoff: false,
@@ -281,7 +296,9 @@ const R: Record<OutboxKind, Renderer> = {
           ? `“${title}”${company ? ` (${company})` : ''} passed the review and is now published.`
           : `«${title}»${company ? ` (${company})` : ''} ha superado la revisión y ya está publicada.` },
         { type: 'button', label: lang === 'en' ? 'See the job posting' : 'Ver la oferta', url },
-        { type: 'small', text: lang === 'en' ? 'You will receive an email for every new application.' : 'Recibirás un correo por cada nueva candidatura.' },
+        { type: 'small', text: lang === 'en'
+          ? 'You will get notices about new applications according to the frequency you chose for this job posting (right away or as a daily summary). You can change it by editing the job posting.'
+          : 'Recibirás avisos de las nuevas candidaturas según la frecuencia que elegiste para esta oferta (al momento o en un resumen diario). Puedes cambiarla editando la oferta.' },
       ],
       footerReason: lang === 'en' ? 'You are receiving this email because you manage this job posting.' : 'Recibes este correo porque gestionas esta oferta.',
     })
@@ -364,6 +381,58 @@ const R: Record<OutboxKind, Renderer> = {
         ] },
         { type: 'button', label: lang === 'en' ? 'Review the application' : 'Revisar la candidatura', url: `${BRAND.url}/company/jobs/applications` },
         ...(p.digest === true ? [{ type: 'small', text: lang === 'en' ? 'You chose to receive a daily summary of applications.' : 'Has elegido recibir un resumen diario de candidaturas.' } as Block] : []),
+      ],
+      footerReason: lang === 'en' ? 'You are receiving this email because you manage this job posting.' : 'Recibes este correo porque gestionas esta oferta.',
+    })
+  },
+
+  application_digest: (p, lang) => {
+    const title = need(str(p.job_title ?? p.title, 150), 'job_title')
+    const company = str(p.company_name, 150)
+    const raw = Array.isArray(p.candidates) ? p.candidates : Array.isArray(p.applications) ? p.applications : Array.isArray(p.items) ? p.items : []
+    const rows = (raw as Payload[]).slice(0, 15).map((c) => {
+      const given = c?.affinity ?? c?.match_score ?? c?.score
+      const score = Number(given)
+      const hasScore = given != null && given !== '' && Number.isFinite(score) && score >= 0 && score <= 100
+      // Solo nombre, fecha y afinidad: nunca correo, teléfono ni identificadores del candidato.
+      return [
+        str(c?.name ?? c?.candidate_name, 120) || (lang === 'en' ? 'Candidate' : 'Candidato/a'),
+        dateText(lang, c?.date ?? c?.applied_at ?? c?.created_at),
+        hasScore ? (lang === 'en' ? `${Math.round(score)} % match` : `${Math.round(score)} % de encaje`) : '',
+      ].filter(Boolean).join(' · ')
+    })
+    const total = Math.max(Math.floor(Number(p.total)) || rows.length, rows.length)
+    if (total < 1) throw new InvalidPayloadError('application_digest sin candidaturas')
+    const day = dateText(lang, p.date ?? p.digest_date ?? p.period_to)
+    const more = total - rows.length
+    // Solo rutas del panel de empresa: un panel_path ajeno se ignora.
+    const rawPath = str(p.panel_path ?? p.url_path, 120)
+    const path = /^\/company\/[A-Za-z0-9/_-]*(\?[A-Za-z0-9=&_-]*)?$/.test(rawPath) ? rawPath : '/company/jobs/applications'
+    const many = total === 1 ? '' : 's'
+    return build(lang, lang === 'en'
+      ? `${total} new application${many} for ${title}`
+      : `${total} candidatura${total === 1 ? ' nueva' : 's nuevas'} para ${title}`, {
+      preheader: lang === 'en'
+        ? `Daily summary: ${total} new application${many} for “${title}”.`
+        : `Resumen diario: ${total} candidatura${total === 1 ? ' nueva' : 's nuevas'} para «${title}».`,
+      eyebrow: lang === 'en' ? 'Daily summary' : 'Resumen diario',
+      heading: lang === 'en' ? 'New applications today' : 'Candidaturas nuevas de hoy',
+      intro: lang === 'en'
+        ? `${total} new application${many}${day ? ` on ${day}` : ''}.`
+        : `${total} candidatura${total === 1 ? ' nueva' : 's nuevas'}${day ? ` el ${day}` : ''}.`,
+      greeting: hello(lang, ''),
+      blocks: [
+        { type: 'details', rows: [
+          [lang === 'en' ? 'Job posting' : 'Oferta', title],
+          [lang === 'en' ? 'Company' : 'Empresa', company],
+          [lang === 'en' ? 'New applications' : 'Candidaturas nuevas', String(total)],
+        ] },
+        ...(rows.length ? [{ type: 'checks', title: lang === 'en' ? 'Who applied' : 'Quién se ha inscrito', items: rows } as Block] : []),
+        ...(more > 0 ? [{ type: 'small', text: lang === 'en' ? `And ${more} more in your panel.` : `Y ${more} más en tu panel.` } as Block] : []),
+        { type: 'button', label: lang === 'en' ? 'Review the applications' : 'Revisar las candidaturas', url: `${BRAND.url}${path}` },
+        { type: 'small', text: lang === 'en'
+          ? 'You get this summary because you chose a daily summary for this job posting. You can change it by editing the job posting.'
+          : 'Recibes este resumen porque elegiste el resumen diario en esta oferta. Puedes cambiarlo editando la oferta.' },
       ],
       footerReason: lang === 'en' ? 'You are receiving this email because you manage this job posting.' : 'Recibes este correo porque gestionas esta oferta.',
     })
@@ -483,15 +552,20 @@ const R: Record<OutboxKind, Renderer> = {
 
   job_alert: (p, lang) => {
     const rawJobs = Array.isArray(p.jobs) ? (p.jobs as Payload[]) : []
-    const jobs = rawJobs.slice(0, 10).map((j) => ({
+    const jobs = rawJobs.slice(0, 8).map((j) => ({
       title: str(j?.title, 120),
       company: str(j?.company_name, 100),
-      country: str(j?.country, 4),
+      country: str(j?.country_code ?? j?.country, 4),
+      slug: str(j?.slug, 200),
     })).filter((j) => j.title)
     if (!jobs.length) throw new InvalidPayloadError('job_alert sin ofertas')
     const total = Math.max(Number(p.total) || jobs.length, jobs.length)
     const weekly = str(p.frequency, 12).toUpperCase() === 'WEEKLY'
-    const items = jobs.map((j) => [j.title, j.company, j.country].filter(Boolean).join(' · '))
+    // Baja de ESTA alerta con un clic: solo si el token es un UUID (si no, no hay enlace).
+    const token = str(p.unsubscribe_token, 64)
+    const unsub = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)
+      ? `${BRAND.url}${lang === 'en' ? '/alerts/unsubscribe' : '/alertas/baja'}?token=${token.toLowerCase()}`
+      : ''
     return build(lang, lang === 'en'
       ? `${total} new job posting${total === 1 ? '' : 's'} for you`
       : `${total} oferta${total === 1 ? ' nueva' : 's nuevas'} para ti`, {
@@ -501,11 +575,13 @@ const R: Record<OutboxKind, Renderer> = {
       intro: lang === 'en' ? 'They match the alerts you set up.' : 'Coinciden con las alertas que configuraste.',
       greeting: hello(lang, ''),
       blocks: [
-        { type: 'checks', title: lang === 'en' ? (total > jobs.length ? `Latest ${jobs.length} of ${total}` : 'Job postings') : (total > jobs.length ? `Las últimas ${jobs.length} de ${total}` : 'Ofertas'), items },
+        { type: 'links', title: lang === 'en' ? (total > jobs.length ? `Latest ${jobs.length} of ${total}` : 'Job postings') : (total > jobs.length ? `Las últimas ${jobs.length} de ${total}` : 'Ofertas'),
+          items: jobs.map((j) => ({ label: j.title, url: jobUrl(lang, j.slug, j.country), meta: [j.company, j.country.toUpperCase()].filter(Boolean).join(' · ') })) },
         { type: 'button', label: lang === 'en' ? 'See all job postings' : 'Ver todas las ofertas', url: `${BRAND.url}/${lang === 'en' ? 'jobs' : 'empleos'}` },
         { type: 'small', text: lang === 'en'
           ? 'You can change or turn off your alerts at any time from your panel.'
           : 'Puedes cambiar o desactivar tus alertas cuando quieras desde tu panel.' },
+        ...(unsub ? [{ type: 'links', items: [{ label: lang === 'en' ? 'Unsubscribe from this alert' : 'Darme de baja de esta alerta', url: unsub }] } as Block] : []),
       ],
       footerReason: lang === 'en' ? 'You are receiving this email because you turned on job alerts on YourCVPassport.' : 'Recibes este correo porque activaste las alertas de empleo en YourCVPassport.',
     })
@@ -519,8 +595,9 @@ const R: Record<OutboxKind, Renderer> = {
     const titulo = str(p.titulo, 150) || label
     const version = str(p.version, 30)
     const when = dateText(lang, p.vigente_desde)
-    // Solo dos destinos posibles; un url_path cualquiera del payload no se usa tal cual.
-    const path = LEGAL_PATHS.has(str(p.url_path, 40)) ? str(p.url_path, 40) : doc.path
+    // El destino lo manda el TIPO de documento (cada uno tiene su página). Solo con un tipo
+    // desconocido se usa el url_path del payload, y únicamente si es una página legal conocida.
+    const path = LEGAL_DOCS[tipo] ? doc.path : LEGAL_PATHS.has(str(p.url_path, 40)) ? str(p.url_path, 40) : doc.path
     const url = `${BRAND.url}${path}`
     return build(lang, lang === 'en'
       ? `We are updating our ${doc.en}${when ? `: effective ${when}` : ''}`
@@ -554,12 +631,13 @@ const R: Record<OutboxKind, Renderer> = {
 }
 
 /** Documentos legales (documentos_legales.tipo) y su destino público. */
-const LEGAL_PATHS = new Set(['/terminos', '/privacidad'])
+const LEGAL_PATHS = new Set(['/terminos', '/privacidad', '/politica-de-cookies'])
 const LEGAL_DOCS: Record<string, { es: string; en: string; path: string }> = {
   terminos_candidato: { es: 'los términos para candidatos', en: 'terms for candidates', path: '/terminos' },
   terminos_empleador: { es: 'los términos para empresas', en: 'terms for employers', path: '/terminos' },
+  condiciones_publicacion: { es: 'las condiciones de publicación de ofertas', en: 'job posting terms', path: '/terminos' },
   privacidad: { es: 'la política de privacidad', en: 'privacy policy', path: '/privacidad' },
-  cookies: { es: 'la política de cookies', en: 'cookie policy', path: '/privacidad' },
+  cookies: { es: 'la política de cookies', en: 'cookie policy', path: '/politica-de-cookies' },
 }
 const LEGAL_GENERIC = { es: 'nuestras condiciones legales', en: 'legal terms', path: '/terminos' }
 

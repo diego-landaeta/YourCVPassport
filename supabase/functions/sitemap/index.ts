@@ -3,6 +3,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import blogPosts from './blog-posts-data.json' with { type: 'json' };
 import { jobPaths } from './jobPaths.ts';
+// Copia de seo/excluded-profiles.json (la regenera scripts/generate-edge-function-data.mjs)
+import excludedProfiles from './excluded-profiles.json' with { type: 'json' };
 
 const BASE_URL = 'https://yourcvpassport.com';
 
@@ -125,17 +127,23 @@ async function generateSitemap(): Promise<string> {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
-    const { data: profiles, error } = await supabase
+    // Perfiles de prueba o internos fuera del sitemap (hallazgo 09 de la auditoria del 25/10/2026):
+    // lista de seo/excluded-profiles.json y marcas is_test / is_internal si las columnas existen.
+    const excluded = new Set(((excludedProfiles as { slugs?: string[] }).slugs ?? []).map((s) => s.toLowerCase()));
+    const baseQuery = (columns: string) => supabase
       .from('profiles')
-      .select('slug, updated_at')
+      .select(columns)
       .eq('is_active', true)
       .eq('profile_hidden', false)
       .not('full_name', 'is', null)
       .not('headline', 'is', null)
       .not('slug', 'is', null);
+    let { data: profiles, error } = await baseQuery('slug, updated_at, is_test, is_internal');
+    if (error) ({ data: profiles, error } = await baseQuery('slug, updated_at'));
 
     if (!error && profiles) {
-      for (const p of profiles) {
+      for (const p of profiles as unknown as Array<{ slug: string; updated_at?: string; is_test?: boolean; is_internal?: boolean }>) {
+        if (excluded.has(String(p.slug).toLowerCase()) || p.is_test === true || p.is_internal === true) continue;
         const lastmod = p.updated_at ? p.updated_at.split('T')[0] : today;
         cvEntries.push({ path: `/cv/${p.slug}`, lastmod, priority: '0.6', changefreq: 'weekly' });
       }
@@ -145,6 +153,7 @@ async function generateSitemap(): Promise<string> {
     // Continue without CV profiles if the DB query fails.
   }
 
+  let jobsRead = false;
   // Ofertas publicadas (PUBLISHED, vigentes, empresa verificada): las mismas que el listado
   // publico. search_public_jobs_v2 pagina de 50 en 50; si aun no existe (migracion 20261030
   // sin aplicar) se omiten las ofertas en vez de romper el sitemap.
@@ -157,7 +166,8 @@ async function generateSitemap(): Promise<string> {
     const countries = new Set<string>();
     for (let offset = 0; offset < 5000; offset += PAGE) {
       const { data, error } = await supabase.rpc('search_public_jobs_v2', { p_limit: PAGE, p_offset: offset });
-      if (error || !data || data.length === 0) break;
+      if (error) break;
+      if (!data || data.length === 0) { jobsRead = true; break; }
       for (const j of data as Array<{ slug: string; published_at: string; country_code: string | null; total_count: number }>) {
         if (!j.slug) continue;
         const lastmod = j.published_at ? j.published_at.split('T')[0] : today;
@@ -168,7 +178,7 @@ async function generateSitemap(): Promise<string> {
         jobEntries.push({ path: paths.es, lastmod, priority: '0.7', changefreq: 'weekly' });
         if (paths.cc) countries.add(paths.cc);
       }
-      if (offset + PAGE >= Number(data[0].total_count ?? 0)) break;
+      if (offset + PAGE >= Number(data[0].total_count ?? 0)) { jobsRead = true; break; }
     }
     // Listado de cada pais con ofertas (/mx/empleos): solo en espanol
     for (const cc of countries) {
@@ -179,7 +189,13 @@ async function generateSitemap(): Promise<string> {
     // Continue without job postings if the DB query fails.
   }
 
-  const rendered = [...staticEntries, ...blogEntries, ...cvEntries, ...jobEntries].map(renderEntry);
+  // Sin ofertas publicadas /jobs y /empleos no se indexan: fuera del sitemap hasta que haya alguna
+  // (auditoria del 25/10/2026, hallazgo 08). Si la lectura de ofertas fallo, se dejan como estaban.
+  const listedStatic = jobsRead && jobEntries.length === 0
+    ? staticEntries.filter((e) => e.path !== '/jobs' && e.path !== '/empleos')
+    : staticEntries;
+
+  const rendered = [...listedStatic, ...blogEntries, ...cvEntries, ...jobEntries].map(renderEntry);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

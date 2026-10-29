@@ -33,12 +33,13 @@ const samples = {
   job_rejected: { job_id: 'j1', title: 'Contable', company_name: 'Acme', reason: 'Pide dinero al candidato' },
   job_expiring: { job_id: 'j1', title: 'Contable', slug: 'contable-madrid-j1', company_name: 'Acme', application_deadline: '2026-11-20T23:59:00Z' },
   job_expired: { job_id: 'j1', title: 'Contable', company_name: 'Acme' },
+  application_digest: { dedupe_key: 'k', job_posting_id: 'j1', job_title: 'Contable', company_name: 'Acme', total: 3, date: '2026-10-29', panel_path: '/company/jobs/applications', candidates: [{ name: 'Lucía Pérez', date: '2026-10-29T09:10:00Z', affinity: 82 }, { name: 'Marcos Gil', date: '2026-10-29T11:00:00Z', affinity: 55 }, { name: 'Ana Ruiz', date: '2026-10-29T15:30:00Z' }] },
   application_received_company: { application_id: 'a1', job_posting_id: 'j1', job_title: 'Contable', company_id: 'c1', candidate_name: 'Lucía Pérez', match_score: 82, digest: false },
   application_received_candidate: { application_id: 'a1', job_posting_id: 'j1', job_title: 'Contable', company_name: 'Acme', candidate_name: 'Lucía Pérez' },
   application_status_candidate: { application_id: 'a1', job_posting_id: 'j1', job_title: 'Contable', company_name: 'Acme', candidate_name: 'Lucía Pérez', old_status: 'NEW', new_status: 'INTERVIEW' },
   application_message: { template: 'interview', job_title: 'Contable', company_name: 'Acme', job_slug: 'contable-madrid-j1', application_id: 'a1' },
   legal_version_notice: { dedupe_key: 'k', tipo: 'terminos_candidato', version: '2.0', titulo: 'Condiciones generales para candidatos', vigente_desde: '2026-11-20T00:00:00Z', url_path: '/terminos' },
-  job_alert: { profile_id: 'p1', frequency: 'DAILY', total: 12, jobs: [{ id: 'j1', title: 'Contable', slug: 's', company_name: 'Acme', country: 'ES', published_at: '2026-10-29' }, { id: 'j2', title: 'Analista', slug: 's2', company_name: 'Globex', country: 'MX', published_at: '2026-10-29' }], period_from: 'x', period_to: 'y' },
+  job_alert: { profile_id: 'p1', frequency: 'DAILY', total: 12, unsubscribe_token: '3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d', jobs: [{ title: 'Contable', slug: 'contable-madrid-1a2b3c4d', country_code: 'es', company_name: 'Acme' }, { title: 'Analista', slug: 'analista-cdmx-5e6f7a8b', country_code: 'mx', company_name: 'Globex' }], period_from: 'x', period_to: 'y' },
 }
 const INTERNAL = new Set(['company_review_flagged', 'job_manual_review', 'job_reported'])
 
@@ -48,8 +49,8 @@ t('hay un ejemplo y una plantilla por cada kind declarado', () => {
 
 t('los kind que encolan las migraciones y las Edge Functions están TODOS cubiertos', () => {
   const found = new Set()
-  // Migraciones 20261029-20261034 (la 20261033 encola legal_version_notice; la 20261034 solo programa).
-  const files = readdirSync(MIGRATIONS).filter((f) => /^2026102[9]|^2026103[0-4]/.test(f))
+  // Migraciones 20261029-20261035 (la 20261033 encola legal_version_notice; la 20261034 solo programa; la 20261035 trae application_digest y los avisos con country_code).
+  const files = readdirSync(MIGRATIONS).filter((f) => /^2026102[9]|^2026103[0-5]/.test(f))
   assert.ok(files.length >= 3, `migraciones encontradas: ${files.join(',')}`)
   for (const f of files) {
     const sql = readFileSync(join(MIGRATIONS, f), 'utf8')
@@ -191,8 +192,12 @@ t('legal_version_notice: el enlace solo puede ser /terminos o /privacidad (url_p
     assert.ok(r.html.includes('href="https://yourcvpassport.com/privacidad"'), bad)
     assert.ok(!/evil\.example|javascript:|<script>/.test(r.html), bad)
   }
+  // El tipo manda: un url_path que no le corresponde no desvía el enlace.
   const ok = renderOutboxEmail('legal_version_notice', { ...samples.legal_version_notice, tipo: 'terminos_candidato', url_path: '/privacidad' }, 'es')
-  assert.ok(ok.html.includes('href="https://yourcvpassport.com/privacidad"'), 'un url_path permitido manda sobre el tipo')
+  assert.ok(ok.text.includes('Leer la nueva versión: https://yourcvpassport.com/terminos'), 'el tipo manda sobre url_path')
+  // Solo con un tipo desconocido se usa un url_path permitido.
+  const unk = renderOutboxEmail('legal_version_notice', { tipo: 'otro', version: '1', url_path: '/privacidad' }, 'es')
+  assert.ok(unk.html.includes('href="https://yourcvpassport.com/privacidad"'))
 })
 
 t('legal_version_notice: fecha ausente o inválida no rompe ni deja «undefined»; tipo desconocido cae a un texto genérico', () => {
@@ -205,6 +210,94 @@ t('legal_version_notice: fecha ausente o inválida no rompe ni deja «undefined�
   const r = renderOutboxEmail('legal_version_notice', { tipo: 'inventado', version: '1' }, 'es')
   assert.ok(r.subject.includes('nuestras condiciones legales'), r.subject)
   assert.ok(r.html.includes('https://yourcvpassport.com/terminos"'))
+})
+
+t('legal_version_notice: cada tipo enlaza a su página (términos, privacidad, cookies, condiciones de publicación)', () => {
+  const expected = {
+    terminos_candidato: '/terminos', terminos_empleador: '/terminos', condiciones_publicacion: '/terminos',
+    privacidad: '/privacidad', cookies: '/politica-de-cookies',
+  }
+  for (const [tipo, path] of Object.entries(expected)) {
+    for (const lang of ['es', 'en']) {
+      const r = renderOutboxEmail('legal_version_notice', { ...samples.legal_version_notice, tipo, url_path: undefined }, lang)
+      assert.ok(r.html.includes(`href="https://yourcvpassport.com${path}"`), `${tipo} [${lang}] -> ${path}`)
+      assert.ok(!/undefined|NaN/.test(r.subject + r.text), tipo)
+    }
+  }
+  const cp = renderOutboxEmail('legal_version_notice', { ...samples.legal_version_notice, tipo: 'condiciones_publicacion' }, 'es')
+  assert.ok(cp.subject.includes('condiciones de publicación de ofertas'), cp.subject)
+})
+
+t('job_published: no promete un correo por candidatura; habla de la frecuencia elegida (es y en)', () => {
+  for (const lang of ['es', 'en']) {
+    const r = renderOutboxEmail('job_published', samples.job_published, lang)
+    const all = r.html + r.text
+    assert.ok(!/un correo por cada nueva candidatura|an email for every new application/i.test(all), 'promesa engañosa')
+    assert.ok(lang === 'es' ? /según la frecuencia que elegiste/.test(r.text) : /according to the frequency you chose/.test(r.text), lang)
+    assert.ok(lang === 'es' ? /resumen diario/.test(r.text) : /daily summary/.test(r.text), lang)
+  }
+})
+
+t('application_digest: lista de candidatos con nombre, fecha y afinidad; total; enlace al panel; sin correo ni ids', () => {
+  const es = renderOutboxEmail('application_digest', samples.application_digest, 'es')
+  assert.ok(es.subject.startsWith('3 candidaturas nuevas para Contable'), es.subject)
+  assert.ok(es.text.includes('Lucía Pérez · 29 de octubre de 2026 · 82 % de encaje'), es.text)
+  assert.ok(es.text.includes('Ana Ruiz · 29 de octubre de 2026') && !es.text.includes('Ana Ruiz · 29 de octubre de 2026 ·'), 'sin afinidad no sale el porcentaje')
+  assert.ok(es.html.includes('href="https://yourcvpassport.com/company/jobs/applications"'))
+  const en = renderOutboxEmail('application_digest', samples.application_digest, 'en')
+  assert.ok(en.subject.startsWith('3 new applications for Contable'), en.subject)
+  assert.ok(en.text.includes('82 % match') && en.text.includes('29 October 2026'), en.text)
+  const one = renderOutboxEmail('application_digest', { ...samples.application_digest, total: 1, candidates: [{ name: 'Solo', date: '2026-10-29' }] }, 'es')
+  assert.ok(one.subject.startsWith('1 candidatura nueva para'), one.subject)
+  const many = renderOutboxEmail('application_digest', { ...samples.application_digest, total: 40, candidates: Array.from({ length: 20 }, (_, i) => ({ name: 'C' + i, date: '2026-10-29' })) }, 'es')
+  assert.ok(many.text.includes('Y 25 más en tu panel.'), many.text)
+  const leaky = renderOutboxEmail('application_digest', { ...samples.application_digest, candidates: [{ name: 'Lu', email: 'lu@privado.com', phone: '+34600111222', id: 'CAND-ID-1', date: '2026-10-29', affinity: 70 }] }, 'es')
+  assert.ok(!/privado\.com|600111222|CAND-ID-1/.test(leaky.html + leaky.text))
+})
+
+t('application_digest: panel_path ajeno se ignora; sin candidaturas ni título es un error permanente', () => {
+  for (const bad of ['https://evil.example/x', '//evil.example', '/admin', '/company/../admin?x=<script>', 'javascript:alert(1)']) {
+    const r = renderOutboxEmail('application_digest', { ...samples.application_digest, panel_path: bad }, 'es')
+    assert.ok(r.html.includes('href="https://yourcvpassport.com/company/jobs/applications"'), bad)
+    assert.ok(!/evil\.example|javascript:|<script>/.test(r.html), bad)
+  }
+  assert.throws(() => renderOutboxEmail('application_digest', { job_title: 'X', total: 0, candidates: [] }, 'es'), InvalidPayloadError)
+  assert.throws(() => renderOutboxEmail('application_digest', { total: 2, candidates: [{ name: 'A' }] }, 'es'), InvalidPayloadError)
+})
+
+t('job_alert: cada oferta enlaza a su URL canónica /<cc>/ofertas|jobs/<slug> y hay enlace de baja con el token', () => {
+  const es = renderOutboxEmail('job_alert', samples.job_alert, 'es')
+  assert.ok(es.html.includes('href="https://yourcvpassport.com/es/ofertas/contable-madrid-1a2b3c4d"'))
+  assert.ok(es.html.includes('href="https://yourcvpassport.com/mx/ofertas/analista-cdmx-5e6f7a8b"'))
+  assert.ok(es.html.includes('href="https://yourcvpassport.com/alertas/baja?token=3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"'))
+  assert.ok(es.text.includes('/alertas/baja?token=3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d') && es.text.includes('Darme de baja de esta alerta'))
+  const en = renderOutboxEmail('job_alert', samples.job_alert, 'en')
+  assert.ok(en.html.includes('href="https://yourcvpassport.com/es/jobs/contable-madrid-1a2b3c4d"'))
+  assert.ok(en.html.includes('href="https://yourcvpassport.com/alerts/unsubscribe?token=3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"'))
+  assert.ok(en.text.includes('Unsubscribe from this alert'))
+})
+
+t('job_alert: token que no es UUID no genera enlace de baja; máximo 8 ofertas; forma antigua (country) sigue valiendo', () => {
+  for (const bad of [undefined, '', 'abc', '"><script>', '3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d/../x']) {
+    const r = renderOutboxEmail('job_alert', { ...samples.job_alert, unsubscribe_token: bad }, 'es')
+    assert.ok(!/alertas\/baja/.test(r.html + r.text), String(bad))
+    assert.ok(!r.html.includes('<script>'))
+  }
+  const jobs = Array.from({ length: 12 }, (_, i) => ({ title: 'Oferta ' + i, slug: 's' + i, country_code: 'ES', company_name: 'X' }))
+  const r = renderOutboxEmail('job_alert', { ...samples.job_alert, total: 12, jobs }, 'es')
+  assert.equal((r.text.match(/^- Oferta /gm) ?? []).length, 8)
+  assert.ok(r.text.includes('Las últimas 8 de 12'))
+  const old = renderOutboxEmail('job_alert', { frequency: 'DAILY', jobs: [{ title: 'Vieja', slug: 'v', country: 'AR', company_name: 'Z' }] }, 'es')
+  assert.ok(old.html.includes('/ar/ofertas/v'))
+})
+
+t('company_review_flagged: las referencias de ambas empresas salen SOLO en el aviso interno', () => {
+  const r = renderOutboxEmail('company_review_flagged', {
+    ...samples.company_review_flagged,
+    duplicates: [{ id: 'ref-otra-1', company_name: 'Otra SL', status: 'APPROVED', matches: ['tax_id', 'email'] }],
+  }, 'es')
+  assert.ok(r.text.includes('ref-otra-1') && r.text.includes('Otra SL') && r.text.includes('coincide en NIF, correo'), r.text)
+  assert.ok(r.text.includes('Referencia: c1'), 'referencia de la propia empresa')
 })
 
 t('sin datos sensibles innecesarios: correos, teléfonos, claves e ids internos no salen', () => {

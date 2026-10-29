@@ -57,6 +57,12 @@
 //
 // Enlace del correo: <redirectTo>?token_hash=…&type=signup (dominio propio, sin
 // supabase.co); ConfirmPage lo verifica con verifyOtp. Ver _shared/authLink.ts.
+//
+// Correo de confirmación: sale en el idioma de registro (registro_idioma 'en' -> inglés, el
+// resto español) y, con tipo='empresa', con el texto de EMPRESA (asunto, saludo, botón y
+// siguiente paso: completar el registro de la empresa). Lo construye
+// _shared/signupConfirmEmail.ts (puro, con pruebas). La validación de tipo, edad y casillas
+// está en ./validation.ts (pura, con pruebas).
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
@@ -65,7 +71,8 @@ import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.t
 import { sendEmail } from '../_shared/email.ts'
 import { buildAuthEmailLink } from '../_shared/authLink.ts'
 import { generatePendingConfirmationLink } from '../_shared/confirmationEmail.ts'
-import { confirmSignupEmail } from '../_shared/emailTemplates.ts'
+import { buildSignupConfirmEmail } from '../_shared/signupConfirmEmail.ts'
+import { SignupValidationError, validateSignupFields } from './validation.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -81,41 +88,6 @@ interface SignupRequest {
   tipo?: string
   fecha_nacimiento?: string
   casillas?: Record<string, unknown>
-}
-
-// Claves de casillas del contrato SQL (20261029_legal_aceptaciones_idioma.sql).
-const CANDIDATE_REQUIRED = ['acepto_condiciones_privacidad', 'datos_verdaderos']
-const CANDIDATE_OPTIONAL = ['perfil_publico', 'aparecer_google', 'empresas_contacto', 'alertas_novedades']
-const GUARDIAN_KEY = 'autorizacion_tutores'
-const MIN_AGE = 16
-const ADULT_AGE = 18
-
-// AAAA-MM-DD real (no 2026-02-31), desde 1900 y no futura. Null si no vale.
-function parseBirthDate(value: unknown): { y: number; m: number; d: number } | null {
-  if (typeof value !== 'string') return null
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
-  if (!match) return null
-  const y = Number(match[1])
-  const m = Number(match[2])
-  const d = Number(match[3])
-  const date = new Date(Date.UTC(y, m - 1, d))
-  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null
-  if (y < 1900 || date.getTime() > Date.now()) return null
-  return { y, m, d }
-}
-
-function ageFrom(b: { y: number; m: number; d: number }, now = new Date()): number {
-  let age = now.getUTCFullYear() - b.y
-  const before = now.getUTCMonth() + 1 < b.m || (now.getUTCMonth() + 1 === b.m && now.getUTCDate() < b.d)
-  if (before) age -= 1
-  return age
-}
-
-// 'es' | 'en' | otro código ISO de 2-3 letras; cualquier otra cosa se ignora.
-function normalizeLang(value: unknown): string | undefined {
-  if (typeof value !== 'string') return undefined
-  const base = value.trim().toLowerCase().split('-')[0]
-  return /^[a-z]{2,3}$/.test(base) ? base : undefined
 }
 
 // Error con status HTTP y código estable para el cliente.
@@ -213,40 +185,15 @@ serve(async (req: Request) => {
     // --- Bolsa de empleo, fase 1 (#6): camino, idioma, edad y casillas ---------
     // Solo 'empresa' EXPLÍCITO sale del camino de candidato. Ausente, vacío,
     // desconocido o de otro tipo = candidato (con edad y casillas obligatorias).
-    const tipo: 'candidato' | 'empresa' = payload?.tipo === 'empresa' ? 'empresa' : 'candidato'
-    const registroIdioma = normalizeLang(payload?.registro_idioma)
-
-    let fechaNacimiento: string | undefined
-    let acceptedBoxes: Record<string, boolean> | undefined
-    // Edad: obligatoria salvo 'empresa'; en 'empresa', si viene, se valida igual.
-    const hasBirth = payload?.fecha_nacimiento !== undefined && payload?.fecha_nacimiento !== null && payload?.fecha_nacimiento !== ''
-    let age = 0
-    if (tipo !== 'empresa' || hasBirth) {
-      const birth = parseBirthDate(payload?.fecha_nacimiento)
-      if (!birth) {
-        throw new HttpError(400, 'INVALID_INPUT', 'A valid fecha_nacimiento (YYYY-MM-DD) is required')
-      }
-      age = ageFrom(birth)
-      if (age < MIN_AGE) {
-        throw new HttpError(400, 'INVALID_INPUT', 'UNDERAGE: you must be at least 16 years old to register')
-      }
-      fechaNacimiento = payload.fecha_nacimiento as string
+    // La lógica está en ./validation.ts (pura, con pruebas).
+    let validated: ReturnType<typeof validateSignupFields>
+    try {
+      validated = validateSignupFields(payload)
+    } catch (e) {
+      if (e instanceof SignupValidationError) throw new HttpError(e.status, e.code, e.message)
+      throw e
     }
-    if (tipo === 'candidato') {
-      const raw = payload?.casillas
-      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-        throw new HttpError(400, 'INVALID_INPUT', 'casillas is required')
-      }
-      const allowed = [...CANDIDATE_REQUIRED, ...CANDIDATE_OPTIONAL, GUARDIAN_KEY]
-      acceptedBoxes = {}
-      for (const key of allowed) acceptedBoxes[key] = (raw as Record<string, unknown>)[key] === true
-      for (const key of CANDIDATE_REQUIRED) {
-        if (!acceptedBoxes[key]) throw new HttpError(400, 'INVALID_INPUT', `CASILLA_OBLIGATORIA: ${key}`)
-      }
-      if (age < ADULT_AGE && !acceptedBoxes[GUARDIAN_KEY]) {
-        throw new HttpError(400, 'INVALID_INPUT', 'CASILLA_OBLIGATORIA: autorizacion_tutores')
-      }
-    }
+    const { tipo, registroIdioma, fechaNacimiento, acceptedBoxes } = validated
 
     // Rate limit por destinatario, compartido con send-email-confirmation
     // ("Reenviar"): evita bombardear un buzón ajeno cambiando de IP.
@@ -349,7 +296,7 @@ serve(async (req: Request) => {
     // cuenta es la de antes.
     const emailResult = await sendEmail({
       to: email,
-      ...confirmSignupEmail({ name: alreadyPending ? null : full_name, link: confirmationLink }),
+      ...buildSignupConfirmEmail({ tipo, lang: registroIdioma, name: alreadyPending ? null : full_name, link: confirmationLink }),
       tags: ['signup'],
     })
 

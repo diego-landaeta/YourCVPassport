@@ -5,8 +5,11 @@
 // Qué hace
 //   - Lee la oferta con service_role y aplica las reglas de `rules.ts` (dinero o pago
 //     por adelantado, WhatsApp/Telegram, multinivel, discriminación, contacto externo,
-//     mayúsculas excesivas, texto sin sentido...). Después consulta `ai.ts` (hoy sin
-//     proveedor: devuelve null).
+//     mayúsculas excesivas, texto sin sentido...) y las de `extras.ts` (salario
+//     incoherente, texto duplicado de OTRA empresa, título que no corresponde a la
+//     categoría, enlaces sospechosos). Después consulta `ai.ts` (hoy sin proveedor:
+//     devuelve null; la interfaz está lista y probada con un proveedor simulado).
+//     Todas las reglas solo MARCAN: un hallazgo siempre es MANUAL_REVIEW, nunca rechazo.
 //   - ANTES de leer el texto pide la huella de TODO el texto moderado con la RPC
 //     get_job_moderation_hash(id). SIN hallazgos -> moderar_oferta(id, 'PUBLISHED',
 //     p_expected_hash => huella). Si la empresa editó mientras tanto, la RPC contesta
@@ -54,6 +57,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { authorizeRequest, supabaseAuthDeps } from '../_shared/serviceAuth.ts'
 import { reasonFromFindings, reviewJobText, type Finding } from './rules.ts'
+import { duplicateFinding, fingerprintIsComparable, reviewJobExtras, textFingerprint } from './extras.ts'
 import { reviewWithAi } from './ai.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -62,7 +66,7 @@ const SUPPORT_EMAIL = 'support@yourcvpassport.com'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const JOB_COLUMNS =
-  'id, title, status, company_id, description, department, responsibilities, requirements, nice_to_have, benefits, required_skills, optional_skills, application_instructions, application_url, application_email, duration'
+  'id, title, status, company_id, description, department, responsibilities, requirements, nice_to_have, benefits, required_skills, optional_skills, application_instructions, application_url, application_email, duration, salary_min, salary_max, salary_currency, salary_period, category, category2'
 
 type Outcome = 'PUBLISHED' | 'MANUAL_REVIEW' | 'SKIPPED' | 'NOT_FOUND' | 'ERROR'
 interface Result {
@@ -115,6 +119,25 @@ async function getModerationHash(admin: Admin, jobId: string): Promise<string> {
   return data
 }
 
+/**
+ * Texto duplicado: busca ofertas PUBLISHED / AI_REVIEW de OTRA empresa con el mismo título
+ * (sin distinguir mayúsculas) y compara la huella normalizada de título + descripción.
+ * Un fallo de la consulta lanza (-> MANUAL_REVIEW): nunca se publica sin haber comprobado.
+ */
+async function findDuplicateText(admin: Admin, job: { id: string; company_id: string | null; title: string | null; description: string | null }): Promise<Finding | null> {
+  const title = String(job.title || '').trim()
+  if (!title || !fingerprintIsComparable(textFingerprint(job))) return null
+  const pattern = title.replace(/[\\%_]/g, (c) => `\\${c}`) // ilike sin comodines
+  let q = admin.from('job_postings').select('id, company_id, title, description').in('status', ['PUBLISHED', 'AI_REVIEW']).ilike('title', pattern).limit(50)
+  if (job.company_id) q = q.neq('company_id', job.company_id)
+  const { data, error } = await q
+  if (error) throw new Error(`duplicados: ${error.message}`)
+  const { finding, matches } = duplicateFinding(job, data ?? [])
+  // La referencia de la otra oferta queda solo en el registro del servidor (no en review_reason).
+  if (finding) console.warn(`[moderate-job-posting] ${job.id} repite el texto de ${matches.join(',')}`)
+  return finding
+}
+
 const isHashMismatch = (err: { message?: string } | null | undefined) => /HASH_MISMATCH/.test(String(err?.message || ''))
 
 async function moderateOne(admin: Admin, jobId: string): Promise<Result> {
@@ -134,7 +157,9 @@ async function moderateOne(admin: Admin, jobId: string): Promise<Result> {
       if (job.status !== 'AI_REVIEW') return { ...base, outcome: 'SKIPPED' }
 
       // 1. Reglas + (si algún día hay) IA. Cualquier excepción cae al catch -> revisión manual.
-      const findings: Finding[] = reviewJobText(job)
+      const findings: Finding[] = [...reviewJobText(job), ...reviewJobExtras(job)]
+      const duplicate = await findDuplicateText(admin, job)
+      if (duplicate) findings.push(duplicate)
       const ai = await reviewWithAi(job, findings)
       let aiNote: string | undefined
       if (ai && ai.verdict !== 'ok') {

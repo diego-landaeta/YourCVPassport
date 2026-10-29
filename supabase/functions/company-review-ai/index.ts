@@ -1,7 +1,10 @@
 // Supabase Edge Function: company-review-ai
 //
 // Revisión automática del registro de una empresa (bolsa de empleo, fase 1, #6).
-// Despliegue: CON verificación de JWT (no usar --no-verify-jwt).
+// Despliegue: supabase functions deploy company-review-ai --no-verify-jwt
+//   (el barrido del cron manda x-cron-secret, no un JWT; la función comprueba dentro,
+//   siempre, quién llama: sesión de admin / de la empresa, o el cron / service_role en
+//   el barrido. Sin credenciales válidas responde 401 antes de leer nada.)
 //
 // QUÉ HACE
 //   Comprueba, con REGLAS deterministas (rules.ts), una empresa PENDING:
@@ -34,9 +37,25 @@
 //     requiere que la empresa esté PENDING; las demás no se tocan.
 //   - La respuesta al cliente NO incluye los motivos (no se enseña qué falla).
 //
+//   - El correo CONFIRMADO de la cuenta que registró la empresa (auth.users, por la API de
+//     admin) debe ser del dominio de la web o de un subdominio; si no coincide, es gratuito,
+//     no está confirmado o no se puede leer: 'dudosa'.
+//   - Duplicados de identificador fiscal o correo: nunca se aprueba. Los motivos guardados
+//     NO llevan referencias de la otra empresa; las referencias de AMBAS empresas van solo
+//     en el aviso interno a support@ (payload.duplicates / payload.company_id).
+//
 // CONTRATO: POST { companyId: uuid, force?: boolean (solo admin: repite la revisión) }
 //   200 { success, status: 'APPROVED'|'PENDING'|..., resultado: 'ok'|'dudosa'|'error'|null, skipped? }
 //   400 INVALID_INPUT | 401 UNAUTHORIZED | 403 FORBIDDEN | 404 NOT_FOUND | 429 RATE_LIMITED | 500 INTERNAL_ERROR
+//
+// BARRIDO: POST { sweep: true }  (cron `bolsa-empresas`, cada 10 min, cabecera x-cron-secret;
+//   también service_role o un admin con sesión; cualquier otro: 401/403)
+//   - Revisa las empresas PENDING SIN ninguna revisión registrada y con más de 2 minutos de
+//     antigüedad (máx. 20 por llamada, las más antiguas primero; ver sweep.ts).
+//   - Las que siguen PENDING sin revisión pasados 30 minutos generan un aviso a support@
+//     (kind company_review_flagged, resultado 'sin_revision', dedupe company_unreviewed:<id>).
+//   200 { success, sweep: true, candidates, reviewed, approved, flagged, errors, stale_notified }
+//   (la respuesta no lleva nombres ni motivos)
 //
 // PUNTO DE EXTENSIÓN PARA IA
 //   Hoy el proveedor es solo 'reglas' (la clave de Gemini caducó y el proveedor es
@@ -49,7 +68,10 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { enforceRateLimit } from '../_shared/ratelimit.ts'
+import { authorizeRequest, supabaseAuthDeps } from '../_shared/serviceAuth.ts'
+import { pickForReview, pickStale, SWEEP_MAX_PER_CALL, type PendingCompany } from './sweep.ts'
 import {
+  duplicateRefs,
   reviewCompany,
   type CompanyForReview,
   type Finding,
@@ -102,20 +124,33 @@ serve(async (req: Request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     })
 
-    // 1. Llamante
+    // 0. Sin ninguna credencial no se lee nada (ni el cuerpo).
     const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim()
-    if (!token) throw new HttpError(401, 'UNAUTHORIZED', 'Missing authorization')
-    const { data: callerData, error: callerError } = await supabase.auth.getUser(token)
-    const callerId: string | undefined = callerData?.user?.id
-    if (callerError || !callerId) throw new HttpError(401, 'UNAUTHORIZED', 'Invalid or expired session')
+    if (!token && req.headers.get('x-cron-secret') === null) throw new HttpError(401, 'UNAUTHORIZED', 'Missing authorization')
 
-    // 2. Entrada
     let body: any
     try {
       body = await req.json()
     } catch {
       throw new HttpError(400, 'INVALID_INPUT', 'Invalid JSON body')
     }
+
+    // Barrido de pendientes sin revisar: cron (x-cron-secret), service_role o admin.
+    if (body?.sweep === true) {
+      const auth = await authorizeRequest(req, supabaseAuthDeps(supabase, SUPABASE_SERVICE_ROLE_KEY, Deno.env.get('CRON_SECRET')))
+      if (!auth.who) {
+        throw auth.status === 403 ? new HttpError(403, 'FORBIDDEN', 'Forbidden') : new HttpError(401, 'UNAUTHORIZED', 'Unauthorized')
+      }
+      return json(200, { success: true, sweep: true, ...(await runSweep(supabase)) })
+    }
+
+    // 1. Llamante
+    if (!token) throw new HttpError(401, 'UNAUTHORIZED', 'Missing authorization')
+    const { data: callerData, error: callerError } = await supabase.auth.getUser(token)
+    const callerId: string | undefined = callerData?.user?.id
+    if (callerError || !callerId) throw new HttpError(401, 'UNAUTHORIZED', 'Invalid or expired session')
+
+    // 2. Entrada
     const companyId = typeof body?.companyId === 'string' ? body.companyId : ''
     if (!UUID_RE.test(companyId)) throw new HttpError(400, 'INVALID_INPUT', 'companyId must be a UUID')
 
@@ -163,7 +198,7 @@ serve(async (req: Request) => {
       if (recent) return json(200, { success: true, skipped: true, status: 'PENDING', resultado: recent.resultado })
     }
 
-    const outcome = await reviewAndDecide(supabase, company as CompanyForReview & { status: string; idioma: string | null })
+    const outcome = await reviewAndDecide(supabase, company as ReviewedCompany)
     return json(200, { success: true, status: outcome.approved ? 'APPROVED' : 'PENDING', resultado: outcome.resultado })
   } catch (error: any) {
     const httpError = error instanceof HttpError ? error : new HttpError(500, 'INTERNAL_ERROR', 'An error occurred')
@@ -174,36 +209,171 @@ serve(async (req: Request) => {
 
 // ---------------------------------------------------------------------------
 
+type ReviewedCompany = CompanyForReview & { status: string; idioma: string | null; created_by?: string | null }
+
+const COMPANY_COLUMNS =
+  'id, company_name, legal_name, tax_id, country_code, company_email, website_url, contact_name, description, industry, status, created_by, idioma'
+const SWEEP_PAGE = 100
+const SWEEP_MAX_PAGES = 10
+
+/**
+ * Barrido (POST { sweep: true }): revisa las PENDING sin ninguna revisión y avisa a soporte de
+ * las que siguen sin revisar pasados 30 min. Ver sweep.ts para las reglas de selección.
+ * La respuesta lleva solo números (ni nombres ni motivos).
+ */
+async function runSweep(supabase: any): Promise<Record<string, number>> {
+  const now = Date.now()
+  const cutoff = new Date(now - 2 * 60 * 1000).toISOString()
+
+  // 1. PENDING con más de 2 min, de la más antigua a la más nueva, y cuáles ya tienen revisión.
+  const unreviewed: PendingCompany[] = []
+  for (let page = 0; page < SWEEP_MAX_PAGES; page++) {
+    const { data: rows, error } = await supabase
+      .from('companies')
+      .select('id, created_at')
+      .eq('status', 'PENDING')
+      .lt('created_at', cutoff)
+      .order('created_at', { ascending: true })
+      .range(page * SWEEP_PAGE, page * SWEEP_PAGE + SWEEP_PAGE - 1)
+    if (error) throw new HttpError(500, 'INTERNAL_ERROR', 'Could not read pending companies')
+    const batch = (rows ?? []) as PendingCompany[]
+    if (!batch.length) break
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('company_ai_reviews')
+      .select('company_id')
+      .in('company_id', batch.map((c) => c.id))
+    if (reviewsError) throw new HttpError(500, 'INTERNAL_ERROR', 'Could not read reviews')
+    const reviewed = new Set<string>((reviews ?? []).map((r: any) => String(r.company_id)))
+    unreviewed.push(...batch.filter((c) => !reviewed.has(c.id)))
+    if (batch.length < SWEEP_PAGE || unreviewed.length >= SWEEP_MAX_PER_CALL * 5) break
+  }
+
+  const toReview = pickForReview(unreviewed, new Set(), now)
+  const stats = { candidates: unreviewed.length, reviewed: 0, approved: 0, flagged: 0, errors: 0, stale_notified: 0 }
+  const handled = new Set<string>()
+
+  // 2. Revisar (los datos de duplicados y países se cargan una sola vez).
+  if (toReview.length) {
+    let shared: ReviewData | null = null
+    try {
+      shared = await loadReviewData(supabase)
+    } catch (e: any) {
+      console.error('[company-review-ai] barrido: no se pudieron cargar los datos:', e?.message)
+    }
+    if (shared) {
+      for (const pending of toReview) {
+        try {
+          const { data: company, error } = await supabase.from('companies').select(COMPANY_COLUMNS).eq('id', pending.id).maybeSingle()
+          if (error || !company || company.status !== 'PENDING') continue
+          const out = await reviewAndDecide(supabase, company as ReviewedCompany, shared)
+          stats.reviewed++
+          if (out.approved) stats.approved++
+          else if (out.resultado === 'error') stats.errors++
+          else stats.flagged++
+          if (out.recorded) handled.add(pending.id)
+        } catch (e: any) {
+          stats.errors++
+          console.error('[company-review-ai] barrido: fallo revisando una empresa:', e?.message)
+        }
+      }
+    }
+  }
+
+  // 3. Las que siguen sin revisión tras 30 min: aviso a soporte (idempotente por dedupe_key).
+  const stale = pickStale(unreviewed.filter((c) => !handled.has(c.id)), now).slice(0, SWEEP_MAX_PER_CALL)
+  if (stale.length) {
+    const { data: companies } = await supabase.from('companies').select(COMPANY_COLUMNS).in('id', stale.map((c) => c.id))
+    for (const company of companies ?? []) {
+      if (company.status !== 'PENDING') continue
+      await enqueue(supabase, {
+        kind: 'company_review_flagged',
+        to_email: SUPPORT_EMAIL,
+        lang: 'es',
+        priority: 3,
+        payload: {
+          dedupe_key: `company_unreviewed:${company.id}`,
+          company_id: company.id,
+          resultado: 'sin_revision',
+          company_name: company.company_name,
+          legal_name: company.legal_name,
+          tax_id: company.tax_id,
+          country_code: company.country_code,
+          company_email: company.company_email,
+          website_url: company.website_url,
+          motivos: ['Sigue pendiente y la revisión automática no ha dejado constancia en más de 30 minutos: revísala a mano.'],
+        },
+      })
+      stats.stale_notified++
+    }
+  }
+  return stats
+}
+
+/** Datos compartidos por varias revisiones (el barrido los carga una vez). */
+interface ReviewData {
+  others: OtherCompany[]
+  active: Set<string>
+}
+
+/** Todas las empresas (para duplicados) y los países activos. Lanza si no se puede garantizar la lista completa. */
+async function loadReviewData(supabase: any): Promise<ReviewData> {
+  const { data: others, error: othersError } = await supabase
+    .from('companies')
+    .select('id, company_name, tax_id, country_code, company_email, website_url, status')
+    .limit(MAX_OTHERS)
+  if (othersError) throw new Error(`others: ${othersError.message}`)
+  // Sin la lista completa no se puede afirmar que no hay duplicados.
+  if ((others ?? []).length >= MAX_OTHERS) throw new Error('others: demasiadas empresas para buscar duplicados')
+
+  const { data: countries, error: countriesError } = await supabase.from('countries').select('code').eq('active', true)
+  if (countriesError) throw new Error(`countries: ${countriesError.message}`)
+  return {
+    others: (others ?? []) as OtherCompany[],
+    active: new Set<string>((countries ?? []).map((c: any) => String(c.code).toUpperCase())),
+  }
+}
+
+/**
+ * Correo de la cuenta que creó la empresa (auth.users, API de admin) y si está CONFIRMADO.
+ * null si no se puede leer: la revisión lo trata como 'dudosa', nunca como válido.
+ */
+async function loadCreatorEmail(supabase: any, createdBy: string | null | undefined): Promise<{ email: string; confirmed: boolean } | null> {
+  if (!createdBy) return null
+  try {
+    const { data, error } = await supabase.auth.admin.getUserById(createdBy)
+    const user = data?.user
+    if (error || !user?.email) return null
+    return { email: String(user.email).trim().toLowerCase(), confirmed: !!(user.email_confirmed_at ?? user.confirmed_at) }
+  } catch {
+    return null
+  }
+}
+
 async function reviewAndDecide(
   supabase: any,
-  company: CompanyForReview & { status: string; idioma: string | null },
-): Promise<{ resultado: 'ok' | 'dudosa' | 'error'; approved: boolean }> {
+  company: ReviewedCompany,
+  shared?: ReviewData,
+): Promise<{ resultado: 'ok' | 'dudosa' | 'error'; approved: boolean; recorded: boolean }> {
   let resultado: 'ok' | 'dudosa' | 'error' = 'error'
   let motivos: Finding[] = []
+  let duplicates: ReturnType<typeof duplicateRefs> = []
   const providerNames = ['reglas', ...PROVIDERS.map((p) => p.name)]
   const modelos = [RULES_MODEL, ...PROVIDERS.map((p) => p.model ?? p.name)]
 
   // 1. Revisión. Cualquier fallo (carga de datos, proveedor...) = 'error'.
   try {
-    const { data: others, error: othersError } = await supabase
-      .from('companies')
-      .select('id, company_name, tax_id, country_code, company_email, website_url, status')
-      .neq('id', company.id)
-      .limit(MAX_OTHERS)
-    if (othersError) throw new Error(`others: ${othersError.message}`)
-    // Sin la lista completa no se puede afirmar que no hay duplicados.
-    if ((others ?? []).length >= MAX_OTHERS) throw new Error('others: demasiadas empresas para buscar duplicados')
+    const data = shared ?? (await loadReviewData(supabase))
+    const others = data.others.filter((o) => o.id !== company.id)
+    const creatorEmail = await loadCreatorEmail(supabase, company.created_by)
 
-    const { data: countries, error: countriesError } = await supabase.from('countries').select('code').eq('active', true)
-    if (countriesError) throw new Error(`countries: ${countriesError.message}`)
-    const active = new Set<string>((countries ?? []).map((c: any) => String(c.code).toUpperCase()))
-
-    const result = reviewCompany(company, (others ?? []) as OtherCompany[], active)
+    const result = reviewCompany(company, others, data.active, { creatorEmail })
     motivos = result.motivos
     resultado = result.resultado
+    // Referencias de AMBAS empresas: solo para el aviso interno a soporte.
+    duplicates = duplicateRefs(company, others)
 
     for (const provider of PROVIDERS) {
-      const extra = await provider.review(company, (others ?? []) as OtherCompany[])
+      const extra = await provider.review(company, others)
       motivos = [...motivos, ...extra]
       if (extra.some((m) => m.severity === 'warn')) resultado = 'dudosa'
     }
@@ -282,7 +452,7 @@ async function reviewAndDecide(
   }
 
   // 4. Avisos en la cola (NO se envía nada aquí). Si otra persona ya decidió, no se avisa.
-  if (statusChanged) return { resultado, approved: false }
+  if (statusChanged) return { resultado, approved: false, recorded: reviewId !== null }
   if (approved) {
     await enqueue(supabase, {
       kind: 'company_verified',
@@ -313,11 +483,12 @@ async function reviewAndDecide(
         company_email: company.company_email,
         website_url: company.website_url,
         motivos: motivos.filter((m) => m.severity === 'warn').map((m) => m.message_es),
+        duplicates: duplicates.map((d) => ({ id: d.id, company_name: d.company_name, status: d.status, matches: d.matches })),
       },
     })
   }
 
-  return { resultado, approved }
+  return { resultado, approved, recorded: reviewId !== null }
 }
 
 async function enqueue(

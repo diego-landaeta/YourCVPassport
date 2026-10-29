@@ -26,12 +26,19 @@
 //   - service_role: Authorization = clave service_role.
 //   - admin: usuario con profiles.role = 'admin' (lanzarla a mano o ver el estado).
 //
-// Contrato: POST { limit?: 1-50, dry_run?: boolean, alerts?: boolean }
+// Contrato: POST { limit?: 1-50, dry_run?: boolean, alerts?: boolean, digests?: boolean }
 //   alerts: true -> ANTES de enviar llama a la RPC queue_job_alerts() (migración 20261031),
 //     que encola un aviso por suscriptor con ofertas nuevas, y después envía como siempre.
 //     Es lo que hace el trabajo diario `bolsa-alertas` (07:00 UTC). Si la RPC falla se
 //     registra y se sigue enviando: la respuesta lleva alerts_queued (número) o
 //     alerts_error: true. Con dry_run no se llama.
+//   digests: true -> ANTES de enviar llama a la RPC queue_application_digests() (migración
+//     20261035), que agrega las candidaturas nuevas del día en UN correo `application_digest` por
+//     empresa y oferta (solo para ofertas con frecuencia de resumen diario; es idempotente por
+//     dedupe_key). Es lo que hace el trabajo diario `bolsa-resumenes` (08:00 UTC). Igual que con
+//     las alertas: si la RPC falla se registra y se sigue enviando (digests_queued o
+//     digests_error: true en la respuesta). Con dry_run no se llama. Alertas y resúmenes
+//     pueden pedirse en la misma llamada.
 //   200 { ok: true, sent, failed, skipped_claimed, cap, sent_today, remaining_today,
 //         stopped: null | CAP_REACHED | QUOTA | TIME_BUDGET, errors: [{id, kind, error}] }
 //       (errors NO lleva destinatarios ni contenido)
@@ -164,7 +171,7 @@ serve(async (req: Request) => {
       return json(auth.status === 403 ? { error: 'Forbidden', code: 'FORBIDDEN' } : { error: 'Unauthorized', code: 'UNAUTHORIZED' }, auth.status)
     }
 
-    let body: { limit?: unknown; dry_run?: unknown; alerts?: unknown } = {}
+    let body: { limit?: unknown; dry_run?: unknown; alerts?: unknown; digests?: unknown } = {}
     try {
       const text = await req.text()
       if (text.trim()) body = JSON.parse(text)
@@ -207,6 +214,19 @@ serve(async (req: Request) => {
       }
     }
 
+    // Resumen diario de candidaturas: la RPC encola un correo por empresa y oferta; el envío lo hace este barrido.
+    let digestsQueued: number | null = null
+    let digestsError = false
+    if (body.digests === true) {
+      const { data, error } = await admin.rpc('queue_application_digests')
+      if (error) {
+        digestsError = true
+        console.error('[send-outbox] queue_application_digests:', error.message)
+      } else {
+        digestsQueued = Number.isFinite(Number(data)) ? Number(data) : 0
+      }
+    }
+
     const limit = Number.isInteger(body.limit) ? Math.min(Math.max(Number(body.limit), 1), MAX_BATCH) : undefined
 
     const summary = await processOutbox({
@@ -225,7 +245,12 @@ serve(async (req: Request) => {
       console.error('[send-outbox] errores:', JSON.stringify(summary.errors.slice(0, 10)))
     }
     const down = summary.stopped === 'CONFIG' || summary.stopped === 'PROVIDER_DOWN'
-    return json({ ok: !down, ...summary, ...(body.alerts === true ? (alertsError ? { alerts_error: true } : { alerts_queued: alertsQueued }) : {}) }, down ? 503 : 200)
+    return json({
+      ok: !down,
+      ...summary,
+      ...(body.alerts === true ? (alertsError ? { alerts_error: true } : { alerts_queued: alertsQueued }) : {}),
+      ...(body.digests === true ? (digestsError ? { digests_error: true } : { digests_queued: digestsQueued }) : {}),
+    }, down ? 503 : 200)
   } catch (error) {
     console.error('[send-outbox] error interno:', (error as Error)?.message)
     return json({ error: 'Unexpected error', code: 'INTERNAL_ERROR' }, 500)

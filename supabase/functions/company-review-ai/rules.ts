@@ -16,7 +16,10 @@
 //     subdominio de él),
 //   - correo que NO sea de un proveedor gratuito ni desechable,
 //   - ningún duplicado de NIF, correo o dominio en otra empresa (la que sea),
-//   - sin palabras sospechosas ni datos poco creíbles.
+//   - sin palabras sospechosas ni datos poco creíbles,
+//   - el correo CONFIRMADO de la cuenta que registró la empresa (auth.users) pertenece
+//     al dominio de la web (o a un subdominio): quien registra una empresa de un dominio
+//     tiene que poder demostrar que es de ese dominio.
 // Cualquier duda es 'dudosa': un humano decide.
 
 export type Severity = 'info' | 'warn'
@@ -39,6 +42,16 @@ export interface CompanyForReview {
   contact_name: string | null
   description: string | null
   industry: string | null
+}
+
+/**
+ * Datos de contexto que la Edge Function lee fuera de la tabla companies.
+ * `creatorEmail`: correo de la cuenta que creó la empresa (auth.users vía admin API) y si
+ * está CONFIRMADO. `null` = no se pudo averiguar (dudosa). `undefined` = no se comprueba
+ * (solo en pruebas de reglas sueltas).
+ */
+export interface ReviewContext {
+  creatorEmail?: { email: string | null; confirmed: boolean } | null
 }
 
 export interface OtherCompany {
@@ -415,7 +428,6 @@ export function canonicalTaxId(countryCode: string | null | undefined, taxId: st
 }
 
 const FLAGGED_STATUSES = new Set(['REJECTED', 'SUSPENDED'])
-const shortId = (id: string) => id.slice(0, 8)
 
 export function checkDuplicates(c: CompanyForReview, others: OtherCompany[]): Finding[] {
   const out: Finding[] = []
@@ -445,23 +457,62 @@ export function checkDuplicates(c: CompanyForReview, others: OtherCompany[]): Fi
     if ([...myDomains].some((d) => oDomains.has(d))) byDomain.push(o)
   }
 
-  const describe = (list: OtherCompany[]) =>
-    list.map((o) => `${shortId(o.id)} (${o.status ?? '?'})`).join(', ')
-
+  // Los motivos NO llevan referencias de las otras empresas (se guardan en company_ai_reviews):
+  // esas referencias salen solo en el aviso interno a soporte (ver duplicateRefs).
   if (byTax.length) {
-    out.push(f('duplicate_tax_id', 'warn', `Ya hay ${byTax.length} empresa(s) con el mismo identificador fiscal: ${describe(byTax)}.`, `${byTax.length} other company(ies) already use the same tax identifier: ${describe(byTax)}.`))
+    out.push(f('duplicate_tax_id', 'warn', `Ya hay ${byTax.length} empresa(s) con el mismo identificador fiscal.`, `${byTax.length} other company(ies) already use the same tax identifier.`))
   }
   if (byEmail.length) {
-    out.push(f('duplicate_email', 'warn', `Ya hay ${byEmail.length} empresa(s) con el mismo correo: ${describe(byEmail)}.`, `${byEmail.length} other company(ies) already use the same email: ${describe(byEmail)}.`))
+    out.push(f('duplicate_email', 'warn', `Ya hay ${byEmail.length} empresa(s) con el mismo correo.`, `${byEmail.length} other company(ies) already use the same email.`))
   }
   if (byDomain.length) {
-    out.push(f('duplicate_domain', 'warn', `Ya hay ${byDomain.length} empresa(s) con el mismo dominio: ${describe(byDomain)}.`, `${byDomain.length} other company(ies) already use the same domain: ${describe(byDomain)}.`))
+    out.push(f('duplicate_domain', 'warn', `Ya hay ${byDomain.length} empresa(s) con el mismo dominio.`, `${byDomain.length} other company(ies) already use the same domain.`))
   }
   const flagged = [...byTax, ...byEmail, ...byDomain].filter((o) => FLAGGED_STATUSES.has(o.status ?? ''))
   if (flagged.length) {
-    out.push(f('duplicate_flagged', 'warn', `Coincide con empresas ya rechazadas o suspendidas: ${describe(flagged)}.`, `Matches companies that were already rejected or suspended: ${describe(flagged)}.`))
+    out.push(f('duplicate_flagged', 'warn', `Coincide con ${new Set(flagged.map((o) => o.id)).size} empresa(s) ya rechazadas o suspendidas.`, `Matches ${new Set(flagged.map((o) => o.id)).size} company(ies) that were already rejected or suspended.`))
   }
   return out
+}
+
+export interface DuplicateRef {
+  id: string
+  company_name: string | null
+  status: string | null
+  /** En qué coincide: 'tax_id' | 'email' | 'domain'. */
+  matches: Array<'tax_id' | 'email' | 'domain'>
+}
+
+/**
+ * Referencias de las empresas que coinciden con `c` (NIF, correo o dominio), para el aviso
+ * INTERNO a soporte. Nunca se devuelven al cliente ni se guardan en los motivos.
+ */
+export function duplicateRefs(c: CompanyForReview, others: OtherCompany[], max = 10): DuplicateRef[] {
+  const taxId = canonicalTaxId(c.country_code, c.tax_id)
+  const email = (c.company_email ?? '').trim().toLowerCase()
+  const mailHost = emailDomain(c.company_email)
+  const myDomains = new Set<string>()
+  const webHost = hostOf(c.website_url)
+  if (webHost) myDomains.add(registrableDomain(webHost))
+  if (mailHost && !isFreeEmailHost(mailHost)) myDomains.add(registrableDomain(mailHost))
+  for (const d of [...myDomains]) if (NOT_OWN_WEBSITE.has(d)) myDomains.delete(d)
+
+  const refs: DuplicateRef[] = []
+  for (const o of others) {
+    if (o.id === c.id) continue
+    const matches: DuplicateRef['matches'] = []
+    if (taxId && canonicalTaxId(o.country_code ?? c.country_code, o.tax_id) === taxId) matches.push('tax_id')
+    if (email && (o.company_email ?? '').trim().toLowerCase() === email) matches.push('email')
+    const oDomains = new Set<string>()
+    const oWeb = hostOf(o.website_url)
+    if (oWeb) oDomains.add(registrableDomain(oWeb))
+    const oMail = emailDomain(o.company_email)
+    if (oMail && !isFreeEmailHost(oMail)) oDomains.add(registrableDomain(oMail))
+    if ([...myDomains].some((d) => oDomains.has(d))) matches.push('domain')
+    if (matches.length) refs.push({ id: o.id, company_name: o.company_name, status: o.status, matches })
+    if (refs.length >= max) break
+  }
+  return refs
 }
 
 // ---------------------------------------------------------------------------
@@ -521,10 +572,41 @@ export function checkCountry(c: CompanyForReview, activeCountries: Set<string> |
   return []
 }
 
+/**
+ * El correo CONFIRMADO de la cuenta que registró la empresa tiene que ser del dominio de la
+ * web (o de un subdominio). Si no se pudo leer (`null`), no está confirmado o no se puede
+ * comparar con ninguna web: 'dudosa'. Sin web no se añade nada aquí (ya lo marca website_missing).
+ */
+export function checkCreatorEmail(c: CompanyForReview, creator: ReviewContext['creatorEmail']): Finding[] {
+  if (!creator || !creator.email) {
+    return [f('creator_email_unavailable', 'warn', 'No se pudo leer el correo de la cuenta que registró la empresa.', 'The email of the account that registered the company could not be read.')]
+  }
+  if (!creator.confirmed) {
+    return [f('creator_email_unconfirmed', 'warn', 'El correo de la cuenta que registró la empresa no está confirmado.', 'The email of the account that registered the company is not confirmed.')]
+  }
+  const accHost = emailDomain(creator.email)
+  const webHost = hostOf(c.website_url)
+  if (!accHost) return [f('creator_email_unavailable', 'warn', 'El correo de la cuenta que registró la empresa no es válido.', 'The email of the account that registered the company is not valid.')]
+  if (!webHost) return []
+  const accRoot = registrableDomain(accHost)
+  const webRoot = registrableDomain(webHost)
+  if (DISPOSABLE_EMAIL_DOMAINS.has(accRoot)) {
+    return [f('creator_email_disposable', 'warn', `La cuenta que registró la empresa usa un correo desechable (${accRoot}).`, `The account that registered the company uses a disposable email (${accRoot}).`)]
+  }
+  if (isFreeEmailHost(accHost)) {
+    return [f('creator_email_free', 'warn', `La cuenta que registró la empresa usa un correo gratuito (${accHost}) y no se puede relacionar con la web (${webRoot}).`, `The account that registered the company uses a free email (${accHost}) that cannot be tied to the website (${webRoot}).`)]
+  }
+  if (accRoot !== webRoot) {
+    return [f('creator_email_domain_mismatch', 'warn', `El dominio del correo de la cuenta (${accRoot}) no coincide con el de la web (${webRoot}).`, `The account email domain (${accRoot}) does not match the website domain (${webRoot}).`)]
+  }
+  return []
+}
+
 export function reviewCompany(
   c: CompanyForReview,
   others: OtherCompany[],
   activeCountries: Set<string> | null = null,
+  ctx: ReviewContext = {},
 ): { resultado: 'ok' | 'dudosa'; motivos: Finding[] } {
   const motivos = [
     ...checkCountry(c, activeCountries),
@@ -532,6 +614,8 @@ export function reviewCompany(
     ...checkDomains(c),
     ...checkDuplicates(c, others),
     ...checkSuspicious(c),
+    // Solo si el llamador informa del correo de la cuenta (null = no se pudo leer).
+    ...(ctx.creatorEmail !== undefined ? checkCreatorEmail(c, ctx.creatorEmail) : []),
   ]
   return { resultado: motivos.some((m) => m.severity === 'warn') ? 'dudosa' : 'ok', motivos }
 }

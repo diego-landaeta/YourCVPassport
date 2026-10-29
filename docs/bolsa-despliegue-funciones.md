@@ -1,22 +1,23 @@
 # Bolsa de empleo: despliegue de las Edge Functions y programación
 
 El despliegue de las funciones y la creación de los secretos son pasos manuales de una persona
-con acceso al proyecto de Supabase. La **programación** (moderación, correos, caducidad y
-alertas) ya NO es manual: la deja hecha la migración `20261034_programacion_cron.sql` con
-pg_cron + pg_net. Ninguna clave va en el repo ni en el chat.
+con acceso al proyecto de Supabase. La **programación** (moderación, correos, caducidad,
+alertas, revisión de empresas y resúmenes diarios) ya NO es manual: la dejan hecha las migraciones
+`20261034_programacion_cron.sql` y `20261035_cierre_final.sql` con pg_cron + pg_net. Ninguna clave va en el repo ni en el chat.
 
 Funciones implicadas:
 
 | Función | Qué hace | JWT en el gateway | Quién la llama |
 | --- | --- | --- | --- |
-| `signup` | Alta de usuarios (edad para todo tipo salvo `empresa`, `aceptado_en`) | **`--no-verify-jwt`** (es pública) | la web |
-| `company-review-ai` | Revisión por reglas de una empresa nueva; aprueba solo si todo cuadra | con JWT (por defecto) | la web, con la sesión de quien registra |
-| `moderate-job-posting` | Revisión de ofertas en `AI_REVIEW`; publica o pasa a revisión manual | **`--no-verify-jwt`** | el cron (`x-cron-secret`) y el botón del panel admin |
-| `send-outbox` | Envía los correos de `email_outbox` con tope diario; con `{"alerts":true}` encola antes las alertas | **`--no-verify-jwt`** | el cron (`x-cron-secret`) |
+| `signup` | Alta de usuarios (edad para todo tipo salvo `empresa`, `aceptado_en`); el correo de confirmación sale en el idioma de registro y con texto de empresa si `tipo='empresa'` | **`--no-verify-jwt`** (es pública) | la web |
+| `company-review-ai` | Revisión por reglas de una empresa nueva (aprueba solo si todo cuadra, incluido el dominio del correo CONFIRMADO de la cuenta); con `{"sweep":true}` revisa las pendientes sin revisar | **`--no-verify-jwt`** (la función comprueba dentro quién llama) | la web, con la sesión de quien registra, y el cron (`x-cron-secret`) para el barrido |
+| `moderate-job-posting` | Revisión de ofertas en `AI_REVIEW`; publica o pasa a revisión manual (salario, texto duplicado, categoría y enlaces incluidos) | **`--no-verify-jwt`** | el cron (`x-cron-secret`) y el botón del panel admin |
+| `send-outbox` | Envía los correos de `email_outbox` con tope diario; con `{"alerts":true}` encola antes las alertas y con `{"digests":true}` los resúmenes diarios de candidaturas | **`--no-verify-jwt`** | el cron (`x-cron-secret`) |
 | `expire-job-postings` | Avisa 3 días antes y cierra las ofertas vencidas | **`--no-verify-jwt`** | el cron (`x-cron-secret`), una vez al día |
 | `sitemap` | Sitemap público (fichas `/<cc>/ofertas/<slug>` y `/<cc>/jobs/<slug>`) | `--no-verify-jwt` (es pública: nginx la llama sin sesión) | buscadores, vía nginx |
 
-**Por qué `--no-verify-jwt` en las tres del cron.** El cron manda solo la cabecera
+**Por qué `--no-verify-jwt` en las del cron (`moderate-job-posting`, `send-outbox`, `expire-job-postings` y,
+desde el cierre final, `company-review-ai`).** El cron manda solo la cabecera
 `x-cron-secret`, no un JWT. Con la verificación de JWT activa, el gateway de Supabase
 contestaría 401 antes de que la función mire el secreto. No se pierde seguridad: cada función
 comprueba dentro (`_shared/serviceAuth.ts`), por este orden, (1) `x-cron-secret` contra el
@@ -27,22 +28,28 @@ secreto de entorno `CRON_SECRET` en tiempo constante, (2) la clave `service_role
 
 ## 0. Orden de despliegue (obligatorio)
 
-1. **Migraciones de datos**: `20261029` → `20261030` → `20261031` → `20261032` → `20261033`
-   (SQL, aparte de este documento). Las funciones dependen de ellas:
+1. **Migraciones de datos**: `20261029` → `20261030` → `20261031` → `20261032` → `20261033` → `20261035`
+   (SQL, aparte de este documento; la 34 es la programación y va en el paso 5). Las funciones dependen de ellas:
    - `moderate-job-posting` necesita `get_job_moderation_hash` y `moderar_oferta(..., p_expected_hash)`
      (migración 32). Sin ellas **no publica nada**: pasa las ofertas a revisión manual (fallo seguro).
    - `send-outbox` necesita `email_outbox.last_error` (migración 32), y `queue_job_alerts()` (31) para
      `{"alerts":true}`. Sin la columna contesta `503 MIGRATION_MISSING` y no envía nada.
    - `expire-job-postings` necesita `expire_job_postings()` (migración 30).
    - Los avisos de nueva versión legal (`legal_version_notice`, migración 33) los envía `send-outbox`.
+   - `send-outbox` con `{"digests":true}` necesita `queue_application_digests()` (migración 35); sin ella
+     responde `digests_error: true` y sigue enviando lo demás. `job_alert` lleva `unsubscribe_token` y las
+     ofertas con `country_code` desde la migración 35 (sin ellos el correo sale sin enlace de baja).
+   - El correo de aviso de candidaturas `application_digest` y el aviso del barrido de empresas
+     (`company_unreviewed:<id>`) viajan por `email_outbox`: no necesitan nada más.
 2. **Generar el secreto del cron** (una vez, en tu terminal; no lo pegues en ningún sitio):
    `openssl rand -hex 32`. Es el valor que irá en dos sitios con el MISMO contenido:
    - la Edge Function: `supabase secrets set CRON_SECRET=<valor>`
    - el vault de la base (SQL editor): `select vault.create_secret('<valor>', 'bolsa_cron_secret');`
 3. **Desplegar las funciones** (sección 2) con el secreto ya puesto.
 4. **Comprobar a mano** cada función (sección 3).
-5. **Aplicar `20261034_programacion_cron.sql`** (activa pg_cron y programa los cuatro trabajos).
-   Hacerlo el último: antes de este paso no hay nada programado y el fallo es seguro (las ofertas
+5. **Aplicar `20261034_programacion_cron.sql` y, después, `20261035_cierre_final.sql`** (activa pg_cron,
+   programa los trabajos de la 34 y añade `bolsa-empresas` y `bolsa-resumenes`; la 35 amplía
+   `bolsa_llamar_funcion` para que acepte `company-review-ai`). Hacerlo el último: antes de este paso no hay nada programado y el fallo es seguro (las ofertas
    esperan en `AI_REVIEW` y la cola de correos no se vacía).
 6. Comprobar que corre (sección 5).
 
@@ -86,13 +93,17 @@ Desde la raíz del repo (rama ya fusionada o la que vayas a desplegar):
 supabase functions deploy send-outbox --no-verify-jwt
 supabase functions deploy expire-job-postings --no-verify-jwt
 supabase functions deploy moderate-job-posting --no-verify-jwt
-supabase functions deploy company-review-ai
+supabase functions deploy company-review-ai --no-verify-jwt
 supabase functions deploy signup --no-verify-jwt
 supabase functions deploy sitemap --no-verify-jwt
 ```
 
-- **Sí** `--no-verify-jwt` en `send-outbox`, `expire-job-postings` y `moderate-job-posting` (el cron no
-  envía JWT). **No** lo pongas en `company-review-ai`. `signup` y `sitemap` son públicas y se despliegan así.
+- **Sí** `--no-verify-jwt` en `send-outbox`, `expire-job-postings`, `moderate-job-posting` y
+  `company-review-ai` (el cron no envía JWT). `company-review-ai` ANTES se desplegaba con JWT: ahora hay que
+  redesplegarla con `--no-verify-jwt` o el barrido recibirá 401 del gateway. No se pierde seguridad: la
+  función sigue exigiendo una sesión (admin o miembro de la empresa) para revisar una empresa, y para el
+  barrido solo acepta `x-cron-secret`, la clave `service_role` o un admin; sin credenciales contesta 401 antes
+  de leer nada. `signup` y `sitemap` son públicas y se despliegan así.
 - Si alguna de las tres del cron se desplegó antes con verificación de JWT, vuelve a desplegarla con
   `--no-verify-jwt`: los síntomas de olvidarlo son `status_code = 401` en `net._http_response` mientras el
   trabajo figura como `succeeded` en `cron.job_run_details` (ver sección 5).
@@ -137,6 +148,15 @@ curl -s -X POST "$URL/send-outbox" -H "x-cron-secret: $CRON" -H "Content-Type: a
 # 6. Moderación y caducidad (sin cuerpo = barrido de todas las pendientes)
 curl -s -X POST "$URL/moderate-job-posting" -H "x-cron-secret: $CRON"
 curl -s -X POST "$URL/expire-job-postings"  -H "x-cron-secret: $CRON"
+
+# 7. Resumen diario de candidaturas: llama antes a queue_application_digests() y después envía
+curl -s -X POST "$URL/send-outbox" -H "x-cron-secret: $CRON" -H "Content-Type: application/json" -d '{"digests":true,"limit":1}'
+#   -> incluye "digests_queued": N (o "digests_error": true si la RPC falló; el envío sigue igualmente)
+
+# 8. Barrido de empresas pendientes sin revisar (lo que hará el trabajo bolsa-empresas)
+curl -s -X POST "$URL/company-review-ai" -H "x-cron-secret: $CRON" -H "Content-Type: application/json" -d '{"sweep":true}'
+#   -> {"success":true,"sweep":true,"candidates":N,"reviewed":N,"approved":N,"flagged":N,"errors":N,"stale_notified":N}
+#   Sin credenciales o con un secreto incorrecto debe ser 401; con la sesión de un usuario normal, 403.
 ```
 
 Qué esperar de `moderate-job-posting`: `{"ok":true,"results":[...]}`. Una oferta limpia pasa de
@@ -144,17 +164,35 @@ Qué esperar de `moderate-job-posting`: `{"ok":true,"results":[...]}`. Una ofert
 `support@yourcvpassport.com` por la cola). Si la empresa edita mientras se evalúa, vuelve a evaluar
 (hasta 3 evaluaciones) y si el texto sigue cambiando la deja en `MANUAL_REVIEW`.
 
+Qué esperar de `company-review-ai` con `{"sweep":true}`: revisa las empresas `PENDING` sin ninguna revisión
+registrada y con más de 2 minutos (máximo 20 por llamada, las más antiguas primero). Una empresa solo se
+aprueba sola si TODO cuadra (formato fiscal propio del país, dominio del correo de la empresa = dominio de la
+web, correo no gratuito, sin duplicados de NIF/correo/dominio y **el correo confirmado de la cuenta que la
+registró pertenece al dominio de la web o a un subdominio**); si no, queda `PENDING`, se guarda la revisión en
+`company_ai_reviews` y se avisa a `support@yourcvpassport.com` (en ese aviso interno salen las referencias de
+las dos empresas cuando hay un NIF o correo duplicado; nunca en la respuesta ni en los motivos guardados).
+Las que siguen `PENDING` sin revisión pasados 30 minutos generan además un aviso (`company_unreviewed:<id>`,
+una sola vez).
+
+Qué esperar de `moderate-job-posting` (reglas del cierre final): además de las anteriores marca (nunca rechaza)
+salario incoherente (mínimo > máximo, mensual < 100 o > 100.000 en moneda común, importe sin periodo), texto
+idéntico al de otra oferta PUBLISHED / AI_REVIEW de OTRA empresa, título de una categoría muy distinta de la
+elegida y enlaces sospechosos en el cuerpo (IP numérica, `xn--`, `.zip`, `.top`). Cualquier hallazgo o error va a
+`MANUAL_REVIEW`. La interfaz de IA (`ai.ts`) está lista y probada con un proveedor simulado; hoy no hay
+proveedor real (decisión pendiente).
+
 Qué esperar de `send-outbox`: respeta `send_after` y la prioridad (3 avisos internos, 4-5 estado y
-seguridad, 6 avisos de nueva versión legal, 7 cierres, 8 resumen diario, 9 alertas). Cuando se gasta
+seguridad, 6 avisos de nueva versión legal, 7 cierres, 8 resumen diario de candidaturas, 9 alertas). Cuando se gasta
 el 80 % del tope solo salen los de prioridad < 8. Si Brevo contesta cupo agotado (402/429) para la
 ejecución y no gasta intentos. Un aviso masivo de versión legal (`legal_encolar_aviso`, hasta 5000 por
 llamada) sale al ritmo del tope diario (por defecto 250 al día, el resto espera al día siguiente).
 
-## 4. Programación (migración `20261034_programacion_cron.sql`)
+## 4. Programación (migraciones `20261034_programacion_cron.sql` y `20261035_cierre_final.sql`)
 
-La migración habilita `pg_net` y `pg_cron` (pg_cron no estaba instalado; se activa con
-`create extension`), crea `public.bolsa_llamar_funcion(nombre, cuerpo)` y programa estos cuatro
-trabajos. La función es `SECURITY DEFINER`, solo admite las tres funciones de la bolsa, lee el
+La migración 34 habilita `pg_net` y `pg_cron` (pg_cron no estaba instalado; se activa con
+`create extension`), crea `public.bolsa_llamar_funcion(nombre, cuerpo)` y programa los cuatro primeros
+trabajos; la migración 35 añade `bolsa-empresas` y `bolsa-resumenes` y hace que la función admita también
+`company-review-ai`. La función es `SECURITY DEFINER`, solo admite las funciones de la bolsa, lee el
 secreto de `vault.decrypted_secrets` y tiene `EXECUTE` revocado a `anon`, `authenticated` y
 `service_role`; el secreto no está en la migración ni en el repo.
 
@@ -164,6 +202,8 @@ secreto de `vault.decrypted_secrets` y tiene `EXECUTE` revocado a `anon`, `authe
 | `bolsa-correos` | cada 5 minutos (`*/5 * * * *`) | `send-outbox`, sin cuerpo |
 | `bolsa-caducidad` | cada día 03:10 UTC (`10 3 * * *`) | `expire-job-postings`, sin cuerpo |
 | `bolsa-alertas` | cada día 07:00 UTC (`0 7 * * *`) | `send-outbox` con `{"alerts":true}` |
+| `bolsa-empresas` (migración 35) | cada 10 minutos (`*/10 * * * *`) | `company-review-ai` con `{"sweep":true}` |
+| `bolsa-resumenes` (migración 35) | cada día 08:00 UTC (`0 8 * * *`) | `send-outbox` con `{"digests":true}` |
 
 Es reaplicable: desprograma cada trabajo por su nombre antes de crearlo. La migración 30 puede
 haber programado además `expire_job_postings()` directamente si pg_cron YA existía al aplicarla;
@@ -177,7 +217,7 @@ a las mismas URLs, guardando el secreto en un fichero que solo lea root (nunca e
 **Trabajos programados** (SQL editor de Supabase):
 
 ```sql
--- 4 filas: bolsa-alertas, bolsa-caducidad, bolsa-correos, bolsa-moderacion (active = true)
+-- 6 filas: bolsa-alertas, bolsa-caducidad, bolsa-correos, bolsa-empresas, bolsa-moderacion, bolsa-resumenes (active = true)
 select jobid, jobname, schedule, command, active from cron.job order by jobname;
 
 -- última ejecución de cada trabajo (status 'succeeded'; si es 'failed', return_message dice por qué:
@@ -228,34 +268,50 @@ De menor a mayor:
    ```sql
    select cron.unschedule('bolsa-moderacion'); select cron.unschedule('bolsa-correos');
    select cron.unschedule('bolsa-caducidad');  select cron.unschedule('bolsa-alertas');
+   select cron.unschedule('bolsa-empresas');   select cron.unschedule('bolsa-resumenes');
    drop function public.bolsa_llamar_funcion(text, jsonb);
    ```
    Sin cron, las ofertas se quedan en `AI_REVIEW` hasta que un admin pulse «Revisión automática» o
    las resuelva a mano, y la cola no se vacía: es un fallo seguro, nada se publica ni se envía solo.
    (pg_cron y pg_net se dejan instaladas.)
-3. **Cerrar la vía del cron sin tocar la base**: `supabase secrets unset CRON_SECRET`. Las tres funciones
-   dejan de aceptar `x-cron-secret` (siguen aceptando la clave `service_role` y a un admin). El secreto
+3. **Cerrar la vía del cron sin tocar la base**: `supabase secrets unset CRON_SECRET`. Las cuatro funciones
+   (incluida `company-review-ai` para el barrido) dejan de aceptar `x-cron-secret` (siguen aceptando la clave `service_role` y a un admin). El secreto
    del vault, si quieres borrarlo: `delete from vault.secrets where name = 'bolsa_cron_secret';`.
 4. **Retirar una función**: `supabase functions delete send-outbox` (o `moderate-job-posting`,
    `expire-job-postings`). Si se borra `company-review-ai`, el registro de empresa sigue
    funcionando (la web ignora el fallo) y las empresas quedan en `PENDING` para revisión manual.
 5. **Volver a una versión anterior de `signup` o `company-review-ai`**:
    `git checkout <commit-anterior> -- supabase/functions/signup` y volver a desplegar (con
-   `--no-verify-jwt` en `signup`). Ojo: la `company-review-ai` anterior aprobaba con menos
+   `--no-verify-jwt` en `signup`). Ojo: la `company-review-ai` anterior se desplegaba CON verificación de JWT y aprobaba con menos
    condiciones (sin exigir web propia ni patrón fiscal propio del país); es preferible
    borrarla antes que volver a ella.
 6. Las migraciones tienen su propia vuelta atrás en su cabecera; las funciones nuevas no
    escriben nada que obligue a deshacerlas (solo `email_outbox`, `job_postings.status` y
    `companies.status`).
 
-## 7. Pruebas del código (Node, sin dependencias)
+## 7. Pruebas del código (Node, sin dependencias salvo esbuild, que ya está en el repo)
+
+Todas se lanzan con `node <fichero>` desde la raíz del repo (Node 22.18+ carga los `.ts` directamente).
+Para ejecutarlas todas: `for f in $(find supabase/functions -name "*.test.mjs"); do node $f || exit 1; done`.
+Los ficheros `digests.test.mjs` y `sweep.test.mjs` empaquetan el `index.ts` REAL con esbuild y lo ejecutan
+contra una base en memoria y un Brevo falso (`supabase/functions/_shared/testHarness.mjs`): no usan red ni claves.
 
 ```bash
 node supabase/functions/_shared/serviceAuth.test.mjs         # x-cron-secret, service_role y admin
-node supabase/functions/send-outbox/templates.test.mjs       # plantillas es/en (incluye legal_version_notice) y kinds de las migraciones
-node supabase/functions/send-outbox/queue.test.mjs          # cola, tope diario, reintentos
+node supabase/functions/_shared/signupConfirmEmail.test.mjs  # correo de confirmación del alta: candidato / empresa, es / en
+node supabase/functions/send-outbox/templates.test.mjs       # plantillas es/en (todos los kinds de las migraciones 29-35)
+node supabase/functions/send-outbox/queue.test.mjs           # cola, tope diario, reintentos
+node supabase/functions/send-outbox/digests.test.mjs         # { digests: true } / { alerts: true } sobre el index.ts real
 node supabase/functions/sitemap/jobPaths.test.mjs            # URL canónica de ficha en sitemap y correos
 node supabase/functions/moderate-job-posting/rules.test.mjs
+node supabase/functions/moderate-job-posting/extras.test.mjs # salario, duplicado, categoría, enlaces
+node supabase/functions/moderate-job-posting/ai.test.mjs     # interfaz de IA con proveedor simulado
 node supabase/functions/moderate-job-posting/orquestacion.test.mjs
 node supabase/functions/company-review-ai/rules.test.mjs
+node supabase/functions/company-review-ai/sweep.test.mjs     # barrido { sweep: true }, correo de la cuenta, duplicados
+node supabase/functions/signup/validation.test.mjs           # tipo, edad, casillas e idioma del alta
 ```
+
+Además, `tests/qa/signup-pendiente-edge.spec.ts` ejecuta las funciones `signup` y `send-email-confirmation` completas
+con dobles de Deno, Supabase y Brevo (sin red): `QA_PORT=5440 npx playwright test -c tests/qa/playwright.qa.config.ts
+tests/qa/signup-pendiente-edge.spec.ts --project=chromium`.
