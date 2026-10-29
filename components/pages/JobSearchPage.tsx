@@ -1,633 +1,387 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../../supabase/client';
-import toast from 'react-hot-toast';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  MagnifyingGlassIcon,
-  MapPinIcon,
-  BriefcaseIcon,
-  ClockIcon,
-  BuildingOfficeIcon,
-  CurrencyDollarIcon,
-  AdjustmentsHorizontalIcon,
-  XMarkIcon,
-  ArrowRightIcon,
-  LockClosedIcon
+  ArrowsUpDownIcon, BriefcaseIcon, ChevronDownIcon, ExclamationTriangleIcon, GlobeEuropeAfricaIcon,
+  MagnifyingGlassIcon, MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
+import NotFoundPage from '../../pages/NotFoundPage';
+import JobCard from '../jobs/JobCard';
+import JobFiltersBar from '../jobs/JobFiltersBar';
+import JobFiltersChips, { type JobFilterChip } from '../jobs/JobFiltersChips';
+import { buildFilterDefs, optionLabel, type JobFilterValues } from '../jobs/JobFiltersDefs';
+import JobListMotion from '../jobs/JobListMotion';
+import JobListPagination from '../jobs/JobListPagination';
+import JobListSkeleton from '../jobs/JobListSkeleton';
+import { formatCount, formatMoney } from '../jobs/JobListFormat';
+import { useJobsText } from '../jobs/textos';
+import { useJobCountries } from '../jobs/useJobCountries';
+import { fmt } from '../../lib/bolsaText';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { countryCurrency, countryName, isKnownCountry } from '../../lib/jobsCatalog';
+import { jobsCountryPath, readSavedCountry, resolveDefaultCountry, saveCountry } from '../../lib/jobsFormat';
+import { fetchMyApplicationStatuses, searchPublicJobs, type CandidateStatus, type PublicJobRow } from '../../lib/jobsApi';
 
-// SEO del listado de empleos. /jobs es la version inglesa y /empleos la espanola.
-const JOBS_SEO = {
-  es: {
-    title: 'Buscar empleo - Encuentra tu próxima oportunidad',
-    description: 'Consulta ofertas de empleo de empresas verificadas. Filtra por ubicación, nivel de experiencia y modalidad, y postúlate con tu perfil de CV verificado.',
-    keywords: 'buscar empleo, ofertas de trabajo, empleo remoto, empresas verificadas, oportunidades profesionales',
-  },
-  en: {
-    title: 'Job Search - Find Your Next Opportunity',
-    description: 'Browse job opportunities from verified companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile.',
-    keywords: 'job search, job opportunities, remote jobs, verified employers, career opportunities',
-  },
-} as const;
+const PAGE_SIZE = 20;
+const ALL = 'ALL';
 
-interface JobPosting {
-  id: string;
-  title: string;
-  slug: string;
-  company_id: string;
-  department: string | null;
-  employment_type: string;
-  work_mode: string;
-  experience_level: string;
-  location_city: string | null;
-  location_country: string | null;
-  is_remote: boolean;
-  description: string;
-  required_skills: string[];
-  salary_min: number | null;
-  salary_max: number | null;
-  salary_currency: string;
-  show_salary: boolean;
-  published_at: string;
-  application_deadline: string | null;
-  company: {
-    name: string;
-    logo_url: string | null;
-    website: string | null;
-  };
-}
+const primaryBtn = 'inline-flex h-11 items-center justify-center rounded-xl bg-cv-blue px-5 text-[15px] font-semibold text-white transition-colors duration-150 hover:bg-cv-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cv-light-gray dark:focus-visible:ring-offset-dark-bg-primary';
+const secondaryBtn = 'inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-[15px] font-medium text-slate-800 transition-colors duration-150 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cv-light-gray dark:border-dark-border dark:bg-dark-bg-secondary dark:text-dark-text-primary dark:hover:bg-dark-bg-tertiary dark:focus-visible:ring-offset-dark-bg-primary';
+const fieldInput = 'h-12 w-full bg-transparent pl-11 pr-3 text-base text-slate-900 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cv-blue rounded-xl dark:text-dark-text-primary dark:placeholder:text-dark-text-secondary';
+const fieldIcon = 'pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 dark:text-dark-text-secondary';
 
+/**
+ * Listado publico de ofertas. Rutas: /empleos y /jobs (pais por defecto o ?country=),
+ * /:pais/empleos (pais en la direccion; fija el espanol, igual que /empleos).
+ */
 const JobSearchPage: React.FC = () => {
+  const tx = useJobsText();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { country: routeCountry } = useParams<{ country?: string }>();
+  const [params, setParams] = useSearchParams();
+  const { user, profile, loading: authLoading, profileLoading } = useAuth();
   const { lang, setLang } = useLanguage();
-  const t = useTranslations();
+  const countries = useJobCountries();
 
-  // /empleos fija el espanol y /jobs el ingles (estas rutas no estan en routeConfig,
-  // asi que LanguageContext no las detecta por la URL).
-  const pathLang = location.pathname.startsWith('/empleos') ? 'es' : 'en';
+  // /empleos y /xx/empleos fijan el espanol, /jobs el ingles (rutas fuera de routeConfig:
+  // LanguageContext no las detecta por la URL).
+  const pathLang = location.pathname.startsWith('/jobs') ? 'en' : 'es';
   useEffect(() => {
     if (lang !== pathLang) setLang(pathLang);
     // Solo al entrar en la ruta: el selector de idioma puede cambiarlo despues.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathLang]);
-  const jobsBasePath = pathLang === 'es' ? '/empleos' : '/jobs';
 
-  const [jobs, setJobs] = useState<JobPosting[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [employmentTypeFilter, setEmploymentTypeFilter] = useState('');
-  const [workModeFilter, setWorkModeFilter] = useState('');
-  const [experienceLevelFilter, setExperienceLevelFilter] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [totalJobs, setTotalJobs] = useState(0);
+  // --- Pais -----------------------------------------------------------------
+  const queryCountry = params.get('country');
+  const urlCountry = (routeCountry || queryCountry || '').toUpperCase();
+  const invalidRouteCountry = !!routeCountry && !isKnownCountry(routeCountry, countries);
+  const authReady = !authLoading && !profileLoading;
 
-  useEffect(() => {
-    loadJobs();
-  }, [searchTerm, locationFilter, employmentTypeFilter, workModeFilter, experienceLevelFilter]);
+  const country = useMemo<string>(() => {
+    if (urlCountry === ALL) return ALL;
+    if (urlCountry && isKnownCountry(urlCountry, countries)) return urlCountry;
+    const saved = readSavedCountry();
+    if (saved === ALL) return ALL;
+    if (saved && isKnownCountry(saved, countries)) return saved.toUpperCase();
+    return resolveDefaultCountry(profile?.country_code, countries);
+  }, [urlCountry, countries, profile?.country_code]);
 
-  const loadJobs = async () => {
-    try {
-      setLoading(true);
-
-      // Public view: limit to 8 featured jobs
-      // Authenticated users should use the dashboard for full experience
-      const limit = user ? 50 : 8;
-
-      // Usar la función RPC para búsqueda pública optimizada
-      const { data, error } = await supabase.rpc('search_public_jobs', {
-        p_search_term: searchTerm || null,
-        p_location: locationFilter || null,
-        p_employment_type: employmentTypeFilter || null,
-        p_work_mode: workModeFilter || null,
-        p_experience_level: experienceLevelFilter || null,
-        p_limit: limit,
-        p_offset: 0
-      });
-
-      if (error) {
-        console.error('Error loading jobs:', error);
-        throw error;
-      }
-
-      // Transformar datos al formato esperado
-      const transformedJobs = (data || []).map((job: any) => ({
-        id: job.id,
-        title: job.title,
-        slug: job.slug,
-        company_id: job.company_id,
-        department: null,
-        employment_type: job.employment_type,
-        work_mode: job.work_mode,
-        experience_level: job.experience_level,
-        location_city: job.location_city,
-        location_country: job.location_country,
-        is_remote: job.is_remote,
-        description: job.description,
-        required_skills: job.required_skills || [],
-        salary_min: job.salary_min,
-        salary_max: job.salary_max,
-        salary_currency: job.salary_currency,
-        show_salary: job.show_salary,
-        published_at: job.published_at,
-        application_deadline: job.application_deadline,
-        company: {
-          name: job.company_name,
-          logo_url: job.company_logo_url,
-          website: null
-        }
-      }));
-
-      setJobs(transformedJobs);
-      setTotalJobs(transformedJobs.length);
-    } catch (error: any) {
-      console.error('Error loading jobs:', error);
-      toast.error(t.company?.jobSearch?.errorLoading || 'Error loading jobs. Please try again.');
-    } finally {
-      setLoading(false);
+  const changeCountry = (code: string) => {
+    saveCountry(code);
+    if (pathLang === 'es') {
+      navigate(code === ALL ? '/empleos?country=all' : jobsCountryPath(code, 'es'));
+    } else {
+      navigate(code === ALL ? '/jobs?country=all' : jobsCountryPath(code, 'en'));
     }
   };
+
+  // --- Filtros (en la URL, para poder compartir la busqueda) -------------------
+  const category = params.get('cat') || '';
+  const workMode = params.get('mode') || '';
+  const contract = params.get('contract') || '';
+  const schedule = params.get('sched') || '';
+  const minSalaryRaw = params.get('min') || '';
+  const days = params.get('days') || '';
+  const expRaw = params.get('exp') || '';
+  // Solo enteros 0-60; un valor raro en la URL se ignora
+  const maxExperience = /^\d{1,2}$/.test(expRaw) && Number(expRaw) <= 60 ? Number(expRaw) : null;
+  const exp = maxExperience === null ? '' : String(maxExperience);
+  const page = Math.max(1, Number(params.get('page')) || 1);
+
+  const [qInput, setQInput] = useState(params.get('q') || '');
+  const [cityInput, setCityInput] = useState(params.get('city') || '');
+  const qDebounced = useDebouncedValue(qInput, 400);
+  const cityDebounced = useDebouncedValue(cityInput, 400);
+
+  const setParam = useCallback((patch: Record<string, string | null>, resetPage = true) => {
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [k, v] of Object.entries(patch)) {
+        if (v) next.set(k, v); else next.delete(k);
+      }
+      if (resetPage) next.delete('page');
+      return next;
+    }, { replace: true });
+  }, [setParams]);
+
+  // Texto escrito -> URL (con retardo)
+  useEffect(() => {
+    if ((params.get('q') || '') !== qDebounced.trim()) setParam({ q: qDebounced.trim() || null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qDebounced]);
+  useEffect(() => {
+    if ((params.get('city') || '') !== cityDebounced.trim()) setParam({ city: cityDebounced.trim() || null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityDebounced]);
+
+  const q = params.get('q') || '';
+  const city = params.get('city') || '';
+  const hasFilters = !!(q || city || category || workMode || contract || schedule || minSalaryRaw || days || exp);
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setLocationFilter('');
-    setEmploymentTypeFilter('');
-    setWorkModeFilter('');
-    setExperienceLevelFilter('');
+    setQInput('');
+    setCityInput('');
+    setParams((prev) => {
+      const next = new URLSearchParams();
+      const c = prev.get('country');
+      if (c) next.set('country', c);
+      return next;
+    }, { replace: true });
   };
 
-  const getEmploymentTypeLabel = (type: string) => {
-    const filters = t.company?.jobSearch?.filters?.employmentType;
-    const labels: Record<string, string> = {
-      FULL_TIME: filters?.fullTime || 'Full Time',
-      PART_TIME: filters?.partTime || 'Part Time',
-      CONTRACT: filters?.contract || 'Contract',
-      TEMPORARY: filters?.temporary || 'Temporary',
-      INTERNSHIP: filters?.internship || 'Internship',
-      FREELANCE: filters?.freelance || 'Freelance',
-    };
-    return labels[type] || type;
+  // «Buscar»: aplica ya lo escrito, sin esperar al retardo
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setParam({ q: qInput.trim() || null, city: cityInput.trim() || null });
+    (document.activeElement as HTMLElement | null)?.blur?.();
   };
 
-  const getWorkModeLabel = (mode: string) => {
-    const filters = t.company?.jobSearch?.filters?.workMode;
-    const labels: Record<string, string> = {
-      REMOTE: filters?.remote || 'Remote',
-      ONSITE: filters?.onsite || 'On-site',
-      HYBRID: filters?.hybrid || 'Hybrid',
-    };
-    return labels[mode] || mode;
-  };
+  // --- Datos ------------------------------------------------------------------
+  const [rows, setRows] = useState<PublicJobRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [applied, setApplied] = useState<Map<string, CandidateStatus>>(new Map());
+  const requestId = useRef(0);
 
-  const getExperienceLevelLabel = (level: string) => {
-    const filters = t.company?.jobSearch?.filters?.experienceLevel;
-    const labels: Record<string, string> = {
-      ENTRY: filters?.entry || 'Entry Level',
-      JUNIOR: filters?.junior || 'Junior',
-      MID: filters?.mid || 'Mid-Level',
-      SENIOR: filters?.senior || 'Senior',
-      LEAD: filters?.lead || 'Lead',
-      EXECUTIVE: filters?.executive || 'Executive',
-    };
-    return labels[level] || level;
-  };
+  const minSalary = minSalaryRaw && Number(minSalaryRaw) > 0 ? Number(minSalaryRaw) : null;
 
-  const formatSalary = (min: number | null, max: number | null, currency: string) => {
-    if (!min && !max) return null;
-    if (min && max) {
-      return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
+  const load = useCallback(async () => {
+    const id = ++requestId.current;
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await searchPublicJobs({
+        country: country === ALL ? null : country,
+        category: category || null,
+        workMode: workMode || null,
+        contract: contract || null,
+        schedule: schedule || null,
+        minSalary,
+        postedWithinDays: days ? Number(days) : null,
+        maxExperienceYears: maxExperience,
+        search: q || null,
+        city: city || null,
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+      });
+      if (id !== requestId.current) return;
+      setRows(res.rows);
+      setTotal(res.total);
+    } catch (e) {
+      if (id !== requestId.current) return;
+      console.error('Error loading jobs', e);
+      setError(true);
+      setRows([]);
+      setTotal(0);
+    } finally {
+      if (id === requestId.current) setLoading(false);
     }
-    if (min) return `${t.company?.jobSearch?.salaryFrom || 'From'} ${currency} ${min.toLocaleString()}`;
-    return `${t.company?.jobSearch?.salaryUpTo || 'Up to'} ${currency} ${max!.toLocaleString()}`;
+  }, [country, category, workMode, contract, schedule, minSalary, days, maxExperience, q, city, page]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    void load();
+  }, [authReady, load]);
+
+  // «Ya inscrito»: la RPC ya lo marca, y ademas se cruza con my_job_applications
+  useEffect(() => {
+    if (!user) { setApplied(new Map()); return; }
+    let alive = true;
+    fetchMyApplicationStatuses().then((m) => { if (alive) setApplied(m); }).catch(() => { /* la RPC ya marca los inscritos */ });
+    return () => { alive = false; };
+  }, [user]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const goPage = (p: number) => {
+    setParam({ page: p > 1 ? String(p) : null }, false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const getDaysAgo = (date: string) => {
-    const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return t.company?.jobSearch?.today || 'Today';
-    if (days === 1) return t.company?.jobSearch?.yesterday || 'Yesterday';
-    const prefix = t.company?.jobSearch?.daysAgoPrefix || '';
-    const suffix = t.company?.jobSearch?.daysAgoSuffix || 'days ago';
-    return prefix ? `${prefix} ${days} ${suffix}` : `${days} ${suffix}`;
-  };
+  const currency = country !== ALL ? countryCurrency(country, countries) : null;
+  const countryLabel = country === ALL ? tx.allCountries : countryName(country, pathLang, countries);
+
+  // Filtros de las pills y chips quitables (el texto y la ciudad viven en el buscador)
+  const filterValues: JobFilterValues = { cat: category, contract, sched: schedule, mode: workMode, days, exp, min: minSalaryRaw };
+  const defs = useMemo(() => buildFilterDefs(tx, pathLang), [tx, pathLang]);
+  const chips = useMemo<JobFilterChip[]>(() => {
+    const out: JobFilterChip[] = [];
+    if (q) out.push({ id: 'q', label: fmt(tx.chipSearch, { q }), onRemove: () => { setQInput(''); setParam({ q: null }); } });
+    if (city) out.push({ id: 'city', label: fmt(tx.chipCity, { city }), onRemove: () => { setCityInput(''); setParam({ city: null }); } });
+    for (const def of defs) {
+      const v = filterValues[def.key];
+      if (v) out.push({ id: def.key, label: optionLabel(def, v), onRemove: () => setParam({ [def.key]: null }) });
+    }
+    if (minSalaryRaw) {
+      const n = Number(minSalaryRaw);
+      out.push({
+        id: 'min',
+        label: fmt(tx.chipSalary, { amount: currency ? formatMoney(n, currency, pathLang) : formatCount(n, pathLang) }),
+        onRemove: () => setParam({ min: null }),
+      });
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, city, category, contract, schedule, workMode, days, exp, minSalaryRaw, currency, defs, tx, pathLang]);
+
+  if (invalidRouteCountry) return <NotFoundPage />;
+
+  // El titulo depende del pais SOLO si va en la direccion (/mx/empleos): /empleos y /jobs llevan
+  // el titulo generico (es el que sirven seo/static-meta.mjs y el servidor, igual para todos).
+  const seoByCountry = !!routeCountry && country !== ALL;
+  const seoTitle = seoByCountry ? fmt(tx.seoTitleCountry, { country: countryLabel }) : tx.seoTitle;
+  const seoDescription = seoByCountry ? fmt(tx.seoDescriptionCountry, { country: countryLabel }) : tx.seoDescription;
+  // Busquedas filtradas y paginas sucesivas no se indexan (contenido duplicado)
+  const noindex = hasFilters || page > 1 || queryCountry === 'all';
 
   return (
-    <div className="min-h-screen bg-cv-light-gray dark:bg-dark-bg-primary">
-      <PageSEO
-        title={JOBS_SEO[pathLang].title}
-        description={JOBS_SEO[pathLang].description}
-        keywords={JOBS_SEO[pathLang].keywords}
-        lang={pathLang}
-      />
-      {/* Hero Section */}
-      <section className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 dark:text-dark-text-primary leading-tight">
-              {t.company?.jobSearch?.hero?.title || 'Find your next'} <span className="text-cv-blue dark:text-cv-blue-light">{t.company?.jobSearch?.hero?.titleHighlight || 'job'}</span>
-            </h1>
-            <p className="mt-4 text-lg md:text-xl text-gray-600 dark:text-dark-text-secondary max-w-2xl mx-auto">
-              {user
-                ? (t.company?.jobSearch?.hero?.subtitleAuthenticated || 'Thousands of opportunities await you')
-                : (t.company?.jobSearch?.hero?.subtitleGuest || 'Create your profile and access thousands of personalized offers')}
-            </p>
-            {!user && (
-              <div className="mt-8 flex justify-center gap-4">
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="px-8 py-4 bg-gradient-to-r from-cv-blue to-indigo-600 text-white rounded-lg font-bold text-lg hover:shadow-xl transition-all transform hover:scale-105"
-                >
-                  {t.company?.jobSearch?.hero?.signUpFree || 'Sign Up Free'}
-                  <ArrowRightIcon className="inline-block w-5 h-5 ml-2" />
-                </button>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="px-8 py-4 bg-white dark:bg-dark-bg-primary border-2 border-cv-blue text-cv-blue dark:text-cv-blue-light rounded-lg font-bold text-lg hover:bg-cv-blue/5 dark:hover:bg-cv-blue/10 transition-all"
-                >
-                  {t.company?.jobSearch?.hero?.signIn || 'Sign In'}
-                </button>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen bg-cv-light-gray accent-cv-blue selection:bg-cv-blue/20 dark:bg-dark-bg-primary dark:selection:bg-cv-blue/40">
+      <PageSEO title={seoTitle} description={seoDescription} lang={pathLang} noindex={noindex} />
+      <JobListMotion />
 
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto bg-white dark:bg-dark-bg-primary border border-gray-200 dark:border-dark-border rounded-lg shadow-lg dark:shadow-2xl p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-dark-text-tertiary" />
-                <input
-                  type="text"
-                  placeholder={t.company.jobSearch.searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  disabled={!user}
-                  className="w-full pl-10 pr-4 py-3 bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-dark-text-primary placeholder-gray-500 dark:placeholder-dark-text-tertiary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+      <section className="border-b border-blue-100 bg-blue-50/70 dark:border-dark-border dark:bg-dark-bg-secondary">
+        <div className="mx-auto max-w-6xl px-4 py-9 sm:px-6 md:py-12 lg:px-8">
+          <h1 className="max-w-3xl text-balance text-3xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-4xl lg:text-[2.75rem] dark:text-dark-text-primary">
+            {seoByCountry ? fmt(tx.seoTitleCountry, { country: countryLabel }) : tx.heroTitle}
+          </h1>
+          <p className="mt-3 max-w-3xl text-pretty text-base leading-relaxed text-slate-700 sm:text-lg dark:text-dark-text-secondary">{tx.heroSubtitle}</p>
+
+          <form
+            role="search"
+            onSubmit={submitSearch}
+            className="mt-7 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_32px_-16px_rgba(15,23,42,.18)] md:flex-row md:items-center dark:border-dark-border dark:bg-dark-bg-primary dark:shadow-[0_12px_32px_-16px_rgba(0,0,0,.6)]"
+          >
+            <div className="flex min-w-0 flex-1 flex-col divide-y divide-slate-200 md:flex-row md:divide-x md:divide-y-0 dark:divide-dark-border">
+              <div className="relative min-w-0 md:flex-[1.6]">
+                <label htmlFor="jf-q" className="sr-only">{tx.searchLabel}</label>
+                <MagnifyingGlassIcon className={fieldIcon} aria-hidden="true" />
+                <input id="jf-q" type="search" value={qInput} onChange={(e) => setQInput(e.target.value)} placeholder={tx.searchPlaceholder} className={fieldInput} />
               </div>
-              <div className="relative">
-                <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-dark-text-tertiary" />
-                <input
-                  type="text"
-                  placeholder={t.company.jobSearch.locationPlaceholder}
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                  disabled={!user}
-                  className="w-full pl-10 pr-4 py-3 bg-cv-light-gray dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-dark-text-primary placeholder-gray-500 dark:placeholder-dark-text-tertiary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+              <div className="relative min-w-0 md:flex-1">
+                <label htmlFor="jf-city" className="sr-only">{tx.cityLabel}</label>
+                <MapPinIcon className={fieldIcon} aria-hidden="true" />
+                <input id="jf-city" type="text" value={cityInput} onChange={(e) => setCityInput(e.target.value)} placeholder={tx.cityPlaceholder} className={fieldInput} />
               </div>
-              <button
-                onClick={() => {
-                  if (!user) {
-                    navigate('/signup');
-                  } else {
-                    setShowFilters(!showFilters);
-                  }
-                }}
-                className="flex items-center justify-center px-6 py-3 bg-cv-blue dark:bg-cv-blue text-white rounded-lg font-semibold hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light transition-all duration-300 transform hover:scale-105 shadow-lg relative group"
-              >
-                {!user && (
-                  <LockClosedIcon className="absolute -top-2 -right-2 h-5 w-5 text-white bg-red-500 rounded-full p-1 shadow-md animate-pulse" />
-                )}
-                <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2" />
-                {user ? (t.company?.jobSearch?.advancedFilters || 'Filters') : (t.company?.jobSearch?.hero?.signUpFree || 'Register to filter')}
-                {user && (employmentTypeFilter || workModeFilter || experienceLevelFilter) && (
-                  <span className="ml-2 bg-white text-cv-blue rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold">
-                    {[employmentTypeFilter, workModeFilter, experienceLevelFilter].filter(Boolean).length}
-                  </span>
-                )}
-              </button>
+              <div className="relative min-w-0 md:flex-1">
+                <label htmlFor="jf-country" className="sr-only">{tx.countryLabel}</label>
+                <GlobeEuropeAfricaIcon className={fieldIcon} aria-hidden="true" />
+                <select
+                  id="jf-country"
+                  value={country}
+                  onChange={(e) => changeCountry(e.target.value)}
+                  className={`${fieldInput} cursor-pointer appearance-none pr-10`}
+                >
+                  <option value={ALL}>{tx.allCountries}</option>
+                  {countries.map((c) => (
+                    <option key={c.code} value={c.code}>{pathLang === 'en' ? c.name_en : c.name_es}</option>
+                  ))}
+                </select>
+                <ChevronDownIcon className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 stroke-2 text-slate-500 dark:text-dark-text-secondary" aria-hidden="true" />
+              </div>
             </div>
-            {!user && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 dark:text-dark-text-tertiary">
-                  🔒 {t.company.jobSearch.limitedAccessMessage}<button onClick={() => navigate('/signup')} className="text-cv-blue dark:text-cv-blue-light font-semibold hover:underline">{t.company.jobSearch.createAccount}</button>{t.company.jobSearch.fullAccessMessage}
-                </p>
-              </div>
-            )}
+            <button
+              type="submit"
+              className="inline-flex h-12 items-center justify-center rounded-xl bg-cv-blue px-8 text-base font-semibold text-white transition-colors duration-150 hover:bg-cv-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-primary"
+            >
+              {tx.searchButton}
+            </button>
+          </form>
+
+          <div className="mt-4">
+            <JobFiltersBar
+              lang={pathLang}
+              values={filterValues}
+              currency={currency}
+              activeCount={chips.length}
+              total={total}
+              loading={loading}
+              onChange={(patch) => setParam(patch)}
+              onClear={clearFilters}
+            />
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters Panel */}
-        {showFilters && (
-          <div className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-lg shadow-lg dark:shadow-2xl p-6 mb-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text-primary flex items-center">
-                <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2 text-cv-blue dark:text-cv-blue-light" />
-                {t.company?.jobSearch?.advancedFilters || 'Advanced Filters'}
-              </h3>
-              <button
-                onClick={() => setShowFilters(false)}
-                className="text-gray-400 dark:text-dark-text-tertiary hover:text-gray-600 dark:hover:text-dark-text-secondary transition-colors"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                  <BriefcaseIcon className="h-4 w-4 inline mr-1" />
-                  {t.company.jobSearch.filters.employmentType.label}
-                </label>
-                <select
-                  value={employmentTypeFilter}
-                  onChange={(e) => setEmploymentTypeFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-cv-light-gray dark:bg-dark-bg-primary border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-dark-text-primary transition-all"
-                >
-                  <option value="">{t.company.jobSearch.filters.all}</option>
-                  <option value="FULL_TIME">{t.company.jobSearch.filters.employmentType.fullTime}</option>
-                  <option value="PART_TIME">{t.company.jobSearch.filters.employmentType.partTime}</option>
-                  <option value="CONTRACT">{t.company.jobSearch.filters.employmentType.contract}</option>
-                  <option value="TEMPORARY">{t.company.jobSearch.filters.employmentType.temporary}</option>
-                  <option value="INTERNSHIP">{t.company.jobSearch.filters.employmentType.internship}</option>
-                  <option value="FREELANCE">{t.company.jobSearch.filters.employmentType.freelance}</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                  <MapPinIcon className="h-4 w-4 inline mr-1" />
-                  {t.company.jobSearch.filters.workMode.label}
-                </label>
-                <select
-                  value={workModeFilter}
-                  onChange={(e) => setWorkModeFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-cv-light-gray dark:bg-dark-bg-primary border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-dark-text-primary transition-all"
-                >
-                  <option value="">{t.company.jobSearch.filters.allModes}</option>
-                  <option value="REMOTE">{t.company.jobSearch.filters.workMode.remote}</option>
-                  <option value="ONSITE">{t.company.jobSearch.filters.workMode.onsite}</option>
-                  <option value="HYBRID">{t.company.jobSearch.filters.workMode.hybrid}</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
-                  <ClockIcon className="h-4 w-4 inline mr-1" />
-                  {t.company.jobSearch.filters.experienceLevel.label}
-                </label>
-                <select
-                  value={experienceLevelFilter}
-                  onChange={(e) => setExperienceLevelFilter(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-cv-light-gray dark:bg-dark-bg-primary border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue dark:focus:ring-cv-blue-light focus:border-transparent text-gray-900 dark:text-dark-text-primary transition-all"
-                >
-                  <option value="">{t.company.jobSearch.filters.allLevels}</option>
-                  <option value="ENTRY">{t.company.jobSearch.filters.experienceLevel.entry}</option>
-                  <option value="JUNIOR">{t.company.jobSearch.filters.experienceLevel.junior}</option>
-                  <option value="MID">{t.company.jobSearch.filters.experienceLevel.mid}</option>
-                  <option value="SENIOR">{t.company.jobSearch.filters.experienceLevel.senior}</option>
-                  <option value="LEAD">{t.company.jobSearch.filters.experienceLevel.lead}</option>
-                  <option value="EXECUTIVE">{t.company.jobSearch.filters.experienceLevel.executive}</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={clearFilters}
-                className="px-6 py-2.5 text-gray-600 dark:text-dark-text-secondary hover:text-cv-blue dark:hover:text-cv-blue-light font-medium transition-colors"
-              >
-                {t.company?.jobSearch?.clearFilters || 'Clear filters'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600 dark:text-dark-text-secondary text-lg">
-            {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin h-5 w-5 mr-2 text-cv-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {t.company.jobSearch.searching}
-              </span>
-            ) : (
-              <>
-                <span className="font-bold text-2xl text-cv-blue dark:text-cv-blue-light">{totalJobs}</span>
-                <span className="ml-2">{totalJobs !== 1 ? t.company.jobSearch.resultsCount.plural : t.company.jobSearch.resultsCount.singular} {!user ? t.company.jobSearch.resultsCount.featured : t.company.jobSearch.resultsCount.found}</span>
-                {!user && (
-                  <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                    <LockClosedIcon className="h-4 w-4 mr-1" />
-                    {t.company.jobSearch.limitedView} · {t.company.jobSearch.registerToSeeAll}
+      <main className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
+        <div className="mb-5 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <p className="min-h-6 text-[15px] text-slate-600 tabular-nums dark:text-dark-text-secondary" aria-live="polite">
+              {!loading && !error && (
+                <>
+                  <span className="font-semibold text-slate-900 dark:text-dark-text-primary">
+                    {total === 1 ? tx.resultsOne : fmt(tx.resultsMany, { n: formatCount(total, pathLang) })}
                   </span>
-                )}
-              </>
+                  {country !== ALL && ` ${fmt(tx.resultsIn, { country: countryLabel })}`}
+                </>
+              )}
+            </p>
+            {!loading && !error && rows.length > 1 && (
+              <p className="hidden items-center gap-1.5 text-sm text-slate-600 sm:inline-flex dark:text-dark-text-secondary">
+                <ArrowsUpDownIcon className="h-4 w-4" aria-hidden="true" />
+                <span>{tx.sortLabel}: {tx.sortRecent}</span>
+              </p>
             )}
-          </p>
+          </div>
+          <JobFiltersChips chips={chips} onClear={clearFilters} />
         </div>
 
-        {/* Jobs List */}
-        {loading ? (
-          <div className="flex flex-col justify-center items-center py-24">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 dark:border-dark-border"></div>
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-cv-blue dark:border-cv-blue-light border-t-transparent absolute top-0"></div>
-            </div>
-            <p className="mt-6 text-gray-600 dark:text-dark-text-secondary font-medium">{t.company.jobSearch.loading}</p>
-          </div>
-        ) : jobs.length === 0 ? (
-          <div className="bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-lg shadow-lg dark:shadow-2xl p-16 text-center">
-            <BriefcaseIcon className="h-20 w-20 text-gray-300 dark:text-dark-text-tertiary mx-auto mb-6" />
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary mb-3">
-              {t.company.jobSearch.noJobsFound}
-            </h3>
-            <p className="text-gray-600 dark:text-dark-text-secondary mb-6 max-w-md mx-auto">
-              {t.company.jobSearch.tryDifferentFilters}
-            </p>
-            <button
-              onClick={clearFilters}
-              className="px-8 py-3 bg-cv-blue dark:bg-cv-blue text-white rounded-lg font-semibold hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              {t.company?.jobSearch?.clearFilters || 'Clear filters'}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {jobs.map((job, index) => (
-              <React.Fragment key={job.id}>
-                <div
-                  onClick={() => navigate(`${jobsBasePath}/${job.slug}`)}
-                  className={`group bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-border rounded-lg shadow-lg dark:shadow-2xl hover:shadow-xl dark:hover:shadow-cv-blue-light/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer p-6 ${
-                    !user && index >= 5 ? 'opacity-60 blur-sm pointer-events-none' : ''
-                  }`}
-                >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    {/* Company Logo */}
-                    {job.company.logo_url ? (
-                      <div className="flex-shrink-0">
-                        <img
-                          src={job.company.logo_url}
-                          alt={job.company.name}
-                          className="h-16 w-16 rounded-lg object-cover border-2 border-gray-100 dark:border-dark-border"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex-shrink-0 h-16 w-16 rounded-lg bg-cv-light-gray dark:bg-dark-bg-tertiary flex items-center justify-center border-2 border-gray-100 dark:border-dark-border">
-                        <BuildingOfficeIcon className="h-8 w-8 text-cv-blue dark:text-cv-blue-light" />
-                      </div>
-                    )}
+        {loading && <JobListSkeleton />}
 
-                    {/* Job Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-gray-800 dark:text-dark-text-primary mb-1 group-hover:text-cv-blue dark:group-hover:text-cv-blue-light transition-colors">
-                        {job.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-dark-text-secondary mb-3 flex items-center">
-                        <BuildingOfficeIcon className="h-4 w-4 mr-1.5" />
-                        {job.company.name}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {job.employment_type && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue dark:text-cv-blue-light">
-                            <BriefcaseIcon className="h-3 w-3 mr-1" />
-                            {getEmploymentTypeLabel(job.employment_type)}
-                          </span>
-                        )}
-                        {job.work_mode && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-cv-green/10 dark:bg-cv-green/20 text-cv-green dark:text-cv-green">
-                            {getWorkModeLabel(job.work_mode)}
-                          </span>
-                        )}
-                        {job.is_remote && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                            <MapPinIcon className="h-3 w-3 mr-1" />
-                            {t.company?.jobSearch?.remoteTag || 'Remote'}
-                          </span>
-                        )}
-                        {!job.is_remote && job.location_city && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-dark-text-secondary">
-                            <MapPinIcon className="h-3 w-3 mr-1" />
-                            {job.location_city}, {job.location_country}
-                          </span>
-                        )}
-                        {job.experience_level && (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
-                            {getExperienceLevelLabel(job.experience_level)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Skills */}
-                      {job.required_skills && job.required_skills.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {job.required_skills.slice(0, 5).map((skill, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-0.5 bg-cv-light-gray dark:bg-dark-bg-primary text-gray-700 dark:text-dark-text-secondary text-xs rounded border border-gray-200 dark:border-dark-border"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                          {job.required_skills.length > 5 && (
-                            <span className="px-2 py-0.5 text-gray-500 dark:text-dark-text-tertiary text-xs">
-                              +{job.required_skills.length - 5} {t.company?.jobSearch?.moreSkills || 'more'}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right Side - Salary & Date */}
-                  <div className="text-right ml-6 flex-shrink-0">
-                    {job.show_salary && (job.salary_min || job.salary_max) && (
-                      <div className="mb-3 px-3 py-2 bg-cv-green/10 dark:bg-cv-green/20 rounded-lg">
-                        <div className="flex items-center justify-end text-cv-green font-semibold text-sm mb-0.5">
-                          <CurrencyDollarIcon className="h-4 w-4 mr-1" />
-                          {formatSalary(job.salary_min, job.salary_max, job.salary_currency)}
-                        </div>
-                        <div className="text-xs text-gray-600 dark:text-dark-text-tertiary">{t.company.jobSearch.salary}</div>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-end text-xs text-gray-500 dark:text-dark-text-tertiary">
-                      <ClockIcon className="h-3.5 w-3.5 mr-1" />
-                      {getDaysAgo(job.published_at)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description Preview */}
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-dark-border">
-                  <p className="text-gray-600 dark:text-dark-text-secondary line-clamp-2 text-sm leading-relaxed">
-                    {job.description}
-                  </p>
-                  <div className="mt-3 flex items-center text-cv-blue dark:text-cv-blue-light font-medium text-sm group-hover:underline">
-                    {t.company.jobSearch.viewDetails}
-                    <svg className="ml-1 h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA after 5th job for non-authenticated users */}
-              {!user && index === 4 && (
-                <div className="relative">
-                  <div className="bg-gradient-to-r from-cv-blue to-indigo-600 rounded-lg shadow-2xl p-10 text-center text-white">
-                    <div className="flex justify-center mb-4">
-                      <LockClosedIcon className="w-16 h-16" />
-                    </div>
-                    <h3 className="text-3xl font-bold mb-3">
-                      {t.company?.jobSearch?.cta?.title || 'Want to see all job offers?'}
-                    </h3>
-                    <p className="text-lg opacity-90 mb-6 max-w-2xl mx-auto">
-                      {t.company?.jobSearch?.cta?.subtitle || 'Create your free profile and access:'}
-                    </p>
-                    <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-3xl mx-auto">
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                        <div className="text-4xl mb-2">🎯</div>
-                        <div className="font-semibold mb-1">{t.company?.jobSearch?.cta?.personalizedOffers || 'Personalized Offers'}</div>
-                        <div className="text-sm opacity-80">{t.company?.jobSearch?.cta?.personalizedOffersDesc || 'Based on your profile and skills'}</div>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                        <div className="text-4xl mb-2">📊</div>
-                        <div className="font-semibold mb-1">{t.company?.jobSearch?.cta?.matchScore || 'Match Score'}</div>
-                        <div className="text-sm opacity-80">{t.company?.jobSearch?.cta?.matchScoreDesc || 'See your compatibility with each offer'}</div>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                        <div className="text-4xl mb-2">💾</div>
-                        <div className="font-semibold mb-1">{t.company?.jobSearch?.cta?.saveAndApply || 'Save & Apply'}</div>
-                        <div className="text-sm opacity-80">{t.company?.jobSearch?.cta?.saveAndApplyDesc || 'Manage your applications in one place'}</div>
-                      </div>
-                    </div>
-                    <div className="flex justify-center gap-4">
-                      <button
-                        onClick={() => navigate('/signup')}
-                        className="px-10 py-4 bg-white text-cv-blue rounded-lg font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
-                      >
-                        {t.company?.jobSearch?.cta?.createAccountFree || 'Create Free Account'}
-                        <ArrowRightIcon className="inline-block w-5 h-5 ml-2" />
-                      </button>
-                      <button
-                        onClick={() => navigate('/login')}
-                        className="px-10 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold text-lg hover:bg-white/10 transition-all"
-                      >
-                        {t.company?.jobSearch?.cta?.alreadyHaveAccount || 'Already have an account'}
-                      </button>
-                    </div>
-                    <p className="mt-6 text-sm opacity-75">
-                      ✓ {t.company?.jobSearch?.cta?.freeForever || 'Free forever'} · ✓ {t.company?.jobSearch?.cta?.noCreditCard || 'No credit card'} · ✓ {t.company?.jobSearch?.cta?.setupTime || 'Setup in 2 minutes'}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </React.Fragment>
-            ))}
+        {!loading && error && (
+          <div role="alert" className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center dark:border-dark-border dark:bg-dark-bg-secondary">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+              <ExclamationTriangleIcon className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-dark-text-primary">{tx.errorTitle}</h2>
+            <p className="mx-auto mt-1 max-w-md text-slate-600 dark:text-dark-text-secondary">{tx.errorHint}</p>
+            <button type="button" onClick={() => void load()} className={`${primaryBtn} mt-6`}>{tx.retry}</button>
           </div>
         )}
-      </div>
+
+        {!loading && !error && rows.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-300 px-6 py-14 text-center dark:border-dark-border-light">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-dark-bg-tertiary dark:text-dark-text-secondary">
+              {hasFilters ? <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" /> : <BriefcaseIcon className="h-6 w-6" aria-hidden="true" />}
+            </span>
+            <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+              {hasFilters ? tx.noResultsTitle : tx.emptyTitle}
+            </h2>
+            <p className="mx-auto mt-1 max-w-md text-slate-600 dark:text-dark-text-secondary">{hasFilters ? tx.noResultsHint : tx.emptyHint}</p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {hasFilters && (
+                <button type="button" onClick={clearFilters} className={primaryBtn}>{tx.clearFilters}</button>
+              )}
+              {country !== ALL && (
+                <button type="button" onClick={() => changeCountry(ALL)} className={hasFilters ? secondaryBtn : primaryBtn}>
+                  {hasFilters ? tx.emptyAllCountries : tx.allCountries}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && rows.length > 0 && (
+          <>
+            <ul className="space-y-3 sm:space-y-4" aria-label={tx.offersListLabel}>
+              {rows.map((job, i) => {
+                const st = applied.get(job.id);
+                const appliedStatus = st === 'WITHDRAWN' ? 'WITHDRAWN' : st || job.already_applied ? 'APPLIED' : null;
+                return (
+                  <li key={job.id}>
+                    <JobCard job={job} lang={pathLang} countries={countries} appliedStatus={appliedStatus} index={i} />
+                  </li>
+                );
+              })}
+            </ul>
+
+            <JobListPagination lang={pathLang} page={page} totalPages={totalPages} total={total} pageSize={PAGE_SIZE} onPage={goPage} />
+          </>
+        )}
+      </main>
     </div>
   );
 };

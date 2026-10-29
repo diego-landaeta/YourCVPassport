@@ -197,10 +197,10 @@ export const STATIC_META_PAIRS = [
   },
   {
     es: '/empleos', en: '/jobs',
-    title: { es: 'Buscar empleo - Encuentra tu próxima oportunidad - YourCVPassport', en: 'Job Search - Find Your Next Opportunity - YourCVPassport' },
+    title: { es: 'Ofertas de empleo de empresas verificadas - YourCVPassport', en: 'Job openings from verified companies - YourCVPassport' },
     description: {
-      es: 'Consulta ofertas de empleo de empresas verificadas. Filtra por ubicación, nivel de experiencia y modalidad, y postúlate con tu perfil de CV verificado.',
-      en: 'Browse job opportunities from verified companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile.',
+      es: 'Busca ofertas de empleo de empresas verificadas, filtra por categoría, contrato, jornada y modalidad e inscríbete con tu perfil de YourCVPassport.',
+      en: 'Browse job openings from verified companies, filter by category, contract, schedule and work mode, and apply in one step with your YourCVPassport profile.',
     },
   },
   {

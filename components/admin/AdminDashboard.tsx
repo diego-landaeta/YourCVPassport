@@ -23,7 +23,10 @@ import {
   StarIcon,
   LanguageIcon,
   ChatBubbleLeftRightIcon,
+  GlobeEuropeAfricaIcon,
+  ScaleIcon,
 } from '@heroicons/react/24/outline';
+import { useLegalAdminText } from './legalAdminText';
 
 // Cada pestana va en su propio chunk y solo se descarga al abrirla (UserMonitoring
 // arrastra recharts; el Testing Hub, todas las plantillas de CV).
@@ -36,6 +39,8 @@ const UserMonitoring = lazy(() => import('./UserMonitoring'));
 const JobPostingsManagement = lazy(() => import('./JobPostingsManagement'));
 const JobApplicationsManagement = lazy(() => import('./JobApplicationsManagement'));
 const UserModeration = lazy(() => import('./UserModeration'));
+const CountriesManagement = lazy(() => import('./CountriesManagement'));
+const LegalVersionsManagement = lazy(() => import('./LegalVersionsManagement'));
 const AdminTestingHub = lazy(() => import('./AdminTestingHub'));
 const EnterpriseFeaturesManagement = lazy(() => import('./EnterpriseFeaturesManagement'));
 const TemplateManagement = lazy(() => import('./TemplateManagement').then(m => ({ default: m.TemplateManagement })));
@@ -78,7 +83,7 @@ const AdminDashboard: React.FC = () => {
     companiesThisMonth: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profiles' | 'blog' | 'stories' | 'stamps' | 'companies' | 'companies-view' | 'jobs' | 'applications' | 'monitoring' | 'user-moderation' | 'templates' | 'testing' | 'enterprise' | 'translations' | 'feed' | null>(null);
+  const [activeTab, setActiveTab] = useState<'profiles' | 'blog' | 'stories' | 'stamps' | 'companies' | 'companies-view' | 'jobs' | 'applications' | 'monitoring' | 'user-moderation' | 'templates' | 'testing' | 'enterprise' | 'translations' | 'feed' | 'countries' | 'legal' | null>(null);
 
   useEffect(() => {
     if (!profile || profile.role !== 'admin') {
@@ -285,6 +290,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   const translations = t[lang];
+  const la = useLegalAdminText();
 
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg-primary">
@@ -586,6 +592,40 @@ const AdminDashboard: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
+
+                    {/* Countries */}
+                    <button
+                      onClick={() => setActiveTab('countries')}
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
+                    >
+                      <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
+                        <GlobeEuropeAfricaIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">{la.cardCountriesTitle}</h3>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">{la.cardCountriesDesc}</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+
+                    {/* Legal versions */}
+                    <button
+                      onClick={() => setActiveTab('legal')}
+                      className="w-full group bg-white dark:bg-dark-bg-tertiary hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4 transition-all flex items-center gap-4 border border-gray-200 dark:border-dark-border scroll-mt-20"
+                    >
+                      <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
+                        <ScaleIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h3 className="font-medium text-gray-900 dark:text-dark-text-primary">{la.cardLegalTitle}</h3>
+                        <p className="text-sm text-gray-600 dark:text-dark-text-secondary mt-1">{la.cardLegalDesc}</p>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
@@ -764,6 +804,8 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === 'jobs' && <JobPostingsManagement />}
                 {activeTab === 'applications' && <JobApplicationsManagement />}
                 {activeTab === 'user-moderation' && <UserModeration />}
+                {activeTab === 'countries' && <CountriesManagement />}
+                {activeTab === 'legal' && <LegalVersionsManagement />}
               </div>
             )}
             </Suspense>

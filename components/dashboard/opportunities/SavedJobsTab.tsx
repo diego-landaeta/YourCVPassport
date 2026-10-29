@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../supabase/client';
-import {
-  BookmarkIcon as BookmarkIconSolid,
-  TrashIcon,
-  BriefcaseIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  CurrencyDollarIcon
-} from '@heroicons/react/24/solid';
-import { BookmarkIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTranslations } from '../../../hooks/useTranslations';
-import LoadingSpinner from '../../shared/LoadingSpinner';
 import toast from 'react-hot-toast';
-import { activateOnKey } from '../../shared/a11y';
+import CompanyMark from '../../jobs/ui/CompanyMark';
+import {
+  BTN_GHOST, BTN_SECONDARY, FOCUS, LIFT, PanelEmpty, PanelError, PanelSkeleton, SEARCH_FROM, SURFACE, SearchBox,
+  TEXT_META, TEXT_STRONG, norm, notifyError, useReveal,
+} from '../../jobs/PanelBits';
+import { usePanelText } from '../../jobs/textosPanel';
+import { fmt } from '../../../lib/bolsaText';
+import { formatJobSalary, jobHref, jobsRootPath, timeAgo } from '../../../lib/jobsFormat';
+import { contractLabel } from '../../../lib/jobsCatalog';
 
 interface SavedJob {
   saved_id: string;
@@ -36,22 +35,31 @@ interface SavedJob {
 
 interface SavedJobsTabProps {
   profileId: string;
+  /** Avisa del numero de ofertas guardadas (para el contador de la pestana). */
+  onCount?: (n: number) => void;
 }
 
-const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
+const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId, onCount }) => {
   const { lang } = useLanguage();
   const t = useTranslations();
+  const tx = usePanelText();
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    loadSavedJobs();
+    void loadSavedJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileId]);
+
+  useEffect(() => {
+    if (state === 'ready') onCount?.(savedJobs.length);
+  }, [state, savedJobs.length, onCount]);
 
   const loadSavedJobs = async () => {
     try {
-      setLoading(true);
+      setState('loading');
       const { data, error } = await supabase.rpc('get_saved_jobs', {
         p_profile_id: profileId,
         p_limit: 100,
@@ -60,11 +68,10 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
 
       if (error) throw error;
       setSavedJobs(data || []);
-    } catch (error: any) {
+      setState('ready');
+    } catch (error: unknown) {
       console.error('Error loading saved jobs:', error);
-      toast.error(t.dashboard.opportunities.errorLoadingSavedJobs);
-    } finally {
-      setLoading(false);
+      setState('error');
     }
   };
 
@@ -81,155 +88,100 @@ const SavedJobsTab: React.FC<SavedJobsTabProps> = ({ profileId }) => {
       toast.success(
         t.dashboard.opportunities.jobRemovedFromSaved(jobTitle)
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error unsaving job:', error);
-      toast.error(t.dashboard.opportunities.errorRemovingSavedJob);
+      notifyError(t.dashboard.opportunities.errorRemovingSavedJob, tx.closeNotice);
     }
   };
 
-  const formatSalary = (min: number | null, max: number | null, currency: string | null) => {
-    if (!min && !max) return null;
-    const curr = currency || '$';
-    if (min && max) return `${curr}${min.toLocaleString()} - ${curr}${max.toLocaleString()}`;
-    if (min) return `${t.dashboard.opportunities.salaryFrom} ${curr}${min.toLocaleString()}`;
-    return `${t.dashboard.opportunities.salaryUpTo} ${curr}${max!.toLocaleString()}`;
-  };
+  const visible = useMemo(() => {
+    const q = norm(query.trim());
+    return q ? savedJobs.filter((j) => norm(`${j.job_title} ${j.company_name} ${j.location_city || ''}`).includes(q)) : savedJobs;
+  }, [savedJobs, query]);
 
-  const getEmploymentTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      FULL_TIME: t.dashboard.opportunities.fullTime,
-      PART_TIME: t.dashboard.opportunities.partTime,
-      CONTRACT: t.dashboard.opportunities.contract,
-      TEMPORARY: t.dashboard.opportunities.temporary,
-      INTERNSHIP: t.dashboard.opportunities.internship,
-      FREELANCE: 'Freelance'
-    };
-    return labels[type] || type;
-  };
+  const listRef = useReveal<HTMLUListElement>(state === 'ready' && savedJobs.length > 0);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-24">
-        <LoadingSpinner
-          message={t.dashboard.opportunities.loadingSavedJobs}
-          size="large"
-        />
-      </div>
-    );
+  if (state === 'loading') return <PanelSkeleton rows={3} label={t.dashboard.opportunities.loadingSavedJobs} />;
+  if (state === 'error') {
+    return <PanelError message={t.dashboard.opportunities.errorLoadingSavedJobs} retryLabel={tx.retry} onRetry={() => void loadSavedJobs()} />;
   }
 
   if (savedJobs.length === 0) {
     return (
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-12 text-center">
-        <BookmarkIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          {t.dashboard.opportunities.noSavedJobs}
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">
-          {t.dashboard.opportunities.noSavedJobsDescription}
-        </p>
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('change-opportunities-tab', { detail: { tab: 'all' } }))}
-          className="px-6 py-3 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors"
-        >
-          {t.dashboard.opportunities.exploreJobs}
-        </button>
-      </div>
+      <PanelEmpty
+        icon={BookmarkIcon}
+        title={t.dashboard.opportunities.noSavedJobs}
+        text={t.dashboard.opportunities.noSavedJobsDescription}
+        action={{ label: t.dashboard.opportunities.exploreJobs, onClick: () => navigate(jobsRootPath(lang)) }}
+      />
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-4 mb-4">
-        <p className="text-gray-600 dark:text-gray-400">
-          <span className="font-semibold text-cv-blue dark:text-cv-blue-light text-lg">
-            {savedJobs.length}
-          </span>{' '}
-          {t.dashboard.opportunities.savedJobsCount}
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className={`text-[15px] tabular-nums ${TEXT_META}`}>
+          {savedJobs.length === 1 ? tx.savedCountOne : fmt(tx.savedCountMany, { n: savedJobs.length })}
         </p>
+        {savedJobs.length >= SEARCH_FROM && (
+          <SearchBox className="sm:w-72" value={query} onChange={setQuery} label={tx.searchLabel} placeholder={tx.searchPlaceholder} clearLabel={tx.searchClear} />
+        )}
       </div>
 
-      {savedJobs.map((job) => (
-        <div
-          key={job.saved_id}
-          className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg hover:shadow-xl transition-all p-6 group"
-        >
-          <div className="flex items-start gap-4">
-            {/* Company Logo */}
-            {job.company_logo_url ? (
-              <img
-                src={job.company_logo_url}
-                alt={job.company_name}
-                className="w-14 h-14 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-              />
-            ) : (
-              <div className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <BuildingOfficeIcon className="w-7 h-7 text-gray-400" />
-              </div>
-            )}
-
-            <div className="flex-1">
-              {/* Job Title & Company */}
-              <h3 role="link" tabIndex={0} onKeyDown={activateOnKey(() => navigate(`/jobs/${job.job_slug}`))}
-                onClick={() => navigate(`/jobs/${job.job_slug}`)}
-                className="text-lg font-bold text-gray-900 dark:text-white mb-1 hover:text-cv-blue dark:hover:text-cv-blue-light cursor-pointer transition-colors"
-              >
-                {job.job_title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-3">{job.company_name}</p>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-cv-blue/10 dark:bg-cv-blue/20 text-cv-blue dark:text-cv-blue-light">
-                  <BriefcaseIcon className="w-3 h-3" />
-                  {getEmploymentTypeLabel(job.employment_type)}
-                </span>
-
-                {job.is_remote ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                    <MapPinIcon className="w-3 h-3" />
-                    {t.dashboard.opportunities.remote}
-                  </span>
-                ) : job.location_city && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400">
-                    <MapPinIcon className="w-3 h-3" />
-                    {job.location_city}, {job.location_country}
-                  </span>
-                )}
-
-                {formatSalary(job.salary_min, job.salary_max, job.salary_currency) && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-                    <CurrencyDollarIcon className="w-3 h-3" />
-                    {formatSalary(job.salary_min, job.salary_max, job.salary_currency)}
-                  </span>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate(`/jobs/${job.job_slug}`)}
-                  className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
-                >
-                  {t.dashboard.opportunities.viewDetails}
-                </button>
-                <button
-                  onClick={() => unsaveJob(job.saved_id, job.job_title)}
-                  className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm flex items-center gap-2"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                  {t.dashboard.opportunities.remove}
-                </button>
-              </div>
-            </div>
-
-            {/* Saved Badge */}
-            <div className="flex-shrink-0">
-              <BookmarkIconSolid className="w-6 h-6 text-cv-blue dark:text-cv-blue-light" />
-            </div>
-          </div>
-        </div>
-      ))}
+      {visible.length === 0 ? (
+        <PanelEmpty icon={BookmarkIcon} title={tx.searchEmpty} action={{ label: tx.searchClear, onClick: () => setQuery('') }} />
+      ) : (
+        <ul ref={listRef} className="space-y-3">
+          {visible.map((job) => {
+            const salary = formatJobSalary(
+              { show_salary: true, salary_min: job.salary_min, salary_max: job.salary_max, salary_currency: job.salary_currency },
+              lang
+            );
+            const place = job.is_remote ? t.dashboard.opportunities.remote : [job.location_city, job.location_country].filter(Boolean).join(', ');
+            const contract = job.employment_type ? contractLabel(job.employment_type, lang) || '' : '';
+            const meta = [contract, place, tx.savedAgo.replace('{when}', timeAgo(job.saved_at, lang))].filter(Boolean).join(' · ');
+            const path = jobHref({ slug: job.job_slug, location_country: job.location_country }, lang);
+            return (
+              <li key={job.saved_id}>
+                <article className={`${SURFACE} ${LIFT} p-5`} aria-labelledby={`sv-${job.saved_id}`}>
+                  <div className="flex items-start gap-4">
+                    <CompanyMark name={job.company_name} logoUrl={job.company_logo_url} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                        <div className="min-w-0">
+                          <h3 id={`sv-${job.saved_id}`} className={`text-lg font-semibold leading-snug break-words ${TEXT_STRONG}`}>
+                            <a
+                              href={path}
+                              onClick={(e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); navigate(path); } }}
+                              className={`rounded hover:underline hover:decoration-slate-400 hover:underline-offset-4 ${FOCUS}`}
+                            >
+                              {job.job_title}
+                            </a>
+                          </h3>
+                          <p className={`mt-0.5 text-[15px] ${TEXT_META}`}>{job.company_name}</p>
+                        </div>
+                        {salary && <p className={`text-base font-bold tabular-nums ${TEXT_STRONG}`}>{salary}</p>}
+                      </div>
+                      {meta && <p className={`mt-2 text-sm ${TEXT_META}`}>{meta}</p>}
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <button type="button" onClick={() => navigate(path)} className={BTN_SECONDARY}>{t.dashboard.opportunities.viewDetails}</button>
+                        <button
+                          type="button"
+                          onClick={() => void unsaveJob(job.saved_id, job.job_title)}
+                          className={`${BTN_GHOST} hover:!text-red-700 dark:hover:!text-red-300`}
+                        >
+                          <TrashIcon className="h-4 w-4" aria-hidden="true" />
+                          {t.dashboard.opportunities.remove}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };

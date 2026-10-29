@@ -739,7 +739,7 @@ export interface LeadWithNotes extends Lead {
 
 export type CompanyStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
 export type CompanyUserRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
-export type CompanySize = '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+';
+export type CompanySize = '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+' | '51-250' | '250+';
 export type CreditTransactionType =
   | 'PURCHASE'
   | 'ADMIN_ADJUSTMENT'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -7,7 +7,49 @@ import PageSEO from '../shared/PageSEO';
 import { useToastContext } from '../../contexts/ToastContext';
 import { supabase } from '../../supabase/client';
 import { COMPANY_DOCUMENTS_BUCKET, COMPANY_LOGOS_BUCKET } from '../../lib/companyDocuments';
-import type { CreateCompanyInput, CompanySize } from '../../types';
+import {
+  ArrowRightIcon,
+  BuildingOffice2Icon,
+  CheckCircleIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  ExclamationCircleIcon,
+  PhotoIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
+import LegalConsentFields from '../legal/LegalConsentFields';
+import { useCompanyRegText } from '../legal/companyRegText';
+import {
+  EMPLOYER_OPTIONAL,
+  EMPLOYER_REQUIRED,
+  countryName,
+  emptyCasillas,
+  fetchActiveCountries,
+  fetchLegalDocuments,
+  registerAcceptance,
+  type Casillas,
+  type CountryOption,
+} from '../../lib/legal';
+
+// Formulario de alta de empresa (bolsa de empleo, fase 1). Tamaños nuevos: 1-10, 11-50, 51-250, 250+.
+interface CompanyFormData {
+  company_name: string;
+  legal_name: string;
+  tax_id: string;
+  company_email: string;
+  company_phone: string;
+  website_url: string;
+  address_street: string;
+  address_city: string;
+  address_state: string;
+  country_code: string;
+  contact_name: string;
+  contact_position: string;
+  address_postal: string;
+  industry: string;
+  company_size: string;
+  description: string;
+}
 
 // SEO de /company/register (diccionario local ES/EN). La URL es la misma en ambos idiomas.
 const REGISTRATION_SEO = {
@@ -22,8 +64,9 @@ const REGISTRATION_SEO = {
 } as const;
 
 const CompanyRegistrationPage: React.FC = () => {
-  const { user, company, companyLoading } = useAuth();
+  const { user, company, companyLoading, loading: authLoading } = useAuth();
   const translations = useTranslations();
+  const tx = useCompanyRegText();
   const navigate = useNavigate();
   const toast = useToastContext();
   const { lang } = useLanguage();
@@ -47,21 +90,28 @@ const CompanyRegistrationPage: React.FC = () => {
 
   // Helper function to get input classes with error state
   const getInputClasses = (fieldName: string) => {
-    const baseClasses = "block w-full px-4 py-3 rounded-lg shadow-sm text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors";
+    const baseClasses = "block w-full px-3.5 py-2.5 rounded-lg shadow-sm text-base sm:text-[15px] leading-6 bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-colors border focus:outline-none focus:ring-2";
     const errorClasses = validationErrors[fieldName]
-      ? 'border-2 border-red-400 focus:ring-2 focus:ring-red-500 focus:border-red-500'
-      : 'border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+      : 'border-slate-300 dark:border-dark-border focus:ring-cv-blue focus:border-cv-blue';
     return `${baseClasses} ${errorClasses}`;
   };
 
-  const labelClasses = "block text-sm font-semibold text-gray-900 dark:text-white mb-2";
+  const labelClasses = "block text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  // Resultado de la revisión automática: verified (APPROVED al momento) o pending (revisión manual).
+  const [outcome, setOutcome] = useState<'verified' | 'pending'>('pending');
+  const [consents, setConsents] = useState<Casillas>(() =>
+    emptyCasillas([...EMPLOYER_REQUIRED, ...EMPLOYER_OPTIONAL]),
+  );
+  const [countries, setCountries] = useState<CountryOption[]>([]);
+  const [countriesError, setCountriesError] = useState(false);
 
   // Form state
-  const [formData, setFormData] = useState<Partial<CreateCompanyInput>>({
+  const [formData, setFormData] = useState<CompanyFormData>({
     company_name: '',
     legal_name: '',
     tax_id: '',
@@ -71,10 +121,12 @@ const CompanyRegistrationPage: React.FC = () => {
     address_street: '',
     address_city: '',
     address_state: '',
-    address_country: '',
+    country_code: '',
+    contact_name: '',
+    contact_position: '',
     address_postal: '',
     industry: '',
-    company_size: undefined,
+    company_size: '',
     description: '',
   });
 
@@ -86,6 +138,21 @@ const CompanyRegistrationPage: React.FC = () => {
 
   // Validation errors
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+
+  // País de la empresa: selector alimentado por la tabla countries (lectura pública).
+  const loadCountries = React.useCallback(async () => {
+    setCountriesError(false);
+    const { countries: list, error: listError } = await fetchActiveCountries();
+    if (listError) setCountriesError(true);
+    setCountries(list);
+  }, []);
+  useEffect(() => {
+    void loadCountries();
+  }, [loadCountries]);
+  const sortedCountries = React.useMemo(
+    () => [...countries].sort((a, b) => countryName(a, lang).localeCompare(countryName(b, lang), lang)),
+    [countries, lang],
+  );
 
   // Redirect if user already has a company
   useEffect(() => {
@@ -207,6 +274,21 @@ const CompanyRegistrationPage: React.FC = () => {
     if (!formData.tax_id?.trim()) {
       errors.tax_id = t('company.registration.requiredField');
     }
+    if (!formData.country_code) {
+      errors.country_code = tx.errCountry;
+    }
+    if (!formData.industry?.trim()) {
+      errors.industry = tx.errIndustry;
+    }
+    if (!formData.company_size) {
+      errors.company_size = tx.errSize;
+    }
+    if (!formData.contact_name?.trim()) {
+      errors.contact_name = tx.errContactName;
+    }
+    if (!EMPLOYER_REQUIRED.every((k) => consents[k] === true)) {
+      errors.consents = tx.errConsents;
+    }
     if (!formData.company_email?.trim()) {
       errors.company_email = t('company.registration.requiredField');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.company_email)) {
@@ -218,16 +300,44 @@ const CompanyRegistrationPage: React.FC = () => {
       errors.website_url = t('company.registration.invalidUrl');
     }
 
-    // Required documents
-    if (!taxDocFile) {
-      errors.tax = t('company.registration.requiredField');
-    }
-    if (!verificationDocFile) {
-      errors.verification = t('company.registration.requiredField');
-    }
+    // Los documentos (CIF, licencia) ya NO son obligatorios: la verificación se
+    // hace con el identificador fiscal, el país, la web y el correo.
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  /** Registra la aceptación de terminos_empleador + privacidad con las casillas marcadas. */
+  const saveEmployerAcceptance = async (companyId: string): Promise<boolean> => {
+    try {
+      const { docs, error: docsError } = await fetchLegalDocuments(['terminos_empleador', 'privacidad'], lang);
+      const ids = [docs.terminos_empleador?.id, docs.privacidad?.id].filter((id): id is string => !!id);
+      if (docsError || ids.length < 2) return false;
+      const { error: regError } = await registerAcceptance({
+        documentIds: ids,
+        casillas: consents,
+        contexto: 'registro',
+        companyId,
+      });
+      return !regError;
+    } catch (e) {
+      console.warn('registrar_aceptacion falló:', e);
+      return false;
+    }
+  };
+
+  /** Revisión por reglas (Edge company-review-ai). Nunca bloquea el registro. */
+  const runCompanyReview = async (companyId: string): Promise<'verified' | 'pending'> => {
+    try {
+      const res = await Promise.race([
+        supabase.functions.invoke('company-review-ai', { body: { companyId } }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000)),
+      ]);
+      return (res.data as { status?: string } | null)?.status === 'APPROVED' ? 'verified' : 'pending';
+    } catch (e) {
+      console.warn('company-review-ai no respondió; queda en revisión manual:', e);
+      return 'pending';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -262,32 +372,24 @@ const CompanyRegistrationPage: React.FC = () => {
         setUploadProgress({ logo: 100 });
       }
 
-      // 2. Upload tax document (required)
-      setUploadProgress(prev => ({ ...prev, tax: 0 }));
-      const taxDocUrl = await uploadFile(taxDocFile!, 'tax-documents');
-      if (!taxDocUrl) {
-        throw new Error('Failed to upload tax document');
+      // 2. Documento fiscal (opcional). Un fallo de subida no impide el registro.
+      let taxDocUrl: string | null = null;
+      if (taxDocFile) {
+        setUploadProgress(prev => ({ ...prev, tax: 0 }));
+        taxDocUrl = await uploadFile(taxDocFile, 'tax-documents');
+        setUploadProgress(prev => ({ ...prev, tax: 100 }));
       }
-      setUploadProgress(prev => ({ ...prev, tax: 100 }));
 
-      // 3. Upload verification document (required)
-      setUploadProgress(prev => ({ ...prev, verification: 0 }));
-      const verificationDocUrl = await uploadFile(verificationDocFile!, 'verification-documents');
-      if (!verificationDocUrl) {
-        throw new Error('Failed to upload verification document');
+      // 3. Documento de verificación (opcional)
+      let verificationDocUrl: string | null = null;
+      if (verificationDocFile) {
+        setUploadProgress(prev => ({ ...prev, verification: 0 }));
+        verificationDocUrl = await uploadFile(verificationDocFile, 'verification-documents');
+        setUploadProgress(prev => ({ ...prev, verification: 100 }));
       }
-      setUploadProgress(prev => ({ ...prev, verification: 100 }));
 
-      // 4. Get user IP (optional)
-      let signupIp: string | undefined;
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        signupIp = ipData.ip;
-      } catch (e) {
-        // IP fetch failed, continue without it
-        console.warn('Could not fetch IP:', e);
-      }
+      // (Ya no se pide la IP a api.ipify.org desde el navegador: se podía falsificar.
+      //  La IP y el navegador de la aceptación los toma el SERVIDOR en registrar_aceptacion.)
 
       // 5. Insert company
       const { data: company, error: companyError } = await supabase
@@ -295,22 +397,26 @@ const CompanyRegistrationPage: React.FC = () => {
         .insert({
           company_name: formData.company_name,
           legal_name: formData.legal_name,
-          tax_id: formData.tax_id,
-          company_email: formData.company_email,
+          tax_id: formData.tax_id?.trim(),
+          company_email: formData.company_email?.trim(),
           company_phone: formData.company_phone || null,
           website_url: formData.website_url || null,
           address_street: formData.address_street || null,
           address_city: formData.address_city || null,
           address_state: formData.address_state || null,
-          address_country: formData.address_country || null,
+          address_country: formData.country_code || null,
           address_postal: formData.address_postal || null,
           industry: formData.industry || null,
           company_size: formData.company_size || null,
           description: formData.description || null,
+          // Fase 1 (#6): país (FK countries), idioma de la empresa y contacto.
+          country_code: formData.country_code,
+          idioma: lang,
+          contact_name: formData.contact_name.trim(),
+          contact_position: formData.contact_position.trim() || null,
           logo_url: logoUrl,
           tax_document_url: taxDocUrl,
           verification_document_url: verificationDocUrl,
-          signup_ip: signupIp,
           status: 'PENDING',
         })
         // Solo columnas públicas: el resto de companies no es legible por authenticated
@@ -359,14 +465,23 @@ const CompanyRegistrationPage: React.FC = () => {
         throw new Error(companyUserError.message);
       }
 
+      // 7. Aceptación de las condiciones de empleador (contexto «registro», con la
+      //    empresa). Si falla no se deshace el alta: CompanyProtectedRoute pasa por
+      //    LegalGate y la pedirá al entrar.
+      const accepted = await saveEmployerAcceptance(company.id);
+      if (!accepted) toast.warning(tx.acceptSaveFailed, 8000);
+
+      // 8. Revisión automática (reglas). Sin incidencias -> APPROVED al momento; con
+      //    dudas o ante cualquier error la empresa queda PENDING (revisión manual).
+      setOutcome(await runCompanyReview(company.id));
+
       // Success!
       setSuccess(true);
-      toast.success('Company registered successfully! Redirecting to dashboard...');
 
-      // Redirect to dashboard after 2 seconds
+      // Redirect to dashboard after a few seconds (PENDING también puede entrar y preparar borradores)
       setTimeout(() => {
         navigate('/company/dashboard');
-      }, 2000);
+      }, 3500);
 
     } catch (err: any) {
       console.error('Registration error:', err);
@@ -377,93 +492,225 @@ const CompanyRegistrationPage: React.FC = () => {
     }
   };
 
+  // Aviso de error de un campo (la clase text-red-600 la usa el scroll al primer error).
+  const fieldError = (name: string) =>
+    validationErrors[name] ? (
+      <p id={`${name}-err`} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-red-600 dark:text-red-400">
+        <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <span>{validationErrors[name]}</span>
+      </p>
+    ) : null;
+  const fa = (name: string) =>
+    validationErrors[name] ? { 'aria-invalid': true as const, 'aria-describedby': `${name}-err` } : {};
+  const req = <span className="text-red-700 dark:text-red-400" aria-hidden="true"> *</span>;
+  const opt = <span className="ml-1.5 font-normal text-slate-500 dark:text-dark-text-secondary">{tx.optionalSuffix}</span>;
+
+  const pageShell = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-bg-primary">
+      {seo}
+      {children}
+    </div>
+  );
+
+  const panelCls =
+    'rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,.05),0_12px_32px_-20px_rgba(15,23,42,.2)] dark:border-dark-border dark:bg-dark-bg-secondary dark:shadow-none';
+
   // Show loading while checking company status
-  if (companyLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        {seo}
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white dark:bg-dark-bg-secondary py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/20 mb-4">
-                <svg className="animate-spin h-6 w-6 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
-                {t('company.registrationPage.verifyingStatus')}
-              </h2>
-            </div>
+  if (companyLoading || authLoading) {
+    return pageShell(
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="text-center" role="status" aria-live="polite">
+          <svg className="mx-auto h-8 w-8 animate-spin text-cv-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="mt-4 text-base font-medium text-slate-800 dark:text-slate-100">{t('company.registrationPage.verifyingStatus')}</p>
+        </div>
+      </div>,
+    );
+  }
+
+  // Sin sesión no se puede registrar una empresa: primero la cuenta (camino «empresa»).
+  if (!user) {
+    return pageShell(
+      <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+        <div className={`${panelCls} w-full max-w-md p-8 text-center sm:p-10`}>
+          <span aria-hidden="true" className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-cv-blue dark:bg-blue-500/15 dark:text-blue-300">
+            <BuildingOffice2Icon className="h-7 w-7" strokeWidth={1.5} />
+          </span>
+          <h1 className="text-balance text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{tx.needAccountTitle}</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.needAccountBody}</p>
+          <div className="mt-7 flex flex-col gap-3">
+            <Link
+              to="/signup?tipo=empresa"
+              className="inline-flex justify-center rounded-lg bg-cv-blue px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary"
+            >
+              {tx.createAccount}
+            </Link>
+            <Link
+              to="/login"
+              className="rounded py-1 font-medium text-cv-blue hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-blue-300"
+            >
+              {tx.signIn}
+            </Link>
           </div>
         </div>
-      </div>
+      </div>,
     );
   }
 
   if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        {seo}
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('company.registration.success')}
-              </h2>
-              <p className="text-gray-600">
-                {t('company.registration.successMessage')}
-              </p>
+    const verified = outcome === 'verified';
+    const steps = [tx.reviewStep1, tx.reviewStep2, tx.reviewStep3];
+    return pageShell(
+      <div className="mx-auto max-w-xl px-4 py-12 sm:py-16">
+        <div className={`${panelCls} p-8 sm:p-10`}>
+          <span
+            aria-hidden="true"
+            className={`mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              verified ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+            }`}
+          >
+            {verified ? <CheckCircleIcon className="h-7 w-7" /> : <ClockIcon className="h-7 w-7" />}
+          </span>
+          <h1 className="text-balance text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">{t('company.registration.success')}</h1>
+          <p role="status" className="mt-3 text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
+            {verified ? tx.successVerified : tx.successPending}
+          </p>
+          {!verified && (
+            <div className="mt-7 border-t border-slate-200 pt-6 dark:border-dark-border">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{tx.reviewStepsTitle}</h2>
+              <ol className="mt-3 space-y-3">
+                {steps.map((text, i) => (
+                  <li key={text} className="flex items-start gap-3 text-sm leading-snug text-slate-700 dark:text-slate-300">
+                    <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold tabular-nums text-slate-700 dark:bg-dark-bg-tertiary dark:text-slate-200">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{text}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
-          </div>
+          )}
+          <Link
+            to="/company/dashboard"
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-cv-blue px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary"
+          >
+            {tx.goToPanel}
+            <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
-      </div>
+      </div>,
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary py-12 px-4 sm:px-6 lg:px-8">
-      {seo}
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
+  // Zona de subida de un archivo opcional (logotipo o documento).
+  const uploadBox = (opts: {
+    key: 'logo' | 'tax' | 'verification';
+    inputId: string;
+    label: string;
+    help?: string;
+    accept: string;
+    file: File | null;
+    clear: () => void;
+    icon: React.ReactNode;
+  }) => (
+    <div>
+      <p className={labelClasses}>
+        {opts.label}
+        {opt}
+      </p>
+      {opts.help && <p className="-mt-1 mb-2 text-[13px] leading-snug text-slate-600 dark:text-dark-text-secondary">{opts.help}</p>}
+      <div
+        className={`flex items-center gap-4 rounded-xl border-2 border-dashed px-4 py-4 transition-colors ${
+          validationErrors[opts.key]
+            ? 'border-red-400 bg-red-50 dark:border-red-400/60 dark:bg-red-500/10'
+            : 'border-slate-300 bg-slate-50 hover:border-cv-blue dark:border-dark-border dark:bg-dark-bg-tertiary/40 dark:hover:border-blue-400'
+        }`}
+      >
+        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 ring-1 ring-slate-200 dark:bg-dark-bg-secondary dark:text-slate-300 dark:ring-dark-border">
+          {opts.icon}
+        </span>
+        {opts.file ? (
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <p className="min-w-0 truncate text-sm font-medium text-slate-900 dark:text-white">{opts.file.name}</p>
+            <button
+              type="button"
+              onClick={opts.clear}
+              className="rounded px-1 text-sm font-medium text-cv-blue underline underline-offset-2 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-blue-300"
+            >
+              {t('company.registrationPage.remove')}
+            </button>
+          </div>
+        ) : (
+          <div className="min-w-0 flex-1 text-sm text-slate-700 dark:text-slate-300">
+            <label
+              htmlFor={opts.inputId}
+              className="relative cursor-pointer rounded font-semibold text-cv-blue hover:underline focus-within:ring-2 focus-within:ring-cv-blue dark:text-blue-300"
+            >
+              <span>{t('company.registration.uploadButton')}</span>
+              <input id={opts.inputId} name={opts.inputId} type="file" accept={opts.accept} className="sr-only" onChange={(e) => handleFileChange(e, opts.key)} />
+            </label>{' '}
+            <span>{t('company.registration.dragDrop')}</span>
+            <p className="mt-0.5 text-xs text-slate-600 dark:text-dark-text-secondary">{t('company.registration.fileTypes')}</p>
+          </div>
+        )}
+      </div>
+      {validationErrors[opts.key] && (
+        <p role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-red-600 dark:text-red-400">
+          <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{validationErrors[opts.key]}</span>
+        </p>
+      )}
+      {uploadProgress[opts.key] !== undefined && uploadProgress[opts.key] < 100 && (
+        <div className="mt-2">
+          <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-dark-bg-tertiary">
+            <div className="h-2 rounded-full bg-cv-blue transition-all" style={{ width: `${uploadProgress[opts.key]}%` }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const section = (id: string, title: string, help: string | null, children: React.ReactNode, first = false) => (
+    <section aria-labelledby={id} className={first ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-dark-border'}>
+      <h2 id={id} className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h2>
+      {help && <p className="mt-1 max-w-[62ch] text-sm leading-relaxed text-slate-600 dark:text-dark-text-secondary">{help}</p>}
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+
+  return pageShell(
+    <>
+      <div className="border-b border-slate-200 bg-blue-50/70 dark:border-dark-border dark:bg-dark-bg-secondary">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+          <h1 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             {t('company.registration.title')}
           </h1>
-          <p className="text-gray-600 dark:text-dark-text-secondary">
-            {t('company.registration.subtitle')}
-          </p>
+          <p className="mt-3 max-w-[60ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.regIntro}</p>
         </div>
+      </div>
 
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <svg className="h-5 w-5 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="ml-3 text-sm text-red-700">{error}</p>
-            </div>
+          <div role="alert" className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200">
+            <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <p>{error}</p>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-dark-bg-secondary shadow-lg rounded-lg border border-gray-200 dark:border-dark-border">
-          <div className="px-6 py-8 space-y-8">
-            {/* Basic Information */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-                {t('company.registration.basicInfo')}
-              </h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className={`${panelCls}`}>
+          <div className="px-5 py-8 sm:px-9 sm:py-10">
+            {section(
+              'reg-company',
+              tx.secCompanyTitle,
+              tx.secCompanyHelp,
+              <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label htmlFor="company_name" className={labelClasses}>
-                    {t('company.registration.companyName')} *
+                    {t('company.registration.companyName')}{req}
                   </label>
                   <input
                     type="text"
@@ -472,16 +719,15 @@ const CompanyRegistrationPage: React.FC = () => {
                     value={formData.company_name}
                     onChange={handleInputChange}
                     placeholder={t('company.registration.companyNamePlaceholder')}
+                    {...fa('company_name')}
                     className={getInputClasses('company_name')}
                   />
-                  {validationErrors.company_name && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.company_name}</p>
-                  )}
+                  {fieldError('company_name')}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label htmlFor="legal_name" className={labelClasses}>
-                    {t('company.registration.legalName')} *
+                    {t('company.registration.legalName')}{req}
                   </label>
                   <input
                     type="text"
@@ -490,16 +736,42 @@ const CompanyRegistrationPage: React.FC = () => {
                     value={formData.legal_name}
                     onChange={handleInputChange}
                     placeholder={t('company.registration.legalNamePlaceholder')}
+                    {...fa('legal_name')}
                     className={getInputClasses('legal_name')}
                   />
-                  {validationErrors.legal_name && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.legal_name}</p>
+                  {fieldError('legal_name')}
+                </div>
+
+                <div>
+                  <label htmlFor="country_code" className={labelClasses}>
+                    {tx.country}{req}
+                  </label>
+                  <select
+                    name="country_code"
+                    id="country_code"
+                    value={formData.country_code || ''}
+                    onChange={handleInputChange}
+                    aria-required="true"
+                    {...fa('country_code')}
+                    className={getInputClasses('country_code')}
+                  >
+                    <option value="">{tx.countryPlaceholder}</option>
+                    {sortedCountries.map((c) => (
+                      <option key={c.code} value={c.code}>{countryName(c, lang)}</option>
+                    ))}
+                  </select>
+                  {countriesError && (
+                    <p role="alert" className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                      {tx.countriesError}{' '}
+                      <button type="button" onClick={loadCountries} className="font-medium underline">{tx.countriesRetry}</button>
+                    </p>
                   )}
+                  {fieldError('country_code')}
                 </div>
 
                 <div>
                   <label htmlFor="tax_id" className={labelClasses}>
-                    {t('company.registration.taxId')} *
+                    {t('company.registration.taxId')}{req}
                   </label>
                   <input
                     type="text"
@@ -508,16 +780,53 @@ const CompanyRegistrationPage: React.FC = () => {
                     value={formData.tax_id}
                     onChange={handleInputChange}
                     placeholder={t('company.registration.taxIdPlaceholder')}
+                    {...fa('tax_id')}
                     className={getInputClasses('tax_id')}
                   />
-                  {validationErrors.tax_id && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.tax_id}</p>
-                  )}
+                  {fieldError('tax_id')}
+                </div>
+
+                <div>
+                  <label htmlFor="industry" className={labelClasses}>
+                    {tx.industryRequired}{req}
+                  </label>
+                  <input
+                    type="text"
+                    name="industry"
+                    id="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    placeholder={t('company.registrationPage.industryPlaceholder')}
+                    {...fa('industry')}
+                    className={getInputClasses('industry')}
+                  />
+                  {fieldError('industry')}
+                </div>
+
+                <div>
+                  <label htmlFor="company_size" className={labelClasses}>
+                    {tx.sizeRequired}{req}
+                  </label>
+                  <select
+                    name="company_size"
+                    id="company_size"
+                    value={formData.company_size || ''}
+                    onChange={handleInputChange}
+                    {...fa('company_size')}
+                    className={getInputClasses('company_size')}
+                  >
+                    <option value="">{tx.selectSize}</option>
+                    <option value="1-10">{tx.size1}</option>
+                    <option value="11-50">{tx.size2}</option>
+                    <option value="51-250">{tx.size3}</option>
+                    <option value="250+">{tx.size4}</option>
+                  </select>
+                  {fieldError('company_size')}
                 </div>
 
                 <div>
                   <label htmlFor="company_email" className={labelClasses}>
-                    {t('company.registration.companyEmail')} *
+                    {t('company.registration.companyEmail')}{req}
                   </label>
                   <input
                     type="email"
@@ -526,16 +835,15 @@ const CompanyRegistrationPage: React.FC = () => {
                     value={formData.company_email}
                     onChange={handleInputChange}
                     placeholder={t('company.registration.companyEmailPlaceholder')}
+                    {...fa('company_email')}
                     className={getInputClasses('company_email')}
                   />
-                  {validationErrors.company_email && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.company_email}</p>
-                  )}
+                  {fieldError('company_email')}
                 </div>
 
                 <div>
                   <label htmlFor="company_phone" className={labelClasses}>
-                    {t('company.registration.companyPhone')}
+                    {t('company.registration.companyPhone')}{opt}
                   </label>
                   <input
                     type="tel"
@@ -548,9 +856,9 @@ const CompanyRegistrationPage: React.FC = () => {
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label htmlFor="website_url" className={labelClasses}>
-                    {t('company.registration.website')}
+                    {t('company.registration.website')}{opt}
                   </label>
                   <input
                     type="url"
@@ -559,52 +867,15 @@ const CompanyRegistrationPage: React.FC = () => {
                     value={formData.website_url}
                     onChange={handleInputChange}
                     placeholder={t('company.registration.websitePlaceholder')}
+                    {...fa('website_url')}
                     className={getInputClasses('website_url')}
                   />
-                  {validationErrors.website_url && (
-                    <p className="mt-1 text-sm text-red-600">{validationErrors.website_url}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="industry" className={labelClasses}>
-                    {t('company.registration.industry')}
-                  </label>
-                  <input
-                    type="text"
-                    name="industry"
-                    id="industry"
-                    value={formData.industry}
-                    onChange={handleInputChange}
-                    placeholder={t('company.registrationPage.industryPlaceholder')}
-                    className={getInputClasses('industry')}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="company_size" className={labelClasses}>
-                    {t('company.registration.companySize')}
-                  </label>
-                  <select
-                    name="company_size"
-                    id="company_size"
-                    value={formData.company_size || ''}
-                    onChange={handleInputChange}
-                    className={getInputClasses('company_size')}
-                  >
-                    <option value="">{t('company.registrationPage.selectSize')}</option>
-                    <option value="1-10">{t('company.registration.companySizeOptions.1-10')}</option>
-                    <option value="11-50">{t('company.registration.companySizeOptions.11-50')}</option>
-                    <option value="51-200">{t('company.registration.companySizeOptions.51-200')}</option>
-                    <option value="201-500">{t('company.registration.companySizeOptions.201-500')}</option>
-                    <option value="501-1000">{t('company.registration.companySizeOptions.501-1000')}</option>
-                    <option value="1000+">{t('company.registration.companySizeOptions.1000+')}</option>
-                  </select>
+                  {fieldError('website_url')}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label htmlFor="description" className={labelClasses}>
-                    {t('company.registration.description')}
+                    {t('company.registration.description')}{opt}
                   </label>
                   <textarea
                     name="description"
@@ -616,277 +887,150 @@ const CompanyRegistrationPage: React.FC = () => {
                     className={getInputClasses('description')}
                   />
                 </div>
-              </div>
-            </div>
+              </div>,
+              true,
+            )}
 
-            {/* Address */}
-            <div className="border-t border-gray-200 dark:border-dark-border pt-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-                {t('company.registration.address')}
-              </h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {section(
+              'reg-contact',
+              tx.contactSection,
+              tx.secContactHelp,
+              <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="contact_name" className={labelClasses}>
+                    {tx.contactName}{req}
+                  </label>
+                  <input
+                    type="text"
+                    name="contact_name"
+                    id="contact_name"
+                    autoComplete="name"
+                    value={formData.contact_name}
+                    onChange={handleInputChange}
+                    {...fa('contact_name')}
+                    className={getInputClasses('contact_name')}
+                  />
+                  {fieldError('contact_name')}
+                </div>
+                <div>
+                  <label htmlFor="contact_position" className={labelClasses}>
+                    {tx.contactPosition}{opt}
+                  </label>
+                  <input
+                    type="text"
+                    name="contact_position"
+                    id="contact_position"
+                    autoComplete="organization-title"
+                    value={formData.contact_position}
+                    onChange={handleInputChange}
+                    placeholder={tx.contactPositionPlaceholder}
+                    className={getInputClasses('contact_position')}
+                  />
+                </div>
+              </div>,
+            )}
+
+            {section(
+              'reg-address',
+              t('company.registration.address'),
+              tx.secAddressHelp,
+              <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label htmlFor="address_street" className={labelClasses}>
                     {t('company.registration.street')}
                   </label>
-                  <input
-                    type="text"
-                    name="address_street"
-                    id="address_street"
-                    value={formData.address_street}
-                    onChange={handleInputChange}
-                    className={getInputClasses('address_street')}
-                  />
+                  <input type="text" name="address_street" id="address_street" value={formData.address_street} onChange={handleInputChange} className={getInputClasses('address_street')} />
                 </div>
-
                 <div>
                   <label htmlFor="address_city" className={labelClasses}>
                     {t('company.registration.city')}
                   </label>
-                  <input
-                    type="text"
-                    name="address_city"
-                    id="address_city"
-                    value={formData.address_city}
-                    onChange={handleInputChange}
-                    className={getInputClasses('address_city')}
-                  />
+                  <input type="text" name="address_city" id="address_city" value={formData.address_city} onChange={handleInputChange} className={getInputClasses('address_city')} />
                 </div>
-
                 <div>
                   <label htmlFor="address_state" className={labelClasses}>
                     {t('company.registration.state')}
                   </label>
-                  <input
-                    type="text"
-                    name="address_state"
-                    id="address_state"
-                    value={formData.address_state}
-                    onChange={handleInputChange}
-                    className={getInputClasses('address_state')}
-                  />
+                  <input type="text" name="address_state" id="address_state" value={formData.address_state} onChange={handleInputChange} className={getInputClasses('address_state')} />
                 </div>
-
-                <div>
-                  <label htmlFor="address_country" className={labelClasses}>
-                    {t('company.registration.country')}
-                  </label>
-                  <input
-                    type="text"
-                    name="address_country"
-                    id="address_country"
-                    value={formData.address_country}
-                    onChange={handleInputChange}
-                    placeholder="ES, US, MX, etc."
-                    maxLength={2}
-                    className={getInputClasses('address_country')}
-                  />
-                </div>
-
                 <div>
                   <label htmlFor="address_postal" className={labelClasses}>
                     {t('company.registration.postalCode')}
                   </label>
-                  <input
-                    type="text"
-                    name="address_postal"
-                    id="address_postal"
-                    value={formData.address_postal}
-                    onChange={handleInputChange}
-                    className={getInputClasses('address_postal')}
-                  />
+                  <input type="text" name="address_postal" id="address_postal" value={formData.address_postal} onChange={handleInputChange} className={getInputClasses('address_postal')} />
                 </div>
-              </div>
-            </div>
+              </div>,
+            )}
 
-            {/* Verification Documents */}
-            <div className="border-t border-gray-200 dark:border-dark-border pt-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-                {t('company.registration.verification')}
-              </h3>
+            {section(
+              'reg-docs',
+              tx.secDocsTitle,
+              tx.docsOptionalNote,
               <div className="space-y-6">
-                {/* Logo Upload (Optional) */}
-                <div>
-                  <label className={labelClasses}>
-                    {t('company.registration.logo')}
-                  </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors bg-gray-50 dark:bg-gray-800/50">
-                    <div className="space-y-1 text-center">
-                      {logoFile ? (
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                          <p className="font-medium">{logoFile.name}</p>
-                          <button
-                            type="button"
-                            onClick={() => setLogoFile(null)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
-                          >
-                            {t('company.registrationPage.remove')}
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          <div className="flex text-sm text-gray-600 dark:text-gray-300 justify-center">
-                            <label htmlFor="logo-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
-                              <span>{t('company.registration.uploadButton')}</span>
-                              <input
-                                id="logo-upload"
-                                name="logo-upload"
-                                type="file"
-                                accept="image/png,image/jpeg,image/jpg"
-                                className="sr-only"
-                                onChange={(e) => handleFileChange(e, 'logo')}
-                              />
-                            </label>
-                            <p className="pl-1">{t('company.registration.dragDrop')}</p>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{t('company.registration.fileTypes')}</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {uploadProgress.logo !== undefined && uploadProgress.logo < 100 && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${uploadProgress.logo}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {uploadBox({
+                  key: 'logo',
+                  inputId: 'logo-upload',
+                  label: t('company.registration.logo'),
+                  accept: 'image/png,image/jpeg,image/jpg',
+                  file: logoFile,
+                  clear: () => setLogoFile(null),
+                  icon: <PhotoIcon className="h-6 w-6" />,
+                })}
+                {uploadBox({
+                  key: 'tax',
+                  inputId: 'tax-upload',
+                  label: t('company.registration.taxDocument'),
+                  help: t('company.registration.taxDocumentHelp'),
+                  accept: 'image/png,image/jpeg,image/jpg,application/pdf',
+                  file: taxDocFile,
+                  clear: () => setTaxDocFile(null),
+                  icon: <DocumentTextIcon className="h-6 w-6" />,
+                })}
+                {uploadBox({
+                  key: 'verification',
+                  inputId: 'verification-upload',
+                  label: t('company.registration.verificationDocument'),
+                  help: t('company.registration.verificationDocumentHelp'),
+                  accept: 'image/png,image/jpeg,image/jpg,application/pdf',
+                  file: verificationDocFile,
+                  clear: () => setVerificationDocFile(null),
+                  icon: <ShieldCheckIcon className="h-6 w-6" />,
+                })}
+              </div>,
+            )}
 
-                {/* Tax Document Upload (Required) */}
-                <div>
-                  <label className={labelClasses}>
-                    {t('company.registration.taxDocument')} *
-                  </label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('company.registration.taxDocumentHelp')}</p>
-                  <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
-                    validationErrors.tax
-                      ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-gray-50 dark:bg-gray-800/50'
-                  }`}>
-                    <div className="space-y-1 text-center">
-                      {taxDocFile ? (
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                          <p className="font-medium">{taxDocFile.name}</p>
-                          <button
-                            type="button"
-                            onClick={() => setTaxDocFile(null)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
-                          >
-                            {t('company.registrationPage.remove')}
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m0-4c0 4.418-7.163 8-16 8S8 28.418 8 24m32 10v6m0 0v6m0-6h6m-6 0h-6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          <div className="flex text-sm text-gray-600 dark:text-gray-300 justify-center">
-                            <label htmlFor="tax-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
-                              <span>{t('company.registration.uploadButton')}</span>
-                              <input
-                                id="tax-upload"
-                                name="tax-upload"
-                                type="file"
-                                accept="image/png,image/jpeg,image/jpg,application/pdf"
-                                className="sr-only"
-                                onChange={(e) => handleFileChange(e, 'tax')}
-                              />
-                            </label>
-                            <p className="pl-1">{t('company.registration.dragDrop')}</p>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{t('company.registration.fileTypes')}</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {validationErrors.tax && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{validationErrors.tax}</p>
-                  )}
-                  {uploadProgress.tax !== undefined && uploadProgress.tax < 100 && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${uploadProgress.tax}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Verification Document Upload (Required) */}
-                <div>
-                  <label className={labelClasses}>
-                    {t('company.registration.verificationDocument')} *
-                  </label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('company.registration.verificationDocumentHelp')}</p>
-                  <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
-                    validationErrors.verification
-                      ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/10'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-gray-50 dark:bg-gray-800/50'
-                  }`}>
-                    <div className="space-y-1 text-center">
-                      {verificationDocFile ? (
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                          <p className="font-medium">{verificationDocFile.name}</p>
-                          <button
-                            type="button"
-                            onClick={() => setVerificationDocFile(null)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2"
-                          >
-                            {t('company.registrationPage.remove')}
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M9 12h6m6 0h6m-6 0v6m-6-6v6m6 0v6m0-6h6m-6 0H9m12 6v6m0-6H9m12 6h6m-6 0v6m0-6H9m12 6H9m12 0h6m-6 0v6m6-6h6m-6 0v6m0-6h6m-6 0V12" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          <div className="flex text-sm text-gray-600 dark:text-gray-300 justify-center">
-                            <label htmlFor="verification-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
-                              <span>{t('company.registration.uploadButton')}</span>
-                              <input
-                                id="verification-upload"
-                                name="verification-upload"
-                                type="file"
-                                accept="image/png,image/jpeg,image/jpg,application/pdf"
-                                className="sr-only"
-                                onChange={(e) => handleFileChange(e, 'verification')}
-                              />
-                            </label>
-                            <p className="pl-1">{t('company.registration.dragDrop')}</p>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{t('company.registration.fileTypes')}</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {validationErrors.verification && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{validationErrors.verification}</p>
-                  )}
-                  {uploadProgress.verification !== undefined && uploadProgress.verification < 100 && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${uploadProgress.verification}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            {section(
+              'reg-legal',
+              tx.secLegalTitle,
+              tx.secLegalHelp,
+              <LegalConsentFields
+                kind="empleador"
+                values={consents}
+                onChange={(key, value) => {
+                  setConsents((prev) => ({ ...prev, [key]: value }));
+                  if (validationErrors.consents) {
+                    setValidationErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.consents;
+                      return next;
+                    });
+                  }
+                }}
+                disabled={loading}
+                errorId="consents-err"
+                errorMessage={validationErrors.consents || null}
+              />,
+            )}
           </div>
 
-          {/* Submit Button */}
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-dark-border rounded-b-lg">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                * {t('company.registration.requiredFieldsNote') || 'Required fields'}
-              </p>
+          {/* Submit Button: barra fija al pie para que «Enviar» siempre esté a mano */}
+          <div className="sticky bottom-0 z-10 rounded-b-2xl border-t border-slate-200 bg-white/95 px-5 py-4 backdrop-blur dark:border-dark-border dark:bg-dark-bg-secondary/95 sm:px-9">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <p className="text-[13px] text-slate-600 dark:text-dark-text-secondary">{tx.requiredNote}</p>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex w-full justify-center rounded-lg bg-cv-blue px-8 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-dark-bg-secondary sm:w-auto"
               >
                 {loading ? t('company.registration.submitting') : t('company.registration.submit')}
               </button>
@@ -894,7 +1038,7 @@ const CompanyRegistrationPage: React.FC = () => {
           </div>
         </form>
       </div>
-    </div>
+    </>,
   );
 };
 

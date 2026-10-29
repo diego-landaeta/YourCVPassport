@@ -1,685 +1,324 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { ArrowDownTrayIcon, BriefcaseIcon, StarIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import toast from 'react-hot-toast';
+import { fmt } from '../../lib/bolsaText';
+import { downloadCsv, toCsv } from '../../lib/jobsCsv';
+import { formatDate } from '../../lib/jobsFormat';
+import { COMPANY_APPLICATION_COLUMNS, markApplicationViewed } from '../../lib/jobsApi';
+import { ckey, useCompanyAppsText } from '../jobs/textosEmpresa';
+import ApplicantDrawer from '../jobs/ApplicantDrawer';
+import { STATUS_TONE, currentRole, matchCls, totalYears, type CompanyApp, type JobLite } from '../jobs/ApplicantShared';
 import {
-  BriefcaseIcon,
-  UserIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  CalendarIcon,
-  StarIcon,
-  EyeIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  ChartBarIcon,
-  ArrowDownTrayIcon,
-} from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+  BTN_GHOST, BTN_SECONDARY, FIELD_CLS, FOCUS, H1_CLS, PanelEmpty, PanelError, PanelSkeleton, PanelTabs, PersonAvatar,
+  SearchBox, StatusDot, SURFACE, TEXT_META, TEXT_STRONG, norm, notifyError, useReveal,
+} from '../jobs/PanelBits';
 
-interface JobApplication {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  job_posting_id: string;
-  profile_id: string;
-  status: string;
-  cover_letter: string | null;
-  resume_url: string | null;
-  answers: any;
-  viewed_by_company: boolean;
-  viewed_at: string | null;
-  internal_notes: string | null;
-  rating: number | null;
-  match_score: number | null;
-  job_posting: {
-    id: string;
-    title: string;
-    slug: string;
-    department: string | null;
-    employment_type: string;
-    location_city: string | null;
-    location_country: string | null;
-  };
-  profile: {
-    id: string;
-    full_name: string;
-    headline: string | null;
-    location: string | null;
-    email: string | null;
-    phone: string | null;
-    cv_url: string | null;
-    slug: string | null;
-    profile_picture_url: string | null;
-  };
-}
+type TabKey = 'received' | 'viewed' | 'shortlisted' | 'rejected' | 'hired' | 'withdrawn' | 'notQualified';
+
+const TABS: Array<{ key: TabKey; test: (a: CompanyApp) => boolean }> = [
+  { key: 'received', test: (a) => a.status === 'NEW' && !a.viewed_by_company },
+  { key: 'viewed', test: (a) => (a.status === 'NEW' && !!a.viewed_by_company) || a.status === 'REVIEWING' },
+  { key: 'shortlisted', test: (a) => ['SHORTLISTED', 'INTERVIEW', 'OFFER'].includes(a.status) },
+  { key: 'rejected', test: (a) => a.status === 'REJECTED' },
+  { key: 'hired', test: (a) => a.status === 'HIRED' },
+  { key: 'withdrawn', test: (a) => a.status === 'WITHDRAWN' },
+  { key: 'notQualified', test: (a) => a.status === 'NOT_QUALIFIED' },
+];
+
+const MAX_ROWS = 500;
+
+// Una sola rejilla para cabecera y filas: casilla | candidato | oferta | afinidad | valoracion | fecha | estado
+const GRID = 'lg:grid-cols-[1.25rem_minmax(0,2fr)_minmax(0,1.3fr)_4.5rem_6rem_6rem_9.5rem]';
 
 const JobApplicationsPage: React.FC = () => {
-  const { user } = useAuth();
+  const tx = useCompanyAppsText();
   const { lang } = useLanguage();
+  const { user, company } = useAuth();
   const navigate = useNavigate();
+  // /company/jobs/applications?job=<id> abre el panel ya filtrado por esa oferta («Mis ofertas» enlaza asi)
+  const [searchParams] = useSearchParams();
 
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [companyId, setCompanyId] = useState<string | null>(null);
-  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [internalNotes, setInternalNotes] = useState('');
-  const [rating, setRating] = useState<number | null>(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    new: 0,
-    reviewing: 0,
-    shortlisted: 0,
-    interview: 0,
-    avgMatchScore: 0,
-  });
+  const [apps, setApps] = useState<CompanyApp[]>([]);
+  const [jobs, setJobs] = useState<Map<string, JobLite>>(new Map());
+  const [state, setState] = useState<'loading' | 'ready' | 'error' | 'nocompany'>('loading');
+  const [jobFilter, setJobFilter] = useState(searchParams.get('job') || '');
+  const [tab, setTab] = useState<TabKey>('received');
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [openId, setOpenId] = useState<string | null>(null);
+  const requestId = useRef(0);
+  const allBox = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    loadCompanyAndApplications();
-  }, [user, selectedJobId, selectedStatus]);
+  const companyId = company?.id || null;
 
-  const loadCompanyAndApplications = async () => {
+  const load = useCallback(async () => {
     if (!user) return;
-
+    if (!companyId) { setState('nocompany'); return; }
+    const id = ++requestId.current;
+    setState('loading');
     try {
-      setLoading(true);
-
-      // Get company ID
-      const { data: companyUser, error: companyError } = await supabase
-        .from('company_users')
-        .select('company_id')
-        .eq('user_id', user.id)
-        // maybeSingle: sin empresa → null (aviso "no encontrada"), sin 406
-        .maybeSingle();
-
-      if (companyError || !companyUser) {
-        toast.error('Empresa no encontrada');
-        return;
-      }
-
-      setCompanyId(companyUser.company_id);
-
-      // Build query. Del candidato solo se piden columnas públicas de profiles:
-      // email y teléfono son privados (migración 20261006_cerrar_columnas_privadas_profiles_stamps.sql);
-      // cv_url y profile_picture_url no existen en profiles.
-      let query = supabase
-        .from('job_applications')
-        .select(`
-          *,
-          job_posting:job_postings(id, title, slug, department, employment_type, location_city, location_country),
-          profile:profiles(id, full_name, headline, location, slug, avatar_url)
-        `)
-        .eq('company_id', companyUser.company_id)
-        .order('created_at', { ascending: false });
-
-      // Filter by job posting
-      if (selectedJobId) {
-        query = query.eq('job_posting_id', selectedJobId);
-      }
-
-      // Filter by status
-      if (selectedStatus !== 'all') {
-        query = query.eq('status', selectedStatus.toUpperCase());
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      setApplications(data || []);
-
-      // Calculate stats
-      if (data) {
-        const total = data.length;
-        const newApps = data.filter(app => app.status === 'NEW').length;
-        const reviewing = data.filter(app => app.status === 'REVIEWING').length;
-        const shortlisted = data.filter(app => app.status === 'SHORTLISTED').length;
-        const interview = data.filter(app => app.status === 'INTERVIEW').length;
-        const avgMatch = data.reduce((sum, app) => sum + (app.match_score || 0), 0) / (total || 1);
-
-        setStats({
-          total,
-          new: newApps,
-          reviewing,
-          shortlisted,
-          interview,
-          avgMatchScore: Math.round(avgMatch),
-        });
-      }
-    } catch (error: any) {
-      toast.error('Error al cargar las aplicaciones');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewApplication = async (application: JobApplication) => {
-    setSelectedApplication(application);
-    setInternalNotes(application.internal_notes || '');
-    setRating(application.rating);
-    setShowDetailsModal(true);
-
-    // Mark as viewed
-    if (!application.viewed_by_company) {
-      await supabase
-        .from('job_applications')
-        .update({
-          viewed_by_company: true,
-          viewed_at: new Date().toISOString(),
-          viewed_by: user?.id,
-        })
-        .eq('id', application.id);
-
-      // Refresh list
-      loadCompanyAndApplications();
-    }
-  };
-
-  const handleUpdateStatus = async (newStatus: string) => {
-    if (!selectedApplication || !companyId || !user) return;
-
-    try {
-      setUpdatingStatus(true);
-
-      const { data, error } = await supabase.rpc('update_application_status', {
-        p_application_id: selectedApplication.id,
-        p_company_id: companyId,
-        p_user_id: user.id,
-        p_new_status: newStatus,
-        p_internal_notes: internalNotes || null,
-        p_rating: rating,
-      });
-
-      if (error) throw error;
-
-      toast.success('Estado actualizado correctamente');
-      setShowDetailsModal(false);
-      loadCompanyAndApplications();
-    } catch (error: any) {
-      // 42501: el servidor no reconoce a la sesión como miembro (OWNER/ADMIN/MEMBER) de la empresa
-      toast.error(error?.code === '42501'
-        ? (lang === 'es'
-          ? 'No tienes permiso para cambiar candidaturas de esta empresa.'
-          : 'You are not allowed to update applications for this company.')
-        : (error.message || 'Error al actualizar el estado'));
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      NEW: 'bg-blue-100 text-blue-800',
-      REVIEWING: 'bg-yellow-100 text-yellow-800',
-      SHORTLISTED: 'bg-purple-100 text-purple-800',
-      INTERVIEW: 'bg-indigo-100 text-indigo-800',
-      OFFER: 'bg-green-100 text-green-800',
-      HIRED: 'bg-green-600 text-white',
-      REJECTED: 'bg-red-100 text-red-800',
-      WITHDRAWN: 'bg-gray-100 text-gray-800',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getMatchScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const exportToCSV = () => {
-    try {
-      // Prepare CSV headers
-      const headers = [
-        'Candidato',
-        'Email',
-        'Teléfono',
-        'Vacante',
-        'Departamento',
-        'Match Score',
-        'Estado',
-        'Calificación',
-        'Fecha Aplicación',
-        'Ubicación',
-      ];
-
-      // Prepare CSV rows
-      const rows = filteredApplications.map(app => [
-        app.profile.full_name || 'N/A',
-        app.profile.email || 'N/A',
-        app.profile.phone || 'N/A',
-        app.job_posting.title,
-        app.job_posting.department || 'N/A',
-        app.match_score?.toString() || '0',
-        app.status,
-        app.rating?.toString() || 'Sin calificar',
-        new Date(app.created_at).toLocaleDateString('es-ES'),
-        app.profile.location || 'N/A',
+      const [appsRes, jobsRes] = await Promise.all([
+        supabase.from('job_applications').select(COMPANY_APPLICATION_COLUMNS)
+          .eq('company_id', companyId).order('created_at', { ascending: false }).range(0, MAX_ROWS - 1),
+        supabase.from('job_postings').select('id, title, location_city').eq('company_id', companyId),
       ]);
+      if (appsRes.error) throw appsRes.error;
+      if (id !== requestId.current) return;
+      setApps((appsRes.data || []) as unknown as CompanyApp[]);
+      setJobs(new Map(((jobsRes.data || []) as JobLite[]).map((j) => [j.id, j])));
+      setState('ready');
+    } catch (e) {
+      if (id !== requestId.current) return;
+      console.error('Error loading applications', e);
+      setState('error');
+    }
+  }, [user, companyId]);
 
-      // Create CSV content
-      const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-      ].join('\n');
+  useEffect(() => { void load(); }, [load]);
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
+  const scoped = useMemo(() => (jobFilter ? apps.filter((a) => a.job_posting_id === jobFilter) : apps), [apps, jobFilter]);
+  const counts = useMemo(() => {
+    const c = {} as Record<TabKey, number>;
+    for (const t of TABS) c[t.key] = scoped.filter(t.test).length;
+    return c;
+  }, [scoped]);
 
-      link.setAttribute('href', url);
-      link.setAttribute('download', `aplicaciones_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
+  const nameOf = (a: CompanyApp) => a.perfil_copia?.profile?.full_name || tx.noName;
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const inTab = useMemo(() => scoped.filter(TABS.find((t) => t.key === tab)!.test), [scoped, tab]);
+  const visible = useMemo(() => {
+    const q = norm(query.trim());
+    if (!q) return inTab;
+    return inTab.filter((a) => norm(`${a.perfil_copia?.profile?.full_name || ''} ${a.perfil_copia?.profile?.headline || ''}`).includes(q));
+  }, [inTab, query]);
+  const openApp = useMemo(() => apps.find((a) => a.id === openId) || null, [apps, openId]);
 
-      toast.success('Aplicaciones exportadas exitosamente');
-    } catch (error) {
-      toast.error('Error al exportar aplicaciones');
+  // La seleccion es de la lista que se ve: cambiar de pestana, oferta o busqueda la vacia
+  useEffect(() => { setSelected(new Set()); }, [tab, jobFilter, query]);
+  const selectedRows = useMemo(() => visible.filter((a) => selected.has(a.id)), [visible, selected]);
+  const allSelected = visible.length > 0 && selectedRows.length === visible.length;
+  useEffect(() => {
+    if (allBox.current) allBox.current.indeterminate = selectedRows.length > 0 && !allSelected;
+  }, [selectedRows.length, allSelected]);
+
+  const toggleRow = (id: string) => setSelected((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(visible.map((a) => a.id)));
+
+  const listRef = useReveal<HTMLUListElement>(state === 'ready' && visible.length > 0);
+
+  // Abrir una candidatura la marca como vista (RPC; ya no hay UPDATE directo)
+  const openApplication = (a: CompanyApp) => {
+    setOpenId(a.id);
+    if (!a.viewed_by_company) {
+      setApps((prev) => prev.map((x) => (x.id === a.id ? { ...x, viewed_by_company: true, viewed_at: x.viewed_at || new Date().toISOString() } : x)));
+      markApplicationViewed(a.id).catch((e) => console.warn('mark_application_viewed', e));
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  const exportCsv = (list: CompanyApp[]) => {
+    try {
+      const header = [tx.csv_candidate, tx.csv_headline, tx.csv_email, tx.csv_phone, tx.csv_job, tx.csv_match, tx.csv_status, tx.csv_rating, tx.csv_date, tx.csv_location];
+      const rows = list.map((a) => [
+        nameOf(a),
+        a.perfil_copia?.profile?.headline || '',
+        a.perfil_copia?.contact?.email || '',
+        a.perfil_copia?.contact?.phone || '',
+        jobs.get(a.job_posting_id)?.title || '',
+        a.match_score ?? '',
+        ckey(tx, `st_${a.status}`, a.status),
+        a.rating ?? '',
+        new Date(a.created_at).toISOString().slice(0, 10),
+        a.perfil_copia?.profile?.location || '',
+      ]);
+      downloadCsv(`candidaturas_${new Date().toISOString().slice(0, 10)}.csv`, toCsv([header, ...rows]));
+      toast.success(tx.csvDone);
+    } catch {
+      notifyError(tx.csvError, tx.closeNotice);
+    }
+  };
+
+  const onSaved = (patch: Partial<CompanyApp> & { id: string }) =>
+    setApps((prev) => prev.map((x) => (x.id === patch.id ? { ...x, ...patch } : x)));
+
+  const shell = (children: React.ReactNode) => (
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>
+  );
+
+  if (state === 'loading') {
+    return shell(
+      <>
+        <h1 className={H1_CLS}>{tx.title}</h1>
+        <div className="mt-8"><PanelSkeleton rows={4} label={tx.loading} /></div>
+      </>
+    );
+  }
+
+  if (state === 'nocompany' || state === 'error') {
+    return shell(
+      <div className="mx-auto max-w-xl py-10">
+        <PanelError message={state === 'nocompany' ? tx.noCompany : tx.loadError} retryLabel={state === 'error' ? tx.retry : undefined} onRetry={state === 'error' ? () => void load() : undefined} />
       </div>
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Aplicaciones Recibidas
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Gestiona las aplicaciones de candidatos a tus vacantes
-        </p>
+  return shell(
+    <>
+      <header>
+        <h1 className={H1_CLS}>{tx.title}</h1>
+        <p className={`mt-2 max-w-prose text-base ${TEXT_META}`}>{tx.subtitle}</p>
+      </header>
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="sm:w-72">
+          <label htmlFor="ja-job" className={`mb-1.5 block text-sm font-semibold ${TEXT_STRONG}`}>{tx.filterJob}</label>
+          <select id="ja-job" value={jobFilter} onChange={(e) => setJobFilter(e.target.value)} className={FIELD_CLS}>
+            <option value="">{tx.allJobs}</option>
+            {[...jobs.values()].map((j) => <option key={j.id} value={j.id}>{j.title}</option>)}
+          </select>
+        </div>
+        <SearchBox className="sm:w-72" value={query} onChange={setQuery} label={tx.searchLabel} placeholder={tx.searchPlaceholder} clearLabel={tx.clearSearch} />
+        <button type="button" onClick={() => exportCsv(visible)} disabled={visible.length === 0} className={`${BTN_SECONDARY} !py-2.5 sm:ml-auto`}>
+          <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />{tx.csv}
+        </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Total</div>
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Nuevas</div>
-          <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Revisando</div>
-          <div className="text-2xl font-bold text-yellow-600">{stats.reviewing}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Preseleccionadas</div>
-          <div className="text-2xl font-bold text-purple-600">{stats.shortlisted}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Entrevista</div>
-          <div className="text-2xl font-bold text-indigo-600">{stats.interview}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Match Promedio</div>
-          <div className={`text-2xl font-bold ${getMatchScoreColor(stats.avgMatchScore)}`}>
-            {stats.avgMatchScore}%
-          </div>
-        </div>
+      <div className="mt-6">
+        <PanelTabs
+          tabs={TABS.map((t) => ({ id: t.key, label: ckey(tx, `tab_${t.key}`), count: counts[t.key] }))}
+          active={tab}
+          onChange={(id) => setTab(id as TabKey)}
+          label={tx.tabsLabel}
+          idPrefix="tab"
+          panelId="ja-panel"
+        />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-end gap-4 justify-between">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Filtrar por Estado
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="new">Nuevas</option>
-              <option value="reviewing">Revisando</option>
-              <option value="shortlisted">Preseleccionadas</option>
-              <option value="interview">Entrevista</option>
-              <option value="offer">Oferta</option>
-              <option value="hired">Contratado</option>
-              <option value="rejected">Rechazadas</option>
-            </select>
-          </div>
-
-          <button
-            onClick={exportToCSV}
-            disabled={filteredApplications.length === 0}
-            className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ArrowDownTrayIcon className="h-5 w-5" />
-            Exportar a CSV
-          </button>
-        </div>
-      </div>
-
-      {/* Applications List */}
-      {applications.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <BriefcaseIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No hay aplicaciones
-          </h3>
-          <p className="text-gray-600">
-            Aún no has recibido aplicaciones para tus vacantes.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Candidato
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vacante
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Match
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rating
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {applications.map((app) => (
-                  <tr
-                    key={app.id}
-                    className={`hover:bg-gray-50 ${!app.viewed_by_company ? 'bg-blue-50' : ''}`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {app.profile.profile_picture_url ? (
-                          <img
-                            src={app.profile.profile_picture_url}
-                            alt={app.profile.full_name}
-                            className="h-10 w-10 rounded-full"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <UserIcon className="h-6 w-6 text-gray-500" />
-                          </div>
-                        )}
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {app.profile.full_name}
-                            {!app.viewed_by_company && (
-                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-600 text-white">
-                                Nueva
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {app.profile.headline || app.profile.location}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{app.job_posting.title}</div>
-                      <div className="text-sm text-gray-500">
-                        {app.job_posting.department && `${app.job_posting.department} • `}
-                        {app.job_posting.location_city || 'Remoto'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <ChartBarIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className={`text-sm font-semibold ${getMatchScoreColor(app.match_score || 0)}`}>
-                          {app.match_score || 0}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                        {app.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(app.created_at).toLocaleDateString('es-ES')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {app.rating ? (
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <StarIconSolid
-                              key={i}
-                              className={`h-4 w-4 ${i < app.rating! ? 'text-yellow-400' : 'text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleViewApplication(app)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <EyeIcon className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Application Details Modal */}
-      {showDetailsModal && selectedApplication && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {selectedApplication.profile.full_name}
-                  </h2>
-                  <p className="text-gray-600">{selectedApplication.profile.headline}</p>
-                  <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                    {selectedApplication.profile.location && (
-                      <div className="flex items-center">
-                        <MapPinIcon className="h-4 w-4 mr-1" />
-                        {selectedApplication.profile.location}
-                      </div>
-                    )}
-                    {selectedApplication.profile.email && (
-                      <div className="flex items-center">
-                        <EnvelopeIcon className="h-4 w-4 mr-1" />
-                        {selectedApplication.profile.email}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XCircleIcon className="h-6 w-6" />
-                </button>
-              </div>
-
-              {/* Match Score */}
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Puntuación de Match</span>
-                  <span className={`text-2xl font-bold ${getMatchScoreColor(selectedApplication.match_score || 0)}`}>
-                    {selectedApplication.match_score || 0}%
+      <div id="ja-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-5">
+        {visible.length === 0 ? (
+          apps.length === 0 ? (
+            <PanelEmpty icon={BriefcaseIcon} title={tx.emptyTitle} text={tx.emptyText} action={{ label: tx.viewMyJobs, onClick: () => navigate('/company/jobs') }} />
+          ) : query ? (
+            <PanelEmpty icon={BriefcaseIcon} title={tx.emptyTitle} text={tx.emptySearch} action={{ label: tx.clearSearch, onClick: () => setQuery('') }} />
+          ) : (
+            <PanelEmpty icon={BriefcaseIcon} title={tx.emptyTitle} text={tx.emptyTabText} />
+          )
+        ) : (
+          <div className={`${SURFACE} overflow-hidden`}>
+            <div className={`grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-[13px] font-semibold dark:border-dark-border dark:bg-white/5 ${GRID} lg:gap-x-4 ${TEXT_META}`}>
+              <input
+                ref={allBox}
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleAll}
+                aria-label={tx.selectAll}
+                className={`h-4 w-4 rounded accent-cv-blue ${FOCUS}`}
+              />
+              {selectedRows.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 lg:col-span-6">
+                  <span className={`tabular-nums ${TEXT_STRONG}`} aria-live="polite">
+                    {selectedRows.length === 1 ? tx.selectedOne : fmt(tx.selectedMany, { n: selectedRows.length })}
                   </span>
+                  <button type="button" onClick={() => exportCsv(selectedRows)} className={`${BTN_GHOST} !px-2 !py-1 !text-cv-blue dark:!text-cv-blue-light`}>
+                    <ArrowDownTrayIcon className="h-4 w-4" aria-hidden="true" />{tx.csvSelected}
+                  </button>
+                  <button type="button" onClick={() => setSelected(new Set())} className={`${BTN_GHOST} !px-2 !py-1`}>{tx.clearSelection}</button>
                 </div>
-              </div>
-
-              {/* Cover Letter */}
-              {selectedApplication.cover_letter && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Carta de Presentación</h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 whitespace-pre-wrap">{selectedApplication.cover_letter}</p>
-                  </div>
-                </div>
+              ) : (
+                <>
+                  <span className="lg:hidden">{visible.length === 1 ? tx.resultsOne : fmt(tx.resultsMany, { n: visible.length })}</span>
+                  <span className="hidden lg:block">{tx.colCandidate}</span>
+                  <span className="hidden lg:block">{tx.colJob}</span>
+                  <span className="hidden text-right lg:block">{tx.factMatch}</span>
+                  <span className="hidden text-center lg:block">{tx.colRating}</span>
+                  <span className="hidden lg:block">{tx.colDate}</span>
+                  <span className="hidden lg:block">{tx.colStatus}</span>
+                </>
               )}
-
-              {/* Rating */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Calificación</h3>
-                <div className="flex items-center space-x-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => setRating(star)}
-                      className="focus:outline-none"
-                    >
-                      {rating && star <= rating ? (
-                        <StarIconSolid className="h-8 w-8 text-yellow-400" />
-                      ) : (
-                        <StarIcon className="h-8 w-8 text-gray-300 hover:text-yellow-400" />
-                      )}
-                    </button>
-                  ))}
-                  {rating && (
-                    <button
-                      onClick={() => setRating(null)}
-                      className="ml-4 text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Limpiar
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Internal Notes */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Notas Internas</h3>
-                <textarea
-                  value={internalNotes}
-                  onChange={(e) => setInternalNotes(e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Agrega notas sobre este candidato..."
-                />
-              </div>
-
-              {/* Status Actions */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Cambiar Estado</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <button
-                    onClick={() => handleUpdateStatus('REVIEWING')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 disabled:opacity-50"
-                  >
-                    Revisando
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus('SHORTLISTED')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 disabled:opacity-50"
-                  >
-                    Preseleccionar
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus('INTERVIEW')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 disabled:opacity-50"
-                  >
-                    Entrevista
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus('OFFER')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 disabled:opacity-50"
-                  >
-                    Oferta
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus('HIRED')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                  >
-                    Contratado
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus('REJECTED')}
-                    disabled={updatingStatus}
-                    className="px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 disabled:opacity-50"
-                  >
-                    Rechazar
-                  </button>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-between items-center pt-6 border-t">
-                <div className="space-x-3">
-                  {selectedApplication.profile.slug && (
-                    <button
-                      onClick={() => navigate(`/company/profile/${selectedApplication.profile_id}`)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Ver Perfil Completo
-                    </button>
-                  )}
-                  {selectedApplication.profile.cv_url && (
-                    <a
-                      href={selectedApplication.profile.cv_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                    >
-                      Descargar CV
-                    </a>
-                  )}
-                </div>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cerrar
-                </button>
-              </div>
             </div>
+
+            <ul ref={listRef} aria-label={tx.tableLabel} className="divide-y divide-slate-200 dark:divide-dark-border">
+              {visible.map((a) => {
+                const snap = a.perfil_copia;
+                const years = totalYears(snap?.experiences);
+                const role = currentRole(snap?.experiences);
+                const isNew = !a.viewed_by_company;
+                const name = nameOf(a);
+                const sub = role ? fmt(tx.currentRole, { role }) : snap?.profile?.headline || '';
+                const yearsText = years > 0 ? (years === 1 ? tx.yearShort : fmt(tx.yearsShort, { n: years })) : '';
+                return (
+                  <li key={a.id} className={`relative transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-white/5 ${selected.has(a.id) ? 'bg-blue-50/60 dark:bg-cv-blue/10' : ''}`}>
+                    <button
+                      type="button"
+                      onClick={() => openApplication(a)}
+                      aria-label={fmt(tx.openCandidate, { name })}
+                      className="absolute inset-0 h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cv-blue"
+                    />
+                    <div className={`pointer-events-none relative grid grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3.5 ${GRID} lg:gap-x-4`}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(a.id)}
+                        onChange={() => toggleRow(a.id)}
+                        aria-label={fmt(tx.selectRow, { name })}
+                        className={`pointer-events-auto relative z-10 col-start-1 row-span-3 row-start-1 h-4 w-4 self-start rounded accent-cv-blue lg:row-span-1 lg:self-center ${FOCUS}`}
+                      />
+                      <div className="col-start-2 row-start-1 flex min-w-0 items-center gap-3">
+                        <PersonAvatar name={name} url={snap?.profile?.avatar_url as string | undefined} size="sm" />
+                        <div className="min-w-0">
+                          <p className={`flex min-w-0 items-center gap-2 text-[15px] leading-tight ${isNew ? 'font-bold' : 'font-semibold'} ${TEXT_STRONG}`}>
+                            {isNew && <span className="h-2 w-2 shrink-0 rounded-full bg-cv-blue dark:bg-cv-blue-light" aria-hidden="true" />}
+                            <span className="truncate">{name}</span>
+                            {isNew && <span className="hidden shrink-0 text-xs font-semibold text-cv-blue dark:text-cv-blue-light sm:inline">{tx.newBadge}</span>}
+                            {isNew && <span className="sr-only sm:hidden">{tx.newBadge}</span>}
+                          </p>
+                          {sub && <p className={`mt-0.5 truncate text-[13px] ${TEXT_META}`}>{sub}{yearsText && <span className="hidden sm:inline"> · {yearsText}</span>}</p>}
+                        </div>
+                      </div>
+                      <p className={`col-span-2 col-start-2 row-start-2 truncate text-sm lg:col-span-1 lg:col-start-3 lg:row-start-1 ${TEXT_META}`}>{jobs.get(a.job_posting_id)?.title}</p>
+                      <p className={`col-start-3 row-start-1 text-right text-base font-bold tabular-nums lg:col-start-4 ${matchCls(a.match_score || 0)}`} title={tx.matchHelp}>
+                        {a.match_score ?? 0}<span className="text-xs font-semibold">%</span>
+                      </p>
+                      <div className="col-start-5 row-start-1 hidden items-center justify-center lg:flex">
+                        {a.rating ? (
+                          <span className={`inline-flex items-center gap-1 text-sm font-semibold tabular-nums ${TEXT_STRONG}`} role="img" aria-label={fmt(tx.starLabel, { n: a.rating })}>
+                            <StarIcon className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />{a.rating}
+                          </span>
+                        ) : (
+                          <span className={`text-sm ${TEXT_META}`} aria-label={tx.noRating}>—</span>
+                        )}
+                      </div>
+                      <p className={`col-start-2 row-start-3 text-[13px] tabular-nums lg:col-start-6 lg:row-start-1 lg:text-sm ${TEXT_META}`}>{formatDate(a.created_at, lang)}</p>
+                      <div className="col-start-3 row-start-3 justify-self-end lg:col-start-7 lg:row-start-1 lg:justify-self-start">
+                        <StatusDot tone={STATUS_TONE[a.status] || 'info'} className="!text-[13px] lg:!text-sm">{ckey(tx, `st_${a.status}`, a.status)}</StatusDot>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        </div>
+        )}
+      </div>
+
+      {openApp && companyId && user && (
+        <ApplicantDrawer
+          app={openApp}
+          job={jobs.get(openApp.job_posting_id) || null}
+          companyId={companyId}
+          userId={user.id}
+          onClose={() => setOpenId(null)}
+          onSaved={onSaved}
+          onOpenPublicProfile={(slug) => navigate(`/cv/${encodeURIComponent(slug)}`)}
+        />
       )}
-    </div>
+    </>
   );
 };
 

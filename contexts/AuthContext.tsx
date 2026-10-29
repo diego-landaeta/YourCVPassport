@@ -9,6 +9,17 @@ import { formatPersonName } from '../utils/personName';
 
 type AuthMode = 'login' | 'signup';
 
+// Datos del alta (Edge Function `signup`). Bolsa de empleo, fase 1 (#6): idioma de
+// registro, camino elegido, fecha de nacimiento y casillas legales; la Edge los
+// valida y los guarda (user_metadata / app_metadata).
+export interface SignUpUserData {
+  full_name: string;
+  registro_idioma?: string;
+  tipo?: 'candidato' | 'empresa';
+  fecha_nacimiento?: string;
+  casillas?: Record<string, boolean>;
+}
+
 // Resultado del alta (Edge Function `signup`).
 export interface SignUpResult {
   user: null;
@@ -39,7 +50,7 @@ interface AuthContextType {
   refetchCompany: () => Promise<void>;
   // Auth methods
   signInWithEmail: (email: string, password: string) => Promise<{ error: any }>;
-  signUpWithEmail: (email: string, password: string, userData: { full_name: string }) => Promise<{ data?: SignUpResult; error: any }>;
+  signUpWithEmail: (email: string, password: string, userData: SignUpUserData) => Promise<{ data?: SignUpResult; error: any }>;
   resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithLinkedIn: () => Promise<{ error: any }>;
@@ -321,7 +332,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, userData: { full_name: string }) => {
+  const signUpWithEmail = async (email: string, password: string, userData: SignUpUserData) => {
     try {
       // Use Edge Function to create user and send custom confirmation email via Brevo.
       // invokeAuthFunction aplica timeout (20 s) y devuelve un AuthFunctionError con
@@ -330,6 +341,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email.trim().toLowerCase(),
         password,
         full_name: userData.full_name,
+        registro_idioma: userData.registro_idioma,
+        tipo: userData.tipo,
+        fecha_nacimiento: userData.fecha_nacimiento,
+        casillas: userData.casillas,
         redirectTo: `${window.location.origin}/confirm`
       });
 

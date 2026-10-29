@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { postAuthDestination } from '../../utils/postAuthDestination';
 import { supabase } from '../../supabase/client';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import SEOHead from '../../components/shared/SEOHead';
@@ -44,7 +45,7 @@ const CallbackPage: React.FC = () => {
           setLinkError(result.error);
           return;
         }
-        if (result.session) navigate('/dashboard');
+        if (result.session) navigate(await postAuthDestination());
         else redirectToLogin(t.noSessionRedirect, 2000);
         return;
       }
@@ -67,7 +68,7 @@ const CallbackPage: React.FC = () => {
 
         if (data.session) {
           // Successfully authenticated, redirect to dashboard
-          navigate('/dashboard');
+          navigate(await postAuthDestination());
         } else {
           // No session found
           redirectToLogin(t.noSessionRedirect, 2000);

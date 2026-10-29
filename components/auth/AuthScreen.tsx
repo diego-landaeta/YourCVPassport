@@ -3,9 +3,54 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import OAuthButtons from './OAuthButtons';
+import LegalConsentFields from '../legal/LegalConsentFields';
+import { useLegalText } from '../legal/legalText';
+import {
+  CANDIDATE_OPTIONAL,
+  CANDIDATE_REQUIRED,
+  GUARDIAN_KEY,
+  ageStatus,
+  clearUnderageNotice,
+  emptyCasillas,
+  hasUnderageNotice,
+  type Casillas,
+} from '../../lib/legal';
+import {
+  ArrowRightIcon,
+  BuildingOffice2Icon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  IdentificationIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline';
 
-type FieldId = 'fullName' | 'email' | 'password' | 'confirmPassword' | 'agreeToTerms';
+type FieldId =
+  | 'fullName'
+  | 'email'
+  | 'password'
+  | 'confirmPassword'
+  | 'birthDate'
+  | 'agreeToTerms'
+  | 'consent-datos_verdaderos'
+  | 'consent-autorizacion_tutores';
+
+type SignupType = 'candidato' | 'empresa';
+
+// ?tipo=empresa|candidato preselecciona el camino (enlaces desde la home, /company/register...).
+const typeFromSearch = (search: string): SignupType | null => {
+  const v = new URLSearchParams(search).get('tipo');
+  return v === 'empresa' || v === 'candidato' ? v : null;
+};
+
+// Hoy en calendario local (AAAA-MM-DD), para el max del <input type="date">.
+const todayLocalISO = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -16,6 +61,8 @@ const AuthScreen: React.FC = () => {
   const translations = useTranslations();
   const t = translations.dashboard.auth;
   const toast = useToastContext();
+  const { lang } = useLanguage();
+  const tx = useLegalText();
 
   // Detect if we're on /login or /signup and set initial view accordingly
   const [isLoginView, setIsLoginView] = useState(location.pathname === '/login');
@@ -23,9 +70,19 @@ const AuthScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  // Bolsa de empleo, fase 1 (#6): primer paso «¿buscas empleo o contratas?», fecha de
+  // nacimiento y casillas legales (todas SIN marcar). La aceptación se registra en
+  // el primer acceso con sesión (components/legal/LegalGate.tsx).
+  const [signupType, setSignupType] = useState<SignupType | null>(() => typeFromSearch(location.search));
+  const [birthDate, setBirthDate] = useState('');
+  const [consents, setConsents] = useState<Casillas>(() =>
+    emptyCasillas([...CANDIDATE_REQUIRED, ...CANDIDATE_OPTIONAL, GUARDIAN_KEY]),
+  );
+  const ageSt = ageStatus(birthDate);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Si la puerta de edad cerró la sesión de un menor de 16 años, /login lo explica (una sola vez).
+  const [error, setError] = useState<string | null>(() => (hasUnderageNotice() ? tx.underageLoginNotice : null));
+  useEffect(() => { clearUnderageNotice(); }, []);
   // Campo al que se refiere el error de validación (aria-invalid + foco).
   const [errorField, setErrorField] = useState<FieldId | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -41,6 +98,7 @@ const AuthScreen: React.FC = () => {
   // Update view when route changes
   useEffect(() => {
     setIsLoginView(location.pathname === '/login');
+    setSignupType(typeFromSearch(location.search));
     setPendingNotice(null);
     setResendEmail(null);
     setResendFeedback(null);
@@ -56,7 +114,9 @@ const AuthScreen: React.FC = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      // Quien se registró como empresa continúa en el área de empresa (si aún no
+      // tiene una, CompanyProtectedRoute lo lleva a /company/register).
+      navigate(user.user_metadata?.tipo === 'empresa' ? '/company/dashboard' : '/dashboard');
     }
   }, [user, navigate]);
 
@@ -116,7 +176,14 @@ const AuthScreen: React.FC = () => {
     if (password.length < 8) return { field: 'password', message: t.errors.passwordTooShort };
     if (!validatePassword(password)) return { field: 'password', message: t.errors.weakPassword };
     if (password !== confirmPassword) return { field: 'confirmPassword', message: t.errors.passwordsNotMatch };
-    if (!agreeToTerms) return { field: 'agreeToTerms', message: t.errors.termsRequired };
+    // Camino de empresa: las casillas de empleador se aceptan al registrar la empresa.
+    if (signupType === 'empresa') return null;
+    if (ageSt === 'empty') return { field: 'birthDate', message: tx.birthDateRequired };
+    if (ageSt === 'invalid') return { field: 'birthDate', message: tx.birthDateInvalid };
+    if (ageSt === 'underage') return { field: 'birthDate', message: tx.underage };
+    if (!consents.acepto_condiciones_privacidad) return { field: 'agreeToTerms', message: t.errors.termsRequired };
+    if (!consents.datos_verdaderos) return { field: 'consent-datos_verdaderos', message: tx.errTruthful };
+    if (ageSt === 'minor' && !consents[GUARDIAN_KEY]) return { field: 'consent-autorizacion_tutores', message: tx.errGuardian };
     return null;
   };
 
@@ -169,6 +236,10 @@ const AuthScreen: React.FC = () => {
       try {
         const { data: signUpData, error: authError } = await signUpWithEmail(email.trim(), password, {
           full_name: fullName.trim(),
+          // Idioma de registro = el de la interfaz; la plataforma se mostrará en él.
+          registro_idioma: lang,
+          tipo: signupType ?? 'candidato',
+          ...(signupType === 'empresa' ? {} : { fecha_nacimiento: birthDate, casillas: consents }),
         });
 
         if (authError) {
@@ -215,64 +286,156 @@ const AuthScreen: React.FC = () => {
   const fieldA11y = (field: FieldId) =>
     errorField === field ? { 'aria-invalid': true as const, 'aria-describedby': 'auth-form-error' } : {};
 
+  // Casilla legal con el error de validación (la marca LegalConsentFields).
+  const consentInvalidKey =
+    errorField === 'agreeToTerms' ? 'acepto_condiciones_privacidad'
+    : errorField?.startsWith('consent-') ? errorField.slice('consent-'.length)
+    : null;
+
+  // Primer paso del registro: sin camino elegido solo se ofrece elegirlo.
+  const showChooser = !isLoginView && !signupType;
+  const isSignup = !isLoginView;
+
+  // Clases comunes de la pantalla (16 px en móvil: iOS no hace zoom al enfocar).
+  const labelCls = 'block text-sm font-medium text-slate-800 dark:text-slate-100 mb-1.5';
+  const fieldCls =
+    'w-full px-3.5 py-2.5 text-base sm:text-[15px] leading-6 border border-slate-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-sm transition-colors focus:ring-2 focus:ring-cv-blue focus:border-cv-blue focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus:ring-red-500 aria-[invalid=true]:focus:border-red-500';
+  const helpCls = 'mt-1.5 text-[13px] leading-snug text-slate-600 dark:text-dark-text-secondary';
+  const groupTitleCls = 'text-sm font-semibold text-slate-900 dark:text-white';
+
+  // Error de validación junto al campo que falla (un solo elemento: lo enlaza aria-describedby).
+  const inlineError = (field: FieldId) =>
+    error && errorField === field ? (
+      <p id="auth-form-error" role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-red-700 dark:text-red-400">
+        <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <span>{error}</span>
+      </p>
+    ) : null;
+
+  const typeOptions: { id: SignupType; testId: string; title: string; desc: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
+    { id: 'candidato', testId: 'signup-type-candidato', title: tx.typeCandidate, desc: tx.typeCandidateDesc, Icon: IdentificationIcon },
+    { id: 'empresa', testId: 'signup-type-empresa', title: tx.typeCompany, desc: tx.typeCompanyDesc, Icon: BuildingOffice2Icon },
+  ];
+  const SelectedIcon = signupType === 'empresa' ? BuildingOffice2Icon : IdentificationIcon;
+
+  const alertBase = 'mb-5 flex items-start gap-3 rounded-lg border p-3.5 text-sm leading-snug';
+
   const formUI = (
     <div className="w-full">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {isLoginView ? t.login.title : t.signup.title}
+      <div className={showChooser ? 'mb-8' : 'mb-6'}>
+        <h2 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          {showChooser ? tx.typeTitle : isLoginView ? t.login.title : t.signup.title}
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {isLoginView ? t.login.subtitle : t.signup.subtitle}
+        <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">
+          {showChooser ? tx.typeSubtitle : isLoginView ? t.login.subtitle : t.signup.subtitle}
         </p>
       </div>
 
-      {/* Error & Success Messages */}
-      {error && (
-        <div id="auth-form-error" role="alert" className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
-          <p className="text-xs text-red-700 dark:text-red-400">{error}</p>
+      {/* Errores generales (los de campo salen junto al campo) */}
+      {error && !errorField && (
+        <div id="auth-form-error" role="alert" className={`${alertBase} border-red-200 bg-red-50 text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200`}>
+          <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <p>{error}</p>
         </div>
       )}
       {successMessage && (
-        <div className="mb-4 p-2.5 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded">
-          <p className="text-xs text-green-700 dark:text-green-400">{successMessage}</p>
+        <div role="status" className={`${alertBase} border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200`}>
+          <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <p>{successMessage}</p>
         </div>
       )}
       {pendingNotice && (
-        <div role="status" className="mb-4 p-2.5 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded">
-          <p className="text-xs text-amber-800 dark:text-amber-300">{pendingNotice}</p>
+        <div role="status" className={`${alertBase} border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100`}>
+          <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <p>{pendingNotice}</p>
         </div>
       )}
       {resendEmail && (
-        <div className="mb-4">
+        <div className="mb-5">
           <button
             type="button"
             onClick={handleResend}
             disabled={isResending || resendCooldown > 0}
-            className="w-full px-3 py-2 text-sm font-medium border border-cv-blue text-cv-blue dark:text-blue-300 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full px-3 py-2.5 text-sm font-medium border border-cv-blue text-cv-blue dark:text-blue-300 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-surface"
           >
             {isResending ? t.signup.resendSending : t.signup.resendButton}
           </button>
           <div aria-live="polite">
             {resendFeedback && (
-              <p className={`mt-2 text-xs ${resendFeedback.ok ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+              <p className={`mt-2 text-sm ${resendFeedback.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
                 {resendFeedback.text}
               </p>
             )}
           </div>
           {resendCooldown > 0 && (
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-1 text-[13px] tabular-nums text-slate-600 dark:text-dark-text-secondary">
               {t.signup.resendCooldown.replace('{seconds}', String(resendCooldown))}
             </p>
           )}
         </div>
       )}
 
+      {/* Paso 1 del registro: ¿buscas empleo o contratas? */}
+      {showChooser && (
+        <div role="group" aria-label={tx.typeTitle} className="grid gap-4">
+          {typeOptions.map(({ id, testId, title, desc, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              data-testid={testId}
+              onClick={() => setSignupType(id)}
+              className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-[border-color,box-shadow,background-color] duration-150 hover:border-cv-blue hover:bg-blue-50/50 hover:shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_32px_-16px_rgba(15,23,42,.18)] focus:outline-none focus-visible:border-cv-blue focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 active:bg-blue-50 dark:border-dark-border dark:bg-dark-bg-tertiary/40 dark:hover:border-blue-400 dark:hover:bg-blue-500/10 dark:focus-visible:ring-offset-dark-surface"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-cv-blue transition-colors duration-150 group-hover:bg-cv-blue group-hover:text-white dark:bg-blue-500/15 dark:text-blue-300 dark:group-hover:bg-blue-500 dark:group-hover:text-white"
+              >
+                <Icon className="h-7 w-7" strokeWidth={1.5} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg font-semibold leading-snug text-slate-900 dark:text-white">{title}</span>
+                <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-dark-text-secondary">{desc}</span>
+              </span>
+              <ArrowRightIcon
+                className="h-5 w-5 shrink-0 text-slate-400 transition-[transform,color] duration-150 group-hover:text-cv-blue motion-safe:group-hover:translate-x-1 dark:text-slate-500 dark:group-hover:text-blue-300"
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!showChooser && (<>
       {/* Form */}
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        {/* Camino elegido (solo registro) */}
+        {isSignup && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/70 px-3.5 py-2.5 dark:border-blue-400/30 dark:bg-blue-500/10">
+            <span className="flex min-w-0 items-center gap-3">
+              <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-cv-blue shadow-sm dark:bg-dark-bg-tertiary dark:text-blue-300">
+                <SelectedIcon className="h-5 w-5" />
+              </span>
+              <span className="truncate text-sm font-semibold text-blue-950 dark:text-blue-100">
+                {signupType === 'empresa' ? tx.typeSelectedCompany : tx.typeSelectedCandidate}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setSignupType(null)}
+              disabled={formLocked}
+              className="shrink-0 rounded-md px-1.5 py-1 text-sm font-medium text-cv-blue underline underline-offset-2 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue disabled:opacity-50 dark:text-blue-300"
+            >
+              {tx.typeChange}
+            </button>
+          </div>
+        )}
+
+        {isSignup && <h3 className={`${groupTitleCls} !mt-7`}>{tx.typeGroupAccount}</h3>}
+
         {/* Full Name (Signup only) */}
-        {!isLoginView && (
+        {isSignup && (
           <div>
-            <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label htmlFor="fullName" className={labelCls}>
               {t.signup.fullName}
             </label>
             <input
@@ -282,16 +445,17 @@ const AuthScreen: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
               autoComplete="name"
               {...fieldA11y('fullName')}
-              className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
+              className={fieldCls}
               placeholder={t.signup.fullNamePlaceholder}
               disabled={formLocked}
             />
+            {inlineError('fullName')}
           </div>
         )}
 
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="email" className={labelCls}>
             {t.login.email}
           </label>
           <input
@@ -302,15 +466,16 @@ const AuthScreen: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             {...fieldA11y('email')}
-            className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
+            className={fieldCls}
             placeholder={isLoginView ? t.login.emailPlaceholder : t.signup.emailPlaceholder}
             disabled={formLocked}
           />
+          {inlineError('email')}
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="password" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label htmlFor="password" className={labelCls}>
             {t.login.password}
           </label>
           <input
@@ -322,21 +487,18 @@ const AuthScreen: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             {...fieldA11y('password')}
-            className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
+            className={fieldCls}
             placeholder="••••••••"
             disabled={formLocked}
           />
-          {!isLoginView && (
-            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-              {t.signup.passwordRequirements}
-            </p>
-          )}
+          {isSignup && <p className={helpCls}>{t.signup.passwordRequirements}</p>}
+          {inlineError('password')}
         </div>
 
         {/* Confirm Password (Signup only) */}
-        {!isLoginView && (
+        {isSignup && (
           <div>
-            <label htmlFor="confirmPassword" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label htmlFor="confirmPassword" className={labelCls}>
               {t.signup.confirmPassword}
             </label>
             <input
@@ -348,67 +510,105 @@ const AuthScreen: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               {...fieldA11y('confirmPassword')}
-              className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-transparent bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
+              className={fieldCls}
               placeholder="••••••••"
               disabled={formLocked}
             />
+            {inlineError('confirmPassword')}
           </div>
         )}
 
         {/* Remember Me & Forgot Password (Login only) */}
         {isLoginView && (
-          <div className="flex items-center justify-between text-xs">
-            <label className="flex items-center cursor-pointer">
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex cursor-pointer items-center">
               <input
                 type="checkbox"
-                className="h-3.5 w-3.5 text-cv-blue focus:ring-cv-blue border-gray-300 dark:border-dark-border dark:bg-dark-bg-tertiary rounded cursor-pointer"
+                className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-cv-blue dark:border-dark-border dark:bg-dark-bg-tertiary"
               />
-              <span className="ml-2 text-gray-700 dark:text-gray-300">
+              <span className="ml-2 text-slate-700 dark:text-slate-200">
                 {t.login.rememberMe}
               </span>
             </label>
             <Link
               to="/recovery"
-              className="text-cv-blue hover:text-cv-blue-dark font-medium hover:underline"
+              className="rounded font-medium text-cv-blue hover:text-cv-blue-dark hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-blue-300"
             >
               {t.login.forgotPassword}
             </Link>
           </div>
         )}
 
-        {/* Terms & Conditions (Signup only) */}
-        {!isLoginView && (
-          <div className="flex items-start gap-2 text-xs">
-            <input
-              id="agreeToTerms"
-              type="checkbox"
-              checked={agreeToTerms}
-              onChange={(e) => setAgreeToTerms(e.target.checked)}
-              // Nombre accesible completo: algunos lectores de pantalla omiten el
-              // texto de los enlaces dentro del <label> y leían «Acepto los y».
-              aria-label={t.signup.agreeToTermsAccessible}
-              {...fieldA11y('agreeToTerms')}
-              className="h-3.5 w-3.5 mt-0.5 text-cv-blue focus:ring-cv-blue border-gray-300 dark:border-dark-border dark:bg-dark-bg-tertiary rounded cursor-pointer"
+        {/* Fecha de nacimiento y casillas legales (solo candidato) */}
+        {isSignup && signupType === 'candidato' && (
+          <>
+            <h3 className={`${groupTitleCls} !mt-8`}>{tx.typeGroupAbout}</h3>
+            <div>
+              <label htmlFor="birthDate" className={labelCls}>
+                {tx.birthDate}
+              </label>
+              <input
+                id="birthDate"
+                type="date"
+                value={birthDate}
+                min="1900-01-01"
+                max={todayLocalISO()}
+                onChange={(e) => setBirthDate(e.target.value)}
+                autoComplete="bday"
+                aria-invalid={errorField === 'birthDate' ? true : undefined}
+                aria-describedby={[
+                  'birthDate-help',
+                  ageSt === 'underage' || ageSt === 'minor' || errorField === 'birthDate' ? 'birthDate-msg' : '',
+                ].filter(Boolean).join(' ')}
+                className={`${fieldCls} tabular-nums sm:max-w-[16rem]`}
+                disabled={formLocked}
+              />
+              <p id="birthDate-help" className={helpCls}>
+                {tx.birthDateHelp} {tx.birthDateHelpShort}
+              </p>
+              {ageSt === 'underage' && (
+                <p id="birthDate-msg" role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-red-700 dark:text-red-400">
+                  <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{tx.underage}</span>
+                </p>
+              )}
+              {ageSt === 'minor' && (
+                <p id="birthDate-msg" role="status" className="mt-2 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
+                  <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>{tx.minorNotice}</span>
+                </p>
+              )}
+              {ageSt !== 'underage' && ageSt !== 'minor' && (
+                <span id="birthDate-msg">{inlineError('birthDate')}</span>
+              )}
+            </div>
+
+            <h3 className={`${groupTitleCls} !mt-8`}>{tx.typeGroupTerms}</h3>
+            <LegalConsentFields
+              kind="candidato"
+              values={consents}
+              onChange={(key, value) => setConsents((prev) => ({ ...prev, [key]: value }))}
               disabled={formLocked}
+              showGuardian={ageSt === 'minor'}
+              invalidKey={consentInvalidKey}
+              errorId="auth-form-error"
+              errorMessage={consentInvalidKey ? error : null}
             />
-            <label htmlFor="agreeToTerms" className="text-gray-600 dark:text-gray-400 cursor-pointer leading-tight">
-              {t.signup.agreeToTerms}{' '}
-              <Link to="/terms" className="text-cv-blue hover:text-cv-blue-dark font-medium hover:underline">
-                {t.signup.termsOfService}
-              </Link>
-              {' '}{t.signup.and}{' '}
-              <Link to="/privacy" className="text-cv-blue hover:text-cv-blue-dark font-medium hover:underline">
-                {t.signup.privacyPolicy}
-              </Link>
-            </label>
-          </div>
+          </>
+        )}
+
+        {isSignup && signupType === 'empresa' && (
+          <p className="flex items-start gap-2.5 rounded-lg border border-blue-200 bg-blue-50 p-3.5 text-sm leading-snug text-blue-900 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-100">
+            <InformationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <span>{tx.companyAccountNote}</span>
+          </p>
         )}
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={formLocked}
-          className="w-full bg-cv-blue hover:bg-cv-blue-dark text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+          className="w-full rounded-lg bg-cv-blue px-4 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-dark-surface"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
@@ -423,12 +623,13 @@ const AuthScreen: React.FC = () => {
       </form>
 
       {/* Divider */}
-      <div className="relative my-6">
+      {(isLoginView || signupType === 'candidato') && (<>
+      <div className="relative my-7">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200 dark:border-dark-border"></div>
+          <div className="w-full border-t border-slate-200 dark:border-dark-border"></div>
         </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="px-2 bg-white dark:bg-dark-surface text-gray-500 dark:text-gray-400">
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-white px-3 text-slate-600 dark:bg-dark-surface dark:text-dark-text-secondary">
             {isLoginView ? t.login.orContinue : t.signup.orContinue}
           </span>
         </div>
@@ -438,10 +639,12 @@ const AuthScreen: React.FC = () => {
       <div className="space-y-2.5">
         <OAuthButtons />
       </div>
+      </>)}
+      </>)}
 
       {/* Toggle Login/Signup */}
-      <div className="mt-6 text-center text-xs">
-        <span className="text-gray-600 dark:text-gray-400">
+      <div className="mt-8 border-t border-slate-200 pt-6 text-center text-sm dark:border-dark-border">
+        <span className="text-slate-600 dark:text-dark-text-secondary">
           {isLoginView ? t.login.noAccount : t.signup.haveAccount}{' '}
         </span>
         <Link
@@ -454,9 +657,11 @@ const AuthScreen: React.FC = () => {
             setPassword('');
             setConfirmPassword('');
             setFullName('');
-            setAgreeToTerms(false);
+            setSignupType(null);
+            setBirthDate('');
+            setConsents(emptyCasillas([...CANDIDATE_REQUIRED, ...CANDIDATE_OPTIONAL, GUARDIAN_KEY]));
           }}
-          className="text-cv-blue hover:text-cv-blue-dark font-semibold hover:underline"
+          className="rounded font-semibold text-cv-blue hover:text-cv-blue-dark hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-blue-300"
         >
           {isLoginView ? t.login.signUpLink : t.signup.loginLink}
         </Link>
@@ -466,7 +671,7 @@ const AuthScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-dark-bg">
-      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-0 bg-white dark:bg-dark-surface rounded-2xl shadow-xl overflow-hidden">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-0 bg-white dark:bg-dark-surface rounded-2xl shadow-[0_1px_2px_rgba(15,23,42,.06),0_24px_48px_-24px_rgba(15,23,42,.28)] dark:shadow-none dark:ring-1 dark:ring-dark-border overflow-hidden lg:min-h-[38rem]">
 
         {/* Left Side - Image/Branding */}
         <div className="relative hidden lg:block overflow-hidden">
@@ -512,7 +717,7 @@ const AuthScreen: React.FC = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="p-6 lg:p-8 flex flex-col justify-center">
+        <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
           {formUI}
         </div>
       </div>

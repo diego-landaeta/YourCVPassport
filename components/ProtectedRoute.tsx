@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslations } from '../hooks/useTranslations';
 import LoadingSpinner from './shared/LoadingSpinner';
+import LegalGate from './legal/LegalGate';
 
 const ProtectedRoute: React.FC = () => {
   const { session, loading, profile, profileLoading } = useAuth();
@@ -30,7 +31,13 @@ const ProtectedRoute: React.FC = () => {
     return <Navigate to="/admin" replace />;
   }
 
-  return <Outlet />;
+  // Bolsa de empleo, fase 1 (#6): hasta aceptar las condiciones vigentes (candidato +
+  // privacidad) no se usa el área personal. Ver components/legal/LegalGate.tsx.
+  return (
+    <LegalGate scope="candidato">
+      <Outlet />
+    </LegalGate>
+  );
 };
 
 export default ProtectedRoute;

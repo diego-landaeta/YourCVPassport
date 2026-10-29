@@ -1,504 +1,431 @@
-// @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../../supabase/client';
 import { useLanguage } from '../../contexts/LanguageContext';
-import {
-  BriefcaseIcon,
-  MagnifyingGlassIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  EyeIcon,
-  ClockIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  FunnelIcon
-} from '@heroicons/react/24/outline';
+import { fmt } from '../../lib/bolsaText';
+import { jobCategoryLabel } from '../../lib/jobCategories';
+import { JOB_STATUSES, formatDate, isReviewStatus, parseRpcError } from '../../lib/jobPostingModel';
+import { msg, pick, useJobText } from '../../lib/jobPostingText';
+import { useJobAdminText } from '../../lib/jobPostingAdminText';
+import { JobRichText } from '../company/jobwizard/JobRichText';
+import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { JobStatusBadge } from '../company/jobwizard/StatusBadge';
 
-interface JobPosting {
+/** Panel de administración de ofertas: cola de revisión (aprobar/rechazar con motivo) y denuncias. */
+
+interface AdminJob {
   id: string;
-  company_id: string;
   title: string;
-  description: string;
-  location: string;
+  company_id: string;
+  status: string;
+  country_code: string | null;
+  category: string | null;
+  work_mode: string | null;
+  location_city: string | null;
+  is_remote: boolean | null;
+  contract_types: string[] | null;
+  schedule: string | null;
   salary_min: number | null;
   salary_max: number | null;
-  employment_type: string;
-  status: 'active' | 'closed' | 'draft';
+  salary_currency: string | null;
+  salary_period: string | null;
+  show_salary: boolean | null;
+  description: string | null;
+  responsibilities: string[] | null;
+  requirements: string[] | null;
+  benefits: string[] | null;
+  review_reason: string | null;
+  reviewed_at: string | null;
+  published_at: string | null;
+  applications_count: number | null;
   created_at: string;
-  updated_at: string;
-  company_name?: string;
-  applications_count?: number;
-  views_count?: number;
+  companies: { company_name: string | null } | { company_name: string | null }[] | null;
 }
 
-type FilterStatus = 'all' | 'active' | 'closed' | 'draft';
+interface Report {
+  id: string;
+  job_id: string;
+  reason: string;
+  details: string | null;
+  status: 'OPEN' | 'REVIEWED' | 'DISMISSED';
+  created_at: string;
+}
+
+interface HistoryRow {
+  id: number;
+  from_status: string | null;
+  to_status: string;
+  source: string;
+  reason: string | null;
+  created_at: string;
+}
+
+type Tab = 'queue' | 'reported' | 'all';
+type Panel = null | { kind: 'reject' | 'manual'; job: AdminJob };
+
+const ADMIN_JOB_COLUMNS =
+  'id, title, company_id, status, country_code, category, work_mode, location_city, is_remote, contract_types, schedule, salary_min, salary_max, salary_currency, salary_period, show_salary, description, responsibilities, requirements, benefits, review_reason, reviewed_at, published_at, applications_count, created_at, companies(company_name)';
+
+const companyName = (j: AdminJob) => (Array.isArray(j.companies) ? j.companies[0]?.company_name : j.companies?.company_name) || '—';
 
 const JobPostingsManagement: React.FC = () => {
   const { lang } = useLanguage();
-  const [loading, setLoading] = useState(true);
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<JobPosting[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const t = useJobAdminText();
+  const tx = useJobText();
 
-  const translations = {
-    en: {
-      title: 'Job Postings Management',
-      subtitle: 'Manage all job vacancies posted by companies',
-      search: 'Search jobs...',
-      filterBy: 'Filter by status',
-      all: 'All',
-      active: 'Active',
-      closed: 'Closed',
-      draft: 'Draft',
-      totalJobs: 'Total Jobs',
-      activeJobs: 'Active Jobs',
-      closedJobs: 'Closed Jobs',
-      draftJobs: 'Draft Jobs',
-      jobTitle: 'Job Title',
-      company: 'Company',
-      location: 'Location',
-      salary: 'Salary',
-      type: 'Type',
-      status: 'Status',
-      applications: 'Applications',
-      views: 'Views',
-      postedOn: 'Posted on',
-      actions: 'Actions',
-      viewDetails: 'View Details',
-      closeJob: 'Close Job',
-      reactivate: 'Reactivate',
-      delete: 'Delete',
-      loading: 'Loading job postings...',
-      noResults: 'No job postings found',
-      jobDetails: 'Job Details',
-      description: 'Description',
-      requirements: 'Requirements',
-      employmentType: {
-        full_time: 'Full Time',
-        part_time: 'Part Time',
-        contract: 'Contract',
-        freelance: 'Freelance',
-        internship: 'Internship'
-      },
-      close: 'Close',
-      confirmClose: 'Are you sure you want to close this job posting?',
-      confirmDelete: 'Are you sure you want to delete this job posting?',
-      success: 'Operation completed successfully',
-      error: 'Error performing operation'
-    },
-    es: {
-      title: 'Gestión de Vacantes',
-      subtitle: 'Administra todas las vacantes publicadas por empresas',
-      search: 'Buscar vacantes...',
-      filterBy: 'Filtrar por estado',
-      all: 'Todas',
-      active: 'Activas',
-      closed: 'Cerradas',
-      draft: 'Borrador',
-      totalJobs: 'Total Vacantes',
-      activeJobs: 'Vacantes Activas',
-      closedJobs: 'Vacantes Cerradas',
-      draftJobs: 'Borradores',
-      jobTitle: 'Título',
-      company: 'Empresa',
-      location: 'Ubicación',
-      salary: 'Salario',
-      type: 'Tipo',
-      status: 'Estado',
-      applications: 'Solicitudes',
-      views: 'Vistas',
-      postedOn: 'Publicado',
-      actions: 'Acciones',
-      viewDetails: 'Ver Detalles',
-      closeJob: 'Cerrar Vacante',
-      reactivate: 'Reactivar',
-      delete: 'Eliminar',
-      loading: 'Cargando vacantes...',
-      noResults: 'No se encontraron vacantes',
-      jobDetails: 'Detalles de la Vacante',
-      description: 'Descripción',
-      requirements: 'Requisitos',
-      employmentType: {
-        full_time: 'Tiempo Completo',
-        part_time: 'Medio Tiempo',
-        contract: 'Contrato',
-        freelance: 'Freelance',
-        internship: 'Prácticas'
-      },
-      close: 'Cerrar',
-      confirmClose: '¿Estás seguro de que quieres cerrar esta vacante?',
-      confirmDelete: '¿Estás seguro de que quieres eliminar esta vacante?',
-      success: 'Operación completada exitosamente',
-      error: 'Error al realizar la operación'
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [jobs, setJobs] = useState<AdminJob[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [countries, setCountries] = useState<Record<string, { es: string; en: string }>>({});
+  const [tab, setTab] = useState<Tab>('queue');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<AdminJob | null>(null);
+  const [history, setHistory] = useState<HistoryRow[] | null>(null);
+  const [panel, setPanel] = useState<Panel>(null);
+  const [note, setNote] = useState('');
+  const [noteError, setNoteError] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  const load = useCallback(async () => {
+    setState((s) => (s === 'ready' ? s : 'loading'));
+    try {
+      const { data, error } = await supabase.from('job_postings').select(ADMIN_JOB_COLUMNS).order('created_at', { ascending: false }).limit(1000);
+      if (error) throw error;
+      setJobs((data || []) as unknown as AdminJob[]);
+
+      // Denuncias y países son accesorios: si fallan (p. ej. migración sin aplicar) la tabla sigue funcionando.
+      const [rep, cs] = await Promise.all([
+        supabase.from('job_reports').select('id, job_id, reason, details, status, created_at').order('created_at', { ascending: false }).limit(2000),
+        supabase.from('countries').select('code, name_es, name_en'),
+      ]);
+      setReports(rep.error ? [] : ((rep.data || []) as Report[]));
+      const map: Record<string, { es: string; en: string }> = {};
+      for (const c of (cs.data || []) as { code: string; name_es: string; name_en: string }[]) map[c.code] = { es: c.name_es, en: c.name_en };
+      setCountries(map);
+      setState('ready');
+    } catch (err) {
+      console.error('[AdminJobPostings] load', err);
+      setState('error');
     }
-  };
-
-  const t = translations[lang];
-
-  useEffect(() => {
-    loadJobPostings();
   }, []);
 
   useEffect(() => {
-    filterJobs();
-  }, [searchQuery, filterStatus, jobPostings]);
+    void load();
+  }, [load]);
 
-  const loadJobPostings = async () => {
+  const openReports = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const r of reports) if (r.status === 'OPEN') m[r.job_id] = (m[r.job_id] || 0) + 1;
+    return m;
+  }, [reports]);
+
+  const stats = useMemo(
+    () => ({
+      total: jobs.length,
+      queue: jobs.filter((j) => isReviewStatus(j.status)).length,
+      published: jobs.filter((j) => j.status === 'PUBLISHED').length,
+      rejected: jobs.filter((j) => j.status === 'REJECTED').length,
+      reported: Object.keys(openReports).length,
+    }),
+    [jobs, openReports],
+  );
+
+  const visible = useMemo(() => {
+    const q = query.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    return jobs.filter((j) => {
+      if (tab === 'queue' && !isReviewStatus(j.status)) return false;
+      if (tab === 'reported' && !openReports[j.id]) return false;
+      if (statusFilter && j.status !== statusFilter) return false;
+      if (!q) return true;
+      return `${j.title} ${companyName(j)}`.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().includes(q);
+    });
+  }, [jobs, tab, openReports, statusFilter, query]);
+
+  // Cola: las más antiguas primero (llevan más tiempo esperando).
+  const ordered = useMemo(() => {
+    const list = visible.slice();
+    if (tab === 'queue') list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    return list;
+  }, [visible, tab]);
+
+  // --- Detalle --------------------------------------------------------------------------
+  const openDetail = async (job: AdminJob) => {
+    setSelected(job);
+    setHistory(null);
+    setPanel(null);
+    const { data, error } = await supabase
+      .from('job_posting_status_history')
+      .select('id, from_status, to_status, source, reason, created_at')
+      .eq('job_id', job.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    setHistory(error ? [] : ((data || []) as HistoryRow[]));
+  };
+
+  const closeDetail = useCallback(() => {
+    setSelected(null);
+    setPanel(null);
+    setNote('');
+    setNoteError(false);
+  }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeDetail();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected, closeDetail]);
+
+  // --- Acciones ---------------------------------------------------------------------------
+  const failToast = (err: unknown) => {
+    console.error('[AdminJobPostings] action', err);
+    const info = parseRpcError(err);
+    toast.error(info.code ? msg(tx, `err_${info.code}`) : t.t_error);
+  };
+
+  const moderate = async (job: AdminJob, decision: 'PUBLISHED' | 'MANUAL_REVIEW' | 'REJECTED', motivo: string | null) => {
+    setBusy(job.id);
     try {
-      setLoading(true);
-
-      // Load job postings with company info
-      const { data: jobs, error } = await supabase
-        .from('job_postings')
-        .select(`
-          *,
-          companies (
-            company_name
-          )
-        `)
-        .order('created_at', { ascending: false });
-
+      const { error } = await supabase.rpc('moderar_oferta', { p_job_id: job.id, p_decision: decision, p_motivo: motivo });
       if (error) throw error;
-
-      // Format data with company name
-      const formattedJobs = jobs?.map(job => ({
-        ...job,
-        company_name: job.companies?.company_name || 'Unknown Company',
-        applications_count: Math.floor(Math.random() * 50), // TODO: Get real count from job_applications table
-        views_count: Math.floor(Math.random() * 200) // TODO: Get real count from analytics
-      })) || [];
-
-      setJobPostings(formattedJobs);
-      setFilteredJobs(formattedJobs);
-    } catch (error) {
-      console.error('Error loading job postings:', error);
+      toast.success(decision === 'PUBLISHED' ? t.t_approved : decision === 'REJECTED' ? t.t_rejected : t.t_manual);
+      closeDetail();
+      await load();
+    } catch (err) {
+      failToast(err);
     } finally {
-      setLoading(false);
+      setBusy(null);
     }
   };
 
-  const filterJobs = () => {
-    let filtered = [...jobPostings];
-
-    // Filter by status
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(job => job.status === filterStatus);
+  const confirmPanel = async () => {
+    if (!panel) return;
+    const motivo = note.trim();
+    if (panel.kind === 'reject' && !motivo) {
+      setNoteError(true);
+      return;
     }
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.company_name?.toLowerCase().includes(query) ||
-        job.location.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredJobs(filtered);
+    await moderate(panel.job, panel.kind === 'reject' ? 'REJECTED' : 'MANUAL_REVIEW', motivo || null);
+    setNote('');
+    setNoteError(false);
   };
 
-  const handleCloseJob = async (jobId: string) => {
-    if (!confirm(t.confirmClose)) return;
-
+  /** Revisión automática por reglas (Edge Function `moderate-job-posting`). */
+  const runAuto = async (job: AdminJob) => {
+    setBusy(job.id);
     try {
-      const { error } = await supabase
-        .from('job_postings')
-        .update({ status: 'closed' })
-        .eq('id', jobId);
-
+      const { data, error } = await supabase.functions.invoke('moderate-job-posting', { body: { job_id: job.id } });
       if (error) throw error;
-
-      await loadJobPostings();
-      alert(t.success);
-    } catch (error) {
-      console.error('Error closing job:', error);
-      alert(t.error);
+      const res = (data || {}) as { results?: { outcome?: string }[] };
+      const outcome = res.results?.[0]?.outcome;
+      if (outcome === 'PUBLISHED') toast.success(t.t_auto_published);
+      else if (outcome === 'MANUAL_REVIEW') toast(t.t_auto_manual);
+      else if (outcome === 'SKIPPED') toast(t.t_auto_skipped);
+      else toast(t.t_auto_manual);
+      await load();
+      closeDetail();
+    } catch (err) {
+      console.error('[AdminJobPostings] auto', err);
+      toast.error(t.t_auto_error);
+    } finally {
+      setBusy(null);
     }
   };
 
-  const handleReactivateJob = async (jobId: string) => {
+  const resolveReport = async (r: Report, status: 'REVIEWED' | 'DISMISSED') => {
+    setBusy(r.id);
     try {
+      const { data: auth } = await supabase.auth.getUser();
       const { error } = await supabase
-        .from('job_postings')
-        .update({ status: 'active' })
-        .eq('id', jobId);
-
+        .from('job_reports')
+        .update({ status, resolved_by: auth?.user?.id ?? null, resolved_at: new Date().toISOString() })
+        .eq('id', r.id);
       if (error) throw error;
-
-      await loadJobPostings();
-      alert(t.success);
-    } catch (error) {
-      console.error('Error reactivating job:', error);
-      alert(t.error);
+      toast.success(t.t_report_done);
+      await load();
+    } catch (err) {
+      failToast(err);
+    } finally {
+      setBusy(null);
     }
   };
 
-  const handleDeleteJob = async (jobId: string) => {
-    if (!confirm(t.confirmDelete)) return;
-
-    try {
-      const { error } = await supabase
-        .from('job_postings')
-        .delete()
-        .eq('id', jobId);
-
-      if (error) throw error;
-
-      await loadJobPostings();
-      alert(t.success);
-    } catch (error) {
-      console.error('Error deleting job:', error);
-      alert(t.error);
-    }
+  // --- Utilidades de render -----------------------------------------------------------------
+  const countryName = (code: string | null) => (code ? countries[code]?.[lang] || code : '—');
+  const place = (j: AdminJob) => (j.is_remote || j.work_mode === 'REMOTE' ? pick(tx, 'workmode', 'REMOTE') : [j.location_city, countryName(j.country_code)].filter(Boolean).join(', '));
+  const salary = (j: AdminJob): string => {
+    if (j.salary_min == null && j.salary_max == null) return '—';
+    const fmtN = (n: number | null) => (n == null ? '' : n.toLocaleString(lang === 'en' ? 'en-GB' : 'es-ES'));
+    const range = j.salary_min != null && j.salary_max != null && j.salary_min !== j.salary_max ? `${fmtN(j.salary_min)} – ${fmtN(j.salary_max)}` : fmtN(j.salary_min ?? j.salary_max);
+    const body = `${range} ${j.salary_currency || ''} ${j.salary_period ? pick(tx, 'period', j.salary_period) : ''}`.replace(/\s+/g, ' ').trim();
+    return j.show_salary ? body : `${body} (${t.d_salary_hidden})`;
   };
 
-  const stats = {
-    total: jobPostings.length,
-    active: jobPostings.filter(j => j.status === 'active').length,
-    closed: jobPostings.filter(j => j.status === 'closed').length,
-    draft: jobPostings.filter(j => j.status === 'draft').length
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'closed':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
-    }
-  };
-
-  if (loading) {
+  const actionButtons = (j: AdminJob, size: 'sm' | 'md' = 'sm') => {
+    const base = `inline-flex items-center justify-center whitespace-nowrap rounded-lg font-semibold shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary disabled:opacity-60 disabled:cursor-not-allowed transition-colors ${
+      size === 'sm' ? 'px-3 py-1.5 text-sm' : 'px-4 py-2 text-sm'
+    }`;
+    const disabled = busy === j.id;
+    const inQueue = isReviewStatus(j.status);
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <BriefcaseIcon className="h-12 w-12 text-cv-blue dark:text-blue-400 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600 dark:text-dark-text-secondary">{t.loading}</p>
-        </div>
+      <div className="flex flex-wrap gap-2">
+        {(inQueue || j.status === 'REJECTED') && (
+          <button type="button" disabled={disabled} onClick={() => moderate(j, 'PUBLISHED', null)} className={`${base} bg-green-600 text-white hover:bg-green-700`} aria-label={`${t.approve}: ${j.title}`}>
+            {t.approve}
+          </button>
+        )}
+        {(inQueue || j.status === 'PUBLISHED') && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              void openDetail(j);
+              setPanel({ kind: 'reject', job: j });
+            }}
+            className={`${base} bg-red-600 text-white hover:bg-red-700`}
+            aria-label={`${j.status === 'PUBLISHED' ? t.withdraw : t.reject}: ${j.title}`}
+          >
+            {j.status === 'PUBLISHED' ? t.withdraw : t.reject}
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const th = 'px-4 py-3 text-left text-[13px] font-medium text-slate-600 dark:text-dark-text-secondary';
+  const card = 'bg-white dark:bg-dark-bg-secondary rounded-2xl border border-slate-200 dark:border-dark-border';
+  const input =
+    'w-full px-3.5 py-2.5 text-base sm:text-[15px] border border-slate-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary shadow-sm focus:ring-2 focus:ring-cv-blue focus:border-cv-blue focus:outline-none';
+
+  if (state === 'loading') {
+    return (
+      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cv-blue" aria-hidden="true" />
+        <span className="ml-3 text-gray-600 dark:text-dark-text-secondary">{t.loading}</span>
       </div>
     );
   }
 
+  if (state === 'error') {
+    return (
+      <div role="alert" className={`${card} p-8 text-center`}>
+        <p className="text-gray-800 dark:text-dark-text-primary mb-4">{t.error}</p>
+        <button type="button" onClick={() => void load()} className="px-4 py-2 rounded-lg bg-cv-blue text-white hover:bg-blue-700">
+          {t.retry}
+        </button>
+      </div>
+    );
+  }
+
+  const tabs: { id: Tab; label: string; count: number }[] = [
+    { id: 'queue', label: t.tab_queue, count: stats.queue },
+    { id: 'reported', label: t.tab_reported, count: stats.reported },
+    { id: 'all', label: t.tab_all, count: stats.total },
+  ];
+  const emptyText = tab === 'queue' && !query && !statusFilter ? t.empty_queue : tab === 'reported' && !query && !statusFilter ? t.empty_reported : jobs.length === 0 ? t.empty_all : t.no_results;
+  const jobReports = selected ? reports.filter((r) => r.job_id === selected.id) : [];
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
-          {t.title}
-        </h2>
-        <p className="text-gray-600 dark:text-dark-text-secondary mt-1">
-          {t.subtitle}
-        </p>
+        <h2 className="text-balance text-2xl font-bold tracking-tight text-slate-900 dark:text-dark-text-primary sm:text-3xl">{t.title}</h2>
+        <p className="mt-1.5 max-w-[64ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{t.subtitle}</p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-6 border border-gray-200 dark:border-dark-border">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-cv-blue/10 dark:bg-cv-blue/20 rounded-lg">
-              <BriefcaseIcon className="h-6 w-6 text-cv-blue dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{t.totalJobs}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">{stats.total}</p>
-            </div>
+      <dl className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          [t.stat_total, stats.total, ''],
+          [t.stat_queue, stats.queue, 'bg-amber-500'],
+          [t.stat_published, stats.published, 'bg-emerald-500'],
+          [t.stat_rejected, stats.rejected, 'bg-red-500'],
+          [t.stat_reported, stats.reported, 'bg-amber-500'],
+        ].map(([label, n, dot]) => (
+          <div key={String(label)} className={`${card} px-4 py-3.5`}>
+            <dt className="flex items-center gap-2 text-[13px] text-slate-600 dark:text-dark-text-secondary">
+              {dot && Number(n) > 0 ? <span aria-hidden="true" className={`h-2 w-2 rounded-full ${dot}`} /> : null}
+              {label}
+            </dt>
+            <dd className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-dark-text-primary">{n}</dd>
           </div>
-        </div>
+        ))}
+      </dl>
 
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-6 border border-gray-200 dark:border-dark-border">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{t.activeJobs}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">{stats.active}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-6 border border-gray-200 dark:border-dark-border">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <XCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{t.closedJobs}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">{stats.closed}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-6 border border-gray-200 dark:border-dark-border">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-              <ClockIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 dark:text-dark-text-secondary">{t.draftJobs}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">{stats.draft}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg p-4 border border-gray-200 dark:border-dark-border">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder={t.search}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div className="flex items-center gap-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-              className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-cv-blue focus:border-transparent"
+      <div className={`${card} p-4 space-y-4`}>
+        <div role="tablist" aria-label={t.title} className="flex flex-wrap gap-2">
+          {tabs.map((x) => (
+            <button
+              key={x.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === x.id}
+              onClick={() => setTab(x.id)}
+              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-secondary ${
+                tab === x.id
+                  ? 'border-cv-blue bg-cv-blue text-white'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-dark-border dark:bg-dark-bg-tertiary dark:text-dark-text-primary dark:hover:bg-dark-bg-primary'
+              }`}
             >
-              <option value="all">{t.all}</option>
-              <option value="active">{t.active}</option>
-              <option value="closed">{t.closed}</option>
-              <option value="draft">{t.draft}</option>
-            </select>
-          </div>
+              {x.label} <span className="tabular-nums opacity-80">({x.count})</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t.search} aria-label={t.search} className={`${input} sm:flex-1`} />
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label={t.status_filter} className={`${input} sm:!w-56`}>
+            <option value="">{t.all_statuses}</option>
+            {JOB_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {pick(tx, 'status', s)}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Job Postings Table */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border overflow-hidden">
-        {filteredJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <BriefcaseIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-dark-text-secondary">{t.noResults}</p>
-          </div>
+      <div className={`${card} overflow-hidden`}>
+        {ordered.length === 0 ? (
+          <p className="text-center py-12 text-gray-600 dark:text-dark-text-secondary">{emptyText}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-border">
+            <table className="w-full min-w-[56rem]" data-testid="admin-jobs-table">
+              <thead className="border-b border-slate-200 bg-slate-50 dark:border-dark-border dark:bg-dark-bg-tertiary">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.jobTitle}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.company}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.location}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.status}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.applications}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.postedOn}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                    {t.actions}
-                  </th>
+                  <th scope="col" className={th}>{t.col_title}</th>
+                  <th scope="col" className={th}>{t.col_company}</th>
+                  <th scope="col" className={th}>{t.col_country}</th>
+                  <th scope="col" className={th}>{t.col_status}</th>
+                  <th scope="col" className={th}>{t.col_reports}</th>
+                  <th scope="col" className={th}>{t.col_created}</th>
+                  <th scope="col" className={`${th} text-right`}>{t.col_actions}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-dark-border">
-                {filteredJobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <BriefcaseIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-dark-text-primary">
-                            {job.title}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-dark-text-secondary">
-                            {t.employmentType[job.employment_type as keyof typeof t.employmentType] || job.employment_type}
-                          </p>
-                        </div>
-                      </div>
+              <tbody className="divide-y divide-slate-100 dark:divide-dark-border">
+                {ordered.map((j) => (
+                  <tr key={j.id} data-job-id={j.id} data-status={j.status} className="align-top transition-colors hover:bg-slate-50/70 dark:hover:bg-dark-bg-tertiary/40">
+                    <td className="px-4 py-3 max-w-xs">
+                      <button
+                        type="button"
+                        onClick={() => void openDetail(j)}
+                        className="text-left font-medium text-cv-blue dark:text-blue-300 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue rounded break-words"
+                      >
+                        {j.title}
+                      </button>
+                      <p className="text-xs text-gray-500 dark:text-dark-text-secondary">{place(j)}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                          {job.company_name}
-                        </span>
-                      </div>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-dark-text-primary">{companyName(j)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-dark-text-secondary">{countryName(j.country_code)}</td>
+                    <td className="px-4 py-3">
+                      <JobStatusBadge status={j.status} />
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <MapPinIcon className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                          {job.location}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(job.status)}`}>
-                        {t[job.status as keyof typeof t] || job.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                        {job.applications_count || 0}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-gray-500 dark:text-dark-text-secondary">
-                        {new Date(job.created_at).toLocaleDateString(lang)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedJob(job);
-                            setShowDetailModal(true);
-                          }}
-                          className="p-2 text-cv-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title={t.viewDetails}
-                          aria-label={t.viewDetails}
-                        >
-                          <EyeIcon className="h-5 w-5" />
-                        </button>
-                        {job.status === 'active' && (
-                          <button
-                            onClick={() => handleCloseJob(job.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title={t.closeJob}
-                            aria-label={t.closeJob}
-                          >
-                            <XCircleIcon className="h-5 w-5" />
-                          </button>
-                        )}
-                        {job.status === 'closed' && (
-                          <button
-                            onClick={() => handleReactivateJob(job.id)}
-                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                            title={t.reactivate}
-                            aria-label={t.reactivate}
-                          >
-                            <CheckCircleIcon className="h-5 w-5" />
-                          </button>
-                        )}
-                      </div>
+                    <td className="px-4 py-3 text-sm">{openReports[j.id] ? <span className="inline-flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-300"><ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />{fmt(t.reports_n, { n: openReports[j.id] })}</span> : <span className="text-slate-600 dark:text-dark-text-secondary">{t.reports_none}</span>}</td>
+                    <td className="px-4 py-3 text-sm tabular-nums text-slate-600 dark:text-dark-text-secondary whitespace-nowrap">{formatDate(j.created_at, lang)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end">{actionButtons(j)}</div>
                     </td>
                   </tr>
                 ))}
@@ -508,78 +435,231 @@ const JobPostingsManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Detail Modal */}
-      {showDetailModal && selectedJob && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 dark:border-dark-border">
-              <div className="flex items-start justify-between">
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-[2px]" onClick={closeDetail}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-job-title"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl dark:bg-dark-bg-secondary dark:ring-1 dark:ring-dark-border"
+          >
+            <div className="p-5 border-b border-gray-200 dark:border-dark-border flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 id="admin-job-title" className="break-words text-xl font-bold tracking-tight text-slate-900 dark:text-dark-text-primary">
+                  {selected.title}
+                </h3>
+                <p className="text-gray-600 dark:text-dark-text-secondary">{companyName(selected)}</p>
+                <div className="mt-2">
+                  <JobStatusBadge status={selected.status} />
+                </div>
+              </div>
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={closeDetail}
+                aria-label={t.d_close}
+                className="h-9 w-9 shrink-0 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue"
+              >
+                <XMarkIcon className="mx-auto h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-6">
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
-                    {selectedJob.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-dark-text-secondary mt-1">
-                    {selectedJob.company_name}
-                  </p>
+                  <dt className="text-gray-500 dark:text-dark-text-secondary">{t.d_location}</dt>
+                  <dd className="text-gray-900 dark:text-dark-text-primary">{place(selected) || '—'}</dd>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowDetailModal(false)}
-                  aria-label={lang === 'en' ? 'Close' : 'Cerrar'}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:focus-visible:ring-blue-400"
-                >
-                  <XCircleIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
+                <div>
+                  <dt className="text-gray-500 dark:text-dark-text-secondary">{t.d_category}</dt>
+                  <dd className="text-gray-900 dark:text-dark-text-primary">{selected.category ? jobCategoryLabel(selected.category, lang) : '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500 dark:text-dark-text-secondary">{t.d_contract}</dt>
+                  <dd className="text-gray-900 dark:text-dark-text-primary">
+                    {[...(selected.contract_types || []).map((c) => pick(tx, 'contract', c)), selected.schedule ? pick(tx, 'schedule', selected.schedule) : ''].filter(Boolean).join(' · ') || '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500 dark:text-dark-text-secondary">{t.d_salary}</dt>
+                  <dd className="text-gray-900 dark:text-dark-text-primary">{salary(selected)}</dd>
+                </div>
+              </dl>
 
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <MapPinIcon className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                    {selectedJob.location}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ClockIcon className="h-5 w-5 text-gray-400" />
-                  <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                    {t.employmentType[selectedJob.employment_type as keyof typeof t.employmentType]}
-                  </span>
-                </div>
-                {selectedJob.salary_min && selectedJob.salary_max && (
-                  <div className="flex items-center gap-2">
-                    <CurrencyDollarIcon className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-900 dark:text-dark-text-primary">
-                      ${selectedJob.salary_min.toLocaleString()} - ${selectedJob.salary_max.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedJob.status)}`}>
-                    {t[selectedJob.status as keyof typeof t]}
-                  </span>
-                </div>
-              </div>
+              <section>
+                <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">{t.d_reason}</h4>
+                <p className="text-sm text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap">{selected.review_reason || t.d_reason_none}</p>
+              </section>
 
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
-                  {t.description}
+              <section>
+                <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">{t.d_description}</h4>
+                <JobRichText html={selected.description} className="text-sm text-gray-700 dark:text-dark-text-secondary" />
+              </section>
+
+              {(selected.responsibilities?.length || 0) > 0 && (
+                <section>
+                  <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">{t.d_responsibilities}</h4>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5">
+                    {selected.responsibilities!.map((r, i) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              {(selected.requirements?.length || 0) > 0 && (
+                <section>
+                  <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">{t.d_requirements}</h4>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 dark:text-dark-text-secondary space-y-0.5">
+                    {selected.requirements!.map((r, i) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              {(selected.benefits?.length || 0) > 0 && (
+                <section>
+                  <h4 className="font-semibold text-gray-900 dark:text-dark-text-primary mb-1">{t.d_benefits}</h4>
+                  <p className="text-sm text-gray-700 dark:text-dark-text-secondary">{selected.benefits!.join(', ')}</p>
+                </section>
+              )}
+
+              <section aria-labelledby="admin-job-reports">
+                <h4 id="admin-job-reports" className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                  {t.d_reports} ({jobReports.length})
                 </h4>
-                <p className="text-gray-600 dark:text-dark-text-secondary whitespace-pre-wrap">
-                  {selectedJob.description}
-                </p>
-              </div>
+                {jobReports.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{t.d_reports_none}</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {jobReports.map((r) => (
+                      <li key={r.id} className="rounded-lg border border-gray-200 dark:border-dark-border p-3 text-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-medium text-gray-900 dark:text-dark-text-primary">{(t as Record<string, string>)[`rep_${r.reason}`] || r.reason}</span>
+                          <span className="text-xs text-gray-500 dark:text-dark-text-secondary">
+                            {(t as Record<string, string>)[`rstat_${r.status}`] || r.status} · {formatDate(r.created_at, lang)}
+                          </span>
+                        </div>
+                        {r.details && <p className="mt-1 text-gray-700 dark:text-dark-text-secondary whitespace-pre-wrap break-words">{r.details}</p>}
+                        {r.status === 'OPEN' && (
+                          <div className="mt-2 flex gap-2">
+                            <button type="button" disabled={busy === r.id} onClick={() => resolveReport(r, 'REVIEWED')} className="px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue">
+                              {t.rep_resolve}
+                            </button>
+                            <button type="button" disabled={busy === r.id} onClick={() => resolveReport(r, 'DISMISSED')} className="px-2.5 py-1 text-xs rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue">
+                              {t.rep_dismiss}
+                            </button>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDetailModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
-                >
-                  {t.close}
-                </button>
-              </div>
+              <section aria-labelledby="admin-job-history">
+                <h4 id="admin-job-history" className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                  {t.d_history}
+                </h4>
+                {history === null ? (
+                  <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{t.loading}</p>
+                ) : history.length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-dark-text-secondary">{t.d_history_none}</p>
+                ) : (
+                  <ol className="space-y-1 text-sm text-gray-700 dark:text-dark-text-secondary">
+                    {history.map((h) => (
+                      <li key={h.id}>
+                        <span className="text-gray-500 dark:text-dark-text-secondary">{formatDate(h.created_at, lang)}</span>{' '}
+                        {h.from_status ? pick(tx, 'status', h.from_status) : '∅'} → <strong>{pick(tx, 'status', h.to_status)}</strong> ·{' '}
+                        {(t as Record<string, string>)[`src_${h.source}`] || h.source}
+                        {h.reason ? ` — ${h.reason}` : ''}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+
+              {panel && (
+                <section aria-labelledby="admin-job-panel" className="rounded-lg border border-gray-200 dark:border-dark-border p-4 bg-gray-50 dark:bg-dark-bg-tertiary">
+                  <h4 id="admin-job-panel" className="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                    {panel.kind === 'reject' ? t.reject_title : t.manual_title}
+                  </h4>
+                  <label htmlFor="admin-job-note" className="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">
+                    {panel.kind === 'reject' ? t.reject_label : t.manual_label}
+                    {panel.kind === 'reject' && <span className="text-red-600" aria-hidden="true"> *</span>}
+                  </label>
+                  <textarea
+                    id="admin-job-note"
+                    rows={3}
+                    maxLength={1000}
+                    value={note}
+                    onChange={(e) => {
+                      setNote(e.target.value);
+                      if (e.target.value.trim()) setNoteError(false);
+                    }}
+                    aria-invalid={noteError || undefined}
+                    aria-describedby="admin-job-note-help"
+                    className={input}
+                  />
+                  <p id="admin-job-note-help" className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary">
+                    {panel.kind === 'reject' ? t.reject_help : ''}
+                  </p>
+                  {noteError && (
+                    <p role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {t.reject_required}
+                    </p>
+                  )}
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={busy === selected.id}
+                      onClick={() => void confirmPanel()}
+                      className={`px-4 py-2 text-sm rounded-lg text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue disabled:opacity-60 ${panel.kind === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-cv-blue hover:bg-blue-700'}`}
+                      data-testid="admin-panel-confirm"
+                    >
+                      {panel.kind === 'reject' ? t.reject_confirm : t.manual_confirm}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPanel(null);
+                        setNote('');
+                        setNoteError(false);
+                      }}
+                      className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary hover:bg-white dark:hover:bg-dark-bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue"
+                    >
+                      {t.reject_cancel}
+                    </button>
+                  </div>
+                </section>
+              )}
             </div>
+
+            {!panel && (
+              <div className="p-5 border-t border-gray-200 dark:border-dark-border flex flex-wrap items-center gap-3">
+                {actionButtons(selected, 'md')}
+                {selected.status === 'AI_REVIEW' && (
+                  <button
+                    type="button"
+                    disabled={busy === selected.id}
+                    onClick={() => void runAuto(selected)}
+                    title={t.auto_hint}
+                    className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue disabled:opacity-60"
+                  >
+                    {t.run_auto}
+                  </button>
+                )}
+                {selected.status === 'AI_REVIEW' && (
+                  <button
+                    type="button"
+                    onClick={() => setPanel({ kind: 'manual', job: selected })}
+                    className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue"
+                  >
+                    {t.manual}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

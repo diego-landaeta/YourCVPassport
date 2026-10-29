@@ -114,6 +114,12 @@ const BLOG_POST_PREFIX: Record<SeoLang, string> = {
 
 /** Busca la pareja de una ruta dinamica (/jobs/:slug <-> /empleos/:slug). */
 function matchDynamic(path: string): { lang: SeoLang; pair: RoutePair } | null {
+  // Ficha canonica con pais: /es/ofertas/<slug> (es) <-> /es/jobs/<slug> (en)
+  const withCountry = /^\/([a-z]{2})\/(ofertas|jobs)\/([^/]+)$/.exec(path);
+  if (withCountry) {
+    const [, cc, kind, slug] = withCountry;
+    return { lang: kind === 'ofertas' ? 'es' : 'en', pair: { en: `/${cc}/jobs/${slug}`, es: `/${cc}/ofertas/${slug}` } };
+  }
   for (const prefix of DYNAMIC_PREFIX_PAIRS) {
     for (const lang of ['en', 'es'] as const) {
       if (path.startsWith(prefix[lang]) && path.length > prefix[lang].length) {

@@ -22,6 +22,14 @@ interface CompanyWithUsers extends Company {
   company_users?: CompanyUser[];
 }
 
+// Columnas nuevas de la fase 1 (companies_full): país, idioma y persona de contacto.
+const EXTRA_COMPANY_COLUMNS = 'country_code, idioma, contact_name, contact_position';
+
+// Revisión automática (company_ai_reviews, solo admin). `motivos` es jsonb:
+// [{ code, severity: 'info' | 'warn', message_es, message_en }].
+const reviewMessage = (m: any, lang: string): string =>
+  typeof m === 'string' ? m : (lang === 'es' ? m?.message_es : m?.message_en) ?? m?.message_es ?? m?.message ?? '';
+
 const CompanyManagementSection: React.FC = () => {
   const { user } = useAuth();
   const { lang } = useLanguage();
@@ -44,6 +52,8 @@ const CompanyManagementSection: React.FC = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [approvalNotes, setApprovalNotes] = useState('');
   const [processing, setProcessing] = useState(false);
+  // company_ai_reviews por empresa (la más reciente primero)
+  const [reviews, setReviews] = useState<Record<string, any[]>>({});
   const [documentToView, setDocumentToView] = useState<string | null>(null);
   const [documentIsPdf, setDocumentIsPdf] = useState(false);
 
@@ -72,7 +82,7 @@ const CompanyManagementSection: React.FC = () => {
     loadCompanies();
   }, [filter, searchTerm]);
 
-  const loadCompanies = async () => {
+  const loadCompanies = async (withExtra = true): Promise<void> => {
     try {
       setLoading(true);
 
@@ -81,7 +91,7 @@ const CompanyManagementSection: React.FC = () => {
         .from('companies_full')
         // Sin embed company_users: no se usaba y, desde una vista, depende de que
         // PostgREST deduzca la relación
-        .select(COMPANY_FULL_COLUMNS)
+        .select(withExtra ? `${COMPANY_FULL_COLUMNS}, ${EXTRA_COMPANY_COLUMNS}` : COMPANY_FULL_COLUMNS)
         .order('created_at', { ascending: false });
 
       // Apply filter
@@ -99,9 +109,28 @@ const CompanyManagementSection: React.FC = () => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        // Migración 20261029 sin aplicar: sin las columnas nuevas, como antes.
+        if (withExtra && (error.code === '42703' || error.code === 'PGRST204')) return loadCompanies(false);
+        throw error;
+      }
 
       setCompanies(data || []);
+
+      // Motivos de la revisión automática de cada empresa (si la tabla no existe, se omite).
+      const ids = (data || []).map((c: any) => c.id);
+      if (ids.length > 0) {
+        const { data: revs, error: revError } = await supabase
+          .from('company_ai_reviews')
+          .select('id, company_id, resultado, motivos, proveedor, modelo, created_at')
+          .in('company_id', ids)
+          .order('created_at', { ascending: false });
+        const byCompany: Record<string, any[]> = {};
+        if (!revError) (revs || []).forEach((r: any) => { (byCompany[r.company_id] ||= []).push(r); });
+        setReviews(byCompany);
+      } else {
+        setReviews({});
+      }
 
       // Calculate stats
       const allCompanies = await supabase
@@ -260,6 +289,26 @@ const CompanyManagementSection: React.FC = () => {
       default:
         return null;
     }
+  };
+
+  const getReviewBadge = (companyId: string) => {
+    const latest = reviews[companyId]?.[0];
+    if (!latest) {
+      return <span className="text-xs text-gray-400 dark:text-dark-text-tertiary">{lang === 'es' ? 'Sin revisar' : 'Not reviewed'}</span>;
+    }
+    const styles: Record<string, string> = {
+      ok: 'bg-green-100 text-green-800',
+      dudosa: 'bg-yellow-100 text-yellow-800',
+      error: 'bg-red-100 text-red-800',
+    };
+    const labels: Record<string, string> = lang === 'es'
+      ? { ok: 'Sin incidencias', dudosa: 'Dudosa', error: 'Error' }
+      : { ok: 'No issues', dudosa: 'Doubtful', error: 'Error' };
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[latest.resultado] || 'bg-gray-100 text-gray-800'}`}>
+        {labels[latest.resultado] || latest.resultado}
+      </span>
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -454,6 +503,9 @@ const CompanyManagementSection: React.FC = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    {lang === 'es' ? 'Revisión auto.' : 'Auto review'}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
                     Credits
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
@@ -493,6 +545,9 @@ const CompanyManagementSection: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(company.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getReviewBadge(company.id)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary">
                       {company.credit_balance}
@@ -561,6 +616,22 @@ const CompanyManagementSection: React.FC = () => {
                           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Email:</span>
                           <p className="text-sm text-gray-900 dark:text-gray-200">{selectedCompany.company_email}</p>
                         </div>
+                        {(selectedCompany as any).country_code && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{lang === 'es' ? 'País / idioma:' : 'Country / language:'}</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-200">
+                              {(selectedCompany as any).country_code}{(selectedCompany as any).idioma ? ` · ${(selectedCompany as any).idioma}` : ''}
+                            </p>
+                          </div>
+                        )}
+                        {(selectedCompany as any).contact_name && (
+                          <div>
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{lang === 'es' ? 'Contacto:' : 'Contact:'}</span>
+                            <p className="text-sm text-gray-900 dark:text-gray-200">
+                              {(selectedCompany as any).contact_name}{(selectedCompany as any).contact_position ? ` · ${(selectedCompany as any).contact_position}` : ''}
+                            </p>
+                          </div>
+                        )}
                         {selectedCompany.company_phone && (
                           <div>
                             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone:</span>
@@ -585,6 +656,45 @@ const CompanyManagementSection: React.FC = () => {
                           <div className="mt-1">{getStatusBadge(selectedCompany.status)}</div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Revisión automática: motivos de company_ai_reviews */}
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                        {lang === 'es' ? 'Revisión automática' : 'Automatic review'}
+                      </h4>
+                      {(reviews[selectedCompany.id] || []).length === 0 ? (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                          {lang === 'es' ? 'Todavía no hay revisión automática de esta empresa.' : 'There is no automatic review for this company yet.'}
+                        </p>
+                      ) : (
+                        (reviews[selectedCompany.id] || []).slice(0, 3).map((r: any, idx: number) => (
+                          <div key={r.id} className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 ${idx > 0 ? 'mt-2 opacity-80' : ''}`}>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              {getReviewBadge(selectedCompany.id) && idx === 0 ? getReviewBadge(selectedCompany.id) : (
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{r.resultado}</span>
+                              )}
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {r.proveedor || '—'}{r.modelo ? ` (${r.modelo})` : ''} · {formatDate(r.created_at)}
+                              </span>
+                            </div>
+                            {Array.isArray(r.motivos) && r.motivos.length > 0 ? (
+                              <ul className="space-y-1">
+                                {r.motivos.map((m: any, i: number) => (
+                                  <li key={i} className="text-sm text-gray-700 dark:text-gray-200 flex gap-2">
+                                    <span className={`shrink-0 text-xs font-semibold uppercase ${m?.severity === 'warn' ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                      {m?.severity === 'warn' ? (lang === 'es' ? 'Aviso' : 'Warning') : 'Info'}
+                                    </span>
+                                    <span>{reviewMessage(m, lang)}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{lang === 'es' ? 'Sin motivos registrados.' : 'No reasons recorded.'}</p>
+                            )}
+                          </div>
+                        ))
+                      )}
                     </div>
 
                     {selectedCompany.description && (

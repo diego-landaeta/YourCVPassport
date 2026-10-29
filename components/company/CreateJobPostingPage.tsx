@@ -1,901 +1,668 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTranslations } from '../../hooks/useTranslations';
-import { supabase } from '../../supabase/client';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { fmt } from '../../lib/bolsaText';
+import { sanitizeJobHtml } from '../../lib/jobPostingHtml';
+import {
+  EDITABLE_STATUSES,
+  STEP_IDS,
+  SUBMITTABLE_STATUSES,
+  dateInDays,
+  editJobPath,
+  emptyForm,
+  formatDate,
+  isReviewStatus,
+  jobRowToForm,
+  parseRpcError,
+  titleIssue,
+  validateAll,
+  validateStep,
+  type CountryRow,
+  type FieldErrors,
+  type JobForm,
+  type StepId,
+} from '../../lib/jobPostingModel';
+import { msg, pick, useJobText, type JobText } from '../../lib/jobPostingText';
+import { useCompanyPublishState } from './CompanyProtectedRoute';
+import { ChooseStart } from './jobwizard/ChooseStart';
+import { btnPrimaryCls, btnSecondaryCls, cardCls, surfaceCls } from './jobwizard/fields';
+import { StepBar, type StepState } from './jobwizard/StepBar';
+import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import {
+  loadCompanyContext,
+  loadCompanyCountry,
+  loadCountries,
+  loadEmployerTerms,
+  loadJobRow,
+  loadOfferList,
+  loadQuestionRows,
+  registerPublishAcceptance,
+  saveJob,
+  submitForReview,
+  type CompanyContext,
+  type LegalDoc,
+  type OfferListItem,
+} from './jobwizard/jobApi';
+import { JobStatusBadge } from './jobwizard/StatusBadge';
+import { StepBasics } from './jobwizard/StepBasics';
+import { StepConditions } from './jobwizard/StepConditions';
+import { StepDescription } from './jobwizard/StepDescription';
+import { StepReview } from './jobwizard/StepReview';
+import { StepScreening } from './jobwizard/StepScreening';
 
-interface JobFormData {
-  title: string;
-  department: string;
-  employment_type: string;
-  work_mode: string;
-  experience_level: string;
-  location_city: string;
-  location_state: string;
-  location_country: string;
-  is_remote: boolean;
-  description: string;
-  responsibilities: string[];
-  requirements: string[];
-  nice_to_have: string[];
-  benefits: string[];
-  required_skills: string[];
-  optional_skills: string[];
-  salary_min: string;
-  salary_max: string;
-  salary_currency: string;
-  salary_period: string;
-  show_salary: boolean;
-  application_deadline: string;
-  application_instructions: string;
+type Phase = 'choose' | 'wizard' | 'done';
+type LoadState = 'loading' | 'ready' | 'error';
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+interface DoneInfo {
+  kind: 'review' | 'changes';
+  status: string;
+  deadline: string | null;
+  backInReview: boolean;
+}
+
+/** Id del control de cada campo del modelo (para llevar el foco desde la lista de errores). */
+const FIELD_IDS: Record<string, string> = {
+  country_code: 'f-country',
+  title: 'f-title',
+  category: 'f-category',
+  category2: 'f-category2',
+  work_mode: 'f-work-mode',
+  location_city: 'f-city',
+  vacancies: 'f-vacancies',
+  description: 'f-description',
+  experience_years: 'f-experience',
+  languages: 'f-languages',
+  contract_types: 'f-contract',
+  schedule: 'f-schedule',
+  start_date: 'f-start-date',
+  show_salary: 'f-show-salary',
+  salary_mode: 'f-salary-mode',
+  salary_min: 'f-salary-min',
+  salary_max: 'f-salary-max',
+  questions: 'f-questions-title',
+  notify_emails: 'f-notify',
+  application_deadline: 'f-deadline',
+};
+
+function focusField(field: string) {
+  const q = /^questions\.(\d+)\./.exec(field);
+  const id = q ? `q${q[1]}-${field.endsWith('.text') ? 'text' : 'type'}` : FIELD_IDS[field];
+  let el: HTMLElement | null = id ? document.getElementById(id) : null;
+  // Los grupos (radios/casillas) son un fieldset: se enfoca su primer control.
+  if (el && el.tagName === 'FIELDSET') el = el.querySelector<HTMLElement>('input,select,textarea');
+  if (!el) return;
+  el.scrollIntoView?.({ block: 'center' });
+  el.focus?.({ preventScroll: true });
+}
+
+/** Mensaje del servidor traducido por prefijo (JOB_INVALID: ... lleva además la lista de motivos). */
+function serverError(tx: JobText, err: unknown): { text: string; list: string[] } {
+  const info = parseRpcError(err);
+  if (!info.code) return { text: tx.err_unknown, list: [] };
+  const text = msg(tx, `err_${info.code}`);
+  const list = info.details.map((d) => msg(tx, `ji_${d}`)).filter((m, i) => m !== `ji_${info.details[i]}`);
+  return { text: text === `err_${info.code}` ? tx.err_unknown : text, list };
 }
 
 const CreateJobPostingPage: React.FC = () => {
-  const t = useTranslations();
-  const translations = t.company.createJobPosting;
+  const tx = useJobText();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const isEditMode = !!id;
+  const [search] = useSearchParams();
+  const { canPublish, companyPending } = useCompanyPublishState();
+  const dupId = search.get('duplicar');
+  const startStep = Number(search.get('paso')) || 1;
 
-  const [loading, setLoading] = useState(false);
-  const [companyId, setCompanyId] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [reloadKey, setReloadKey] = useState(0);
+  const [ctx, setCtx] = useState<CompanyContext | null>(null);
+  const [countries, setCountries] = useState<CountryRow[]>([]);
+  const [phase, setPhase] = useState<Phase>('choose');
+  const [form, setForm] = useState<JobForm>(() => emptyForm());
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [stepIdx, setStepIdx] = useState(0);
+  const [maxStep, setMaxStep] = useState(0);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [jobStatus, setJobStatus] = useState<string>('DRAFT');
+  const [rejectedReason, setRejectedReason] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [busy, setBusy] = useState(false);
+  const [submitError, setSubmitError] = useState<{ text: string; list: string[] } | null>(null);
+  const [offers, setOffers] = useState<OfferListItem[]>([]);
+  const [offersState, setOffersState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [terms, setTerms] = useState<LegalDoc | null>(null);
+  const [termsState, setTermsState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [checks, setChecks] = useState<Record<string, boolean>>({});
+  const [done, setDone] = useState<DoneInfo | null>(null);
 
-  const [formData, setFormData] = useState<JobFormData>({
-    title: '',
-    department: '',
-    employment_type: 'FULL_TIME',
-    work_mode: 'ONSITE',
-    experience_level: 'MID',
-    location_city: '',
-    location_state: '',
-    location_country: 'ES',
-    is_remote: false,
-    description: '',
-    responsibilities: [''],
-    requirements: [''],
-    nice_to_have: [''],
-    benefits: [''],
-    required_skills: [],
-    optional_skills: [],
-    salary_min: '',
-    salary_max: '',
-    salary_currency: 'USD',
-    salary_period: 'YEARLY',
-    show_salary: false,
-    application_deadline: '',
-    application_instructions: '',
-  });
+  const jobIdRef = useRef<string | null>(null);
+  const ctxRef = useRef<CompanyContext | null>(null);
+  const originalDescRef = useRef<string | null>(null);
+  const acceptedRef = useRef<string | null>(null);
+  const termsRequested = useRef(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const firstRender = useRef(true);
 
-  const [skillInput, setSkillInput] = useState('');
-  const [optionalSkillInput, setOptionalSkillInput] = useState('');
+  const step: StepId = STEP_IDS[stepIdx];
+  const editable = EDITABLE_STATUSES.includes(jobStatus);
+  const draftLike = SUBMITTABLE_STATUSES.includes(jobStatus);
+  const country = useMemo(() => countries.find((c) => c.code === form.country_code) ?? null, [countries, form.country_code]);
+  const countryName = country ? (lang === 'en' ? country.name_en : country.name_es) : '';
+  const usedCities = useMemo(() => offers.map((o) => o.location_city || '').filter(Boolean), [offers]);
+
+  const set = useCallback((patch: Partial<JobForm>) => {
+    setForm((f) => ({ ...f, ...patch }));
+    setSaveState((s) => (s === 'saved' ? 'idle' : s));
+  }, []);
+
+  // --- Carga inicial -------------------------------------------------------------------
+  const refreshOffers = useCallback(async (companyId: string) => {
+    setOffersState('loading');
+    try {
+      setOffers(await loadOfferList(companyId));
+      setOffersState('ready');
+    } catch {
+      setOffersState('error');
+    }
+  }, []);
 
   useEffect(() => {
-    fetchCompanyAndJobPosting();
-  }, [id]);
+    let cancelled = false;
+    // Acabamos de crear esta oferta nosotros (la URL pasó de /new a /edit/:id): el estado ya es el bueno.
+    if (id && jobIdRef.current === id && ctxRef.current) return;
 
-  const fetchCompanyAndJobPosting = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        return;
-      }
+    (async () => {
+      setLoadState('loading');
+      try {
+        const [c, cs] = await Promise.all([loadCompanyContext(), loadCountries()]);
+        if (cancelled) return;
+        ctxRef.current = c;
+        setCtx(c);
+        setCountries(cs);
 
-      const { data: companyUser, error: companyUserError } = await supabase
-        .from('company_users')
-        .select('company_id')
-        .eq('user_id', user.id)
-        // maybeSingle: sin empresa → null y se redirige al registro, sin 406
-        .maybeSingle();
+        // Sesión de edición limpia (también al pasar de una oferta a «nueva»).
+        setDone(null);
+        setErrors({});
+        setChecks({});
+        setSubmitError(null);
+        setTermsState('idle');
+        termsRequested.current = false;
+        setSaveState('idle');
+        acceptedRef.current = null;
+        originalDescRef.current = null;
 
-      if (companyUserError || !companyUser) {
-        toast.error(translations.toasts.noCompanyFound);
-        navigate('/company/register');
-        return;
-      }
+        const applyRow = async (srcId: string, duplicate: boolean) => {
+          const row = await loadJobRow(srcId, c.companyId);
+          if (cancelled) return;
+          if (!row) {
+            toast.error(tx.load_error);
+            navigate('/company/jobs');
+            return;
+          }
+          const qs = await loadQuestionRows(srcId);
+          if (cancelled) return;
+          if (duplicate) {
+            const f = jobRowToForm(row, qs, { keepIds: false });
+            f.application_deadline = dateInDays(30);
+            if (f.start_date && f.start_date < dateInDays(0)) f.start_immediate = true;
+            f.show_salary = f.show_salary ?? null;
+            setForm(f);
+            jobIdRef.current = null;
+            setJobId(null);
+            setJobStatus('DRAFT');
+            setRejectedReason(null);
+            originalDescRef.current = null;
+            setPhase('wizard');
+            setStepIdx(0);
+            setMaxStep(0);
+          } else {
+            setForm(jobRowToForm(row, qs));
+            jobIdRef.current = srcId;
+            setJobId(srcId);
+            setJobStatus(row.status);
+            setRejectedReason(row.status === 'REJECTED' ? row.review_reason || '' : null);
+            originalDescRef.current = row.description ?? '';
+            setPhase('wizard');
+            const idx = Math.min(Math.max(startStep, 1), STEP_IDS.length) - 1;
+            setStepIdx(idx);
+            setMaxStep(STEP_IDS.length - 1);
+          }
+        };
 
-      setCompanyId(companyUser.company_id);
-
-      if (isEditMode && id) {
-        const { data: jobPosting, error: jobError } = await supabase
-          .from('job_postings')
-          .select('*')
-          .eq('id', id)
-          .eq('company_id', companyUser.company_id)
-          .maybeSingle();
-
-        if (jobError || !jobPosting) {
-          toast.error(translations.toasts.jobNotFound);
-          navigate('/company/jobs');
+        if (id) {
+          await applyRow(id, false);
+        } else if (dupId) {
+          await applyRow(dupId, true);
+          void refreshOffers(c.companyId);
+        } else {
+          jobIdRef.current = null;
+          setJobId(null);
+          setJobStatus('DRAFT');
+          setRejectedReason(null);
+          const cc = await loadCompanyCountry(c.companyId);
+          if (cancelled) return;
+          setForm(emptyForm(cc && cs.some((x) => x.code === cc) ? cc : ''));
+          setPhase('choose');
+          void refreshOffers(c.companyId);
+        }
+        if (!cancelled) setLoadState('ready');
+      } catch (err) {
+        if (cancelled) return;
+        const m = (err as Error)?.message;
+        if (m === 'AUTH') {
+          navigate('/login');
           return;
         }
-
-        setFormData({
-          title: jobPosting.title || '',
-          department: jobPosting.department || '',
-          employment_type: jobPosting.employment_type || 'FULL_TIME',
-          work_mode: jobPosting.work_mode || 'ONSITE',
-          experience_level: jobPosting.experience_level || 'MID',
-          location_city: jobPosting.location_city || '',
-          location_state: jobPosting.location_state || '',
-          location_country: jobPosting.location_country || 'ES',
-          is_remote: jobPosting.is_remote || false,
-          description: jobPosting.description || '',
-          responsibilities: jobPosting.responsibilities || [''],
-          requirements: jobPosting.requirements || [''],
-          nice_to_have: jobPosting.nice_to_have || [''],
-          benefits: jobPosting.benefits || [''],
-          required_skills: jobPosting.required_skills || [],
-          optional_skills: jobPosting.optional_skills || [],
-          salary_min: jobPosting.salary_min?.toString() || '',
-          salary_max: jobPosting.salary_max?.toString() || '',
-          salary_currency: jobPosting.salary_currency || 'USD',
-          salary_period: jobPosting.salary_period || 'YEARLY',
-          show_salary: jobPosting.show_salary || false,
-          application_deadline: jobPosting.application_deadline ? new Date(jobPosting.application_deadline).toISOString().split('T')[0] : '',
-          application_instructions: jobPosting.application_instructions || '',
-        });
+        if (m === 'NO_COMPANY') {
+          toast.error(tx.no_company);
+          navigate('/company/register');
+          return;
+        }
+        console.error('[CreateJobPostingPage] load', err);
+        setLoadState('error');
       }
-    } catch (error: any) {
-      toast.error(translations.toasts.errorLoadingData);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, dupId, reloadKey]);
+
+  // Al cambiar de paso se lleva el foco al título y se sube al principio.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
     }
-  };
+    headingRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  }, [stepIdx, phase]);
 
-  const handleArrayFieldChange = (field: keyof JobFormData, index: number, value: string) => {
-    const updatedArray = [...(formData[field] as string[])];
-    updatedArray[index] = value;
-    setFormData({ ...formData, [field]: updatedArray });
-  };
-
-  const handleAddArrayField = (field: keyof JobFormData) => {
-    setFormData({
-      ...formData,
-      [field]: [...(formData[field] as string[]), ''],
-    });
-  };
-
-  const handleRemoveArrayField = (field: keyof JobFormData, index: number) => {
-    const updatedArray = (formData[field] as string[]).filter((_, i) => i !== index);
-    setFormData({ ...formData, [field]: updatedArray.length ? updatedArray : [''] });
-  };
-
-  const handleAddSkill = (type: 'required' | 'optional') => {
-    const input = type === 'required' ? skillInput : optionalSkillInput;
-    if (!input.trim()) return;
-
-    const field = type === 'required' ? 'required_skills' : 'optional_skills';
-    const currentSkills = formData[field] as string[];
-
-    if (!currentSkills.includes(input.trim())) {
-      setFormData({
-        ...formData,
-        [field]: [...currentSkills, input.trim()],
+  // Condiciones del empleador: se cargan al llegar al paso final.
+  // (Una sola petición por sesión de edición: la guarda es un ref, no el estado, para que el
+  // cambio de estado no cancele la propia petición.)
+  useEffect(() => {
+    if (phase !== 'wizard' || step !== 'review' || !draftLike || termsRequested.current) return;
+    termsRequested.current = true;
+    setTermsState('loading');
+    loadEmployerTerms(lang)
+      .then((doc) => {
+        setTerms(doc);
+        setTermsState(doc ? 'ready' : 'error');
+      })
+      .catch((err) => {
+        console.error('[CreateJobPostingPage] terms', err);
+        setTermsState('error');
       });
-    }
+  }, [phase, step, draftLike, lang]);
 
-    if (type === 'required') {
-      setSkillInput('');
-    } else {
-      setOptionalSkillInput('');
+  // --- Guardado ------------------------------------------------------------------------
+  const focusFirstError = () => {
+    window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>('[aria-invalid="true"]') || document.querySelector<HTMLElement>('[role="alert"]');
+      el?.focus?.();
+      el?.scrollIntoView?.({ block: 'center' });
+    }, 0);
+  };
+
+  /** Inserta o actualiza la oferta. Devuelve su id y el estado que tiene ahora en la base, o null si falla. */
+  const persist = async (): Promise<{ id: string; status: string } | null> => {
+    const c = ctxRef.current;
+    if (!c) return null;
+    setSaveState('saving');
+    try {
+      const wasNew = !jobIdRef.current;
+      const res = await saveJob(form, c, jobIdRef.current, country?.currency ?? null, originalDescRef.current);
+      jobIdRef.current = res.id;
+      setJobId(res.id);
+      setJobStatus(res.status);
+      const clean = sanitizeJobHtml(form.description);
+      if (originalDescRef.current === null || sanitizeJobHtml(originalDescRef.current) !== clean) originalDescRef.current = clean;
+      setForm((f) => ({
+        ...f,
+        questions: f.questions.map((q) => {
+          const m = res.questions.find((r) => r.key === q.key);
+          return m?.id ? { ...q, id: m.id } : q;
+        }),
+      }));
+      setSaveState('saved');
+      if (wasNew) navigate(editJobPath(res.id, stepIdx + 1), { replace: true });
+      return { id: res.id, status: res.status };
+    } catch (err) {
+      console.error('[CreateJobPostingPage] save', err);
+      setSaveState('error');
+      const e = serverError(tx, err);
+      toast.error(e.text === tx.err_unknown ? tx.save_error : e.text);
+      return null;
     }
   };
 
-  const handleRemoveSkill = (type: 'required' | 'optional', skill: string) => {
-    const field = type === 'required' ? 'required_skills' : 'optional_skills';
-    setFormData({
-      ...formData,
-      [field]: (formData[field] as string[]).filter((s) => s !== skill),
-    });
+  const goTo = (idx: number) => {
+    setStepIdx(idx);
+    setMaxStep((m) => Math.max(m, idx));
   };
 
-  const validateStep = (step: number): boolean => {
-    if (step === 1) {
-      if (!formData.title.trim()) {
-        toast.error(translations.validation.titleRequired);
-        return false;
-      }
+  const handleNext = async () => {
+    const errs = validateStep(step, form, countries);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      focusFirstError();
+      return;
     }
-    if (step === 2) {
-      if (!formData.description.trim()) {
-        toast.error(translations.validation.descriptionRequired);
-        return false;
-      }
+    // Autoguardado en cada «Continuar» (solo borradores/rechazadas: una publicada se guarda al final).
+    if (draftLike) {
+      const saved = await persist();
+      if (!saved) return;
     }
-    if (step === 4) {
-      const min = parseFloat(formData.salary_min);
-      const max = parseFloat(formData.salary_max);
-      if (formData.salary_min && formData.salary_max && max < min) {
-        toast.error(translations.validation.salaryInvalid);
-        return false;
-      }
-    }
-    return true;
+    goTo(Math.min(stepIdx + 1, STEP_IDS.length - 1));
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(Math.min(currentStep + 1, totalSteps));
-    }
-  };
-
-  const handlePrevious = () => {
-    setCurrentStep(Math.max(currentStep - 1, 1));
+  const handlePrev = () => {
+    setErrors({});
+    setStepIdx(Math.max(stepIdx - 1, 0));
   };
 
   const handleSaveDraft = async () => {
-    if (!companyId) return;
+    const ti = titleIssue(form.title);
+    if (ti) {
+      setErrors({ title: `v_title_${ti}` });
+      setStepIdx(0);
+      focusFirstError();
+      return;
+    }
+    const saved = await persist();
+    if (saved) toast.success(tx.saved);
+  };
 
-    try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const jobData = {
-        company_id: companyId,
-        created_by: user.id,
-        title: formData.title,
-        department: formData.department || null,
-        employment_type: formData.employment_type,
-        work_mode: formData.work_mode,
-        experience_level: formData.experience_level,
-        location_city: formData.location_city || null,
-        location_state: formData.location_state || null,
-        location_country: formData.location_country,
-        is_remote: formData.is_remote,
-        description: formData.description,
-        responsibilities: formData.responsibilities.filter((r) => r.trim()),
-        requirements: formData.requirements.filter((r) => r.trim()),
-        nice_to_have: formData.nice_to_have.filter((n) => n.trim()),
-        benefits: formData.benefits.filter((b) => b.trim()),
-        required_skills: formData.required_skills,
-        optional_skills: formData.optional_skills,
-        salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
-        salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
-        salary_currency: formData.salary_currency,
-        salary_period: formData.salary_period,
-        show_salary: formData.show_salary,
-        application_deadline: formData.application_deadline || null,
-        application_instructions: formData.application_instructions || null,
-        status: 'DRAFT',
-      };
-
-      if (isEditMode && id) {
-        const { error } = await supabase
-          .from('job_postings')
-          .update(jobData)
-          .eq('id', id);
-
-        if (error) throw error;
-        toast.success(translations.success.updated);
-      } else {
-        const { error } = await supabase
-          .from('job_postings')
-          .insert([jobData]);
-
-        if (error) throw error;
-        toast.success(translations.success.created);
-      }
-
-      navigate('/company/jobs');
-    } catch (error: any) {
-      toast.error(error.message || translations.toasts.errorSaving);
-    } finally {
-      setLoading(false);
+  const jumpToStep = (s: StepId, field?: string) => {
+    setErrors({});
+    setStepIdx(STEP_IDS.indexOf(s));
+    if (field) {
+      // Lleva el foco al campo que falla (tras pintar el paso).
+      window.setTimeout(() => focusField(field), 80);
     }
   };
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {translations.steps.basic}
-            </h3>
+  const issues = useMemo(() => (phase === 'wizard' && step === 'review' ? validateAll(form, countries) : []), [phase, step, form, countries]);
 
-            {/* Job Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.title} *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder={translations.fields.titlePlaceholder}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
+  // --- Publicar / guardar cambios --------------------------------------------------------
+  const handlePublish = async () => {
+    const c = ctxRef.current;
+    if (!c || busy) return;
+    setSubmitError(null);
+    if (validateAll(form, countries).length > 0) return;
+    const needsTerms = draftLike;
+    if (needsTerms && !canPublish) return;
+    if (needsTerms && (!terms || !terms.casillas_obligatorias.every((k) => checks[k]))) return;
+
+    setBusy(true);
+    try {
+      const saved = await persist();
+      if (!saved) return;
+
+      if (!needsTerms) {
+        // Oferta ya publicada o pausada: solo se guardan los cambios.
+        const back = isReviewStatus(saved.status);
+        setDone({ kind: 'changes', status: saved.status, deadline: null, backInReview: back });
+        setPhase('done');
+        return;
+      }
+
+      const acceptKey = `${saved.id}:${terms!.id}`;
+      if (acceptedRef.current !== acceptKey) {
+        const casillas = Object.fromEntries(terms!.casillas_obligatorias.map((k) => [k, !!checks[k]]));
+        await registerPublishAcceptance(terms!, casillas, saved.id, c.companyId);
+        acceptedRef.current = acceptKey;
+      }
+      const res = await submitForReview(saved.id);
+      setJobStatus(res.status);
+      setDone({ kind: 'review', status: res.status, deadline: res.application_deadline, backInReview: false });
+      setPhase('done');
+    } catch (err) {
+      console.error('[CreateJobPostingPage] publish', err);
+      const e = serverError(tx, err);
+      setSubmitError(e);
+      toast.error(e.text);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // --- Render --------------------------------------------------------------------------
+  const pageTitle = jobId || id ? tx.wz_title_edit : tx.wz_title_new;
+
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-bg-primary">
+      <div className="border-b border-slate-200 bg-blue-50/70 dark:border-dark-border dark:bg-dark-bg-secondary">
+        <div className="mx-auto flex max-w-5xl items-start justify-between gap-4 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="min-w-0">
+            <h1 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{pageTitle}</h1>
+            <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.wz_subtitle}</p>
+          </div>
+          <button type="button" onClick={() => navigate('/company/jobs')} className={`${btnSecondaryCls} shrink-0`}>
+            {phase === 'done' ? tx.wz_back_to_list : tx.btn_cancel}
+          </button>
+        </div>
+      </div>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">{children}</div>
+    </div>
+  );
+
+  if (loadState === 'loading') {
+    return shell(
+      <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cv-blue" aria-hidden="true" />
+        <span className="ml-3 text-slate-600 dark:text-dark-text-secondary">{tx.loading}</span>
+      </div>,
+    );
+  }
+
+  if (loadState === 'error') {
+    return shell(
+      <div role="alert" className={`${cardCls} mx-auto max-w-xl p-8 text-center`}>
+        <p className="mb-4 text-slate-800 dark:text-slate-200">{tx.load_error}</p>
+        <button type="button" className={btnPrimaryCls} onClick={() => setReloadKey((k) => k + 1)}>
+          {tx.retry}
+        </button>
+      </div>,
+    );
+  }
+
+  if (phase === 'choose') {
+    return shell(
+      <ChooseStart
+        tx={tx}
+        lang={lang}
+        offers={offers}
+        offersState={offersState}
+        onNew={() => setPhase('wizard')}
+        onDuplicate={(srcId) => navigate(`/company/jobs/new?duplicar=${encodeURIComponent(srcId)}`)}
+        onRetry={() => ctx && refreshOffers(ctx.companyId)}
+      />,
+    );
+  }
+
+  if (phase === 'done' && done) {
+    const manual = done.status === 'MANUAL_REVIEW';
+    const title = done.kind === 'changes' ? (done.backInReview ? tx.res_ai_title : tx.saved_changes) : manual ? tx.res_manual_title : tx.res_ai_title;
+    const body = done.kind === 'changes' ? (done.backInReview ? tx.res_back_in_review : '') : manual ? tx.res_manual_body : tx.res_ai_body;
+    const waiting = done.kind === 'review' || done.backInReview;
+    return shell(
+      <div className={`${surfaceCls} mx-auto max-w-2xl p-8 text-center sm:p-10`} role="status" data-testid="publish-result" data-status={done.status}>
+        <div
+          className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+            waiting ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+          }`}
+        >
+          {waiting ? <InformationCircleIcon className="h-7 w-7" aria-hidden="true" /> : <CheckCircleIcon className="h-7 w-7" aria-hidden="true" />}
+        </div>
+        <div className="mb-3 flex justify-center">
+          <JobStatusBadge status={done.kind === 'changes' && !done.backInReview ? jobStatus : done.status} />
+        </div>
+        <h2 ref={headingRef} tabIndex={-1} className="text-balance text-2xl font-bold tracking-tight text-slate-900 focus:outline-none dark:text-white">
+          {title}
+        </h2>
+        {body && <p className="mx-auto mt-3 max-w-[56ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{body}</p>}
+        {done.deadline && <p className="mt-2 text-sm tabular-nums text-slate-600 dark:text-dark-text-secondary">{fmt(tx.res_deadline, { date: formatDate(done.deadline, lang) })}</p>}
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <button type="button" className={btnPrimaryCls} onClick={() => navigate('/company/jobs')}>
+            {tx.res_to_list}
+          </button>
+          <button type="button" className={btnSecondaryCls} onClick={() => navigate('/company/jobs/new')}>
+            {tx.res_create_another}
+          </button>
+        </div>
+      </div>,
+    );
+  }
+
+  // Estados en los que no se edita
+  if (!editable) {
+    const inReview = isReviewStatus(jobStatus);
+    return shell(
+      <div className={`${surfaceCls} mx-auto max-w-2xl p-8`} role="status">
+        <div className="mb-3">
+          <JobStatusBadge status={jobStatus} />
+        </div>
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{inReview ? tx.ro_review_title : tx.ro_closed_title}</h2>
+        <p className="mt-2 text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{inReview ? tx.ro_review_body : fmt(tx.ro_closed_body, { status: pick(tx, 'status', jobStatus).toLowerCase() })}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button type="button" className={btnPrimaryCls} onClick={() => navigate('/company/jobs')}>
+            {tx.wz_back_to_list}
+          </button>
+          {jobId && (
+            <button type="button" className={btnSecondaryCls} onClick={() => navigate(`/company/jobs/new?duplicar=${encodeURIComponent(jobId)}`)}>
+              {tx.ro_duplicate}
+            </button>
+          )}
+        </div>
+      </div>,
+    );
+  }
+
+  const stepProps = { tx, lang, form, set, errors, disabled: busy };
+  const stepName = msg(tx, `step_${step}`);
+  const isLast = stepIdx === STEP_IDS.length - 1;
+
+  // Estado de cada paso: misma validación que «Continuar» y la revisión final (una sola fuente).
+  const stepItems = STEP_IDS.map((s, i) => {
+    const reached = i <= maxStep || i === stepIdx;
+    const valid = Object.keys(validateStep(s, form, countries)).length === 0;
+    const state: StepState = !reached ? 'pending' : valid ? 'done' : 'missing';
+    return { id: s, label: msg(tx, `step_${s}`), state };
+  });
+
+  const noteCls = 'mb-5 flex items-start gap-3 rounded-xl border p-4 text-sm leading-relaxed';
+
+  return shell(
+    <>
+      <div className={isLast ? '' : 'mx-auto max-w-3xl'}>
+        <StepBar
+          tx={tx}
+          steps={stepItems}
+          current={stepIdx}
+          busy={busy}
+          onSelect={(i) => {
+            setErrors({});
+            setStepIdx(i);
+          }}
+        />
+      </div>
+
+      <div className={isLast ? '' : 'mx-auto max-w-3xl'}>
+        {jobStatus === 'PUBLISHED' || jobStatus === 'PAUSED' ? (
+          <p role="note" className={`${noteCls} border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-100`}>
+            <InformationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <span>
+              {tx.published_edit_banner} {tx.rv_edit_warning}
+            </span>
+          </p>
+        ) : null}
+        {rejectedReason !== null && step !== 'review' && (
+          <p role="note" className={`${noteCls} border-red-200 bg-red-50 text-red-900 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100`}>
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <span>{rejectedReason ? fmt(tx.rejected_banner, { reason: rejectedReason }) : tx.rejected_banner_nomotivo}</span>
+          </p>
+        )}
+
+        <div className={isLast ? '' : `${surfaceCls} p-5 sm:p-8`}>
+          <div className="mb-6 flex items-start justify-between gap-3">
+            <h2 ref={headingRef} tabIndex={-1} className="text-balance text-xl font-bold tracking-tight text-slate-900 focus:outline-none dark:text-white sm:text-2xl">
+              {stepName}
+            </h2>
+            <p className="min-h-[1.25rem] shrink-0 pt-1 text-xs text-slate-600 dark:text-dark-text-secondary" role="status" aria-live="polite" data-testid="save-state">
+              {saveState === 'saving' ? tx.saving : saveState === 'saved' ? tx.saved : saveState === 'error' ? tx.save_error : ''}
+            </p>
+          </div>
+
+          {step === 'basics' && <StepBasics {...stepProps} countries={countries} usedCities={usedCities} />}
+          {step === 'description' && <StepDescription {...stepProps} />}
+          {step === 'conditions' && <StepConditions {...stepProps} currency={country?.currency ?? null} countryName={countryName} />}
+          {step === 'screening' && <StepScreening {...stepProps} />}
+          {step === 'review' && (
+            <>
+              <StepReview
+                tx={tx}
+                lang={lang}
+                form={form}
+                mode={draftLike ? 'submit' : 'save'}
+                country={country}
+                companyName={ctx?.companyName || ''}
+                companyLogo={ctx?.companyLogo ?? null}
+                issues={issues}
+                onGoto={jumpToStep}
+                terms={terms}
+                termsState={termsState === 'idle' ? 'loading' : termsState}
+                checks={checks}
+                onChecks={setChecks}
+                busy={busy}
+                onPublish={handlePublish}
+                rejectedReason={rejectedReason}
+                publishedEdit={jobStatus === 'PUBLISHED' || jobStatus === 'PAUSED'}
+                companyPending={companyPending || !canPublish}
               />
-            </div>
-
-            {/* Department */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.department}
-              </label>
-              <input
-                type="text"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                placeholder={translations.fields.departmentPlaceholder}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-              />
-            </div>
-
-            {/* Employment Type, Work Mode, Experience Level */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {translations.fields.employmentType}
-                </label>
-                <select
-                  value={formData.employment_type}
-                  onChange={(e) => setFormData({ ...formData, employment_type: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                >
-                  {Object.entries(translations.employmentTypes).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {translations.fields.workMode}
-                </label>
-                <select
-                  value={formData.work_mode}
-                  onChange={(e) => {
-                    const newWorkMode = e.target.value;
-                    setFormData({
-                      ...formData,
-                      work_mode: newWorkMode,
-                      is_remote: newWorkMode === 'REMOTE'
-                    });
-                  }}
-                  disabled={formData.is_remote}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {Object.entries(translations.workModes).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {translations.fields.experienceLevel}
-                </label>
-                <select
-                  value={formData.experience_level}
-                  onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                >
-                  {Object.entries(translations.experienceLevels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="space-y-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.is_remote}
-                  onChange={(e) => {
-                    const isRemote = e.target.checked;
-                    setFormData({
-                      ...formData,
-                      is_remote: isRemote,
-                      work_mode: isRemote ? 'REMOTE' : 'ONSITE'
-                    });
-                  }}
-                  className="w-4 h-4 text-cv-blue rounded focus:ring-cv-blue"
-                />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {translations.fields.isRemote}
-                </span>
-              </label>
-
-              {!formData.is_remote && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {submitError && (
+                <div role="alert" className="mt-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-100" data-testid="submit-error">
+                  <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {translations.fields.city}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location_city}
-                      onChange={(e) => setFormData({ ...formData, location_city: e.target.value })}
-                      placeholder={translations.fields.cityPlaceholder}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {translations.fields.state}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location_state}
-                      onChange={(e) => setFormData({ ...formData, location_state: e.target.value })}
-                      placeholder={translations.fields.statePlaceholder}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {translations.fields.country}
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location_country}
-                      onChange={(e) => setFormData({ ...formData, location_country: e.target.value })}
-                      maxLength={2}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                    />
+                    <p className="font-medium">{submitError.text}</p>
+                    {submitError.list.length > 0 && (
+                      <ul className="mt-1.5 list-disc space-y-0.5 pl-5">
+                        {submitError.list.map((l) => (
+                          <li key={l}>{l}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {translations.steps.description}
-            </h3>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.description} *
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={translations.fields.descriptionPlaceholder}
-                rows={6}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-              />
-            </div>
-
-            {/* Responsibilities */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.responsibilities}
-              </label>
-              {formData.responsibilities.map((resp, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={resp}
-                    onChange={(e) => handleArrayFieldChange('responsibilities', index, e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                  />
-                  {formData.responsibilities.length > 1 && (
-                    <button
-                      onClick={() => handleRemoveArrayField('responsibilities', index)}
-                      className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40"
-                    >
-                      {translations.actions.removeItem}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => handleAddArrayField('responsibilities')}
-                className="mt-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                + {translations.actions.addItem}
-              </button>
-            </div>
-
-            {/* Benefits */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.benefits}
-              </label>
-              {formData.benefits.map((benefit, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={benefit}
-                    onChange={(e) => handleArrayFieldChange('benefits', index, e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                  />
-                  {formData.benefits.length > 1 && (
-                    <button
-                      onClick={() => handleRemoveArrayField('benefits', index)}
-                      className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40"
-                    >
-                      {translations.actions.removeItem}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => handleAddArrayField('benefits')}
-                className="mt-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                + {translations.actions.addItem}
-              </button>
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {translations.steps.requirements}
-            </h3>
-
-            {/* Requirements */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.requirements}
-              </label>
-              {formData.requirements.map((req, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={req}
-                    onChange={(e) => handleArrayFieldChange('requirements', index, e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                  />
-                  {formData.requirements.length > 1 && (
-                    <button
-                      onClick={() => handleRemoveArrayField('requirements', index)}
-                      className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40"
-                    >
-                      {translations.actions.removeItem}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => handleAddArrayField('requirements')}
-                className="mt-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                + {translations.actions.addItem}
-              </button>
-            </div>
-
-            {/* Nice to Have */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.niceToHave}
-              </label>
-              {formData.nice_to_have.map((nice, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={nice}
-                    onChange={(e) => handleArrayFieldChange('nice_to_have', index, e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                  />
-                  {formData.nice_to_have.length > 1 && (
-                    <button
-                      onClick={() => handleRemoveArrayField('nice_to_have', index)}
-                      className="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40"
-                    >
-                      {translations.actions.removeItem}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => handleAddArrayField('nice_to_have')}
-                className="mt-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                + {translations.actions.addItem}
-              </button>
-            </div>
-
-            {/* Required Skills */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.requiredSkills}
-              </label>
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill('required'))}
-                  placeholder={translations.fields.skillPlaceholder}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                />
-                <button
-                  onClick={() => handleAddSkill('required')}
-                  className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700"
-                >
-                  {translations.actions.addSkill}
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.required_skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm"
-                  >
-                    {skill}
-                    <button
-                      onClick={() => handleRemoveSkill('required', skill)}
-                      className="hover:text-blue-900 dark:hover:text-blue-100"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Optional Skills */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.optionalSkills}
-              </label>
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={optionalSkillInput}
-                  onChange={(e) => setOptionalSkillInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill('optional'))}
-                  placeholder={translations.fields.skillPlaceholder}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                />
-                <button
-                  onClick={() => handleAddSkill('optional')}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                >
-                  {translations.actions.addSkill}
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.optional_skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded-full text-sm"
-                  >
-                    {skill}
-                    <button
-                      onClick={() => handleRemoveSkill('optional', skill)}
-                      className="hover:text-gray-900 dark:hover:text-gray-100"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {translations.steps.compensation}
-            </h3>
-
-            {/* Salary Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.salaryRange}
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <input
-                  type="number"
-                  value={formData.salary_min}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value && parseFloat(value) > 10000000) {
-                      toast.error(translations.toasts.maxSalary);
-                      return;
-                    }
-                    setFormData({ ...formData, salary_min: value });
-                  }}
-                  placeholder={translations.fields.salaryMin}
-                  max="10000000"
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                />
-                <input
-                  type="number"
-                  value={formData.salary_max}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value && parseFloat(value) > 10000000) {
-                      toast.error(translations.toasts.maxSalary);
-                      return;
-                    }
-                    setFormData({ ...formData, salary_max: value });
-                  }}
-                  placeholder={translations.fields.salaryMax}
-                  max="10000000"
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                />
-                <select
-                  value={formData.salary_currency}
-                  onChange={(e) => setFormData({ ...formData, salary_currency: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                >
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="MXN">MXN</option>
-                </select>
-                <select
-                  value={formData.salary_period}
-                  onChange={(e) => setFormData({ ...formData, salary_period: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-                >
-                  {Object.entries(translations.periods).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-2 mt-3">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.show_salary}
-                    onChange={(e) => setFormData({ ...formData, show_salary: e.target.checked })}
-                    className="w-4 h-4 text-cv-blue rounded focus:ring-cv-blue"
-                  />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {translations.fields.showSalary}
-                  </span>
-                </label>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {translations.salaryTip}
-                </p>
-              </div>
-            </div>
-
-            {/* Application Deadline */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.deadline}
-              </label>
-              <input
-                type="date"
-                value={formData.application_deadline}
-                onChange={(e) => setFormData({ ...formData, application_deadline: e.target.value })}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-              />
-            </div>
-
-            {/* Application Instructions */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {translations.fields.instructions}
-              </label>
-              <textarea
-                value={formData.application_instructions}
-                onChange={(e) => setFormData({ ...formData, application_instructions: e.target.value })}
-                placeholder={translations.fields.instructionsPlaceholder}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-              />
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary">
-      {/* Header */}
-      <div className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isEditMode ? translations.titleEdit : translations.titleCreate}
-              </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {translations.subtitle}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/company/jobs')}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            >
-              {translations.actions.cancel}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {[1, 2, 3, 4].map((step) => (
-              <React.Fragment key={step}>
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                      step <= currentStep
-                        ? 'bg-cv-blue text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                    }`}
-                  >
-                    {step}
-                  </div>
-                  <span className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                    {translations.steps[Object.keys(translations.steps)[step - 1] as keyof typeof translations.steps]}
-                  </span>
-                </div>
-                {step < 4 && (
-                  <div
-                    className={`flex-1 h-1 mx-2 ${
-                      step < currentStep ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
-        {/* Form Content */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6 mb-6">
-          {renderStepContent()}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="px-6 py-3 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {translations.actions.previous}
+        {/* Navegación */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <button type="button" onClick={handlePrev} disabled={stepIdx === 0 || busy} className={btnSecondaryCls}>
+            {tx.btn_prev}
           </button>
-
-          <div className="flex gap-3">
-            <button
-              onClick={handleSaveDraft}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? '...' : translations.actions.saveDraft}
-            </button>
-
-            {currentStep < totalSteps ? (
-              <button
-                onClick={handleNext}
-                className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {translations.actions.next}
+          <div className="flex flex-wrap gap-3">
+            {draftLike && (
+              <button type="button" onClick={handleSaveDraft} disabled={busy || saveState === 'saving'} className={btnSecondaryCls} data-testid="save-draft">
+                {saveState === 'saving' ? tx.saving : tx.btn_save_draft}
               </button>
-            ) : (
-              <button
-                onClick={handleSaveDraft}
-                disabled={loading}
-                className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? '...' : (isEditMode ? translations.actions.update : translations.actions.saveDraft)}
+            )}
+            {!isLast && (
+              <button type="button" onClick={handleNext} disabled={busy || saveState === 'saving'} className={btnPrimaryCls} data-testid="next-step">
+                {saveState === 'saving' ? tx.saving : tx.btn_next}
               </button>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </>,
   );
 };
 

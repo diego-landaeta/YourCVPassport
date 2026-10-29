@@ -1,6 +1,6 @@
 
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -8,8 +8,9 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import MainLayout from './components/MainLayout';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CompanyProtectedRoute from './components/company/CompanyProtectedRoute';
-import { routeConfig, routeRedirects } from './config/routeConfig';
+import { jobDetailRoutes, routeConfig, routeRedirects } from './config/routeConfig';
 import { getRedirectPath } from './utils/canonicalUrl';
+import { consumePostLoginReturn, isSafeReturnPath, setPostLoginReturn } from './lib/jobsReturn';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import Breadcrumbs from './components/shared/Breadcrumbs';
 import { QueryProvider } from './hooks/useQueryClient';
@@ -113,6 +114,33 @@ const RedirectRoute: React.FC = () => {
   return <Navigate to={`${target}${search}${hash}`} replace />;
 };
 
+// «Inscribirme» sin sesion manda a /login guardando la oferta (lib/jobsReturn.ts). Al haber
+// sesion, cuando AuthScreen lleva al usuario a /dashboard se le devuelve a la oferta. Se consume
+// SOLO en /dashboard: consumirlo en /login o /signup lo gastaba antes de que AuthScreen navegara
+// a /dashboard (que ganaba) y el usuario nunca volvia a la oferta.
+// Tambien acepta /login?next=/ruta (solo rutas internas).
+const PostLoginReturn: React.FC = () => {
+  const { user } = useAuth();
+  const { pathname, search } = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) return;
+    if (pathname !== '/login' && pathname !== '/signup') return;
+    const next = new URLSearchParams(search).get('next');
+    if (isSafeReturnPath(next)) setPostLoginReturn(next);
+  }, [user, pathname, search]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (pathname !== '/dashboard') return;
+    const target = consumePostLoginReturn();
+    if (target) navigate(target, { replace: true });
+  }, [user, pathname, navigate]);
+
+  return null;
+};
+
 const AppContent: React.FC = () => {
     // Combine English and Spanish paths into a single list for the router.
     // The useLanguage hook will ensure the correct content is rendered based on the URL prefix.
@@ -123,6 +151,8 @@ const AppContent: React.FC = () => {
     const uniqueRoutes = Array.from(new Map(allRoutes.map(item => [item.path, item])).values());
 
     return (
+      <>
+      <PostLoginReturn />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -174,11 +204,16 @@ const AppContent: React.FC = () => {
             <Route path="/p/:id" element={<PostViewPage />} />
           </Route>
 
-          {/* Public Job Search */}
+          {/* Listado publico de ofertas y ficha de cada oferta */}
           <Route path="/jobs" element={<JobSearchPage />} />
-          <Route path="/jobs/:slug" element={<JobDetailPage />} />
+          {/* Ficha: la canonica lleva pais (/es/ofertas/<slug>, /es/jobs/<slug>); las antiguas redirigen en cliente */}
+          {[...jobDetailRoutes.canonical, ...jobDetailRoutes.legacy].map((path) => (
+            <Route key={path} path={path} element={<JobDetailPage />} />
+          ))}
           <Route path="/empleos" element={<JobSearchPage />} />
-          <Route path="/empleos/:slug" element={<JobDetailPage />} />
+          {/* Listado por pais: /es/empleos, /mx/empleos... (pais = codigo ISO en minuscula; JobSearchPage
+              responde NotFound si no esta en la tabla countries). Gana a /es/* y /en/* por ser mas especifica. */}
+          <Route path="/:country/empleos" element={<JobSearchPage />} />
 
           {/* Company routes */}
           <Route path="/company/register" element={<CompanyRegistrationPage />} />
@@ -239,6 +274,7 @@ const AppContent: React.FC = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
+      </>
     );
 };
 

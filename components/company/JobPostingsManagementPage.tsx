@@ -1,477 +1,551 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslations } from '../../hooks/useTranslations';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { supabase } from '../../supabase/client';
 import toast from 'react-hot-toast';
+import { supabase } from '../../supabase/client';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { fmt } from '../../lib/bolsaText';
+import { dateInDays, deadlineToInstant, duplicateJobPath, editJobPath, formatDate, isReviewStatus, parseRpcError } from '../../lib/jobPostingModel';
+import { msg, useJobText, type JobText } from '../../lib/jobPostingText';
+import { BriefcaseIcon, ExclamationCircleIcon, MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { btnGhostCls, btnPrimaryCls, btnSecondaryCls, btnSmallCls, cardCls, inputCls } from './jobwizard/fields';
+import { deleteDraft, loadCompanyContext, setJobStatus } from './jobwizard/jobApi';
+import { jobPath } from '../../lib/jobsFormat';
+import { JobStatusBadge } from './jobwizard/StatusBadge';
 
-interface JobPosting {
+interface JobRow {
   id: string;
   title: string;
-  slug: string;
-  department: string | null;
-  employment_type: string;
-  work_mode: string;
-  experience_level: string;
+  slug: string | null;
+  country_code: string | null;
+  status: string;
   location_city: string | null;
-  location_country: string | null;
-  is_remote: boolean;
-  status: 'DRAFT' | 'PUBLISHED' | 'PAUSED' | 'CLOSED' | 'FILLED';
+  work_mode: string | null;
+  is_remote: boolean | null;
   published_at: string | null;
   application_deadline: string | null;
-  views_count: number;
-  applications_count: number;
+  views_count: number | null;
+  applications_count: number | null;
+  review_reason: string | null;
   created_at: string;
-  updated_at: string;
-  credits_cost: number;
+}
+
+type FilterKey = 'ALL' | 'DRAFT' | 'REVIEW' | 'REJECTED' | 'PUBLISHED' | 'PAUSED' | 'ENDED';
+type SortKey = 'newest' | 'oldest' | 'apps' | 'views';
+type Confirm = { id: string; kind: 'close' | 'filled' | 'delete' | 'renew' } | null;
+
+const JOB_LIST_COLUMNS =
+  'id, title, slug, country_code, status, location_city, work_mode, is_remote, published_at, application_deadline, views_count, applications_count, review_reason, created_at';
+
+const FILTERS: FilterKey[] = ['ALL', 'DRAFT', 'REVIEW', 'REJECTED', 'PUBLISHED', 'PAUSED', 'ENDED'];
+
+function inFilter(status: string, f: FilterKey): boolean {
+  switch (f) {
+    case 'ALL':
+      return true;
+    case 'REVIEW':
+      return isReviewStatus(status);
+    case 'ENDED':
+      return status === 'CLOSED' || status === 'FILLED' || status === 'EXPIRED';
+    default:
+      return status === f;
+  }
+}
+
+function filterLabel(tx: JobText, f: FilterKey): string {
+  switch (f) {
+    case 'ALL':
+      return tx.mg_filter_all;
+    case 'REVIEW':
+      return tx.mg_filter_review;
+    case 'ENDED':
+      return tx.mg_filter_ended;
+    default:
+      return msg(tx, `status_${f}`);
+  }
 }
 
 const JobPostingsManagementPage: React.FC = () => {
-  const t = useTranslations();
+  const tx = useJobText();
   const { lang } = useLanguage();
-  const translations = t.company.jobPostingsManagement;
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
-  const [filteredPostings, setFilteredPostings] = useState<JobPosting[]>([]);
+
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [companyId, setCompanyId] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_views' | 'most_applications'>('newest');
+  const [jobs, setJobs] = useState<JobRow[]>([]);
+  const [newCounts, setNewCounts] = useState<Record<string, number>>({});
+  const [filter, setFilter] = useState<FilterKey>('ALL');
+  const [sort, setSort] = useState<SortKey>('newest');
+  const [query, setQuery] = useState('');
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<Confirm>(null);
 
-  useEffect(() => {
-    fetchCompanyAndJobPostings();
-  }, []);
-
-  useEffect(() => {
-    applyFiltersAndSort();
-  }, [jobPostings, filterStatus, searchQuery, sortBy]);
-
-  const fetchCompanyAndJobPostings = async () => {
+  const load = useCallback(async () => {
+    setState((s) => (s === 'ready' ? s : 'loading'));
     try {
-      setLoading(true);
+      const ctx = await loadCompanyContext();
+      setCompanyId(ctx.companyId);
+      const { data, error } = await supabase
+        .from('job_postings')
+        .select(JOB_LIST_COLUMNS)
+        .eq('company_id', ctx.companyId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setJobs((data || []) as unknown as JobRow[]);
 
-      // Get current user's company
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Candidaturas nuevas = recibidas y aún sin abrir por la empresa. Si falla no rompe la tabla.
+      try {
+        const { data: apps, error: appsErr } = await supabase
+          .from('job_applications')
+          .select('job_posting_id')
+          .eq('company_id', ctx.companyId)
+          .eq('status', 'NEW')
+          .eq('viewed_by_company', false)
+          .limit(5000);
+        if (appsErr) throw appsErr;
+        const counts: Record<string, number> = {};
+        for (const a of (apps || []) as { job_posting_id: string }[]) counts[a.job_posting_id] = (counts[a.job_posting_id] || 0) + 1;
+        setNewCounts(counts);
+      } catch {
+        setNewCounts({});
+      }
+      setState('ready');
+    } catch (err) {
+      const m = (err as Error)?.message;
+      if (m === 'AUTH') {
         navigate('/login');
         return;
       }
-
-      // Get company user membership
-      const { data: companyUser, error: companyUserError } = await supabase
-        .from('company_users')
-        .select('company_id, role')
-        .eq('user_id', user.id)
-        // maybeSingle: sin empresa → null y se redirige al registro, sin 406
-        .maybeSingle();
-
-      if (companyUserError || !companyUser) {
-        toast.error(translations.toasts.noCompanyFound);
+      if (m === 'NO_COMPANY') {
+        toast.error(tx.no_company);
         navigate('/company/register');
         return;
       }
-
-      setCompanyId(companyUser.company_id);
-
-      // Fetch job postings for this company
-      const { data: postings, error: postingsError } = await supabase
-        .from('job_postings')
-        .select('*')
-        .eq('company_id', companyUser.company_id)
-        .order('created_at', { ascending: false });
-
-      if (postingsError) throw postingsError;
-
-      setJobPostings(postings || []);
-    } catch (error: any) {
-      console.error('Error fetching job postings:', error);
-      toast.error(translations.toasts.errorLoading);
-    } finally {
-      setLoading(false);
+      console.error('[JobPostingsManagement] load', err);
+      setState('error');
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
-  const applyFiltersAndSort = () => {
-    let filtered = [...jobPostings];
+  useEffect(() => {
+    void load();
+  }, [load]);
 
-    // Apply status filter
-    if (filterStatus !== 'ALL') {
-      filtered = filtered.filter(p => p.status === filterStatus);
-    }
+  const counts = useMemo(() => {
+    const c = {} as Record<FilterKey, number>;
+    for (const f of FILTERS) c[f] = jobs.filter((j) => inFilter(j.status, f)).length;
+    return c;
+  }, [jobs]);
 
-    // Apply search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(query) ||
-        p.department?.toLowerCase().includes(query) ||
-        p.location_city?.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  const visible = useMemo(() => {
+    const q = query.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    const list = jobs.filter((j) => {
+      if (!inFilter(j.status, filter)) return false;
+      if (!q) return true;
+      const hay = `${j.title} ${j.location_city || ''}`.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+      return hay.includes(q);
+    });
+    const t = (s: string) => new Date(s).getTime();
+    list.sort((a, b) => {
+      switch (sort) {
         case 'oldest':
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        case 'most_views':
-          return b.views_count - a.views_count;
-        case 'most_applications':
-          return b.applications_count - a.applications_count;
+          return t(a.created_at) - t(b.created_at);
+        case 'apps':
+          return (b.applications_count || 0) - (a.applications_count || 0);
+        case 'views':
+          return (b.views_count || 0) - (a.views_count || 0);
         default:
-          return 0;
+          return t(b.created_at) - t(a.created_at);
       }
     });
+    return list;
+  }, [jobs, filter, sort, query]);
 
-    setFilteredPostings(filtered);
-  };
-
-  const handlePublish = async (posting: JobPosting) => {
-    if (!companyId) return;
-
-    const confirmMsg = translations.confirmPublish.replace('{credits}', posting.credits_cost.toString());
-    if (!confirm(confirmMsg)) return;
-
+  // --- Acciones -----------------------------------------------------------------------
+  const run = async (job: JobRow, fn: () => Promise<void>) => {
+    setBusyId(job.id);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase.rpc('publish_job_posting', {
-        p_job_posting_id: posting.id,
-        p_company_id: companyId,
-        p_user_id: user.id,
-        p_duration_days: 30,
-      });
-
-      if (error) throw error;
-
-      toast.success(translations.toasts.publishSuccess);
-      fetchCompanyAndJobPostings();
-    } catch (error: any) {
-      console.error('Error publishing job:', error);
-      if (error?.code === '42501') {
-        // El servidor valida que la sesión es miembro (OWNER/ADMIN/MEMBER) de la empresa
-        toast.error(lang === 'es'
-          ? 'No tienes permiso para publicar ofertas de esta empresa.'
-          : 'You are not allowed to publish job postings for this company.');
-      } else if (error?.message?.includes('Insufficient credits')) {
-        toast.error(translations.toasts.insufficientCredits);
-        navigate('/company/credits');
-      } else {
-        toast.error(translations.toasts.errorPublishing);
-      }
+      await fn();
+      await load();
+    } catch (err) {
+      console.error('[JobPostingsManagement] action', err);
+      const info = parseRpcError(err);
+      toast.error(info.code ? msg(tx, `err_${info.code}`) : tx.err_unknown);
+    } finally {
+      setBusyId(null);
+      setConfirm(null);
     }
   };
 
-  const handleStatusChange = async (postingId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('job_postings')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', postingId);
+  const pause = (j: JobRow) =>
+    run(j, async () => {
+      await setJobStatus(j.id, 'PAUSED');
+      toast.success(tx.tt_paused);
+    });
 
-      if (error) throw error;
+  const resume = (j: JobRow) =>
+    run(j, async () => {
+      const status = await setJobStatus(j.id, 'PUBLISHED');
+      // Si el texto cambió durante la pausa, el servidor la devuelve a revisión.
+      if (isReviewStatus(status)) toast(tx.tt_resumed_review);
+      else toast.success(tx.tt_resumed);
+    });
 
-      toast.success(translations.toasts.statusUpdated);
-      fetchCompanyAndJobPostings();
-    } catch (error: any) {
-      console.error('Error updating status:', error);
-      toast.error(translations.toasts.errorUpdatingStatus);
-    }
-  };
+  const close = (j: JobRow, kind: 'CLOSED' | 'FILLED') =>
+    run(j, async () => {
+      await setJobStatus(j.id, kind);
+      toast.success(kind === 'CLOSED' ? tx.tt_closed : tx.tt_filled);
+    });
 
-  const handleDelete = async (postingId: string) => {
-    if (!confirm(translations.confirmDelete)) return;
+  const remove = (j: JobRow) =>
+    run(j, async () => {
+      await deleteDraft(j.id);
+      toast.success(tx.tt_deleted);
+    });
 
-    try {
-      const { error } = await supabase
-        .from('job_postings')
-        .delete()
-        .eq('id', postingId);
+  // Renovar una caducada: vuelve a borrador con 30 días y se revisa/publica desde el último paso
+  // (hay que aceptar de nuevo las condiciones de publicación).
+  const renew = (j: JobRow) =>
+    run(j, async () => {
+      await setJobStatus(j.id, 'DRAFT', { application_deadline: deadlineToInstant(dateInDays(30)) });
+      toast.success(tx.tt_renewed);
+      navigate(editJobPath(j.id, 5));
+    });
 
-      if (error) throw error;
+  const askConfirm = (id: string, kind: NonNullable<Confirm>['kind']) => setConfirm({ id, kind });
 
-      toast.success(translations.toasts.deleted);
-      fetchCompanyAndJobPostings();
-    } catch (error: any) {
-      console.error('Error deleting job:', error);
-      toast.error(translations.toasts.errorDeleting);
-    }
-  };
+  const place = (j: JobRow) => (j.is_remote || j.work_mode === 'REMOTE' ? tx.mg_city_remote : j.location_city || '—');
+  const newOf = (j: JobRow) => newCounts[j.id] || 0;
+  const appsCell = (j: JobRow) => ((j.applications_count || 0) === 0 ? tx.mg_apps_cell_none : fmt(tx.mg_apps_cell, { new: newOf(j), total: j.applications_count || 0 }));
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'DRAFT':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      case 'PUBLISHED':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'PAUSED':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case 'CLOSED':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'FILLED':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
+  const confirmText = (j: JobRow, kind: NonNullable<Confirm>['kind']) =>
+    fmt(kind === 'close' ? tx.cf_close : kind === 'filled' ? tx.cf_filled : kind === 'renew' ? tx.cf_renew : tx.cf_delete, { title: j.title });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cv-blue"></div>
-      </div>
+  const renderActions = (j: JobRow) => {
+    const busy = busyId === j.id;
+    // Orden fijo: principal (azul) → secundarias (grises) → destructivas (rojo al final).
+    const btn = (label: string, onClick: () => void, kind: 'primary' | 'quiet' | 'danger' = 'quiet') => (
+      <button
+        type="button"
+        disabled={busy}
+        onClick={onClick}
+        className={
+          kind === 'primary'
+            ? 'inline-flex items-center justify-center rounded-lg bg-cv-blue px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-dark-bg-secondary'
+            : kind === 'danger'
+              ? `${btnGhostCls} !text-red-700 hover:!bg-red-50 dark:!text-red-300 dark:hover:!bg-red-500/10`
+              : btnGhostCls
+        }
+        aria-label={`${label}: ${j.title}`}
+      >
+        {label}
+      </button>
     );
-  }
+    const s = j.status;
+    const duplicate = btn(tx.act_duplicate, () => navigate(duplicateJobPath(j.id)));
+    const applications = btn(tx.act_applications, () => navigate(`/company/jobs/applications?job=${j.id}`), s === 'PUBLISHED' ? 'primary' : 'quiet');
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary">
-      {/* Header */}
-      <div className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {translations.title}
-              </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {translations.subtitle}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/company/jobs/new')}
-              className="px-4 py-2 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              {translations.newPosting}
+    if (confirm && confirm.id === j.id) {
+      const proceed = () => (confirm.kind === 'close' ? close(j, 'CLOSED') : confirm.kind === 'filled' ? close(j, 'FILLED') : confirm.kind === 'renew' ? renew(j) : remove(j));
+      const destructive = confirm.kind === 'delete' || confirm.kind === 'close';
+      return (
+        <div
+          role="alertdialog"
+          aria-label={confirmText(j, confirm.kind)}
+          className={`flex flex-col gap-3 rounded-lg border p-3 ${
+            destructive ? 'border-red-200 bg-red-50 dark:border-red-400/30 dark:bg-red-500/10' : 'border-amber-300 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-500/10'
+          }`}
+        >
+          <p className="text-sm leading-snug text-slate-900 dark:text-slate-100">{confirmText(j, confirm.kind)}</p>
+          <div className="flex gap-2">
+            <button type="button" disabled={busy} onClick={proceed} className={`${btnPrimaryCls} !px-3.5 !py-1.5 text-sm`}>
+              {tx.cf_yes}
+            </button>
+            <button type="button" disabled={busy} onClick={() => setConfirm(null)} className={btnSmallCls}>
+              {tx.cf_no}
             </button>
           </div>
         </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-wrap items-center gap-x-1 gap-y-1.5">
+        {s === 'DRAFT' && (
+          <>
+            {btn(tx.act_edit, () => navigate(editJobPath(j.id)), 'primary')}
+            {duplicate}
+            {btn(tx.act_delete, () => askConfirm(j.id, 'delete'), 'danger')}
+          </>
+        )}
+        {isReviewStatus(s) && duplicate}
+        {s === 'REJECTED' && (
+          <>
+            {btn(tx.act_resubmit, () => navigate(editJobPath(j.id)), 'primary')}
+            {duplicate}
+          </>
+        )}
+        {s === 'PUBLISHED' && (
+          <>
+            {applications}
+            {btn(tx.act_edit, () => navigate(editJobPath(j.id)))}
+            {btn(tx.act_pause, () => pause(j))}
+            {duplicate}
+            {j.slug && (
+              <a
+                href={jobPath(j.country_code, j.slug, lang)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={btnGhostCls}
+                aria-label={`${tx.act_view_public}: ${j.title}`}
+              >
+                {tx.act_view_public}
+              </a>
+            )}
+            {btn(tx.act_filled, () => askConfirm(j.id, 'filled'))}
+            {btn(tx.act_close, () => askConfirm(j.id, 'close'), 'danger')}
+          </>
+        )}
+        {s === 'PAUSED' && (
+          <>
+            {btn(tx.act_resume, () => resume(j), 'primary')}
+            {btn(tx.act_edit, () => navigate(editJobPath(j.id)))}
+            {duplicate}
+            {btn(tx.act_filled, () => askConfirm(j.id, 'filled'))}
+            {btn(tx.act_close, () => askConfirm(j.id, 'close'), 'danger')}
+          </>
+        )}
+        {(s === 'CLOSED' || s === 'FILLED') && (
+          <>
+            {applications}
+            {duplicate}
+          </>
+        )}
+        {s === 'EXPIRED' && (
+          <>
+            {btn(tx.act_renew, () => askConfirm(j.id, 'renew'), 'primary')}
+            {applications}
+            {duplicate}
+          </>
+        )}
       </div>
+    );
+  };
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters and Search */}
-        <div className="mb-6 space-y-4">
-          {/* Search */}
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={translations.search}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-            />
-          </div>
+  const renderHint = (j: JobRow) => {
+    if (j.status === 'REJECTED' && j.review_reason)
+      return (
+        <p className="mt-1.5 flex items-start gap-1.5 text-[13px] leading-snug text-red-700 dark:text-red-300">
+          <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{fmt(tx.mg_rejected_reason, { reason: j.review_reason })}</span>
+        </p>
+      );
+    if (isReviewStatus(j.status)) return <p className="mt-1.5 text-[13px] leading-snug text-slate-600 dark:text-dark-text-secondary">{tx.mg_in_review_hint}</p>;
+    if (j.status === 'EXPIRED') return <p className="mt-1.5 text-[13px] leading-snug text-slate-600 dark:text-dark-text-secondary">{tx.mg_expired_hint}</p>;
+    return null;
+  };
 
-          {/* Filter and Sort */}
-          <div className="flex flex-wrap gap-4 items-center">
-            {/* Status Filter Tabs */}
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(translations.filters).map(([key, label]) => (
+  // --- Render --------------------------------------------------------------------------
+  const header = (
+    <div className="border-b border-slate-200 bg-blue-50/70 dark:border-dark-border dark:bg-dark-bg-secondary">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-x-6 gap-y-4 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="min-w-0">
+          <h1 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{tx.mg_title}</h1>
+          <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.mg_subtitle}</p>
+        </div>
+        <button type="button" onClick={() => navigate('/company/jobs/new')} className={btnPrimaryCls} data-testid="new-job">
+          <PlusIcon className="h-5 w-5" aria-hidden="true" />
+          {tx.mg_new}
+        </button>
+      </div>
+    </div>
+  );
+
+  const page = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-slate-50 dark:bg-dark-bg-primary">
+      {header}
+      {children}
+    </div>
+  );
+
+  if (state === 'loading') {
+    return page(
+      <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cv-blue" aria-hidden="true" />
+        <span className="ml-3 text-slate-600 dark:text-dark-text-secondary">{tx.mg_loading}</span>
+      </div>,
+    );
+  }
+
+  if (state === 'error') {
+    return page(
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <div role="alert" className={`${cardCls} p-8 text-center`}>
+          <p className="mb-4 text-slate-800 dark:text-slate-200">{tx.mg_error}</p>
+          <button type="button" className={btnPrimaryCls} onClick={() => void load()}>
+            {tx.retry}
+          </button>
+        </div>
+      </div>,
+    );
+  }
+
+  const surface = 'overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,.05),0_12px_32px_-20px_rgba(15,23,42,.2)] dark:border-dark-border dark:bg-dark-bg-secondary dark:shadow-none';
+
+  return page(
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      {jobs.length === 0 ? (
+        <div className={`${cardCls} mx-auto max-w-xl px-8 py-14 text-center`}>
+          <span aria-hidden="true" className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-cv-blue dark:bg-blue-500/15 dark:text-blue-300">
+            <BriefcaseIcon className="h-7 w-7" strokeWidth={1.5} />
+          </span>
+          <h2 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white">{tx.mg_empty_title}</h2>
+          <p className="mx-auto mb-7 max-w-[44ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.mg_empty_desc}</p>
+          <button type="button" onClick={() => navigate('/company/jobs/new')} className={btnPrimaryCls}>
+            {tx.mg_empty_action}
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="mb-6 space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="relative sm:flex-1">
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={tx.mg_search}
+                  aria-label={tx.mg_search}
+                  className={`${inputCls} !pl-10`}
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-dark-text-secondary">
+                <span className="whitespace-nowrap">{tx.mg_sort_label}</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={`${inputCls} !w-auto`}>
+                  <option value="newest">{tx.mg_sort_newest}</option>
+                  <option value="oldest">{tx.mg_sort_oldest}</option>
+                  <option value="apps">{tx.mg_sort_apps}</option>
+                  <option value="views">{tx.mg_sort_views}</option>
+                </select>
+              </label>
+            </div>
+            <div role="group" aria-label={tx.mg_filter_label} className="flex flex-wrap gap-2">
+              {FILTERS.filter((f) => f === 'ALL' || counts[f] > 0 || f === filter).map((f) => (
                 <button
-                  key={key}
-                  onClick={() => setFilterStatus(key.toUpperCase())}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filterStatus === key.toUpperCase()
-                      ? 'bg-cv-blue text-white'
-                      : 'bg-white dark:bg-dark-bg-secondary text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary'
+                  key={f}
+                  type="button"
+                  aria-pressed={filter === f}
+                  onClick={() => setFilter(f)}
+                  className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:focus-visible:ring-offset-dark-bg-primary ${
+                    filter === f
+                      ? 'border-cv-blue bg-cv-blue text-white'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-dark-border dark:bg-dark-bg-secondary dark:text-slate-200 dark:hover:bg-dark-bg-tertiary'
                   }`}
                 >
-                  {label}
+                  {filterLabel(tx, f)} <span className="tabular-nums opacity-80">({counts[f]})</span>
                 </button>
               ))}
             </div>
-
-            {/* Sort Dropdown */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-white focus:ring-2 focus:ring-cv-blue focus:border-transparent"
-            >
-              <option value="newest">{translations.sort.newest}</option>
-              <option value="oldest">{translations.sort.oldest}</option>
-              <option value="most_views">{translations.sort.most_views}</option>
-              <option value="most_applications">{translations.sort.most_applications}</option>
-            </select>
           </div>
-        </div>
 
-        {/* Job Postings List */}
-        {filteredPostings.length === 0 ? (
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm p-12 text-center">
-            <svg
-              className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {jobPostings.length === 0 ? translations.emptyState.title : translations.noResults.title}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
-              {jobPostings.length === 0 ? translations.emptyState.description : translations.noResults.description}
-            </p>
-            {jobPostings.length === 0 && (
+          {visible.length === 0 ? (
+            <div className={`${cardCls} px-8 py-12 text-center`}>
+              <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">{tx.mg_noresults_title}</h2>
+              <p className="mb-5 text-slate-600 dark:text-dark-text-secondary">{tx.mg_noresults_desc}</p>
               <button
-                onClick={() => navigate('/company/jobs/new')}
-                className="px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
+                type="button"
+                className={btnSecondaryCls}
+                onClick={() => {
+                  setFilter('ALL');
+                  setQuery('');
+                }}
               >
-                {translations.emptyState.action}
+                {tx.mg_clear_filters}
               </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredPostings.map((posting) => (
-              <div
-                key={posting.id}
-                className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    {/* Title and Status */}
-                    <div className="flex items-start gap-3 mb-3">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex-1">
-                        {posting.title}
-                      </h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(posting.status)}`}>
-                        {translations.status[posting.status]}
-                      </span>
-                    </div>
-
-                    {/* Meta Information */}
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                      {posting.department && (
-                        <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                          {posting.department}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        {translations.employmentType[posting.employment_type as keyof typeof translations.employmentType]}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {posting.is_remote ? translations.workMode.REMOTE : `${posting.location_city || ''}, ${posting.location_country || ''}`}
-                      </span>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex flex-wrap gap-6 text-sm">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <span className="font-medium text-gray-900 dark:text-white">{posting.views_count}</span>
-                        <span className="text-gray-500 dark:text-gray-400">{translations.stats.views}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="font-medium text-gray-900 dark:text-white">{posting.applications_count}</span>
-                        <span className="text-gray-500 dark:text-gray-400">{translations.stats.applications}</span>
-                      </div>
-                      {posting.status === 'DRAFT' && (
-                        <div className="flex items-center gap-2">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <span className="font-medium text-gray-900 dark:text-white">{posting.credits_cost}</span>
-                          <span className="text-gray-500 dark:text-gray-400">{translations.stats.cost}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 ml-4">
-                    {posting.status === 'DRAFT' && (
-                      <>
-                        <button
-                          onClick={() => navigate(`/company/jobs/edit/${posting.id}`)}
-                          className="px-4 py-2 text-sm bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
-                        >
-                          {translations.actions.edit}
-                        </button>
-                        <button
-                          onClick={() => handlePublish(posting)}
-                          className="px-4 py-2 text-sm bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          {translations.actions.publish}
-                        </button>
-                      </>
-                    )}
-                    {posting.status === 'PUBLISHED' && (
-                      <>
-                        <button
-                          onClick={() => navigate(`/company/jobs/${posting.id}/applications`)}
-                          className="px-4 py-2 text-sm bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          {translations.actions.viewApplications}
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(posting.id, 'PAUSED')}
-                          className="px-4 py-2 text-sm bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
-                        >
-                          {translations.actions.pause}
-                        </button>
-                      </>
-                    )}
-                    {posting.status === 'PAUSED' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusChange(posting.id, 'PUBLISHED')}
-                          className="px-4 py-2 text-sm bg-cv-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          {translations.actions.resume}
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(posting.id, 'CLOSED')}
-                          className="px-4 py-2 text-sm bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-primary transition-colors"
-                        >
-                          {translations.actions.close}
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleDelete(posting.id)}
-                      className="px-4 py-2 text-sm bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-                    >
-                      {translations.actions.delete}
-                    </button>
-                  </div>
+            </div>
+          ) : (
+            <>
+              {/* Escritorio: tabla */}
+              <div className={`${surface} hidden lg:block`}>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left" data-testid="jobs-table">
+                    <thead className="border-b border-slate-200 bg-slate-50 text-[13px] text-slate-600 dark:border-dark-border dark:bg-dark-bg-tertiary dark:text-dark-text-secondary">
+                      <tr>
+                        <th scope="col" className="px-5 py-3 font-medium">{tx.mg_col_title}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{tx.mg_col_status}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{tx.mg_col_published}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{tx.mg_col_closes}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{tx.mg_col_apps}</th>
+                        <th scope="col" className="px-4 py-3 font-medium">{tx.mg_col_views}</th>
+                        <th scope="col" className="px-5 py-3 font-medium">{tx.mg_col_actions}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-dark-border">
+                      {visible.map((j) => (
+                        <tr key={j.id} data-job-id={j.id} data-status={j.status} className="align-top transition-colors hover:bg-slate-50/70 dark:hover:bg-dark-bg-tertiary/40">
+                          <td className="max-w-xs px-5 py-4">
+                            <p className="break-words font-semibold leading-snug text-slate-900 dark:text-white">{j.title}</p>
+                            <p className="mt-0.5 text-[13px] text-slate-600 dark:text-dark-text-secondary">{place(j)}</p>
+                            {renderHint(j)}
+                          </td>
+                          <td className="px-4 py-4">
+                            <JobStatusBadge status={j.status} />
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-4 text-sm tabular-nums text-slate-700 dark:text-slate-300">{formatDate(j.published_at, lang)}</td>
+                          <td className="whitespace-nowrap px-4 py-4 text-sm tabular-nums text-slate-700 dark:text-slate-300">{formatDate(j.application_deadline, lang)}</td>
+                          <td className="whitespace-nowrap px-4 py-4 text-sm font-medium tabular-nums text-slate-900 dark:text-white" data-testid="apps-cell">{appsCell(j)}</td>
+                          <td className="px-4 py-4 text-sm tabular-nums text-slate-700 dark:text-slate-300">{j.views_count || 0}</td>
+                          <td className="min-w-[17rem] px-5 py-3.5">
+                            {renderActions(j)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+
+              {/* Móvil y tablet: lista en una sola superficie */}
+              <ul className={`${surface} divide-y divide-slate-100 dark:divide-dark-border lg:hidden`}>
+                {visible.map((j) => (
+                  <li key={j.id} data-job-id={j.id} data-status={j.status} className="p-4 sm:p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words font-semibold leading-snug text-slate-900 dark:text-white">{j.title}</p>
+                        <p className="mt-0.5 text-[13px] text-slate-600 dark:text-dark-text-secondary">{place(j)}</p>
+                      </div>
+                      <JobStatusBadge status={j.status} />
+                    </div>
+                    {renderHint(j)}
+                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+                      <div>
+                        <dt className="text-xs text-slate-600 dark:text-dark-text-secondary">{tx.mg_col_published}</dt>
+                        <dd className="mt-0.5 tabular-nums text-slate-900 dark:text-white">{formatDate(j.published_at, lang)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-600 dark:text-dark-text-secondary">{tx.mg_col_closes}</dt>
+                        <dd className="mt-0.5 tabular-nums text-slate-900 dark:text-white">{formatDate(j.application_deadline, lang)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-600 dark:text-dark-text-secondary">{tx.mg_col_apps}</dt>
+                        <dd className="mt-0.5 font-medium tabular-nums text-slate-900 dark:text-white">{appsCell(j)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-slate-600 dark:text-dark-text-secondary">{tx.mg_col_views}</dt>
+                        <dd className="mt-0.5 tabular-nums text-slate-900 dark:text-white">{j.views_count || 0}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-4 -ml-2.5">
+                      {renderActions(j)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+    </div>,
   );
 };
 

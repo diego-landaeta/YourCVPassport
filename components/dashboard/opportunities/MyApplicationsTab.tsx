@@ -1,288 +1,298 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  DocumentCheckIcon,
-  EyeIcon,
-  ChatBubbleLeftRightIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
-import { useJobApplications, JobApplicationStatus } from '../../../hooks/useJobApplications';
-import ApplicationTimeline from '../../jobs/ApplicationTimeline';
+import toast from 'react-hot-toast';
+import { ChevronDownIcon, DocumentCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useJobApplications, type JobApplication, type JobApplicationStatus } from '../../../hooks/useJobApplications';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { useTranslations } from '../../../hooks/useTranslations';
-import LoadingSpinner from '../../shared/LoadingSpinner';
+import CandidateProgress, { CANDIDATE_TONE } from '../../jobs/CandidateProgress';
+import CompanyMark from '../../jobs/ui/CompanyMark';
+import {
+  BTN_DANGER, BTN_GHOST, BTN_PRIMARY, BTN_SECONDARY, FOCUS, LIFT, PanelEmpty, PanelError, PanelSkeleton, SEARCH_FROM, SURFACE,
+  SearchBox, StatusDot, TEXT_META, TEXT_STRONG, Timeline, norm, notifyError, useReveal,
+} from '../../jobs/PanelBits';
+import { pkey, usePanelText } from '../../jobs/textosPanel';
+import { fmt } from '../../../lib/bolsaText';
+import { errorCode, fetchApplicationHistory, withdrawApplication, type ApplicationHistoryRow, type CandidateStatus } from '../../../lib/jobsApi';
+import { formatDate, jobDetailPath, jobsRootPath } from '../../../lib/jobsFormat';
 
 interface MyApplicationsTabProps {
   profileId: string;
   statusFilter?: JobApplicationStatus | JobApplicationStatus[]; // External status filter from parent (single or array)
+  /** Avisa del total de candidaturas (para el contador de la pestana). */
+  onCount?: (n: number) => void;
 }
 
-/**
- * My Applications Tab - Track job application status
- *
- * Features:
- * - Visual timeline for each application
- * - Filter by status (can be controlled externally)
- * - Quick actions (view job, message company)
- * - Statistics overview
- */
-const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, statusFilter: externalStatusFilter }) => {
+type Filter = 'all' | 'active' | 'selected' | 'notSelected' | 'withdrawn';
+
+const FILTER_TEST: Record<Filter, (s: CandidateStatus) => boolean> = {
+  all: () => true,
+  active: (s) => s === 'SENT' || s === 'VIEWED' || s === 'IN_PROGRESS',
+  selected: (s) => s === 'SELECTED',
+  notSelected: (s) => s === 'NOT_SELECTED',
+  withdrawn: (s) => s === 'WITHDRAWN',
+};
+
+/** Una candidatura: estado en lenguaje del candidato, progreso, historial y «Retirarme». */
+const ApplicationCard: React.FC<{ app: JobApplication; onChanged: () => void }> = ({ app, onChanged }) => {
+  const tx = usePanelText();
   const { lang } = useLanguage();
-  const t = useTranslations();
   const navigate = useNavigate();
+  const [confirming, setConfirming] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<ApplicationHistoryRow[] | null>(null);
+  const [historyState, setHistoryState] = useState<'idle' | 'loading' | 'error'>('idle');
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const withdrawRef = useRef<HTMLButtonElement>(null);
 
-  // Use external filter if provided, otherwise allow internal filtering
-  const { applications, loading, error, activeCount } = useJobApplications(profileId, {
-    includeJobDetails: true,
-    statusFilter: externalStatusFilter
-      ? Array.isArray(externalStatusFilter)
-        ? externalStatusFilter
-        : [externalStatusFilter]
-      : undefined
-  });
+  const cs = app.candidate_status;
+  const closed = ['CLOSED', 'FILLED', 'EXPIRED'].includes(app.job_status || '');
+  const unavailable = !app.job_status && !app.job_posting?.slug;
+  const canWithdraw = cs !== 'WITHDRAWN' && cs !== 'SELECTED' && cs !== 'NOT_SELECTED' && !closed;
+  const company = app.job_posting?.company;
+  const title = app.job_posting?.title || tx.jobUnavailable;
+  const detailPath = jobDetailPath(app.job_posting?.slug || '', lang);
 
-  // No need for internal filtering if using hook's statusFilter
-  const filteredApplications = applications;
+  useEffect(() => {
+    if (confirming) cancelRef.current?.focus();
+  }, [confirming]);
 
-  // Calculate statistics (from unfiltered data if possible)
-  // Note: These stats might be partial if external filter is applied
-  const stats = {
-    total: applications.length,
-    active: activeCount,
-    interviewing: applications.filter(app => app.status === 'INTERVIEW').length,
-    offers: applications.filter(app => app.status === 'OFFER').length,
-    hired: applications.filter(app => app.status === 'HIRED').length,
-    rejected: applications.filter(app => app.status === 'REJECTED').length
+  const closeConfirm = () => {
+    setConfirming(false);
+    // El foco vuelve al boton que abrio la confirmacion
+    requestAnimationFrame(() => withdrawRef.current?.focus());
   };
 
-  // Status labels for display
-  const statusLabels: Record<JobApplicationStatus, { es: string; en: string }> = {
-    NEW: { es: 'Nueva', en: 'New' },
-    REVIEWING: { es: 'En Revisión', en: 'Under Review' },
-    SHORTLISTED: { es: 'Preseleccionado', en: 'Shortlisted' },
-    INTERVIEW: { es: 'Entrevista', en: 'Interview' },
-    OFFER: { es: 'Oferta', en: 'Offer' },
-    HIRED: { es: 'Contratado', en: 'Hired' },
-    REJECTED: { es: 'Rechazada', en: 'Rejected' },
-    WITHDRAWN: { es: 'Retirada', en: 'Withdrawn' }
-  };
-
-  const getStatusBadgeColor = (status: JobApplicationStatus) => {
-    switch (status) {
-      case 'NEW':
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400';
-      case 'REVIEWING':
-        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
-      case 'SHORTLISTED':
-        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
-      case 'INTERVIEW':
-        return 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400';
-      case 'OFFER':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
-      case 'HIRED':
-        return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400';
-      case 'REJECTED':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
-      case 'WITHDRAWN':
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400';
-      default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400';
+  const toggleHistory = async () => {
+    const next = !historyOpen;
+    setHistoryOpen(next);
+    if (next && history === null) {
+      setHistoryState('loading');
+      try {
+        setHistory(await fetchApplicationHistory(app.id));
+        setHistoryState('idle');
+      } catch {
+        setHistoryState('error');
+      }
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-24">
-        <LoadingSpinner
-          message={t.dashboard.opportunities.loadingApplications}
-          size="large"
-        />
-      </div>
-    );
-  }
+  const doWithdraw = async () => {
+    setWithdrawing(true);
+    try {
+      await withdrawApplication(app.id);
+      toast.success(tx.withdrawDone);
+      setConfirming(false);
+      setHistory(null);
+      onChanged();
+    } catch (e) {
+      notifyError(pkey(tx, `wd_${errorCode(e)}`, tx.withdrawError), tx.closeNotice);
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
-  if (error) {
-    return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-        <p className="text-red-700 dark:text-red-400">
-          {t.dashboard.opportunities.errorLoadingApplications}{': '}
-          {error}
-        </p>
-      </div>
-    );
-  }
+  // El historial del candidato junta los pasos consecutivos que se ven igual («En proceso»)
+  const visibleHistory = (history || []).reduce<Array<{ label: string; at: string }>>((acc, h) => {
+    const label = pkey(tx, `hs_${h.to_status}`, h.to_status);
+    if (acc.length && acc[acc.length - 1].label === label) return acc;
+    acc.push({ label, at: h.created_at });
+    return acc;
+  }, []);
+
+  const meta: string[] = [];
+  if (company?.company_name) meta.push(company.company_name);
+  meta.push(fmt(tx.appliedOn, { date: formatDate(app.created_at, lang) }));
+  if (app.viewed_at && cs !== 'VIEWED' && cs !== 'SENT') meta.push(fmt(tx.viewedOn, { date: formatDate(app.viewed_at, lang) }));
+  if (app.match_score != null) meta.push(`${tx.matchLabel} ${app.match_score} %`);
 
   return (
-    <div className="space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard
-          label={t.dashboard.opportunities.statsTotal}
-          value={stats.total}
-          color="blue"
-        />
-        <StatCard
-          label={t.dashboard.opportunities.statsActive}
-          value={stats.active}
-          color="yellow"
-        />
-        <StatCard
-          label={t.dashboard.opportunities.statsInterviews}
-          value={stats.interviewing}
-          color="indigo"
-        />
-        <StatCard
-          label={t.dashboard.opportunities.statsOffers}
-          value={stats.offers}
-          color="green"
-        />
-        <StatCard
-          label={t.dashboard.opportunities.statsAccepted}
-          value={stats.hired}
-          color="emerald"
-        />
-        <StatCard
-          label={t.dashboard.opportunities.statsRejected}
-          value={stats.rejected}
-          color="red"
-        />
+    <article className={`${SURFACE} ${LIFT} p-5`} aria-labelledby={`app-t-${app.id}`}>
+      <div className="flex items-start gap-4">
+        <CompanyMark name={company?.company_name || title} logoUrl={company?.logo_url} size="md" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1.5">
+            <div className="min-w-0">
+              <h3 id={`app-t-${app.id}`} className={`text-lg font-semibold leading-snug break-words ${TEXT_STRONG}`}>
+                {unavailable ? (
+                  title
+                ) : (
+                  <a
+                    href={detailPath}
+                    onClick={(e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); navigate(detailPath); } }}
+                    className={`rounded hover:underline hover:decoration-slate-400 hover:underline-offset-4 ${FOCUS}`}
+                  >
+                    {title}
+                  </a>
+                )}
+              </h3>
+              <p className={`mt-0.5 text-sm tabular-nums ${TEXT_META}`}>{meta.join(' · ')}</p>
+            </div>
+            <StatusDot tone={CANDIDATE_TONE[cs]} className="shrink-0">{pkey(tx, `st_${cs}`, cs)}</StatusDot>
+          </div>
+          {closed && <p className="mt-1.5 text-sm font-medium text-amber-700 dark:text-amber-400">{tx.jobClosed}</p>}
+        </div>
       </div>
 
-      {/* Filter is now in parent component MyApplicationsSection */}
+      <div className="mt-5">
+        <CandidateProgress status={cs} />
+      </div>
 
-      {/* Applications List */}
-      {filteredApplications.length === 0 ? (
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow p-12 text-center">
-          <DocumentCheckIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            {t.dashboard.opportunities.noApplications}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            {externalStatusFilter
-              ? t.dashboard.opportunities.noApplicationsWithStatus
-              : t.dashboard.opportunities.noApplicationsYet}
+      {confirming ? (
+        <div role="alertdialog" aria-labelledby={`wd-${app.id}`} aria-describedby={`wd-d-${app.id}`} className="mt-5 rounded-xl border border-red-200 bg-red-50/70 p-4 dark:border-red-500/30 dark:bg-red-500/10">
+          <p id={`wd-${app.id}`} className="flex items-center gap-2 font-semibold text-red-900 dark:text-red-200">
+            <ExclamationTriangleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />{tx.withdrawConfirmTitle}
           </p>
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('change-opportunities-tab', { detail: { tab: 'all' } }))}
-            className="px-6 py-3 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors"
-          >
-            {t.dashboard.opportunities.exploreJobs}
-          </button>
+          <p id={`wd-d-${app.id}`} className="mt-1 text-sm text-red-900 dark:text-red-200">{tx.withdrawConfirmText}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={() => void doWithdraw()} disabled={withdrawing} className={BTN_DANGER}>
+              {withdrawing ? tx.withdrawing : tx.withdrawConfirmYes}
+            </button>
+            <button ref={cancelRef} type="button" onClick={closeConfirm} disabled={withdrawing} className={BTN_SECONDARY}>
+              {tx.cancel}
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredApplications.map((application) => (
-            <div
-              key={application.id}
-              className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-lg hover:shadow-xl transition-all p-6"
-            >
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left: Job Info */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4">
-                      {/* Company Logo */}
-                      {application.job_posting?.company?.logo_url ? (
-                        <img
-                          src={application.job_posting.company.logo_url}
-                          alt={application.job_posting.company.company_name}
-                          className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                          <DocumentCheckIcon className="w-6 h-6 text-gray-400 dark:text-gray-600" />
-                        </div>
-                      )}
-
-                      {/* Job Title & Company */}
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                          {application.job_posting?.title || 'Job Title'}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          {application.job_posting?.company?.company_name || 'Company Name'}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(application.status)}`}>
-                            {statusLabels[application.status]?.[lang] || application.status}
-                          </span>
-                          {application.viewed_by_company && (
-                            <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                              <EyeIcon className="w-3.5 h-3.5" />
-                              {t.dashboard.opportunities.viewedByCompany}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Application Details */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <span className="flex items-center gap-1">
-                      <ClockIcon className="w-4 h-4" />
-                      {t.dashboard.opportunities.appliedAgo}{' '}
-                      {Math.floor((new Date().getTime() - new Date(application.created_at).getTime()) / (1000 * 60 * 60 * 24))}{' '}
-                      {t.dashboard.opportunities.daysLabel}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate(`/jobs/${application.job_posting?.slug}`)}
-                      className="px-4 py-2 bg-cv-blue text-white rounded-lg font-medium hover:bg-cv-blue-dark transition-colors text-sm"
-                    >
-                      {t.dashboard.opportunities.viewJob}
-                    </button>
-                    <button
-                      onClick={() => {/* TODO: Open messaging */}}
-                      className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm flex items-center gap-2"
-                    >
-                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                      {t.dashboard.opportunities.message}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right: Timeline */}
-                <div className="lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 pt-4 lg:pt-0 lg:pl-6">
-                  <ApplicationTimeline
-                    currentStatus={application.status}
-                    createdAt={application.created_at}
-                    updatedAt={application.updated_at}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-white/10">
+          {!unavailable && (
+            <button type="button" onClick={() => navigate(detailPath)} className={BTN_SECONDARY}>{tx.viewJob}</button>
+          )}
+          {canWithdraw && (
+            <button ref={withdrawRef} type="button" onClick={() => setConfirming(true)} className={BTN_GHOST}>{tx.withdraw}</button>
+          )}
+          <button
+            type="button"
+            onClick={() => void toggleHistory()}
+            aria-expanded={historyOpen}
+            aria-controls={`hist-${app.id}`}
+            className={`${BTN_GHOST} ml-auto !text-cv-blue dark:!text-cv-blue-light`}
+          >
+            {historyOpen ? tx.hideHistory : tx.history}
+            <ChevronDownIcon className={`h-4 w-4 transition-transform duration-150 ${historyOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
         </div>
       )}
-    </div>
+
+      {historyOpen && (
+        <div id={`hist-${app.id}`} className="mt-4 border-t border-slate-100 pt-4 dark:border-white/10" aria-live="polite">
+          {historyState === 'loading' && <p className={`text-sm ${TEXT_META}`}>{tx.historyLoading}</p>}
+          {historyState === 'error' && <p role="alert" className="text-sm text-red-700 dark:text-red-400">{tx.historyError}</p>}
+          {historyState === 'idle' && history && (
+            visibleHistory.length === 0 ? (
+              <p className={`text-sm ${TEXT_META}`}>{tx.historyEmpty}</p>
+            ) : (
+              <Timeline label={tx.history} items={visibleHistory.map((h, i) => ({ key: String(i), label: h.label, at: formatDate(h.at, lang) }))} />
+            )
+          )}
+        </div>
+      )}
+    </article>
   );
 };
 
-// Helper Component: Stat Card
-interface StatCardProps {
-  label: string;
-  value: number;
-  color: 'blue' | 'yellow' | 'indigo' | 'green' | 'emerald' | 'red';
-}
+/**
+ * Mis candidaturas: lee la vista my_job_applications (estados del candidato), con
+ * historial por candidatura y «Retirarme». Se actualiza sola (ver useJobApplications).
+ */
+const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({ profileId, statusFilter: externalStatusFilter, onCount }) => {
+  const tx = usePanelText();
+  const { lang } = useLanguage();
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<Filter>('all');
+  const [query, setQuery] = useState('');
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, color }) => {
-  const colorClasses = {
-    blue: 'from-blue-500 to-blue-600 text-white',
-    yellow: 'from-yellow-500 to-amber-600 text-white',
-    indigo: 'from-indigo-500 to-indigo-600 text-white',
-    green: 'from-green-500 to-green-600 text-white',
-    emerald: 'from-emerald-500 to-emerald-600 text-white',
-    red: 'from-red-500 to-red-600 text-white'
-  };
+  const { applications, loading, error, refetch } = useJobApplications(profileId, {
+    statusFilter: externalStatusFilter
+      ? Array.isArray(externalStatusFilter) ? externalStatusFilter : [externalStatusFilter]
+      : undefined,
+  });
+
+  const counts = useMemo(() => {
+    const c = {} as Record<Filter, number>;
+    (Object.keys(FILTER_TEST) as Filter[]).forEach((f) => { c[f] = applications.filter((a) => FILTER_TEST[f](a.candidate_status)).length; });
+    return c;
+  }, [applications]);
+
+  useEffect(() => {
+    if (!loading && !error && !externalStatusFilter) onCount?.(applications.length);
+  }, [loading, error, externalStatusFilter, applications.length, onCount]);
+
+  const visible = useMemo(() => {
+    const q = norm(query.trim());
+    return applications.filter((a) => FILTER_TEST[filter](a.candidate_status)
+      && (!q || norm(`${a.job_posting?.title || ''} ${a.job_posting?.company?.company_name || ''}`).includes(q)));
+  }, [applications, filter, query]);
+
+  const listRef = useReveal<HTMLUListElement>(!loading && !error && applications.length > 0);
+  const goJobs = () => navigate(jobsRootPath(lang));
+
+  if (loading) return <PanelSkeleton rows={3} label={tx.appsLoading} />;
+  if (error) return <PanelError message={tx.appsError} retryLabel={tx.retry} onRetry={() => void refetch()} />;
+
+  if (applications.length === 0) {
+    return (
+      <PanelEmpty
+        icon={DocumentCheckIcon}
+        title={externalStatusFilter ? tx.appsFilteredEmpty : tx.appsEmptyTitle}
+        text={externalStatusFilter ? undefined : tx.appsEmptyText}
+        action={{ label: tx.exploreJobs, onClick: goJobs }}
+      />
+    );
+  }
+
+  const filters: Array<{ id: Filter; label: string }> = [
+    { id: 'all', label: tx.fltAll },
+    { id: 'active', label: tx.fltActive },
+    { id: 'selected', label: tx.fltSelected },
+    { id: 'notSelected', label: tx.fltNotSelected },
+    { id: 'withdrawn', label: tx.fltWithdrawn },
+  ];
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-lg shadow-lg p-4`}>
-      <p className="text-sm opacity-90 mb-1">{label}</p>
-      <p className="text-3xl font-bold">{value}</p>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div role="group" aria-label={tx.filterLabel} className="scrollbar-thin -mx-1 flex gap-1.5 overflow-x-auto px-1 py-1">
+          {filters.map((f) => {
+            const on = filter === f.id;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setFilter(f.id)}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 ${FOCUS} ${
+                  on
+                    ? 'border-cv-blue bg-cv-blue text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-dark-border dark:bg-transparent dark:text-dark-text-secondary dark:hover:bg-white/5'
+                }`}
+              >
+                {f.label}
+                <span className={`tabular-nums ${on ? 'text-white/90' : 'text-slate-500 dark:text-dark-text-secondary'}`}>{counts[f.id]}</span>
+              </button>
+            );
+          })}
+        </div>
+        {applications.length >= SEARCH_FROM && (
+          <SearchBox className="sm:w-72" value={query} onChange={setQuery} label={tx.searchLabel} placeholder={tx.searchPlaceholder} clearLabel={tx.searchClear} />
+        )}
+      </div>
+
+      {visible.length === 0 ? (
+        <PanelEmpty
+          icon={DocumentCheckIcon}
+          title={query ? tx.searchEmpty : tx.appsFilteredEmpty}
+          action={{ label: query ? tx.searchClear : tx.showAll, onClick: () => { setQuery(''); if (!query) setFilter('all'); } }}
+        />
+      ) : (
+        <ul ref={listRef} className="space-y-3">
+          {visible.map((app) => (
+            <li key={app.id}>
+              <ApplicationCard app={app} onChanged={() => void refetch()} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

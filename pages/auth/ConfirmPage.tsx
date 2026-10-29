@@ -5,6 +5,7 @@ import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import SEOHead from '../../components/shared/SEOHead';
 import EmailLinkError from '../../components/auth/EmailLinkError';
 import { useTranslations } from '../../hooks/useTranslations';
+import { postAuthDestination } from '../../utils/postAuthDestination';
 import {
   readEmailLinkParams,
   readEmailLinkUrlError,
@@ -36,7 +37,11 @@ const ConfirmPage: React.FC = () => {
       setHasSession(session);
       setStatus('success');
       // Email confirmed and user is authenticated: dashboard after 2 seconds
-      if (session) redirectTimer = setTimeout(() => navigate('/dashboard'), 2000);
+      if (session) {
+        redirectTimer = setTimeout(() => {
+          void postAuthDestination().then((to) => { if (!cancelled) navigate(to); });
+        }, 2000);
+      }
     };
     const fail = (kind: EmailLinkErrorKind) => {
       if (cancelled) return;

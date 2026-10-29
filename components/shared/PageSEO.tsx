@@ -15,6 +15,10 @@ interface PageSEOProps {
    * (pareja ES/EN de config/routeConfig.ts); `null` no emite hreflang.
    */
   alternates?: HreflangUrls | null;
+  /** Datos estructurados JSON-LD (uno o varios objetos). Se emiten como <script type="application/ld+json">. */
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>> | null;
+  /** Paginas que no deben indexarse (busquedas filtradas, ofertas cerradas...). */
+  noindex?: boolean;
 }
 
 const PageSEO: React.FC<PageSEOProps> = ({
@@ -24,7 +28,9 @@ const PageSEO: React.FC<PageSEOProps> = ({
   ogImage = 'https://yourcvpassport.com/og-image.png',
   lang = 'en',
   keywords,
-  alternates
+  alternates,
+  jsonLd,
+  noindex = false
 }) => {
   const location = useLocation();
 
@@ -42,6 +48,9 @@ const PageSEO: React.FC<PageSEOProps> = ({
   const metaDescription = description.length > 160
     ? description.substring(0, 157) + '...'
     : description;
+
+  const robots = noindex ? 'noindex, nofollow' : 'index, follow';
+  const jsonLdList = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
   return (
     <Helmet key={location.pathname}>
@@ -75,10 +84,17 @@ const PageSEO: React.FC<PageSEOProps> = ({
       <meta name="twitter:site" content="@YourCVPassport" />
 
       {/* Additional SEO Tags */}
-      <meta name="robots" content="index, follow" />
-      <meta name="googlebot" content="index, follow" />
+      <meta name="robots" content={robots} />
+      <meta name="googlebot" content={robots} />
       <meta name="language" content={lang === 'es' ? 'Spanish' : 'English'} />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+      {/* Datos estructurados (JSON-LD). Se escapa `<` para que el texto de una oferta no pueda cerrar el script. */}
+      {jsonLdList.map((obj, i) => (
+        <script key={`jsonld-${i}`} type="application/ld+json">
+          {JSON.stringify(obj).replace(/</g, '\\u003c')}
+        </script>
+      ))}
     </Helmet>
   );
 };
