@@ -10,12 +10,12 @@
  * mantiene desplegable pero endurecida con las mismas garantías:
  * - CORS limitado a los orígenes de _shared/cors.ts (antes '*').
  * - JWT obligatorio validado con auth.getUser (antes era opcional y se podía
- *   usar de forma anónima con la clave de Gemini del proyecto).
+ *   usar de forma anónima con la clave de IA del proyecto).
  * - Límites de tamaño por petición y por campo.
  * - Límites del plan (check_feature_limit / record_usage) en servidor.
  * - Rate limit por usuario (Upstash, fail open si no está configurado).
- * - La clave (GEMINI_API_KEY) viaja en cabecera, nunca en la URL. Ya no se usa
- *   OPENAI_API_KEY como respaldo: se habría enviado a Google.
+ * - La clave (ANTHROPIC_API_KEY) viaja en cabecera, nunca en la URL. El proveedor es
+ *   Claude (Anthropic) desde el 29/10/2026; antes Gemini, cuya clave caducó (issue #17).
  * - Los errores internos no se devuelven al cliente.
  */
 
@@ -24,12 +24,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4';
 import { Redis } from 'https://esm.sh/@upstash/redis@1.34.3';
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@2.0.3';
 import { getCorsHeaders, isAllowedOrigin } from '../_shared/cors.ts';
+import { callClaude, CLAUDE_FAST } from '../_shared/claude.ts';
 
 // ==================================================
 // CONFIGURACION
 // ==================================================
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const MAX_BODY_BYTES = 16 * 1024;   // petición completa
 const MAX_TEXT_CHARS = 5_000;       // campo text
@@ -163,7 +163,7 @@ async function checkRateLimit(userId: string): Promise<{ success: boolean; retry
 }
 
 // ==================================================
-// GEMINI
+// PROVEEDOR (Claude)
 // ==================================================
 
 async function optimizeText(apiKey: string, prompt: string): Promise<string> {
@@ -171,25 +171,8 @@ async function optimizeText(apiKey: string, prompt: string): Promise<string> {
   // invocacion hasta el limite de la plataforma y el usuario se queda mirando.
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
-
-  let response: Response;
   try {
-    response = await fetch(GEMINI_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // En cabecera y no en ?key= para que la clave no quede en logs de URL.
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1024,
-        },
-      }),
-      signal: controller.signal,
-    });
+    return await callClaude({ apiKey, model: CLAUDE_FAST, prompt, maxTokens: 1024, temperature: 0.7, signal: controller.signal });
   } catch (err) {
     if ((err as Error).name === 'AbortError') {
       throw new Error('AI request timed out');
@@ -198,22 +181,6 @@ async function optimizeText(apiKey: string, prompt: string): Promise<string> {
   } finally {
     clearTimeout(timeout);
   }
-
-  if (!response.ok) {
-    // No se registra el cuerpo del proveedor: puede reflejar datos de la peticion.
-    throw new Error(`AI provider returned ${response.status}`);
-  }
-
-  const data = await response.json();
-  const output = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (typeof output !== 'string' || !output.trim()) {
-    // Respuesta vacia por filtros de seguridad o por corte de tokens.
-    const reason = data?.candidates?.[0]?.finishReason ?? 'unknown';
-    throw new Error(`AI returned no usable text (finishReason: ${reason})`);
-  }
-
-  return output.trim();
 }
 
 // ==================================================
@@ -336,9 +303,9 @@ serve(async (req: Request) => {
     }
 
     // ---- Proveedor ----
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
     if (!apiKey) {
-      console.error('[ai-optimize-description] GEMINI_API_KEY no configurada');
+      console.error('[ai-optimize-description] ANTHROPIC_API_KEY no configurada');
       return fail(503, 'ai_not_configured', 'AI service not configured', cors);
     }
 
