@@ -85,11 +85,13 @@ async function isolate(page: Page, lang: 'es' | 'en', fns: { signup?: Responder;
 }
 
 async function fillSignup(page: Page, email = 'QA.Pendiente@Example.com') {
-  await page.goto('/signup');
+  await page.goto('/signup?tipo=candidato');
   await page.fill('#fullName', 'QA Tester');
   await page.fill('#email', email);
   await page.fill('#password', 'Prueba1234');
   await page.fill('#confirmPassword', 'Prueba1234');
+  await page.fill('#birthDate', '1990-05-15');
+  await page.check('#consent-datos_verdaderos');
   await page.check('#agreeToTerms');
   await page.locator('form button[type=submit]').click();
 }

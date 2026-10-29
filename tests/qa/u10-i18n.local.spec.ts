@@ -137,7 +137,7 @@ test.describe('auth en español sin claves crudas', () => {
   test('registro: etiquetas en mayúscula de frase', async ({ page, context }) => {
     await setup(context, 'es');
     // En móvil el panel con el <h1> se oculta: se espera directamente al formulario.
-    await page.goto('/signup', { waitUntil: 'domcontentloaded' });
+    await page.goto('/signup?tipo=candidato', { waitUntil: 'domcontentloaded' });
     await expect(page.getByLabel('Nombre completo', { exact: true })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByLabel('Correo electrónico', { exact: true })).toBeVisible();
     await expect(page.locator('form button[type=submit]')).toHaveText('Crear cuenta');

@@ -271,7 +271,9 @@ test.describe('B2 títulos', () => {
 
     await page.goto('/signup/', { waitUntil: 'domcontentloaded' });
     await expect.poll(() => new URL(page.url()).pathname, { timeout: 45_000 }).toBe('/signup');
-    await expect(page.locator('#fullName')).toBeVisible({ timeout: 45_000 });
+    // /signup abre la eleccion «¿Buscas empleo o quieres contratar?»; el formulario llega al elegir camino
+    await expect(page.getByText('Busco empleo').first()).toBeVisible({ timeout: 45_000 });
+    await expect(page.locator('#confirmPassword')).toHaveCount(0);
     await expect.poll(() => page.title(), { timeout: 45_000 }).toBe('Crear cuenta - Crea tu CV profesional | YourCVPassport');
   });
 

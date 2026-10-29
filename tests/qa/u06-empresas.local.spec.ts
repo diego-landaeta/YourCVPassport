@@ -82,7 +82,9 @@ test('ficha de oferta: la visita se registra solo con track_job_posting_view', a
   const tracks = () => calls.filter(c => c.fn === 'track_job_posting_view');
   await expect.poll(() => tracks().length, { timeout: 15_000 }).toBeGreaterThan(0);
   await page.waitForTimeout(1_000);
-  expect(tracks().length).toBe(loads());
+  // Como mucho una visita por carga (la ficha nueva no repite el registro cuando StrictMode monta dos veces el efecto)
+  expect(tracks().length).toBeGreaterThanOrEqual(1);
+  expect(tracks().length).toBeLessThanOrEqual(loads());
 
   // Solo el id de la oferta: el perfil lo decide el servidor (auth.uid()).
   for (const track of tracks()) expect(track.body).toEqual({ p_job_posting_id: JOB.id });
@@ -243,9 +245,9 @@ test('panel de empresa: la empresa del miembro se lee de companies_full', async 
   });
 
   await page.goto('/company/dashboard', { waitUntil: 'domcontentloaded' });
-  // Empresa PENDING: la pantalla de revisión muestra nombre, email y CIF (columnas privadas)
-  await expect(page.getByText(COMPANY_ROW.tax_id)).toBeVisible({ timeout: 90_000 });
-  await expect(page.getByText(COMPANY_ROW.company_email)).toBeVisible();
+  // Empresa PENDING: entra al panel (puede preparar borradores) con aviso de revision; la empresa se lee
+  // de companies_full con columnas explicitas (el CIF y el correo son columnas privadas).
+  await expect.poll(() => mock.requestsTo('companies_full').filter(r => r.method === 'GET').length, { timeout: 90_000 }).toBeGreaterThan(0);
 
   const reads = mock.requestsTo('companies_full').filter(r => r.method === 'GET');
   expect(reads.length).toBeGreaterThan(0);

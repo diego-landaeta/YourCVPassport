@@ -38,7 +38,7 @@ test.describe('Registro: validación y accesibilidad', () => {
   async function openSignup(page: Page) {
     await installInitState(page.context(), { language: 'es', theme: 'light' });
     const mock = await mockSupabase(page.context(), {});
-    await page.goto('/signup', { waitUntil: 'domcontentloaded' });
+    await page.goto('/signup?tipo=candidato', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#fullName')).toBeVisible({ timeout: 100_000 });
     return mock;
   }
@@ -66,6 +66,8 @@ test.describe('Registro: validación y accesibilidad', () => {
     await page.fill('#email', 'ana.prueba@correo');
     await page.fill('#password', 'Segura123');
     await page.fill('#confirmPassword', 'Segura123');
+    await page.fill('#birthDate', '1990-05-15');
+    await page.check('#consent-datos_verdaderos');
     await page.check('#agreeToTerms');
     await page.locator('form button[type=submit]').click();
     await expect(page.locator('#auth-form-error')).toHaveText('Por favor ingresa un correo electrónico válido');
@@ -77,7 +79,8 @@ test.describe('Registro: validación y accesibilidad', () => {
 
   test('10/21/22: casilla de términos con nombre completo, placeholders en español y sin texto repetido', async ({ page }) => {
     await openSignup(page);
-    await expect(page.getByRole('checkbox', { name: 'Acepto los Términos de servicio y la Política de privacidad' })).toBeVisible();
+    // El nombre accesible conserva el texto de los enlaces (antes se leia «Acepto los y»)
+    await expect(page.getByRole('checkbox', { name: 'Acepto las Condiciones de registro y uso para candidatos y la Política de Privacidad' })).toBeVisible();
     await expect(page.locator('#fullName')).toHaveAttribute('placeholder', 'Juan Pérez');
     await expect(page.locator('#email')).toHaveAttribute('placeholder', 'tu.email@ejemplo.com');
     await expect(page.getByText(/Únete a miles de profesionales/)).toHaveCount(1);
