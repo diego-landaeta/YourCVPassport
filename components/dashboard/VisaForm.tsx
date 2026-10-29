@@ -341,7 +341,7 @@ const VisaForm: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Context (Contexto)
+                  Contexto
                 </label>
                 <button
                   type="button"
@@ -350,7 +350,7 @@ const VisaForm: React.FC = () => {
                   className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  {aiGenerating === 'context' ? 'Generando...' : 'IA Assistant'}
+                  {aiGenerating === 'context' ? 'Generando...' : 'Asistente IA'}
                 </button>
               </div>
               <textarea
@@ -366,7 +366,7 @@ const VisaForm: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Action (Acción)
+                  Acción
                 </label>
                 <button
                   type="button"
@@ -375,7 +375,7 @@ const VisaForm: React.FC = () => {
                   className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  {aiGenerating === 'action' ? 'Generando...' : 'IA Assistant'}
+                  {aiGenerating === 'action' ? 'Generando...' : 'Asistente IA'}
                 </button>
               </div>
               <textarea
@@ -391,7 +391,7 @@ const VisaForm: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Results (Resultados)
+                  Resultados
                 </label>
                 <button
                   type="button"
@@ -400,7 +400,7 @@ const VisaForm: React.FC = () => {
                   className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  {aiGenerating === 'results' ? 'Generando...' : 'IA Assistant'}
+                  {aiGenerating === 'results' ? 'Generando...' : 'Asistente IA'}
                 </button>
               </div>
               <textarea

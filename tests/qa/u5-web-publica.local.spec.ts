@@ -461,6 +461,11 @@ test.describe('server.mjs', () => {
     };
     walk(distDir);
     expect(dirsWithoutIndex).toEqual([]);
-    expect(await (await fetch(`${base}/empresas`)).text()).toContain('<title>YourCVPassport - Plataforma de CV profesional verificado</title>');
+    // /empresas es una raíz duplicada (STATIC_META_ALIASES): llega con el título,
+    // canonical y hreflang de su principal, /empresas/busqueda.
+    const empresas = await (await fetch(`${base}/empresas`)).text();
+    expect(empresas).toContain('<title>Búsqueda Avanzada de Talento - YourCVPassport</title>');
+    expect(empresas).toContain('<link rel="canonical" href="https://yourcvpassport.com/empresas/busqueda" data-rh="true" />');
+    expect(empresas).toContain('<link rel="alternate" hreflang="en" href="https://yourcvpassport.com/companies/search" data-rh="true" />');
   });
 });

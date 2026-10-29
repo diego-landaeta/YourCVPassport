@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslations } from '../hooks/useTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
+import { openCookieSettings } from '../lib/consent';
 
 // Redes sociales oficiales. Solo se pintan las que tienen URL real: hoy no hay
 // ninguna confirmada, así que la lista va vacía y no se muestra nada (antes eran
@@ -18,42 +19,52 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 dark:bg-dark-bg-primary text-white border-t border-transparent dark:border-dark-border">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-8">
           <div className="col-span-2 md:col-span-4 lg:col-span-2">
             <Link to={getPath('/')} className="text-xl font-bold text-cv-blue dark:text-cv-blue-light hover:text-cv-blue-dark dark:hover:text-cv-blue transition-colors">YourCVPassport</Link>
             <p className="mt-4 text-gray-400 dark:text-dark-text-secondary text-sm">{t.footer.tagline}</p>
           </div>
           <div>
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.product.title}</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              <li><Link to={getPath(t.footer.links.overview)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.overview}</Link></li>
-              <li><Link to={getPath(t.footer.links.stamps)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.stamps}</Link></li>
-              <li><Link to={getPath(t.footer.links.ats)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.ats}</Link></li>
-              <li><Link to={getPath(t.footer.links.ai)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.ai}</Link></li>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li><Link to={getPath(t.footer.links.overview)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.overview}</Link></li>
+              <li><Link to={getPath(t.footer.links.stamps)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.stamps}</Link></li>
+              <li><Link to={getPath(t.footer.links.ats)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.ats}</Link></li>
+              <li><Link to={getPath(t.footer.links.ai)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.product.ai}</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.solutions.title}</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              <li><Link to={getPath(t.footer.links.professionals)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.professionals}</Link></li>
-              <li><Link to={getPath(t.footer.links.companies)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.companies}</Link></li>
-              <li><Link to={getPath(t.footer.links.pricing)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.pricing}</Link></li>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li><Link to={getPath(t.footer.links.professionals)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.professionals}</Link></li>
+              <li><Link to={getPath(t.footer.links.companies)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.companies}</Link></li>
+              <li><Link to={getPath(t.footer.links.pricing)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.pricing}</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.resources.title}</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              <li><Link to={getPath(t.footer.links.blog)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.blog}</Link></li>
-              <li><Link to={getPath(t.footer.links.help)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.help}</Link></li>
-              <li><Link to={getPath(t.footer.links.status)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.status}</Link></li>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li><Link to={getPath(t.footer.links.blog)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.blog}</Link></li>
+              <li><Link to={getPath(t.footer.links.help)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.help}</Link></li>
+              <li><Link to={getPath(t.footer.links.status)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.resources.status}</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.company.title}</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              <li><Link to={getPath(t.footer.links.about)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.about}</Link></li>
-              <li><Link to={getPath(t.footer.links.press)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.press}</Link></li>
-              <li><Link to={getPath(t.footer.links.contact)} className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.contact}</Link></li>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li><Link to={getPath(t.footer.links.about)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.about}</Link></li>
+              <li><Link to={getPath(t.footer.links.press)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.press}</Link></li>
+              <li><Link to={getPath(t.footer.links.contact)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.contact}</Link></li>
+            </ul>
+          </div>
+          {/* Legal (issue #11, YCV-015): privacidad, términos, cookies y volver a decidir. */}
+          <div>
+            <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.legal.title}</h4>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li><Link to={getPath(t.footer.links.privacy)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.privacy}</Link></li>
+              <li><Link to={getPath(t.footer.links.terms)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.terms}</Link></li>
+              <li><Link to={getPath(t.footer.links.cookies)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.cookies}</Link></li>
+              <li><button type="button" onClick={openCookieSettings} className="py-1.5 text-left text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.settings}</button></li>
             </ul>
           </div>
         </div>
@@ -62,7 +73,7 @@ const Footer: React.FC = () => {
           {SOCIAL_LINKS.length > 0 && (
             <div className="flex space-x-6 mt-4 sm:mt-0">
               {SOCIAL_LINKS.map(({ name, url }) => (
-                <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">{name}</a>
+                <a key={name} href={url} target="_blank" rel="noopener noreferrer" className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors">{name}</a>
               ))}
             </div>
           )}

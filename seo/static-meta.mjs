@@ -196,6 +196,14 @@ export const STATIC_META_PAIRS = [
     },
   },
   {
+    es: '/politica-de-cookies', en: '/cookie-policy',
+    title: { es: 'Política de cookies | YourCVPassport', en: 'Cookie policy | YourCVPassport' },
+    description: {
+      es: 'Qué guarda YourCVPassport en tu navegador, para qué y cómo cambiar tu decisión.',
+      en: 'What YourCVPassport stores in your browser, why, and how to change your choice.',
+    },
+  },
+  {
     es: '/empleos', en: '/jobs',
     title: { es: 'Ofertas de empleo de empresas verificadas - YourCVPassport', en: 'Job openings from verified companies - YourCVPassport' },
     description: {
@@ -211,6 +219,32 @@ export const STATIC_META_PAIRS = [
       en: 'Discover posts from verified professionals. Achievements, jobs, events and more.',
     },
   },
+  {
+    es: '/recursos', en: '/resources',
+    title: { es: 'Página en Construcción - YourCVPassport', en: 'Page Under Construction - YourCVPassport' },
+    description: {
+      es: 'Esta sección está en desarrollo. Pronto estará disponible con nuevas características para mejorar tu experiencia profesional con YourCVPassport.',
+      en: 'This section is under development. It will soon be available with new features to enhance your professional experience with YourCVPassport.',
+    },
+  },
+];
+
+/**
+ * Raíces de sección que muestran la misma página que otra ruta (issue #11, YCV-004):
+ * la SPA pone canonical a la principal (utils/canonicalUrl.ts) y aquí se sirve igual
+ * desde el primer byte, con el título, canonical y hreflang de esa principal. Antes
+ * llevaban el index.html genérico, sin canonical ni hreflang.
+ * @type {ReadonlyArray<{ path: string, of: string }>}
+ */
+export const STATIC_META_ALIASES = [
+  { path: '/producto', of: '/producto/resumen' },
+  { path: '/product', of: '/product/overview' },
+  { path: '/profesionales', of: '/profesionales/como-funciona' },
+  { path: '/professionals', of: '/professionals/how' },
+  { path: '/empresas', of: '/empresas/busqueda' },
+  { path: '/companies', of: '/companies/search' },
+  { path: '/perfiles', of: '/empresas/busqueda' },
+  { path: '/profiles', of: '/companies/search' },
 ];
 
 /**

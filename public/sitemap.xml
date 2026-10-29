@@ -407,6 +407,24 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/privacy" />
   </url>
   <url>
+    <loc>https://yourcvpassport.com/cookie-policy</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cookie-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/politica-de-cookies" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cookie-policy" />
+  </url>
+  <url>
+    <loc>https://yourcvpassport.com/politica-de-cookies</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://yourcvpassport.com/cookie-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://yourcvpassport.com/politica-de-cookies" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://yourcvpassport.com/cookie-policy" />
+  </url>
+  <url>
     <loc>https://yourcvpassport.com/jobs</loc>
     <lastmod>2026-10-29</lastmod>
     <changefreq>daily</changefreq>

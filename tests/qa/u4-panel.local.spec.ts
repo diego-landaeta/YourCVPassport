@@ -132,6 +132,11 @@ async function bootDashboard(page: Page, path = '/dashboard') {
 }
 
 test.describe('Panel de escritorio (asistente sin terminar)', () => {
+  // El menú lateral de escritorio está oculto en el viewport de móvil (lg:block):
+  // estas pruebas solo tienen sentido en escritorio. El móvil tiene su bloque abajo.
+  test.beforeEach(({}, testInfo) => {
+    test.skip(testInfo.project.name.startsWith('mobile'), 'Menú de escritorio: solo en escritorio');
+  });
   test('2/3/25/26: Ajustes y Notificaciones abiertos, «Panel» traducido y aria-current', async ({ page }) => {
     await bootDashboard(page);
     const sidebar = page.locator('[data-tour="sidebar"]');

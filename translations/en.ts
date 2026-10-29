@@ -60,9 +60,9 @@ export const translations = {
         logos: [
             { name: "ISEIE", url: "https://iseie.com/", logoUrl: "https://iseie.com/wp-content/uploads/2024/11/LOGO-PAIS-BANDERA-ESPANA-0-00-00-00-e1738499416780.png" },
             { name: "Psiko Aprende", url: "https://psikoaprende.com/", logoUrl: "https://psikoaprende.com/wp-content/uploads/2024/11/LOGO-PSIKO-APRENDE-PNG-1-e1730841803106.png", logoUrlLight: "https://psikoaprende.com/wp-content/uploads/2024/03/LOGO-PSIKO-APRENDE-PNG-2-e1730843042102.png" },
-            { name: "Navalis University", url: "https://navalis.university/", logoUrl: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-logo-scaled.png", logoUrlLight: "https://navalis.university/wp-content/uploads/2025/08/Navalis-Magna-Logo-Negro-1024x1024.png" },
-            { name: "ISEIH", url: "https://iseih.com/", logoUrl: "https://iseih.com/wp-content/uploads/2025/08/ISEIH-LOGOTIPO-3.png" },
-            { name: "CETLAT", url: "https://cetlat.org/", logoUrl: "https://cetlat.org/wp-content/uploads/2025/05/cetlat-horizontal-nuevo-logo.webp" }
+            { name: "Navalis University", url: "https://navalis.university/", logoUrl: "/partners/navalis.webp", logoUrlLight: "/partners/navalis-negro.webp" },
+            { name: "ISEIH", url: "https://iseih.com/", logoUrl: "/partners/iseih.webp" },
+            { name: "CETLAT", url: "https://cetlat.org/", logoUrl: "/partners/cetlat.webp" }
         ],
     },
     features: {
@@ -120,6 +120,28 @@ export const translations = {
         subtitle: 'Ready to take the next step in your career? Create your verified CV Passport and unlock new opportunities.',
         button: 'Create Your Passport Now',
     },
+    // Cookie notice and settings (components/legal/CookieConsent.tsx, lib/consent.ts)
+    cookieConsent: {
+        title: 'Your privacy, your choice',
+        text: 'We only use what the site needs to work. If you accept, we also measure visits to public CVs and show Opynio reviews. Never advertising.',
+        accept: 'Accept all',
+        reject: 'Reject',
+        settings: 'Settings',
+        policyLink: 'Cookie policy',
+        dialogTitle: 'Cookie settings',
+        dialogIntro: 'Choose what you allow. You can change it at any time from "Cookie settings" in the site footer.',
+        necessaryTitle: 'Necessary',
+        necessaryText: 'They keep you signed in, remember your language and theme, the CV wizard drafts and this choice. The site does not work without them.',
+        alwaysOn: 'Always on',
+        analyticsTitle: 'Analytics',
+        analyticsText: 'Our own statistics of visits to public CVs, for their owners. Stores a visitor identifier in your browser. Not shared with third parties.',
+        thirdPartyTitle: 'Third-party content',
+        thirdPartyText: 'Shows user reviews with the Opynio widget (web.opynio.com), which is loaded from its domain.',
+        save: 'Save selection',
+        close: 'Close',
+        reviewsBlocked: 'Reviews are shown by Opynio, an external service. Enable it to see them.',
+        reviewsEnable: 'Show reviews',
+    },
     footer: {
         tagline: 'Your verified professional identity.',
         rights: 'All rights reserved.',
@@ -127,7 +149,11 @@ export const translations = {
         solutions: { title: 'Solutions', professionals: 'For Professionals', companies: 'For Companies', pricing: 'Pricing' },
         resources: { title: 'Resources', blog: 'Blog', help: 'Help Center', status: 'System Status' },
         company: { title: 'Company', about: 'About Us', press: 'Press', contact: 'Contact' },
+        legal: { title: 'Legal', privacy: 'Privacy', terms: 'Terms', cookies: 'Cookies', settings: 'Cookie settings' },
         links: {
+            privacy: '/privacy',
+            terms: '/terms',
+            cookies: '/cookie-policy',
             overview: '/product/overview',
             stamps: '/product/stamps',
             ats: '/product/ats',
@@ -3234,7 +3260,9 @@ export const translations = {
             "terms": "Terms and conditions",
             "terminos": "Terms and conditions",
             "privacy": "Privacy policy",
-            "privacidad": "Privacy policy"
+            "privacidad": "Privacy policy",
+            "cookie-policy": "Cookie policy",
+            "politica-de-cookies": "Cookie policy"
         }
     },
     onboardingWizard: {
@@ -4899,6 +4927,7 @@ export const translations = {
         from: 'from',
         to: 'to',
         backToHome: 'Back to Home',
+        back: 'Back',
         contactSupport: 'Contact Support',
         loading: 'Loading...',
         saving: 'Saving...',

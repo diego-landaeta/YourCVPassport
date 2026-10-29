@@ -1,10 +1,20 @@
 import { useEffect } from 'react';
 import { supabase } from '../supabase/client';
 import { localDayKeysBetween, localDaysAgo, toLocalDayKey } from '../utils/dateKeys';
+import { hasAnalyticsConsent } from '../lib/consent';
 
-// Generar o recuperar un visitor_id único
+// Identificador de esta página abierta, sin guardar nada en el dispositivo: se usa
+// cuando el visitante no ha aceptado la analítica (issue #11, cookies). La visita
+// se cuenta igual, pero no se puede saber si es el mismo visitante otro día.
+const PAGE_VISITOR_ID = `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+
+// Sin consentimiento, la visita solo se recuerda mientras la página está abierta.
+const recordedThisPage = new Set<string>();
+
+// Generar o recuperar un visitor_id único (persistente solo con consentimiento)
 function getVisitorId(): string {
   if (typeof window === 'undefined') return '';
+  if (!hasAnalyticsConsent()) return PAGE_VISITOR_ID;
 
   let visitorId = localStorage.getItem('visitor_id');
   if (!visitorId) {
@@ -33,6 +43,7 @@ async function isOwnProfile(profileId: string): Promise<boolean> {
 
 // Verificar si ya se registró una visita reciente de este visitor_id
 function hasRecentView(profileId: string, visitorId: string): boolean {
+  if (!hasAnalyticsConsent()) return recordedThisPage.has(profileId);
   const storageKey = `view_${profileId}_${visitorId}`;
   const lastView = localStorage.getItem(storageKey);
 
@@ -52,6 +63,7 @@ function hasRecentView(profileId: string, visitorId: string): boolean {
 
 // Marcar que se registró una visita
 function markViewRecorded(profileId: string, visitorId: string): void {
+  if (!hasAnalyticsConsent()) { recordedThisPage.add(profileId); return; }
   const storageKey = `view_${profileId}_${visitorId}`;
   localStorage.setItem(storageKey, Date.now().toString());
 }

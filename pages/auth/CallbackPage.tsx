@@ -4,6 +4,7 @@ import { postAuthDestination } from '../../utils/postAuthDestination';
 import { supabase } from '../../supabase/client';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import SEOHead from '../../components/shared/SEOHead';
+import { useLanguage } from '../../contexts/LanguageContext';
 import EmailLinkError from '../../components/auth/EmailLinkError';
 import { useTranslations } from '../../hooks/useTranslations';
 import {
@@ -21,6 +22,7 @@ import {
 const CallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations().dashboard.auth.emailLink;
+  const es = useLanguage().lang === 'es';
   const [error, setError] = useState<string | null>(null);
   // Enlace del correo caducado o usado: tarjeta con "pedir otro" (sin redirigir).
   const [linkError, setLinkError] = useState<EmailLinkErrorKind | null>(null);
@@ -88,8 +90,8 @@ const CallbackPage: React.FC = () => {
   return (
     <>
       <SEOHead
-        title="Authenticating - YourCVPassport"
-        description="Completing authentication"
+        title={es ? 'Iniciando sesión - YourCVPassport' : 'Authenticating - YourCVPassport'}
+        description={es ? 'Completando el inicio de sesión' : 'Completing authentication'}
       />
       <div className="min-h-screen bg-gradient-to-br from-cv-blue/5 via-white to-cv-blue/5 dark:from-dark-bg dark:via-dark-bg dark:to-dark-bg flex items-center justify-center">
         {linkError ? (

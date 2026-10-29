@@ -1,4 +1,4 @@
-import { writeFileSync, readFileSync } from 'fs';
+import { existsSync, writeFileSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
@@ -20,6 +20,11 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
   console.warn('[Sitemap] WARNING: Supabase credentials not found. Dynamic URLs (blog, CV, jobs) will be skipped.');
 }
+
+// Sin credenciales o con una lectura fallida el sitemap saldría sin CV, blog u ofertas.
+// En ese caso no se sobrescribe public/sitemap.xml: se conserva el último completo
+// (15/10/2026: una build local sin .env dejó un sitemap con 113 URLs menos).
+let incomplete = !supabaseUrl || !supabaseKey;
 
 const supabase = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
@@ -87,6 +92,7 @@ const ROUTE_META = {
   '/feed': { priority: '0.6', changefreq: 'daily' },
   '/terms': { priority: '0.3', changefreq: 'yearly' },
   '/privacy': { priority: '0.3', changefreq: 'yearly' },
+  '/cookie-policy': { priority: '0.3', changefreq: 'yearly' },
 };
 const DEFAULT_META = { priority: '0.7', changefreq: 'weekly' };
 
@@ -176,6 +182,7 @@ function readStaticBlogPosts() {
     return out;
   } catch (err) {
     console.error('[Sitemap] Error reading static blog posts:', err.message);
+    incomplete = true;
     return [];
   }
 }
@@ -202,6 +209,7 @@ async function fetchSupabaseBlogPosts() {
 
     if (error) {
       console.error('[Sitemap] Error fetching blog posts:', error.message);
+      incomplete = true;
       return [];
     }
 
@@ -212,6 +220,7 @@ async function fetchSupabaseBlogPosts() {
     }));
   } catch (err) {
     console.error('[Sitemap] Error fetching blog posts:', err.message);
+    incomplete = true;
     return [];
   }
 }
@@ -255,6 +264,7 @@ async function fetchCVProfiles() {
 
     if (error) {
       console.error('[Sitemap] Error fetching CV profiles:', error.message);
+      incomplete = true;
       return [];
     }
 
@@ -266,6 +276,7 @@ async function fetchCVProfiles() {
     }));
   } catch (err) {
     console.error('[Sitemap] Error fetching CV profiles:', err.message);
+    incomplete = true;
     return [];
   }
 }
@@ -351,6 +362,7 @@ async function fetchJobPostings() {
     return routes;
   } catch (err) {
     console.error('[Sitemap] Error fetching job postings:', err.message);
+    incomplete = true;
     return [];
   }
 }
@@ -415,6 +427,12 @@ function resolveOutputPath() {
 try {
   const { sitemap, totalStatic, totalBlog, totalCV, totalJobs } = await generateSitemap();
   const sitemapPath = resolveOutputPath();
+  const defaultPath = join(__dirname, '..', 'public', 'sitemap.xml');
+
+  if (incomplete && sitemapPath === defaultPath && existsSync(defaultPath) && process.env.SITEMAP_ALLOW_PARTIAL !== '1') {
+    console.warn('[Sitemap] Datos dinámicos incompletos: se conserva el public/sitemap.xml actual (SITEMAP_ALLOW_PARTIAL=1 para forzarlo).');
+    process.exit(0);
+  }
 
   writeFileSync(sitemapPath, sitemap, 'utf-8');
   console.log('Sitemap generated successfully at:', sitemapPath);

@@ -9,6 +9,7 @@ import LegalTextBody from './LegalTextBody';
 import { useLegalText } from './legalText';
 import { useLegalNotices, useNoticeDate } from './LegalNoticeBanner';
 import { useNoticeText } from './noticeText';
+import SeoLinks from '../shared/SeoLinks';
 
 /** Texto estático de respaldo (el que había antes de existir documentos_legales). */
 export interface LegalFallbackContent {
@@ -100,6 +101,7 @@ const LegalDocPage: React.FC<LegalDocPageProps> = ({ kind, fallback, fallbackDat
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      <SeoLinks />
       <Helmet>
         <title>{`${title} | YourCVPassport`}</title>
         <meta name="description" content={fallback.metaDescription} />
