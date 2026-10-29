@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1280,
-  title: "Como Hacer un CV para Emigrar a Europa desde LATAM",
+  title: "Cómo Hacer un CV para Emigrar a Europa desde LATAM",
   slug: "como-hacer-cv-para-emigrar-europa",
-  summary: "Adapta tu CV para emigrar a Europa. Formato Europass, homologacion y requisitos.",
-  content: `# Como Hacer un CV para Emigrar a Europa desde LATAM
+  summary: "Adapta tu CV para emigrar a Europa. Formato Europass, homologación y requisitos.",
+  content: `# Cómo Hacer un CV para Emigrar a Europa desde LATAM
 
 En el competitivo mercado laboral de 2026, dominar **CV emigrar Europa LATAM** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,25 +13,25 @@ Esta guía completa sobre **CV emigrar Europa LATAM** te proporciona estrategias
 
 ![CV emigrar Europa LATAM](https://images.unsplash.com/photo-1517400508447-f8dd518b86db?w=800&q=80){caption:Guía completa sobre CV emigrar Europa LATAM}
 
-## 1. Paises europeos con demanda
+## 1. Países europeos con demanda
 2. Formato Europass
-3. Homologacion de titulos
+3. Homologación de títulos
 4. Idiomas europeos en tu CV
 5. Permisos de trabajo
 6. Perfil verificado internacional
 
-Cuando hablamos de **CV emigrar Europa LATAM** en el contexto de 1. paises europeos con demanda
+Cuando hablamos de **CV emigrar Europa LATAM** en el contexto de 1. países europeos con demanda
 2. formato europass
-3. homologacion de titulos
+3. homologación de títulos
 4. idiomas europeos en tu cv
 5. permisos de trabajo
 6. perfil verificado internacional, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. paises europeos con demanda
+### Mejores prácticas para 1. países europeos con demanda
 2. formato europass
-3. homologacion de titulos
+3. homologación de títulos
 4. idiomas europeos en tu cv
 5. permisos de trabajo
 6. perfil verificado internacional
@@ -44,9 +44,9 @@ Para destacar en **CV emigrar Europa LATAM** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. paises europeos con demanda
+### Errores frecuentes en 1. países europeos con demanda
 2. formato europass
-3. homologacion de titulos
+3. homologación de títulos
 4. idiomas europeos en tu cv
 5. permisos de trabajo
 6. perfil verificado internacional
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: true,
   published_at: "2026-05-08T12:00:00.000Z",
-  meta_title: "Como Hacer un CV para Emigrar a Europa desde LATAM",
-  meta_description: "Adapta tu CV para emigrar a Europa. Formato Europass, homologacion y requisitos.",
+  meta_title: "Cómo Hacer un CV para Emigrar a Europa desde LATAM",
+  meta_description: "Adapta tu CV para emigrar a Europa. Formato Europass, homologación y requisitos.",
   lang: "es",
 };
 

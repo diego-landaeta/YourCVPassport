@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1186,
-  title: "Como Manejar el Rechazo Laboral y Seguir Adelante",
+  title: "Cómo Manejar el Rechazo Laboral y Seguir Adelante",
   slug: "como-manejar-rechazo-laboral",
-  summary: "Convierte el rechazo laboral en combustible. Mentalidad, feedback y pasos practicos.",
-  content: `# Como Manejar el Rechazo Laboral y Seguir Adelante
+  summary: "Convierte el rechazo laboral en combustible. Mentalidad, feedback y pasos prácticos.",
+  content: `# Cómo Manejar el Rechazo Laboral y Seguir Adelante
 
 En el competitivo mercado laboral de 2026, dominar **manejar rechazo laboral** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -17,15 +17,15 @@ Esta guía completa sobre **manejar rechazo laboral** te proporciona estrategias
 2. Solicitar feedback constructivo
 3. Analizar mejoras
 4. Mantener confianza
-5. Cuando ajustar estrategia
-6. Historias de exito tras el rechazo — claves de manejar rechazo laboral
+5. Cuándo ajustar estrategia
+6. Historias de éxito tras el rechazo — claves de manejar rechazo laboral
 
 Cuando hablamos de **manejar rechazo laboral** en el contexto de 1. el rechazo es parte del proceso
 2. solicitar feedback constructivo
 3. analizar mejoras
 4. mantener confianza
-5. cuando ajustar estrategia
-6. historias de exito tras el rechazo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+5. cuándo ajustar estrategia
+6. historias de éxito tras el rechazo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
@@ -33,8 +33,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 2. solicitar feedback constructivo
 3. analizar mejoras
 4. mantener confianza
-5. cuando ajustar estrategia
-6. historias de exito tras el rechazo
+5. cuándo ajustar estrategia
+6. historias de éxito tras el rechazo
 
 Para destacar en **manejar rechazo laboral** dentro de esta área, aplica estas estrategias probadas:
 
@@ -48,8 +48,8 @@ Para destacar en **manejar rechazo laboral** dentro de esta área, aplica estas 
 2. solicitar feedback constructivo
 3. analizar mejoras
 4. mantener confianza
-5. cuando ajustar estrategia
-6. historias de exito tras el rechazo
+5. cuándo ajustar estrategia
+6. historias de éxito tras el rechazo
 
 Evita estos errores que cometen la mayoría de candidatos con **manejar rechazo laboral**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Entrevista y Empleo",
   is_featured: false,
   published_at: "2026-04-29T00:00:00.000Z",
-  meta_title: "Como Manejar el Rechazo Laboral y Seguir Adelante",
-  meta_description: "Convierte el rechazo laboral en combustible. Mentalidad, feedback y pasos practicos.",
+  meta_title: "Cómo Manejar el Rechazo Laboral y Seguir Adelante",
+  meta_description: "Convierte el rechazo laboral en combustible. Mentalidad, feedback y pasos prácticos.",
   lang: "es",
 };
 

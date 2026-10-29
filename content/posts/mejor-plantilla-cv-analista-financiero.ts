@@ -16,14 +16,14 @@ Esta guía completa sobre **plantilla CV analista financiero** te proporciona es
 ## 1. CV especializado para analistas
 2. Secciones: CFA, modelado, herramientas
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes
 6. Plantillas verificadas
 
 Cuando hablamos de **plantilla CV analista financiero** en el contexto de 1. cv especializado para analistas
 2. secciones: cfa, modelado, herramientas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. cv especializado para analistas
 2. secciones: cfa, modelado, herramientas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
@@ -47,7 +47,7 @@ Para destacar en **plantilla CV analista financiero** dentro de esta área, apli
 ### Errores frecuentes en 1. cv especializado para analistas
 2. secciones: cfa, modelado, herramientas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 

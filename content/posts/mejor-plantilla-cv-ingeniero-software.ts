@@ -13,26 +13,26 @@ Esta guía completa sobre **plantilla CV ingeniero software** te proporciona est
 
 ![plantilla CV ingeniero software](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre plantilla CV ingeniero software}
 
-## 1. Por que necesitan un CV especializado
+## 1. Por qué necesitan un CV especializado
 2. Secciones esenciales del CV tech
 3. Mejores plantillas con ejemplos
-4. Optimizacion para sistemas ATS
+4. Optimización para sistemas ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
-Cuando hablamos de **plantilla CV ingeniero software** en el contexto de 1. por que necesitan un cv especializado
+Cuando hablamos de **plantilla CV ingeniero software** en el contexto de 1. por qué necesitan un cv especializado
 2. secciones esenciales del cv tech
 3. mejores plantillas con ejemplos
-4. optimizacion para sistemas ats
+4. optimización para sistemas ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que necesitan un cv especializado
+### Mejores prácticas para 1. por qué necesitan un cv especializado
 2. secciones esenciales del cv tech
 3. mejores plantillas con ejemplos
-4. optimizacion para sistemas ats
+4. optimización para sistemas ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -44,10 +44,10 @@ Para destacar en **plantilla CV ingeniero software** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que necesitan un cv especializado
+### Errores frecuentes en 1. por qué necesitan un cv especializado
 2. secciones esenciales del cv tech
 3. mejores plantillas con ejemplos
-4. optimizacion para sistemas ats
+4. optimización para sistemas ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 

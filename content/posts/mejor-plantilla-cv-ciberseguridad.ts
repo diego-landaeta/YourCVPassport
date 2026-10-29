@@ -14,25 +14,25 @@ Esta guía completa sobre **plantilla CV ciberseguridad** te proporciona estrate
 ![plantilla CV ciberseguridad](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre plantilla CV ciberseguridad}
 
 ## 1. CV especializado para ciberseguridad
-2. Secciones: certificaciones, herramientas, analisis
+2. Secciones: certificaciones, herramientas, análisis
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV ciberseguridad** en el contexto de 1. cv especializado para ciberseguridad
-2. secciones: certificaciones, herramientas, analisis
+2. secciones: certificaciones, herramientas, análisis
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. cv especializado para ciberseguridad
-2. secciones: certificaciones, herramientas, analisis
+2. secciones: certificaciones, herramientas, análisis
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -45,9 +45,9 @@ Para destacar en **plantilla CV ciberseguridad** dentro de esta área, aplica es
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. cv especializado para ciberseguridad
-2. secciones: certificaciones, herramientas, analisis
+2. secciones: certificaciones, herramientas, análisis
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 

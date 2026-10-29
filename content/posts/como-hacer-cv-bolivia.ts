@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1133,
-  title: "Como Hacer un CV para Trabajar en Bolivia",
+  title: "Cómo Hacer un CV para Trabajar en Bolivia",
   slug: "como-hacer-cv-bolivia",
   summary: "CV adaptado al mercado boliviano. Formato y requisitos locales.",
-  content: `# Como Hacer un CV para Trabajar en Bolivia
+  content: `# Cómo Hacer un CV para Trabajar en Bolivia
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Bolivia** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV para trabajar en Bolivia** te proporciona estrate
 ## 1. Panorama laboral en Bolivia
 2. Formato de CV
 3. Carnet de identidad
-4. Experiencia y formacion
+4. Experiencia y formación
 5. Portales de empleo
 6. Sectores en crecimiento
 
 Cuando hablamos de **CV para trabajar en Bolivia** en el contexto de 1. panorama laboral en bolivia
 2. formato de cv
 3. carnet de identidad
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
 6. sectores en crecimiento, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. panorama laboral en bolivia
 2. formato de cv
 3. carnet de identidad
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
 6. sectores en crecimiento
 
@@ -47,7 +47,7 @@ Para destacar en **CV para trabajar en Bolivia** dentro de esta área, aplica es
 ### Errores frecuentes en 1. panorama laboral en bolivia
 2. formato de cv
 3. carnet de identidad
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
 6. sectores en crecimiento
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T18:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Bolivia",
+  meta_title: "Cómo Hacer un CV para Trabajar en Bolivia",
   meta_description: "CV adaptado al mercado boliviano. Formato y requisitos locales.",
   lang: "es",
 };

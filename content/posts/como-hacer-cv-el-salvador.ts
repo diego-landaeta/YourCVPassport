@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1134,
-  title: "Como Hacer un CV para Trabajar en El Salvador",
+  title: "Cómo Hacer un CV para Trabajar en El Salvador",
   slug: "como-hacer-cv-el-salvador",
-  summary: "CV adaptado al mercado salvadoreno. Formato y oportunidades laborales.",
-  content: `# Como Hacer un CV para Trabajar en El Salvador
+  summary: "CV adaptado al mercado salvadoreño. Formato y oportunidades laborales.",
+  content: `# Cómo Hacer un CV para Trabajar en El Salvador
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en El Salvador** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **CV para trabajar en El Salvador** te proporciona est
 
 ![CV para trabajar en El Salvador](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre CV para trabajar en El Salvador}
 
-## 1. Panorama laboral salvadoreno
+## 1. Panorama laboral salvadoreño
 2. Formato de CV
 3. DUI y datos
-4. Experiencia y formacion
+4. Experiencia y formación
 5. Portales de empleo
-6. Economia digital en El Salvador
+6. Economía digital en El Salvador
 
-Cuando hablamos de **CV para trabajar en El Salvador** en el contexto de 1. panorama laboral salvadoreno
+Cuando hablamos de **CV para trabajar en El Salvador** en el contexto de 1. panorama laboral salvadoreño
 2. formato de cv
 3. dui y datos
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
-6. economia digital en el salvador, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. economía digital en el salvador, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. panorama laboral salvadoreno
+### Mejores prácticas para 1. panorama laboral salvadoreño
 2. formato de cv
 3. dui y datos
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
-6. economia digital en el salvador
+6. economía digital en el salvador
 
 Para destacar en **CV para trabajar en El Salvador** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **CV para trabajar en El Salvador** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. panorama laboral salvadoreno
+### Errores frecuentes en 1. panorama laboral salvadoreño
 2. formato de cv
 3. dui y datos
-4. experiencia y formacion
+4. experiencia y formación
 5. portales de empleo
-6. economia digital en el salvador
+6. economía digital en el salvador
 
 Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en El Salvador**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T20:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en El Salvador",
-  meta_description: "CV adaptado al mercado salvadoreno. Formato y oportunidades laborales.",
+  meta_title: "Cómo Hacer un CV para Trabajar en El Salvador",
+  meta_description: "CV adaptado al mercado salvadoreño. Formato y oportunidades laborales.",
   lang: "es",
 };
 

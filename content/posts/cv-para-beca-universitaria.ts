@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1172,
-  title: "Como Escribir un CV para Solicitar Becas Universitarias",
+  title: "Cómo Escribir un CV para Solicitar Becas Universitarias",
   slug: "cv-para-beca-universitaria",
-  summary: "CV ganador para solicitudes de becas. Logros academicos y servicio comunitario.",
-  content: `# Como Escribir un CV para Solicitar Becas Universitarias
+  summary: "CV ganador para solicitudes de becas. Logros académicos y servicio comunitario.",
+  content: `# Cómo Escribir un CV para Solicitar Becas Universitarias
 
 En el competitivo mercado laboral de 2026, dominar **CV beca universitaria** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,15 +14,15 @@ Esta guía completa sobre **CV beca universitaria** te proporciona estrategias c
 ![CV beca universitaria](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre CV beca universitaria}
 
 ## 1. Diferencias del CV para becas
-2. Logros academicos y promedio
-3. Experiencia de investigacion
+2. Logros académicos y promedio
+3. Experiencia de investigación
 4. Servicio comunitario
 5. Premios y reconocimientos
 6. Personalizar para cada beca
 
 Cuando hablamos de **CV beca universitaria** en el contexto de 1. diferencias del cv para becas
-2. logros academicos y promedio
-3. experiencia de investigacion
+2. logros académicos y promedio
+3. experiencia de investigación
 4. servicio comunitario
 5. premios y reconocimientos
 6. personalizar para cada beca, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
@@ -30,8 +30,8 @@ Cuando hablamos de **CV beca universitaria** en el contexto de 1. diferencias de
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. diferencias del cv para becas
-2. logros academicos y promedio
-3. experiencia de investigacion
+2. logros académicos y promedio
+3. experiencia de investigación
 4. servicio comunitario
 5. premios y reconocimientos
 6. personalizar para cada beca
@@ -45,8 +45,8 @@ Para destacar en **CV beca universitaria** dentro de esta área, aplica estas es
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. diferencias del cv para becas
-2. logros academicos y promedio
-3. experiencia de investigacion
+2. logros académicos y promedio
+3. experiencia de investigación
 4. servicio comunitario
 5. premios y reconocimientos
 6. personalizar para cada beca
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-04-27T16:00:00.000Z",
-  meta_title: "Como Escribir un CV para Solicitar Becas Universitarias",
-  meta_description: "CV ganador para solicitudes de becas. Logros academicos y servicio comunitario.",
+  meta_title: "Cómo Escribir un CV para Solicitar Becas Universitarias",
+  meta_description: "CV ganador para solicitudes de becas. Logros académicos y servicio comunitario.",
   lang: "es",
 };
 

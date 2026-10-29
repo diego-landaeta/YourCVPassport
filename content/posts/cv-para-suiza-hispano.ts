@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1294,
-  title: "Como Hacer un CV para Trabajar en Suiza siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Suiza siendo Hispano",
   slug: "cv-para-suiza-hispano",
-  summary: "CV para hispanos en Suiza. Lebenslauf por region, salarios y permisos.",
-  content: `# Como Hacer un CV para Trabajar en Suiza siendo Hispano
+  summary: "CV para hispanos en Suiza. Lebenslauf por región, salarios y permisos.",
+  content: `# Cómo Hacer un CV para Trabajar en Suiza siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Suiza hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,14 +14,14 @@ Esta guía completa sobre **CV trabajar Suiza hispano** te proporciona estrategi
 ![CV trabajar Suiza hispano](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre CV trabajar Suiza hispano}
 
 ## 1. Mercado laboral suizo
-2. CV por region idiomatica
+2. CV por región idiomática
 3. Foto y datos personales
 4. Permisos B y C
 5. Idiomas requeridos
 6. Perfil verificado internacional
 
 Cuando hablamos de **CV trabajar Suiza hispano** en el contexto de 1. mercado laboral suizo
-2. cv por region idiomatica
+2. cv por región idiomática
 3. foto y datos personales
 4. permisos b y c
 5. idiomas requeridos
@@ -30,7 +30,7 @@ Cuando hablamos de **CV trabajar Suiza hispano** en el contexto de 1. mercado la
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. mercado laboral suizo
-2. cv por region idiomatica
+2. cv por región idiomática
 3. foto y datos personales
 4. permisos b y c
 5. idiomas requeridos
@@ -45,7 +45,7 @@ Para destacar en **CV trabajar Suiza hispano** dentro de esta área, aplica esta
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. mercado laboral suizo
-2. cv por region idiomatica
+2. cv por región idiomática
 3. foto y datos personales
 4. permisos b y c
 5. idiomas requeridos
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T20:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Suiza siendo Hispano",
-  meta_description: "CV para hispanos en Suiza. Lebenslauf por region, salarios y permisos.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Suiza siendo Hispano",
+  meta_description: "CV para hispanos en Suiza. Lebenslauf por región, salarios y permisos.",
   lang: "es",
 };
 

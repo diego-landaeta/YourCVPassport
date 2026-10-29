@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1293,
-  title: "Como Hacer un CV para Trabajar en Holanda siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Holanda siendo Hispano",
   slug: "como-hacer-cv-holanda-hispano",
-  summary: "CV para hispanos en los Paises Bajos. Formato, HSM visa y startup visa.",
-  content: `# Como Hacer un CV para Trabajar en Holanda siendo Hispano
+  summary: "CV para hispanos en los Países Bajos. Formato, HSM visa y startup visa.",
+  content: `# Cómo Hacer un CV para Trabajar en Holanda siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Holanda hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,25 +13,25 @@ Esta guía completa sobre **CV trabajar Holanda hispano** te proporciona estrate
 
 ![CV trabajar Holanda hispano](https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80){caption:Guía completa sobre CV trabajar Holanda hispano}
 
-## 1. Mercado laboral holandes
+## 1. Mercado laboral holandés
 2. Formato CV holanda
-3. Ingles como idioma de trabajo
+3. Inglés como idioma de trabajo
 4. HSM y startup visa
 5. 30% ruling fiscal
 6. Perfil verificado europeo
 
-Cuando hablamos de **CV trabajar Holanda hispano** en el contexto de 1. mercado laboral holandes
+Cuando hablamos de **CV trabajar Holanda hispano** en el contexto de 1. mercado laboral holandés
 2. formato cv holanda
-3. ingles como idioma de trabajo
+3. inglés como idioma de trabajo
 4. hsm y startup visa
 5. 30% ruling fiscal
 6. perfil verificado europeo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral holandes
+### Mejores prácticas para 1. mercado laboral holandés
 2. formato cv holanda
-3. ingles como idioma de trabajo
+3. inglés como idioma de trabajo
 4. hsm y startup visa
 5. 30% ruling fiscal
 6. perfil verificado europeo
@@ -44,9 +44,9 @@ Para destacar en **CV trabajar Holanda hispano** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral holandes
+### Errores frecuentes en 1. mercado laboral holandés
 2. formato cv holanda
-3. ingles como idioma de trabajo
+3. inglés como idioma de trabajo
 4. hsm y startup visa
 5. 30% ruling fiscal
 6. perfil verificado europeo
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T18:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Holanda siendo Hispano",
-  meta_description: "CV para hispanos en los Paises Bajos. Formato, HSM visa y startup visa.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Holanda siendo Hispano",
+  meta_description: "CV para hispanos en los Países Bajos. Formato, HSM visa y startup visa.",
   lang: "es",
 };
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1132,
-  title: "Como Hacer un CV para Trabajar en Guatemala",
+  title: "Cómo Hacer un CV para Trabajar en Guatemala",
   slug: "como-hacer-cv-guatemala",
   summary: "CV para el mercado guatemalteco. Formato, estructura y consejos.",
-  content: `# Como Hacer un CV para Trabajar en Guatemala
+  content: `# Cómo Hacer un CV para Trabajar en Guatemala
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Guatemala** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV para trabajar en Guatemala** te proporciona estra
 ## 1. Mercado de trabajo en Guatemala
 2. Formato de CV
 3. DPI y datos
-4. Experiencia y educacion
+4. Experiencia y educación
 5. Plataformas de empleo
 6. Sectores con demanda
 
 Cuando hablamos de **CV para trabajar en Guatemala** en el contexto de 1. mercado de trabajo en guatemala
 2. formato de cv
 3. dpi y datos
-4. experiencia y educacion
+4. experiencia y educación
 5. plataformas de empleo
 6. sectores con demanda, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. mercado de trabajo en guatemala
 2. formato de cv
 3. dpi y datos
-4. experiencia y educacion
+4. experiencia y educación
 5. plataformas de empleo
 6. sectores con demanda
 
@@ -47,7 +47,7 @@ Para destacar en **CV para trabajar en Guatemala** dentro de esta área, aplica 
 ### Errores frecuentes en 1. mercado de trabajo en guatemala
 2. formato de cv
 3. dpi y datos
-4. experiencia y educacion
+4. experiencia y educación
 5. plataformas de empleo
 6. sectores con demanda
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T16:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Guatemala",
+  meta_title: "Cómo Hacer un CV para Trabajar en Guatemala",
   meta_description: "CV para el mercado guatemalteco. Formato, estructura y consejos.",
   lang: "es",
 };

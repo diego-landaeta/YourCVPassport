@@ -16,14 +16,14 @@ Esta guía completa sobre **ChatGPT vs Gemini escribir CV** te proporciona estra
 ## 1. Asistentes IA para CVs
 2. Fortalezas de ChatGPT
 3. Fortalezas de Gemini
-4. Comparacion directa
+4. Comparación directa
 5. Mejores prompts
 6. Ventaja del constructor YourCVPassport
 
 Cuando hablamos de **ChatGPT vs Gemini escribir CV** en el contexto de 1. asistentes ia para cvs
 2. fortalezas de chatgpt
 3. fortalezas de gemini
-4. comparacion directa
+4. comparación directa
 5. mejores prompts
 6. ventaja del constructor yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. asistentes ia para cvs
 2. fortalezas de chatgpt
 3. fortalezas de gemini
-4. comparacion directa
+4. comparación directa
 5. mejores prompts
 6. ventaja del constructor yourcvpassport
 
@@ -47,7 +47,7 @@ Para destacar en **ChatGPT vs Gemini escribir CV** dentro de esta área, aplica 
 ### Errores frecuentes en 1. asistentes ia para cvs
 2. fortalezas de chatgpt
 3. fortalezas de gemini
-4. comparacion directa
+4. comparación directa
 5. mejores prompts
 6. ventaja del constructor yourcvpassport
 

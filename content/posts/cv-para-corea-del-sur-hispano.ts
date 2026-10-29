@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1296,
-  title: "Como Hacer un CV para Corea del Sur siendo Hispano",
+  title: "Cómo Hacer un CV para Corea del Sur siendo Hispano",
   slug: "cv-para-corea-del-sur-hispano",
   summary: "CV para hispanos en Corea del Sur. Iryeokseo y cultura laboral coreana.",
-  content: `# Como Hacer un CV para Corea del Sur siendo Hispano
+  content: `# Cómo Hacer un CV para Corea del Sur siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Corea del Sur hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-10T00:00:00.000Z",
-  meta_title: "Como Hacer un CV para Corea del Sur siendo Hispano",
+  meta_title: "Cómo Hacer un CV para Corea del Sur siendo Hispano",
   meta_description: "CV para hispanos en Corea del Sur. Iryeokseo y cultura laboral coreana.",
   lang: "es",
 };

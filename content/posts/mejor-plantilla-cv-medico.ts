@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1101,
-  title: "Mejor Plantilla de CV para Medicos en 2026",
+  title: "Mejor Plantilla de CV para Médicos en 2026",
   slug: "mejor-plantilla-cv-medico",
-  summary: "Mejores plantillas de CV para medicos. Residencias, especialidades y experiencia clinica.",
-  content: `# Mejor Plantilla de CV para Medicos en 2026
+  summary: "Mejores plantillas de CV para médicos. Residencias, especialidades y experiencia clínica.",
+  content: `# Mejor Plantilla de CV para Médicos en 2026
 
-En el competitivo mercado laboral de 2026, dominar **plantilla CV medico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **plantilla CV médico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **plantilla CV medico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **plantilla CV médico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV medico](https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80){caption:Guía completa sobre plantilla CV medico}
+![plantilla CV médico](https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80){caption:Guía completa sobre plantilla CV médico}
 
-## 1. CV especializado para medicos
+## 1. CV especializado para médicos
 2. Secciones: residencia, especialidades, publicaciones
 3. Mejores plantillas con ejemplos
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
-Cuando hablamos de **plantilla CV medico** en el contexto de 1. cv especializado para medicos
+Cuando hablamos de **plantilla CV médico** en el contexto de 1. cv especializado para médicos
 2. secciones: residencia, especialidades, publicaciones
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. cv especializado para medicos
+### Mejores prácticas para 1. cv especializado para médicos
 2. secciones: residencia, especialidades, publicaciones
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. cv especializado para medicos
+### Errores frecuentes en 1. cv especializado para médicos
 2. secciones: residencia, especialidades, publicaciones
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV medico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV médico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV med
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre plantilla CV medico sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre plantilla CV médico sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV médico](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80){caption:Aspectos avanzados de plantilla CV médico}
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv medico
+### Errores frecuentes en aspectos avanzados de plantilla cv médico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV medico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV médico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV med
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de plantilla CV medico es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de plantilla CV médico es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv medico
+### Errores frecuentes en aspectos avanzados de plantilla cv médico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV medico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV médico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV médico](https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80){caption:Aspectos avanzados de plantilla CV médico}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV medico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV médico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv medico
+### Errores frecuentes en aspectos avanzados de plantilla cv médico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV medico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV médico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV med
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV médico](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de plantilla CV médico}
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv medico
+### Errores frecuentes en aspectos avanzados de plantilla cv médico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV medico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV médico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV med
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv medico
+### Mejores prácticas para aspectos avanzados de plantilla cv médico
 
-Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV médico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **plantilla CV medico** dentro de esta área, aplica estas estr
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV medico
+## Aspectos avanzados de plantilla CV médico
 
-Cuando hablamos de **plantilla CV medico** en el contexto de aspectos avanzados de plantilla cv medico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV médico** en el contexto de aspectos avanzados de plantilla cv médico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV medico](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de plantilla CV medico}
+![Aspectos avanzados de plantilla CV médico](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de plantilla CV médico}
 
-## Cómo YourCVPassport te ayuda con plantilla CV medico
+## Cómo YourCVPassport te ayuda con plantilla CV médico
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **plantilla CV medico**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **plantilla CV médico**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina plantilla CV medico y transforma tu carrera profesional
+## Conclusión: domina plantilla CV médico y transforma tu carrera profesional
 
-Dominar **plantilla CV medico** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **plantilla CV médico** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Guías Profesionales",
   is_featured: false,
   published_at: "2026-04-20T14:00:00.000Z",
-  meta_title: "Mejor Plantilla de CV para Medicos en 2026",
-  meta_description: "Mejores plantillas de CV para medicos. Residencias, especialidades y experiencia clinica.",
+  meta_title: "Mejor Plantilla de CV para Médicos en 2026",
+  meta_description: "Mejores plantillas de CV para médicos. Residencias, especialidades y experiencia clínica.",
   lang: "es",
 };
 

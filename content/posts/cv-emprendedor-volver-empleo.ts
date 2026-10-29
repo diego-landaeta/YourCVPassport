@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1241,
-  title: "De Emprendedor a Empleado: Como Escribir tu CV",
+  title: "De Emprendedor a Empleado: Cómo Escribir tu CV",
   slug: "cv-emprendedor-volver-empleo",
-  summary: "Transicion del emprendimiento al empleo con CV estrategico.",
-  content: `# De Emprendedor a Empleado: Como Escribir tu CV
+  summary: "Transición del emprendimiento al empleo con CV estratégico.",
+  content: `# De Emprendedor a Empleado: Cómo Escribir tu CV
 
 En el competitivo mercado laboral de 2026, dominar **CV emprendedor a empleado** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **CV emprendedor a empleado** te proporciona estrategi
 
 ![CV emprendedor a empleado](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre CV emprendedor a empleado}
 
-## 1. Por que reclutadores dudan de emprendedores
+## 1. Por qué reclutadores dudan de emprendedores
 2. Reencuadrar experiencia empresarial
 3. Habilidades transferibles
 4. Abordar estabilidad
 5. Formato para ex-emprendedores
-6. Verificacion de experiencia — claves de CV emprendedor a empleado
+6. Verificación de experiencia — claves de CV emprendedor a empleado
 
-Cuando hablamos de **CV emprendedor a empleado** en el contexto de 1. por que reclutadores dudan de emprendedores
+Cuando hablamos de **CV emprendedor a empleado** en el contexto de 1. por qué reclutadores dudan de emprendedores
 2. reencuadrar experiencia empresarial
 3. habilidades transferibles
 4. abordar estabilidad
 5. formato para ex-emprendedores
-6. verificacion de experiencia, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. verificación de experiencia, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que reclutadores dudan de emprendedores
+### Mejores prácticas para 1. por qué reclutadores dudan de emprendedores
 2. reencuadrar experiencia empresarial
 3. habilidades transferibles
 4. abordar estabilidad
 5. formato para ex-emprendedores
-6. verificacion de experiencia
+6. verificación de experiencia
 
 Para destacar en **CV emprendedor a empleado** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **CV emprendedor a empleado** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que reclutadores dudan de emprendedores
+### Errores frecuentes en 1. por qué reclutadores dudan de emprendedores
 2. reencuadrar experiencia empresarial
 3. habilidades transferibles
 4. abordar estabilidad
 5. formato para ex-emprendedores
-6. verificacion de experiencia
+6. verificación de experiencia
 
 Evita estos errores que cometen la mayoría de candidatos con **CV emprendedor a empleado**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-04T14:00:00.000Z",
-  meta_title: "De Emprendedor a Empleado: Como Escribir tu CV",
-  meta_description: "Transicion del emprendimiento al empleo con CV estrategico.",
+  meta_title: "De Emprendedor a Empleado: Cómo Escribir tu CV",
+  meta_description: "Transición del emprendimiento al empleo con CV estratégico.",
   lang: "es",
 };
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1166,
-  title: "Como Escribir un CV para Cambio de Carrera Profesional",
+  title: "Cómo Escribir un CV para Cambio de Carrera Profesional",
   slug: "cv-cambio-de-carrera-espanol",
-  summary: "Reinventa tu carrera con un CV estrategico. Habilidades transferibles para un cambio de rumbo.",
-  content: `# Como Escribir un CV para Cambio de Carrera Profesional
+  summary: "Reinventa tu carrera con un CV estratégico. Habilidades transferibles para un cambio de rumbo.",
+  content: `# Cómo Escribir un CV para Cambio de Carrera Profesional
 
 En el competitivo mercado laboral de 2026, dominar **CV cambio de carrera** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,15 +13,15 @@ Esta guía completa sobre **CV cambio de carrera** te proporciona estrategias co
 
 ![CV cambio de carrera](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre CV cambio de carrera}
 
-## 1. Cuando cambiar de carrera
-2. Formato funcional o hibrido
+## 1. Cuándo cambiar de carrera
+2. Formato funcional o híbrido
 3. Identificar habilidades transferibles
 4. Resumen profesional convincente
 5. Abordar preocupaciones
 6. Ejemplos de cambios exitosos — claves de CV cambio de carrera
 
-Cuando hablamos de **CV cambio de carrera** en el contexto de 1. cuando cambiar de carrera
-2. formato funcional o hibrido
+Cuando hablamos de **CV cambio de carrera** en el contexto de 1. cuándo cambiar de carrera
+2. formato funcional o híbrido
 3. identificar habilidades transferibles
 4. resumen profesional convincente
 5. abordar preocupaciones
@@ -29,8 +29,8 @@ Cuando hablamos de **CV cambio de carrera** en el contexto de 1. cuando cambiar 
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. cuando cambiar de carrera
-2. formato funcional o hibrido
+### Mejores prácticas para 1. cuándo cambiar de carrera
+2. formato funcional o híbrido
 3. identificar habilidades transferibles
 4. resumen profesional convincente
 5. abordar preocupaciones
@@ -44,8 +44,8 @@ Para destacar en **CV cambio de carrera** dentro de esta área, aplica estas est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. cuando cambiar de carrera
-2. formato funcional o hibrido
+### Errores frecuentes en 1. cuándo cambiar de carrera
+2. formato funcional o híbrido
 3. identificar habilidades transferibles
 4. resumen profesional convincente
 5. abordar preocupaciones
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-04-27T00:00:00.000Z",
-  meta_title: "Como Escribir un CV para Cambio de Carrera Profesional",
-  meta_description: "Reinventa tu carrera con un CV estrategico. Habilidades transferibles para un cambio de rumbo.",
+  meta_title: "Cómo Escribir un CV para Cambio de Carrera Profesional",
+  meta_description: "Reinventa tu carrera con un CV estratégico. Habilidades transferibles para un cambio de rumbo.",
   lang: "es",
 };
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1165,
-  title: "Como Hacer un CV para tu Primer Empleo Sin Experiencia",
+  title: "Cómo Hacer un CV para tu Primer Empleo Sin Experiencia",
   slug: "cv-primer-empleo-sin-experiencia-es",
-  summary: "CV atractivo sin experiencia laboral. Educacion, habilidades y proyectos para tu primer trabajo.",
-  content: `# Como Hacer un CV para tu Primer Empleo Sin Experiencia
+  summary: "CV atractivo sin experiencia laboral. Educación, habilidades y proyectos para tu primer trabajo.",
+  content: `# Cómo Hacer un CV para tu Primer Empleo Sin Experiencia
 
 En el competitivo mercado laboral de 2026, dominar **CV primer empleo sin experiencia** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,25 +13,25 @@ Esta guía completa sobre **CV primer empleo sin experiencia** te proporciona es
 
 ![CV primer empleo sin experiencia](https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80){caption:Guía completa sobre CV primer empleo sin experiencia}
 
-## 1. El CV sin experiencia no esta vacio
+## 1. El CV sin experiencia no está vacío
 2. Formato para primer empleo
-3. Seccion de educacion destacada
+3. Sección de educación destacada
 4. Voluntariado y proyectos personales
 5. Habilidades transferibles
 6. Plantilla gratuita para primer empleo
 
-Cuando hablamos de **CV primer empleo sin experiencia** en el contexto de 1. el cv sin experiencia no esta vacio
+Cuando hablamos de **CV primer empleo sin experiencia** en el contexto de 1. el cv sin experiencia no está vacío
 2. formato para primer empleo
-3. seccion de educacion destacada
+3. sección de educación destacada
 4. voluntariado y proyectos personales
 5. habilidades transferibles
 6. plantilla gratuita para primer empleo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. el cv sin experiencia no esta vacio
+### Mejores prácticas para 1. el cv sin experiencia no está vacío
 2. formato para primer empleo
-3. seccion de educacion destacada
+3. sección de educación destacada
 4. voluntariado y proyectos personales
 5. habilidades transferibles
 6. plantilla gratuita para primer empleo
@@ -44,9 +44,9 @@ Para destacar en **CV primer empleo sin experiencia** dentro de esta área, apli
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. el cv sin experiencia no esta vacio
+### Errores frecuentes en 1. el cv sin experiencia no está vacío
 2. formato para primer empleo
-3. seccion de educacion destacada
+3. sección de educación destacada
 4. voluntariado y proyectos personales
 5. habilidades transferibles
 6. plantilla gratuita para primer empleo
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-04-26T22:00:00.000Z",
-  meta_title: "Como Hacer un CV para tu Primer Empleo Sin Experiencia",
-  meta_description: "CV atractivo sin experiencia laboral. Educacion, habilidades y proyectos para tu primer trabajo.",
+  meta_title: "Cómo Hacer un CV para tu Primer Empleo Sin Experiencia",
+  meta_description: "CV atractivo sin experiencia laboral. Educación, habilidades y proyectos para tu primer trabajo.",
   lang: "es",
 };
 

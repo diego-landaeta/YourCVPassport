@@ -1,0 +1,317 @@
+{
+  "_descripcion": "Diccionario de correcciones ortográficas del blog en español de YourCVPassport (content/posts, lang es). Clave = palabra sin diacríticos en minúsculas; valor = forma correcta. Construido a mano a partir del vocabulario del propio corpus (2.117 formas distintas en los 150 artículos). Lo usan scripts/seo/corregir-ortografia.mjs y scripts/seo/verificar-ortografia.mjs.",
+  "correcciones": {
+    "academico": "académico",
+    "academicos": "académicos",
+    "accion": "acción",
+    "adaptacion": "adaptación",
+    "ademas": "además",
+    "administracion": "administración",
+    "adopcion": "adopción",
+    "aleman": "alemán",
+    "alla": "allá",
+    "analisis": "análisis",
+    "anatomia": "anatomía",
+    "ano": "año",
+    "anos": "años",
+    "aplicacion": "aplicación",
+    "arabe": "árabe",
+    "arabes": "árabes",
+    "areas": "áreas",
+    "automatizacion": "automatización",
+    "autonoma": "autónoma",
+    "autonomo": "autónomo",
+    "autonomos": "autónomos",
+    "bilingue": "bilingüe",
+    "brasileno": "brasileño",
+    "britanico": "británico",
+    "busqueda": "búsqueda",
+    "cafes": "cafés",
+    "camara": "cámara",
+    "campanas": "campañas",
+    "canada": "canadá",
+    "cedula": "cédula",
+    "cientifico": "científico",
+    "cientificos": "científicos",
+    "ciudadania": "ciudadanía",
+    "clinica": "clínica",
+    "clinicas": "clínicas",
+    "codigo": "código",
+    "codigos": "códigos",
+    "colocacion": "colocación",
+    "comparacion": "comparación",
+    "compensacion": "compensación",
+    "comun": "común",
+    "comunicacion": "comunicación",
+    "contratacion": "contratación",
+    "cuanta": "cuánta",
+    "curriculo": "currículo",
+    "curriculum": "currículum",
+    "curriculums": "currículums",
+    "declaracion": "declaración",
+    "desafios": "desafíos",
+    "desempeno": "desempeño",
+    "despues": "después",
+    "dificil": "difícil",
+    "direccion": "dirección",
+    "disenador": "diseñador",
+    "disenadores": "diseñadores",
+    "diseno": "diseño",
+    "documentacion": "documentación",
+    "economia": "economía",
+    "educacion": "educación",
+    "enfermeria": "enfermería",
+    "espana": "españa",
+    "espanol": "español",
+    "espanola": "española",
+    "espanolas": "españolas",
+    "espanoles": "españoles",
+    "especifico": "específico",
+    "especificos": "específicos",
+    "estandar": "estándar",
+    "estrategica": "estratégica",
+    "estrategicamente": "estratégicamente",
+    "estrategico": "estratégico",
+    "estres": "estrés",
+    "evaluacion": "evaluación",
+    "evolucion": "evolución",
+    "exito": "éxito",
+    "exportacion": "exportación",
+    "extension": "extensión",
+    "facil": "fácil",
+    "farmaceutica": "farmacéutica",
+    "farmaceutico": "farmacéutico",
+    "farmaceuticos": "farmacéuticos",
+    "formacion": "formación",
+    "formula": "fórmula",
+    "fotografia": "fotografía",
+    "frances": "francés",
+    "gastronomia": "gastronomía",
+    "genero": "género",
+    "gestion": "gestión",
+    "grafico": "gráfico",
+    "graficos": "gráficos",
+    "guia": "guía",
+    "hablame": "háblame",
+    "hibrido": "híbrido",
+    "holandes": "holandés",
+    "holistico": "holístico",
+    "homologacion": "homologación",
+    "hondureno": "hondureño",
+    "idiomatica": "idiomática",
+    "iluminacion": "iluminación",
+    "imagenes": "imágenes",
+    "implementacion": "implementación",
+    "inclusion": "inclusión",
+    "infograficos": "infográficos",
+    "informacion": "información",
+    "ingles": "inglés",
+    "integracion": "integración",
+    "investigacion": "investigación",
+    "irlandes": "irlandés",
+    "israeli": "israelí",
+    "japon": "japón",
+    "japones": "japonés",
+    "jovenes": "jóvenes",
+    "latinoamerica": "latinoamérica",
+    "lideres": "líderes",
+    "logistica": "logística",
+    "maestria": "maestría",
+    "mas": "más",
+    "maximo": "máximo",
+    "medico": "médico",
+    "medicos": "médicos",
+    "mentorias": "mentorías",
+    "metodo": "método",
+    "metodologias": "metodologías",
+    "metricas": "métricas",
+    "mexico": "méxico",
+    "multiples": "múltiples",
+    "neozelandes": "neozelandés",
+    "nicaraguense": "nicaragüense",
+    "nomada": "nómada",
+    "odontologo": "odontólogo",
+    "odontologos": "odontólogos",
+    "optimizacion": "optimización",
+    "organizacion": "organización",
+    "ortografia": "ortografía",
+    "pagina": "página",
+    "paginas": "páginas",
+    "pais": "país",
+    "paises": "países",
+    "panama": "panamá",
+    "panameno": "panameño",
+    "pasantia": "pasantía",
+    "pasantias": "pasantías",
+    "personalizacion": "personalización",
+    "peru": "perú",
+    "politicas": "políticas",
+    "portugues": "portugués",
+    "postulacion": "postulación",
+    "postulate": "postúlate",
+    "practica": "práctica",
+    "practicas": "prácticas",
+    "practico": "práctico",
+    "practicos": "prácticos",
+    "preparacion": "preparación",
+    "preparate": "prepárate",
+    "presentacion": "presentación",
+    "preservacion": "preservación",
+    "presion": "presión",
+    "programacion": "programación",
+    "proteccion": "protección",
+    "psicologo": "psicólogo",
+    "psicologos": "psicólogos",
+    "publico": "público",
+    "rapidamente": "rápidamente",
+    "recien": "recién",
+    "recomendacion": "recomendación",
+    "reconversion": "reconversión",
+    "region": "región",
+    "regulacion": "regulación",
+    "republica": "república",
+    "revision": "revisión",
+    "revolucion": "revolución",
+    "sabatico": "sabático",
+    "sabaticos": "sabáticos",
+    "salvadoreno": "salvadoreño",
+    "seccion": "sección",
+    "segun": "según",
+    "seleccion": "selección",
+    "senales": "señales",
+    "situacion": "situación",
+    "solido": "sólido",
+    "sudafrica": "sudáfrica",
+    "surgiran": "surgirán",
+    "tabu": "tabú",
+    "tambien": "también",
+    "tecnica": "técnica",
+    "tecnicos": "técnicos",
+    "tecnologia": "tecnología",
+    "tecnologico": "tecnológico",
+    "terminologia": "terminología",
+    "tipografia": "tipografía",
+    "titulo": "título",
+    "titulos": "títulos",
+    "transformacion": "transformación",
+    "transicion": "transición",
+    "ubicacion": "ubicación",
+    "util": "útil",
+    "vacio": "vacío",
+    "validacion": "validación",
+    "verificacion": "verificación",
+    "vinetas": "viñetas",
+    "vision": "visión",
+    "vistete": "vístete",
+    "vitae": "vítae"
+  },
+  "sufijos": [
+    {
+      "termina": "cion",
+      "sustituye": "ción",
+      "nota": "Todo sustantivo singular en -ción lleva tilde. El plural -ciones no la lleva y no se toca."
+    },
+    {
+      "termina": "sion",
+      "sustituye": "sión",
+      "nota": "Idem para -sión."
+    }
+  ],
+  "contextuales": {
+    "como": {
+      "defecto": "cómo",
+      "nota": "Interrogativo indirecto en títulos y listas (Como hacer un CV, como escribir una carta). Se queda sin tilde cuando significa 'en calidad de/igual que'.",
+      "reglas": [
+        {
+          "siguiente": [
+            "idioma",
+            "requisito",
+            "desarrollo",
+            "protagonista",
+            "norma",
+            "sello",
+            "carta",
+            "recien",
+            "freelancer",
+            "nomada",
+            "introvertido",
+            "un"
+          ],
+          "usar": null
+        }
+      ]
+    },
+    "cual": {
+      "defecto": "cuál",
+      "nota": "En el corpus siempre es interrogativo (CV PDF vs DOCX: cuál enviar).",
+      "reglas": []
+    },
+    "cuando": {
+      "defecto": "cuándo",
+      "nota": "Interrogativo en titulares/listas (cuándo enviar, cuándo buscar). 'Cuando hablamos de' (subordinada temporal de la plantilla) no se toca.",
+      "reglas": [
+        {
+          "siguiente": [
+            "hablamos"
+          ],
+          "usar": null
+        }
+      ]
+    },
+    "que": {
+      "defecto": null,
+      "nota": "Solo se acentúa tras 'por' (por qué) y al inicio de segmento (título, ítem de lista numerada, inicio de frase), donde es interrogativo. El relativo/conjunción (empleos que desaparecen) se deja.",
+      "reglas": [
+        {
+          "anterior": [
+            "por"
+          ],
+          "usar": "qué"
+        },
+        {
+          "inicio_segmento": true,
+          "usar": "qué"
+        }
+      ]
+    },
+    "si": {
+      "defecto": null,
+      "nota": "'el sí' (sustantivo) y 'Sí o No' (afirmación) llevan tilde; el condicional 'si' no.",
+      "reglas": [
+        {
+          "anterior": [
+            "el"
+          ],
+          "usar": "sí"
+        },
+        {
+          "siguiente": [
+            "o"
+          ],
+          "usar": "sí"
+        }
+      ]
+    },
+    "esta": {
+      "defecto": null,
+      "nota": "Demostrativo (esta guía, esta área) sin tilde; verbo estar con tilde.",
+      "reglas": [
+        {
+          "siguiente": [
+            "vacio",
+            "transformando"
+          ],
+          "usar": "está"
+        }
+      ]
+    }
+  },
+  "conservar": {
+    "solo": "RAE 2010: adverbio 'solo' sin tilde.",
+    "continua": "adjetivo femenino (mejora continua, formación continua), sin tilde.",
+    "periodo": "RAE admite 'periodo' y 'período'.",
+    "guion": "RAE 2010: monosílabo sin tilde.",
+    "brasileiro": "portuguesismo dentro de 'currículo brasileiro'; no es un problema de diacríticos.",
+    "bilingualismo": "errata de letras (bilingüismo); fuera del alcance (solo diacríticos)."
+  }
+}

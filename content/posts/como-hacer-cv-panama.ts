@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1131,
-  title: "Como Hacer un CV para Trabajar en Panama",
+  title: "Cómo Hacer un CV para Trabajar en Panamá",
   slug: "como-hacer-cv-panama",
-  summary: "CV adaptado al mercado panameno. Finanzas, logistica y turismo.",
-  content: `# Como Hacer un CV para Trabajar en Panama
+  summary: "CV adaptado al mercado panameño. Finanzas, logística y turismo.",
+  content: `# Cómo Hacer un CV para Trabajar en Panamá
 
-En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Panama** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Panamá** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **CV para trabajar en Panama** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **CV para trabajar en Panamá** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV para trabajar en Panama](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV para trabajar en Panama}
+![CV para trabajar en Panamá](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV para trabajar en Panamá}
 
-## 1. Mercado laboral panameno
+## 1. Mercado laboral panameño
 2. Formato de CV
 3. Datos personales y permisos
 4. Sectores clave
 5. Portales de empleo
-6. Multinacionales en Panama
+6. Multinacionales en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de 1. mercado laboral panameno
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de 1. mercado laboral panameño
 2. formato de cv
 3. datos personales y permisos
 4. sectores clave
 5. portales de empleo
-6. multinacionales en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. multinacionales en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral panameno
+### Mejores prácticas para 1. mercado laboral panameño
 2. formato de cv
 3. datos personales y permisos
 4. sectores clave
 5. portales de empleo
-6. multinacionales en panama
+6. multinacionales en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral panameno
+### Errores frecuentes en 1. mercado laboral panameño
 2. formato de cv
 3. datos personales y permisos
 4. sectores clave
 5. portales de empleo
-6. multinacionales en panama
+6. multinacionales en panamá
 
-Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panama**:
+Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panamá**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV para trabajar en Panama sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV para trabajar en Panamá sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV para trabajar en Panama](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panama}
+![Aspectos avanzados de CV para trabajar en Panamá](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panamá}
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv para trabajar en panama
+### Errores frecuentes en aspectos avanzados de cv para trabajar en panamá
 
-Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panama**:
+Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panamá**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV para trabajar en Panama es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV para trabajar en Panamá es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv para trabajar en panama
+### Errores frecuentes en aspectos avanzados de cv para trabajar en panamá
 
-Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panama**:
+Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panamá**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV para trabajar en Panama](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panama}
+![Aspectos avanzados de CV para trabajar en Panamá](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panamá}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV para trabajar en Panama para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV para trabajar en Panamá para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv para trabajar en panama
+### Errores frecuentes en aspectos avanzados de cv para trabajar en panamá
 
-Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panama**:
+Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panamá**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV para trabajar en Panama](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panama}
+![Aspectos avanzados de CV para trabajar en Panamá](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panamá}
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv para trabajar en panama
+### Errores frecuentes en aspectos avanzados de cv para trabajar en panamá
 
-Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panama**:
+Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Panamá**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv para trabajar en panama
+### Mejores prácticas para aspectos avanzados de cv para trabajar en panamá
 
-Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV para trabajar en Panamá** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **CV para trabajar en Panama** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV para trabajar en Panama
+## Aspectos avanzados de CV para trabajar en Panamá
 
-Cuando hablamos de **CV para trabajar en Panama** en el contexto de aspectos avanzados de cv para trabajar en panama, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV para trabajar en Panamá** en el contexto de aspectos avanzados de cv para trabajar en panamá, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV para trabajar en Panama](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panama}
+![Aspectos avanzados de CV para trabajar en Panamá](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de CV para trabajar en Panamá}
 
-## Cómo YourCVPassport te ayuda con CV para trabajar en Panama
+## Cómo YourCVPassport te ayuda con CV para trabajar en Panamá
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV para trabajar en Panama**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV para trabajar en Panamá**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina CV para trabajar en Panama y transforma tu carrera profesional
+## Conclusión: domina CV para trabajar en Panamá y transforma tu carrera profesional
 
-Dominar **CV para trabajar en Panama** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **CV para trabajar en Panamá** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T14:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Panama",
-  meta_description: "CV adaptado al mercado panameno. Finanzas, logistica y turismo.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Panamá",
+  meta_description: "CV adaptado al mercado panameño. Finanzas, logística y turismo.",
   lang: "es",
 };
 

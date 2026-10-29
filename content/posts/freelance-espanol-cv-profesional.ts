@@ -2,29 +2,29 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1153,
-  title: "Como Crear un CV Profesional para Freelancers en Espanol",
+  title: "Cómo Crear un CV Profesional para Freelancers en Español",
   slug: "freelance-espanol-cv-profesional",
   summary: "Destaca como freelancer con un CV profesional. Experiencia independiente convincente.",
-  content: `# Como Crear un CV Profesional para Freelancers en Espanol
+  content: `# Cómo Crear un CV Profesional para Freelancers en Español
 
-En el competitivo mercado laboral de 2026, dominar **CV freelancer espanol** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **CV freelancer español** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **CV freelancer espanol** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **CV freelancer español** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV freelancer espanol](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre CV freelancer espanol}
+![CV freelancer español](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre CV freelancer español}
 
 ## 1. El auge del freelancing hispano
 2. Estructura de CV para freelancers
 3. Presentar clientes y proyectos
 4. Tarifas y portafolio
-5. Plataformas de freelancing en espanol
+5. Plataformas de freelancing en español
 6. Perfil verificado para freelancers
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de 1. el auge del freelancing hispano
+Cuando hablamos de **CV freelancer español** en el contexto de 1. el auge del freelancing hispano
 2. estructura de cv para freelancers
 3. presentar clientes y proyectos
 4. tarifas y portafolio
-5. plataformas de freelancing en espanol
+5. plataformas de freelancing en español
 6. perfil verificado para freelancers, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -33,10 +33,10 @@ La clave está en combinar una presentación visual impecable con contenido estr
 2. estructura de cv para freelancers
 3. presentar clientes y proyectos
 4. tarifas y portafolio
-5. plataformas de freelancing en espanol
+5. plataformas de freelancing en español
 6. perfil verificado para freelancers
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -48,10 +48,10 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 2. estructura de cv para freelancers
 3. presentar clientes y proyectos
 4. tarifas y portafolio
-5. plataformas de freelancing en espanol
+5. plataformas de freelancing en español
 6. perfil verificado para freelancers
 
-Evita estos errores que cometen la mayoría de candidatos con **CV freelancer espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **CV freelancer español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV freelancer es
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV freelancer espanol sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV freelancer español sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV freelancer espanol](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV freelancer espanol}
+![Aspectos avanzados de CV freelancer español](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV freelancer español}
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv freelancer espanol
+### Errores frecuentes en aspectos avanzados de cv freelancer español
 
-Evita estos errores que cometen la mayoría de candidatos con **CV freelancer espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **CV freelancer español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV freelancer es
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV freelancer espanol es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV freelancer español es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv freelancer espanol
+### Errores frecuentes en aspectos avanzados de cv freelancer español
 
-Evita estos errores que cometen la mayoría de candidatos con **CV freelancer espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **CV freelancer español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV freelancer espanol](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de CV freelancer espanol}
+![Aspectos avanzados de CV freelancer español](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de CV freelancer español}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV freelancer espanol para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV freelancer español para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv freelancer espanol
+### Errores frecuentes en aspectos avanzados de cv freelancer español
 
-Evita estos errores que cometen la mayoría de candidatos con **CV freelancer espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **CV freelancer español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV freelancer es
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV freelancer espanol](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80){caption:Aspectos avanzados de CV freelancer espanol}
+![Aspectos avanzados de CV freelancer español](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80){caption:Aspectos avanzados de CV freelancer español}
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv freelancer espanol
+### Errores frecuentes en aspectos avanzados de cv freelancer español
 
-Evita estos errores que cometen la mayoría de candidatos con **CV freelancer espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **CV freelancer español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV freelancer es
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv freelancer espanol
+### Mejores prácticas para aspectos avanzados de cv freelancer español
 
-Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV freelancer español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **CV freelancer espanol** dentro de esta área, aplica estas es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV freelancer espanol
+## Aspectos avanzados de CV freelancer español
 
-Cuando hablamos de **CV freelancer espanol** en el contexto de aspectos avanzados de cv freelancer espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV freelancer español** en el contexto de aspectos avanzados de cv freelancer español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV freelancer espanol](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de CV freelancer espanol}
+![Aspectos avanzados de CV freelancer español](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de CV freelancer español}
 
-## Cómo YourCVPassport te ayuda con CV freelancer espanol
+## Cómo YourCVPassport te ayuda con CV freelancer español
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV freelancer espanol**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV freelancer español**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina CV freelancer espanol y transforma tu carrera profesional
+## Conclusión: domina CV freelancer español y transforma tu carrera profesional
 
-Dominar **CV freelancer espanol** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **CV freelancer español** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-25T18:00:00.000Z",
-  meta_title: "Como Crear un CV Profesional para Freelancers en Espanol",
+  meta_title: "Cómo Crear un CV Profesional para Freelancers en Español",
   meta_description: "Destaca como freelancer con un CV profesional. Experiencia independiente convincente.",
   lang: "es",
 };

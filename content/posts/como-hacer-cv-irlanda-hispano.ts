@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1292,
-  title: "Como Hacer un CV para Trabajar en Irlanda siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Irlanda siendo Hispano",
   slug: "como-hacer-cv-irlanda-hispano",
-  summary: "CV para hispanos en Irlanda. Hub tecnologico y formato irlandes.",
-  content: `# Como Hacer un CV para Trabajar en Irlanda siendo Hispano
+  summary: "CV para hispanos en Irlanda. Hub tecnológico y formato irlandés.",
+  content: `# Cómo Hacer un CV para Trabajar en Irlanda siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Irlanda hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **CV trabajar Irlanda hispano** te proporciona estrate
 
 ![CV trabajar Irlanda hispano](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre CV trabajar Irlanda hispano}
 
-## 1. Mercado laboral irlandes
+## 1. Mercado laboral irlandés
 2. Formato CV Irlanda
 3. Sin foto ni edad
 4. Sector tech y multinacionales
 5. Visa de trabajo
 6. Perfil verificado europeo
 
-Cuando hablamos de **CV trabajar Irlanda hispano** en el contexto de 1. mercado laboral irlandes
+Cuando hablamos de **CV trabajar Irlanda hispano** en el contexto de 1. mercado laboral irlandés
 2. formato cv irlanda
 3. sin foto ni edad
 4. sector tech y multinacionales
@@ -29,7 +29,7 @@ Cuando hablamos de **CV trabajar Irlanda hispano** en el contexto de 1. mercado 
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral irlandes
+### Mejores prácticas para 1. mercado laboral irlandés
 2. formato cv irlanda
 3. sin foto ni edad
 4. sector tech y multinacionales
@@ -44,7 +44,7 @@ Para destacar en **CV trabajar Irlanda hispano** dentro de esta área, aplica es
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral irlandes
+### Errores frecuentes en 1. mercado laboral irlandés
 2. formato cv irlanda
 3. sin foto ni edad
 4. sector tech y multinacionales
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T16:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Irlanda siendo Hispano",
-  meta_description: "CV para hispanos en Irlanda. Hub tecnologico y formato irlandes.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Irlanda siendo Hispano",
+  meta_description: "CV para hispanos en Irlanda. Hub tecnológico y formato irlandés.",
   lang: "es",
 };
 

@@ -15,15 +15,15 @@ Esta guía completa sobre **plantilla CV arquitecto** te proporciona estrategias
 
 ## 1. CV especializado para arquitectos
 2. Secciones: proyectos, software, colegiatura
-3. Integracion del portafolio
-4. Optimizacion ATS
+3. Integración del portafolio
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV arquitecto** en el contexto de 1. cv especializado para arquitectos
 2. secciones: proyectos, software, colegiatura
-3. integracion del portafolio
-4. optimizacion ats
+3. integración del portafolio
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -31,8 +31,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 
 ### Mejores prácticas para 1. cv especializado para arquitectos
 2. secciones: proyectos, software, colegiatura
-3. integracion del portafolio
-4. optimizacion ats
+3. integración del portafolio
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -46,8 +46,8 @@ Para destacar en **plantilla CV arquitecto** dentro de esta área, aplica estas 
 
 ### Errores frecuentes en 1. cv especializado para arquitectos
 2. secciones: proyectos, software, colegiatura
-3. integracion del portafolio
-4. optimizacion ats
+3. integración del portafolio
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 

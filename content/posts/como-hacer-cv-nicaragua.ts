@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1139,
-  title: "Como Hacer un CV para Trabajar en Nicaragua",
+  title: "Cómo Hacer un CV para Trabajar en Nicaragua",
   slug: "como-hacer-cv-nicaragua",
-  summary: "CV adaptado al mercado nicaraguense. Formato y sectores con demanda.",
-  content: `# Como Hacer un CV para Trabajar en Nicaragua
+  summary: "CV adaptado al mercado nicaragüense. Formato y sectores con demanda.",
+  content: `# Cómo Hacer un CV para Trabajar en Nicaragua
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Nicaragua** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -15,15 +15,15 @@ Esta guía completa sobre **CV para trabajar en Nicaragua** te proporciona estra
 
 ## 1. Mercado laboral en Nicaragua
 2. Formato de CV
-3. Cedula y datos
-4. Experiencia y educacion
+3. Cédula y datos
+4. Experiencia y educación
 5. Zonas francas y turismo
 6. Portales de empleo
 
 Cuando hablamos de **CV para trabajar en Nicaragua** en el contexto de 1. mercado laboral en nicaragua
 2. formato de cv
-3. cedula y datos
-4. experiencia y educacion
+3. cédula y datos
+4. experiencia y educación
 5. zonas francas y turismo
 6. portales de empleo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -31,8 +31,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 
 ### Mejores prácticas para 1. mercado laboral en nicaragua
 2. formato de cv
-3. cedula y datos
-4. experiencia y educacion
+3. cédula y datos
+4. experiencia y educación
 5. zonas francas y turismo
 6. portales de empleo
 
@@ -46,8 +46,8 @@ Para destacar en **CV para trabajar en Nicaragua** dentro de esta área, aplica 
 
 ### Errores frecuentes en 1. mercado laboral en nicaragua
 2. formato de cv
-3. cedula y datos
-4. experiencia y educacion
+3. cédula y datos
+4. experiencia y educación
 5. zonas francas y turismo
 6. portales de empleo
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-24T06:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Nicaragua",
-  meta_description: "CV adaptado al mercado nicaraguense. Formato y sectores con demanda.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Nicaragua",
+  meta_description: "CV adaptado al mercado nicaragüense. Formato y sectores con demanda.",
   lang: "es",
 };
 

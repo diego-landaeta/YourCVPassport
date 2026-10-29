@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1267,
   title: "Coaching Profesional: Mejora tu CV y Entrevistas",
   slug: "coaching-profesional-cv-entrevista",
-  summary: "Coaching profesional para transformar tu CV y desempeno en entrevistas.",
+  summary: "Coaching profesional para transformar tu CV y desempeño en entrevistas.",
   content: `# Coaching Profesional: Mejora tu CV y Entrevistas
 
 En el competitivo mercado laboral de 2026, dominar **coaching profesional CV entrevista** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -13,14 +13,14 @@ Esta guía completa sobre **coaching profesional CV entrevista** te proporciona 
 
 ![coaching profesional CV entrevista](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre coaching profesional CV entrevista}
 
-## 1. Que es coaching profesional
+## 1. Qué es coaching profesional
 2. Coaching de CV
 3. Coaching de entrevistas
 4. Encontrar buen coach
 5. Online vs presencial
 6. Recursos de PsikoAprende.com
 
-Cuando hablamos de **coaching profesional CV entrevista** en el contexto de 1. que es coaching profesional
+Cuando hablamos de **coaching profesional CV entrevista** en el contexto de 1. qué es coaching profesional
 2. coaching de cv
 3. coaching de entrevistas
 4. encontrar buen coach
@@ -29,7 +29,7 @@ Cuando hablamos de **coaching profesional CV entrevista** en el contexto de 1. q
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. que es coaching profesional
+### Mejores prácticas para 1. qué es coaching profesional
 2. coaching de cv
 3. coaching de entrevistas
 4. encontrar buen coach
@@ -44,7 +44,7 @@ Para destacar en **coaching profesional CV entrevista** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. que es coaching profesional
+### Errores frecuentes en 1. qué es coaching profesional
 2. coaching de cv
 3. coaching de entrevistas
 4. encontrar buen coach
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-05-07T02:00:00.000Z",
   meta_title: "Coaching Profesional: Mejora tu CV y Entrevistas",
-  meta_description: "Coaching profesional para transformar tu CV y desempeno en entrevistas.",
+  meta_description: "Coaching profesional para transformar tu CV y desempeño en entrevistas.",
   lang: "es",
 };
 
