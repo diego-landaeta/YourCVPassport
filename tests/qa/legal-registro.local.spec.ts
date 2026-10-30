@@ -156,7 +156,6 @@ async function fillAccount(page: Page, email = 'Nuevo.Usuario@Example.com') {
   await page.fill('#fullName', 'Nuevo Usuario');
   await page.fill('#email', email);
   await page.fill('#password', 'Prueba1234');
-  await page.fill('#confirmPassword', 'Prueba1234');
 }
 
 test.describe('registro con dos caminos', () => {

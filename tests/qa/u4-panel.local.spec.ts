@@ -65,7 +65,6 @@ test.describe('Registro: validación y accesibilidad', () => {
     await page.fill('#fullName', 'Ana Prueba');
     await page.fill('#email', 'ana.prueba@correo');
     await page.fill('#password', 'Segura123');
-    await page.fill('#confirmPassword', 'Segura123');
     await page.fill('#birthDate', '1990-05-15');
     await page.check('#consent-datos_verdaderos');
     await page.check('#agreeToTerms');

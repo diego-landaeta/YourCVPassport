@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ChevronDownIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { fmt } from '../../lib/bolsaText';
 import {
@@ -150,7 +150,7 @@ const LegalConsentFields: React.FC<LegalConsentFieldsProps> = ({
   const statusTone = complete ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-900 dark:text-amber-200';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <fieldset className={`min-w-0 rounded-xl border px-4 pb-4 pt-3.5 transition-colors ${reqTone}`}>
         <legend className="float-left mb-3 w-full p-0">
           <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
@@ -175,15 +175,18 @@ const LegalConsentFields: React.FC<LegalConsentFieldsProps> = ({
         )}
       </fieldset>
 
-      <fieldset className="min-w-0 px-1">
-        <legend className="float-left mb-3 w-full p-0">
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{tx.optionalGroup}</span>
-          <span className="mt-0.5 block text-[13px] font-normal text-slate-600 dark:text-dark-text-secondary">{tx.optionalHint}</span>
-        </legend>
-        <div className="clear-both space-y-3">
-          {optionalKeys.map((key) => row(key, casillaLabel(tx, key), casillaLabel(tx, key), false))}
+      <details className="group rounded-lg border border-slate-200 dark:border-dark-border" data-testid="signup-optional">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-200 dark:hover:bg-white/5">
+          <span>{tx.optionalGroup} <span className="font-normal text-slate-500 dark:text-dark-text-secondary">({optionalKeys.length})</span></span>
+          <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+        </summary>
+        <div className="border-t border-slate-200 px-3 pb-3 pt-3 dark:border-dark-border">
+          <p className="mb-3 text-[13px] text-slate-600 dark:text-dark-text-secondary">{tx.optionalHint}</p>
+          <div className="space-y-3">
+            {optionalKeys.map((key) => row(key, casillaLabel(tx, key), casillaLabel(tx, key), false))}
+          </div>
         </div>
-      </fieldset>
+      </details>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 
-const OAuthButtons: React.FC = () => {
+const OAuthButtons: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const { signInWithGoogle, signInWithLinkedIn } = useAuth();
   const translations = useTranslations();
   const t = translations.dashboard.auth.oauth;
@@ -49,10 +49,12 @@ const OAuthButtons: React.FC = () => {
         </div>
       )}
 
+      <div className={compact ? 'grid grid-cols-2 gap-2.5' : 'space-y-2.5'}>
       {/* Google Button */}
       <button
         type="button"
         onClick={handleGoogleSignIn}
+        aria-label={t.google}
         disabled={isGoogleLoading || isLinkedInLoading}
         className="w-full flex items-center justify-center gap-2.5 bg-white dark:bg-dark-bg-tertiary border border-gray-300 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-bg-secondary text-gray-700 dark:text-gray-200 font-medium py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
@@ -81,13 +83,14 @@ const OAuthButtons: React.FC = () => {
             />
           </svg>
         )}
-        <span>{isGoogleLoading ? 'Connecting...' : t.google}</span>
+        <span>{isGoogleLoading ? 'Connecting...' : compact ? 'Google' : t.google}</span>
       </button>
 
       {/* LinkedIn Button */}
       <button
         type="button"
         onClick={handleLinkedInSignIn}
+        aria-label={t.linkedin}
         disabled={isGoogleLoading || isLinkedInLoading}
         className="w-full flex items-center justify-center gap-2.5 bg-[#0A66C2] hover:bg-[#004182] text-white font-medium py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
@@ -101,8 +104,9 @@ const OAuthButtons: React.FC = () => {
             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
           </svg>
         )}
-        <span>{isLinkedInLoading ? 'Connecting...' : t.linkedin}</span>
+        <span>{isLinkedInLoading ? 'Connecting...' : compact ? 'LinkedIn' : t.linkedin}</span>
       </button>
+      </div>
     </div>
   );
 };

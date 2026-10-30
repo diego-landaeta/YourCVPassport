@@ -106,7 +106,6 @@ async function fillSignup(page: Page, email = 'qa.Mock@Example.com') {
   await page.fill('#fullName', 'QA Tester');
   await page.fill('#email', email);
   await page.fill('#password', 'Prueba1234');
-  await page.fill('#confirmPassword', 'Prueba1234');
   await page.fill('#birthDate', '1990-05-15');
   await page.check('#consent-datos_verdaderos');
   await page.check('#agreeToTerms');

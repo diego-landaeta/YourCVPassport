@@ -25,6 +25,8 @@ import {
   ExclamationTriangleIcon,
   IdentificationIcon,
   InformationCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 
 type FieldId =
@@ -68,7 +70,7 @@ const AuthScreen: React.FC = () => {
   const [isLoginView, setIsLoginView] = useState(location.pathname === '/login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   // Bolsa de empleo, fase 1 (#6): primer paso «¿buscas empleo o contratas?», fecha de
   // nacimiento y casillas legales (todas SIN marcar). La aceptación se registra en
@@ -175,7 +177,6 @@ const AuthScreen: React.FC = () => {
     if (isLoginView) return null;
     if (password.length < 8) return { field: 'password', message: t.errors.passwordTooShort };
     if (!validatePassword(password)) return { field: 'password', message: t.errors.weakPassword };
-    if (password !== confirmPassword) return { field: 'confirmPassword', message: t.errors.passwordsNotMatch };
     // Camino de empresa: las casillas de empleador se aceptan al registrar la empresa.
     if (signupType === 'empresa') return null;
     if (ageSt === 'empty') return { field: 'birthDate', message: tx.birthDateRequired };
@@ -407,7 +408,7 @@ const AuthScreen: React.FC = () => {
 
       {!showChooser && (<>
       {/* Form */}
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Camino elegido (solo registro) */}
         {isSignup && (
           <div className="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/70 px-3.5 py-2.5 dark:border-blue-400/30 dark:bg-blue-500/10">
@@ -430,7 +431,15 @@ const AuthScreen: React.FC = () => {
           </div>
         )}
 
-        {isSignup && <h3 className={`${groupTitleCls} !mt-7`}>{tx.typeGroupAccount}</h3>}
+        {isSignup && signupType === 'candidato' && (
+          <>
+            <OAuthButtons compact />
+            <div className="relative" aria-hidden="true">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-dark-border" /></div>
+              <div className="relative flex justify-center text-sm"><span className="bg-white px-3 text-slate-600 dark:bg-dark-surface dark:text-dark-text-secondary">{tx.orWithEmail}</span></div>
+            </div>
+          </>
+        )}
 
         {/* Full Name (Signup only) */}
         {isSignup && (
@@ -478,45 +487,34 @@ const AuthScreen: React.FC = () => {
           <label htmlFor="password" className={labelCls}>
             {t.login.password}
           </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete={isLoginView ? 'current-password' : 'new-password'}
-            required
-            minLength={isLoginView ? 1 : 8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            {...fieldA11y('password')}
-            className={fieldCls}
-            placeholder="••••••••"
-            disabled={formLocked}
-          />
-          {isSignup && <p className={helpCls}>{t.signup.passwordRequirements}</p>}
-          {inlineError('password')}
-        </div>
-
-        {/* Confirm Password (Signup only) */}
-        {isSignup && (
-          <div>
-            <label htmlFor="confirmPassword" className={labelCls}>
-              {t.signup.confirmPassword}
-            </label>
+          <div className="relative">
             <input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete={isLoginView ? 'current-password' : 'new-password'}
               required
-              minLength={8}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              {...fieldA11y('confirmPassword')}
-              className={fieldCls}
+              minLength={isLoginView ? 1 : 8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              {...fieldA11y('password')}
+              className={`${fieldCls} pr-11`}
               placeholder="••••••••"
               disabled={formLocked}
             />
-            {inlineError('confirmPassword')}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? tx.hidePassword : tx.showPassword}
+              aria-pressed={showPassword}
+              disabled={formLocked}
+              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-slate-500 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-400 dark:hover:text-white"
+            >
+              {showPassword ? <EyeSlashIcon className="h-5 w-5" aria-hidden="true" /> : <EyeIcon className="h-5 w-5" aria-hidden="true" />}
+            </button>
           </div>
-        )}
+          {isSignup && <p className={helpCls}>{t.signup.passwordRequirements}</p>}
+          {inlineError('password')}
+        </div>
 
         {/* Remember Me & Forgot Password (Login only) */}
         {isLoginView && (
@@ -542,7 +540,6 @@ const AuthScreen: React.FC = () => {
         {/* Fecha de nacimiento y casillas legales (solo candidato) */}
         {isSignup && signupType === 'candidato' && (
           <>
-            <h3 className={`${groupTitleCls} !mt-8`}>{tx.typeGroupAbout}</h3>
             <div>
               <label htmlFor="birthDate" className={labelCls}>
                 {tx.birthDate}
@@ -564,7 +561,7 @@ const AuthScreen: React.FC = () => {
                 disabled={formLocked}
               />
               <p id="birthDate-help" className={helpCls}>
-                {tx.birthDateHelp} {tx.birthDateHelpShort}
+                {tx.birthDateHelpShort}
               </p>
               {ageSt === 'underage' && (
                 <p id="birthDate-msg" role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-red-700 dark:text-red-400">
@@ -583,7 +580,6 @@ const AuthScreen: React.FC = () => {
               )}
             </div>
 
-            <h3 className={`${groupTitleCls} !mt-8`}>{tx.typeGroupTerms}</h3>
             <LegalConsentFields
               kind="candidato"
               values={consents}
@@ -623,7 +619,7 @@ const AuthScreen: React.FC = () => {
       </form>
 
       {/* Divider */}
-      {(isLoginView || signupType === 'candidato') && (<>
+      {isLoginView && (<>
       <div className="relative my-7">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-200 dark:border-dark-border"></div>
@@ -655,7 +651,7 @@ const AuthScreen: React.FC = () => {
             setSuccessMessage(null);
             setEmail('');
             setPassword('');
-            setConfirmPassword('');
+            setShowPassword(false);
             setFullName('');
             setSignupType(null);
             setBirthDate('');

@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ArrowDownTrayIcon, CheckCircleIcon, ChevronDownIcon, ExclamationCircleIcon, ExclamationTriangleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ArrowTopRightOnSquareIcon, CheckCircleIcon, ChevronDownIcon, DocumentTextIcon, ExclamationCircleIcon, ExclamationTriangleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../shared/LoadingSpinner';
-import LegalTextBody from './LegalTextBody';
 import {
   GUARDIAN_KEY,
   ageStatus,
@@ -12,6 +11,7 @@ import {
   fetchMyBirthDate,
   fetchMyConsentPrefs,
   fetchPendingLegalDocuments,
+  legalPagePath,
   registerAcceptance,
   rememberUnderageNotice,
   saveConsentPrefs,
@@ -467,16 +467,26 @@ const LegalGate: React.FC<LegalGateProps> = ({ scope, companyId = null, children
   const total = requiredKeys.length;
   const checkedCount = requiredKeys.filter((k) => checked[k] === true).length;
 
+  // Cada documento se lee en su propia página (pestaña nueva): aquí solo se enlaza, no se incrusta el texto.
+  const docHref = (doc: PendingLegalDocument): string => {
+    switch (doc.tipo) {
+      case 'privacidad': return legalPagePath('privacy', lang);
+      case 'terminos_empleador': return legalPagePath('terms', lang, '?tipo=empleador');
+      case 'condiciones_publicacion': return legalPagePath('terms', lang, '?tipo=publicacion');
+      default: return legalPagePath('terms', lang);
+    }
+  };
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="legal-gate-title"
-      className="fixed inset-0 z-[100] flex flex-col bg-slate-50 dark:bg-dark-bg-primary"
+      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-slate-50 px-4 py-6 dark:bg-dark-bg-primary sm:items-center sm:py-10"
     >
-      <header className="border-b border-slate-200 bg-white dark:border-dark-border dark:bg-dark-bg-secondary">
-        <div className="mx-auto flex w-full max-w-3xl items-start gap-4 px-4 py-5 sm:px-6 sm:py-6">
-          <span aria-hidden="true" className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-cv-blue dark:bg-blue-500/15 dark:text-blue-300 sm:flex">
+      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 dark:border-dark-border dark:bg-dark-bg-secondary sm:p-8">
+        <div className="flex items-start gap-4">
+          <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-cv-blue dark:bg-blue-500/15 dark:text-blue-300">
             <ShieldCheckIcon className="h-6 w-6" />
           </span>
           <div className="min-w-0">
@@ -484,159 +494,152 @@ const LegalGate: React.FC<LegalGateProps> = ({ scope, companyId = null, children
               id="legal-gate-title"
               ref={headingRef}
               tabIndex={-1}
-              className="text-balance text-2xl font-extrabold tracking-tight text-slate-900 focus:outline-none dark:text-white sm:text-3xl"
+              className="text-balance text-xl font-bold tracking-tight text-slate-900 focus:outline-none dark:text-white sm:text-2xl"
             >
               {tx.gateTitle}
             </h1>
-            <p className="mt-2 max-w-[62ch] text-[15px] leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.gateIntro}</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-dark-text-secondary">{tx.gateIntro}</p>
           </div>
         </div>
-      </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-8 sm:px-6">
-          {upcoming.length > 0 && (
-            <div role="note" data-testid="legal-gate-upcoming" className="-mb-4 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-snug text-amber-950 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
-              {upcoming.map((n) => (
-                <p key={`${n.tipo}:${n.version}:${n.idioma}`} className="flex items-start gap-2.5">
-                  <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden="true" />
-                  <span>
-                    <span className="font-semibold">{nx.gateTitle}.</span>{' '}
-                    {fmt(nx.gateLine, { date: dateFmt(n.vigente_desde), version: n.version, titulo: n.titulo })}
-                  </span>
+        {upcoming.length > 0 && (
+          <div role="note" data-testid="legal-gate-upcoming" className="mt-5 space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-snug text-amber-950 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-100">
+            {upcoming.map((n) => (
+              <p key={`${n.tipo}:${n.version}:${n.idioma}`} className="flex items-start gap-2.5">
+                <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+                <span>
+                  <span className="font-semibold">{nx.gateTitle}.</span>{' '}
+                  {fmt(nx.gateLine, { date: dateFmt(n.vigente_desde), version: n.version, titulo: n.titulo })}
+                </span>
+              </p>
+            ))}
+          </div>
+        )}
+
+        <ul className="mt-6 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 dark:divide-dark-border dark:border-dark-border">
+          {pending.map((doc) => (
+            <li key={doc.documento_id} className="flex items-center gap-3 px-4 py-3">
+              <DocumentTextIcon className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <a
+                  href={docHref(doc)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded text-sm font-semibold text-slate-900 hover:text-cv-blue hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-white dark:hover:text-blue-300"
+                >
+                  <span>{doc.titulo}</span>
+                  <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="sr-only">({tx.gateNewTab})</span>
+                </a>
+                <p className="mt-0.5 text-xs tabular-nums text-slate-500 dark:text-dark-text-secondary">
+                  {fmt(tx.gateVersion, { version: doc.version })} · {fmt(tx.gateSince, { date: dateFmt(doc.vigente_desde) })}
                 </p>
+                {doc.borrador && (
+                  <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-900 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-200">
+                    <ExclamationTriangleIcon className="h-3 w-3" aria-hidden="true" />
+                    {tx.draftBadge}
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => downloadLegalText(doc)}
+                aria-label={`${tx.download}: ${doc.titulo}`}
+                title={tx.download}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              >
+                <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {requiredKeys.length > 0 && (
+          <fieldset className="mt-6 min-w-0">
+            <legend className="mb-2.5 flex w-full flex-wrap items-center justify-between gap-x-3 text-sm font-semibold text-slate-900 dark:text-white">
+              <span>{tx.gateConfirmGroup}</span>
+              <span className={`inline-flex items-center gap-1.5 text-[13px] font-medium tabular-nums ${checkedCount === total ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
+                {checkedCount === total ? <CheckCircleIcon className="h-4 w-4" aria-hidden="true" /> : <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />}
+                {fmt(tx.gateProgress, { n: checkedCount, total })}
+              </span>
+            </legend>
+            <div className="space-y-3">
+              {requiredKeys.map((key) => (
+                <div key={key} className="flex items-start gap-3">
+                  <input
+                    id={`gate-${key}`}
+                    type="checkbox"
+                    checked={checked[key] === true}
+                    onChange={(e) => setChecked((prev) => ({ ...prev, [key]: e.target.checked }))}
+                    disabled={saving}
+                    className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-slate-300 accent-cv-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:border-slate-500"
+                  />
+                  <label htmlFor={`gate-${key}`} className="cursor-pointer text-sm leading-snug text-slate-800 dark:text-slate-100">
+                    {casillaLabel(tx, key)}
+                  </label>
+                </div>
               ))}
             </div>
-          )}
-          {pending.map((doc) => (
-            <section key={doc.documento_id} aria-label={doc.titulo}>
-              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-                <div className="min-w-0">
-                  <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">{doc.titulo}</h2>
-                  <p className="mt-1 text-[13px] tabular-nums text-slate-600 dark:text-dark-text-secondary">
-                    {fmt(tx.gateVersion, { version: doc.version })} · {fmt(tx.gateSince, { date: dateFmt(doc.vigente_desde) })}
-                  </p>
-                  {doc.borrador && (
-                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200">
-                      <ExclamationTriangleIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                      {tx.draftBadge}
-                    </span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => downloadLegalText(doc)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:border-dark-border dark:bg-dark-bg-secondary dark:text-slate-200 dark:hover:bg-dark-bg-tertiary dark:focus-visible:ring-offset-dark-bg-primary"
-                >
-                  <ArrowDownTrayIcon className="h-4 w-4" aria-hidden="true" />
-                  {tx.download}
-                </button>
-              </div>
-              <div
-                tabIndex={0}
-                role="region"
-                aria-label={`${tx.gateRead}: ${doc.titulo}`}
-                className="mt-4 max-h-[22rem] overflow-y-auto rounded-xl border border-slate-200 bg-white px-5 py-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:border-dark-border dark:bg-dark-bg-secondary sm:px-6"
-              >
-                <LegalTextBody texto={doc.texto} />
-              </div>
-            </section>
-          ))}
+          </fieldset>
+        )}
 
-        </div>
-      </main>
-
-      <footer className="border-t border-slate-200 bg-white/95 shadow-[0_-12px_32px_-20px_rgba(15,23,42,.25)] backdrop-blur dark:border-dark-border dark:bg-dark-bg-secondary/95 dark:shadow-none">
-        <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6">
-          {requiredKeys.length > 0 && (
-            <fieldset className="min-w-0">
-              <legend className="mb-2 flex w-full flex-wrap items-center justify-between gap-x-3 text-sm font-semibold text-slate-900 dark:text-white">
-                <span>{tx.gateConfirmGroup}</span>
-                <span className={`inline-flex items-center gap-1.5 text-[13px] font-medium tabular-nums ${checkedCount === total ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-900 dark:text-amber-200'}`}>
-                  {checkedCount === total ? <CheckCircleIcon className="h-4 w-4" aria-hidden="true" /> : <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />}
-                  {fmt(tx.gateProgress, { n: checkedCount, total })}
-                </span>
-              </legend>
-              <div className="max-h-[32vh] space-y-2.5 overflow-y-auto pr-1">
-                {requiredKeys.map((key) => (
+        {scope === 'candidato' && (
+          <details className="group mt-4 rounded-lg border border-slate-200 dark:border-dark-border" data-testid="gate-optional">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-200 dark:hover:bg-white/5">
+              <span>{tx.optionalGroup}</span>
+              <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
+            </summary>
+            <div className="border-t border-slate-200 px-3 pb-3 pt-3 dark:border-dark-border">
+              <p className="mb-3 text-[13px] text-slate-600 dark:text-dark-text-secondary">{nx.gateOptHint}</p>
+              <div className="space-y-2.5">
+                {CANDIDATE_OPTIONAL.map((key) => (
                   <div key={key} className="flex items-start gap-3">
                     <input
-                      id={`gate-${key}`}
+                      id={`gate-opt-${key}`}
                       type="checkbox"
-                      checked={checked[key] === true}
-                      onChange={(e) => setChecked((prev) => ({ ...prev, [key]: e.target.checked }))}
+                      checked={optChecked[key] === true}
+                      onChange={(e) => {
+                        setOptChecked((prev) => ({ ...prev, [key]: e.target.checked }));
+                        setOptTouched((prev) => ({ ...prev, [key]: true }));
+                      }}
                       disabled={saving}
-                      className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-slate-300 accent-cv-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:border-dark-border dark:focus-visible:ring-offset-dark-bg-secondary"
+                      className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-slate-300 accent-cv-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:border-slate-500"
                     />
-                    <label htmlFor={`gate-${key}`} className="cursor-pointer text-sm leading-snug text-slate-800 dark:text-slate-100">
+                    <label htmlFor={`gate-opt-${key}`} className="cursor-pointer text-sm leading-snug text-slate-700 dark:text-slate-200">
                       {casillaLabel(tx, key)}
                     </label>
                   </div>
                 ))}
               </div>
-            </fieldset>
+            </div>
+          </details>
+        )}
+
+        <div aria-live="polite">
+          {saveError && (
+            <p role="alert" className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200">
+              <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>{tx.gateError}</span>
+            </p>
           )}
-
-          {scope === 'candidato' && (
-            <details className="group mt-3 rounded-lg border border-slate-200 dark:border-dark-border" data-testid="gate-optional">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:text-slate-200 dark:hover:bg-dark-bg-tertiary dark:focus-visible:ring-offset-dark-bg-secondary [&::-webkit-details-marker]:hidden">
-                <span>{tx.optionalGroup}</span>
-                <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
-              </summary>
-              <div className="border-t border-slate-200 px-3 pb-3 pt-3 dark:border-dark-border">
-                <p className="mb-3 text-[13px] text-slate-600 dark:text-dark-text-secondary">{nx.gateOptHint}</p>
-                <div className="max-h-[24vh] space-y-2.5 overflow-y-auto pr-1">
-                  {CANDIDATE_OPTIONAL.map((key) => (
-                    <div key={key} className="flex items-start gap-3">
-                      <input
-                        id={`gate-opt-${key}`}
-                        type="checkbox"
-                        checked={optChecked[key] === true}
-                        onChange={(e) => {
-                          setOptChecked((prev) => ({ ...prev, [key]: e.target.checked }));
-                          setOptTouched((prev) => ({ ...prev, [key]: true }));
-                        }}
-                        disabled={saving}
-                        className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-slate-300 accent-cv-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 dark:border-dark-border dark:focus-visible:ring-offset-dark-bg-secondary"
-                      />
-                      <label htmlFor={`gate-opt-${key}`} className="cursor-pointer text-sm leading-snug text-slate-700 dark:text-slate-200">
-                        {casillaLabel(tx, key)}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </details>
-          )}
-
-          <div aria-live="polite">
-            {saveError && (
-              <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-400/30 dark:bg-red-500/10 dark:text-red-200">
-                <ExclamationCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{tx.gateError}</span>
-              </p>
-            )}
-          </div>
-
-          <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={() => { void signOut(); }}
-              className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-300 dark:hover:text-white"
-            >
-              {tx.gateLogout}
-            </button>
-            <button
-              type="button"
-              onClick={handleAccept}
-              disabled={!allChecked || saving}
-              className="rounded-lg bg-cv-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-dark-bg-secondary"
-            >
-              {saving ? tx.gateAccepting : tx.gateAccept}
-            </button>
-          </div>
         </div>
-      </footer>
+
+        <button
+          type="button"
+          onClick={handleAccept}
+          disabled={!allChecked || saving}
+          className="mt-6 w-full rounded-lg bg-cv-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-cv-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving ? tx.gateAccepting : tx.gateAccept}
+        </button>
+        <button
+          type="button"
+          onClick={() => { void signOut(); }}
+          className="mx-auto mt-3 block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-cv-blue dark:text-slate-300 dark:hover:text-white"
+        >
+          {tx.gateLogout}
+        </button>
+      </div>
     </div>
   );
 };
