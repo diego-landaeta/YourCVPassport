@@ -128,9 +128,9 @@ const ModernCleanTemplate: React.FC<ModernCleanTemplateProps> = ({ data, color }
                                 <div key={exp.id} className="relative pl-10 pb-10 border-l-2 border-gray-200 dark:border-gray-700 last:border-l-0 last:pb-0">
                                     <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full ring-4 ring-white dark:ring-dark-bg-secondary -translate-x-[11px] shadow-lg" style={{ background: gradient }}></div>
                                     <div className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-dark-bg-tertiary rounded-xl p-6 hover:shadow-md transition-all">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
-                                            <p className="text-sm font-semibold px-4 py-1.5 rounded-lg whitespace-nowrap ml-4" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
+                                        <div className="flex flex-wrap justify-between items-start gap-x-4 gap-y-2 mb-3">
+                                            <h3 className="min-w-0 break-words text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
+                                            <p className="shrink-0 text-sm font-semibold px-4 py-1.5 rounded-lg whitespace-nowrap" style={{ backgroundColor: `${accentColor}20`, color: accentColor }}>
                                                 {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                             </p>
                                         </div>

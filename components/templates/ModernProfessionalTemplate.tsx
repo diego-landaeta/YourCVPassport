@@ -141,9 +141,9 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                         <div className="space-y-6">
                             {experiences.map(exp => (
                                 <div key={exp.id} className="border-l-4 pl-6 pb-6" style={{ borderColor: accentColor }}>
-                                    <div className="flex justify-between items-baseline mb-2">
+                                    <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-2">
                                         <h3 className="text-xl font-bold text-gray-800 dark:text-white">{exp.position}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap ml-4">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap shrink-0">
                                             {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                         </p>
                                     </div>
