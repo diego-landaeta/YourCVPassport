@@ -1,7 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import SeoLinks from './shared/SeoLinks';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LEGAL_ENTITY as E } from '../lib/legalDrafts';
@@ -9,7 +8,7 @@ import { LEGAL_ENTITY as E } from '../lib/legalDrafts';
 // Aviso legal (artículo 10 de la LSSI). /aviso-legal y /legal-notice (issue #10).
 // Página informativa: no requiere aceptación, por eso es estática como la de cookies
 // y no vive en documentos_legales. Datos del titular: LEGAL_ENTITY (lo vacío no se
-// muestra). Borrador pendiente de revisión legal.
+// muestra).
 
 const NOTICE_LAST_UPDATED = '2026-11-04';
 
@@ -19,7 +18,6 @@ const CONTENT = {
   es: {
     title: 'Aviso legal',
     metaDescription: 'Quién es el titular de YourCVPassport, condiciones de uso de la web, propiedad intelectual y responsabilidad.',
-    draft: 'Borrador pendiente de revisión legal.',
     lastUpdated: 'Última actualización',
     date: '4 de noviembre de 2026',
     intro: 'En cumplimiento del artículo 10 de la Ley 34/2002, de servicios de la sociedad de la información y de comercio electrónico (LSSI), te informamos de quién está detrás de YourCVPassport y de las condiciones generales de uso de esta web.',
@@ -66,7 +64,6 @@ const CONTENT = {
   en: {
     title: 'Legal notice',
     metaDescription: 'Who owns YourCVPassport, terms of use of the website, intellectual property and liability.',
-    draft: 'Draft pending legal review.',
     lastUpdated: 'Last updated',
     date: 'November 4, 2026',
     intro: 'In compliance with article 10 of Spanish Law 34/2002 on information society services and e-commerce (LSSI), we tell you who is behind YourCVPassport and the general terms of use of this website.',
@@ -127,10 +124,6 @@ const LegalNoticePage: React.FC = () => {
       </Helmet>
 
       <h1 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{c.title}</h1>
-      <p role="note" className="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-snug text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
-        <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-        <span>{c.draft}</span>
-      </p>
       <p className="mt-5 border-b border-slate-200 pb-6 text-sm text-slate-600 dark:border-dark-border dark:text-dark-text-secondary">
         {c.lastUpdated}: <time dateTime={NOTICE_LAST_UPDATED}>{c.date}</time>
       </p>

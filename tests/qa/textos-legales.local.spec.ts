@@ -1,9 +1,9 @@
 /**
  * Textos legales v2.0 de la bolsa de empleo (issue #10), con Supabase MOCKEADO:
  *
- *  1. Aviso legal (/aviso-legal y /legal-notice): datos del titular, aviso de borrador, enlaces a
+ *  1. Aviso legal (/aviso-legal y /legal-notice): datos del titular, sin aviso de borrador, enlaces a
  *     privacidad, condiciones y cookies, enlace en el pie y sin desbordamiento a 390 px.
- *  2. Política de cookies con el aviso de borrador.
+ *  2. Política de cookies sin aviso de borrador.
  *  3. Los borradores de lib/legalDrafts.ts se leen bien con LegalTextBody (títulos en negrita,
  *     apartados sangrados y UN solo #anexo en las condiciones de empleador).
  *  4. Admin: «Cargar el borrador preparado» rellena versión, título y texto, avisa de que es un
@@ -61,11 +61,11 @@ const ALL_DOCS = (): Row[] => (['privacidad', 'terminos_candidato', 'terminos_em
 
 test.describe('aviso legal', () => {
   for (const theme of ['light', 'dark'] as const) {
-    test(`es (${theme}): titular, borrador, enlaces y pie`, async ({ context, page }) => {
+    test(`es (${theme}): titular sin aviso de borrador, enlaces y pie`, async ({ context, page }) => {
       await boot(context, { theme });
       await page.goto('/aviso-legal');
       await expect(page.getByRole('heading', { level: 1, name: 'Aviso legal' })).toBeVisible({ timeout: 60_000 });
-      await expect(page.getByRole('note').filter({ hasText: 'Borrador pendiente de revisión legal.' })).toBeVisible();
+      await expect(page.getByText(/Borrador pendiente de revisión legal/)).toHaveCount(0);
       const owner = page.locator('dl');
       await expect(owner).toContainText('YourCVPassport');
       // Lo que falta en LEGAL_ENTITY no se pinta (ni filas vacías ni marcas)
@@ -83,7 +83,7 @@ test.describe('aviso legal', () => {
     await boot(context, { lang: 'en' });
     await page.goto('/legal-notice');
     await expect(page.getByRole('heading', { level: 1, name: 'Legal notice' })).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText('Draft pending legal review.')).toBeVisible();
+    await expect(page.getByText(/Draft pending legal review/)).toHaveCount(0);
     await expect(page.locator('dl')).toContainText('support@yourcvpassport.com');
     await expect(page.locator('body')).not.toContainText(/iseie|to be confirmed/i);
     await expect(page.locator('footer').getByRole('link', { name: 'Legal notice' })).toHaveAttribute('href', '/legal-notice');
@@ -92,11 +92,11 @@ test.describe('aviso legal', () => {
   });
 });
 
-test('politica de cookies: aviso de borrador y responsable', async ({ context, page }) => {
+test('politica de cookies: sin aviso de borrador y con responsable', async ({ context, page }) => {
   await boot(context);
   await page.goto('/politica-de-cookies');
   await expect(page.getByRole('heading', { level: 1, name: 'Política de cookies' })).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole('note').filter({ hasText: 'Borrador pendiente de revisión legal.' })).toBeVisible();
+  await expect(page.getByText(/Borrador pendiente de revisión legal/)).toHaveCount(0);
   await expect(page.getByText(/Responsable: YourCVPassport \(/)).toBeVisible();
 });
 
