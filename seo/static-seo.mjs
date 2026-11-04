@@ -195,6 +195,16 @@ export const STATIC_SEO = {
     description: "What YourCVPassport stores in your browser, why it does so, and how to change your cookie choices at any time from the settings of the site.",
     h1: "Cookie Policy and Browser Storage",
   },
+  "/aviso-legal": {
+    title: "Aviso Legal y Datos del Titular del Sitio - YourCVPassport",
+    description: "Titular de YourCVPassport, datos registrales y de contacto, condiciones de uso de la web, propiedad intelectual y responsabilidad, explicados con claridad.",
+    h1: "Aviso Legal y Datos del Titular",
+  },
+  "/legal-notice": {
+    title: "Legal Notice and Website Owner Details - YourCVPassport",
+    description: "Who owns YourCVPassport, its registration and contact details, the terms of use of the website, intellectual property and liability, explained clearly.",
+    h1: "Legal Notice and Website Owner Details",
+  },
   "/comunidad": {
     title: "Comunidad de Profesionales Verificados - YourCVPassport",
     description: "Descubre publicaciones de profesionales verificados: logros, nuevos empleos, eventos y novedades de la comunidad de YourCVPassport. Únete y comparte.",
@@ -248,8 +258,8 @@ export const MAIN_LINKS = {
 };
 
 export const LEGAL_LINKS = {
-  es: [['/privacidad', 'Política de privacidad'], ['/terminos', 'Términos y condiciones'], ['/politica-de-cookies', 'Política de cookies']],
-  en: [['/privacy', 'Privacy Policy'], ['/terms', 'Terms and Conditions'], ['/cookie-policy', 'Cookie policy']],
+  es: [['/privacidad', 'Política de privacidad'], ['/terminos', 'Términos y condiciones'], ['/politica-de-cookies', 'Política de cookies'], ['/aviso-legal', 'Aviso legal']],
+  en: [['/privacy', 'Privacy Policy'], ['/terms', 'Terms and Conditions'], ['/cookie-policy', 'Cookie policy'], ['/legal-notice', 'Legal notice']],
 };
 
 export const COPY = {

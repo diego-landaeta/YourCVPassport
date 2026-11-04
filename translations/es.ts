@@ -131,7 +131,6 @@ export const translations = {
     companies: {
         title: 'Empresas que confían en la verificación de YourCVPassport',
         logos: [
-            { name: "ISEIE", url: "https://iseie.com/", logoUrl: "https://iseie.com/wp-content/uploads/2024/11/LOGO-PAIS-BANDERA-ESPANA-0-00-00-00-e1738499416780.png" },
             { name: "Psiko Aprende", url: "https://psikoaprende.com/", logoUrl: "https://psikoaprende.com/wp-content/uploads/2024/11/LOGO-PSIKO-APRENDE-PNG-1-e1730841803106.png", logoUrlLight: "https://psikoaprende.com/wp-content/uploads/2024/03/LOGO-PSIKO-APRENDE-PNG-2-e1730843042102.png" },
             { name: "Navalis University", url: "https://navalis.university/", logoUrl: "/partners/navalis.webp", logoUrlLight: "/partners/navalis-negro.webp" },
             { name: "ISEIH", url: "https://iseih.com/", logoUrl: "/partners/iseih.webp" },
@@ -222,11 +221,12 @@ export const translations = {
         solutions: { title: 'Soluciones', professionals: 'Para profesionales', companies: 'Para empresas', pricing: 'Precios' },
         resources: { title: 'Recursos', blog: 'Blog', help: 'Centro de ayuda', status: 'Estado del sistema' },
         company: { title: 'Empresa', about: 'Sobre nosotros', press: 'Prensa', contact: 'Contacto' },
-        legal: { title: 'Legal', privacy: 'Privacidad', terms: 'Términos', cookies: 'Cookies', settings: 'Configurar cookies' },
+        legal: { title: 'Legal', privacy: 'Privacidad', terms: 'Términos', cookies: 'Cookies', notice: 'Aviso legal', settings: 'Configurar cookies' },
         links: {
             privacy: '/privacidad',
             terms: '/terminos',
             cookies: '/politica-de-cookies',
+            notice: '/aviso-legal',
             overview: '/producto/resumen',
             stamps: '/producto/sellos',
             ats: '/producto/ats',
@@ -3251,7 +3251,9 @@ export const translations = {
             "privacy": "Política de privacidad",
             "privacidad": "Política de privacidad",
             "cookie-policy": "Política de cookies",
-            "politica-de-cookies": "Política de cookies"
+            "politica-de-cookies": "Política de cookies",
+            "legal-notice": "Aviso legal",
+            "aviso-legal": "Aviso legal"
         }
     },
     onboardingWizard: {

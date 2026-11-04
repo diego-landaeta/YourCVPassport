@@ -60,13 +60,14 @@ const Footer: React.FC = () => {
               <li><Link to={getPath(t.footer.links.contact)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.company.contact}</Link></li>
             </ul>
           </div>
-          {/* Legal (issue #11, YCV-015): privacidad, términos, cookies y volver a decidir. */}
+          {/* Legal (issue #11, YCV-015): privacidad, términos, cookies, aviso legal (#10) y volver a decidir. */}
           <div>
             <h4 className="font-semibold tracking-wider uppercase text-gray-100 dark:text-dark-text-primary">{t.footer.legal.title}</h4>
             <ul className="mt-3 space-y-1 text-sm">
               <li><Link to={getPath(t.footer.links.privacy)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.privacy}</Link></li>
               <li><Link to={getPath(t.footer.links.terms)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.terms}</Link></li>
               <li><Link to={getPath(t.footer.links.cookies)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.cookies}</Link></li>
+              <li><Link to={getPath(t.footer.links.notice)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.notice}</Link></li>
               <li><button type="button" onClick={openCookieSettings} className="py-1.5 text-left text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.legal.settings}</button></li>
             </ul>
           </div>

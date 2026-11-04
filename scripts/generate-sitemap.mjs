@@ -107,6 +107,7 @@ const ROUTE_META = {
   '/terms': { priority: '0.3', changefreq: 'yearly' },
   '/privacy': { priority: '0.3', changefreq: 'yearly' },
   '/cookie-policy': { priority: '0.3', changefreq: 'yearly' },
+  '/legal-notice': { priority: '0.3', changefreq: 'yearly' },
 };
 const DEFAULT_META = { priority: '0.7', changefreq: 'weekly' };
 

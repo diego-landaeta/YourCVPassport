@@ -25,6 +25,7 @@ import {
   type LegalIdioma,
   type LegalVersionStatus,
 } from '../../lib/legalAdminApi';
+import { LEGAL_DRAFT_VERSION, getLegalDraft, isDraftLegalText } from '../../lib/legalDrafts';
 import LegalTextBody from '../legal/LegalTextBody';
 import { a11y, btnGhostCls, btnPrimaryCls, btnSecondaryCls, btnSmallCls, Field, inputCls } from '../company/jobwizard/fields';
 import { useLegalAdminText } from './legalAdminText';
@@ -66,6 +67,7 @@ const draftErrorText = (e: LegalDraftError, t: TextKey): string => {
     case 'version_duplicate': return t.lErrVersionDuplicate;
     case 'titulo_required': return t.lErrTituloRequired;
     case 'texto_required': return t.lErrTextoRequired;
+    case 'texto_borrador': return t.lErrTextoBorrador;
     case 'fecha_required': return t.lErrFechaRequired;
     case 'fecha_invalid': return t.lErrFechaInvalid;
     default: return fmt(t.lErrFechaEarly, { days: LEGAL_MIN_NOTICE_DAYS });
@@ -213,6 +215,16 @@ const LegalVersionsManagement: React.FC = () => {
     }
   };
 
+  // Borrador v2.0 preparado en el repo (lib/legalDrafts.ts) para este tipo e idioma.
+  const prepared = getLegalDraft(draft.tipo, draft.idioma);
+  const loadPrepared = () => {
+    if (!prepared) return;
+    const taken = rows.some((r) => r.tipo === draft.tipo && r.idioma === draft.idioma && r.version === LEGAL_DRAFT_VERSION);
+    patch({ texto: prepared.texto, titulo: prepared.titulo, version: (draft.version.trim() || taken) ? draft.version : LEGAL_DRAFT_VERSION });
+    toast.success(fmt(t.lFromPreparedDone, { version: LEGAL_DRAFT_VERSION }));
+  };
+  const textIsDraft = isDraftLegalText(draft.texto);
+
   const hasCurrent = rows.some((r) => r.tipo === draft.tipo && r.idioma === draft.idioma && statuses.get(r.id) === 'vigente');
 
   const review = (e: React.FormEvent) => {
@@ -358,6 +370,11 @@ const LegalVersionsManagement: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{t.lFText} <span className="text-red-600 dark:text-red-400" aria-hidden="true">*</span></p>
                   <div className="flex flex-wrap items-center gap-2">
+                    {prepared && (
+                      <button type="button" onClick={loadPrepared} className={btnGhostCls} data-testid="legal-load-prepared">
+                        {fmt(t.lFromPrepared, { version: LEGAL_DRAFT_VERSION })}
+                      </button>
+                    )}
                     {hasCurrent && (
                       <button type="button" onClick={() => void copyCurrent()} disabled={copying} className={btnGhostCls}>
                         {copying ? t.loading : t.lFromCurrent}
@@ -380,6 +397,13 @@ const LegalVersionsManagement: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {textIsDraft && (
+                  <p role="note" data-testid="legal-draft-note" className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-snug text-amber-950 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
+                    <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+                    <span>{t.lDraftTextNote}</span>
+                  </p>
+                )}
 
                 {mode === 'write' ? (
                   <div className="mt-2">

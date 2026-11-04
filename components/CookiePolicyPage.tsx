@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import SeoLinks from './shared/SeoLinks';
 import { useLanguage } from '../contexts/LanguageContext';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { openCookieSettings } from '../lib/consent';
 
 // Política de cookies (issue #11, YCV-001 y YCV-015). /politica-de-cookies y
@@ -16,6 +17,7 @@ type Row = [name: string, purpose: string, duration: string];
 const CONTENT = {
   es: {
     title: 'Política de cookies',
+    draft: 'Borrador pendiente de revisión legal.',
     metaDescription: 'Qué guarda YourCVPassport en tu navegador, para qué y cómo cambiar tu decisión.',
     lastUpdated: 'Última actualización',
     date: '29 de octubre de 2026',
@@ -48,10 +50,11 @@ const CONTENT = {
     changeTitle: '4. Cambiar tu decisión',
     changeText: 'Puedes cambiarla cuando quieras con el botón «Configurar cookies» de esta página o del pie de la web. También puedes borrar el almacenamiento desde la configuración de tu navegador.',
     contactTitle: '5. Contacto',
-    contactText: 'Para cualquier duda sobre esta política, escríbenos a support@yourcvpassport.com.',
+    contactText: 'Responsable: YourCVPassport (todos sus datos en el aviso legal). Para cualquier duda sobre esta política, escríbenos a support@yourcvpassport.com.',
   },
   en: {
     title: 'Cookie policy',
+    draft: 'Draft pending legal review.',
     metaDescription: 'What YourCVPassport stores in your browser, why, and how to change your choice.',
     lastUpdated: 'Last updated',
     date: 'October 29, 2026',
@@ -84,7 +87,7 @@ const CONTENT = {
     changeTitle: '4. Changing your choice',
     changeText: 'You can change it at any time with the "Cookie settings" button on this page or in the site footer. You can also clear the storage from your browser settings.',
     contactTitle: '5. Contact',
-    contactText: 'For any question about this policy, write to support@yourcvpassport.com.',
+    contactText: 'Controller: YourCVPassport (full details in the legal notice). For any question about this policy, write to support@yourcvpassport.com.',
   },
 };
 
@@ -121,6 +124,10 @@ const CookiePolicyPage: React.FC = () => {
         <meta name="description" content={c.metaDescription} />
       </Helmet>
       <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-dark-text-primary">{c.title}</h1>
+      <p role="note" className="mb-4 mt-4 flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm leading-snug text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100">
+        <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+        <span>{c.draft}</span>
+      </p>
       <p className="mb-6 text-sm text-gray-500 dark:text-dark-text-tertiary">
         {c.lastUpdated}: <time dateTime={POLICY_LAST_UPDATED}>{c.date}</time>
       </p>

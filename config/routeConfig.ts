@@ -27,6 +27,7 @@ const AllTemplatesPreview = lazy(() => import('../components/pages/AllTemplatesP
 const TermsPage = lazy(() => import('../components/TermsPage'));
 const PrivacyPage = lazy(() => import('../components/PrivacyPage'));
 const CookiePolicyPage = lazy(() => import('../components/CookiePolicyPage'));
+const LegalNoticePage = lazy(() => import('../components/LegalNoticePage'));
 
 interface RouteConfig {
   path_en: string;
@@ -62,6 +63,7 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   TermsPage,
   PrivacyPage,
   CookiePolicyPage,
+  LegalNoticePage,
 };
 
 const pathMappings = [
@@ -96,6 +98,7 @@ const pathMappings = [
   { en: 'terms', es: 'terminos', componentName: 'TermsPage' },
   { en: 'privacy', es: 'privacidad', componentName: 'PrivacyPage' },
   { en: 'cookie-policy', es: 'politica-de-cookies', componentName: 'CookiePolicyPage' },
+  { en: 'legal-notice', es: 'aviso-legal', componentName: 'LegalNoticePage' },
 ];
 
 /**

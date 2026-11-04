@@ -10,6 +10,7 @@
  */
 import { supabase } from '../supabase/client';
 import type { LegalTipo } from './legal';
+import { isDraftLegalText } from './legalDrafts';
 
 export const LEGAL_MIN_NOTICE_DAYS = 15;
 export const LEGAL_TIPOS: readonly LegalTipo[] = ['terminos_candidato', 'terminos_empleador', 'condiciones_publicacion', 'privacidad', 'cookies'];
@@ -186,7 +187,7 @@ export interface LegalDraft {
 
 export type LegalDraftError =
   | 'version_required' | 'version_long' | 'version_duplicate'
-  | 'titulo_required' | 'texto_required' | 'fecha_required' | 'fecha_invalid' | 'fecha_early';
+  | 'titulo_required' | 'texto_required' | 'texto_borrador' | 'fecha_required' | 'fecha_invalid' | 'fecha_early';
 
 export type LegalDraftField = 'version' | 'titulo' | 'texto' | 'vigente_desde';
 
@@ -202,6 +203,8 @@ export function validateLegalDraft(
   else if (rows.some((r) => r.tipo === d.tipo && r.idioma === d.idioma && r.version === v)) err.version = 'version_duplicate';
   if (!d.titulo.trim()) err.titulo = 'titulo_required';
   if (!d.texto.trim()) err.texto = 'texto_required';
+  // Un borrador pendiente de revisión legal (línea «BORRADOR…» o «[POR CONFIRMAR…]») no se publica.
+  else if (isDraftLegalText(d.texto)) err.texto = 'texto_borrador';
   if (!d.vigente_desde) err.vigente_desde = 'fecha_required';
   else {
     const t = new Date(d.vigente_desde).getTime();

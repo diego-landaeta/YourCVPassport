@@ -204,6 +204,14 @@ export const STATIC_META_PAIRS = [
     },
   },
   {
+    es: '/aviso-legal', en: '/legal-notice',
+    title: { es: 'Aviso legal | YourCVPassport', en: 'Legal notice | YourCVPassport' },
+    description: {
+      es: 'Quién es el titular de YourCVPassport, condiciones de uso de la web, propiedad intelectual y responsabilidad.',
+      en: 'Who owns YourCVPassport, terms of use of the website, intellectual property and liability.',
+    },
+  },
+  {
     es: '/empleos', en: '/jobs',
     title: { es: 'Ofertas de empleo de empresas verificadas - YourCVPassport', en: 'Job openings from verified companies - YourCVPassport' },
     description: {
