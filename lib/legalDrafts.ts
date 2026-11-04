@@ -27,21 +27,26 @@ import type { LegalTipo } from './legal';
  */
 
 /**
- * Datos del titular de YourCVPassport. Es un proyecto propio: estos datos NO salen de
- * ningún otro proyecto. Se rellenan aquí (y solo aquí) con los datos reales:
- *   name: razón social («Nombre, S.L.») o nombre completo si es persona física.
- *   taxId: NIF/CIF.  address: domicilio fiscal («Calle 1, 46000 Ciudad»).
- *   registry: solo si es sociedad («Registro Mercantil de X, tomo …, libro …, folio …,
- *     sección …, hoja …, inscripción …»).
- * Lo vacío no se muestra en ningún texto. Mientras falten taxId o address,
- * isDraftLegalText impide publicar (el aviso legal de la LSSI los exige).
+ * Datos del titular de YourCVPassport, en un solo sitio (los usan todos los textos).
+ * Titular: ISEIE Innovation School, S.L., según YourCVPassport#10 («Ya decidido», Manuel,
+ * 08/10/2026), confirmado el 04/11/2026. NIF, domicilio y datos registrales: los de sus
+ * facturas (CRM-ISEIE, _iseie_invoice_template.js).
+ *   name: razón social o nombre completo si es persona física.
+ *   registry: solo si es sociedad. Lo vacío no se muestra en ningún texto.
+ * Mientras falten taxId o address, isDraftLegalText impide publicar (LSSI, art. 10).
  * No poner datos de ejemplo: un NIF inventado con formato válido es de otra empresa.
  */
 export const LEGAL_ENTITY = {
-  name: 'YourCVPassport',
-  taxId: '',
-  address: { es: '', en: '' },
-  registry: { es: '', en: '' },
+  name: 'ISEIE Innovation School, S.L.',
+  taxId: 'B67799247',
+  address: {
+    es: 'Av. Aragón 30-8-5º, 46021 Valencia',
+    en: 'Av. Aragón 30-8-5º, 46021 Valencia, Spain',
+  },
+  registry: {
+    es: 'Registro Mercantil de Valencia, tomo 11081, libro 8359, folio 197, sección 1, hoja V201399, inscripción 1.ª',
+    en: 'Valencia Companies Register, volume 11081, book 8359, folio 197, section 1, sheet V201399, entry 1',
+  },
   email: 'support@yourcvpassport.com',
   web: 'https://yourcvpassport.com',
 } as const;
@@ -49,7 +54,7 @@ export const LEGAL_ENTITY = {
 /** ¿Están los datos que exige el artículo 10 de la LSSI? */
 export const LEGAL_ENTITY_COMPLETE = Boolean(LEGAL_ENTITY.taxId && LEGAL_ENTITY.address.es && LEGAL_ENTITY.address.en);
 
-export const LEGAL_DRAFT_VERSION = '2.1';
+export const LEGAL_DRAFT_VERSION = '2.2';
 
 /**
  * ¿Es todavía un borrador? Primera línea «BORRADOR…» / «DRAFT…», alguna marca
@@ -73,15 +78,17 @@ const WHO_ES = `${E.name}${E.taxId ? ` (NIF ${E.taxId})` : ''}${E.address.es ? `
 const WHO_EN = `${E.name}${E.taxId ? ` (tax ID ${E.taxId})` : ''}${E.address.en ? `, ${E.address.en}` : ''}${E.registry.en ? `, registered in the ${E.registry.en}` : ''}. Contact: ${E.email}.`;
 
 // «YourCVPassport es un servicio de …» solo si el titular no es la propia marca.
-const OWNER_IS_BRAND = E.name === 'YourCVPassport';
+const OWNER_IS_BRAND = (E.name as string) === 'YourCVPassport';
 const ABOUT_ES = OWNER_IS_BRAND
   ? `YourCVPassport (yourcvpassport.com). Contacto: ${E.email}.`
-  : `YourCVPassport (yourcvpassport.com) es un servicio de ${WHO_ES}`;
+  : `YourCVPassport (yourcvpassport.com) es un servicio de ${WHO_ES} En estas condiciones, «YourCVPassport» y «nosotros» se refieren a este titular.`;
 const ABOUT_EN = OWNER_IS_BRAND
   ? `YourCVPassport (yourcvpassport.com). Contact: ${E.email}.`
-  : `YourCVPassport (yourcvpassport.com) is a service of ${WHO_EN}`;
-const SERVICE_OF_ES = OWNER_IS_BRAND ? '' : `, servicio de ${E.name}`;
-const SERVICE_OF_EN = OWNER_IS_BRAND ? '' : `, a service of ${E.name}`;
+  : `YourCVPassport (yourcvpassport.com) is a service of ${WHO_EN} In these terms, "YourCVPassport", "we" and "us" refer to this owner.`;
+// Sin el punto final de «S.L.»: la frase ya cierra con punto.
+const NAME_NO_DOT = E.name.replace(/\.$/, '');
+const SERVICE_OF_ES = OWNER_IS_BRAND ? '' : `, servicio de ${NAME_NO_DOT}`;
+const SERVICE_OF_EN = OWNER_IS_BRAND ? '' : `, a service of ${NAME_NO_DOT}`;
 
 // ---------------------------------------------------------------------------
 // Política de privacidad
@@ -89,7 +96,7 @@ const SERVICE_OF_EN = OWNER_IS_BRAND ? '' : `, a service of ${E.name}`;
 const PRIVACY_ES = lines(
   HEAD_ES,
   'Esta política explica qué datos personales tratamos en YourCVPassport, para qué, con quién los compartimos, cuánto tiempo los guardamos y cómo puedes ejercer tus derechos. Se aplica a candidatos, a las personas que gestionan una cuenta de empresa y a quien visita un CV público o nos escribe.',
-  `1. Responsable del tratamiento. ${WHO_ES} No hemos designado delegado de protección de datos porque no estamos obligados a ello: para cualquier cuestión sobre tus datos, escríbenos a support@yourcvpassport.com.`,
+  `1. Responsable del tratamiento. ${WHO_ES} En esta política, «YourCVPassport» y «nosotros» se refieren a este responsable. No hemos designado delegado de protección de datos porque no estamos obligados a ello: para cualquier cuestión sobre tus datos, escríbenos a support@yourcvpassport.com.`,
   '2. Datos de tu cuenta. Nombre, correo electrónico, contraseña (se guarda cifrada y nadie puede leerla), idioma de registro y fecha de nacimiento. La fecha solo sirve para comprobar la edad mínima: no se muestra en tu perfil ni la ven las empresas. Si entras con Google o LinkedIn, recibimos de ese servicio tu nombre, tu correo y tu foto.',
   '3. Datos de tu CV y tu perfil. Lo que tú decidas incluir: foto, titular, resumen, ubicación, experiencia, formación, habilidades, idiomas, certificaciones, enlaces, preferencias de empleo (por ejemplo, el salario que buscas) y los datos de contacto que quieras mostrar. Los campos opcionales, como el género, puedes dejarlos en blanco. No hace falta incluir datos de salud, religión, ideología, afiliación sindical u origen étnico; si decides hacerlo, los tratamos con tu consentimiento explícito y solo para mostrarlos en tu CV.',
   '4. Sellos de verificación. Para verificar tu correo o tu teléfono te enviamos un código. Para verificar formación, empleo, certificaciones, idiomas o identidad puedes subir documentos (títulos, certificados, contratos o un documento de identidad). Los revisa nuestro equipo, no se publican y en tu CV solo se ve el sello.',
@@ -134,7 +141,7 @@ const PRIVACY_ES = lines(
 const PRIVACY_EN = lines(
   HEAD_EN,
   'This policy explains which personal data we process on YourCVPassport, why, who we share it with, how long we keep it and how you can exercise your rights. It applies to candidates, to the people who manage a company account and to anyone who visits a public CV or writes to us.',
-  `1. Data controller. ${WHO_EN} We have not appointed a data protection officer because we are not required to: for any question about your data, write to support@yourcvpassport.com.`,
+  `1. Data controller. ${WHO_EN} In this policy, "YourCVPassport", "we" and "us" refer to this controller. We have not appointed a data protection officer because we are not required to: for any question about your data, write to support@yourcvpassport.com.`,
   '2. Your account data. Name, email address, password (stored encrypted; nobody can read it), sign-up language and date of birth. The date is only used to check the minimum age: it is not shown on your profile and companies cannot see it. If you sign in with Google or LinkedIn, we receive your name, email and photo from that service.',
   '3. Your CV and profile data. Whatever you decide to include: photo, headline, summary, location, experience, education, skills, languages, certifications, links, job preferences (for example, the salary you are looking for) and the contact details you choose to show. Optional fields, such as gender, can be left blank. You do not need to include data about health, religion, beliefs, trade union membership or ethnic origin; if you decide to, we process it with your explicit consent and only to show it on your CV.',
   '4. Verification stamps. To verify your email or phone we send you a code. To verify education, employment, certifications, languages or identity you can upload documents (degrees, certificates, contracts or an identity document). Our team reviews them, they are never published and your CV only shows the stamp.',

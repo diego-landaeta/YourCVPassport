@@ -48,7 +48,7 @@ const CONTENT = {
     changeTitle: '4. Cambiar tu decisión',
     changeText: 'Puedes cambiarla cuando quieras con el botón «Configurar cookies» de esta página o del pie de la web. También puedes borrar el almacenamiento desde la configuración de tu navegador.',
     contactTitle: '5. Contacto',
-    contactText: 'Responsable: YourCVPassport (todos sus datos en el aviso legal). Para cualquier duda sobre esta política, escríbenos a support@yourcvpassport.com.',
+    contactText: 'Responsable: ISEIE Innovation School, S.L., titular de YourCVPassport (todos sus datos en el aviso legal). Para cualquier duda sobre esta política, escríbenos a support@yourcvpassport.com.',
   },
   en: {
     title: 'Cookie policy',
@@ -84,7 +84,7 @@ const CONTENT = {
     changeTitle: '4. Changing your choice',
     changeText: 'You can change it at any time with the "Cookie settings" button on this page or in the site footer. You can also clear the storage from your browser settings.',
     contactTitle: '5. Contact',
-    contactText: 'Controller: YourCVPassport (full details in the legal notice). For any question about this policy, write to support@yourcvpassport.com.',
+    contactText: 'Controller: ISEIE Innovation School, S.L., owner of YourCVPassport (full details in the legal notice). For any question about this policy, write to support@yourcvpassport.com.',
   },
 };
 

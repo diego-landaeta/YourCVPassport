@@ -67,10 +67,11 @@ test.describe('aviso legal', () => {
       await expect(page.getByRole('heading', { level: 1, name: 'Aviso legal' })).toBeVisible({ timeout: 60_000 });
       await expect(page.getByText(/Borrador pendiente de revisión legal/)).toHaveCount(0);
       const owner = page.locator('dl');
-      await expect(owner).toContainText('YourCVPassport');
-      // Lo que falta en LEGAL_ENTITY no se pinta (ni filas vacías ni marcas)
+      await expect(owner).toContainText('ISEIE Innovation School, S.L.');
+      await expect(owner).toContainText('B67799247');
+      await expect(owner).toContainText('Av. Aragón 30-8-5º, 46021 Valencia');
+      await expect(owner).toContainText('tomo 11081, libro 8359, folio 197, sección 1, hoja V201399');
       await expect(owner).not.toContainText('CONFIRMAR');
-      await expect(page.locator('body')).not.toContainText(/iseie/i);
       await expect(owner.getByRole('link', { name: 'support@yourcvpassport.com' })).toHaveAttribute('href', 'mailto:support@yourcvpassport.com');
       await expect(page.getByRole('link', { name: 'Política de privacidad' }).first()).toHaveAttribute('href', '/privacidad');
       await expect(page.getByRole('link', { name: 'Política de cookies' }).first()).toHaveAttribute('href', '/politica-de-cookies');
@@ -85,7 +86,8 @@ test.describe('aviso legal', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Legal notice' })).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText(/Draft pending legal review/)).toHaveCount(0);
     await expect(page.locator('dl')).toContainText('support@yourcvpassport.com');
-    await expect(page.locator('body')).not.toContainText(/iseie|to be confirmed/i);
+    await expect(page.locator('dl')).toContainText('Valencia Companies Register, volume 11081');
+    await expect(page.locator('body')).not.toContainText(/to be confirmed/i);
     await expect(page.locator('footer').getByRole('link', { name: 'Legal notice' })).toHaveAttribute('href', '/legal-notice');
     await page.setViewportSize({ width: 390, height: 900 });
     await noHorizontalOverflow(page);
@@ -97,7 +99,7 @@ test('politica de cookies: sin aviso de borrador y con responsable', async ({ co
   await page.goto('/politica-de-cookies');
   await expect(page.getByRole('heading', { level: 1, name: 'Política de cookies' })).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText(/Borrador pendiente de revisión legal/)).toHaveCount(0);
-  await expect(page.getByText(/Responsable: YourCVPassport \(/)).toBeVisible();
+  await expect(page.getByText(/Responsable: ISEIE Innovation School, S\.L\., titular de YourCVPassport/)).toBeVisible();
 });
 
 test.describe('borradores v2.0 en las paginas legales', () => {
@@ -148,7 +150,7 @@ test.describe('admin: cargar el borrador preparado', () => {
     await page.getByTestId('legal-load-prepared').click();
     await expect(page.locator('#legal-version')).toHaveValue(LEGAL_DRAFT_VERSION);
     await expect(page.locator('#legal-titulo')).toHaveValue('Política de Privacidad');
-    await expect(page.locator('#legal-texto')).toHaveValue(/^BORRADOR v2.1/);
+    await expect(page.locator('#legal-texto')).toHaveValue(/^BORRADOR v2.2/);
     await expect(page.getByTestId('legal-draft-note')).toBeVisible();
 
     await page.getByRole('button', { name: 'Vista previa' }).click();
@@ -159,16 +161,19 @@ test.describe('admin: cargar el borrador preparado', () => {
     await expect(page.getByText(/El texto sigue siendo un borrador/)).toBeVisible();
     await expect(page.getByTestId('legal-confirm')).toHaveCount(0);
 
-    // Quitar la línea BORRADOR no basta: faltan el NIF y el domicilio del titular
+    // Sin la línea BORRADOR (y con los datos del titular completos) ya pasa a la confirmación,
+    // pero no publica nada hasta confirmar
     const texto = await page.locator('#legal-texto').inputValue();
     await page.locator('#legal-texto').fill(texto.split('\n').slice(1).join('\n'));
     await page.getByRole('button', { name: 'Revisar y publicar' }).click();
-    await expect(page.getByText(/El texto sigue siendo un borrador/)).toBeVisible();
+    await expect(page.getByTestId('legal-confirm')).toBeVisible();
+    await expect(page.getByText(/El texto sigue siendo un borrador/)).toHaveCount(0);
     expect(rpcCalls.filter((f) => f === 'legal_publicar_version')).toHaveLength(0);
+    await page.getByRole('button', { name: 'Seguir editando' }).click();
 
     // En inglés también hay borrador preparado
     await page.locator('#legal-idioma').selectOption('en');
     await page.getByTestId('legal-load-prepared').click();
-    await expect(page.locator('#legal-texto')).toHaveValue(/^DRAFT v2.1/);
+    await expect(page.locator('#legal-texto')).toHaveValue(/^DRAFT v2.2/);
   });
 });
