@@ -49,7 +49,7 @@ export const LEGAL_ENTITY = {
 /** ¿Están los datos que exige el artículo 10 de la LSSI? */
 export const LEGAL_ENTITY_COMPLETE = Boolean(LEGAL_ENTITY.taxId && LEGAL_ENTITY.address.es && LEGAL_ENTITY.address.en);
 
-export const LEGAL_DRAFT_VERSION = '2.0';
+export const LEGAL_DRAFT_VERSION = '2.1';
 
 /**
  * ¿Es todavía un borrador? Primera línea «BORRADOR…» / «DRAFT…», alguna marca
@@ -71,6 +71,17 @@ const HEAD_EN = `DRAFT v${LEGAL_DRAFT_VERSION} – pending legal review. Do not 
 
 const WHO_ES = `${E.name}${E.taxId ? ` (NIF ${E.taxId})` : ''}${E.address.es ? `, ${E.address.es}` : ''}${E.registry.es ? `, inscrita en el ${E.registry.es}` : ''}. Contacto: ${E.email}.`;
 const WHO_EN = `${E.name}${E.taxId ? ` (tax ID ${E.taxId})` : ''}${E.address.en ? `, ${E.address.en}` : ''}${E.registry.en ? `, registered in the ${E.registry.en}` : ''}. Contact: ${E.email}.`;
+
+// «YourCVPassport es un servicio de …» solo si el titular no es la propia marca.
+const OWNER_IS_BRAND = E.name === 'YourCVPassport';
+const ABOUT_ES = OWNER_IS_BRAND
+  ? `YourCVPassport (yourcvpassport.com). Contacto: ${E.email}.`
+  : `YourCVPassport (yourcvpassport.com) es un servicio de ${WHO_ES}`;
+const ABOUT_EN = OWNER_IS_BRAND
+  ? `YourCVPassport (yourcvpassport.com). Contact: ${E.email}.`
+  : `YourCVPassport (yourcvpassport.com) is a service of ${WHO_EN}`;
+const SERVICE_OF_ES = OWNER_IS_BRAND ? '' : `, servicio de ${E.name}`;
+const SERVICE_OF_EN = OWNER_IS_BRAND ? '' : `, a service of ${E.name}`;
 
 // ---------------------------------------------------------------------------
 // Política de privacidad
@@ -170,7 +181,7 @@ const PRIVACY_EN = lines(
 // ---------------------------------------------------------------------------
 const CANDIDATE_ES = lines(
   HEAD_ES,
-  `1. Quiénes somos. YourCVPassport (yourcvpassport.com) es un servicio de ${WHO_ES}`,
+  `1. Quiénes somos. ${ABOUT_ES}`,
   '2. Qué es YourCVPassport. Una plataforma para crear tu CV como pasaporte profesional, con enlace público propio, sellos de verificación, exportación a PDF y Word y una comunidad profesional, y una bolsa de empleo en la que empresas verificadas publican ofertas y tú te inscribes con tu perfil.',
   '3. Quién puede registrarse. Personas de al menos 16 años. Si tienes entre 16 y 18, necesitas la autorización de tus padres o tutores y debes confirmarlo al registrarte. La cuenta es personal: no la compartas ni crees cuentas a nombre de otra persona.',
   '4. Precio. Crear tu cuenta y tu CV e inscribirte en ofertas es gratis. Algunas funciones pueden ofrecerse en planes de pago; en ese caso verás su precio y sus condiciones antes de contratar, y nunca se te cobrará nada sin tu aceptación expresa. Ninguna empresa puede pedirte dinero por inscribirte en una oferta: si te pasa, avísanos.',
@@ -192,7 +203,7 @@ const CANDIDATE_ES = lines(
 
 const CANDIDATE_EN = lines(
   HEAD_EN,
-  `1. Who we are. YourCVPassport (yourcvpassport.com) is a service of ${WHO_EN}`,
+  `1. Who we are. ${ABOUT_EN}`,
   '2. What YourCVPassport is. A platform to build your CV as a professional passport, with your own public link, verification stamps, PDF and Word export and a professional community, plus a job board where verified companies publish offers and you apply with your profile.',
   '3. Who can sign up. People aged 16 or over. If you are between 16 and 18, you need the authorisation of your parents or guardians and must confirm it when you sign up. The account is personal: do not share it or create accounts on behalf of someone else.',
   '4. Price. Creating your account and CV and applying to offers is free. Some features may be offered in paid plans; if so, you will see their price and terms before buying, and you will never be charged without your express acceptance. No company may ask you for money to apply to an offer: if that happens, let us know.',
@@ -217,7 +228,7 @@ const CANDIDATE_EN = lines(
 // ---------------------------------------------------------------------------
 const EMPLOYER_ES = lines(
   HEAD_ES,
-  `1. Quiénes somos. YourCVPassport (yourcvpassport.com) es un servicio de ${WHO_ES}`,
+  `1. Quiénes somos. ${ABOUT_ES}`,
   '2. Objeto. Estas condiciones regulan el registro de empresas, la publicación de ofertas de empleo y la gestión de las candidaturas recibidas. Las condiciones de publicación de ofertas se aceptan aparte y completan estas.',
   '3. Quién puede registrar una empresa. Una persona con poder o autorización suficiente para actuar en nombre de la empresa. Al registrarla declaras que la tienes y aceptas estas condiciones en nombre de la empresa. Las agencias de colocación y de selección se registran como empresa con sus propios datos. Deben contar con la autorización que exija la ley de cada país en el que publiquen ofertas.',
   '4. Verificación. Revisamos los datos de cada empresa (identificador fiscal, web, dominio del correo y posibles duplicados) con comprobaciones automáticas y, si hace falta, manuales. Hasta que la empresa está verificada solo puede preparar borradores. Podemos pedir documentación y rechazar o suspender empresas con datos falsos o dudosos.',
@@ -247,7 +258,7 @@ const EMPLOYER_ES = lines(
 
 const EMPLOYER_EN = lines(
   HEAD_EN,
-  `1. Who we are. YourCVPassport (yourcvpassport.com) is a service of ${WHO_EN}`,
+  `1. Who we are. ${ABOUT_EN}`,
   '2. Purpose. These terms govern company registration, the publication of job offers and the management of the applications received. The job posting terms are accepted separately and complement these.',
   '3. Who can register a company. A person with sufficient power or authorisation to act on behalf of the company. By registering it you declare that you have it and accept these terms on behalf of the company. Employment and recruitment agencies register as a company with their own details. They must hold the authorisation required by law in each country where they publish offers.',
   '4. Verification. We review each company\'s details (tax ID, website, email domain and possible duplicates) with automatic and, if needed, manual checks. Until the company is verified it can only prepare drafts. We may ask for documents and reject or suspend companies with false or doubtful details.',
@@ -280,7 +291,7 @@ const EMPLOYER_EN = lines(
 // ---------------------------------------------------------------------------
 const POSTING_ES = lines(
   HEAD_ES,
-  `1. Quién las acepta. Quien envía una oferta a revisión en nombre de una empresa verificada en YourCVPassport, servicio de ${E.name}. Completan las condiciones para empleadores. Contacto: ${E.email}.`,
+  `1. Quién las acepta. Quien envía una oferta a revisión en nombre de una empresa verificada en YourCVPassport${SERVICE_OF_ES}. Completan las condiciones para empleadores. Contacto: ${E.email}.`,
   '2. Ofertas reales. Cada oferta debe corresponder a un puesto real y disponible, con datos ciertos sobre la empresa, el puesto, la ubicación o la modalidad, el tipo de contrato, la jornada y la remuneración. No se admiten ofertas simuladas, duplicadas o para captar datos o currículos, ni las que en realidad venden cursos, productos o la entrada en negocios multinivel.',
   '3. Remuneración y moneda. Si indicas la remuneración, debe ser la real y en la moneda local del país del puesto, también en los puestos en remoto.',
   '4. No discriminación. Las ofertas no pueden excluir ni dar preferencia por sexo, edad, origen racial o étnico, nacionalidad, religión o convicciones, discapacidad, orientación sexual, identidad de género, estado civil o embarazo, salvo que sea un requisito profesional esencial, legítimo y proporcionado. Usa un lenguaje que no excluya a nadie.',
@@ -295,7 +306,7 @@ const POSTING_ES = lines(
 
 const POSTING_EN = lines(
   HEAD_EN,
-  `1. Who accepts them. Whoever sends a job offer for review on behalf of a verified company on YourCVPassport, a service of ${E.name}. They complement the employer terms. Contact: ${E.email}.`,
+  `1. Who accepts them. Whoever sends a job offer for review on behalf of a verified company on YourCVPassport${SERVICE_OF_EN}. They complement the employer terms. Contact: ${E.email}.`,
   '2. Real offers. Every offer must correspond to a real, available position, with true information about the company, the role, the location or work mode, the contract type, the working hours and the pay. Fake or duplicated offers, offers to harvest data or CVs, and offers that actually sell courses, products or entry into multi-level businesses are not allowed.',
   '3. Pay and currency. If you state the pay, it must be the real one and in the local currency of the country of the position, also for remote positions.',
   '4. No discrimination. Offers may not exclude or prefer anyone on grounds of sex, age, racial or ethnic origin, nationality, religion or belief, disability, sexual orientation, gender identity, marital status or pregnancy, unless it is an essential, legitimate and proportionate occupational requirement. Use language that does not exclude anyone.',

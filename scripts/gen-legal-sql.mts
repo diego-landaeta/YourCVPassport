@@ -1,5 +1,5 @@
-// Genera supabase/migrations/20261104b_legal_v20_completos.sql desde lib/legalDrafts.ts:
-// los textos v2.0 sin la primera línea «BORRADOR…». Uso: npx tsx scripts/gen-legal-v20-sql.mts
+// Genera supabase/migrations/<argv[2]> (p. ej. 20261104c_legal_v21.sql) desde lib/legalDrafts.ts:
+// los textos de LEGAL_DRAFT_VERSION sin la primera línea «BORRADOR…». Uso: npx tsx scripts/gen-legal-sql.mts <fichero.sql>
 import { writeFileSync } from 'node:fs';
 import { LEGAL_DRAFTS, LEGAL_DRAFT_VERSION } from '../lib/legalDrafts.ts';
 
@@ -16,9 +16,9 @@ for (const [tipo, porIdioma] of Object.entries(LEGAL_DRAFTS)) {
 }
 
 const sql = `-- =============================================================================
--- 20261104b_legal_v20_completos.sql (generado con scripts/gen-legal-v20-sql.mts)
+-- ${process.argv[2] ?? "legal_vX.sql"} (generado con scripts/gen-legal-sql.mts)
 -- Publica la versión ${LEGAL_DRAFT_VERSION} completa de privacidad, condiciones de candidato y
--- de empleador y condiciones de publicación (ES y EN), que sustituye a la 1.1.
+-- de empleador y condiciones de publicación (ES y EN), que sustituye a la versión en vigor.
 -- Texto: lib/legalDrafts.ts sin la línea «BORRADOR…».
 --
 -- Entra en vigor al momento (publicación urgente del servicio) y NO encola correo
@@ -66,5 +66,5 @@ SELECT tipo, idioma, version, length(texto) AS caracteres
  WHERE public.documento_legal_vigente(id)
  ORDER BY tipo, idioma;
 `;
-writeFileSync(new URL('../supabase/migrations/20261104b_legal_v20_completos.sql', import.meta.url), sql);
-console.log(`${filas.length} textos → supabase/migrations/20261104b_legal_v20_completos.sql`);
+writeFileSync(new URL('../supabase/migrations/' + (process.argv[2] ?? 'legal_vX.sql'), import.meta.url), sql);
+console.log(`${filas.length} textos → supabase/migrations/${process.argv[2]}`);

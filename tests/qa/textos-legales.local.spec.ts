@@ -148,7 +148,7 @@ test.describe('admin: cargar el borrador preparado', () => {
     await page.getByTestId('legal-load-prepared').click();
     await expect(page.locator('#legal-version')).toHaveValue(LEGAL_DRAFT_VERSION);
     await expect(page.locator('#legal-titulo')).toHaveValue('Política de Privacidad');
-    await expect(page.locator('#legal-texto')).toHaveValue(/^BORRADOR v2\.0/);
+    await expect(page.locator('#legal-texto')).toHaveValue(/^BORRADOR v2.1/);
     await expect(page.getByTestId('legal-draft-note')).toBeVisible();
 
     await page.getByRole('button', { name: 'Vista previa' }).click();
@@ -169,6 +169,6 @@ test.describe('admin: cargar el borrador preparado', () => {
     // En inglés también hay borrador preparado
     await page.locator('#legal-idioma').selectOption('en');
     await page.getByTestId('legal-load-prepared').click();
-    await expect(page.locator('#legal-texto')).toHaveValue(/^DRAFT v2\.0/);
+    await expect(page.locator('#legal-texto')).toHaveValue(/^DRAFT v2.1/);
   });
 });
