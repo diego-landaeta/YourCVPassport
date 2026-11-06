@@ -139,7 +139,8 @@ const BadCVExample: React.FC = () => {
             <div className="w-full bg-white p-6 font-serif text-xs leading-tight overflow-hidden" style={{ fontFamily: 'Times New Roman, serif', maxWidth: '100%' }}>
             {/* Header mal formateado con demasiada información */}
             <div className="text-center mb-3 border-4 border-double border-black p-3 overflow-hidden">
-                <h1 className="text-lg font-bold underline mb-1">{c.heading}</h1>
+                {/* <p> y no <h1>: es un CV de ejemplo dentro de otra pagina, que ya tiene su H1 (hallazgo SEO 15) */}
+                <p className="text-lg font-bold underline mb-1">{c.heading}</p>
                 <div className="text-[10px] mt-2 space-y-0.5">
                     {c.personal.map(([label, value]) => (
                         <p key={label} className="break-words"><strong>{label}</strong> {value}</p>

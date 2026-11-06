@@ -31,7 +31,7 @@ en variables `VITE_*`.
 | `BREVO_NEWSLETTER_LIST_ID` | sí (boletín) | Lista de Brevo del boletín |
 | `BREVO_DOI_TEMPLATE_ID`, `BREVO_DOI_TEMPLATE_ID_EN` | sí (boletín) | Plantillas de doble opt-in ES/EN |
 | `PRESS_INBOX_EMAIL` | sí (prensa) | Buzón que recibe el formulario de prensa |
-| `GEMINI_API_KEY` | sí | IA (ya no está en el frontend); usar la clave **rotada** |
+| `ANTHROPIC_API_KEY` | sí | IA (Claude; ya no está en el frontend). Sustituye a `GEMINI_API_KEY` desde el 29/10/2026 |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | recomendado | Rate limit (sin ellos no limita) |
 | `VERIFICATION_CODE_SECRET` | recomendado | Firma de códigos de verificación (si falta, usa la service role) |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` | si hay SMS | Verificación por SMS |

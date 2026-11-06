@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1122,
-  title: "Como Hacer un CV para Trabajar en Argentina: Guia Completa",
+  title: "Cómo Hacer un CV para Trabajar en Argentina: Guía Completa",
   slug: "como-hacer-cv-argentina",
   summary: "CV competitivo en Argentina. Formato local, CUIL y consejos de reclutadores.",
-  content: `# Como Hacer un CV para Trabajar en Argentina: Guia Completa
+  content: `# Cómo Hacer un CV para Trabajar en Argentina: Guía Completa
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Argentina** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -18,14 +18,14 @@ Esta guía completa sobre **CV para trabajar en Argentina** te proporciona estra
 3. Datos personales y CUIL
 4. Presentar experiencia laboral
 5. Portales de empleo argentinos
-6. Tendencias de contratacion
+6. Tendencias de contratación
 
 Cuando hablamos de **CV para trabajar en Argentina** en el contexto de 1. mercado laboral argentino 2026
 2. formato de cv preferido
 3. datos personales y cuil
 4. presentar experiencia laboral
 5. portales de empleo argentinos
-6. tendencias de contratacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. tendencias de contratación, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
@@ -34,7 +34,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 3. datos personales y cuil
 4. presentar experiencia laboral
 5. portales de empleo argentinos
-6. tendencias de contratacion
+6. tendencias de contratación
 
 Para destacar en **CV para trabajar en Argentina** dentro de esta área, aplica estas estrategias probadas:
 
@@ -49,7 +49,7 @@ Para destacar en **CV para trabajar en Argentina** dentro de esta área, aplica 
 3. datos personales y cuil
 4. presentar experiencia laboral
 5. portales de empleo argentinos
-6. tendencias de contratacion
+6. tendencias de contratación
 
 Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Argentina**:
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-22T16:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Argentina: Guia Completa",
+  meta_title: "Cómo Hacer un CV para Trabajar en Argentina: Guía Completa",
   meta_description: "CV competitivo en Argentina. Formato local, CUIL y consejos de reclutadores.",
   lang: "es",
 };

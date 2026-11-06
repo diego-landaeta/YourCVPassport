@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1140,
-  title: "Trabajo Remoto en LATAM: Como Preparar tu CV para Empresas Internacionales",
+  title: "Trabajo Remoto en LATAM: Cómo Preparar tu CV para Empresas Internacionales",
   slug: "trabajo-remoto-latam-guia-cv-2026",
-  summary: "Prepara tu CV para trabajo remoto con empresas internacionales desde Latinoamerica.",
-  content: `# Trabajo Remoto en LATAM: Como Preparar tu CV para Empresas Internacionales
+  summary: "Prepara tu CV para trabajo remoto con empresas internacionales desde Latinoamérica.",
+  content: `# Trabajo Remoto en LATAM: Cómo Preparar tu CV para Empresas Internacionales
 
 En el competitivo mercado laboral de 2026, dominar **trabajo remoto LATAM CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,15 +14,15 @@ Esta guía completa sobre **trabajo remoto LATAM CV** te proporciona estrategias
 ![trabajo remoto LATAM CV](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre trabajo remoto LATAM CV}
 
 ## 1. El auge del trabajo remoto en LATAM
-2. Que buscan las empresas internacionales
-3. CV bilingue o en ingles
+2. Qué buscan las empresas internacionales
+3. CV bilingüe o en inglés
 4. Habilidades clave para remoto
 5. Herramientas y plataformas
 6. CV verificado para empleadores internacionales
 
 Cuando hablamos de **trabajo remoto LATAM CV** en el contexto de 1. el auge del trabajo remoto en latam
-2. que buscan las empresas internacionales
-3. cv bilingue o en ingles
+2. qué buscan las empresas internacionales
+3. cv bilingüe o en inglés
 4. habilidades clave para remoto
 5. herramientas y plataformas
 6. cv verificado para empleadores internacionales, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
@@ -30,8 +30,8 @@ Cuando hablamos de **trabajo remoto LATAM CV** en el contexto de 1. el auge del 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. el auge del trabajo remoto en latam
-2. que buscan las empresas internacionales
-3. cv bilingue o en ingles
+2. qué buscan las empresas internacionales
+3. cv bilingüe o en inglés
 4. habilidades clave para remoto
 5. herramientas y plataformas
 6. cv verificado para empleadores internacionales
@@ -45,8 +45,8 @@ Para destacar en **trabajo remoto LATAM CV** dentro de esta área, aplica estas 
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. el auge del trabajo remoto en latam
-2. que buscan las empresas internacionales
-3. cv bilingue o en ingles
+2. qué buscan las empresas internacionales
+3. cv bilingüe o en inglés
 4. habilidades clave para remoto
 5. herramientas y plataformas
 6. cv verificado para empleadores internacionales
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: true,
   published_at: "2026-04-24T12:00:00.000Z",
-  meta_title: "Trabajo Remoto en LATAM: Como Preparar tu CV para Empresa...",
-  meta_description: "Prepara tu CV para trabajo remoto con empresas internacionales desde Latinoamerica.",
+  meta_title: "Trabajo Remoto en LATAM: Cómo Preparar tu CV para Empresa...",
+  meta_description: "Prepara tu CV para trabajo remoto con empresas internacionales desde Latinoamérica.",
   lang: "es",
 };
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1268,
-  title: "CV para Emigrar a Estados Unidos: Guia para Hispanos",
+  title: "CV para Emigrar a Estados Unidos: Guía para Hispanos",
   slug: "cv-para-emigrar-estados-unidos",
   summary: "Adapta tu CV al formato estadounidense. Resume, cover letter y expectativas.",
-  content: `# CV para Emigrar a Estados Unidos: Guia para Hispanos
+  content: `# CV para Emigrar a Estados Unidos: Guía para Hispanos
 
 En el competitivo mercado laboral de 2026, dominar **CV emigrar Estados Unidos hispanos** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -17,14 +17,14 @@ Esta guía completa sobre **CV emigrar Estados Unidos hispanos** te proporciona 
 2. Resume vs CV
 3. Formato sin foto
 4. Visa y permisos
-5. Equivalencias de titulos
+5. Equivalencias de títulos
 6. Perfil verificado
 
 Cuando hablamos de **CV emigrar Estados Unidos hispanos** en el contexto de 1. mercado laboral usa para hispanos
 2. resume vs cv
 3. formato sin foto
 4. visa y permisos
-5. equivalencias de titulos
+5. equivalencias de títulos
 6. perfil verificado, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -33,7 +33,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 2. resume vs cv
 3. formato sin foto
 4. visa y permisos
-5. equivalencias de titulos
+5. equivalencias de títulos
 6. perfil verificado
 
 Para destacar en **CV emigrar Estados Unidos hispanos** dentro de esta área, aplica estas estrategias probadas:
@@ -48,7 +48,7 @@ Para destacar en **CV emigrar Estados Unidos hispanos** dentro de esta área, ap
 2. resume vs cv
 3. formato sin foto
 4. visa y permisos
-5. equivalencias de titulos
+5. equivalencias de títulos
 6. perfil verificado
 
 Evita estos errores que cometen la mayoría de candidatos con **CV emigrar Estados Unidos hispanos**:
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-05-07T04:00:00.000Z",
-  meta_title: "CV para Emigrar a Estados Unidos: Guia para Hispanos",
+  meta_title: "CV para Emigrar a Estados Unidos: Guía para Hispanos",
   meta_description: "Adapta tu CV al formato estadounidense. Resume, cover letter y expectativas.",
   lang: "es",
 };

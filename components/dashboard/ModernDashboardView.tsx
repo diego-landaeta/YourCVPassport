@@ -201,6 +201,13 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
   const translations = useTranslations();
   const t = translations.dashboard;
   const { lang } = useLanguage();
+  // Fecha de alta real (antes la tarjeta decía siempre «Hoy»).
+  const registrationLabel = (() => {
+    const created = profile?.created_at ? new Date(profile.created_at) : null;
+    if (!created || Number.isNaN(created.getTime())) return '—';
+    if (created.toDateString() === new Date().toDateString()) return t.quickSummary.today;
+    return created.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  })();
   const [chartType, setChartType] = React.useState<'bar' | 'pie' | 'calendar'>('calendar');
   const [notification, setNotification] = React.useState<CompletionNotification>({ show: false, message: '' });
   const [previousStats, setPreviousStats] = React.useState(stats);
@@ -584,7 +591,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stats.visits}</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   {t.modernView.statsPreview.profileViews}
                 </div>
@@ -596,7 +603,7 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stats.verifiedStamps}</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   {t.modernView.statsPreview.verifiedStamps}
                 </div>
@@ -608,8 +615,8 @@ const ModernDashboardView: React.FC<ModernDashboardViewProps> = memo(({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                  {t.quickSummary.today}
+                <div className={`font-bold text-gray-900 dark:text-white mb-1 ${registrationLabel.length > 8 ? 'text-xl leading-9' : 'text-3xl'}`}>
+                  {registrationLabel}
                 </div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   {t.quickSummary.registrationDate}

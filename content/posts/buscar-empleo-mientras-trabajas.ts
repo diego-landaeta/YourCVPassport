@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1189,
-  title: "Como Buscar Empleo Mientras Trabajas: Guia Discreta",
+  title: "Cómo Buscar Empleo Mientras Trabajas: Guía Discreta",
   slug: "buscar-empleo-mientras-trabajas",
-  summary: "Busqueda confidencial sin arriesgar tu puesto. Timing, privacidad y estrategias.",
-  content: `# Como Buscar Empleo Mientras Trabajas: Guia Discreta
+  summary: "Búsqueda confidencial sin arriesgar tu puesto. Timing, privacidad y estrategias.",
+  content: `# Cómo Buscar Empleo Mientras Trabajas: Guía Discreta
 
 En el competitivo mercado laboral de 2026, dominar **buscar empleo mientras trabajas** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Entrevista y Empleo",
   is_featured: false,
   published_at: "2026-04-29T06:00:00.000Z",
-  meta_title: "Como Buscar Empleo Mientras Trabajas: Guia Discreta",
-  meta_description: "Busqueda confidencial sin arriesgar tu puesto. Timing, privacidad y estrategias.",
+  meta_title: "Cómo Buscar Empleo Mientras Trabajas: Guía Discreta",
+  meta_description: "Búsqueda confidencial sin arriesgar tu puesto. Timing, privacidad y estrategias.",
   lang: "es",
 };
 

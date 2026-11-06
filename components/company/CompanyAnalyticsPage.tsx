@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import type { Company, CompanyUser } from '../../types';
 import {
@@ -49,6 +50,7 @@ interface AnalyticsData {
 const CompanyAnalyticsPage: React.FC = () => {
   const { company, companyUser } = useOutletContext<{ company: Company; companyUser: CompanyUser }>();
   const translations = useTranslations();
+  const { lang } = useLanguage();
 
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -221,7 +223,8 @@ const CompanyAnalyticsPage: React.FC = () => {
   };
 
   const generateDayOfWeekData = (views: any[], contacts: any[]) => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // Etiqueta y clave a la vez: lunes a domingo en el idioma de la interfaz.
+    const days = lang === 'es' ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dayMap: { [key: string]: { views: number; contacts: number } } = {};
 
     // Initialize all days with 0
@@ -276,8 +279,8 @@ const CompanyAnalyticsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {t('company.analytics.title') || 'Analytics'}
               </h1>
@@ -285,7 +288,7 @@ const CompanyAnalyticsPage: React.FC = () => {
                 {t('company.analytics.subtitle') || 'Track your recruitment performance and activity'}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setTimeRange('week')}
                 className={`px-4 py-2 rounded-lg transition-colors ${

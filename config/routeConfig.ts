@@ -26,6 +26,8 @@ const TemplatePreviewCapture = lazy(() => import('../components/pages/TemplatePr
 const AllTemplatesPreview = lazy(() => import('../components/pages/AllTemplatesPreview'));
 const TermsPage = lazy(() => import('../components/TermsPage'));
 const PrivacyPage = lazy(() => import('../components/PrivacyPage'));
+const CookiePolicyPage = lazy(() => import('../components/CookiePolicyPage'));
+const LegalNoticePage = lazy(() => import('../components/LegalNoticePage'));
 
 interface RouteConfig {
   path_en: string;
@@ -60,6 +62,8 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   AllTemplatesPreview,
   TermsPage,
   PrivacyPage,
+  CookiePolicyPage,
+  LegalNoticePage,
 };
 
 const pathMappings = [
@@ -93,6 +97,8 @@ const pathMappings = [
   { en: 'profiles', es: 'perfiles', componentName: 'AdvancedTalentSearchPage' },
   { en: 'terms', es: 'terminos', componentName: 'TermsPage' },
   { en: 'privacy', es: 'privacidad', componentName: 'PrivacyPage' },
+  { en: 'cookie-policy', es: 'politica-de-cookies', componentName: 'CookiePolicyPage' },
+  { en: 'legal-notice', es: 'aviso-legal', componentName: 'LegalNoticePage' },
 ];
 
 /**
@@ -114,3 +120,21 @@ export const routeConfig: RouteConfig[] = pathMappings.map(route => ({
     component: componentMap[route.componentName],
     props: route.props,
 }));
+
+/**
+ * Rutas de la ficha de oferta (dinamicas: no caben en `pathMappings`, que son estaticas).
+ * La CANONICA lleva el pais (`/es/ofertas/<slug>`, `/es/jobs/<slug>`; codigo ISO en minuscula);
+ * las dos antiguas (`/empleos/:slug`, `/jobs/:slug`) siguen sirviendo la ficha y redirigen en
+ * cliente (replace) a la canonica cuando la oferta tiene pais. El formato lo construye
+ * `jobPath()` en `lib/jobsFormat.ts`.
+ */
+/**
+ * Baja de alertas de ofertas desde el correo (`?token=`). Rutas publicas pero NO de marketing: no
+ * van en `pathMappings` para que no entren en el sitemap ni en el hreflang; la pagina lleva noindex.
+ */
+export const alertUnsubscribeRoutes = ['/alertas/baja', '/alerts/unsubscribe'] as const;
+
+export const jobDetailRoutes = {
+  canonical: ['/:cc/ofertas/:slug', '/:cc/jobs/:slug'],
+  legacy: ['/empleos/:slug', '/jobs/:slug'],
+} as const;

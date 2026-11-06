@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useA11yLabels } from './shared/a11y';
 import Header from './Header';
 import Footer from './Footer';
+import CookieConsent from './legal/CookieConsent';
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { pathname } = useLocation();
@@ -56,6 +57,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {children}
             </main>
             {!hideHeaderFooter && <Footer />}
+            <CookieConsent />
         </>
     );
 };

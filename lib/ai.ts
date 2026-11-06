@@ -3,7 +3,7 @@
  *
  * Funciones centralizadas para las funciones de IA del editor de perfil.
  *
- * Las llamadas al modelo (Google Gemini) se hacen en el servidor, en la Edge
+ * Las llamadas al modelo (Claude, de Anthropic) se hacen en el servidor, en la Edge
  * Function `ai-cv-assistant`, que guarda la API key como secreto de Supabase,
  * verifica la sesion y aplica los limites del plan. El navegador solo envia los
  * datos de cada tarea (nunca un prompt libre ni un modelo) e interpreta el texto

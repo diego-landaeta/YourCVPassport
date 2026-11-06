@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1152,
-  title: "Contratacion Basada en Habilidades: La Revolucion del Reclutamiento",
+  title: "Contratación Basada en Habilidades: La Revolución del Reclutamiento",
   slug: "contratacion-basada-habilidades-espanol",
-  summary: "La contratacion por habilidades reemplaza titulos universitarios. Adapta tu CV.",
-  content: `# Contratacion Basada en Habilidades: La Revolucion del Reclutamiento
+  summary: "La contratación por habilidades reemplaza títulos universitarios. Adapta tu CV.",
+  content: `# Contratación Basada en Habilidades: La Revolución del Reclutamiento
 
-En el competitivo mercado laboral de 2026, dominar **contratacion basada en habilidades** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **contratación basada en habilidades** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **contratacion basada en habilidades** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **contratación basada en habilidades** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![contratacion basada en habilidades](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Guía completa sobre contratacion basada en habilidades}
+![contratación basada en habilidades](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Guía completa sobre contratación basada en habilidades}
 
-## 1. Que es la contratacion por habilidades
-2. Empresas abandonan requisitos de titulo
+## 1. Qué es la contratación por habilidades
+2. Empresas abandonan requisitos de título
 3. CV basado en habilidades
 4. Competencias verificables
-5. Herramientas de evaluacion
+5. Herramientas de evaluación
 6. Credenciales verificadas de YourCVPassport
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de 1. que es la contratacion por habilidades
-2. empresas abandonan requisitos de titulo
+Cuando hablamos de **contratación basada en habilidades** en el contexto de 1. qué es la contratación por habilidades
+2. empresas abandonan requisitos de título
 3. cv basado en habilidades
 4. competencias verificables
-5. herramientas de evaluacion
+5. herramientas de evaluación
 6. credenciales verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. que es la contratacion por habilidades
-2. empresas abandonan requisitos de titulo
+### Mejores prácticas para 1. qué es la contratación por habilidades
+2. empresas abandonan requisitos de título
 3. cv basado en habilidades
 4. competencias verificables
-5. herramientas de evaluacion
+5. herramientas de evaluación
 6. credenciales verificadas de yourcvpassport
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. que es la contratacion por habilidades
-2. empresas abandonan requisitos de titulo
+### Errores frecuentes en 1. qué es la contratación por habilidades
+2. empresas abandonan requisitos de título
 3. cv basado en habilidades
 4. competencias verificables
-5. herramientas de evaluacion
+5. herramientas de evaluación
 6. credenciales verificadas de yourcvpassport
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion basada en habilidades**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación basada en habilidades**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion bas
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre contratacion basada en habilidades sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre contratación basada en habilidades sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
+![Aspectos avanzados de contratación basada en habilidades](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Aspectos avanzados de contratación basada en habilidades}
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion basada en habilidades
+### Errores frecuentes en aspectos avanzados de contratación basada en habilidades
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion basada en habilidades**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación basada en habilidades**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion bas
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de contratacion basada en habilidades es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de contratación basada en habilidades es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion basada en habilidades
+### Errores frecuentes en aspectos avanzados de contratación basada en habilidades
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion basada en habilidades**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación basada en habilidades**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
+![Aspectos avanzados de contratación basada en habilidades](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de contratación basada en habilidades}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de contratacion basada en habilidades para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de contratación basada en habilidades para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion basada en habilidades
+### Errores frecuentes en aspectos avanzados de contratación basada en habilidades
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion basada en habilidades**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación basada en habilidades**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion bas
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
+![Aspectos avanzados de contratación basada en habilidades](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de contratación basada en habilidades}
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion basada en habilidades
+### Errores frecuentes en aspectos avanzados de contratación basada en habilidades
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion basada en habilidades**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación basada en habilidades**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion bas
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion basada en habilidades
+### Mejores prácticas para aspectos avanzados de contratación basada en habilidades
 
-Para destacar en **contratacion basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación basada en habilidades** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **contratacion basada en habilidades** dentro de esta área, ap
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion basada en habilidades
+## Aspectos avanzados de contratación basada en habilidades
 
-Cuando hablamos de **contratacion basada en habilidades** en el contexto de aspectos avanzados de contratacion basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación basada en habilidades** en el contexto de aspectos avanzados de contratación basada en habilidades, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de contratacion basada en habilidades](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de contratacion basada en habilidades}
+![Aspectos avanzados de contratación basada en habilidades](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de contratación basada en habilidades}
 
-## Cómo YourCVPassport te ayuda con contratacion basada en habilidades
+## Cómo YourCVPassport te ayuda con contratación basada en habilidades
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **contratacion basada en habilidades**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **contratación basada en habilidades**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina contratacion basada en habilidades y transforma tu carrera profesional
+## Conclusión: domina contratación basada en habilidades y transforma tu carrera profesional
 
-Dominar **contratacion basada en habilidades** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **contratación basada en habilidades** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-25T16:00:00.000Z",
-  meta_title: "Contratacion Basada en Habilidades: La Revolucion del Rec...",
-  meta_description: "La contratacion por habilidades reemplaza titulos universitarios. Adapta tu CV.",
+  meta_title: "Contratación Basada en Habilidades: La Revolución del Rec...",
+  meta_description: "La contratación por habilidades reemplaza títulos universitarios. Adapta tu CV.",
   lang: "es",
 };
 

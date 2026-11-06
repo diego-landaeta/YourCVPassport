@@ -75,6 +75,7 @@ const PricingPage: React.FC = () => {
     const t = useTranslations();
     const pageData = t.pricingPage;
     const { lang } = useLanguage();
+    const { openModal } = useAuth();
 
     const seoTitle = lang === 'es'
         ? 'Precios y Planes'
@@ -213,7 +214,7 @@ const PricingPage: React.FC = () => {
                         <p className="mt-4 text-lg leading-6 text-white/80">
                             {pageData.finalCta.subtitle}
                         </p>
-                        <button onClick={() => { useAuth().openModal('signup')}} className="mt-8 w-full inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-cv-blue bg-white dark:bg-dark-bg-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary dark:bg-dark-bg-secondary sm:w-auto transform hover:scale-105 transition-transform">
+                        <button onClick={() => openModal('signup')} className="mt-8 w-full inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-md text-cv-blue bg-white dark:bg-dark-bg-primary hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary dark:bg-dark-bg-secondary sm:w-auto transform hover:scale-105 transition-transform">
                             {pageData.finalCta.button}
                         </button>
                     </AnimatedWrapper>

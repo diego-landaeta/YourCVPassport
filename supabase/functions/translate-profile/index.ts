@@ -108,7 +108,9 @@ serve(async (req: Request) => {
     return new Response('ok', { status: isAllowedOrigin(origin) ? 200 : 403, headers: corsHeadersFor(origin) })
   }
   // Un navegador desde otro dominio no puede usar esta función
-  if (origin && !isAllowedOrigin(origin)) {
+  // Sin Origin (curl, scripts) tampoco: solo la llama el navegador desde la web
+  // (auditoría 15/10/2026: se podía llenar la caché de traducciones desde fuera).
+  if (!isAllowedOrigin(origin)) {
     return json({ error: 'Origin not allowed' }, 403, origin)
   }
   if (req.method !== 'POST') {

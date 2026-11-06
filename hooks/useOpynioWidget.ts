@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useConsent } from './useConsent';
 
 /**
  * Widget de reseñas de Opynio (testimonios de la home, /precios, /recursos/exito...).
@@ -12,13 +13,18 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
  * Antes la sección se pintaba siempre: con la API vacía o caída quedaba el spinner y
  * luego solo el título. Este hook dice si hay reseñas para que el llamador oculte la
  * sección entera cuando no las hay (comportamiento observado en la versión v6.10 del widget).
+ *
+ * Cookies (issue #11): el widget es contenido de terceros. Sin consentimiento de
+ * «Contenido de terceros» (lib/consent.ts) no se inserta el script y el estado es
+ * 'blocked': el llamador enseña un aviso con «Mostrar reseñas» en su lugar.
  */
 
 export const OPYNIO_SCRIPT_SRC = 'https://web.opynio.com/widget.js';
 export const OPYNIO_BUSINESS_ID = 'cee0e351-db95-4024-a5e0-2646e49b2756';
 
-/** loading: aún no se sabe; ready: hay reseñas; empty: no hay (o falló la carga). */
-export type OpynioStatus = 'loading' | 'ready' | 'empty';
+/** loading: aún no se sabe; ready: hay reseñas; empty: no hay (o falló la carga);
+ * blocked: el visitante no ha aceptado el contenido de terceros. */
+export type OpynioStatus = 'loading' | 'ready' | 'empty' | 'blocked';
 
 const REVIEW_SELECTOR = '.opynio-review-card';
 // Tras data-loaded, comprobaciones escalonadas por si las tarjetas llegan un poco después
@@ -34,8 +40,10 @@ const VISIBLE_TIMEOUT_MS = 20_000;
 export function useOpynioWidget(reloadKey: string): { ref: RefObject<HTMLDivElement>; status: OpynioStatus } {
   const ref = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<OpynioStatus>('loading');
+  const allowed = useConsent()?.thirdParty === true;
 
   useEffect(() => {
+    if (!allowed) return;
     const el = ref.current;
     if (!el) return;
 
@@ -90,7 +98,9 @@ export function useOpynioWidget(reloadKey: string): { ref: RefObject<HTMLDivElem
       intersectionObserver?.disconnect();
       timers.forEach(t => window.clearTimeout(t));
     };
-  }, [reloadKey]);
+  }, [reloadKey, allowed]);
 
-  return { ref, status };
+  // Sin consentimiento no se carga nada; al aceptarlo, el estado pasa a 'loading' en
+  // el mismo render para que el llamador pinte el contenedor y el efecto lo encuentre.
+  return { ref, status: allowed ? status : 'blocked' };
 }

@@ -2,7 +2,7 @@
  * AI Skills Suggestion Component
  *
  * Sugiere habilidades faltantes basadas en las experiencias del usuario
- * usando inteligencia artificial (Gemini, via la Edge Function ai-cv-assistant)
+ * usando inteligencia artificial (Claude, via la Edge Function ai-cv-assistant)
  */
 
 import React, { useState, useEffect } from 'react';

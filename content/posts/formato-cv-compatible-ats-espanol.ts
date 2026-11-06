@@ -14,27 +14,27 @@ Esta guía completa sobre **formato CV compatible ATS** te proporciona estrategi
 ![formato CV compatible ATS](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80){caption:Guía completa sobre formato CV compatible ATS}
 
 ## 1. Fuentes que ATS puede leer
-2. Nombres de secciones estandar
-3. Vinetas y caracteres especiales
+2. Nombres de secciones estándar
+3. Viñetas y caracteres especiales
 4. Tablas y columnas
 5. PDF vs DOCX
-6. Imagenes y graficos — claves de formato CV compatible ATS
+6. Imágenes y gráficos — claves de formato CV compatible ATS
 
 Cuando hablamos de **formato CV compatible ATS** en el contexto de 1. fuentes que ats puede leer
-2. nombres de secciones estandar
-3. vinetas y caracteres especiales
+2. nombres de secciones estándar
+3. viñetas y caracteres especiales
 4. tablas y columnas
 5. pdf vs docx
-6. imagenes y graficos, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. imágenes y gráficos, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. fuentes que ats puede leer
-2. nombres de secciones estandar
-3. vinetas y caracteres especiales
+2. nombres de secciones estándar
+3. viñetas y caracteres especiales
 4. tablas y columnas
 5. pdf vs docx
-6. imagenes y graficos
+6. imágenes y gráficos
 
 Para destacar en **formato CV compatible ATS** dentro de esta área, aplica estas estrategias probadas:
 
@@ -45,11 +45,11 @@ Para destacar en **formato CV compatible ATS** dentro de esta área, aplica esta
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. fuentes que ats puede leer
-2. nombres de secciones estandar
-3. vinetas y caracteres especiales
+2. nombres de secciones estándar
+3. viñetas y caracteres especiales
 4. tablas y columnas
 5. pdf vs docx
-6. imagenes y graficos
+6. imágenes y gráficos
 
 Evita estos errores que cometen la mayoría de candidatos con **formato CV compatible ATS**:
 

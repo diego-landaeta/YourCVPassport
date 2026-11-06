@@ -80,6 +80,8 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  // Móvil y tablet: filtros plegados para que los resultados queden a la vista.
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProfiles, setTotalProfiles] = useState(0);
   const PROFILES_PER_PAGE = 30;
@@ -511,10 +513,23 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
 
       {/* Main Content with Sidebar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Filters Sidebar */}
-          <aside className="w-72 flex-shrink-0">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 sticky top-24">
+          <aside className="w-full lg:w-72 lg:flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(open => !open)}
+              aria-expanded={filtersOpen}
+              aria-controls="talent-search-filters"
+              className="lg:hidden w-full min-h-[44px] flex items-center justify-between gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 font-semibold text-gray-900 dark:text-white"
+            >
+              <span className="flex items-center gap-2">
+                <FunnelIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                {t('company.search.filters')}{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+              </span>
+              <svg aria-hidden="true" className={`w-5 h-5 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div id="talent-search-filters" className={`${filtersOpen ? 'block mt-3' : 'hidden'} lg:block lg:mt-0 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 lg:sticky lg:top-24`}>
               {/* Filters Header */}
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-1">
@@ -523,7 +538,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                 </div>
                 {activeFiltersCount > 0 && (
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{activeFiltersCount} activos</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{activeFiltersCount} {lang === 'es' ? 'activos' : 'active'}</span>
                     <button
                       onClick={clearAllFilters}
                       className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
@@ -593,7 +608,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                     onChange={(e) => setExperienceLevelFilter(e.target.value)}
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                   >
-                    <option value="">Any</option>
+                    <option value="">{lang === 'es' ? 'Cualquiera' : 'Any'}</option>
                     <option value="entry">{t('company.search.entry')}</option>
                     <option value="mid">{t('company.search.mid')}</option>
                     <option value="senior">{t('company.search.senior')}</option>
@@ -619,16 +634,16 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
           <main className="flex-1 min-w-0">
             {/* Results Count and Pagination Info */}
             {!loading && profiles.length > 0 && (
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Results Found
+                    {t('company.search.resultsFound')}
                   </h2>
                   <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-full">
                     {totalProfiles}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Page {currentPage} of {totalPages}
+                    {lang === 'es' ? `Página ${currentPage} de ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
                   </span>
                 </div>
                 <button
@@ -638,7 +653,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Refresh
+                  {lang === 'es' ? 'Actualizar' : 'Refresh'}
                 </button>
               </div>
             )}
@@ -780,7 +795,7 @@ const CompanyTalentSearchPage: React.FC<TalentSearchPageProps> = ({
                             }}
                             className="w-full px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg group"
                           >
-                            <span>View Profile</span>
+                            <span>{lang === 'es' ? 'Ver perfil' : 'View profile'}</span>
                             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1137,
-  title: "Como Hacer un CV para Trabajar en Paraguay",
+  title: "Cómo Hacer un CV para Trabajar en Paraguay",
   slug: "como-hacer-cv-paraguay",
   summary: "CV efectivo para el mercado paraguayo. Formato local y consejos.",
-  content: `# Como Hacer un CV para Trabajar en Paraguay
+  content: `# Cómo Hacer un CV para Trabajar en Paraguay
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Paraguay** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -15,14 +15,14 @@ Esta guía completa sobre **CV para trabajar en Paraguay** te proporciona estrat
 
 ## 1. Mercado de trabajo paraguayo
 2. Formato de CV
-3. Cedula y datos
+3. Cédula y datos
 4. Experiencia y estudios
 5. Portales de empleo
 6. Industrias principales
 
 Cuando hablamos de **CV para trabajar en Paraguay** en el contexto de 1. mercado de trabajo paraguayo
 2. formato de cv
-3. cedula y datos
+3. cédula y datos
 4. experiencia y estudios
 5. portales de empleo
 6. industrias principales, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
@@ -31,7 +31,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 
 ### Mejores prácticas para 1. mercado de trabajo paraguayo
 2. formato de cv
-3. cedula y datos
+3. cédula y datos
 4. experiencia y estudios
 5. portales de empleo
 6. industrias principales
@@ -46,7 +46,7 @@ Para destacar en **CV para trabajar en Paraguay** dentro de esta área, aplica e
 
 ### Errores frecuentes en 1. mercado de trabajo paraguayo
 2. formato de cv
-3. cedula y datos
+3. cédula y datos
 4. experiencia y estudios
 5. portales de empleo
 6. industrias principales
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-24T02:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Paraguay",
+  meta_title: "Cómo Hacer un CV para Trabajar en Paraguay",
   meta_description: "CV efectivo para el mercado paraguayo. Formato local y consejos.",
   lang: "es",
 };

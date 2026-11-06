@@ -1,11 +1,85 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { isSectionLocked } from './dashboardNav';
 import { supabase } from '../../supabase/client';
 import { Lead, LeadNote, LeadStatus, LeadFilters } from '../../types';
 import { activateOnKey } from '../shared/a11y';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const TEXT = {
+  es: {
+    title: 'Leads y mensajes',
+    subtitle: 'Gestiona las consultas de quienes visitan tu perfil',
+    total: 'Total',
+    searchPlaceholder: 'Buscar leads…',
+    allStatus: 'Todos los estados',
+    status: { new: 'Nuevo', read: 'Leído', replied: 'Respondido', archived: 'Archivado', deleted: 'Eliminado' },
+    statsNew: 'Nuevos',
+    statsRead: 'Leídos',
+    statsReplied: 'Respondidos',
+    statsArchived: 'Archivados',
+    leadsCount: (n: number) => `Leads (${n})`,
+    loading: 'Cargando leads…',
+    empty: 'No se han encontrado leads',
+    reply: 'Responder',
+    archive: 'Archivar',
+    delete: 'Eliminar',
+    confirmDelete: '¿Seguro que quieres eliminar este lead?',
+    subject: 'Asunto',
+    message: 'Mensaje',
+    received: (when: string) => `Recibido: ${when}`,
+    internalNotes: 'Notas internas',
+    notePlaceholder: 'Añadir una nota privada…',
+    adding: 'Añadiendo…',
+    addNote: 'Añadir nota',
+    noNotes: 'Aún no hay notas',
+    selectLead: 'Selecciona un lead para ver los detalles',
+    replySubjectFallback: 'Tu consulta',
+    justNow: 'Ahora mismo',
+    minsAgo: (n: number) => `hace ${n} min`,
+    hoursAgo: (n: number) => `hace ${n} h`,
+    daysAgo: (n: number) => `hace ${n} ${n === 1 ? 'día' : 'días'}`,
+  },
+  en: {
+    title: 'Leads & Messages',
+    subtitle: 'Manage inquiries from your profile visitors',
+    total: 'Total',
+    searchPlaceholder: 'Search leads...',
+    allStatus: 'All Status',
+    status: { new: 'New', read: 'Read', replied: 'Replied', archived: 'Archived', deleted: 'Deleted' },
+    statsNew: 'New',
+    statsRead: 'Read',
+    statsReplied: 'Replied',
+    statsArchived: 'Archived',
+    leadsCount: (n: number) => `Leads (${n})`,
+    loading: 'Loading leads...',
+    empty: 'No leads found',
+    reply: 'Reply',
+    archive: 'Archive',
+    delete: 'Delete',
+    confirmDelete: 'Are you sure you want to delete this lead?',
+    subject: 'Subject',
+    message: 'Message',
+    received: (when: string) => `Received ${when}`,
+    internalNotes: 'Internal Notes',
+    notePlaceholder: 'Add a private note...',
+    adding: 'Adding...',
+    addNote: 'Add Note',
+    noNotes: 'No notes yet',
+    selectLead: 'Select a lead to view details',
+    replySubjectFallback: 'Your inquiry',
+    justNow: 'Just now',
+    minsAgo: (n: number) => `${n}m ago`,
+    hoursAgo: (n: number) => `${n}h ago`,
+    daysAgo: (n: number) => `${n}d ago`,
+  },
+} as const;
 
 const LeadsPage: React.FC = () => {
   const { profile } = useAuth();
+  const { lang } = useLanguage();
+  const tx = TEXT[lang];
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -158,7 +232,7 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleDelete = async (leadId: string) => {
-    if (!confirm('Are you sure you want to delete this lead?')) return;
+    if (!confirm(tx.confirmDelete)) return;
 
     try {
       const { error } = await supabase
@@ -200,7 +274,7 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleReply = (lead: Lead) => {
-    const subject = `Re: ${lead.subject || 'Your inquiry'}`;
+    const subject = `Re: ${lead.subject || tx.replySubjectFallback}`;
     const mailtoLink = `mailto:${lead.sender_email}?subject=${encodeURIComponent(subject)}`;
     window.location.href = mailtoLink;
 
@@ -216,11 +290,11 @@ const LeadsPage: React.FC = () => {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    if (diffMins < 1) return tx.justNow;
+    if (diffMins < 60) return tx.minsAgo(diffMins);
+    if (diffHours < 24) return tx.hoursAgo(diffHours);
+    if (diffDays < 7) return tx.daysAgo(diffDays);
+    return date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US');
   };
 
   const getStatusBadge = (status: LeadStatus) => {
@@ -234,10 +308,14 @@ const LeadsPage: React.FC = () => {
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badges[status]}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {tx.status[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
+
+  // Con el asistente sin terminar el menú bloquea este apartado; por URL tampoco se
+  // entra (antes solo se bloqueaba ?seccion=, auditoría 15/10/2026).
+  if (profile && isSectionLocked(profile, 'leads')) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg-primary">
@@ -245,33 +323,33 @@ const LeadsPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Leads & Messages
+            {tx.title}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Manage inquiries from your profile visitors
+            {tx.subtitle}
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{tx.total}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">New</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{tx.statsNew}</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.new}</p>
           </div>
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Read</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{tx.statsRead}</p>
             <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.read}</p>
           </div>
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Replied</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{tx.statsReplied}</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.replied}</p>
           </div>
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Archived</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{tx.statsArchived}</p>
             <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.archived}</p>
           </div>
         </div>
@@ -283,7 +361,7 @@ const LeadsPage: React.FC = () => {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Search leads..."
+                placeholder={tx.searchPlaceholder}
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 className="w-full px-4 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
@@ -296,11 +374,11 @@ const LeadsPage: React.FC = () => {
               onChange={(e) => setFilters({ ...filters, status: e.target.value as any })}
               className="px-4 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white"
             >
-              <option value="all">All Status</option>
-              <option value="new">New</option>
-              <option value="read">Read</option>
-              <option value="replied">Replied</option>
-              <option value="archived">Archived</option>
+              <option value="all">{tx.allStatus}</option>
+              <option value="new">{tx.status.new}</option>
+              <option value="read">{tx.status.read}</option>
+              <option value="replied">{tx.status.replied}</option>
+              <option value="archived">{tx.status.archived}</option>
             </select>
           </div>
         </div>
@@ -311,7 +389,7 @@ const LeadsPage: React.FC = () => {
           <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Leads ({filteredLeads.length})
+                {tx.leadsCount(filteredLeads.length)}
               </h2>
             </div>
 
@@ -319,14 +397,14 @@ const LeadsPage: React.FC = () => {
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-cv-blue mx-auto"></div>
-                  <p className="mt-4 text-gray-600 dark:text-gray-400">Loading leads...</p>
+                  <p className="mt-4 text-gray-600 dark:text-gray-400">{tx.loading}</p>
                 </div>
               ) : filteredLeads.length === 0 ? (
                 <div className="p-8 text-center">
                   <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
-                  <p className="text-gray-600 dark:text-gray-400">No leads found</p>
+                  <p className="text-gray-600 dark:text-gray-400">{tx.empty}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -403,7 +481,7 @@ const LeadsPage: React.FC = () => {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                       </svg>
-                      Reply
+                      {tx.reply}
                     </button>
                     {selectedLead.status !== 'archived' && (
                       <button
@@ -413,7 +491,7 @@ const LeadsPage: React.FC = () => {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
-                        Archive
+                        {tx.archive}
                       </button>
                     )}
                     <button
@@ -423,7 +501,7 @@ const LeadsPage: React.FC = () => {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      Delete
+                      {tx.delete}
                     </button>
                   </div>
                 </div>
@@ -433,7 +511,7 @@ const LeadsPage: React.FC = () => {
                   {selectedLead.subject && (
                     <div className="mb-4">
                       <p className="text-xs text-gray-500 dark:text-gray-500 uppercase font-semibold mb-1">
-                        Subject
+                        {tx.subject}
                       </p>
                       <p className="text-sm text-gray-900 dark:text-white font-medium">
                         {selectedLead.subject}
@@ -441,20 +519,20 @@ const LeadsPage: React.FC = () => {
                     </div>
                   )}
                   <p className="text-xs text-gray-500 dark:text-gray-500 uppercase font-semibold mb-2">
-                    Message
+                    {tx.message}
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                     {selectedLead.message}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-4">
-                    Received {formatDate(selectedLead.created_at)}
+                    {tx.received(formatDate(selectedLead.created_at))}
                   </p>
                 </div>
 
                 {/* Internal Notes */}
                 <div className="flex-1 overflow-y-auto p-4">
                   <p className="text-xs text-gray-500 dark:text-gray-500 uppercase font-semibold mb-3">
-                    Internal Notes
+                    {tx.internalNotes}
                   </p>
 
                   {/* Add Note Form */}
@@ -462,7 +540,7 @@ const LeadsPage: React.FC = () => {
                     <textarea
                       value={noteText}
                       onChange={(e) => setNoteText(e.target.value)}
-                      placeholder="Add a private note..."
+                      placeholder={tx.notePlaceholder}
                       rows={3}
                       className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cv-blue focus:border-cv-blue dark:bg-dark-bg-tertiary dark:text-white text-sm resize-none"
                     />
@@ -471,7 +549,7 @@ const LeadsPage: React.FC = () => {
                       disabled={!noteText.trim() || addingNote}
                       className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {addingNote ? 'Adding...' : 'Add Note'}
+                      {addingNote ? tx.adding : tx.addNote}
                     </button>
                   </div>
 
@@ -489,7 +567,7 @@ const LeadsPage: React.FC = () => {
                     ))}
                     {notes.length === 0 && (
                       <p className="text-sm text-gray-500 dark:text-gray-500 italic">
-                        No notes yet
+                        {tx.noNotes}
                       </p>
                     )}
                   </div>
@@ -502,7 +580,7 @@ const LeadsPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Select a lead to view details
+                    {tx.selectLead}
                   </p>
                 </div>
               </div>

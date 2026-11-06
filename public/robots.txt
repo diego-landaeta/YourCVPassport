@@ -72,6 +72,8 @@ Disallow: /company/team
 Disallow: /company/settings
 Disallow: /company/analytics
 Disallow: /company/jobs
+Disallow: /alertas/baja
+Disallow: /alerts/unsubscribe
 
 # ==========================================
 # BLOCK TECHNICAL FILES AND RESOURCES

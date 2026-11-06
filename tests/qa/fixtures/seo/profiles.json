@@ -1,0 +1,131 @@
+[
+  {
+    "id": "1",
+    "slug": "delsy-romero",
+    "full_name": "Delsy Romero",
+    "headline": "Psicóloga clínica | Terapia cognitivo-conductual y formación de equipos",
+    "summary": "Psicóloga con más de diez años de experiencia en terapia individual y de pareja. Trabajo con adultos y adolescentes, y colaboro con equipos de salud mental en la formación de profesionales.",
+    "location": "Madrid, España",
+    "avatar_url": "https://cdn.example.test/avatars/delsy.png",
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-20T10:00:00Z",
+    "skills": [
+      {
+        "name": "Terapia cognitivo-conductual"
+      }
+    ],
+    "experiences": [
+      {
+        "title": "Psicóloga clínica"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "slug": "diego-do-santos",
+    "full_name": "Diego Do Santos",
+    "headline": "Senior Full-Stack Developer at a fintech scale-up working with TypeScript and Postgres",
+    "summary": "I build and ship web products end to end. Over eight years working with distributed teams, mentoring engineers and improving delivery speed in regulated environments.",
+    "location": "Lisbon, Portugal",
+    "avatar_url": null,
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-21T10:00:00Z",
+    "skills": [
+      {
+        "name": "TypeScript"
+      }
+    ],
+    "experiences": [
+      {
+        "title": "Senior Developer"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "slug": "louis-garnier",
+    "full_name": "Louis Garnier",
+    "headline": "Chef de projet digital",
+    "summary": "",
+    "location": null,
+    "avatar_url": "",
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-22T10:00:00Z"
+  },
+  {
+    "id": "4",
+    "slug": "ana-lopez-marketing",
+    "full_name": "Ana López",
+    "headline": "Directora de Marketing Digital especializada en crecimiento y adquisición para startups",
+    "summary": "Lidero equipos de marketing de rendimiento. He escalado cuatro startups de cero a un millón de usuarios con estrategias de contenido, SEO y publicidad de pago. Me apasiona medir todo lo que hacemos.",
+    "location": "Ciudad de México, México",
+    "avatar_url": "https://cdn.example.test/avatars/ana.png",
+    "meta_title": "Ana López | Directora de Marketing Digital y Growth en LATAM",
+    "meta_description": null,
+    "updated_at": "2026-10-18T10:00:00Z"
+  },
+  {
+    "id": "5",
+    "slug": "john-smith-nurse",
+    "full_name": "John Smith",
+    "headline": "Registered Nurse",
+    "summary": "Critical care nurse with a focus on patient safety and team coordination in busy hospital units across the United Kingdom and Ireland.",
+    "location": "Dublin, Ireland",
+    "avatar_url": "https://cdn.example.test/avatars/john.png",
+    "meta_title": null,
+    "meta_description": "Registered nurse specialised in critical care, patient safety and team coordination in busy hospital units. See his verified CV and credentials.",
+    "updated_at": "2026-10-19T10:00:00Z"
+  },
+  {
+    "id": "6",
+    "slug": "diana-ziegler",
+    "full_name": "Diana Ziegler",
+    "headline": "Perfil de prueba",
+    "summary": "Perfil de prueba.",
+    "location": "Berlin, Germany",
+    "avatar_url": null,
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-01T10:00:00Z"
+  },
+  {
+    "id": "7",
+    "slug": "support-yourcvpassport-com",
+    "full_name": "YourCVPassport Support",
+    "headline": "Customer support and success team for the platform",
+    "summary": "Soporte interno de la plataforma.",
+    "location": null,
+    "avatar_url": null,
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-02T10:00:00Z"
+  },
+  {
+    "id": "8",
+    "slug": "qa-marcado-prueba",
+    "full_name": "Marcado Como Prueba",
+    "headline": "Perfil creado por el equipo de QA para pruebas internas",
+    "summary": "Datos de ejemplo.",
+    "location": "Sevilla, España",
+    "avatar_url": null,
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-03T10:00:00Z",
+    "is_test": true
+  },
+  {
+    "id": "9",
+    "slug": "ana-xss",
+    "full_name": "Ana</title><script>window.__pwned=1</script>",
+    "headline": "Analista \"con comillas\" & símbolos <b>raros</b>",
+    "summary": "Resumen con <img src=x onerror=alert(1)> y $& patrones $' de reemplazo.",
+    "location": "Madrid",
+    "avatar_url": null,
+    "meta_title": null,
+    "meta_description": null,
+    "updated_at": "2026-10-04T10:00:00Z"
+  }
+]

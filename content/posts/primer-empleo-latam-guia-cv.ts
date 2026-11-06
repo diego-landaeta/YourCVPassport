@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1145,
-  title: "Guia para Conseguir tu Primer Empleo en Latinoamerica",
+  title: "Guía para Conseguir tu Primer Empleo en Latinoamérica",
   slug: "primer-empleo-latam-guia-cv",
   summary: "Todo para tu primera experiencia laboral en LATAM. CV hasta entrevista, paso a paso.",
-  content: `# Guia para Conseguir tu Primer Empleo en Latinoamerica
+  content: `# Guía para Conseguir tu Primer Empleo en Latinoamérica
 
 En el competitivo mercado laboral de 2026, dominar **primer empleo LATAM CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,25 +13,25 @@ Esta guía completa sobre **primer empleo LATAM CV** te proporciona estrategias 
 
 ![primer empleo LATAM CV](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre primer empleo LATAM CV}
 
-## 1. Mercado para jovenes en LATAM
+## 1. Mercado para jóvenes en LATAM
 2. CV sin experiencia: que incluir
-3. Practicas y pasantias
+3. Prácticas y pasantías
 4. Habilidades que valoran
 5. Portales para principiantes
 6. Tu primer CV verificado
 
-Cuando hablamos de **primer empleo LATAM CV** en el contexto de 1. mercado para jovenes en latam
+Cuando hablamos de **primer empleo LATAM CV** en el contexto de 1. mercado para jóvenes en latam
 2. cv sin experiencia: que incluir
-3. practicas y pasantias
+3. prácticas y pasantías
 4. habilidades que valoran
 5. portales para principiantes
 6. tu primer cv verificado, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado para jovenes en latam
+### Mejores prácticas para 1. mercado para jóvenes en latam
 2. cv sin experiencia: que incluir
-3. practicas y pasantias
+3. prácticas y pasantías
 4. habilidades que valoran
 5. portales para principiantes
 6. tu primer cv verificado
@@ -44,9 +44,9 @@ Para destacar en **primer empleo LATAM CV** dentro de esta área, aplica estas e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado para jovenes en latam
+### Errores frecuentes en 1. mercado para jóvenes en latam
 2. cv sin experiencia: que incluir
-3. practicas y pasantias
+3. prácticas y pasantías
 4. habilidades que valoran
 5. portales para principiantes
 6. tu primer cv verificado
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-24T22:00:00.000Z",
-  meta_title: "Guia para Conseguir tu Primer Empleo en Latinoamerica",
+  meta_title: "Guía para Conseguir tu Primer Empleo en Latinoamérica",
   meta_description: "Todo para tu primera experiencia laboral en LATAM. CV hasta entrevista, paso a paso.",
   lang: "es",
 };

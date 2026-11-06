@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const { signOut, isCompanyUser } = useAuth();
-  const { lang, setLang } = useLanguage();
+  const { lang, chooseLang } = useLanguage();
   const translations = useTranslations();
   const t = translations.dashboard.preferences.language;
   const menu = translations.dashboard.menu;
@@ -413,12 +413,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-2 border-t border-gray-200 dark:border-dark-border space-y-1">
           <div className="flex gap-1 justify-center mb-1">
             <button
-              onClick={() => { setLang('en'); localStorage.setItem('language', 'en'); }}
+              onClick={() => { chooseLang('en'); }}
               title="English"
               className={`flex-1 py-1.5 rounded-md text-[10px] font-bold transition-all ${lang === 'en' ? 'bg-cv-blue text-white' : 'text-gray-400 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'}`}
             >EN</button>
             <button
-              onClick={() => { setLang('es'); localStorage.setItem('language', 'es'); }}
+              onClick={() => { chooseLang('es'); }}
               title="Español"
               className={`flex-1 py-1.5 rounded-md text-[10px] font-bold transition-all ${lang === 'es' ? 'bg-cv-blue text-white' : 'text-gray-400 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-dark-bg-tertiary'}`}
             >ES</button>
@@ -453,7 +453,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Language toggle — compact pill */}
           <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-white/5 rounded-xl mb-3">
             <button
-              onClick={() => { setLang('en'); localStorage.setItem('language', 'en'); }}
+              onClick={() => { chooseLang('en'); }}
               className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                 lang === 'en'
                   ? 'bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white shadow-sm'
@@ -461,7 +461,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >English</button>
             <button
-              onClick={() => { setLang('es'); localStorage.setItem('language', 'es'); }}
+              onClick={() => { chooseLang('es'); }}
               className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                 lang === 'es'
                   ? 'bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white shadow-sm'
