@@ -318,13 +318,21 @@ test.describe('U9 sitemap', () => {
     // Todas las URLs cargan en local (SPA) sin la pagina 404 y sin redirigir
     await setup(context, 'es');
     const failed: string[] = [];
+    // /empleos y /jobs: aqui no hay datos y el listado sale vacio, con noindex A PROPOSITO (una
+    // pagina sin ofertas no se indexa). En produccion el generador los deja fuera del sitemap
+    // cuando hay 0 ofertas; sin credenciales no puede saberlo y los deja. De estos dos solo se
+    // exige que carguen sin la pagina 404 y sin redirigir.
+    const LISTADOS = new Set(['/empleos', '/jobs']);
     for (const loc of locs) {
       const p = loc.slice(BASE.length) || '/';
       await page.goto(p, { waitUntil: 'domcontentloaded' });
       try {
         await expect.poll(() => page.title(), { timeout: 30_000 }).not.toBe(INDEX_TITLE);
         await page.waitForTimeout(150);
-        const noindex = await page.locator('meta[name="robots"][content*="noindex"]').count();
+        const titulo = await page.title();
+        const noindex = LISTADOS.has(p)
+          ? (/404|no encontrad|not found/i.test(titulo) ? 1 : 0)
+          : await page.locator('meta[name="robots"][content*="noindex"]').count();
         const now = new URL(page.url()).pathname;
         if (noindex > 0 || now !== p) failed.push(`${p} -> ${now}${noindex ? ' (404/noindex)' : ''}`);
       } catch {
