@@ -205,8 +205,10 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
         }
     };
 
+    // overflow-x-hidden: con las fuentes de Linux un texto de la plantilla pasaba 8 px del
+    // borde a 375 px y ensanchaba la página (QA 13). No hay nada sticky que se rompa.
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 dark:from-dark-bg-primary dark:to-dark-bg-secondary font-sans">
+        <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 dark:from-dark-bg-primary dark:to-dark-bg-secondary font-sans">
             <div className="max-w-6xl mx-auto px-5 py-16">
                 <div className="text-center rounded-3xl mb-16 p-6 sm:p-10 md:p-16 text-white shadow-2xl relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
                     <div className="absolute inset-0 opacity-10 overflow-hidden" aria-hidden="true">

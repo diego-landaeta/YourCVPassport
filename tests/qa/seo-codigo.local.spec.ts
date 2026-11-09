@@ -356,7 +356,19 @@ test.describe('13: sin desbordamiento horizontal a 375 px', () => {
           const desc = `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 50)} right=${Math.round(r.right)} w=${Math.round(r.width)}${txt ? ` «${txt}»` : ''}`;
           (recortado(el) ? dentro : sueltos).push(desc);
         }
-        const wide = [...sueltos.map((s) => `SIN RECORTAR ${s}`), ...dentro];
+        // El texto que se sale de su caja no cambia el tamaño de la caja: se mide aparte.
+        const textos: string[] = [];
+        const paso = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let n = paso.nextNode(); n; n = paso.nextNode()) {
+          const rango = document.createRange();
+          rango.selectNodeContents(n);
+          const r = rango.getBoundingClientRect();
+          const padre = n.parentElement;
+          if (padre && r.width > 0 && r.right > vw + 1 && !recortado(padre)) {
+            textos.push(`TEXTO «${(n.textContent || '').trim().slice(0, 30)}» en ${padre.tagName.toLowerCase()}.${String(padre.className).slice(0, 40)} right=${Math.round(r.right)}`);
+          }
+        }
+        const wide = [...textos, ...sueltos.map((s) => `SIN RECORTAR ${s}`), ...dentro];
         return { vw, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth, wide: wide.slice(0, 8) };
       });
       expect(m.scroll, `${c.template}/${c.len}: scrollWidth ${m.scroll} > ${m.vw}; anchos: ${m.wide.join(' | ')}`).toBeLessThanOrEqual(m.vw);
