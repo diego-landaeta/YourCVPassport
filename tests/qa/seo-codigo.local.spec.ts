@@ -341,12 +341,23 @@ test.describe('13: sin desbordamiento horizontal a 375 px', () => {
 
       const m = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth;
-        const wide: string[] = [];
-        for (const el of Array.from(document.querySelectorAll<HTMLElement>('.cv-template *'))) {
+        // Toda la página, no solo la plantilla, y primero lo que NO recorta ningún padre
+        // (overflow distinto de visible): eso es lo que ensancha el scroll de verdad.
+        const recortado = (el: HTMLElement) => {
+          for (let p = el.parentElement; p; p = p.parentElement) if (getComputedStyle(p).overflowX !== 'visible') return true;
+          return false;
+        };
+        const sueltos: string[] = [];
+        const dentro: string[] = [];
+        for (const el of Array.from(document.querySelectorAll<HTMLElement>('body *'))) {
           const r = el.getBoundingClientRect();
-          if (r.width > 0 && r.right > vw + 1) wide.push(`${el.tagName.toLowerCase()}.${String(el.className).slice(0, 50)} right=${Math.round(r.right)}`);
+          if (!(r.width > 0 && r.right > vw + 1)) continue;
+          const txt = (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 30);
+          const desc = `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 50)} right=${Math.round(r.right)} w=${Math.round(r.width)}${txt ? ` «${txt}»` : ''}`;
+          (recortado(el) ? dentro : sueltos).push(desc);
         }
-        return { vw, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth, wide: wide.slice(0, 6) };
+        const wide = [...sueltos.map((s) => `SIN RECORTAR ${s}`), ...dentro];
+        return { vw, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth, wide: wide.slice(0, 8) };
       });
       expect(m.scroll, `${c.template}/${c.len}: scrollWidth ${m.scroll} > ${m.vw}; anchos: ${m.wide.join(' | ')}`).toBeLessThanOrEqual(m.vw);
       expect(m.body).toBeLessThanOrEqual(m.vw);
