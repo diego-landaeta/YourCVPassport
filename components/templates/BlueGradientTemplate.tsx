@@ -209,9 +209,9 @@ const BlueGradientTemplate: React.FC<BlueGradientTemplateProps> = ({ data, color
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 dark:from-dark-bg-primary dark:to-dark-bg-secondary font-sans">
             <div className="max-w-6xl mx-auto px-5 py-16">
                 <div className="text-center rounded-3xl mb-16 p-6 sm:p-10 md:p-16 text-white shadow-2xl relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accentColor}, #818CF8)` }}>
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute inset-0 opacity-10 overflow-hidden" aria-hidden="true">
+                        <div className="absolute top-0 left-0 w-96 max-w-full aspect-square bg-white rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-96 max-w-full aspect-square bg-white rounded-full blur-3xl"></div>
                     </div>
                     <div className="relative">
                         <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-8 border-4 border-white/30 shadow-2xl ring-8 ring-white/10 overflow-hidden flex items-center justify-center">
