@@ -41,7 +41,12 @@ const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnu
 
     return (
         <div className={`border dark:border-dark-border rounded-lg p-8 flex flex-col relative overflow-hidden isolate ${plan.highlight ? 'border-cv-blue md:scale-105 bg-white dark:bg-dark-bg-secondary' : 'border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg-secondary'} shadow-lg`}>
-            {plan.highlight && <div className="absolute top-0 -right-12 transform rotate-45 bg-cv-green text-white text-center font-semibold py-1 w-40">{t.pricingPage.trialLabel}</div>}
+            {/* Etiqueta en una píldora dentro de la tarjeta: la cinta diagonal sobresalía y se cortaba. */}
+            {plan.highlight && (
+                <span className="mb-4 inline-flex self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-semibold tracking-wide text-white">
+                    {t.pricingPage.trialLabel}
+                </span>
+            )}
             <h3 className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary">{plan.title}</h3>
             <div className="mt-4">
                 <div className="flex items-baseline">
