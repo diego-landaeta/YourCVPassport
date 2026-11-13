@@ -3026,9 +3026,9 @@ export const translations = {
         tiers: {
             title: "Nuestros niveles",
             plans: [
-                { title: "Starter", description: "Para equipos pequeños.", price: "€99", credits: "100 créditos/mes", features: ["Acceso a la búsqueda", "1 puesto de usuario"], cta: "Empezar" },
-                { title: "Growth", description: "Para empresas en crecimiento.", price: "€249", credits: "1000 créditos/mes", features: ["Todo en Starter", "3 puestos de usuario", "Integración ATS"], cta: "Empezar", highlight: true },
-                { title: "Enterprise", description: "Para grandes organizaciones.", price: "A medida", credits: "3000 créditos/mes", features: ["Todo en Growth", "Puestos ilimitados", "Acceso a API"], cta: "Contactar a ventas" }
+                { planKey: "starter", title: "Starter", description: "Para equipos pequeños.", price: "€99", credits: "100 créditos/mes", features: ["Acceso a la búsqueda", "1 puesto de usuario"], cta: "Empezar" },
+                { planKey: "growth", title: "Growth", description: "Para empresas en crecimiento.", price: "€249", credits: "1000 créditos/mes", features: ["Todo en Starter", "3 puestos de usuario", "Integración ATS"], cta: "Empezar", highlight: true },
+                { planKey: "enterprise", title: "Enterprise", description: "Para grandes organizaciones.", price: "A medida", credits: "3000 créditos/mes", features: ["Todo en Growth", "Puestos ilimitados", "Acceso a API"], cta: "Contactar a ventas" }
             ]
         },
         credits: {
@@ -5239,5 +5239,31 @@ export const translations = {
         finalCtaNote: 'No se requiere tarjeta de crédito',
         beforeLabel: 'Antes',
         afterLabel: 'Después (con IA)',
+    },
+    // Pagos con Stripe (lib/billingApi.ts, hooks/useBilling.ts, components/billing/)
+    payments: {
+        comingSoon: 'Los pagos estarán disponibles muy pronto.',
+        manageSubscription: 'Gestionar suscripción',
+        subscribePro: 'Contratar el plan Profesional',
+        checkoutSuccess: '¡Listo! Tu plan se activará en unos segundos.',
+        checkoutCancel: 'Has cancelado el pago. No se ha cobrado nada.',
+        creditsSuccess: 'Pago completado. Los créditos aparecerán en tu saldo en unos segundos.',
+        alreadySubscribed: 'Ya tienes una suscripción activa. Te llevamos a gestionarla.',
+        companyRequired: 'Registra primero tu empresa para contratar un plan.',
+        companyRoleRequired: 'Solo el propietario o un administrador de la empresa puede gestionar los pagos.',
+        companyInactive: 'Tu empresa no puede realizar pagos en este momento. Escríbenos a support@yourcvpassport.com.',
+        noBillingAccount: 'Todavía no tienes ninguna suscripción que gestionar.',
+        rateLimited: 'Demasiados intentos seguidos. Espera unos minutos e inténtalo de nuevo.',
+        genericError: 'No se ha podido iniciar el pago. Inténtalo de nuevo en unos minutos.',
+        portalError: 'No se ha podido abrir la gestión de la suscripción. Inténtalo de nuevo.',
+        banner: {
+            trialTitle: 'Prueba gratuita del plan Profesional',
+            trialDaysLeft: (days: number) => days <= 0 ? 'Tu prueba termina hoy.' : days === 1 ? 'Te queda 1 día de prueba.' : `Te quedan ${days} días de prueba.`,
+            trialHint: 'Para seguir con Pro al terminar, guarda una tarjeta. Si no, volverás al plan Gratis sin ningún cargo.',
+            activeTitle: 'Plan Profesional activo',
+            renewsOn: (date: string) => `Se renueva el ${date}.`,
+            endsOn: (date: string) => `Cancelado: sigue activo hasta el ${date}.`,
+            pastDue: 'No hemos podido cobrar la última cuota. Revisa tu tarjeta para no perder el plan.',
+        },
     },
 };

@@ -259,8 +259,8 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
     return Promise.resolve(true);
   };
 
-  // Check if user has premium plan (lowercase: 'pro', 'premium', 'enterprise')
-  const isPremiumUser = profile?.plan && ['pro', 'premium', 'enterprise'].includes(profile.plan.toLowerCase());
+  // Planes con IA: pro o enterprise (profiles_plan_check no tiene 'premium'); mismo criterio que lib/ai.ts.
+  const isPremiumUser = !!profile?.plan && ['pro', 'enterprise'].includes(String(profile.plan).toLowerCase());
 
   // En un perfil gestionado, `profile.plan` es el del PERFIL EDITADO, no el del
   // gestor que lo esta editando. Los perfiles gestionados se crean siempre con

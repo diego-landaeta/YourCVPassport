@@ -7,6 +7,8 @@ import { Plan } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useBillingActions, useBillingStatus, useCheckoutReturn, useManageBillingLink } from '../../hooks/useBilling';
+import { isLiveSubscription } from '../../lib/billingApi';
 
 // Wrapper for animations
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
@@ -19,7 +21,8 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
 };
 
 // Pricing Card Component
-const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnual }) => {
+// onPaidClick / paidLabel: solo el plan de pago (precio numérico). Sin ellos, como siempre: alta.
+const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean, onPaidClick?: (annual: boolean) => void, paidLabel?: string, busy?: boolean }> = ({ plan, isAnnual, onPaidClick, paidLabel, busy }) => {
     const { openModal } = useAuth();
     const t = useTranslations();
     const { lang } = useLanguage();
@@ -63,8 +66,12 @@ const PricingCard: React.FC<{ plan: Plan, isAnnual: boolean }> = ({ plan, isAnnu
                   </li>
                 ))}
             </ul>
-            <button onClick={() => openModal('signup')} className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold ${plan.highlight ? 'bg-cv-blue text-white hover:bg-opacity-90' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-border-light'}`}>
-                {plan.cta}
+            <button
+                onClick={() => (monthlyPrice !== null && onPaidClick ? onPaidClick(isAnnual) : openModal('signup'))}
+                disabled={monthlyPrice !== null && busy}
+                aria-busy={monthlyPrice !== null && busy ? true : undefined}
+                className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold ${plan.highlight ? 'bg-cv-blue text-white hover:bg-opacity-90' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-border-light'}`}>
+                {monthlyPrice !== null && paidLabel ? paidLabel : plan.cta}
             </button>
         </div>
     );
@@ -75,7 +82,32 @@ const PricingPage: React.FC = () => {
     const t = useTranslations();
     const pageData = t.pricingPage;
     const { lang } = useLanguage();
-    const { openModal } = useAuth();
+    const { openModal, session, refetchProfile } = useAuth();
+
+    // Pagos (Stripe): sin sesión el plan de pago abre el alta, como antes. Con sesión,
+    // Checkout con prueba de 14 días (o el portal si ya tiene suscripción). Sin pagos
+    // activados solo sale el aviso «muy pronto».
+    const billing = useBillingStatus(!!session);
+    const { busy, checkout, portal } = useBillingActions();
+    const refreshAfterPayment = () => {
+        void refetchProfile();
+        void billing.refresh();
+        // El webhook puede tardar unos segundos en activar el plan.
+        window.setTimeout(() => { void refetchProfile(); void billing.refresh(); }, 5000);
+    };
+    useCheckoutReturn((result) => { if (result === 'ok') refreshAfterPayment(); });
+    useManageBillingLink(() => { void portal('profile'); });
+    const hasProSubscription = isLiveSubscription(billing.status?.profile.subscription);
+    const handlePaidClick = (annual: boolean) => {
+        if (!session) { openModal('signup'); return; }
+        if (hasProSubscription) { void portal('profile'); return; }
+        void checkout(annual ? 'pro_annual' : 'pro_monthly', 'profile');
+    };
+    const paidLabel = !session || !billing.status
+        ? undefined
+        : hasProSubscription
+            ? t.payments.manageSubscription
+            : billing.status.profile.trialAvailable ? undefined : t.payments.subscribePro;
 
     const seoTitle = lang === 'es'
         ? 'Precios y Planes'
@@ -130,7 +162,7 @@ const PricingPage: React.FC = () => {
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                             {t.PRICING_PAGE_PLANS.map((plan) => (
-                                <PricingCard key={plan.title} plan={plan} isAnnual={isAnnual} />
+                                <PricingCard key={plan.title} plan={plan} isAnnual={isAnnual} onPaidClick={handlePaidClick} paidLabel={paidLabel} busy={busy !== null} />
                             ))}
                         </div>
                     </AnimatedWrapper>

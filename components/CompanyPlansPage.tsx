@@ -5,6 +5,8 @@ import Testimonials from './landing/Testimonials';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './shared/PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useBillingActions, useBillingStatus, useCheckoutReturn } from '../hooks/useBilling';
+import { companyPlanProduct, formatEuro, isLiveSubscription } from '../lib/billingApi';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -15,7 +17,8 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = (
     );
 };
 
-const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isAnnual }) => {
+// onPlanClick / planLabel: planes de pago (Starter, Growth). Enterprise sigue como antes.
+const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean, onPlanClick?: (planKey: 'starter' | 'growth', annual: boolean) => void, planLabel?: string, busy?: boolean }> = ({ plan, isAnnual, onPlanClick, planLabel, busy }) => {
     const { openModal } = useAuth();
     const { lang } = useLanguage();
 
@@ -23,11 +26,14 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
         ? parseInt(plan.price.replace('€', ''))
         : null;
 
-    const annualPrice = monthlyPrice ? Math.round(monthlyPrice * 12 * 0.8) : null;
-    const monthlyFromAnnual = annualPrice ? Math.round(annualPrice / 12) : null;
+    // En céntimos y sin redondear a euros: se enseña lo que cobra Stripe (950,40 €, no 950 €).
+    const annualCents = monthlyPrice ? Math.round(monthlyPrice * 100 * 12 * 0.8) : null;
+    const annualPrice = annualCents ? annualCents / 100 : null;
+    const monthlyFromAnnual = annualCents ? formatEuro(Math.round(annualCents / 12) / 100, lang) : null;
+    const isPaidPlan = (plan.planKey === 'starter' || plan.planKey === 'growth') && monthlyPrice !== null;
 
     const displayPrice = isAnnual && annualPrice
-        ? `€${annualPrice}`
+        ? formatEuro(annualPrice, lang)
         : plan.price;
 
     const t = useTranslations();
@@ -48,7 +54,7 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
                 </div>
                 {isAnnual && monthlyFromAnnual && (
                     <p className="mt-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-                        €{monthlyFromAnnual} {billing.perMonth}
+                        {monthlyFromAnnual} {billing.perMonth}
                     </p>
                 )}
             </div>
@@ -61,8 +67,12 @@ const CompanyPlanCard: React.FC<{ plan: any, isAnnual: boolean }> = ({ plan, isA
                   </li>
                 ))}
             </ul>
-            <button onClick={() => openModal('signup')} className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-border-light'}`}>
-                {plan.cta}
+            <button
+                onClick={() => (isPaidPlan && onPlanClick ? onPlanClick(plan.planKey, isAnnual) : openModal('signup'))}
+                disabled={isPaidPlan && busy}
+                aria-busy={isPaidPlan && busy ? true : undefined}
+                className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-border-light'}`}>
+                {isPaidPlan && planLabel ? planLabel : plan.cta}
             </button>
         </div>
     );
@@ -74,6 +84,26 @@ const CompanyPlansPage: React.FC = () => {
     const pageData = t.companyPlansPage;
     const [isAnnual, setIsAnnual] = useState(false);
     const { lang } = useLanguage();
+    const { session, openModal, company, refetchCompany } = useAuth();
+
+    // Pagos (Stripe): sin sesión, alta como antes. Con sesión, Checkout del plan para su
+    // empresa (solo OWNER/ADMIN; el servidor lo comprueba) o el portal si ya tiene plan.
+    // Sin empresa, al registro de empresa. Sin pagos activados, aviso «muy pronto».
+    const billing = useBillingStatus(!!session);
+    const { busy, checkout, portal } = useBillingActions();
+    const companyId = billing.status?.company?.id ?? company?.id ?? null;
+    const hasCompanyPlan = isLiveSubscription(billing.status?.company?.subscription);
+    useCheckoutReturn((result) => {
+        if (result !== 'ok') return;
+        void billing.refresh();
+        void refetchCompany();
+        window.setTimeout(() => { void billing.refresh(); void refetchCompany(); }, 5000);
+    });
+    const handlePlanClick = (planKey: 'starter' | 'growth', annual: boolean) => {
+        if (!session) { openModal('signup'); return; }
+        if (hasCompanyPlan) { void portal('company', companyId); return; }
+        void checkout(companyPlanProduct(planKey, annual), 'company', companyId);
+    };
 
     const seoTitle = lang === 'es'
         ? 'Planes para Empresas'
@@ -129,7 +159,7 @@ const CompanyPlansPage: React.FC = () => {
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                             {pageData.tiers.plans.map((plan: any) => (
-                                <CompanyPlanCard key={plan.title} plan={plan} isAnnual={isAnnual} />
+                                <CompanyPlanCard key={plan.title} plan={plan} isAnnual={isAnnual} onPlanClick={handlePlanClick} planLabel={hasCompanyPlan ? t.payments.manageSubscription : undefined} busy={busy !== null} />
                             ))}
                         </div>
                     </AnimatedWrapper>

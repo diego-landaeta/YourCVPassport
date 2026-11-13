@@ -1,11 +1,13 @@
 // Utilidades SOLO para las pruebas de Node de las Edge Functions (no se despliega).
 //
 //  - loadEdge(entry, env): empaqueta con esbuild el index.ts de una función sustituyendo
-//    `serve` (Deno std), supabase-js y Upstash por dobles, y devuelve el handler. Nada sale
-//    a la red: fetch y Deno.env son falsos y las claves son inventadas.
+//    `serve` (Deno std), supabase-js, Upstash y Stripe por dobles, y devuelve el handler. Nada
+//    sale a la red: fetch y Deno.env son falsos y las claves son inventadas. Stripe: `new
+//    Stripe(clave)` devuelve globalThis.__fakeStripe (lo monta cada prueba) y apunta la clave
+//    en __fakeStripe.key.
 //  - createFakeSupabase(tables, hooks): una «base» en memoria con el constructor de
 //    consultas de supabase-js que usan las funciones (select/eq/neq/lt/lte/gte/is/not/in/
-//    order/limit/range/update/insert/maybeSingle/single), rpc() y auth.admin.
+//    order/limit/range/update/insert/upsert/delete/maybeSingle/single), rpc() y auth.admin.
 //
 // Uso: ver company-review-ai/sweep.test.mjs y send-outbox/digests.test.mjs.
 import path from 'node:path'
@@ -35,6 +37,20 @@ export async function loadEdge(fn, env = {}) {
         b.onResolve({ filter: /^https:\/\/deno\.land\/std@[^/]+\/http\/server\.ts$/ }, () => ({ path: 'serve', namespace: 'stub' }))
         b.onResolve({ filter: /^https:\/\/esm\.sh\/@supabase\/supabase-js/ }, () => ({ path: 'supabase', namespace: 'stub' }))
         b.onResolve({ filter: /^https:\/\/esm\.sh\/@upstash\// }, () => ({ path: 'upstash', namespace: 'stub' }))
+        b.onResolve({ filter: /^https:\/\/esm\.sh\/stripe@/ }, () => ({ path: 'stripe', namespace: 'stub' }))
+        b.onLoad({ filter: /^stripe$/, namespace: 'stub' }, () => ({
+          contents: `export default class Stripe {
+              constructor(key) {
+                const f = globalThis.__fakeStripe
+                if (!f) throw new Error('prueba sin globalThis.__fakeStripe')
+                f.key = key
+                return f
+              }
+              static createFetchHttpClient() { return {} }
+              static createSubtleCryptoProvider() { return {} }
+            }`,
+          loader: 'js',
+        }))
         b.onLoad({ filter: /^serve$/, namespace: 'stub' }, () => ({
           contents: 'export function serve(handler) { globalThis.__edgeHandler = handler }',
           loader: 'js',
@@ -100,6 +116,12 @@ class Query {
     return this
   }
   insert(rows) { this.op = 'insert'; this.rowsToInsert = Array.isArray(rows) ? rows : [rows]; return this }
+  upsert(rows, opts = {}) {
+    this.op = 'upsert'
+    this.rowsToInsert = Array.isArray(rows) ? rows : [rows]
+    this.conflictCols = String(opts.onConflict || 'id').split(',').map((c) => c.trim())
+    return this
+  }
   update(patch) { this.op = 'update'; this.patch = patch; return this }
   delete() { this.op = 'delete'; return this }
   eq(c, v) { this.filters.push((r) => get(r, c) === v); return this }
@@ -133,6 +155,21 @@ class Query {
         const full = { id: row.id ?? `${this.table}-${tableRows.length + 1}`, created_at: new Date().toISOString(), ...row }
         tableRows.push(full)
         out.push(full)
+      }
+      return this.finish(this.returning || this.single_ ? out : null)
+    }
+    if (this.op === 'upsert') {
+      const out = []
+      for (const row of this.rowsToInsert) {
+        const found = tableRows.find((r) => this.conflictCols.every((c) => r[c] === row[c]))
+        if (found) {
+          Object.assign(found, row)
+          out.push(found)
+        } else {
+          const full = { created_at: new Date().toISOString(), ...row }
+          tableRows.push(full)
+          out.push(full)
+        }
       }
       return this.finish(this.returning || this.single_ ? out : null)
     }

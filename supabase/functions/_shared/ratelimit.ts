@@ -45,6 +45,12 @@ export const rateLimitConfigs = {
     requests: 3,
     window: '15 m',
   },
+  // Pagos (create-checkout-session, create-portal-session): 10 cada 10 min por
+  // usuario. Cada intento crea objetos en Stripe; una persona no necesita más.
+  billing: {
+    requests: 10,
+    window: '10 m',
+  },
   // Analytics: 30 req/min per IP
   analytics: {
     requests: 30,

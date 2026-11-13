@@ -4,10 +4,22 @@ import { Link } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getLocalizedPath } from '../../utils/canonicalUrl';
+import { useBillingActions, useBillingStatus } from '../../hooks/useBilling';
+import { isLiveSubscription } from '../../lib/billingApi';
 
 const Pricing: React.FC = () => {
-  const { openModal } = useAuth();
+  const { openModal, session } = useAuth();
   const t = useTranslations();
+  // Plan de pago (Pro): sin sesión, alta como antes; con sesión, Stripe Checkout (vuelve a
+  // /precios) o el portal si ya está suscrito. Sin pagos activados, aviso «muy pronto».
+  const billing = useBillingStatus(!!session);
+  const { busy, checkout, portal } = useBillingActions();
+  const hasProSubscription = isLiveSubscription(billing.status?.profile.subscription);
+  const handlePaidClick = () => {
+    if (!session) { openModal('signup'); return; }
+    if (hasProSubscription) { void portal('profile'); return; }
+    void checkout(isAnnual ? 'pro_annual' : 'pro_monthly', 'profile');
+  };
   const { lang } = useLanguage();
   // Rutas en el idioma activo (antes '/es' + ruta inglesa, que daba 404)
   const plansPath = getLocalizedPath('/companies/plans', lang) ?? '/companies/plans';
@@ -86,8 +98,12 @@ const Pricing: React.FC = () => {
                     {plan.cta}
                 </Link>
               ) : (
-                <button onClick={() => openModal('signup')} className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light shadow-md' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-bg-primary border border-transparent dark:border-dark-border'}`}>
-                    {plan.cta}
+                <button
+                  onClick={() => (monthlyPrice !== null ? handlePaidClick() : openModal('signup'))}
+                  disabled={monthlyPrice !== null && busy !== null}
+                  aria-busy={monthlyPrice !== null && busy !== null ? true : undefined}
+                  className={`mt-10 block w-full text-center px-6 py-3 rounded-md font-semibold transition-all ${plan.highlight ? 'bg-cv-blue dark:bg-cv-blue text-white hover:bg-cv-blue-dark dark:hover:bg-cv-blue-light shadow-md' : 'bg-gray-100 dark:bg-dark-bg-tertiary text-cv-blue dark:text-cv-blue-light hover:bg-gray-200 dark:hover:bg-dark-bg-primary border border-transparent dark:border-dark-border'}`}>
+                    {monthlyPrice !== null && hasProSubscription ? t.payments.manageSubscription : plan.cta}
                 </button>
               )}
             </div>

@@ -42,6 +42,7 @@ datos escapados y URLs solo http(s)/mailto). El contenido de cada uno está en
 | Código del sello de correo | `verificationCodeEmail` | `send-verification-email` |
 | Empresa aprobada / rechazada | `companyApprovedEmail` / `companyRejectedEmail` | `company-registration-email` |
 | Consulta de prensa (interno) | `pressContactEmail` | `newsletter-contact` |
+| Fin de la prueba del plan Profesional (ES/EN) | `trialEndingEmail` (`stripe-webhook/billingEmails.ts`) | `stripe-webhook` (`customer.subscription.trial_will_end`) |
 | Correos propios de Supabase Auth (invitación, cambio de email, reautenticación, avisos) | `inviteEmail`, `emailChangeEmail`, `reauthenticationEmail`, `accountNoticeEmail` | `send-auth-email` |
 
 Retiradas (2026-10-08): `send-email` (8 plantillas que disparaban triggers de

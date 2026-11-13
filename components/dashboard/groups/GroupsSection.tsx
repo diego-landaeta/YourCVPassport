@@ -26,7 +26,9 @@ const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSection
   const isEs = lang === 'es';
   const isChannel = mode === 'channel';
 
-  const isPremium = profile?.plan && ['pro', 'premium', 'enterprise'].includes(String(profile.plan).toLowerCase());
+  // Planes con funciones Pro (profiles_plan_check: free | basic | pro | enterprise; 'premium' no existe).
+  // Mismo criterio que lib/ai.ts y useUsageLimits: pro o enterprise.
+  const isPremium = !!profile?.plan && ['pro', 'enterprise'].includes(String(profile.plan).toLowerCase());
 
   const { myGroups: allMyGroups, suggestedGroups: allSuggested, loading, refresh } = useGroups();
   const { joinGroup, leaveGroup } = useGroupActions();

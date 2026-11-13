@@ -3037,9 +3037,9 @@ export const translations = {
         tiers: {
             title: "Our Tiers",
             plans: [
-                { title: "Starter", description: "For small teams.", price: "€99", credits: "100 credits/month", features: ["Search access", "1 user seat"], cta: "Get Started" },
-                { title: "Growth", description: "For growing businesses.", price: "€249", credits: "1000 credits/month", features: ["Everything in Starter", "3 user seats", "ATS integration"], cta: "Get Started", highlight: true },
-                { title: "Enterprise", description: "For large organizations.", price: "Custom", credits: "3000 credits/month", features: ["Everything in Growth", "Unlimited seats", "API Access"], cta: "Contact Sales" }
+                { planKey: "starter", title: "Starter", description: "For small teams.", price: "€99", credits: "100 credits/month", features: ["Search access", "1 user seat"], cta: "Get Started" },
+                { planKey: "growth", title: "Growth", description: "For growing businesses.", price: "€249", credits: "1000 credits/month", features: ["Everything in Starter", "3 user seats", "ATS integration"], cta: "Get Started", highlight: true },
+                { planKey: "enterprise", title: "Enterprise", description: "For large organizations.", price: "Custom", credits: "3000 credits/month", features: ["Everything in Growth", "Unlimited seats", "API Access"], cta: "Contact Sales" }
             ]
         },
         credits: {
@@ -5323,5 +5323,31 @@ export const translations = {
         finalCtaNote: 'No credit card required',
         beforeLabel: 'Before',
         afterLabel: 'After (with AI)',
+    },
+    // Stripe payments (lib/billingApi.ts, hooks/useBilling.ts, components/billing/)
+    payments: {
+        comingSoon: 'Payments will be available very soon.',
+        manageSubscription: 'Manage subscription',
+        subscribePro: 'Subscribe to the Professional plan',
+        checkoutSuccess: 'Done! Your plan will be active in a few seconds.',
+        checkoutCancel: 'You cancelled the payment. Nothing has been charged.',
+        creditsSuccess: 'Payment completed. The credits will show in your balance in a few seconds.',
+        alreadySubscribed: 'You already have an active subscription. Taking you to manage it.',
+        companyRequired: 'Register your company first to subscribe to a plan.',
+        companyRoleRequired: 'Only the owner or an admin of the company can manage payments.',
+        companyInactive: 'Your company cannot make payments right now. Write to us at support@yourcvpassport.com.',
+        noBillingAccount: 'You do not have any subscription to manage yet.',
+        rateLimited: 'Too many attempts in a row. Wait a few minutes and try again.',
+        genericError: 'We could not start the payment. Please try again in a few minutes.',
+        portalError: 'We could not open your subscription settings. Please try again.',
+        banner: {
+            trialTitle: 'Professional plan free trial',
+            trialDaysLeft: (days: number) => days <= 0 ? 'Your trial ends today.' : days === 1 ? '1 day of trial left.' : `${days} days of trial left.`,
+            trialHint: 'To keep Pro when it ends, save a card. Otherwise you will go back to the Free plan with no charge.',
+            activeTitle: 'Professional plan active',
+            renewsOn: (date: string) => `Renews on ${date}.`,
+            endsOn: (date: string) => `Cancelled: active until ${date}.`,
+            pastDue: 'We could not charge your last payment. Check your card to keep your plan.',
+        },
     },
 };

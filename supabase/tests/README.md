@@ -27,6 +27,7 @@ Necesitan Node 22.6 o superior (24 recomendado) para leer los `.ts` de las funci
 | `fase4.test.mjs` | `20261032` sobre el encadenado 29 → 32 (correcciones de la auditoría) |
 | `fase5.test.mjs` | `20261033` y `20261034` sobre el encadenado 28 → 34 (aviso de 15 días, casillas opcionales, cron) |
 | `fase6.test.mjs` | `20261035` (cierre final) sobre el encadenado 28 → 35 |
+| `fase7.test.mjs` | `20261104` (pagos con Stripe) sobre el estado real + el encadenado 28 → 36: RLS de las tablas de pago, `companies.plan` protegido y `add_company_credits_from_payment` (solo `service_role`, idempotente) |
 | `integrado*.test.mjs` | La cadena completa de migraciones sobre el estado REAL de producción (`integrado35` es la vigente; las anteriores se conservan como comparación de cada tramo) |
 | `stub-base.sql`, `stub-triggers.sql`, `prod-funcs.sql` | El estado de producción del 29/10/2026 (tablas, disparadores y funciones), leído con consultas de solo lectura. Es el punto de partida de `fase5`, `fase6` e `integrado*` |
 | `run-all.mjs`, `run-functions.mjs` | Lanzadores: ejecutan todo, resumen al final y código de salida |

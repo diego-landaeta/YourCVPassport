@@ -37,6 +37,8 @@ en variables `VITE_*`.
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` | si hay SMS | Verificación por SMS |
 | `CORS_EXTRA_ORIGINS` | opcional | Orígenes extra separados por comas (p. ej. staging) |
 | `APP_URL` | opcional | Por defecto `https://yourcvpassport.com` |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | para cobrar | Pagos con Stripe. Sin ellos los pagos quedan «muy pronto» y nada se rompe. Ver `docs/pagos-stripe.md` |
+| `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_ANNUAL`, `STRIPE_PRICE_STARTER_MONTHLY`, `STRIPE_PRICE_STARTER_ANNUAL`, `STRIPE_PRICE_GROWTH_MONTHLY`, `STRIPE_PRICE_GROWTH_ANNUAL`, `STRIPE_PRICE_CREDITS_50`, `STRIPE_PRICE_CREDITS_150`, `STRIPE_PRICE_CREDITS_300`, `STRIPE_PRICE_CREDITS_1000` | para cobrar | Price IDs de Stripe de cada producto (EUR). Un producto sin su price sigue «muy pronto» |
 
 - [ ] Brevo: autenticar el dominio `yourcvpassport.com` (registros SPF, DKIM y DMARC
       que da Brevo en Senders & IP → Domains). Sin esto los correos van a spam.
@@ -87,6 +89,10 @@ En el SQL editor, en este orden:
 - [ ] El resto de funciones modificadas: `admin-create-managed-profile`,
       `ai-cv-assistant`, `ai-optimize-description`, `get-public-profile`,
       `track-analytics`, `sitemap`.
+- [ ] Pagos (después de `20261104_pagos_stripe.sql`): `create-checkout-session`,
+      `create-portal-session`, `get-billing-status` y `stripe-webhook --no-verify-jwt`.
+      Sin los secretos de Stripe quedan durmientes. Pasos de Stripe y pruebas en
+      `docs/pagos-stripe.md`.
 
 ## 4. Frontend
 

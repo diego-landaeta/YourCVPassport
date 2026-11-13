@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { supabase } from '../../supabase/client';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useBillingActions, useCheckoutReturn } from '../../hooks/useBilling';
+import { creditsProduct, formatEuro } from '../../lib/billingApi';
 import type { Company, CompanyUser } from '../../types';
 import {
   CreditCardIcon,
@@ -36,8 +39,12 @@ const CreditsManagementPage: React.FC = () => {
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
-  const [processing, setProcessing] = useState(false);
+  const { lang } = useLanguage();
+  // Compra por Stripe Checkout (create-checkout-session); los créditos los abona el webhook.
+  const { busy, checkout } = useBillingActions();
+  // Saldo mostrado: el de la empresa y, tras pagar, el que se relee de companies_full.
+  const [balance, setBalance] = useState<number>(company?.credit_balance || 0);
+  useEffect(() => { setBalance(company?.credit_balance || 0); }, [company?.credit_balance]);
 
   // Helper function to access translations
   const t = (key: string) => {
@@ -115,76 +122,29 @@ const CreditsManagementPage: React.FC = () => {
     }
   };
 
+  // Saldo actual (credit_balance es privado: vista companies_full) e historial.
+  const refreshCredits = async () => {
+    const { data } = await supabase
+      .from('companies_full')
+      .select('credit_balance')
+      .eq('id', company.id)
+      .maybeSingle();
+    if (data && typeof data.credit_balance === 'number') setBalance(data.credit_balance);
+    await fetchTransactions();
+  };
+
+  // Vuelta de Stripe: el webhook abona los créditos en unos segundos; se relee unas veces.
+  useCheckoutReturn((result) => {
+    if (result !== 'ok') return;
+    for (const ms of [0, 3000, 8000, 15000]) window.setTimeout(() => { void refreshCredits(); }, ms);
+  }, 'credits');
+
+  // Antes: UPDATE directo del saldo (simulación sin pasarela), que la base rechaza (42501).
+  // Ahora: Stripe Checkout; el servidor decide precio y créditos por el pack.
   const handlePurchase = async (pkg: CreditPackage) => {
-    setSelectedPackage(pkg);
-    setProcessing(true);
-
-    try {
-      // In a real app, this would integrate with Stripe, PayPal, etc.
-      // For now, we'll simulate a purchase
-
-      // Get current balance
-      // credit_balance es privado: se lee de la vista companies_full
-      const { data: companyData, error: fetchError } = await supabase
-        .from('companies_full')
-        .select('credit_balance')
-        .eq('id', company.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      const newBalance = (companyData?.credit_balance || 0) + pkg.credits;
-
-      // Update company balance
-      const { error: updateError } = await supabase
-        .from('companies')
-        .update({
-          credit_balance: newBalance,
-          total_credits_purchased: (company.total_credits_purchased || 0) + pkg.credits,
-        })
-        .eq('id', company.id);
-
-      if (updateError) throw updateError;
-
-      // Record transaction in history
-      const { error: historyError } = await supabase
-        .from('company_credits_history')
-        .insert({
-          company_id: company.id,
-          amount: pkg.credits,
-          balance_after: newBalance,
-          transaction_type: 'PURCHASE',
-          description: `Purchased ${pkg.name} - ${pkg.credits} credits for $${pkg.price}`,
-          created_by: companyUser.user_id,
-          metadata: { package_id: pkg.id, price: pkg.price },
-        });
-
-      if (historyError) throw historyError;
-
-      // Log activity
-      await supabase.from('company_activity_log').insert({
-        company_id: company.id,
-        activity_type: 'credit_purchase',
-        description: `Purchased ${pkg.credits} credits for $${pkg.price}`,
-        metadata: { package: pkg.id, credits: pkg.credits, price: pkg.price },
-        created_by: companyUser.user_id,
-      });
-
-      alert(
-        t('company.credits.purchaseSuccess') ||
-          `Successfully purchased ${pkg.credits} credits!`
-      );
-
-      // Refresh data
-      await fetchTransactions();
-      window.location.reload(); // Refresh to update company credits balance
-    } catch (error: any) {
-      console.error('Error purchasing credits:', error);
-      alert(error.message || t('company.credits.purchaseError') || 'Error purchasing credits');
-    } finally {
-      setProcessing(false);
-      setSelectedPackage(null);
-    }
+    const product = creditsProduct(pkg.credits);
+    if (!product) return;
+    await checkout(product, 'company', company.id);
   };
 
   const formatDate = (dateString: string) => {
@@ -212,7 +172,7 @@ const CreditsManagementPage: React.FC = () => {
               <p className="text-blue-100 mb-2">
                 {t('company.credits.currentBalance') || 'Current Balance'}
               </p>
-              <p className="text-5xl font-bold">{company.credit_balance || 0}</p>
+              <p className="text-5xl font-bold">{balance}</p>
               <p className="text-blue-100 mt-2">
                 {t('company.credits.availableCredits') || 'credits available'}
               </p>
@@ -310,14 +270,14 @@ const CreditsManagementPage: React.FC = () => {
                   </div>
                   <div className="mb-6">
                     <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                      ${pkg.price}
+                      {formatEuro(pkg.price, lang)}
                     </span>
                   </div>
                   <ul className="mb-6 space-y-2 text-left">
                     <li className="flex items-start gap-2 text-sm text-gray-600 dark:text-dark-text-secondary">
                       <CheckIcon className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span>
-                        ${(pkg.price / pkg.credits).toFixed(2)} {t('company.credits.perCredit') || 'per credit'}
+                        {formatEuro(pkg.price / pkg.credits, lang, true)} {t('company.credits.perCredit') || 'per credit'}
                       </span>
                     </li>
                     <li className="flex items-start gap-2 text-sm text-gray-600 dark:text-dark-text-secondary">
@@ -331,14 +291,14 @@ const CreditsManagementPage: React.FC = () => {
                   </ul>
                   <button
                     onClick={() => handlePurchase(pkg)}
-                    disabled={processing && selectedPackage?.id === pkg.id}
+                    disabled={busy !== null}
                     className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
                       pkg.popular
                         ? 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white'
                         : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    {processing && selectedPackage?.id === pkg.id
+                    {busy === creditsProduct(pkg.credits)
                       ? t('common.processing') || 'Processing...'
                       : t('company.credits.purchase') || 'Purchase'}
                   </button>

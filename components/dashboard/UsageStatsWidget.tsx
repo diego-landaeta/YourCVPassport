@@ -16,6 +16,7 @@ import {
   ArrowTrendingUpIcon,
 } from '@heroicons/react/24/solid';
 import { Crown } from 'lucide-react';
+import BillingStatusBanner from '../billing/BillingStatusBanner';
 
 interface UsageStatsWidgetProps {
   compact?: boolean;
@@ -162,6 +163,9 @@ export function UsageStatsWidget({ compact = false }: UsageStatsWidgetProps) {
           )}
         </div>
       </div>
+
+      {/* Suscripción del plan Profesional (prueba, renovación); nada si no hay suscripción */}
+      <BillingStatusBanner />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
