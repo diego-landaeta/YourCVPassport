@@ -54,6 +54,7 @@ import {
 } from '../../schemas/profileSchemas';
 import { useUsageLimits, FeatureLimitCheck } from '../../hooks/useUsageLimits';
 import { UsageLimitModal, UsageLimitWarning } from '../UsageLimitModal';
+import { TODO_GRATIS } from '../../lib/plans';
 
 interface DashboardContentProps {
   activeSection: string;
@@ -1667,7 +1668,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                       ? 'text-red-700 dark:text-red-300'
                       : 'text-gray-600 dark:text-gray-400'
                   }`}>
-                    {atsExportInfo.remaining === 0 ? (
+                    {atsExportInfo.remaining === 0 && !TODO_GRATIS ? (
                       t.export.limitReached
                     ) : (
                       t.export.remaining(atsExportInfo.remaining as number, atsExportInfo.limit as number)
@@ -1675,7 +1676,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({ activeSection, onSe
                   </p>
                 </div>
               </div>
-              {currentPlan !== 'pro' && currentPlan !== 'enterprise' && (
+              {/* Sin «Mejorar plan» mientras todo es gratis (#24) */}
+              {!TODO_GRATIS && currentPlan !== 'pro' && currentPlan !== 'enterprise' && (
                 <Link
                   to="/pricing"
                   className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-medium rounded-lg transition-all shadow-sm hover:shadow-md"

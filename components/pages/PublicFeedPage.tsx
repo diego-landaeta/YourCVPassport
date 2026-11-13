@@ -13,6 +13,7 @@ import type { Session } from '@supabase/supabase-js';
 import type { FeedContentType } from '../../types/feed';
 import FeedPost from '../dashboard/feed/FeedPost';
 import FeedSkeleton from '../dashboard/feed/FeedSkeleton';
+import { TODO_GRATIS } from '../../lib/plans';
 import {
   ChatBubbleLeftRightIcon,
   ArrowRightIcon,
@@ -141,7 +142,7 @@ const ExploreCard: React.FC<{ lang: string }> = ({ lang }) => {
     { label: lang === 'es' ? 'Blog' : 'Blog',                   icon: BookOpenIcon,           to: lang === 'es' ? '/recursos/blog' : '/resources/blog' },
     { label: lang === 'es' ? 'Precios' : 'Pricing',             icon: TagIcon,                to: lang === 'es' ? '/precios' : '/pricing' },
     { label: lang === 'es' ? 'Comunidad' : 'Community',         icon: ChatBubbleLeftRightIcon, to: lang === 'es' ? '/comunidad' : '/feed' },
-  ];
+  ].filter(item => !TODO_GRATIS || item.icon !== TagIcon); // sin «Precios» mientras todo es gratis (#24)
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-2xl border border-gray-200 dark:border-dark-border p-4 shadow-sm">

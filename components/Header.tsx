@@ -6,6 +6,7 @@ import { supabase } from '../supabase/client';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useJobsNavText } from './jobs/textosNav';
 import { useTranslations } from '../hooks/useTranslations';
+import { sinPrecios } from '../lib/plans';
 
 const DarkModeToggle: React.FC = () => {
     const { lang } = useLanguage();
@@ -314,9 +315,10 @@ const Header: React.FC = () => {
   // «Empleos» / «Jobs»: enlace visible al listado público de ofertas, justo antes de Comunidad.
   const jobsNav = useJobsNavText();
   const jobsItem: NavItem = { name: jobsNav.label, href: '#', id: jobsNav.id };
-  const baseLinks = isAdmin
+  // Mientras todo es gratis (#24) el menú no enseña precios ni planes.
+  const baseLinks = sinPrecios(isAdmin
     ? t.NAV_LINKS.filter((item) => item.id !== 'comunidad' && item.id !== 'feed')
-    : t.NAV_LINKS;
+    : t.NAV_LINKS);
   const communityIdx = baseLinks.findIndex((item) => item.id === 'comunidad' || item.id === 'feed');
   const navLinks: NavItem[] = communityIdx >= 0
     ? [...baseLinks.slice(0, communityIdx), jobsItem, ...baseLinks.slice(communityIdx)]

@@ -7,6 +7,8 @@ import { Plan } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { TODO_GRATIS } from '../../lib/plans';
+import TodoGratisAviso from '../shared/TodoGratisAviso';
 
 // Wrapper for animations
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
@@ -93,6 +95,9 @@ const PricingPage: React.FC = () => {
     const seoKeywords = lang === 'es'
         ? 'precios, planes, suscripción, gratis, premium, enterprise, CV profesional, plantillas, ATS, YourCVPassport, carrera'
         : 'pricing, plans, subscription, free, premium, enterprise, professional CV, templates, ATS, YourCVPassport, career';
+
+    // Mientras todo es gratis (#24) no se enseñan planes ni precios.
+    if (TODO_GRATIS) return <TodoGratisAviso para="profesionales" />;
 
     return (
         <>

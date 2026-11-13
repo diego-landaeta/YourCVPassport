@@ -11,6 +11,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useNavigate } from 'react-router-dom';
 import { optimizeExperience, optimizeEducation, checkAIAccess } from '../../lib/ai';
+import { ofrecerIA } from '../../lib/plans';
 import {
   SparklesIcon,
   CheckCircleIcon,
@@ -260,6 +261,9 @@ const AITextOptimizer: React.FC<AITextOptimizerProps> = ({ type, items, onApplyS
       </div>
     );
   }
+
+  // Mientras todo es gratis (#24) no se ofrece la IA a quien no la tiene.
+  if (!isCheckingAccess && aiAccessInfo && !ofrecerIA(aiAccessInfo.hasAccess)) return null;
 
   // Show premium upgrade banner if no access
   if (!isCheckingAccess && aiAccessInfo && !aiAccessInfo.hasAccess) {

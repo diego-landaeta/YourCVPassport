@@ -31,6 +31,7 @@ import { TemplatePreviewSelector, ALL_TEMPLATES } from './TemplatePreviewSelecto
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useA11yLabels } from '../shared/a11y';
+import { tieneFuncionesPro } from '../../lib/plans';
 
 // SVG Icons as simple functions
 function FiX({ className = "w-5 h-5" }: { className?: string }) {
@@ -135,8 +136,9 @@ export function CreateVersionModal({
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is PRO
-  const userIsPro = profile?.is_pro || false;
+  // Antes leía `profile.is_pro`, una columna que no existe: las plantillas PRO de
+  // las versiones salían bloqueadas para todos, también para quien paga (#24).
+  const userIsPro = tieneFuncionesPro(profile?.plan);
 
   // Load editing version data
   useEffect(() => {

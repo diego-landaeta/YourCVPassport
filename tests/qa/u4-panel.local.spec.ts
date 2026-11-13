@@ -24,6 +24,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase, type Row } from './helpers/supabaseMock';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use({ ...SAFE_CONTEXT_OPTIONS, locale: 'es-ES' });
 // El dashboard carga muchas secciones lazy: con Vite en frío la primera visita tarda.
@@ -97,7 +98,7 @@ test.describe('Registro: validación y accesibilidad', () => {
 // ---------------------------------------------------------------------------
 
 /** Usuario que entró con Google (nombre en minúsculas) y aún no terminó el asistente. */
-function me(): Row {
+function me(plan = 'free'): Row {
   const [base] = makeProfiles(1);
   return {
     ...base,
@@ -113,15 +114,15 @@ function me(): Row {
     wizard_completed: false,
     first_login_completed: true,
     dashboard_tour_completed: true,
-    plan: 'free',
+    plan,
   };
 }
 
-async function bootDashboard(page: Page, path = '/dashboard') {
-  await installInitState(page.context(), { sessionProfile: me(), language: 'es', theme: 'light' });
+async function bootDashboard(page: Page, path = '/dashboard', plan = 'free') {
+  await installInitState(page.context(), { sessionProfile: me(plan), language: 'es', theme: 'light' });
   await page.addInitScript(() => { try { localStorage.setItem('sidebar-collapsed', 'false'); } catch { /* sin storage */ } });
   const mock = await mockSupabase(page.context(), {
-    profiles: [me()],
+    profiles: [me(plan)],
     experiences: [], education: [], skills: [], languages: [], portfolio_items: [],
     stamps: [], visas: [], cv_versions: [], analytics_views: [],
     feed_notifications: [], feed_posts: [], groups: [], group_members: [],
@@ -254,7 +255,8 @@ test.describe('Panel móvil (asistente sin terminar)', () => {
   });
 
   test('17: con el menú abierto el botón flotante PRO del asistente queda debajo', async ({ page }) => {
-    await bootDashboard(page);
+    // #24: con todo gratis el botón de IA solo sale a perfiles con plan de pago
+    await bootDashboard(page, '/dashboard', TODO_GRATIS ? 'pro' : 'free');
     // El botón PRO sale en el paso Identidad cuando hay nombre
     const pro = page.locator('button', { hasText: 'PRO' }).first();
     await expect(pro).toBeVisible({ timeout: 100_000 });

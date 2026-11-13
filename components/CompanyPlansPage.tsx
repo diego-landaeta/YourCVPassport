@@ -5,6 +5,8 @@ import Testimonials from './landing/Testimonials';
 import { useTranslations } from '../hooks/useTranslations';
 import PageSEO from './shared/PageSEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import { TODO_GRATIS } from '../lib/plans';
+import TodoGratisAviso from './shared/TodoGratisAviso';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -86,6 +88,9 @@ const CompanyPlansPage: React.FC = () => {
     const seoKeywords = lang === 'es'
         ? 'planes empresas, reclutamiento, talento, ATS, integración, créditos, búsqueda talento, verificación, YourCVPassport, empresa, soluciones HR'
         : 'company plans, recruitment, talent, ATS, integration, credits, talent search, verification, YourCVPassport, enterprise, HR solutions';
+
+    // Mientras todo es gratis (#24) no se enseñan planes ni créditos.
+    if (TODO_GRATIS) return <TodoGratisAviso para="empresas" />;
 
     return (
         <>

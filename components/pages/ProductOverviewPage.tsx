@@ -4,6 +4,7 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useTranslations } from '../../hooks/useTranslations';
 import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { TODO_GRATIS } from '../../lib/plans';
 
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, threshold?: number, delay?: string}> = ({ children, threshold = 0.1, delay = 'duration-700' }) => {
@@ -180,7 +181,8 @@ const ProductOverviewPage: React.FC = () => {
         </AnimatedWrapper>
       </section>
 
-      {/* Comparison Table */}
+      {/* Comparison Table (planes y precios: fuera mientras todo es gratis, #24) */}
+      {!TODO_GRATIS && (
       <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary">
         <AnimatedWrapper>
             <div className="max-w-7xl mx-auto">
@@ -234,6 +236,7 @@ const ProductOverviewPage: React.FC = () => {
             </div>
         </AnimatedWrapper>
       </section>
+      )}
 
       {/* Final CTA */}
       <section className="bg-cv-blue">

@@ -16,6 +16,7 @@ import {
   ArrowTrendingUpIcon,
 } from '@heroicons/react/24/solid';
 import { Crown } from 'lucide-react';
+import { TODO_GRATIS } from '../../lib/plans';
 
 interface UsageStatsWidgetProps {
   compact?: boolean;
@@ -125,7 +126,7 @@ export function UsageStatsWidget({ compact = false }: UsageStatsWidgetProps) {
         </div>
 
         {/* Upgrade Button for Free Users */}
-        {currentPlan === 'free' && (
+        {currentPlan === 'free' && !TODO_GRATIS && (
           <button
             onClick={() => navigate('/pricing')}
             className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all"
@@ -151,7 +152,7 @@ export function UsageStatsWidget({ compact = false }: UsageStatsWidgetProps) {
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${planInfo.badge}`}>
             {planInfo.name}
           </span>
-          {currentPlan === 'free' && (
+          {currentPlan === 'free' && !TODO_GRATIS && (
             <button
               onClick={() => navigate('/pricing')}
               className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg"

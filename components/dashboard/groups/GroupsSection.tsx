@@ -9,6 +9,7 @@ import GroupCard from './GroupCard';
 import GroupDetailView from './GroupDetailView';
 import CreateGroupModal from './CreateGroupModal';
 import { PlusIcon, UserGroupIcon, MegaphoneIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { tieneFuncionesPro } from '../../../lib/plans';
 
 type GroupMode = 'group' | 'channel';
 
@@ -26,7 +27,8 @@ const GroupsSection: React.FC<GroupsSectionProps> = ({ mode = 'group', onSection
   const isEs = lang === 'es';
   const isChannel = mode === 'channel';
 
-  const isPremium = profile?.plan && ['pro', 'premium', 'enterprise'].includes(String(profile.plan).toLowerCase());
+  // Mientras todo es gratis (#24), crear grupos y canales es para todos.
+  const isPremium = tieneFuncionesPro(profile?.plan);
 
   const { myGroups: allMyGroups, suggestedGroups: allSuggested, loading, refresh } = useGroups();
   const { joinGroup, leaveGroup } = useGroupActions();

@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToastContext } from '../../contexts/ToastContext';
+import { tieneFuncionesPro } from '../../lib/plans';
 import PassportTemplate from '../templates/PassportTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate';
@@ -173,9 +174,8 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ currentTemplate, on
     }
   };
 
-  const userPlan = profile?.plan || 'free';
-  // Check for pro/premium (case-insensitive) or any plan that's not 'free'
-  const isPro = userPlan && userPlan.toLowerCase() !== 'free' && userPlan.toLowerCase() !== 'basic';
+  // Mientras todo es gratis (#24), las plantillas Pro son para todos.
+  const isPro = tieneFuncionesPro(profile?.plan);
 
   if (loading) {
     return (

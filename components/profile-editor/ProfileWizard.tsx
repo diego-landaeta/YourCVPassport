@@ -23,6 +23,7 @@ import PortfolioSection from './PortfolioSection';
 import PreferencesSection from './PreferencesSection';
 import FinalizationStep from './FinalizationStep';
 import { useA11yLabels, activateOnKey } from '../shared/a11y';
+import { ofrecerIA, tienePlanDePago } from '../../lib/plans';
 
 interface ProfileWizardProps {
   profile: any;
@@ -260,7 +261,7 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
   };
 
   // Check if user has premium plan (lowercase: 'pro', 'premium', 'enterprise')
-  const isPremiumUser = profile?.plan && ['pro', 'premium', 'enterprise'].includes(profile.plan.toLowerCase());
+  const isPremiumUser = tienePlanDePago(profile?.plan);
 
   // En un perfil gestionado, `profile.plan` es el del PERFIL EDITADO, no el del
   // gestor que lo esta editando. Los perfiles gestionados se crean siempre con
@@ -619,7 +620,8 @@ const ProfileWizard: React.FC<ProfileWizardProps> = ({
 
       {/* AI Optimization Floating Button - Fixed bottom right */}
       {/* Show button based on current section's AI support */}
-      {!isManagedProfile && steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
+      {/* Mientras todo es gratis (#24) no se ofrece la IA a quien no la tiene. */}
+      {!isManagedProfile && ofrecerIA(isPremiumUser) && steps[currentStep] && ((currentStep === 0 && profile?.full_name) || // Identity has About Me with AI
         (currentStep === 1 && experiences.length > 0) || // Experience has AI
         (currentStep === 2 && education.length > 0) || // Education has AI
         currentStep === 3) && ( // Skills has AI

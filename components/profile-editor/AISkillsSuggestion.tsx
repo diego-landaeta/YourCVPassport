@@ -11,6 +11,7 @@ import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import { suggestSkills, checkAIAccess } from '../../lib/ai';
+import { ofrecerIA } from '../../lib/plans';
 import { useNavigate } from 'react-router-dom';
 import {
   SparklesIcon,
@@ -156,6 +157,9 @@ const AISkillsSuggestion: React.FC<AISkillsSuggestionProps> = ({
       </div>
     );
   }
+
+  // Mientras todo es gratis (#24) no se ofrece la IA a quien no la tiene.
+  if (!isCheckingAccess && aiAccessInfo && !ofrecerIA(aiAccessInfo.hasAccess)) return null;
 
   // Show premium upgrade banner if no access
   if (!isCheckingAccess && aiAccessInfo && !aiAccessInfo.hasAccess) {

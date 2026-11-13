@@ -24,6 +24,7 @@ import { useATSExport } from '../../hooks/useATSExport';
 import { useATSExportAccess, FeatureLimitCheck } from '../../hooks/useUsageLimits';
 import { UsageLimitModal, UsageLimitWarning } from '../UsageLimitModal';
 import { useNavigate } from 'react-router-dom';
+import { TODO_GRATIS } from '../../lib/plans';
 
 interface ATSPDFPreviewProps {
   profile: FullProfileData;
@@ -219,12 +220,15 @@ export const ATSPDFPreview: React.FC<ATSPDFPreviewProps> = ({
                     : `${limitInfo.remaining} exportaci${limitInfo.remaining !== 1 ? 'ones' : 'ón'} restante${limitInfo.remaining !== 1 ? 's' : ''} este mes`}
                 </span>
               </div>
+              {/* Sin «mejorar el plan» mientras todo es gratis (#24) */}
+              {!TODO_GRATIS && (
               <button
                 onClick={handleUpgrade}
                 className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {language === 'en' ? 'Get Unlimited' : 'Obtener Ilimitado'}
               </button>
+              )}
             </div>
           )}
         </div>
