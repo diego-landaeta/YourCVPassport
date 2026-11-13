@@ -12,6 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase, freezeMotion, contrastRatio, type SupabaseMock } from './helpers/supabaseMock';
 import { sampleDarkColors, diffSamples, readEffectiveColors, type ColorSample } from './helpers/darkSample';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -134,7 +135,10 @@ test.describe('#19 regresion modo oscuro global', () => {
 
     for (const [k, v] of Object.entries(samples)) expect(v.length, `muestra ${k} vacia`).toBeGreaterThan(5);
 
-    const file = path.join(FIXTURES, `dark-regression-baseline.${testInfo.project.name}.json`);
+    // Con «todo gratis» (#24) la portada no lleva la sección de precios y las claves
+    // (índice:etiqueta:clases) se desplazan: tiene su propia línea base.
+    const sufijo = TODO_GRATIS ? '.todo-gratis' : '';
+    const file = path.join(FIXTURES, `dark-regression-baseline.${testInfo.project.name}${sufijo}.json`);
     if (process.env.QA_DARK_BASELINE === 'capture') {
       fs.mkdirSync(FIXTURES, { recursive: true });
       fs.writeFileSync(file, JSON.stringify(samples, null, 1));
