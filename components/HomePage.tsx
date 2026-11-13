@@ -13,6 +13,7 @@ import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 import { organizationJsonLd, webSiteJsonLd } from '../lib/seoJsonLd';
+import { TODO_GRATIS } from '../lib/plans';
 
 // SEO de la home: la misma URL sirve ambos idiomas, asi que no lleva hreflang.
 const HOME_SEO = {
@@ -59,7 +60,8 @@ const HomePage: React.FC = () => {
         buttonText={hp.inlineCta2.button}
         variant="light"
       />
-      <Pricing />
+      {/* Planes y precios fuera mientras todo es gratis (#24) */}
+      {!TODO_GRATIS && <Pricing />}
       <Security />
       <Faq />
       <CallToAction />

@@ -20,6 +20,7 @@ import CompanyVisibilityWidget from './analytics/CompanyVisibilityWidget';
 import { useTranslations } from '../../hooks/useTranslations';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { localDayKeysBetween, localDaysAgo, toLocalDayKey } from '../../utils/dateKeys';
+import { TODO_GRATIS } from '../../lib/plans';
 
 interface AnalyticsDashboardProps {
   profileId: string;
@@ -649,7 +650,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ profileId }) =>
 
       {/* Company Visibility Widget - Premium Feature */}
       <CompanyVisibilityWidget
-        isPremium={false}
+        isPremium={TODO_GRATIS}
         topCountries={analyticsData.topCountries}
         summary={analyticsData.summary}
         recentViews={analyticsData.recentViews}

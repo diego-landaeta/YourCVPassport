@@ -21,6 +21,8 @@ export interface Plan {
 export interface FaqItem {
   question: string;
   answer: string;
+  /** Respuesta mientras todo es gratis (#24, lib/plans.ts): sustituye a `answer` si existe. */
+  answerGratis?: string;
 }
 
 export interface Testimonial {

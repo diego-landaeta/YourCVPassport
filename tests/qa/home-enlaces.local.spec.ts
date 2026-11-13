@@ -7,6 +7,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { AVISO_H1, TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -41,6 +42,16 @@ for (const p of PRICES) {
       await installInitState(context, { language: p.lang, theme: 'light' });
       await mockSupabase(context, {});
       await page.goto(where === 'home' ? '/' : p.path, { waitUntil: 'domcontentloaded' });
+      if (TODO_GRATIS) {
+        // #24: ni planes ni precios; la home sin la sección y /precios con el aviso
+        await expect(page.locator('h1').first()).toBeVisible({ timeout: 45_000 });
+        if (where === 'precios') await expect(page.locator('h1').first()).toHaveText(AVISO_H1.profesionales[p.lang]);
+        else await expect(page.locator('footer')).toBeVisible({ timeout: 45_000 });
+        await expect(page.locator('section#pricing')).toHaveCount(0);
+        await expect(page.getByRole('heading', { name: p.plan, exact: true })).toHaveCount(0);
+        expect(await page.locator('main').innerText()).not.toContain(p.price);
+        return;
+      }
       const scope = where === 'home' ? page.locator('section#pricing') : page.locator('main');
       const card = scope.locator('div', { has: page.getByRole('heading', { name: p.plan, exact: true }) }).last();
       await card.scrollIntoViewIfNeeded({ timeout: 45_000 });
@@ -84,6 +95,22 @@ for (const c of CASES) {
     await installInitState(context, { language: c.lang, theme: 'light' });
     await mockSupabase(context, {});
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+    if (TODO_GRATIS) {
+      // #24: sin sección de precios ni enlaces a precios o planes (menú y pie incluidos)
+      await expect(page.locator(`a[href="${c.security}"]`).first()).toBeVisible({ timeout: 45_000 });
+      await expect(page.locator('section#pricing')).toHaveCount(0);
+      await expect(page.locator(`a[href="${c.plans}"], a[href="${c.pricing}"]`)).toHaveCount(0);
+      await expect(page.locator('a[href^="/es/"]')).toHaveCount(0);
+      // Las rutas siguen cargando (con el aviso), no la 404
+      for (const [href, h1] of [[c.plans, AVISO_H1.empresas[c.lang]], [c.pricing, AVISO_H1.profesionales[c.lang]], [c.security, null]] as const) {
+        await page.goto(href, { waitUntil: 'domcontentloaded' });
+        await expect(page.locator('h1').first()).toBeVisible({ timeout: 45_000 });
+        if (h1) await expect(page.locator('h1').first()).toHaveText(h1);
+        await expect(page.getByText(/404/)).toHaveCount(0);
+      }
+      return;
+    }
 
     const pricing = page.locator('section#pricing');
     await expect(pricing).toBeVisible({ timeout: 45_000 });

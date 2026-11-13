@@ -8,6 +8,7 @@ import PageSEO from './shared/PageSEO';
 import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 import HeroImage from './landing/HeroImage';
+import { TODO_GRATIS } from '../lib/plans';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -112,10 +113,13 @@ const CustomDomainPage: React.FC = () => {
                             <h3 className="text-lg font-semibold text-cv-dark-gray dark:text-dark-text-primary"><span className="text-cv-blue font-bold">{t.customDomain.step1.formatsTitle}:</span> <code className="bg-gray-200 dark:bg-dark-bg-tertiary text-sm p-1 rounded">yourcvpassport.com/cv/yourname</code> {t.customDomain.step1.structureText} <code className="bg-gray-200 dark:bg-dark-bg-tertiary text-sm p-1 rounded">{t.customDomain.step1.slugOptionsText}</code>.</h3>
                          </div>
                         <URLSimulator />
+                        {/* Paso 2 (dominio propio, «plan Profesional»): fuera mientras todo es gratis (#24) */}
+                        {!TODO_GRATIS && (
                         <div className="mt-4 text-left max-w-2xl mx-auto">
                            <h3 className="text-lg font-semibold"><span className="text-cv-blue font-bold">{t.customDomain.step2.title}:</span> {t.customDomain.step2.description}</h3>
                            <p className="text-gray-600 dark:text-dark-text-secondary">{t.customDomain.step2.subDescription}</p>
                         </div>
+                        )}
                     </AnimatedWrapper>
                  </div>
             </section>
@@ -218,7 +222,7 @@ const CustomDomainPage: React.FC = () => {
                             {t.customDomain.ctaTitle}
                         </h2>
                         <p className="mt-4 text-lg leading-6 text-white/80">
-                           {t.customDomain.ctaSubtitle}
+                           {TODO_GRATIS ? t.customDomain.ctaSubtitleGratis : t.customDomain.ctaSubtitle}
                         </p>
                         <button
                         onClick={() => openModal('signup')}

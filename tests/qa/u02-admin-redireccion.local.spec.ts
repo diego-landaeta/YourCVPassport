@@ -11,6 +11,7 @@
  */
 import { test, expect, type Page, type BrowserContext, type TestInfo } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase, type Row } from './helpers/supabaseMock';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use({ ...SAFE_CONTEXT_OPTIONS, locale: 'es-ES' });
 
@@ -85,7 +86,13 @@ test.describe('U2 admin: menu de cuenta y navegacion', () => {
       await page.screenshot({ path: `${SHOTS}/u02-admin-menu-${testInfo.project.name}.png` });
       await drawer.getByRole('link', { name: 'Panel admin' }).click();
     } else {
-      await expect(page.locator('header nav').getByRole('link', { name: 'Precios' }).first()).toBeVisible({ timeout: 45_000 });
+      if (TODO_GRATIS) {
+        // #24: el menú ya no enseña «Precios»; «Producto» sigue (señal de menú pintado)
+        await expect(page.locator('header nav').getByText('Producto', { exact: true }).first()).toBeAttached({ timeout: 45_000 });
+        await expect(page.locator('header nav').getByRole('link', { name: 'Precios' })).toHaveCount(0);
+      } else {
+        await expect(page.locator('header nav').getByRole('link', { name: 'Precios' }).first()).toBeVisible({ timeout: 45_000 });
+      }
       await expect(page.locator('header nav').getByRole('link', { name: 'Comunidad' })).toHaveCount(0);
       await page.getByRole('button', { name: 'Menú de cuenta' }).click();
       const menu = page.locator('header div.absolute.right-0');

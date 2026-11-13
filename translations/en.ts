@@ -252,6 +252,8 @@ export const translations = {
         },
         ctaTitle: 'Ready to Claim Your Professional URL?',
         ctaSubtitle: 'Upgrade to our Professional Plan to unlock your custom domain and build a stronger personal brand.',
+        // While everything is free (#24, lib/plans.ts)
+        ctaSubtitleGratis: 'Create your free profile and claim your custom URL to build a stronger personal brand.',
         ctaButton: 'Claim Your URL'
     },
     urlSimulator: {
@@ -513,7 +515,7 @@ export const translations = {
         inlineCta: {
             title: 'Let AI work for you',
             description: 'Optimize your CV automatically and generate personalized cover letters in seconds.',
-            button: 'Try AI for free',
+            button: 'Create my account',
         },
         title: 'AI Assistant: Your Personal Career Co-Pilot',
         subtitle: 'Leverage the power of artificial intelligence to enhance your profile summary, write compelling cover letters, and suggest impactful keywords that get you noticed.',
@@ -606,6 +608,8 @@ export const translations = {
         ],
         companyInsightsTitle: "Company Insights: Identify Interested Employers",
         companyInsightsDescription: "With our Professional Plan, see the names of companies that view your profile, giving you a warm lead for outreach.",
+        // While everything is free (#24, lib/plans.ts)
+        companyInsightsDescriptionGratis: "See the names of companies that view your profile, giving you a warm lead for outreach.",
         testimonialsTitle: "Turn Analytics Into Career Opportunities",
         testimonialsDescription: "Hear from professionals who used data to supercharge their job search.",
         analyticsTestimonials: [
@@ -2478,7 +2482,7 @@ export const translations = {
         { question: 'How does the verification process work?', answer: 'You submit your documents and information through our secure platform. Our system, combined with third-party verification services, confirms the authenticity of your credentials. Once verified, a "stamp" is added to your profile.' },
         { question: 'Is my data secure?', answer: 'Absolutely. We are fully GDPR compliant and use state-of-the-art encryption to protect your data. You have complete control over who sees your profile and information.' },
         { question: 'Can I export my CV for job applications?', answer: 'Yes! You can export your verified CV in various ATS-friendly formats like PDF and DOCX, ensuring it passes through the applicant tracking systems used by most companies.' },
-        { question: 'How much does it cost to create a profile on YourCVPassport?', answer: 'Creating your basic profile is completely free. We offer a free plan that includes essential templates and basic features. For access to premium templates, AI tools, custom domain, and advanced analytics, you can upgrade to one of our paid plans.' },
+        { question: 'How much does it cost to create a profile on YourCVPassport?', answer: 'Creating your basic profile is completely free. We offer a free plan that includes essential templates and basic features. For access to premium templates, AI tools, custom domain, and advanced analytics, you can upgrade to one of our paid plans.', answerGratis: 'Creating your profile is free and no card is needed. For now, every template, CV export and verification is free too.' },
         { question: 'Can I update my CV after creating it?', answer: 'Absolutely. You can edit and update your CV anytime from your dashboard. All updates are automatically saved and reflected in real-time on your public profile if enabled.' },
         { question: 'What is a public profile and how does it work?', answer: 'A public profile is a version of your CV that you can share with recruiters via a unique link. You can toggle it on or off anytime and control exactly what information is visible. It\'s ideal for passive job searching.' },
         { question: 'Can recruiters find me on YourCVPassport?', answer: 'Yes, if you enable your public profile, recruiters can find you through our advanced search feature. They can filter by skills, location, industry, and more. You maintain control over your visibility and can disable your profile anytime.' },
@@ -2496,7 +2500,7 @@ export const translations = {
         { question: 'Can I verify professional certifications in addition to academic degrees?', answer: 'Yes, you can verify multiple types of credentials including professional certifications (PMP, AWS, Google, etc.), academic degrees, specialized courses, professional licenses, and work experience. Each type of credential receives its own verification stamp.' },
         { question: 'What happens if my previous employer no longer exists or doesn\'t respond?', answer: 'We understand that some companies may have closed or be difficult to contact. In these cases, we accept alternative documents such as reference letters, pay stubs, employment contracts, or tax statements that demonstrate your employment.' },
         { question: 'Can recruiters see my original documents?', answer: 'No. Recruiters only see the verification stamp on your profile confirming that your credentials have been verified. Your original documents remain private and secure in our encrypted system. Only our authorized verification team has temporary access for the validation process.' },
-        { question: 'How much do credential verifications cost?', answer: 'Basic identity verification is included in all plans. Education and work experience verifications are included in Professional and Enterprise plans. For free plan users, we offer individual verifications starting at €9.99 per credential.' },
+        { question: 'How much do credential verifications cost?', answer: 'Basic identity verification is included in all plans. Education and work experience verifications are included in Professional and Enterprise plans. For free plan users, we offer individual verifications starting at €9.99 per credential.', answerGratis: 'For now, credential verifications are free for everyone: you do not have to pay anything for them.' },
     ],
     PRICING_PAGE_TESTIMONIALS: [
         { quote: "The Professional Plan is worth every penny. The custom domain and advanced analytics gave me the edge I needed.", name: 'John Doe', role: 'Marketing Director', imageUrl: 'https://picsum.photos/id/1012/100/100', plan: 'Professional' },
@@ -2524,7 +2528,7 @@ export const translations = {
         { question: 'Can I download my CV in different languages?', answer: 'Yes, YourCVPassport supports multilingual CV creation. You can create versions of your CV in Spanish and English, and export each version separately. This is especially useful for applying to international jobs.'},
         { question: 'How do I enable or disable my public profile?', answer: 'In your dashboard, go to "Privacy Settings" and use the "Public Profile" toggle to turn it on or off. When enabled, recruiters can find you; when disabled, only you can access your profile.'},
         { question: 'What should I do if I don\'t receive the verification email?', answer: 'First, check your spam or junk folder. If you still can\'t find it, go to your account settings and click "Resend verification email". If the problem persists, contact our support team at support@yourcvpassport.com.'},
-        { question: 'How can I view my CV statistics (views, downloads)?', answer: 'Analytics are available on Professional and Enterprise plans. In your dashboard, click on "Analytics" to see detailed metrics including profile views, CV downloads, keyword searches that led to your profile, and trends over time.'},
+        { question: 'How can I view my CV statistics (views, downloads)?', answer: 'Analytics are available on Professional and Enterprise plans. In your dashboard, click on "Analytics" to see detailed metrics including profile views, CV downloads, keyword searches that led to your profile, and trends over time.', answerGratis: 'In your dashboard, click on "Analytics" to see detailed metrics including profile views, CV downloads, keyword searches that led to your profile, and trends over time.'},
     ],
     SEARCH_PROFILE_EXAMPLES: [
         { name: 'Dr. Evelyn Reed', role: 'Data Scientist', location: 'Berlin, Germany', skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL', 'Big Data'], verified: true, imageUrl: 'https://picsum.photos/id/1027/100/100' },
@@ -2710,7 +2714,7 @@ export const translations = {
         { question: 'Where is YourCVPassport headquartered?', answer: 'Our headquarters are located in Valencia, Spain, near the Valencia City Hall (Ayuntamiento) in the historic city center. We operate with a fully remote team across the globe.'},
         { question: 'How can I verify my credentials on the platform?', answer: 'You can verify your educational and professional credentials through our blockchain verification system. Simply upload the necessary documents in the verification section of your profile, and our team will process the verification within 24-48 business hours.' },
         { question: 'Do you offer support in Spanish?', answer: 'Yes, we offer full support in both Spanish and English. Our team is available to assist you in your preferred language via email, live chat, and our multilingual help center.' },
-        { question: 'What is the average response time for support inquiries?', answer: 'For general email inquiries, our response time is 4-6 hours during business days. Professional plan customers receive responses in under 2 hours, and Enterprise customers have priority support with guaranteed response time under 1 hour.' },
+        { question: 'What is the average response time for support inquiries?', answer: 'For general email inquiries, our response time is 4-6 hours during business days. Professional plan customers receive responses in under 2 hours, and Enterprise customers have priority support with guaranteed response time under 1 hour.', answerGratis: 'For general email inquiries, our response time is 4-6 hours during business days.' },
         { question: 'Do you have physical offices where I can visit?', answer: 'Our main headquarters is in Valencia, Spain, but we operate primarily remotely to better serve our global community. For in-person meetings or office visits, please coordinate in advance with our team at support@yourcvpassport.com.' },
         { question: 'How can I report a technical issue or bug on the platform?', answer: 'If you encounter a technical issue, please report it immediately by emailing support@yourcvpassport.com with screenshots, problem description, and steps to reproduce. Our technical team will investigate and keep you informed of the progress.' },
         { question: 'Do you offer training or webinars for new users?', answer: 'Yes, we host free monthly webinars for new users where we showcase platform best practices, how to optimize your profile, and answer live questions. We also offer personalized training sessions for corporate teams.' },
@@ -3019,7 +3023,7 @@ export const translations = {
         },
         finalCta: {
             title: "Start Finding Verified Talent Today",
-            subtitle: "Sign up for a company plan to access our advanced talent search.",
+            subtitle: "Register your company to access our advanced talent search.",
             button: "Get Started Now"
         }
     },
@@ -5305,9 +5309,9 @@ export const translations = {
         checklistItem4: 'Add at least 2 certifications',
         checklistItem5: 'Include portfolio/GitHub links',
         profileQuality: 'Profile quality:',
-        midCtaTitle: 'Try AI for free',
-        midCtaDescription: 'Discover how artificial intelligence can transform your CV in minutes. No credit card required.',
-        midCtaButton: 'Start now for free',
+        midCtaTitle: 'Discover the AI assistant',
+        midCtaDescription: 'Discover how artificial intelligence can transform your CV in minutes.',
+        midCtaButton: 'Create my account',
         testimonialsTitle: 'What our users say',
         testimonialsSubtitle: 'Thousands of professionals have transformed their CVs with our AI',
         testimonial1Name: 'Maria Garcia',
@@ -5321,8 +5325,8 @@ export const translations = {
         testimonial3Text: 'The quality checklist helped me identify exactly what was missing from my CV. In 30 minutes I had a complete and professional profile.',
         finalCtaTitle: 'Ready to optimize your profile with AI?',
         finalCtaSubtitle: 'Join thousands of professionals already using our AI to stand out in the job market',
-        finalCtaButton: 'Start free now',
-        finalCtaNote: 'No credit card required',
+        finalCtaButton: 'Create my account',
+        finalCtaNote: 'Creating your account and CV is free',
         beforeLabel: 'Before',
         afterLabel: 'After (with AI)',
     },

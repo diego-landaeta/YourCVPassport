@@ -13,6 +13,7 @@
  */
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { AVISO_H1, TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 // Vite en modo dev compila bajo demanda: el primer goto puede tardar en máquinas cargadas.
@@ -115,14 +116,35 @@ const SENTENCE_CASE: { path: string; expected: string[]; old: string[] }[] = [
   },
 ];
 
+// #24: mientras todo es gratis no se pintan planes ni precios. Esos encabezados dejan de
+// esperarse y pasan a `gone` (no deben verse); /precios y /empresas/planes son el aviso.
+const PLANES_FUERA: Record<string, { expected: string[]; gone: string[] }> = {
+  '/': {
+    expected: SENTENCE_CASE[0].expected.filter(t => t !== 'Planes a medida de tus necesidades profesionales'),
+    gone: ['Planes a medida de tus necesidades profesionales'],
+  },
+  '/precios': { expected: [AVISO_H1.profesionales.es], gone: ['Encuentra el plan perfecto', 'Nuestros planes', 'Compara todas las funciones'] },
+  '/producto/resumen': {
+    expected: ['Tu CV profesional para oportunidades globales', 'Una plataforma todo en uno para el crecimiento profesional'],
+    gone: ['Cómo nos comparamos'],
+  },
+  '/empresas/planes': { expected: [AVISO_H1.empresas.es], gone: ['Nuestros niveles', 'Cómo funcionan los créditos', 'Matriz de características'] },
+};
+
+const exactHeading = (text: string) => new RegExp(`^\\s*${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
+
 test.describe('títulos de sección en español con mayúscula de frase', () => {
   for (const s of SENTENCE_CASE) {
     test(s.path, async ({ page, context }) => {
       await setup(context, 'es');
       await open(page, s.path);
       const headings = page.locator('h1, h2, h3');
-      for (const text of s.expected) {
-        await expect(headings.filter({ hasText: new RegExp(`^\\s*${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).first()).toBeVisible();
+      const { expected, gone } = (TODO_GRATIS && PLANES_FUERA[s.path]) || { expected: s.expected, gone: [] };
+      for (const text of expected) {
+        await expect(headings.filter({ hasText: exactHeading(text) }).first()).toBeVisible();
+      }
+      for (const text of gone) {
+        await expect(headings.filter({ hasText: exactHeading(text) }).locator('visible=true')).toHaveCount(0);
       }
       const all = await headings.allInnerTexts();
       for (const text of s.old) expect(all.map(t => t.trim())).not.toContain(text);

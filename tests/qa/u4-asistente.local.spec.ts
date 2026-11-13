@@ -23,6 +23,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, ADMIN_ID, makeProfiles, installInitState, mockSupabase, type Row, type SupabaseMock } from './helpers/supabaseMock';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use({ ...SAFE_CONTEXT_OPTIONS, locale: 'es-ES' });
 // El dashboard carga muchas secciones lazy: con Vite en frío la primera visita tarda.
@@ -248,7 +249,8 @@ test.describe('U4 barra de pasos en móvil', () => {
   });
 
   test('botón flotante de IA: nombre accesible y oculto mientras se escribe (issue #4, 17 y 18)', async ({ page }) => {
-    await boot(page, me());
+    // #24: con todo gratis el botón solo sale a perfiles con plan de pago
+    await boot(page, me(TODO_GRATIS ? { plan: 'pro' } : {}));
     const pro = page.getByTestId('ai-pro-button');
     await expect(pro).toBeVisible();
     await expect(pro).toHaveAttribute('aria-label', /.+/);
@@ -259,5 +261,13 @@ test.describe('U4 barra de pasos en móvil', () => {
     await expect(pro).toBeHidden();
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await expect(pro).toBeVisible();
+  });
+
+  test('botón flotante de IA: no se ofrece a un perfil gratis mientras todo es gratis (#24)', async ({ page }) => {
+    await boot(page, me());
+    // Identidad con nombre: sin #24 aquí saldría el botón (ver la prueba anterior)
+    await expect(activeStep(page)).toHaveAttribute('aria-label', 'Identidad');
+    await expect(page.locator('main input[type="text"], main textarea').first()).toBeVisible();
+    await expect(page.getByTestId('ai-pro-button')).toHaveCount(TODO_GRATIS ? 0 : 1);
   });
 });

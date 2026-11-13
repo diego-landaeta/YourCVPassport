@@ -10,6 +10,7 @@ import Modal from '../shared/Modal';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useUsageLimits, FeatureLimitCheck } from '../../hooks/useUsageLimits';
 import { UsageLimitModal } from '../UsageLimitModal';
+import { TODO_GRATIS } from '../../lib/plans';
 import { useNavigate } from 'react-router-dom';
 import {
     CheckBadgeIcon,
@@ -527,7 +528,9 @@ const StampsSection: React.FC<StampsSectionProps> = ({ onStampsUpdate }) => {
                         </div>
                         {usageStats.stamp_request.limit !== 'unlimited' && typeof usageStats.stamp_request.remaining === 'number' && usageStats.stamp_request.remaining <= 1 && (
                             <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                                {s.fewRemaining} <button onClick={handleUpgrade} className="underline hover:no-underline">{s.upgradePlan}</button> {s.forMore}
+                                {s.fewRemaining}
+                                {/* Sin «Mejora tu plan» mientras todo es gratis (#24) */}
+                                {!TODO_GRATIS && <> <button onClick={handleUpgrade} className="underline hover:no-underline">{s.upgradePlan}</button> {s.forMore}</>}
                             </p>
                         )}
                     </div>

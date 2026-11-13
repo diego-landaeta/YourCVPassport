@@ -10,6 +10,7 @@ import { X, Zap, Lock, TrendingUp, Crown } from 'lucide-react';
 import { FeatureType, FeatureLimitCheck, PLAN_INFO, FEATURE_INFO, PlanType } from '../hooks/useUsageLimits';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useA11yLabels } from './shared/a11y';
+import { TODO_GRATIS } from '../lib/plans';
 
 interface UsageLimitModalProps {
   isOpen: boolean;
@@ -144,7 +145,9 @@ export function UsageLimitModal({
               <Lock className="h-8 w-8 text-white" />
             </div>
             <h2 className="text-xl font-bold text-white">{featureTexts.limitTitle}</h2>
-            <p className="mt-2 text-amber-100">{featureTexts.limitDescription}</p>
+            {/* Mientras todo es gratis (#24) no se habla de mejorar el plan (con la migración
+                20261113_todo_gratis, exportaciones y sellos no tienen límite en el plan free). */}
+            <p className="mt-2 text-amber-100">{TODO_GRATIS ? t.subtitle : featureTexts.limitDescription}</p>
           </div>
 
           {/* Content */}
@@ -176,6 +179,7 @@ export function UsageLimitModal({
             </div>
 
             {/* Upgrade suggestion */}
+            {!TODO_GRATIS && (
             <div className="mb-6 rounded-lg border-2 border-indigo-200 bg-indigo-50 p-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100">
@@ -197,9 +201,11 @@ export function UsageLimitModal({
                 ))}
               </ul>
             </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col gap-3">
+              {!TODO_GRATIS && (
               <button
                 onClick={onUpgrade}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-indigo-300"
@@ -207,6 +213,7 @@ export function UsageLimitModal({
                 <TrendingUp className="h-5 w-5" />
                 {t.upgradeButton}
               </button>
+              )}
               <button
                 onClick={onClose}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
@@ -242,16 +249,23 @@ export function UsageLimitWarning({
   if (!limitInfo || limitInfo.allowed) return null;
 
   const isSpanish = language === 'es';
+  // Mientras todo es gratis (#24) no se ofrece mejorar el plan.
+  const upgrade = TODO_GRATIS ? undefined : onUpgrade;
 
   if (compact) {
     return (
       <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
         <Lock className="h-4 w-4" />
         <span>
-          {isSpanish ? 'Límite alcanzado' : 'Limit reached'} •{' '}
-          <button onClick={onUpgrade} className="font-medium underline hover:no-underline">
-            {isSpanish ? 'Mejorar' : 'Upgrade'}
-          </button>
+          {isSpanish ? 'Límite alcanzado' : 'Limit reached'}
+          {upgrade && (
+            <>
+              {' • '}
+              <button onClick={upgrade} className="font-medium underline hover:no-underline">
+                {isSpanish ? 'Mejorar' : 'Upgrade'}
+              </button>
+            </>
+          )}
         </span>
       </div>
     );
@@ -265,7 +279,9 @@ export function UsageLimitWarning({
         </div>
         <div className="flex-1">
           <h4 className="font-medium text-amber-900">
-            {isSpanish ? 'Función Premium' : 'Premium Feature'}
+            {TODO_GRATIS
+              ? (isSpanish ? 'Límite alcanzado' : 'Limit reached')
+              : (isSpanish ? 'Función Premium' : 'Premium Feature')}
           </h4>
           <p className="mt-1 text-sm text-amber-700">
             {limitInfo.reason ||
@@ -273,16 +289,16 @@ export function UsageLimitWarning({
                 ? 'Esta función no está disponible en tu plan actual'
                 : 'This feature is not available on your current plan')}
           </p>
-          {limitInfo.plan && (
+          {limitInfo.plan && !TODO_GRATIS && (
             <p className="mt-2 text-xs text-amber-600">
               {isSpanish ? 'Plan actual: ' : 'Current plan: '}
               <span className="font-medium capitalize">{limitInfo.plan}</span>
             </p>
           )}
         </div>
-        {onUpgrade && (
+        {upgrade && (
           <button
-            onClick={onUpgrade}
+            onClick={upgrade}
             className="flex-shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
           >
             {isSpanish ? 'Mejorar' : 'Upgrade'}

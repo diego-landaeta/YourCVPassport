@@ -22,6 +22,7 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, installInitState, makeProfiles, mockSupabase, type MockDb, type Row } from './helpers/supabaseMock';
 import { CANONICAL_SECTION_PATHS, canonicalSectionPath } from '../../lib/seoCanonicalPaths';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -280,6 +281,9 @@ test.describe('17: las migas de pan enlazan a la URL canonica', () => {
     expect(hrefs).toContain('/professionals/how');
     expect(hrefs).not.toContain('/companies');
     expect(hrefs).not.toContain('/professionals');
+    // #24: «Pricing» sale de la tarjeta «Explore» mientras todo es gratis
+    if (TODO_GRATIS) expect(hrefs).not.toContain('/pricing');
+    else expect(hrefs).toContain('/pricing');
   });
 });
 

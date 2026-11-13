@@ -28,6 +28,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { AVISO_H1, TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -107,11 +108,18 @@ test.describe('A1-A4 enlaces', () => {
   test('home: ventas, comparar planes y seguridad enlazan a las rutas en español', async ({ page, context }) => {
     await setup(context, 'es');
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    const pricing = page.locator('section#pricing');
-    await expect(pricing).toBeVisible({ timeout: 45_000 });
-    await expect(pricing.locator('a[href="/empresas/planes"]')).toHaveCount(1);
-    await expect(pricing.locator('a[href="/precios"]')).toHaveCount(1);
-    await expect(page.locator('a[href="/empresas/seguridad"]').first()).toBeAttached();
+    if (TODO_GRATIS) {
+      // #24: sin sección de precios ni enlaces a precios o planes en toda la página
+      await expect(page.locator('a[href="/empresas/seguridad"]').first()).toBeAttached({ timeout: 45_000 });
+      await expect(page.locator('section#pricing')).toHaveCount(0);
+      await expect(page.locator('a[href="/empresas/planes"], a[href="/precios"]')).toHaveCount(0);
+    } else {
+      const pricing = page.locator('section#pricing');
+      await expect(pricing).toBeVisible({ timeout: 45_000 });
+      await expect(pricing.locator('a[href="/empresas/planes"]')).toHaveCount(1);
+      await expect(pricing.locator('a[href="/precios"]')).toHaveCount(1);
+      await expect(page.locator('a[href="/empresas/seguridad"]').first()).toBeAttached();
+    }
     await expect(page.locator('a[href^="/es/"], a[href^="/en/"]')).toHaveCount(0);
   });
 
@@ -140,6 +148,8 @@ test.describe('A1-A4 enlaces', () => {
       await expect(footer).toBeVisible({ timeout: 45_000 });
       await expect(footer.locator('a[href="#"], a[href=""], a:not([href])')).toHaveCount(0);
       await expect(footer.getByText(/^(LinkedIn|X|YouTube)$/)).toHaveCount(0);
+      // #24: mientras todo es gratis el pie no enlaza a precios ni planes
+      if (TODO_GRATIS) await expect(footer.locator('a[href="/precios"], a[href="/empresas/planes"]')).toHaveCount(0);
     });
   }
 
@@ -153,6 +163,9 @@ test.describe('A1-A4 enlaces', () => {
     await expect(header.locator('a[href="/jobs"], a[href="/empleos"]')).toHaveCount(1);
     await expect(header.getByRole('link', { name: 'Buscar empleos' })).toHaveCount(0);
     await expect(header.locator('a[href="/recursos/biblioteca"], a[href="/nosotros/mision"]')).toHaveCount(0);
+    // #24: ni «Precios» ni «Plan para empresas» mientras todo es gratis (siguen en NAV_LINKS)
+    if (TODO_GRATIS) await expect(header.locator('a[href="/precios"], a[href="/empresas/planes"]')).toHaveCount(0);
+    else await expect(header.locator('a[href="/precios"]').first()).toBeAttached();
     const es = fs.readFileSync(path.join(ROOT, 'translations', 'es.ts'), 'utf8');
     const nav = es.slice(es.indexOf('NAV_LINKS'), es.indexOf('PRICING_PLANS'));
     expect(nav).not.toMatch(/id: 'jobs'/);
@@ -189,6 +202,14 @@ test.describe('A3 testimonios', () => {
       await setup(context, 'es');
       await mockOpynio(page, 'reviews');
       await page.goto(path, { waitUntil: 'domcontentloaded' });
+      if (TODO_GRATIS && path === '/precios') {
+        // #24: /precios es el aviso «es gratis», sin testimonios aunque haya reseñas
+        await expect(page.locator('h1').first()).toHaveText(AVISO_H1.profesionales.es, { timeout: 45_000 });
+        await expect(page.locator('footer')).toBeVisible();
+        await scrollToBottom(page);
+        await expect(page.getByTestId('testimonials-section')).toHaveCount(0);
+        return;
+      }
       const section = page.getByTestId('testimonials-section');
       await section.scrollIntoViewIfNeeded({ timeout: 45_000 });
       await expect(section.getByRole('heading', { name: heading })).toBeVisible({ timeout: 15_000 });
@@ -287,14 +308,22 @@ test.describe('B2 títulos', () => {
     const precios = pages.find(p => p.path === '/precios')!;
     const html = renderPage(base, precios) as string;
     expect(html).toContain('<html lang="es">');
-    expect(html).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
+    if (TODO_GRATIS) {
+      // #24: el HTML estático de /precios es el del aviso «es gratis», no el de planes
+      expect(precios.title).toMatch(/gratis/i);
+      expect(html).toContain(`<title>${precios.title}</title>`);
+      expect(html).not.toContain('Precios y Planes');
+    } else {
+      expect(html).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
+    }
     expect(html).toContain('<link rel="canonical" href="https://yourcvpassport.com/precios" data-rh="true" />');
     expect(html).toContain('<link rel="alternate" hreflang="en" href="https://yourcvpassport.com/pricing" data-rh="true" />');
     expect(html.match(/<meta name="description"/g)).toHaveLength(1);
     expect(html.match(/<title>/g)).toHaveLength(1);
     const pricing = renderPage(base, pages.find(p => p.path === '/pricing')!) as string;
     expect(pricing).toContain('<html lang="en">');
-    expect(pricing).toContain('<title>Pricing and Plans for Every Career Stage - YourCVPassport</title>');
+    if (TODO_GRATIS) expect(pricing).toMatch(/<title>[^<]*\bfree\b[^<]*<\/title>/i);
+    else expect(pricing).toContain('<title>Pricing and Plans for Every Career Stage - YourCVPassport</title>');
     // Ninguna página en español con el título genérico ni textos en inglés de index.html
     for (const p of pages.filter(x => x.lang === 'es')) expect(p.title).not.toMatch(/Professional CV Platform|Sign Up|Sign In/);
   });
@@ -439,10 +468,13 @@ test.describe('server.mjs', () => {
 
   test('cada página pública llega con su título en el HTML; el resto, con el de index.html', async () => {
     const precios = await (await fetch(`${base}/precios`)).text();
-    expect(precios).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
+    // #24: con todo gratis, /precios y /empresas/planes llegan con el título del aviso
+    if (TODO_GRATIS) expect(precios).toMatch(/<title>[^<]*gratis[^<]*<\/title>/i);
+    else expect(precios).toContain('<title>Precios y Planes de YourCVPassport - YourCVPassport</title>');
     expect(precios).toContain('<link rel="canonical" href="https://yourcvpassport.com/precios" data-rh="true" />');
     const planes = await (await fetch(`${base}/empresas/planes`)).text();
-    expect(planes).toContain('<title>Planes de Reclutamiento para Empresas - YourCVPassport</title>');
+    if (TODO_GRATIS) expect(planes).toMatch(/<title>[^<]*gratis[^<]*<\/title>/i);
+    else expect(planes).toContain('<title>Planes de Reclutamiento para Empresas - YourCVPassport</title>');
     const pricing = await (await fetch(`${base}/pricing`)).text();
     expect(pricing).toContain('<html lang="en">');
     // Ruta sin página propia (y la barra final no redirige a /precios/)

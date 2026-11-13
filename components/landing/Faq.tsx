@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FaqItem } from '../../types';
 import { useTranslations } from '../../hooks/useTranslations';
+import { TODO_GRATIS } from '../../lib/plans';
 
 const FaqItemComponent: React.FC<{ item: { question: string, answer: string } }> = ({ item }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,9 @@ const FaqItemComponent: React.FC<{ item: { question: string, answer: string } }>
 
 const Faq: React.FC<{ items?: FaqItem[], title?: string, description?: string }> = ({ items, title, description }) => {
     const t = useTranslations();
-    const faqItems = items || t.FAQ_ITEMS;
+    // Mientras todo es gratis (#24) las preguntas de precio usan su `answerGratis`.
+    const faqItems = (items || t.FAQ_ITEMS).map((item: FaqItem) =>
+        TODO_GRATIS && item.answerGratis ? { ...item, answer: item.answerGratis } : item);
     const defaultTitle = t.faq.title;
     const defaultDescription = t.faq.subtitle;
 

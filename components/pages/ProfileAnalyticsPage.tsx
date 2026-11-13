@@ -8,6 +8,7 @@ import PageSEO from '../shared/PageSEO';
 import InlineCTA from '../landing/InlineCTA';
 import { useLanguage } from '../../contexts/LanguageContext';
 import HeroImage from '../landing/HeroImage';
+import { TODO_GRATIS } from '../../lib/plans';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -192,7 +193,7 @@ const ProfileAnalyticsPage: React.FC = () => {
                         </div>
                         <div className="mt-12 text-center">
                              <h3 className="text-2xl font-bold text-cv-dark-gray dark:text-dark-text-primary">{pageData.companyInsightsTitle}</h3>
-                             <p className="mt-2 text-lg text-gray-600 dark:text-dark-text-secondary">{pageData.companyInsightsDescription}</p>
+                             <p className="mt-2 text-lg text-gray-600 dark:text-dark-text-secondary">{TODO_GRATIS ? pageData.companyInsightsDescriptionGratis : pageData.companyInsightsDescription}</p>
                         </div>
                     </AnimatedWrapper>
                  </div>

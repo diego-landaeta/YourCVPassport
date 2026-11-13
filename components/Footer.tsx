@@ -4,6 +4,7 @@ import { useTranslations } from '../hooks/useTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { openCookieSettings } from '../lib/consent';
 import { useJobsNavText } from './jobs/textosNav';
+import { TODO_GRATIS } from '../lib/plans';
 
 // Redes sociales oficiales. Solo se pintan las que tienen URL real: hoy no hay
 // ninguna confirmada, así que la lista va vacía y no se muestra nada (antes eran
@@ -41,7 +42,8 @@ const Footer: React.FC = () => {
               <li><Link to={getPath(t.footer.links.professionals)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.professionals}</Link></li>
               <li><Link to={getPath(jobsNav.id)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{jobsNav.label}</Link></li>
               <li><Link to={getPath(t.footer.links.companies)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.companies}</Link></li>
-              <li><Link to={getPath(t.footer.links.pricing)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.pricing}</Link></li>
+              {/* Sin precios mientras todo es gratis (#24) */}
+              {!TODO_GRATIS && <li><Link to={getPath(t.footer.links.pricing)} className="inline-block py-1.5 text-gray-400 dark:text-dark-text-secondary hover:text-cv-blue-light dark:hover:text-cv-blue-light transition-colors duration-200">{t.footer.solutions.pricing}</Link></li>}
             </ul>
           </div>
           <div>

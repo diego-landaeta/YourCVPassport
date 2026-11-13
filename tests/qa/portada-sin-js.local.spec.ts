@@ -8,6 +8,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { TODO_GRATIS } from './_todoGratis';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 
@@ -36,7 +37,13 @@ test('con JavaScript: React sustituye el bloque estático (sin contenido duplica
   await installInitState(context, { language: 'es', theme: 'light' });
   await mockSupabase(context, {});
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('section#pricing')).toBeVisible({ timeout: 45_000 });
+  if (TODO_GRATIS) {
+    // #24: la home ya no pinta la sección de precios; la de seguridad (más abajo) sí
+    await expect(page.locator('main a[href="/empresas/seguridad"]').first()).toBeAttached({ timeout: 45_000 });
+    await expect(page.locator('section#pricing')).toHaveCount(0);
+  } else {
+    await expect(page.locator('section#pricing')).toBeVisible({ timeout: 45_000 });
+  }
   await expect(page.locator('#static-home')).toHaveCount(0);
   await expect(page.locator('h1')).toHaveCount(1);
 });

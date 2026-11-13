@@ -16,9 +16,16 @@
  * redirecciones) más /empleos-/jobs y /comunidad-/feed.
  */
 
+/**
+ * «Todo gratis hasta nuevo aviso» (#24): el mismo interruptor que lib/plans.ts. Aquí se lee de
+ * process.env, así que el build tiene que correr con VITE_TODO_GRATIS en el entorno (no basta
+ * con ponerlo en un .env: eso solo lo lee Vite).
+ */
+export const TODO_GRATIS = process.env.VITE_TODO_GRATIS !== 'false';
+
 /** @typedef {{ es: string, en: string }} Bilingual */
 /** @type {ReadonlyArray<{ es: string, en: string, title: Bilingual, description: Bilingual }>} */
-export const STATIC_META_PAIRS = [
+const PAIRS = [
   {
     es: '/producto/resumen', en: '/product/overview',
     title: { es: 'Plataforma Profesional de CV Verificado - YourCVPassport', en: 'Professional Verified CV Platform - YourCVPassport' },
@@ -236,6 +243,33 @@ export const STATIC_META_PAIRS = [
     },
   },
 ];
+
+/**
+ * Mientras todo es gratis, /precios y /empresas/planes pintan el aviso «Es gratis»
+ * (components/shared/TodoGratisAviso.tsx) en vez de planes y precios.
+ * @type {Record<string, { title: Bilingual, description: Bilingual }>}
+ */
+const AVISO_GRATIS = {
+  '/precios': {
+    title: { es: 'YourCVPassport es gratis - YourCVPassport', en: 'YourCVPassport is free - YourCVPassport' },
+    description: {
+      es: 'Crear tu perfil en YourCVPassport es gratis: usa todas las plantillas, exporta tu CV y verifícalo sin pagar nada y sin tarjeta de crédito.',
+      en: 'Building your profile on YourCVPassport is free: use every template, export your CV and verify it without paying anything and with no card needed.',
+    },
+  },
+  '/empresas/planes': {
+    title: { es: 'Publicar ofertas es gratis - YourCVPassport', en: 'Posting jobs is free - YourCVPassport' },
+    description: {
+      es: 'Registrar tu empresa y publicar ofertas de empleo en YourCVPassport no cuesta nada. Verificamos cada empresa antes de que publique su primera oferta.',
+      en: 'Registering your company and posting job openings on YourCVPassport costs nothing. We verify every company before it can publish its first job.',
+    },
+  },
+};
+
+/** @type {ReadonlyArray<{ es: string, en: string, title: Bilingual, description: Bilingual }>} */
+export const STATIC_META_PAIRS = TODO_GRATIS
+  ? PAIRS.map((pair) => (AVISO_GRATIS[pair.es] ? { ...pair, ...AVISO_GRATIS[pair.es] } : pair))
+  : PAIRS;
 
 /**
  * Raíces de sección que muestran la misma página que otra ruta (issue #11, YCV-004):

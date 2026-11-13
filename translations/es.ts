@@ -325,6 +325,8 @@ export const translations = {
         },
         ctaTitle: '¿Listo para reclamar tu URL profesional?',
         ctaSubtitle: 'Actualiza a nuestro plan Profesional para desbloquear tu dominio personalizado y construir una marca personal más fuerte.',
+        // Mientras todo es gratis (#24, lib/plans.ts)
+        ctaSubtitleGratis: 'Crea tu perfil gratis y reserva tu URL personalizada para construir una marca personal más fuerte.',
         ctaButton: 'Reclama tu URL'
     },
     urlSimulator: {
@@ -586,7 +588,7 @@ export const translations = {
         inlineCta: {
             title: 'Deja que la IA trabaje por ti',
             description: 'Optimiza tu CV automáticamente y genera cartas de presentación personalizadas en segundos.',
-            button: 'Probar IA gratis',
+            button: 'Crear mi cuenta',
         },
         title: 'Asistente de IA: tu copiloto profesional personal',
         subtitle: 'Aprovecha el poder de la inteligencia artificial para mejorar el resumen de tu perfil, escribir cartas de presentación convincentes y sugerir palabras clave impactantes que te hagan destacar.',
@@ -679,6 +681,8 @@ export const translations = {
         ],
         companyInsightsTitle: "Información de empresas: identifica empleadores interesados",
         companyInsightsDescription: "Con nuestro plan Profesional, ve los nombres de las empresas que visitan tu perfil, dándote una pista para contactarlos.",
+        // Mientras todo es gratis (#24, lib/plans.ts)
+        companyInsightsDescriptionGratis: "Ve los nombres de las empresas que visitan tu perfil, dándote una pista para contactarlos.",
         testimonialsTitle: "Convierte las analíticas en oportunidades profesionales",
         testimonialsDescription: "Escucha a profesionales que usaron datos para potenciar su búsqueda de empleo.",
         analyticsTestimonials: [
@@ -2466,7 +2470,7 @@ export const translations = {
         { question: '¿Cómo funciona el proceso de verificación?', answer: 'Envías tus documentos e información a través de nuestra plataforma segura. Nuestro sistema, combinado con servicios de verificación de terceros, confirma la autenticidad de tus credenciales. Una vez verificado, se añade un "sello" a tu perfil.' },
         { question: '¿Están seguros mis datos?', answer: 'Absolutamente. Cumplimos totalmente con el RGPD y utilizamos encriptación de última generación para proteger tus datos. Tienes control total sobre quién ve tu perfil e información.' },
         { question: '¿Puedo exportar mi CV para solicitudes de empleo?', answer: '¡Sí! Puedes exportar tu CV verificado en varios formatos compatibles con ATS como PDF y DOCX, asegurando que pase a través de los sistemas de seguimiento de candidatos utilizados por la mayoría de las empresas.' },
-        { question: '¿Cuánto cuesta crear un perfil en YourCVPassport?', answer: 'Crear tu perfil básico es completamente gratis. Ofrecemos un plan gratuito que incluye plantillas esenciales y funciones básicas. Para acceso a plantillas premium, herramientas de IA, dominio personalizado y análisis avanzado, puedes actualizar a uno de nuestros planes de pago.' },
+        { question: '¿Cuánto cuesta crear un perfil en YourCVPassport?', answer: 'Crear tu perfil básico es completamente gratis. Ofrecemos un plan gratuito que incluye plantillas esenciales y funciones básicas. Para acceso a plantillas premium, herramientas de IA, dominio personalizado y análisis avanzado, puedes actualizar a uno de nuestros planes de pago.', answerGratis: 'Crear tu perfil es gratis y no necesitas tarjeta. Por ahora también son gratis todas las plantillas, las exportaciones de tu CV y las verificaciones.' },
         { question: '¿Puedo actualizar mi CV después de haberlo creado?', answer: 'Por supuesto. Puedes editar y actualizar tu CV en cualquier momento desde tu panel de control. Todas las actualizaciones se guardan automáticamente y se reflejan en tiempo real en tu perfil público si está activado.' },
         { question: '¿Qué es un perfil público y cómo funciona?', answer: 'Un perfil público es una versión de tu CV que puedes compartir con reclutadores mediante un enlace único. Puedes activarlo o desactivarlo cuando quieras y controlar exactamente qué información es visible. Es ideal para búsqueda pasiva de empleo.' },
         { question: '¿Los reclutadores pueden encontrarme en YourCVPassport?', answer: 'Sí, si activas tu perfil público, los reclutadores pueden encontrarte mediante nuestra función de búsqueda avanzada. Pueden filtrar por habilidades, ubicación, industria y más. Tú mantienes el control sobre tu visibilidad y puedes desactivar tu perfil en cualquier momento.' },
@@ -2484,7 +2488,7 @@ export const translations = {
         { question: '¿Puedo verificar certificaciones profesionales además de títulos académicos?', answer: 'Sí, puedes verificar múltiples tipos de credenciales incluyendo certificaciones profesionales (PMP, AWS, Google, etc.), títulos académicos, cursos especializados, licencias profesionales y experiencia laboral. Cada tipo de credencial recibe su propio sello de verificación.' },
         { question: '¿Qué sucede si mi empleador anterior ya no existe o no responde?', answer: 'Entendemos que algunas empresas pueden haber cerrado o ser difíciles de contactar. En estos casos, aceptamos documentos alternativos como cartas de referencia, recibos de nómina, contratos laborales o declaraciones de impuestos que demuestren tu empleo.' },
         { question: '¿Los reclutadores pueden ver mis documentos originales?', answer: 'No. Los reclutadores solo ven el sello de verificación en tu perfil que confirma que tus credenciales han sido verificadas. Tus documentos originales permanecen privados y seguros en nuestro sistema encriptado. Solo nuestro equipo de verificación autorizado tiene acceso temporal para el proceso de validación.' },
-        { question: '¿Cuánto cuestan las verificaciones de credenciales?', answer: 'La verificación básica de identidad está incluida en todos los planes. Las verificaciones de educación y experiencia laboral están incluidas en los planes Profesional y Corporativo. Para usuarios del plan gratuito, ofrecemos verificaciones individuales a partir de €9.99 por credencial.' },
+        { question: '¿Cuánto cuestan las verificaciones de credenciales?', answer: 'La verificación básica de identidad está incluida en todos los planes. Las verificaciones de educación y experiencia laboral están incluidas en los planes Profesional y Corporativo. Para usuarios del plan gratuito, ofrecemos verificaciones individuales a partir de €9.99 por credencial.', answerGratis: 'Por ahora las verificaciones de credenciales son gratis para todos: no tienes que pagar nada por ellas.' },
     ],
     PRICING_PAGE_TESTIMONIALS: [
         { quote: "El Plan Profesional vale cada céntimo. El dominio personalizado y las analíticas avanzadas me dieron la ventaja que necesitaba.", name: 'Juan Pérez', role: 'Director de Marketing', imageUrl: 'https://picsum.photos/id/1012/100/100', plan: 'Profesional' },
@@ -2512,7 +2516,7 @@ export const translations = {
         { question: '¿Puedo descargar mi CV en diferentes idiomas?', answer: 'Sí, YourCVPassport soporta creación de CV multilingüe. Puedes crear versiones de tu CV en español e inglés, y exportar cada versión por separado. Esto es especialmente útil para aplicar a empleos internacionales.'},
         { question: '¿Cómo activo o desactivo mi perfil público?', answer: 'En tu panel de control, ve a "Configuración de privacidad" y utiliza el interruptor "Perfil público" para activarlo o desactivarlo. Cuando está activado, los reclutadores pueden encontrarte; cuando está desactivado, solo tú puedes acceder a tu perfil.'},
         { question: '¿Qué hago si no recibo el correo de verificación?', answer: 'Primero, revisa tu carpeta de spam o correo no deseado. Si aún no lo encuentras, ve a la configuración de tu cuenta y haz clic en "Reenviar correo de verificación". Si el problema persiste, contacta a nuestro equipo de soporte en support@yourcvpassport.com.'},
-        { question: '¿Cómo puedo ver las estadísticas de mi CV (vistas, descargas)?', answer: 'Las analíticas están disponibles en los planes Profesional y Corporativo. En tu panel de control, haz clic en "Analíticas" para ver métricas detalladas incluyendo vistas de perfil, descargas de CV, búsquedas por palabra clave que llevaron a tu perfil, y tendencias a lo largo del tiempo.'},
+        { question: '¿Cómo puedo ver las estadísticas de mi CV (vistas, descargas)?', answer: 'Las analíticas están disponibles en los planes Profesional y Corporativo. En tu panel de control, haz clic en "Analíticas" para ver métricas detalladas incluyendo vistas de perfil, descargas de CV, búsquedas por palabra clave que llevaron a tu perfil, y tendencias a lo largo del tiempo.', answerGratis: 'En tu panel de control, haz clic en "Analíticas" para ver métricas detalladas incluyendo vistas de perfil, descargas de CV, búsquedas por palabra clave que llevaron a tu perfil, y tendencias a lo largo del tiempo.'},
     ],
     SEARCH_PROFILE_EXAMPLES: [
         { name: 'Dr. Evelyn Reed', role: 'Científica de Datos', location: 'Berlín, Alemania', skills: ['Python', 'Machine Learning', 'TensorFlow', 'SQL', 'Big Data'], verified: true, imageUrl: 'https://picsum.photos/id/1027/100/100' },
@@ -2699,7 +2703,7 @@ export const translations = {
         { question: '¿Dónde está la sede de YourCVPassport?', answer: 'Nuestra sede se encuentra en Valencia, España, cerca del Ayuntamiento de Valencia en el centro histórico de la ciudad. Operamos con un equipo totalmente remoto en todo el mundo.'},
         { question: '¿Cómo puedo verificar mis credenciales en la plataforma?', answer: 'Puedes verificar tus credenciales educativas y profesionales a través de nuestro sistema blockchain. Simplemente sube los documentos necesarios en la sección de verificación de tu perfil, y nuestro equipo procesará la verificación en 24-48 horas laborables.' },
         { question: '¿Ofrecen soporte en español?', answer: 'Sí, ofrecemos soporte completo en español e inglés. Nuestro equipo está disponible para ayudarte en tu idioma preferido a través de correo electrónico, chat en vivo y nuestro centro de ayuda multilingüe.' },
-        { question: '¿Cuál es el tiempo de respuesta promedio del equipo de soporte?', answer: 'Para consultas generales por correo electrónico, nuestro tiempo de respuesta es de 4-6 horas durante días laborables. Los clientes del plan Profesional reciben respuesta en menos de 2 horas, y los clientes Corporativos tienen soporte prioritario con respuesta garantizada en menos de 1 hora.' },
+        { question: '¿Cuál es el tiempo de respuesta promedio del equipo de soporte?', answer: 'Para consultas generales por correo electrónico, nuestro tiempo de respuesta es de 4-6 horas durante días laborables. Los clientes del plan Profesional reciben respuesta en menos de 2 horas, y los clientes Corporativos tienen soporte prioritario con respuesta garantizada en menos de 1 hora.', answerGratis: 'Para consultas generales por correo electrónico, nuestro tiempo de respuesta es de 4-6 horas durante días laborables.' },
         { question: '¿Tienen oficinas físicas donde pueda visitarlos?', answer: 'Nuestra sede principal está en Valencia, España, pero operamos principalmente de forma remota para servir mejor a nuestra comunidad global. Para reuniones presenciales o visitas a la oficina, por favor coordina previamente con nuestro equipo a través de support@yourcvpassport.com.' },
         { question: '¿Cómo puedo reportar un problema técnico o bug en la plataforma?', answer: 'Si encuentras un problema técnico, por favor repórtalo inmediatamente enviando un correo a support@yourcvpassport.com con capturas de pantalla, descripción del problema y los pasos para reproducirlo. Nuestro equipo técnico lo investigará y te mantendrá informado del progreso.' },
         { question: '¿Ofrecen capacitación o webinars para nuevos usuarios?', answer: 'Sí, organizamos webinars gratuitos mensuales para nuevos usuarios donde mostramos las mejores prácticas de la plataforma, cómo optimizar tu perfil, y responder preguntas en vivo. También ofrecemos sesiones de capacitación personalizadas para equipos corporativos.' },
@@ -3008,7 +3012,7 @@ export const translations = {
         },
         finalCta: {
             title: "Empieza a encontrar talento verificado hoy",
-            subtitle: "Regístrate en un plan de empresa para acceder a nuestra búsqueda avanzada de talento.",
+            subtitle: "Registra tu empresa para acceder a nuestra búsqueda avanzada de talento.",
             button: "Comenzar ahora"
         }
     },
@@ -5221,9 +5225,9 @@ export const translations = {
         checklistItem4: 'Agregar al menos 2 certificaciones',
         checklistItem5: 'Incluir enlaces a portfolio/GitHub',
         profileQuality: 'Calidad del perfil:',
-        midCtaTitle: 'Prueba la IA gratis',
-        midCtaDescription: 'Descubre cómo la inteligencia artificial puede transformar tu CV en minutos. Sin tarjeta de crédito.',
-        midCtaButton: 'Empezar ahora gratis',
+        midCtaTitle: 'Descubre el asistente de IA',
+        midCtaDescription: 'Descubre cómo la inteligencia artificial puede transformar tu CV en minutos.',
+        midCtaButton: 'Crear mi cuenta',
         testimonialsTitle: 'Lo que dicen nuestros usuarios',
         testimonialsSubtitle: 'Miles de profesionales han transformado sus CVs con nuestra IA',
         testimonial1Name: 'María García',
@@ -5237,8 +5241,8 @@ export const translations = {
         testimonial3Text: 'El checklist de calidad me ayudó a identificar exactamente qué faltaba en mi CV. En 30 minutos tenía un perfil completo y profesional.',
         finalCtaTitle: '¿Listo para optimizar tu perfil con IA?',
         finalCtaSubtitle: 'Únete a miles de profesionales que ya están usando nuestra IA para destacar en el mercado laboral',
-        finalCtaButton: 'Comenzar gratis ahora',
-        finalCtaNote: 'No se requiere tarjeta de crédito',
+        finalCtaButton: 'Crear mi cuenta',
+        finalCtaNote: 'Crear tu cuenta y tu CV es gratis',
         beforeLabel: 'Antes',
         afterLabel: 'Después (con IA)',
     },

@@ -13,6 +13,8 @@
  * Un test (tests/qa/seo-estatico.spec.ts) comprueba los rangos de longitud de todas las entradas.
  */
 
+import { TODO_GRATIS } from './static-meta.mjs';
+
 /** @type {Record<string, { title?: string, description?: string, h1?: string }>} */
 export const STATIC_SEO = {
   "/producto/ats": {
@@ -229,14 +231,44 @@ export const STATIC_SEO = {
     description: "Inicia sesión en YourCVPassport para gestionar tu CV profesional, postularte a ofertas de empleo y seguir el estado de tus candidaturas.",
   },
   "/signup": {
-    description: "Crea gratis tu cuenta de YourCVPassport y empieza a construir tu CV profesional verificado, con plantillas, IA y sellos de verificación.",
+    description: "Crea gratis tu cuenta de YourCVPassport y empieza a construir tu CV profesional verificado, con plantillas y sellos de verificación.",
   },
 };
+
+/**
+ * Mientras todo es gratis (#24, TODO_GRATIS en seo/static-meta.mjs) las páginas de precios y
+ * planes enseñan el aviso «Es gratis» (components/shared/TodoGratisAviso.tsx): su copia
+ * estática lleva ese texto y los enlaces principales no hablan de precios.
+ */
+if (TODO_GRATIS) {
+  Object.assign(STATIC_SEO, {
+    "/precios": {
+      title: "Crea tu CV profesional gratis y sin tarjeta - YourCVPassport",
+      description: "Crear tu perfil en YourCVPassport es gratis: usa todas las plantillas, exporta tu CV y verifícalo sin pagar nada y sin tarjeta de crédito.",
+      h1: "YourCVPassport es gratis",
+    },
+    "/pricing": {
+      title: "Create Your Professional CV for Free - YourCVPassport",
+      description: "Building your profile on YourCVPassport is free: use every template, export your CV and verify it without paying anything and with no card needed.",
+      h1: "YourCVPassport is free",
+    },
+    "/empresas/planes": {
+      title: "Publicar ofertas de empleo es gratis - YourCVPassport",
+      description: "Registrar tu empresa y publicar ofertas de empleo en YourCVPassport no cuesta nada. Verificamos cada empresa antes de que publique su primera oferta.",
+      h1: "Publicar ofertas es gratis",
+    },
+    "/companies/plans": {
+      title: "Posting Job Openings Is Free for Companies - YourCVPassport",
+      description: "Registering your company and posting job openings on YourCVPassport costs nothing. We verify every company before it can publish its first job.",
+      h1: "Posting jobs is free",
+    },
+  });
+}
 
 /** Enlaces principales que llevan todas las páginas estáticas (sin la propia ruta). */
 export const MAIN_LINKS = {
   es: [
-    ['/precios', 'Precios y planes'],
+    ['/precios', TODO_GRATIS ? 'YourCVPassport es gratis' : 'Precios y planes'],
     ['/producto/resumen', 'Qué ofrece YourCVPassport'],
     ['/profesionales/como-funciona', 'Cómo funciona'],
     ['/profesionales/plantillas', 'Plantillas de CV'],
@@ -246,7 +278,7 @@ export const MAIN_LINKS = {
     ['/nosotros/contacto', 'Contacto'],
   ],
   en: [
-    ['/pricing', 'Pricing and plans'],
+    ['/pricing', TODO_GRATIS ? 'YourCVPassport is free' : 'Pricing and plans'],
     ['/product/overview', 'What YourCVPassport offers'],
     ['/professionals/how', 'How it works'],
     ['/professionals/templates', 'CV templates'],
