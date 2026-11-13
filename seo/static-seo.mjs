@@ -231,7 +231,7 @@ export const STATIC_SEO = {
     description: "Inicia sesión en YourCVPassport para gestionar tu CV profesional, postularte a ofertas de empleo y seguir el estado de tus candidaturas.",
   },
   "/signup": {
-    description: "Crea gratis tu cuenta de YourCVPassport y empieza a construir tu CV profesional verificado, con plantillas, IA y sellos de verificación.",
+    description: "Crea gratis tu cuenta de YourCVPassport y empieza a construir tu CV profesional verificado, con plantillas y sellos de verificación.",
   },
 };
 
