@@ -1,63 +1,46 @@
-import React, { useState, Suspense, lazy } from 'react';
-import { SparklesIcon, BriefcaseIcon, BookmarkIcon } from '@heroicons/react/24/outline';
-import { useLanguage } from '../../contexts/LanguageContext';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTranslations } from '../../hooks/useTranslations';
-import LoadingSpinner from '../shared/LoadingSpinner';
+import { H1_CLS, PanelSkeleton, PanelTabs, TEXT_META } from '../jobs/PanelBits';
+import { usePanelText } from '../jobs/textosPanel';
+import { usePanelCounts } from '../jobs/usePanelCounts';
 
 // Lazy load tab components
 const RecommendedJobsTab = lazy(() => import('./opportunities/RecommendedJobsTab'));
 const AllJobsTab = lazy(() => import('./opportunities/AllJobsTab'));
 const SavedJobsTab = lazy(() => import('./opportunities/SavedJobsTab'));
+const JobAlertsTab = lazy(() => import('./opportunities/JobAlertsTab'));
 
 interface JobSearchSectionProps {
   profileId: string;
 }
 
-type TabId = 'recommended' | 'all' | 'saved';
-
-interface Tab {
-  id: TabId;
-  label: { es: string; en: string };
-  icon: React.ComponentType<{ className?: string }>;
-}
+type TabId = 'recommended' | 'all' | 'saved' | 'alerts';
 
 /**
  * Job Search Section - Complete job discovery interface
  *
- * Features 3 tabs:
- * 1. Recommended - Jobs with best match score
- * 2. All Jobs - Full search with advanced filters
- * 3. Saved - Bookmarked jobs for later review
+ * Pestanas con texto y contador: Recomendadas, Todas (lleva al listado), Guardadas y Alertas.
  */
 const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
-  const { lang } = useLanguage();
   const t = useTranslations();
+  const tx = usePanelText();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>('recommended');
+  const { counts, setCount } = usePanelCounts(user?.id || profileId);
+  const onRecommended = useCallback((n: number) => setCount('recommended', n), [setCount]);
+  const onSaved = useCallback((n: number) => setCount('saved', n), [setCount]);
 
-  const tabs: Tab[] = [
-    {
-      id: 'recommended',
-      label: { es: 'Recomendadas', en: 'Recommended' },
-      icon: SparklesIcon
-    },
-    {
-      id: 'all',
-      label: { es: 'Todas', en: 'All Jobs' },
-      icon: BriefcaseIcon
-    },
-    {
-      id: 'saved',
-      label: { es: 'Guardadas', en: 'Saved' },
-      icon: BookmarkIcon
-    }
+  const tabs = [
+    { id: 'recommended', label: tx.tabRecommended, count: counts.recommended },
+    // Lleva al listado publico (el buscador propio del panel se retiro)
+    { id: 'all', label: tx.tabAll },
+    { id: 'saved', label: tx.tabSaved, count: counts.saved },
+    { id: 'alerts', label: tx.tabAlerts },
   ];
 
   const renderTabContent = () => {
-    const LoadingFallback = (
-      <div className="flex justify-center items-center py-24">
-        <LoadingSpinner message={t.dashboard.loading} size="large" />
-      </div>
-    );
+    const LoadingFallback = <PanelSkeleton rows={3} label={t.dashboard.loading} />;
 
     switch (activeTab) {
       case 'recommended':
@@ -66,6 +49,7 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
             <RecommendedJobsTab
               profileId={profileId}
               onSwitchToAllJobs={() => setActiveTab('all')}
+              onCount={onRecommended}
             />
           </Suspense>
         );
@@ -78,7 +62,13 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
       case 'saved':
         return (
           <Suspense fallback={LoadingFallback}>
-            <SavedJobsTab profileId={profileId} />
+            <SavedJobsTab profileId={profileId} onCount={onSaved} />
+          </Suspense>
+        );
+      case 'alerts':
+        return (
+          <Suspense fallback={LoadingFallback}>
+            <JobAlertsTab profileId={profileId} />
           </Suspense>
         );
       default:
@@ -88,60 +78,14 @@ const JobSearchSection: React.FC<JobSearchSectionProps> = ({ profileId }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-lg p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <BriefcaseIcon className="w-8 h-8 text-cv-blue dark:text-cv-blue-light" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {t.dashboard.opportunities.searchJobs}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {t.dashboard.opportunities.searchJobsDescription}
-            </p>
-          </div>
-        </div>
+      <header>
+        <h1 className={H1_CLS}>{t.dashboard.opportunities.searchJobs}</h1>
+        <p className={`mt-2 max-w-prose text-base ${TEXT_META}`}>{t.dashboard.opportunities.searchJobsDescription}</p>
+      </header>
 
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex justify-center space-x-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+      <PanelTabs tabs={tabs} active={activeTab} onChange={(id) => setActiveTab(id as TabId)} label={tx.tabsLabel} idPrefix="jtab" panelId="jpanel" />
 
-              return (
-                <button aria-label={tab.label[lang]}
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  title={tab.label[lang]}
-                  className={`
-                    group inline-flex items-center justify-center px-5 py-3 border-b-2 font-medium text-sm transition-all
-                    ${
-                      isActive
-                        ? 'border-cv-blue dark:border-cv-blue-light text-cv-blue dark:text-cv-blue-light'
-                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                    }
-                  `}
-                >
-                  <Icon aria-hidden="true"
-                    className={`
-                      w-5 h-5 transition-all
-                      ${
-                        isActive
-                          ? 'text-cv-blue dark:text-cv-blue-light'
-                          : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'
-                      }
-                    `}
-                  />
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[600px]">
+      <div id="jpanel" role="tabpanel" aria-labelledby={`jtab-${activeTab}`} className="min-h-[24rem]">
         {renderTabContent()}
       </div>
     </div>

@@ -145,13 +145,13 @@ const DisplaySettingsSection: React.FC = () => {
         {settingsOptions.map((option) => (
           <div
             key={option.key}
-            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border-2 border-gray-200 dark:border-dark-border hover:border-cv-blue/50 transition-all"
+            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 sm:p-6 border-2 border-gray-200 dark:border-dark-border hover:border-cv-blue/50 transition-all"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4 flex-1">
+            <div className="flex items-start justify-between gap-3 sm:gap-4">
+              <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                 <div className="flex-shrink-0">{option.icon}</div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1 min-w-0 break-words">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white">
                       {option.title}
                     </h4>
@@ -170,7 +170,7 @@ const DisplaySettingsSection: React.FC = () => {
               {/* Toggle Switch */}
               <button role="switch" aria-checked={!!settings[option.key]} aria-label={option.title}
                 onClick={() => handleToggle(option.key)}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cv-blue focus:ring-offset-2 ${
+                className={`relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cv-blue focus:ring-offset-2 ${
                   settings[option.key]
                     ? 'bg-cv-blue'
                     : 'bg-gray-300 dark:bg-gray-600'

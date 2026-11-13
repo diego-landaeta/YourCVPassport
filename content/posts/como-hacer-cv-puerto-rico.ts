@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1135,
-  title: "Como Hacer un CV para Trabajar en Puerto Rico",
+  title: "Cómo Hacer un CV para Trabajar en Puerto Rico",
   slug: "como-hacer-cv-puerto-rico",
   summary: "Resume adaptado a Puerto Rico. Formato estadounidense con consideraciones locales.",
-  content: `# Como Hacer un CV para Trabajar en Puerto Rico
+  content: `# Cómo Hacer un CV para Trabajar en Puerto Rico
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Puerto Rico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV para trabajar en Puerto Rico** te proporciona est
 ## 1. Mercado laboral en Puerto Rico
 2. Resume vs CV: formato US
 3. Bilingualismo
-4. Sectores: farmaceutica, turismo
+4. Sectores: farmacéutica, turismo
 5. Portales de empleo
 6. Consideraciones federales y locales
 
 Cuando hablamos de **CV para trabajar en Puerto Rico** en el contexto de 1. mercado laboral en puerto rico
 2. resume vs cv: formato us
 3. bilingualismo
-4. sectores: farmaceutica, turismo
+4. sectores: farmacéutica, turismo
 5. portales de empleo
 6. consideraciones federales y locales, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. mercado laboral en puerto rico
 2. resume vs cv: formato us
 3. bilingualismo
-4. sectores: farmaceutica, turismo
+4. sectores: farmacéutica, turismo
 5. portales de empleo
 6. consideraciones federales y locales
 
@@ -47,7 +47,7 @@ Para destacar en **CV para trabajar en Puerto Rico** dentro de esta área, aplic
 ### Errores frecuentes en 1. mercado laboral en puerto rico
 2. resume vs cv: formato us
 3. bilingualismo
-4. sectores: farmaceutica, turismo
+4. sectores: farmacéutica, turismo
 5. portales de empleo
 6. consideraciones federales y locales
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T22:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Puerto Rico",
+  meta_title: "Cómo Hacer un CV para Trabajar en Puerto Rico",
   meta_description: "Resume adaptado a Puerto Rico. Formato estadounidense con consideraciones locales.",
   lang: "es",
 };

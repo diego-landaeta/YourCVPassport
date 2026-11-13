@@ -316,7 +316,12 @@ function project(row: Row, select: string | null): Row {
  */
 function tableRows(db: MockDb, table: string): Row[] {
   if (db[table]) return db[table];
-  if (table === 'profiles_full') return db.profiles ?? [];
+  if (table === 'profiles_full') {
+    // La puerta de edad (LegalGate) pide la fecha de nacimiento cuando es NULL. Los perfiles
+    // de prueba que no la definen se sirven como adultos; para probar la puerta, un spec
+    // pone `fecha_nacimiento: null` explicito en el perfil.
+    return (db.profiles ?? []).map(p => (p.fecha_nacimiento === undefined ? { ...p, fecha_nacimiento: '1990-01-01' } : p));
+  }
   if (table === 'companies_full') return db.companies ?? [];
   if (table === 'public_stamps') {
     return (db.stamps ?? [])

@@ -6,6 +6,8 @@ import { normalizeUrl, getCanonicalUrlForPath, getHreflangUrls } from '../../uti
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SEOHeadProps {
+  /** Perfil de prueba o interno: no debe indexarse (hallazgo 09 de la auditoria SEO del 25/10). */
+  noindex?: boolean;
   title?: string;
   description?: string;
   profile?: Profile;
@@ -17,6 +19,7 @@ interface SEOHeadProps {
 }
 
 const SEOHead: React.FC<SEOHeadProps> = ({
+  noindex = false,
   title: propTitle,
   description: propDescription,
   profile,
@@ -209,8 +212,8 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="twitter:creator" content={profile?.linkedin_url ? `@${profile.slug}` : '@YourCVPassport'} />
       
       {/* Additional SEO Tags */}
-      <meta name="robots" content="index, follow" />
-      <meta name="googlebot" content="index, follow" />
+      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+      <meta name="googlebot" content={noindex ? "noindex, nofollow" : "index, follow"} />
       {profile && <meta name="author" content={profile.full_name} />}
       <meta name="language" content={currentLang === 'es' ? 'Spanish' : 'English'} />
       

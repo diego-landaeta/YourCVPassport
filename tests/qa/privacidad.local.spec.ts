@@ -267,7 +267,7 @@ test.describe('búsqueda de talento', () => {
     const mock = await mockSupabase(context, { profiles, stamps: stampsFor(target.id), skills: [] });
 
     await gotoAndWait(page, '/admin/search');
-    await expect(page.getByText(/Page 1 of \d+/)).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByText(/Página 1 de \d+/)).toBeVisible({ timeout: 45_000 });
     // En móvil la tarjeta queda bajo el panel de filtros: basta con que esté en el DOM
     await expect(page.getByText(target.full_name).first()).toBeAttached();
     await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});

@@ -9,6 +9,7 @@ import PageSEO from '../shared/PageSEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../supabase/client';
 import { useOpynioWidget, OPYNIO_BUSINESS_ID } from '../../hooks/useOpynioWidget';
+import ThirdPartyPlaceholder from '../legal/ThirdPartyPlaceholder';
 
 const AnimatedWrapper: React.FC<{children: React.ReactNode, delay?: string}> = ({ children, delay = 'duration-700' }) => {
     const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
@@ -232,11 +233,13 @@ const SuccessStoriesPage: React.FC = () => {
             <section className="py-20 px-4 bg-white dark:bg-dark-bg-primary" aria-busy={reviewsStatus !== 'ready'}>
                 <div className="max-w-7xl mx-auto">
                     <AnimatedWrapper>
-                        <h2 className={`text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8 ${reviewsStatus === 'ready' ? '' : 'invisible'}`}>
+                        <h2 className={`text-3xl font-bold text-cv-dark-gray dark:text-dark-text-primary text-center mb-8 ${reviewsStatus === 'ready' || reviewsStatus === 'blocked' ? '' : 'invisible'}`}>
                             {pageData.whatUsersSay}
                         </h2>
                         {/* Opynio Widget v6.0 - horizontal-carousel */}
-                        <div ref={reviewsRef} key={lang} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme="light"></div>
+                        {reviewsStatus === 'blocked'
+                            ? <ThirdPartyPlaceholder />
+                            : <div ref={reviewsRef} key={lang} className="opynio-widget" data-business-id={OPYNIO_BUSINESS_ID} data-type="horizontal-carousel" data-theme="light"></div>}
                     </AnimatedWrapper>
                 </div>
             </section>

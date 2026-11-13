@@ -196,11 +196,27 @@ export const STATIC_META_PAIRS = [
     },
   },
   {
-    es: '/empleos', en: '/jobs',
-    title: { es: 'Buscar empleo - Encuentra tu próxima oportunidad - YourCVPassport', en: 'Job Search - Find Your Next Opportunity - YourCVPassport' },
+    es: '/politica-de-cookies', en: '/cookie-policy',
+    title: { es: 'Política de cookies | YourCVPassport', en: 'Cookie policy | YourCVPassport' },
     description: {
-      es: 'Consulta ofertas de empleo de empresas verificadas. Filtra por ubicación, nivel de experiencia y modalidad, y postúlate con tu perfil de CV verificado.',
-      en: 'Browse job opportunities from verified companies. Filter by location, experience level, and work mode. Apply directly with your verified CV profile.',
+      es: 'Qué guarda YourCVPassport en tu navegador, para qué y cómo cambiar tu decisión.',
+      en: 'What YourCVPassport stores in your browser, why, and how to change your choice.',
+    },
+  },
+  {
+    es: '/aviso-legal', en: '/legal-notice',
+    title: { es: 'Aviso legal | YourCVPassport', en: 'Legal notice | YourCVPassport' },
+    description: {
+      es: 'Quién es el titular de YourCVPassport, condiciones de uso de la web, propiedad intelectual y responsabilidad.',
+      en: 'Who owns YourCVPassport, terms of use of the website, intellectual property and liability.',
+    },
+  },
+  {
+    es: '/empleos', en: '/jobs',
+    title: { es: 'Ofertas de empleo de empresas verificadas - YourCVPassport', en: 'Job openings from verified companies - YourCVPassport' },
+    description: {
+      es: 'Busca ofertas de empleo de empresas verificadas, filtra por categoría, contrato, jornada y modalidad e inscríbete con tu perfil de YourCVPassport.',
+      en: 'Browse job openings from verified companies, filter by category, contract, schedule and work mode, and apply in one step with your YourCVPassport profile.',
     },
   },
   {
@@ -211,6 +227,32 @@ export const STATIC_META_PAIRS = [
       en: 'Discover posts from verified professionals. Achievements, jobs, events and more.',
     },
   },
+  {
+    es: '/recursos', en: '/resources',
+    title: { es: 'Página en Construcción - YourCVPassport', en: 'Page Under Construction - YourCVPassport' },
+    description: {
+      es: 'Esta sección está en desarrollo. Pronto estará disponible con nuevas características para mejorar tu experiencia profesional con YourCVPassport.',
+      en: 'This section is under development. It will soon be available with new features to enhance your professional experience with YourCVPassport.',
+    },
+  },
+];
+
+/**
+ * Raíces de sección que muestran la misma página que otra ruta (issue #11, YCV-004):
+ * la SPA pone canonical a la principal (utils/canonicalUrl.ts) y aquí se sirve igual
+ * desde el primer byte, con el título, canonical y hreflang de esa principal. Antes
+ * llevaban el index.html genérico, sin canonical ni hreflang.
+ * @type {ReadonlyArray<{ path: string, of: string }>}
+ */
+export const STATIC_META_ALIASES = [
+  { path: '/producto', of: '/producto/resumen' },
+  { path: '/product', of: '/product/overview' },
+  { path: '/profesionales', of: '/profesionales/como-funciona' },
+  { path: '/professionals', of: '/professionals/how' },
+  { path: '/empresas', of: '/empresas/busqueda' },
+  { path: '/companies', of: '/companies/search' },
+  { path: '/perfiles', of: '/empresas/busqueda' },
+  { path: '/profiles', of: '/companies/search' },
 ];
 
 /**

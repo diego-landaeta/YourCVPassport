@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1253,
-  title: "Como Crear un Perfil Profesional Online en 2026",
+  title: "Cómo Crear un Perfil Profesional Online en 2026",
   slug: "crear-perfil-profesional-online",
   summary: "Presencia profesional online impactante. Dominio personalizado y portafolio digital.",
-  content: `# Como Crear un Perfil Profesional Online en 2026
+  content: `# Cómo Crear un Perfil Profesional Online en 2026
 
 En el competitivo mercado laboral de 2026, dominar **crear perfil profesional online** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **crear perfil profesional online** te proporciona est
 
 ![crear perfil profesional online](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Guía completa sobre crear perfil profesional online}
 
-## 1. Por que necesitas presencia online
+## 1. Por qué necesitas presencia online
 2. Dominio vs plataformas
 3. Elementos esenciales
 4. Secciones de portafolio
 5. SEO personal
 6. Perfiles con dominio YourCVPassport — claves de crear perfil profesional online
 
-Cuando hablamos de **crear perfil profesional online** en el contexto de 1. por que necesitas presencia online
+Cuando hablamos de **crear perfil profesional online** en el contexto de 1. por qué necesitas presencia online
 2. dominio vs plataformas
 3. elementos esenciales
 4. secciones de portafolio
@@ -29,7 +29,7 @@ Cuando hablamos de **crear perfil profesional online** en el contexto de 1. por 
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que necesitas presencia online
+### Mejores prácticas para 1. por qué necesitas presencia online
 2. dominio vs plataformas
 3. elementos esenciales
 4. secciones de portafolio
@@ -44,7 +44,7 @@ Para destacar en **crear perfil profesional online** dentro de esta área, aplic
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que necesitas presencia online
+### Errores frecuentes en 1. por qué necesitas presencia online
 2. dominio vs plataformas
 3. elementos esenciales
 4. secciones de portafolio
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "ATS y Tecnología",
   is_featured: false,
   published_at: "2026-05-05T18:00:00.000Z",
-  meta_title: "Como Crear un Perfil Profesional Online en 2026",
+  meta_title: "Cómo Crear un Perfil Profesional Online en 2026",
   meta_description: "Presencia profesional online impactante. Dominio personalizado y portafolio digital.",
   lang: "es",
 };

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1289,
-  title: "Como Hacer un CV para Nueva Zelanda siendo Hispano",
+  title: "Cómo Hacer un CV para Nueva Zelanda siendo Hispano",
   slug: "cv-para-nueva-zelanda-hispano",
   summary: "CV para hispanos en Nueva Zelanda. Formato, visa y skilled worker list.",
-  content: `# Como Hacer un CV para Nueva Zelanda siendo Hispano
+  content: `# Cómo Hacer un CV para Nueva Zelanda siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Nueva Zelanda hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **CV trabajar Nueva Zelanda hispano** te proporciona e
 
 ![CV trabajar Nueva Zelanda hispano](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre CV trabajar Nueva Zelanda hispano}
 
-## 1. Mercado laboral neozelandes
+## 1. Mercado laboral neozelandés
 2. Formato CV NZ
 3. Visa de trabajo
 4. Skills shortage list
 5. IELTS y requisitos
 6. Perfil verificado internacional
 
-Cuando hablamos de **CV trabajar Nueva Zelanda hispano** en el contexto de 1. mercado laboral neozelandes
+Cuando hablamos de **CV trabajar Nueva Zelanda hispano** en el contexto de 1. mercado laboral neozelandés
 2. formato cv nz
 3. visa de trabajo
 4. skills shortage list
@@ -29,7 +29,7 @@ Cuando hablamos de **CV trabajar Nueva Zelanda hispano** en el contexto de 1. me
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral neozelandes
+### Mejores prácticas para 1. mercado laboral neozelandés
 2. formato cv nz
 3. visa de trabajo
 4. skills shortage list
@@ -44,7 +44,7 @@ Para destacar en **CV trabajar Nueva Zelanda hispano** dentro de esta área, apl
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral neozelandes
+### Errores frecuentes en 1. mercado laboral neozelandés
 2. formato cv nz
 3. visa de trabajo
 4. skills shortage list
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T06:00:00.000Z",
-  meta_title: "Como Hacer un CV para Nueva Zelanda siendo Hispano",
+  meta_title: "Cómo Hacer un CV para Nueva Zelanda siendo Hispano",
   meta_description: "CV para hispanos en Nueva Zelanda. Formato, visa y skilled worker list.",
   lang: "es",
 };

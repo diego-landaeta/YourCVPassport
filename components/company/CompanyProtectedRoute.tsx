@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
+import { ClockIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../supabase/client';
 import LoadingSpinner from '../shared/LoadingSpinner';
@@ -7,6 +8,19 @@ import type { Company, CompanyUser } from '../../types';
 import { COMPANY_FULL_COLUMNS } from '../../lib/companyColumns';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslations } from '../../hooks/useTranslations';
+import LegalGate from '../legal/LegalGate';
+import { useCompanyRegText } from '../legal/companyRegText';
+
+/**
+ * Estado de publicación de la empresa, para las páginas bajo CompanyProtectedRoute.
+ * Mientras la empresa está PENDING (revisión) se puede entrar y preparar borradores,
+ * pero NO publicar: la página de ofertas debe usar `canPublish` para deshabilitar
+ * «Publicar» (el servidor lo vuelve a exigir: submit_job_for_review pide APPROVED).
+ */
+export function useCompanyPublishState(): { canPublish: boolean; companyPending: boolean } {
+  const ctx = useOutletContext<{ canPublish?: boolean; companyPending?: boolean } | undefined>();
+  return { canPublish: ctx?.canPublish === true, companyPending: ctx?.companyPending === true };
+}
 
 const CompanyProtectedRoute: React.FC = () => {
   const { session, loading: authLoading, user } = useAuth();
@@ -14,6 +28,7 @@ const CompanyProtectedRoute: React.FC = () => {
   const translations = useTranslations();
   const location = useLocation();
   const navigate = useNavigate();
+  const rx = useCompanyRegText();
 
   // Helper function to access translations
   const t = (key: string) => {
@@ -103,59 +118,6 @@ const CompanyProtectedRoute: React.FC = () => {
   // User is not part of any company - redirect to registration
   if (!companyUser || !company) {
     return <Navigate to="/company/register" replace />;
-  }
-
-  // Company is pending approval
-  if (company.status === 'PENDING') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
-                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('company.pendingApproval.title') || 'Application Under Review'}
-              </h2>
-              <p className="text-gray-600 mb-6">
-                {t('company.pendingApproval.message') ||
-                  'Your company registration is currently being reviewed by our team. We will notify you via email once your application has been processed.'}
-              </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-                <h3 className="font-semibold text-blue-900 mb-2">
-                  {company.company_name}
-                </h3>
-                <p className="text-sm text-blue-700">
-                  <span className="font-medium">Email:</span> {company.company_email}
-                </p>
-                <p className="text-sm text-blue-700">
-                  <span className="font-medium">Tax ID:</span> {company.tax_id}
-                </p>
-                <p className="text-sm text-blue-700 mt-2">
-                  <span className="font-medium">Status:</span>{' '}
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    Pending
-                  </span>
-                </p>
-              </div>
-              <p className="text-sm text-gray-500 mt-6">
-                {t('company.pendingApproval.timeframe') ||
-                  'Reviews typically take 1-2 business days.'}
-              </p>
-              <button
-                onClick={() => navigate('/')}
-                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
-              >
-                {t('common.backToHome') || 'Back to Home'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   // Company is rejected
@@ -255,8 +217,27 @@ const CompanyProtectedRoute: React.FC = () => {
     );
   }
 
-  // Company is approved - allow access
-  return <Outlet context={{ company, companyUser }} />;
+  // Company approved (publica) o pending (entra y prepara borradores, sin publicar).
+  const companyPending = company.status === 'PENDING';
+  return (
+    <LegalGate scope="empleador" companyId={company.id}>
+      {companyPending && (
+        <div
+          role="status"
+          className="border-b border-amber-300 bg-amber-50 dark:border-amber-400/30 dark:bg-amber-500/10"
+        >
+          <div className="mx-auto flex max-w-7xl items-start gap-3 px-4 py-3.5 sm:px-6 lg:px-8">
+            <ClockIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">{rx.pendingBannerTitle}</p>
+              <p className="mt-0.5 max-w-[78ch] text-sm leading-relaxed text-amber-900 dark:text-amber-200">{rx.pendingBannerBody}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <Outlet context={{ company, companyUser, canPublish: !companyPending, companyPending }} />
+    </LegalGate>
+  );
 };
 
 export default CompanyProtectedRoute;

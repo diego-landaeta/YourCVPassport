@@ -64,9 +64,10 @@ const GoodCVExample: React.FC = () => {
 
                         {/* Info */}
                         <div className="flex-1">
-                            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
+                            {/* <p> y no <h1>: es un CV de ejemplo dentro de otra pagina, que ya tiene su H1 (hallazgo SEO 15) */}
+                            <p className="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
                                 {c.name}
-                            </h1>
+                            </p>
                             <p className="text-xl text-gray-600 dark:text-gray-300 font-medium mb-3">
                                 {c.headline}
                             </p>

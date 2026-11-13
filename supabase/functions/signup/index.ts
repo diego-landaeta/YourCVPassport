@@ -18,6 +18,35 @@
 //   - alreadyPending: true → el email ya tenía una cuenta sin confirmar: no se
 //     crea otra ni se cambia su password, solo se reenvía la confirmación.
 //
+// Bolsa de empleo, fase 1 (#6). El cuerpo admite además:
+//   registro_idioma   'es' | 'en' (idioma de la interfaz al registrarse; se guarda
+//                     en user_metadata y handle_new_user lo copia a
+//                     profiles.registro_idioma; si falta o es raro se ignora)
+//   tipo              'empresa' (solo si llega EXACTAMENTE así); cualquier otra
+//                     cosa (ausente, vacío, desconocido, otro tipo de dato) se
+//                     trata como 'candidato': el tipo no sirve para esquivar la
+//                     edad ni las casillas (auditoría 29/10/2026, S4).
+//   fecha_nacimiento  AAAA-MM-DD; OBLIGATORIA para todo lo que no sea 'empresa'.
+//                     Menores de 16 no se registran (400 INVALID_INPUT, mensaje
+//                     UNDERAGE). En 'empresa' es opcional, pero si llega se
+//                     valida igual (un menor de 16 se rechaza). Va a
+//                     user_metadata y handle_new_user la copia a
+//                     profiles.fecha_nacimiento. Los accesos que no pasan por
+//                     aquí (OAuth, GoTrue directo) los cubre el servidor: RPC
+//                     set_my_birth_date y UNDERAGE en apply_to_job / envío de ofertas.
+//   casillas          { clave: boolean }. Candidato: acepto_condiciones_privacidad
+//                     y datos_verdaderos deben venir a true (y autorizacion_tutores
+//                     si tiene 16 o 17 años); el resto de opcionales se guardan.
+// Como el alta exige verificar el correo antes de tener sesión, la aceptación NO
+// se puede registrar aquí (registrar_aceptacion pide un usuario autenticado):
+// las casillas validadas, las versiones vigentes que se mostraron y el instante
+// declarado (`aceptado_en`, ISO UTC, hora del servidor) se guardan en
+// app_metadata.registro_aceptacion (solo escribe service_role; el usuario no lo
+// puede editar) y components/legal/LegalGate.tsx las registra con
+// registrar_aceptacion en el primer acceso con sesión, copiando `aceptado_en` a
+// aceptaciones.aceptado_declarado_en (la IP y la hora de la fila son las del
+// primer acceso, no las del alta: esto conserva la hora real de la aceptación).
+//
 // Rate limit (Upstash, fail open si no está configurado): 5/min por IP (config
 // 'auth') y 3 cada 15 min por email (config 'authEmail', hash SHA-256, cubo
 // compartido con send-email-confirmation).
@@ -28,6 +57,12 @@
 //
 // Enlace del correo: <redirectTo>?token_hash=…&type=signup (dominio propio, sin
 // supabase.co); ConfirmPage lo verifica con verifyOtp. Ver _shared/authLink.ts.
+//
+// Correo de confirmación: sale en el idioma de registro (registro_idioma 'en' -> inglés, el
+// resto español) y, con tipo='empresa', con el texto de EMPRESA (asunto, saludo, botón y
+// siguiente paso: completar el registro de la empresa). Lo construye
+// _shared/signupConfirmEmail.ts (puro, con pruebas). La validación de tipo, edad y casillas
+// está en ./validation.ts (pura, con pruebas).
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.44.4'
@@ -36,7 +71,8 @@ import { enforceRateLimit, getClientIp, sha256Hex } from '../_shared/ratelimit.t
 import { sendEmail } from '../_shared/email.ts'
 import { buildAuthEmailLink } from '../_shared/authLink.ts'
 import { generatePendingConfirmationLink } from '../_shared/confirmationEmail.ts'
-import { confirmSignupEmail } from '../_shared/emailTemplates.ts'
+import { buildSignupConfirmEmail } from '../_shared/signupConfirmEmail.ts'
+import { SignupValidationError, validateSignupFields } from './validation.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -48,6 +84,10 @@ interface SignupRequest {
   password: string
   full_name?: string
   redirectTo?: string
+  registro_idioma?: string
+  tipo?: string
+  fecha_nacimiento?: string
+  casillas?: Record<string, unknown>
 }
 
 // Error con status HTTP y código estable para el cliente.
@@ -142,6 +182,19 @@ serve(async (req: Request) => {
       throw new HttpError(400, 'WEAK_PASSWORD', 'Password must be at least 8 characters and include uppercase, lowercase and a number')
     }
 
+    // --- Bolsa de empleo, fase 1 (#6): camino, idioma, edad y casillas ---------
+    // Solo 'empresa' EXPLÍCITO sale del camino de candidato. Ausente, vacío,
+    // desconocido o de otro tipo = candidato (con edad y casillas obligatorias).
+    // La lógica está en ./validation.ts (pura, con pruebas).
+    let validated: ReturnType<typeof validateSignupFields>
+    try {
+      validated = validateSignupFields(payload)
+    } catch (e) {
+      if (e instanceof SignupValidationError) throw new HttpError(e.status, e.code, e.message)
+      throw e
+    }
+    const { tipo, registroIdioma, fechaNacimiento, acceptedBoxes } = validated
+
     // Rate limit por destinatario, compartido con send-email-confirmation
     // ("Reenviar"): evita bombardear un buzón ajeno cambiando de IP.
     const emailLimited = await enforceRateLimit('authEmail', [`confirm:email:${await sha256Hex(email)}`], corsHeaders)
@@ -150,12 +203,53 @@ serve(async (req: Request) => {
     // Create Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+    // Versiones vigentes de los textos que se aceptaron en el formulario (las que
+    // lee el servidor, no las que diga el cliente). Si la tabla aún no existe o la
+    // consulta falla, no se bloquea el alta: LegalGate pedirá la aceptación.
+    let registroAceptacion: Record<string, unknown> | undefined
+    if (tipo === 'candidato' && acceptedBoxes) {
+      const versiones: Record<string, string> = {}
+      try {
+        const { data: docs, error: docsError } = await supabase
+          .from('documentos_legales')
+          .select('tipo, version, idioma, vigente_desde')
+          .in('tipo', ['terminos_candidato', 'privacidad'])
+          .lte('vigente_desde', new Date().toISOString())
+          .order('vigente_desde', { ascending: false })
+        if (docsError) throw docsError
+        for (const t of ['terminos_candidato', 'privacidad']) {
+          const wanted = registroIdioma ?? 'es'
+          const doc = (docs ?? []).find((d: any) => d.tipo === t && d.idioma === wanted)
+            ?? (docs ?? []).find((d: any) => d.tipo === t && d.idioma === 'es')
+          if (doc) versiones[t] = String(doc.version)
+        }
+      } catch (e: any) {
+        console.warn('[signup] no se pudieron leer las versiones vigentes:', e?.message)
+      }
+      registroAceptacion = {
+        tipo,
+        casillas: acceptedBoxes,
+        versiones,
+        // Hora del SERVIDOR en el alta (ISO UTC); LegalGate la copia a
+        // aceptaciones.aceptado_declarado_en al registrar la aceptación.
+        aceptado_en: new Date().toISOString(),
+      }
+    }
+
     // Create user
     const { error: createError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: false, // Require email confirmation
-      user_metadata: { full_name }
+      // handle_new_user lee registro_idioma y fecha_nacimiento de estos metadatos.
+      user_metadata: {
+        full_name,
+        tipo,
+        ...(registroIdioma ? { registro_idioma: registroIdioma } : {}),
+        ...(fechaNacimiento ? { fecha_nacimiento: fechaNacimiento } : {}),
+      },
+      // Solo service_role escribe app_metadata: el usuario no puede falsear la aceptación.
+      ...(registroAceptacion ? { app_metadata: { registro_aceptacion: registroAceptacion } } : {}),
     })
 
     let alreadyPending = false
@@ -202,7 +296,7 @@ serve(async (req: Request) => {
     // cuenta es la de antes.
     const emailResult = await sendEmail({
       to: email,
-      ...confirmSignupEmail({ name: alreadyPending ? null : full_name, link: confirmationLink }),
+      ...buildSignupConfirmEmail({ tipo, lang: registroIdioma, name: alreadyPending ? null : full_name, link: confirmationLink }),
       tags: ['signup'],
     })
 

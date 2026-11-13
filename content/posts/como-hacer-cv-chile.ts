@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1124,
-  title: "Como Hacer un CV para Trabajar en Chile: Guia Practica",
+  title: "Cómo Hacer un CV para Trabajar en Chile: Guía Práctica",
   slug: "como-hacer-cv-chile",
   summary: "CV adaptado al mercado chileno. Formato, expectativas y portales de empleo.",
-  content: `# Como Hacer un CV para Trabajar en Chile: Guia Practica
+  content: `# Cómo Hacer un CV para Trabajar en Chile: Guía Práctica
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Chile** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV para trabajar en Chile** te proporciona estrategi
 ## 1. Panorama laboral en Chile 2026
 2. Formato de CV en Chile
 3. RUT y datos personales
-4. Experiencia y formacion
+4. Experiencia y formación
 5. Principales portales de empleo
 6. Trabajo remoto en Chile
 
 Cuando hablamos de **CV para trabajar en Chile** en el contexto de 1. panorama laboral en chile 2026
 2. formato de cv en chile
 3. rut y datos personales
-4. experiencia y formacion
+4. experiencia y formación
 5. principales portales de empleo
 6. trabajo remoto en chile, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. panorama laboral en chile 2026
 2. formato de cv en chile
 3. rut y datos personales
-4. experiencia y formacion
+4. experiencia y formación
 5. principales portales de empleo
 6. trabajo remoto en chile
 
@@ -47,7 +47,7 @@ Para destacar en **CV para trabajar en Chile** dentro de esta área, aplica esta
 ### Errores frecuentes en 1. panorama laboral en chile 2026
 2. formato de cv en chile
 3. rut y datos personales
-4. experiencia y formacion
+4. experiencia y formación
 5. principales portales de empleo
 6. trabajo remoto en chile
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-22T20:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Chile: Guia Practica",
+  meta_title: "Cómo Hacer un CV para Trabajar en Chile: Guía Práctica",
   meta_description: "CV adaptado al mercado chileno. Formato, expectativas y portales de empleo.",
   lang: "es",
 };

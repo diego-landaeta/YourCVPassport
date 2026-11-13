@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1282,
-  title: "Como Hacer un CV para Emigrar a Australia desde LATAM",
+  title: "Cómo Hacer un CV para Emigrar a Australia desde LATAM",
   slug: "cv-para-australia-desde-latam",
   summary: "CV para emigrar a Australia. Formato australiano, visa y skilled occupation list.",
-  content: `# Como Hacer un CV para Emigrar a Australia desde LATAM
+  content: `# Cómo Hacer un CV para Emigrar a Australia desde LATAM
 
 En el competitivo mercado laboral de 2026, dominar **CV emigrar Australia LATAM** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-08T16:00:00.000Z",
-  meta_title: "Como Hacer un CV para Emigrar a Australia desde LATAM",
+  meta_title: "Cómo Hacer un CV para Emigrar a Australia desde LATAM",
   meta_description: "CV para emigrar a Australia. Formato australiano, visa y skilled occupation list.",
   lang: "es",
 };

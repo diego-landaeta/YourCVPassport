@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1252,
-  title: "Como los Reclutadores Realmente Leen los CVs en 2026",
+  title: "Cómo los Reclutadores Realmente Leen los CVs en 2026",
   slug: "como-reclutadores-leen-cv-2026",
-  summary: "Proceso real de revision de CVs. Lo que buscan en los primeros segundos.",
-  content: `# Como los Reclutadores Realmente Leen los CVs en 2026
+  summary: "Proceso real de revisión de CVs. Lo que buscan en los primeros segundos.",
+  content: `# Cómo los Reclutadores Realmente Leen los CVs en 2026
 
-En el competitivo mercado laboral de 2026, dominar **como reclutadores leen CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **cómo reclutadores leen CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **como reclutadores leen CV** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **cómo reclutadores leen CV** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![como reclutadores leen CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Guía completa sobre como reclutadores leen CV}
+![cómo reclutadores leen CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Guía completa sobre cómo reclutadores leen CV}
 
 ## 1. Escaneo de 7 segundos
 2. Fase pre-filtro ATS
-3. Criterios de revision humana
-4. Senales de alerta
-5. Que pone tu CV en el si
-6. CVs verificados en seleccion — claves de como reclutadores leen CV
+3. Criterios de revisión humana
+4. Señales de alerta
+5. Qué pone tu CV en el sí
+6. CVs verificados en selección — claves de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de 1. escaneo de 7 segundos
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de 1. escaneo de 7 segundos
 2. fase pre-filtro ats
-3. criterios de revision humana
-4. senales de alerta
-5. que pone tu cv en el si
-6. cvs verificados en seleccion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+3. criterios de revisión humana
+4. señales de alerta
+5. qué pone tu cv en el sí
+6. cvs verificados en selección, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. escaneo de 7 segundos
 2. fase pre-filtro ats
-3. criterios de revision humana
-4. senales de alerta
-5. que pone tu cv en el si
-6. cvs verificados en seleccion
+3. criterios de revisión humana
+4. señales de alerta
+5. qué pone tu cv en el sí
+6. cvs verificados en selección
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -46,12 +46,12 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 
 ### Errores frecuentes en 1. escaneo de 7 segundos
 2. fase pre-filtro ats
-3. criterios de revision humana
-4. senales de alerta
-5. que pone tu cv en el si
-6. cvs verificados en seleccion
+3. criterios de revisión humana
+4. señales de alerta
+5. qué pone tu cv en el sí
+6. cvs verificados en selección
 
-Evita estos errores que cometen la mayoría de candidatos con **como reclutadores leen CV**:
+Evita estos errores que cometen la mayoría de candidatos con **cómo reclutadores leen CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **como reclutadore
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre como reclutadores leen CV sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre cómo reclutadores leen CV sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
+![Aspectos avanzados de cómo reclutadores leen CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Aspectos avanzados de cómo reclutadores leen CV}
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de como reclutadores leen cv
+### Errores frecuentes en aspectos avanzados de cómo reclutadores leen cv
 
-Evita estos errores que cometen la mayoría de candidatos con **como reclutadores leen CV**:
+Evita estos errores que cometen la mayoría de candidatos con **cómo reclutadores leen CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **como reclutadore
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de como reclutadores leen CV es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de cómo reclutadores leen CV es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de como reclutadores leen cv
+### Errores frecuentes en aspectos avanzados de cómo reclutadores leen cv
 
-Evita estos errores que cometen la mayoría de candidatos con **como reclutadores leen CV**:
+Evita estos errores que cometen la mayoría de candidatos con **cómo reclutadores leen CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
+![Aspectos avanzados de cómo reclutadores leen CV](https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80){caption:Aspectos avanzados de cómo reclutadores leen CV}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de como reclutadores leen CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de cómo reclutadores leen CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de como reclutadores leen cv
+### Errores frecuentes en aspectos avanzados de cómo reclutadores leen cv
 
-Evita estos errores que cometen la mayoría de candidatos con **como reclutadores leen CV**:
+Evita estos errores que cometen la mayoría de candidatos con **cómo reclutadores leen CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **como reclutadore
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
+![Aspectos avanzados de cómo reclutadores leen CV](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Aspectos avanzados de cómo reclutadores leen CV}
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de como reclutadores leen cv
+### Errores frecuentes en aspectos avanzados de cómo reclutadores leen cv
 
-Evita estos errores que cometen la mayoría de candidatos con **como reclutadores leen CV**:
+Evita estos errores que cometen la mayoría de candidatos con **cómo reclutadores leen CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **como reclutadore
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de como reclutadores leen cv
+### Mejores prácticas para aspectos avanzados de cómo reclutadores leen cv
 
-Para destacar en **como reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **cómo reclutadores leen CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **como reclutadores leen CV** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de como reclutadores leen CV
+## Aspectos avanzados de cómo reclutadores leen CV
 
-Cuando hablamos de **como reclutadores leen CV** en el contexto de aspectos avanzados de como reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **cómo reclutadores leen CV** en el contexto de aspectos avanzados de cómo reclutadores leen cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de como reclutadores leen CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de como reclutadores leen CV}
+![Aspectos avanzados de cómo reclutadores leen CV](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de cómo reclutadores leen CV}
 
-## Cómo YourCVPassport te ayuda con como reclutadores leen CV
+## Cómo YourCVPassport te ayuda con cómo reclutadores leen CV
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **como reclutadores leen CV**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **cómo reclutadores leen CV**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina como reclutadores leen CV y transforma tu carrera profesional
+## Conclusión: domina cómo reclutadores leen CV y transforma tu carrera profesional
 
-Dominar **como reclutadores leen CV** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **cómo reclutadores leen CV** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "ATS y Tecnología",
   is_featured: false,
   published_at: "2026-05-05T16:00:00.000Z",
-  meta_title: "Como los Reclutadores Realmente Leen los CVs en 2026",
-  meta_description: "Proceso real de revision de CVs. Lo que buscan en los primeros segundos.",
+  meta_title: "Cómo los Reclutadores Realmente Leen los CVs en 2026",
+  meta_description: "Proceso real de revisión de CVs. Lo que buscan en los primeros segundos.",
   lang: "es",
 };
 

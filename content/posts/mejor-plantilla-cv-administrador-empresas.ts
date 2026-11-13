@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1114,
   title: "Mejor Plantilla de CV para Administradores de Empresas",
   slug: "mejor-plantilla-cv-administrador-empresas",
-  summary: "Mejores plantillas de CV para administradores. Liderazgo, gestion y resultados.",
+  summary: "Mejores plantillas de CV para administradores. Liderazgo, gestión y resultados.",
   content: `# Mejor Plantilla de CV para Administradores de Empresas
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV administrador empresas** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -16,15 +16,15 @@ Esta guía completa sobre **plantilla CV administrador empresas** te proporciona
 ## 1. CV especializado para administradores
 2. Secciones: liderazgo, resultados, herramientas
 3. Mejores plantillas
-4. Optimizacion ATS
-5. Formacion de ISEIE.com
+4. Optimización ATS
+5. Formación de ISEIE.com
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV administrador empresas** en el contexto de 1. cv especializado para administradores
 2. secciones: liderazgo, resultados, herramientas
 3. mejores plantillas
-4. optimizacion ats
-5. formacion de iseie.com
+4. optimización ats
+5. formación de iseie.com
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -32,8 +32,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. cv especializado para administradores
 2. secciones: liderazgo, resultados, herramientas
 3. mejores plantillas
-4. optimizacion ats
-5. formacion de iseie.com
+4. optimización ats
+5. formación de iseie.com
 6. plantillas verificadas de yourcvpassport
 
 Para destacar en **plantilla CV administrador empresas** dentro de esta área, aplica estas estrategias probadas:
@@ -47,8 +47,8 @@ Para destacar en **plantilla CV administrador empresas** dentro de esta área, a
 ### Errores frecuentes en 1. cv especializado para administradores
 2. secciones: liderazgo, resultados, herramientas
 3. mejores plantillas
-4. optimizacion ats
-5. formacion de iseie.com
+4. optimización ats
+5. formación de iseie.com
 6. plantillas verificadas de yourcvpassport
 
 Evita estos errores que cometen la mayoría de candidatos con **plantilla CV administrador empresas**:
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-04-21T20:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Administradores de Empresas",
-  meta_description: "Mejores plantillas de CV para administradores. Liderazgo, gestion y resultados.",
+  meta_description: "Mejores plantillas de CV para administradores. Liderazgo, gestión y resultados.",
   lang: "es",
 };
 

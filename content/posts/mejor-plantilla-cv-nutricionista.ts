@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1117,
   title: "Mejor Plantilla de CV para Nutricionistas en 2026",
   slug: "mejor-plantilla-cv-nutricionista",
-  summary: "Mejores plantillas de CV para nutricionistas. Certificaciones y bienestar holistico.",
+  summary: "Mejores plantillas de CV para nutricionistas. Certificaciones y bienestar holístico.",
   content: `# Mejor Plantilla de CV para Nutricionistas en 2026
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV nutricionista** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -16,14 +16,14 @@ Esta guía completa sobre **plantilla CV nutricionista** te proporciona estrateg
 ## 1. CV especializado para nutricionistas
 2. Secciones: certificaciones, pacientes, especialidades
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Recursos de ISEIH.com
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV nutricionista** en el contexto de 1. cv especializado para nutricionistas
 2. secciones: certificaciones, pacientes, especialidades
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. recursos de iseih.com
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. cv especializado para nutricionistas
 2. secciones: certificaciones, pacientes, especialidades
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. recursos de iseih.com
 6. plantillas verificadas de yourcvpassport
 
@@ -47,7 +47,7 @@ Para destacar en **plantilla CV nutricionista** dentro de esta área, aplica est
 ### Errores frecuentes en 1. cv especializado para nutricionistas
 2. secciones: certificaciones, pacientes, especialidades
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. recursos de iseih.com
 6. plantillas verificadas de yourcvpassport
 
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-04-22T02:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Nutricionistas en 2026",
-  meta_description: "Mejores plantillas de CV para nutricionistas. Certificaciones y bienestar holistico.",
+  meta_description: "Mejores plantillas de CV para nutricionistas. Certificaciones y bienestar holístico.",
   lang: "es",
 };
 

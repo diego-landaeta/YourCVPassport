@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1126,
-  title: "Como Hacer un CV para Trabajar en Ecuador",
+  title: "Cómo Hacer un CV para Trabajar en Ecuador",
   slug: "como-hacer-cv-ecuador",
   summary: "CV adaptado al mercado ecuatoriano. Formato, requisitos y consejos.",
-  content: `# Como Hacer un CV para Trabajar en Ecuador
+  content: `# Cómo Hacer un CV para Trabajar en Ecuador
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Ecuador** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -15,26 +15,26 @@ Esta guía completa sobre **CV para trabajar en Ecuador** te proporciona estrate
 
 ## 1. Mercado laboral ecuatoriano
 2. Formato de hoja de vida
-3. Cedula y datos requeridos
+3. Cédula y datos requeridos
 4. Experiencia y referencias
 5. Plataformas de empleo
-6. Tendencias de contratacion — claves de CV para trabajar en Ecuador
+6. Tendencias de contratación — claves de CV para trabajar en Ecuador
 
 Cuando hablamos de **CV para trabajar en Ecuador** en el contexto de 1. mercado laboral ecuatoriano
 2. formato de hoja de vida
-3. cedula y datos requeridos
+3. cédula y datos requeridos
 4. experiencia y referencias
 5. plataformas de empleo
-6. tendencias de contratacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. tendencias de contratación, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. mercado laboral ecuatoriano
 2. formato de hoja de vida
-3. cedula y datos requeridos
+3. cédula y datos requeridos
 4. experiencia y referencias
 5. plataformas de empleo
-6. tendencias de contratacion
+6. tendencias de contratación
 
 Para destacar en **CV para trabajar en Ecuador** dentro de esta área, aplica estas estrategias probadas:
 
@@ -46,10 +46,10 @@ Para destacar en **CV para trabajar en Ecuador** dentro de esta área, aplica es
 
 ### Errores frecuentes en 1. mercado laboral ecuatoriano
 2. formato de hoja de vida
-3. cedula y datos requeridos
+3. cédula y datos requeridos
 4. experiencia y referencias
 5. plataformas de empleo
-6. tendencias de contratacion
+6. tendencias de contratación
 
 Evita estos errores que cometen la mayoría de candidatos con **CV para trabajar en Ecuador**:
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T00:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Ecuador",
+  meta_title: "Cómo Hacer un CV para Trabajar en Ecuador",
   meta_description: "CV adaptado al mercado ecuatoriano. Formato, requisitos y consejos.",
   lang: "es",
 };

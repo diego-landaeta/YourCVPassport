@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1247,
-  title: "CV para tu Segundo Empleo: Guia de Carrera Temprana",
+  title: "CV para tu Segundo Empleo: Guía de Carrera Temprana",
   slug: "cv-segundo-empleo-carrera-temprana",
   summary: "De tu primer a segundo empleo. Aprovecha experiencia inicial para posicionarte.",
-  content: `# CV para tu Segundo Empleo: Guia de Carrera Temprana
+  content: `# CV para tu Segundo Empleo: Guía de Carrera Temprana
 
 En el competitivo mercado laboral de 2026, dominar **CV segundo empleo** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **CV segundo empleo** te proporciona estrategias compr
 
 ![CV segundo empleo](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80){caption:Guía completa sobre CV segundo empleo}
 
-## 1. Cuando buscar segundo empleo
-2. Como cambia tu CV
+## 1. Cuándo buscar segundo empleo
+2. Cómo cambia tu CV
 3. Cuantificar logros tempranos
 4. Expandir habilidades
 5. Incluir o resumir primer empleo
-6. Plantilla para jovenes profesionales
+6. Plantilla para jóvenes profesionales
 
-Cuando hablamos de **CV segundo empleo** en el contexto de 1. cuando buscar segundo empleo
-2. como cambia tu cv
+Cuando hablamos de **CV segundo empleo** en el contexto de 1. cuándo buscar segundo empleo
+2. cómo cambia tu cv
 3. cuantificar logros tempranos
 4. expandir habilidades
 5. incluir o resumir primer empleo
-6. plantilla para jovenes profesionales, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. plantilla para jóvenes profesionales, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. cuando buscar segundo empleo
-2. como cambia tu cv
+### Mejores prácticas para 1. cuándo buscar segundo empleo
+2. cómo cambia tu cv
 3. cuantificar logros tempranos
 4. expandir habilidades
 5. incluir o resumir primer empleo
-6. plantilla para jovenes profesionales
+6. plantilla para jóvenes profesionales
 
 Para destacar en **CV segundo empleo** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **CV segundo empleo** dentro de esta área, aplica estas estrat
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. cuando buscar segundo empleo
-2. como cambia tu cv
+### Errores frecuentes en 1. cuándo buscar segundo empleo
+2. cómo cambia tu cv
 3. cuantificar logros tempranos
 4. expandir habilidades
 5. incluir o resumir primer empleo
-6. plantilla para jovenes profesionales
+6. plantilla para jóvenes profesionales
 
 Evita estos errores que cometen la mayoría de candidatos con **CV segundo empleo**:
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-05T02:00:00.000Z",
-  meta_title: "CV para tu Segundo Empleo: Guia de Carrera Temprana",
+  meta_title: "CV para tu Segundo Empleo: Guía de Carrera Temprana",
   meta_description: "De tu primer a segundo empleo. Aprovecha experiencia inicial para posicionarte.",
   lang: "es",
 };

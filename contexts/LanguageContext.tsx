@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { routeConfig } from '../config/routeConfig';
 import type { TranslationsType } from '../types/translations';
+import { useAuth } from './AuthContext';
 
 type Language = 'en' | 'es';
 
@@ -11,11 +12,31 @@ interface LanguageContextType {
     lang: Language;
     setLang: (lang: Language) => void;
     setLangWithNav: (lang: Language) => void;
+    /**
+     * Idioma ELEGIDO por la persona (selector de idioma, ajustes): igual que `setLang`, pero queda
+     * anotado en este dispositivo y desde entonces el idioma de registro del perfil ya no se impone.
+     */
+    chooseLang: (lang: Language) => void;
     /** Diccionario del idioma activo (siempre cargado: el proveedor no pinta nada hasta tenerlo). */
     translations: TranslationsType;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+/** useAuth sin lanzar si no hay AuthProvider (arneses de prueba que montan solo el idioma). */
+const useOptionalAuth = () => {
+    try { return useAuth(); } catch { return null; }
+};
+
+/** Clave de localStorage: la persona ha elegido idioma a mano en este dispositivo (gana al idioma de registro). */
+export const LANGUAGE_MANUAL_KEY = 'language_manual';
+
+const hasChosenLanguage = (): boolean => {
+    try { return localStorage.getItem(LANGUAGE_MANUAL_KEY) === '1'; } catch { return false; }
+};
+const rememberChosenLanguage = () => {
+    try { localStorage.setItem(LANGUAGE_MANUAL_KEY, '1'); } catch { /* sin storage: la eleccion dura la sesion */ }
+};
 
 // --- Carga diferida de los diccionarios -------------------------------------------
 // translations/en.ts y es.ts pesan ~300 kB cada uno. Antes iban los dos en el chunk de
@@ -172,7 +193,30 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         document.documentElement.lang = lang;
     }, [lang]);
 
+    const chooseLang = useCallback((newLang: Language) => {
+        rememberChosenLanguage();
+        try { localStorage.setItem('language', newLang); } catch { /* sin storage */ }
+        setLang(newLang);
+    }, [setLang]);
+
+    // F-8: la interfaz adopta el idioma con el que la persona se registró (profiles_full.registro_idioma) al
+    // iniciar sesión, salvo que ya haya elegido idioma a mano en este dispositivo. Una vez por usuario y sesión.
+    const auth = useOptionalAuth();
+    const authUser = auth?.user ?? null;
+    const authProfile = auth?.profile ?? null;
+    const adoptedFor = useRef<string | null>(null);
+    const registroIdioma = authProfile?.registro_idioma;
+    React.useEffect(() => {
+        if (!authUser) { adoptedFor.current = null; return; }
+        if (registroIdioma !== 'es' && registroIdioma !== 'en') return;
+        if (adoptedFor.current === authUser.id) return;
+        adoptedFor.current = authUser.id;
+        if (hasChosenLanguage()) return;
+        if (registroIdioma !== langRef.current) setLang(registroIdioma);
+    }, [authUser, registroIdioma, setLang]);
+
     const setLangWithNav = (newLang: Language) => {
+        rememberChosenLanguage();
         whenLoaded(newLang, () => {
             // Save language to localStorage
             localStorage.setItem('language', newLang);
@@ -216,7 +260,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
                 <html lang={lang} />
             </Helmet>
             {translations && (
-                <LanguageContext.Provider value={{ lang, setLang, setLangWithNav, translations }}>
+                <LanguageContext.Provider value={{ lang, setLang, setLangWithNav, chooseLang, translations }}>
                     {children}
                 </LanguageContext.Provider>
             )}

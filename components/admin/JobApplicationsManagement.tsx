@@ -17,11 +17,20 @@ import {
   PhoneIcon
 } from '@heroicons/react/24/outline';
 
+// Estados REALES de job_applications (CHECK de la base): en MAYUSCULAS. Los antiguos
+// 'pending|reviewing|accepted|rejected' los rechazaba el CHECK y la actualizacion fallaba.
+const APPLICATION_STATUSES = ['NEW', 'REVIEWING', 'SHORTLISTED', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED', 'WITHDRAWN', 'NOT_QUALIFIED'] as const;
+type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+/** Estados en los que el administrador puede mover la candidatura (en revision, preseleccionar, descartar). */
+const OPEN_STATUSES: readonly ApplicationStatus[] = ['NEW', 'REVIEWING', 'NOT_QUALIFIED'];
+/** Candidaturas que ya avanzan en el proceso (para el contador). */
+const ADVANCED_STATUSES: readonly ApplicationStatus[] = ['SHORTLISTED', 'INTERVIEW', 'OFFER', 'HIRED'];
+
 interface JobApplication {
   id: string;
   job_posting_id: string;
-  user_id: string;
-  status: 'pending' | 'reviewing' | 'accepted' | 'rejected';
+  profile_id: string;
+  status: ApplicationStatus;
   cover_letter: string | null;
   created_at: string;
   updated_at: string;
@@ -32,7 +41,7 @@ interface JobApplication {
   applicant_phone?: string;
 }
 
-type FilterStatus = 'all' | 'pending' | 'reviewing' | 'accepted' | 'rejected';
+type FilterStatus = 'all' | ApplicationStatus;
 
 const JobApplicationsManagement: React.FC = () => {
   const { lang } = useLanguage();
@@ -51,14 +60,19 @@ const JobApplicationsManagement: React.FC = () => {
       search: 'Search applications...',
       filterBy: 'Filter by status',
       all: 'All',
-      pending: 'Pending',
-      reviewing: 'Under Review',
-      accepted: 'Accepted',
-      rejected: 'Rejected',
+      st_NEW: 'Received',
+      st_REVIEWING: 'Under review',
+      st_SHORTLISTED: 'Shortlisted',
+      st_INTERVIEW: 'Interview',
+      st_OFFER: 'Offer made',
+      st_HIRED: 'Hired',
+      st_REJECTED: 'Rejected',
+      st_WITHDRAWN: 'Withdrawn',
+      st_NOT_QUALIFIED: 'Does not meet requirements',
       totalApplications: 'Total Applications',
-      pendingApplications: 'Pending',
+      pendingApplications: 'Received',
       reviewingApplications: 'Under Review',
-      acceptedApplications: 'Accepted',
+      acceptedApplications: 'Advanced stages',
       applicant: 'Applicant',
       jobTitle: 'Job Title',
       company: 'Company',
@@ -66,7 +80,7 @@ const JobApplicationsManagement: React.FC = () => {
       appliedOn: 'Applied on',
       actions: 'Actions',
       viewDetails: 'View Details',
-      approve: 'Approve',
+      approve: 'Shortlist',
       reject: 'Reject',
       markReviewing: 'Mark as Reviewing',
       loading: 'Loading applications...',
@@ -75,7 +89,7 @@ const JobApplicationsManagement: React.FC = () => {
       coverLetter: 'Cover Letter',
       noCoverLetter: 'No cover letter provided',
       close: 'Close',
-      confirmApprove: 'Are you sure you want to approve this application?',
+      confirmApprove: 'Are you sure you want to shortlist this application?',
       confirmReject: 'Are you sure you want to reject this application?',
       success: 'Operation completed successfully',
       error: 'Error performing operation',
@@ -89,14 +103,19 @@ const JobApplicationsManagement: React.FC = () => {
       search: 'Buscar solicitudes...',
       filterBy: 'Filtrar por estado',
       all: 'Todas',
-      pending: 'Pendientes',
-      reviewing: 'En Revisión',
-      accepted: 'Aceptadas',
-      rejected: 'Rechazadas',
+      st_NEW: 'Recibida',
+      st_REVIEWING: 'En revisión',
+      st_SHORTLISTED: 'Preseleccionada',
+      st_INTERVIEW: 'En entrevista',
+      st_OFFER: 'Con oferta',
+      st_HIRED: 'Contratada',
+      st_REJECTED: 'Descartada',
+      st_WITHDRAWN: 'Retirada',
+      st_NOT_QUALIFIED: 'No cumple requisitos',
       totalApplications: 'Total Solicitudes',
-      pendingApplications: 'Pendientes',
+      pendingApplications: 'Recibidas',
       reviewingApplications: 'En Revisión',
-      acceptedApplications: 'Aceptadas',
+      acceptedApplications: 'En fases avanzadas',
       applicant: 'Solicitante',
       jobTitle: 'Vacante',
       company: 'Empresa',
@@ -104,8 +123,8 @@ const JobApplicationsManagement: React.FC = () => {
       appliedOn: 'Solicitó',
       actions: 'Acciones',
       viewDetails: 'Ver Detalles',
-      approve: 'Aprobar',
-      reject: 'Rechazar',
+      approve: 'Preseleccionar',
+      reject: 'Descartar',
       markReviewing: 'Marcar en Revisión',
       loading: 'Cargando solicitudes...',
       noResults: 'No se encontraron solicitudes',
@@ -113,8 +132,8 @@ const JobApplicationsManagement: React.FC = () => {
       coverLetter: 'Carta de Presentación',
       noCoverLetter: 'No se proporcionó carta de presentación',
       close: 'Cerrar',
-      confirmApprove: '¿Estás seguro de que quieres aprobar esta solicitud?',
-      confirmReject: '¿Estás seguro de que quieres rechazar esta solicitud?',
+      confirmApprove: '¿Estás seguro de que quieres preseleccionar esta solicitud?',
+      confirmReject: '¿Estás seguro de que quieres descartar esta solicitud?',
       success: 'Operación completada exitosamente',
       error: 'Error al realizar la operación',
       contactInfo: 'Información de Contacto',
@@ -124,6 +143,7 @@ const JobApplicationsManagement: React.FC = () => {
   };
 
   const t = translations[lang];
+  const statusLabel = (status: string): string => (translations[lang] as Record<string, string>)[`st_${status}`] || status;
 
   useEffect(() => {
     loadApplications();
@@ -202,8 +222,8 @@ const JobApplicationsManagement: React.FC = () => {
     setFilteredApplications(filtered);
   };
 
-  const handleUpdateStatus = async (applicationId: string, newStatus: 'reviewing' | 'accepted' | 'rejected') => {
-    const confirmMessage = newStatus === 'accepted' ? t.confirmApprove : newStatus === 'rejected' ? t.confirmReject : null;
+  const handleUpdateStatus = async (applicationId: string, newStatus: 'REVIEWING' | 'SHORTLISTED' | 'REJECTED') => {
+    const confirmMessage = newStatus === 'SHORTLISTED' ? t.confirmApprove : newStatus === 'REJECTED' ? t.confirmReject : null;
 
     if (confirmMessage && !confirm(confirmMessage)) return;
 
@@ -226,20 +246,24 @@ const JobApplicationsManagement: React.FC = () => {
 
   const stats = {
     total: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    reviewing: applications.filter(a => a.status === 'reviewing').length,
-    accepted: applications.filter(a => a.status === 'accepted').length
+    pending: applications.filter(a => a.status === 'NEW').length,
+    reviewing: applications.filter(a => a.status === 'REVIEWING').length,
+    accepted: applications.filter(a => ADVANCED_STATUSES.includes(a.status)).length
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'NEW':
+      case 'NOT_QUALIFIED':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'reviewing':
+      case 'REVIEWING':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-      case 'accepted':
+      case 'SHORTLISTED':
+      case 'INTERVIEW':
+      case 'OFFER':
+      case 'HIRED':
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'rejected':
+      case 'REJECTED':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400';
@@ -248,13 +272,17 @@ const JobApplicationsManagement: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending':
+      case 'NEW':
+      case 'NOT_QUALIFIED':
         return <ClockIcon className="h-4 w-4" />;
-      case 'reviewing':
+      case 'REVIEWING':
         return <DocumentTextIcon className="h-4 w-4" />;
-      case 'accepted':
+      case 'SHORTLISTED':
+      case 'INTERVIEW':
+      case 'OFFER':
+      case 'HIRED':
         return <CheckCircleIcon className="h-4 w-4" />;
-      case 'rejected':
+      case 'REJECTED':
         return <XCircleIcon className="h-4 w-4" />;
       default:
         return <ClockIcon className="h-4 w-4" />;
@@ -359,10 +387,9 @@ const JobApplicationsManagement: React.FC = () => {
               className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-cv-blue focus:border-transparent"
             >
               <option value="all">{t.all}</option>
-              <option value="pending">{t.pending}</option>
-              <option value="reviewing">{t.reviewing}</option>
-              <option value="accepted">{t.accepted}</option>
-              <option value="rejected">{t.rejected}</option>
+              {APPLICATION_STATUSES.map((st) => (
+                <option key={st} value={st}>{statusLabel(st)}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -437,7 +464,7 @@ const JobApplicationsManagement: React.FC = () => {
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
                         {getStatusIcon(application.status)}
-                        {t[application.status as keyof typeof t] || application.status}
+                        {statusLabel(application.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -458,9 +485,9 @@ const JobApplicationsManagement: React.FC = () => {
                         >
                           <EyeIcon className="h-5 w-5" />
                         </button>
-                        {application.status === 'pending' && (
+                        {application.status === 'NEW' && (
                           <button
-                            onClick={() => handleUpdateStatus(application.id, 'reviewing')}
+                            onClick={() => handleUpdateStatus(application.id, 'REVIEWING')}
                             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title={t.markReviewing}
                             aria-label={t.markReviewing}
@@ -468,10 +495,10 @@ const JobApplicationsManagement: React.FC = () => {
                             <DocumentTextIcon className="h-5 w-5" />
                           </button>
                         )}
-                        {(application.status === 'pending' || application.status === 'reviewing') && (
+                        {OPEN_STATUSES.includes(application.status) && (
                           <>
                             <button
-                              onClick={() => handleUpdateStatus(application.id, 'accepted')}
+                              onClick={() => handleUpdateStatus(application.id, 'SHORTLISTED')}
                               className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                               title={t.approve}
                               aria-label={t.approve}
@@ -479,7 +506,7 @@ const JobApplicationsManagement: React.FC = () => {
                               <CheckCircleIcon className="h-5 w-5" />
                             </button>
                             <button
-                              onClick={() => handleUpdateStatus(application.id, 'rejected')}
+                              onClick={() => handleUpdateStatus(application.id, 'REJECTED')}
                               className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                               title={t.reject}
                               aria-label={t.reject}
@@ -566,7 +593,7 @@ const JobApplicationsManagement: React.FC = () => {
                 </h4>
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(selectedApplication.status)}`}>
                   {getStatusIcon(selectedApplication.status)}
-                  {t[selectedApplication.status as keyof typeof t]}
+                  {statusLabel(selectedApplication.status)}
                 </span>
               </div>
 
@@ -590,17 +617,17 @@ const JobApplicationsManagement: React.FC = () => {
 
               {/* Actions */}
               <div className="flex gap-3">
-                {(selectedApplication.status === 'pending' || selectedApplication.status === 'reviewing') && (
+                {OPEN_STATUSES.includes(selectedApplication.status) && (
                   <>
                     <button
-                      onClick={() => handleUpdateStatus(selectedApplication.id, 'accepted')}
+                      onClick={() => handleUpdateStatus(selectedApplication.id, 'SHORTLISTED')}
                       className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                     >
                       <CheckCircleIcon className="h-5 w-5" />
                       {t.approve}
                     </button>
                     <button
-                      onClick={() => handleUpdateStatus(selectedApplication.id, 'rejected')}
+                      onClick={() => handleUpdateStatus(selectedApplication.id, 'REJECTED')}
                       className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                     >
                       <XCircleIcon className="h-5 w-5" />

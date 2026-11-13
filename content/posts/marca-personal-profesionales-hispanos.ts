@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1149,
-  title: "Como Construir tu Marca Personal: Guia para Profesionales Hispanos",
+  title: "Cómo Construir tu Marca Personal: Guía para Profesionales Hispanos",
   slug: "marca-personal-profesionales-hispanos",
   summary: "Construye marca personal que abra puertas. CV, redes e identidad profesional coherente.",
-  content: `# Como Construir tu Marca Personal: Guia para Profesionales Hispanos
+  content: `# Cómo Construir tu Marca Personal: Guía para Profesionales Hispanos
 
 En el competitivo mercado laboral de 2026, dominar **marca personal profesionales hispanos** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **marca personal profesionales hispanos** te proporcio
 
 ![marca personal profesionales hispanos](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80){caption:Guía completa sobre marca personal profesionales hispanos}
 
-## 1. Que es la marca personal profesional
+## 1. Qué es la marca personal profesional
 2. Define tu propuesta de valor
 3. Alinea CV, LinkedIn y portafolio
 4. Contenido en redes sociales
 5. Networking en el mundo hispano
 6. Perfil verificado como sello de confianza
 
-Cuando hablamos de **marca personal profesionales hispanos** en el contexto de 1. que es la marca personal profesional
+Cuando hablamos de **marca personal profesionales hispanos** en el contexto de 1. qué es la marca personal profesional
 2. define tu propuesta de valor
 3. alinea cv, linkedin y portafolio
 4. contenido en redes sociales
@@ -29,7 +29,7 @@ Cuando hablamos de **marca personal profesionales hispanos** en el contexto de 1
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. que es la marca personal profesional
+### Mejores prácticas para 1. qué es la marca personal profesional
 2. define tu propuesta de valor
 3. alinea cv, linkedin y portafolio
 4. contenido en redes sociales
@@ -44,7 +44,7 @@ Para destacar en **marca personal profesionales hispanos** dentro de esta área,
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. que es la marca personal profesional
+### Errores frecuentes en 1. qué es la marca personal profesional
 2. define tu propuesta de valor
 3. alinea cv, linkedin y portafolio
 4. contenido en redes sociales
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-25T06:00:00.000Z",
-  meta_title: "Como Construir tu Marca Personal: Guia para Profesionales...",
+  meta_title: "Cómo Construir tu Marca Personal: Guía para Profesionales...",
   meta_description: "Construye marca personal que abra puertas. CV, redes e identidad profesional coherente.",
   lang: "es",
 };

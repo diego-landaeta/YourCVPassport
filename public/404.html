@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Página de error 404 que sirve nginx (error_page 404 /404.html; ver nginx/yourcvpassport-static.conf).
+         Sin JavaScript a propósito: se pinta igual para personas y buscadores. Va con noindex y sin canonical. -->
+    <title>Página no encontrada | Page not found - YourCVPassport</title>
+    <meta name="description" content="La página que buscas no existe o ha cambiado de dirección. / The page you are looking for does not exist or has moved." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#3B82F6" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <style>
+      :root { --fondo: #ffffff; --texto: #1f2937; --suave: #4b5563; --marca: #2563eb; --borde: #d1d5db; }
+      @media (prefers-color-scheme: dark) {
+        :root { --fondo: #0f1419; --texto: #e6e8eb; --suave: #aab1b9; --marca: #60a5fa; --borde: #374151; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--fondo); color: var(--texto); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+      main { max-width: 720px; margin: 0 auto; padding: 48px 16px; }
+      .marca { color: var(--marca); font-weight: 700; font-size: 18px; text-decoration: none; }
+      .codigo { color: var(--marca); font-size: 56px; font-weight: 800; line-height: 1; margin: 32px 0 8px; }
+      h1 { font-size: 26px; margin: 0 0 8px; }
+      p { margin: 0 0 12px; color: var(--suave); }
+      section { border-top: 1px solid var(--borde); margin-top: 32px; padding-top: 24px; }
+      ul { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px 12px; }
+      li a { display: inline-block; padding: 8px 14px; border: 1px solid var(--borde); border-radius: 8px; color: var(--marca); text-decoration: none; font-weight: 600; }
+      li a:hover, li a:focus-visible { border-color: var(--marca); outline: 2px solid var(--marca); outline-offset: 2px; }
+      .marca:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="marca" href="/">YourCVPassport</a>
+
+      <p class="codigo" aria-hidden="true">404</p>
+
+      <section lang="es" aria-labelledby="titulo-es" style="border-top:0;margin-top:0;padding-top:0">
+        <h1 id="titulo-es">No encontramos esta página</h1>
+        <p>La dirección no existe o ha cambiado. Puedes volver al inicio o ir a alguno de estos sitios:</p>
+        <ul>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/precios">Precios</a></li>
+          <li><a href="/profesionales/plantillas">Plantillas de CV</a></li>
+          <li><a href="/recursos/blog">Blog</a></li>
+          <li><a href="/nosotros/contacto">Contacto</a></li>
+        </ul>
+      </section>
+
+      <section lang="en" aria-labelledby="titulo-en">
+        <h1 id="titulo-en">We could not find this page</h1>
+        <p>The address does not exist or has moved. You can go back to the home page or try one of these:</p>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/professionals/templates">CV templates</a></li>
+          <li><a href="/resources/blog">Blog</a></li>
+          <li><a href="/about/contact">Contact</a></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

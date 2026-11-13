@@ -25,6 +25,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Perfiles publicos (auditoria SEO 25/10/2026, hallazgo 13): el nombre de un CV, que las plantillas
+ * pintan en un H1 de 48-96 px, se parte donde haga falta en lugar de ensanchar la pagina en movil
+ * ("YourCVPassport Support" a 375 px). `anywhere` (y no `break-word`) tambien reduce el ancho minimo
+ * del elemento, asi que un h1 dentro de un flex no empuja a su columna fuera de la pantalla.
+ */
+.cv-template h1 {
+  overflow-wrap: anywhere;
+}
+
 /* Print Styles - Only show CV content with colors */
 @media print {
   /*
@@ -394,3 +404,19 @@ button, a, input, textarea, select {
 /* Sin excepciones por tamano de letra: se justifica todo el texto del CV,
    metadatos y titulares incluidos. La unica alineacion que sigue mandando es
    la que el propio markup declara (text-center / text-right), arriba. */
+
+/* Aviso de cookies (components/legal/CookieConsent.tsx): entrada suave desde abajo.
+   Sin animacion si el usuario pide reducir el movimiento. */
+@keyframes ycp-consent-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ycp-consent-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.ycp-consent-in { animation: ycp-consent-in 0.3s ease-out both; }
+.ycp-consent-fade { animation: ycp-consent-fade 0.2s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .ycp-consent-in, .ycp-consent-fade { animation: none; }
+}

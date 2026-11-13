@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1129,
-  title: "Como Hacer un CV para Trabajar en Costa Rica",
+  title: "Cómo Hacer un CV para Trabajar en Costa Rica",
   slug: "como-hacer-cv-costa-rica",
   summary: "CV adaptado al mercado costarricense. Formato y sectores en demanda.",
-  content: `# Como Hacer un CV para Trabajar en Costa Rica
+  content: `# Cómo Hacer un CV para Trabajar en Costa Rica
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Costa Rica** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV para trabajar en Costa Rica** te proporciona estr
 ## 1. Mercado laboral en Costa Rica
 2. Formato de CV costarricense
 3. Datos personales
-4. Sectores: tecnologia y turismo
+4. Sectores: tecnología y turismo
 5. Portales de empleo
 6. Trabajo remoto desde Costa Rica
 
 Cuando hablamos de **CV para trabajar en Costa Rica** en el contexto de 1. mercado laboral en costa rica
 2. formato de cv costarricense
 3. datos personales
-4. sectores: tecnologia y turismo
+4. sectores: tecnología y turismo
 5. portales de empleo
 6. trabajo remoto desde costa rica, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. mercado laboral en costa rica
 2. formato de cv costarricense
 3. datos personales
-4. sectores: tecnologia y turismo
+4. sectores: tecnología y turismo
 5. portales de empleo
 6. trabajo remoto desde costa rica
 
@@ -47,7 +47,7 @@ Para destacar en **CV para trabajar en Costa Rica** dentro de esta área, aplica
 ### Errores frecuentes en 1. mercado laboral en costa rica
 2. formato de cv costarricense
 3. datos personales
-4. sectores: tecnologia y turismo
+4. sectores: tecnología y turismo
 5. portales de empleo
 6. trabajo remoto desde costa rica
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-23T06:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Costa Rica",
+  meta_title: "Cómo Hacer un CV para Trabajar en Costa Rica",
   meta_description: "CV adaptado al mercado costarricense. Formato y sectores en demanda.",
   lang: "es",
 };

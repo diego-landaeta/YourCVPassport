@@ -92,8 +92,11 @@ test('Edge Function sitemap: rutas correctas, blog por idioma y todas cargan sin
     stdio: 'pipe',
   });
   const genPaths = locsOf(fs.readFileSync(genOut, 'utf8')).map(l => l.slice(BASE.length) || '/');
-  const staticEdge = paths.filter(p => !isDynamic(p)).sort();
-  const staticGen = genPaths.filter(p => !isDynamic(p)).sort();
+  // /jobs y /empleos salen del sitemap en producción mientras no haya ofertas publicas (hallazgo 08
+  // de la auditoria del 25/10/2026); el generador sin credenciales no lo sabe y las deja: se ignoran.
+  const onlyWithJobs = (p: string) => p === '/jobs' || p === '/empleos';
+  const staticEdge = paths.filter(p => !isDynamic(p) && !onlyWithJobs(p)).sort();
+  const staticGen = genPaths.filter(p => !isDynamic(p) && !onlyWithJobs(p)).sort();
   expect(staticEdge).toEqual(staticGen);
 
   expect(paths).not.toContain('/resources/success');

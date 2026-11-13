@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1284,
-  title: "Como Hacer un CV para Trabajar en Reino Unido siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Reino Unido siendo Hispano",
   slug: "como-hacer-cv-reino-unido-hispano",
-  summary: "CV para hispanos en el Reino Unido. Formato britanico post-Brexit.",
-  content: `# Como Hacer un CV para Trabajar en Reino Unido siendo Hispano
+  summary: "CV para hispanos en el Reino Unido. Formato británico post-Brexit.",
+  content: `# Cómo Hacer un CV para Trabajar en Reino Unido siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Reino Unido hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,26 +14,26 @@ Esta guía completa sobre **CV trabajar Reino Unido hispano** te proporciona est
 ![CV trabajar Reino Unido hispano](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre CV trabajar Reino Unido hispano}
 
 ## 1. Mercado laboral UK
-2. Formato CV britanico
+2. Formato CV británico
 3. Sin foto ni edad
 4. Visa de trabajo post-Brexit
-5. Nivel de ingles
+5. Nivel de inglés
 6. Perfil verificado para UK
 
 Cuando hablamos de **CV trabajar Reino Unido hispano** en el contexto de 1. mercado laboral uk
-2. formato cv britanico
+2. formato cv británico
 3. sin foto ni edad
 4. visa de trabajo post-brexit
-5. nivel de ingles
+5. nivel de inglés
 6. perfil verificado para uk, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. mercado laboral uk
-2. formato cv britanico
+2. formato cv británico
 3. sin foto ni edad
 4. visa de trabajo post-brexit
-5. nivel de ingles
+5. nivel de inglés
 6. perfil verificado para uk
 
 Para destacar en **CV trabajar Reino Unido hispano** dentro de esta área, aplica estas estrategias probadas:
@@ -45,10 +45,10 @@ Para destacar en **CV trabajar Reino Unido hispano** dentro de esta área, aplic
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. mercado laboral uk
-2. formato cv britanico
+2. formato cv británico
 3. sin foto ni edad
 4. visa de trabajo post-brexit
-5. nivel de ingles
+5. nivel de inglés
 6. perfil verificado para uk
 
 Evita estos errores que cometen la mayoría de candidatos con **CV trabajar Reino Unido hispano**:
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-08T20:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Reino Unido siendo Hispano",
-  meta_description: "CV para hispanos en el Reino Unido. Formato britanico post-Brexit.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Reino Unido siendo Hispano",
+  meta_description: "CV para hispanos en el Reino Unido. Formato británico post-Brexit.",
   lang: "es",
 };
 

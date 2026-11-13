@@ -13,6 +13,7 @@
  */
 import { test, expect as baseExpect, type Page, type BrowserContext, type Route } from '@playwright/test';
 import { SAFE_CONTEXT_OPTIONS, installInitState, mockSupabase } from './helpers/supabaseMock';
+import { esperarSinDesborde } from './helpers/desborde';
 
 test.use(SAFE_CONTEXT_OPTIONS);
 // Con los 4 navegadores en paralelo WebKit tarda a veces mas de 10 s en pintar el
@@ -265,6 +266,6 @@ test('el honeypot no es accesible ni enfocable', async ({ page, context }) => {
   await openPress(page, 'es');
   await expect(page.getByRole('textbox', { name: 'Website' })).toHaveCount(0);
   await expect(page.locator('#press-website')).toHaveAttribute('tabindex', '-1');
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(0);
+  // Medido con la página asentada (ver helpers/desborde.ts): al cargar, bajo carga, se salía 4 px.
+  await esperarSinDesborde(page);
 });

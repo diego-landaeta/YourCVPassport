@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1244,
-  title: "Como Hacer un CV para Trabajos de Medio Tiempo",
+  title: "Cómo Hacer un CV para Trabajos de Medio Tiempo",
   slug: "cv-trabajo-medio-tiempo",
   summary: "CV enfocado en posiciones de medio tiempo. Disponibilidad y habilidades.",
-  content: `# Como Hacer un CV para Trabajos de Medio Tiempo
+  content: `# Cómo Hacer un CV para Trabajos de Medio Tiempo
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajo medio tiempo** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **CV trabajo medio tiempo** te proporciona estrategias
 
 ![CV trabajo medio tiempo](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre CV trabajo medio tiempo}
 
-## 1. Que buscan empleadores
+## 1. Qué buscan empleadores
 2. Formato para medio tiempo
 3. Disponibilidad y flexibilidad
 4. Habilidades relevantes
 5. Combinar con otros compromisos
 6. Plantilla para medio tiempo — claves de CV trabajo medio tiempo
 
-Cuando hablamos de **CV trabajo medio tiempo** en el contexto de 1. que buscan empleadores
+Cuando hablamos de **CV trabajo medio tiempo** en el contexto de 1. qué buscan empleadores
 2. formato para medio tiempo
 3. disponibilidad y flexibilidad
 4. habilidades relevantes
@@ -29,7 +29,7 @@ Cuando hablamos de **CV trabajo medio tiempo** en el contexto de 1. que buscan e
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. que buscan empleadores
+### Mejores prácticas para 1. qué buscan empleadores
 2. formato para medio tiempo
 3. disponibilidad y flexibilidad
 4. habilidades relevantes
@@ -44,7 +44,7 @@ Para destacar en **CV trabajo medio tiempo** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. que buscan empleadores
+### Errores frecuentes en 1. qué buscan empleadores
 2. formato para medio tiempo
 3. disponibilidad y flexibilidad
 4. habilidades relevantes
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-04T20:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajos de Medio Tiempo",
+  meta_title: "Cómo Hacer un CV para Trabajos de Medio Tiempo",
   meta_description: "CV enfocado en posiciones de medio tiempo. Disponibilidad y habilidades.",
   lang: "es",
 };

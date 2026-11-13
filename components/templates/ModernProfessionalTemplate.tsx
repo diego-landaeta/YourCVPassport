@@ -26,9 +26,10 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
     return (
         <div className="font-sans bg-white dark:bg-dark-bg-secondary">
             {/* Header with modern sidebar design */}
-            <div className="flex min-h-screen">
+            {/* Dos columnas desde 640 px; por debajo, apiladas (hallazgo SEO 13: desbordaba a 375 px) */}
+            <div className="flex min-h-screen flex-col sm:flex-row">
                 {/* Left sidebar */}
-                <div className="w-1/3" style={{ backgroundColor: accentColor }}>
+                <div className="w-full sm:w-1/3" style={{ backgroundColor: accentColor }}>
                     <div className="p-8 text-white">
                         {profile.avatar_url && (
                             <div className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white bg-cover bg-center"
@@ -127,7 +128,7 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                 </div>
 
                 {/* Right content */}
-                <div className="w-2/3 p-12 bg-gray-50 dark:bg-dark-bg-tertiary">
+                <div className="w-full min-w-0 sm:w-2/3 p-6 sm:p-12 bg-gray-50 dark:bg-dark-bg-tertiary">
                     <section className="mb-10">
                         <h2 className="text-3xl font-bold uppercase tracking-wider mb-4" style={{ color: accentColor }}>{t.cvSections.profile}</h2>
                         <div className="h-1 w-20 mb-6" style={{ backgroundColor: accentColor }}></div>
@@ -140,9 +141,9 @@ const ModernProfessionalTemplate: React.FC<ModernProfessionalTemplateProps> = ({
                         <div className="space-y-6">
                             {experiences.map(exp => (
                                 <div key={exp.id} className="border-l-4 pl-6 pb-6" style={{ borderColor: accentColor }}>
-                                    <div className="flex justify-between items-baseline mb-2">
+                                    <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-2">
                                         <h3 className="text-xl font-bold text-gray-800 dark:text-white">{exp.position}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap ml-4">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap shrink-0">
                                             {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                         </p>
                                     </div>

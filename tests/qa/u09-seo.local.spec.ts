@@ -34,6 +34,7 @@ test.use(SAFE_CONTEXT_OPTIONS);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const BASE = 'https://yourcvpassport.com';
+const PAIRS: Array<{ es: string; en: string }> = JSON.parse(fs.readFileSync(path.join(ROOT, 'seo', 'blog-translations.json'), 'utf8')).pairs;
 // Título por defecto de index.html (en español desde el issue #5)
 const INDEX_TITLE = 'YourCVPassport - Plataforma de CV profesional verificado';
 
@@ -229,7 +230,9 @@ test.describe('U9 SEO por idioma', () => {
     await setup(context, 'es');
     await page.goto('/recursos/blog/como-hacer-cv-para-emigrar-europa', { waitUntil: 'domcontentloaded' });
     const head = await readHead(page, `${BASE}/recursos/blog/como-hacer-cv-para-emigrar-europa`);
-    expect(head.hreflangCount).toBe(0);
+    // Sin par traducido: sin hreflang; con par (seo/blog-translations.json): es, en y x-default
+    const paired = PAIRS.some(x => x.es === 'como-hacer-cv-para-emigrar-europa');
+    expect(head.hreflangCount).toBe(paired ? 3 : 0);
   });
 
   test('AboutUs en espanol enlaza a /nosotros/... sin prefijo /es', async ({ page, context }) => {
@@ -302,19 +305,34 @@ test.describe('U9 sitemap', () => {
       const other = `${BASE}${p.lang === 'en' ? '/recursos/blog/' : '/resources/blog/'}${p.slug}`;
       expect(locs.has(own), own).toBe(true);
       expect(locs.has(other), other).toBe(false);
-      expect(byLoc.get(own)!.alternates).toEqual({ [p.lang]: own });
+      // Solo su idioma, salvo los pares es/en declarados en seo/blog-translations.json (hallazgo 16 de la auditoria del 25/10)
+      const pair = PAIRS.find(x => (p.lang === 'es' ? x.es : x.en) === p.slug);
+      if (pair) {
+        const es = `${BASE}/recursos/blog/${pair.es}`; const en = `${BASE}/resources/blog/${pair.en}`;
+        expect(byLoc.get(own)!.alternates).toEqual({ es, en, 'x-default': en });
+      } else {
+        expect(byLoc.get(own)!.alternates).toEqual({ [p.lang]: own });
+      }
     }
 
     // Todas las URLs cargan en local (SPA) sin la pagina 404 y sin redirigir
     await setup(context, 'es');
     const failed: string[] = [];
+    // /empleos y /jobs: aqui no hay datos y el listado sale vacio, con noindex A PROPOSITO (una
+    // pagina sin ofertas no se indexa). En produccion el generador los deja fuera del sitemap
+    // cuando hay 0 ofertas; sin credenciales no puede saberlo y los deja. De estos dos solo se
+    // exige que carguen sin la pagina 404 y sin redirigir.
+    const LISTADOS = new Set(['/empleos', '/jobs']);
     for (const loc of locs) {
       const p = loc.slice(BASE.length) || '/';
       await page.goto(p, { waitUntil: 'domcontentloaded' });
       try {
         await expect.poll(() => page.title(), { timeout: 30_000 }).not.toBe(INDEX_TITLE);
         await page.waitForTimeout(150);
-        const noindex = await page.locator('meta[name="robots"][content*="noindex"]').count();
+        const titulo = await page.title();
+        const noindex = LISTADOS.has(p)
+          ? (/404|no encontrad|not found/i.test(titulo) ? 1 : 0)
+          : await page.locator('meta[name="robots"][content*="noindex"]').count();
         const now = new URL(page.url()).pathname;
         if (noindex > 0 || now !== p) failed.push(`${p} -> ${now}${noindex ? ' (404/noindex)' : ''}`);
       } catch {

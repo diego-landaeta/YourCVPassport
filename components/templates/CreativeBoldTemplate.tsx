@@ -104,9 +104,9 @@ const CreativeBoldTemplate: React.FC<CreativeBoldTemplateProps> = ({ data, color
                                 <div className="absolute left-0 top-0 w-4 h-4 rounded-full -translate-x-[10px]"
                                      style={{ backgroundColor: accentColor }}>
                                 </div>
-                                <div className="flex justify-between items-baseline mb-2">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-2">
                                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
-                                    <span className="text-sm font-semibold whitespace-nowrap ml-4" style={{ color: accentColor }}>
+                                    <span className="text-sm font-semibold whitespace-nowrap shrink-0" style={{ color: accentColor }}>
                                         {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present.toUpperCase()}
                                     </span>
                                 </div>

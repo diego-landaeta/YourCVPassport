@@ -1,7 +1,8 @@
 /**
  * Servidor Express para Meta Tags SEO Dinámicos
  *
- * Este servidor intercepta peticiones a /cv/:slug y:
+ * Este servidor intercepta peticiones a /cv/:slug (y a /empleos/:slug, /jobs/:slug, ver
+ * "OFERTAS DE EMPLEO" mas abajo) y:
  * 1. Consulta el perfil del usuario en Supabase
  * 2. Genera meta tags personalizados desde los datos reales
  * 3. Inyecta los meta tags en el HTML (escapados: los datos vienen de usuarios)
@@ -61,7 +62,7 @@ const CONTENT_SECURITY_POLICY = [
   "script-src 'self' https://web.opynio.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://djehzlzombqrzzuchcef.supabase.co https://flagcdn.com https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://ui-avatars.com https://images.pexels.com https://via.placeholder.com https://api.qrserver.com https://maps.googleapis.com https://media.tenor.com https://www.google.com https://*.gstatic.com https://iseie.com https://psikoaprende.com",
-  "connect-src 'self' https://djehzlzombqrzzuchcef.supabase.co wss://djehzlzombqrzzuchcef.supabase.co https://translate.googleapis.com https://api.mymemory.translated.net https://api.ipify.org https://tenor.googleapis.com https://web.opynio.com https://hvtrrhxeqrsnjxhngdsj.supabase.co",
+  "connect-src 'self' https://djehzlzombqrzzuchcef.supabase.co wss://djehzlzombqrzzuchcef.supabase.co https://translate.googleapis.com https://api.mymemory.translated.net https://tenor.googleapis.com https://web.opynio.com https://hvtrrhxeqrsnjxhngdsj.supabase.co",
   "font-src 'self' data:",
   "frame-src https://www.google.com",
   "worker-src 'self'",
@@ -449,6 +450,32 @@ function sitemapEntry(path, lastmod, priority, changefreq) {
   return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n${hreflang}\n  </url>`;
 }
 
+/** Entrada de una pagina que solo existe en espanol (sin pareja inglesa). */
+function sitemapEntryEsOnly(path, lastmod, priority, changefreq) {
+  const loc = escapeHtml(`${SITE_URL}${path}`);
+  return `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="${loc}" />
+  </url>`;
+}
+
+/** Ofertas publicas de 50 en 50 (tope de la RPC), hasta 5000. */
+async function fetchAllPublicJobs() {
+  const PAGE = 50;
+  const out = [];
+  for (let offset = 0; offset < 5000; offset += PAGE) {
+    const { data, error } = await supabase.rpc('search_public_jobs_v2', { p_limit: PAGE, p_offset: offset });
+    if (error) throw error;
+    out.push(...(data || []));
+    const total = Number(data?.[0]?.total_count ?? 0);
+    if (!data || data.length === 0 || offset + PAGE >= total) break;
+  }
+  return out;
+}
+
 /**
  * Posts estáticos del blog (content/posts/index.ts), los mismos que incluye
  * scripts/generate-sitemap.mjs. Si el archivo no está junto al servidor, se omiten.
@@ -535,19 +562,33 @@ async function generateDynamicSitemap() {
     }
   } catch (e) { console.error('[Sitemap] Profiles error:', e.message); }
 
-  // Job postings
+  // Job postings: las mismas que ve el listado publico (PUBLISHED, vigentes, empresa verificada)
   try {
-    const { data: jobs } = await supabase
-      .from('job_postings')
-      .select('slug, updated_at, published_at')
-      .eq('status', 'PUBLISHED')
-      .order('published_at', { ascending: false });
-    if (jobs) {
-      for (const j of jobs) {
-        if (!j.slug) continue;
-        const lastmod = (j.updated_at || j.published_at || now).split('T')[0];
-        entries.push(sitemapEntry(slugPath('/jobs/', j.slug), lastmod, '0.7', 'weekly'));
-      }
+    let jobs;
+    try {
+      jobs = await fetchAllPublicJobs();
+    } catch (rpcErr) {
+      // search_public_jobs_v2 aun no existe (migracion 20261030 sin aplicar): se cae a la tabla
+      console.warn('[Sitemap] search_public_jobs_v2 no disponible, se usa la tabla:', rpcErr.message);
+      const { data } = await supabase
+        .from('job_postings')
+        .select('slug, updated_at, published_at, application_deadline')
+        .eq('status', 'PUBLISHED')
+        .order('published_at', { ascending: false });
+      jobs = (data || [])
+        .filter((j) => !j.application_deadline || new Date(j.application_deadline).getTime() > Date.now())
+        .map((j) => ({ slug: j.slug, country_code: null, published_at: j.updated_at || j.published_at }));
+    }
+    const countries = new Set();
+    for (const j of jobs) {
+      if (!j.slug) continue;
+      const lastmod = (j.published_at || now).split('T')[0];
+      entries.push(sitemapEntry(slugPath('/jobs/', j.slug), lastmod, '0.7', 'weekly'));
+      if (j.country_code && /^[A-Za-z]{2}$/.test(j.country_code)) countries.add(j.country_code.toLowerCase());
+    }
+    // Listado de cada pais con ofertas (/mx/empleos): solo en espanol
+    for (const cc of countries) {
+      entries.push(sitemapEntryEsOnly(`/${cc}/empleos`, now, '0.8', 'daily'));
     }
   } catch (e) { console.error('[Sitemap] Jobs error:', e.message); }
 
@@ -557,6 +598,11 @@ async function generateDynamicSitemap() {
 // Redirecciones permanentes (antes que los estáticos y el fallback de la SPA)
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  // /es/empleos, /mx/empleos...: listado de ofertas por pais (codigo ISO). /es es tambien un
+  // prefijo de idioma antiguo, pero aqui NO se redirige. /en/empleos si (el ingles no es un pais).
+  if (jobsCountryFromPath(req.path)) return next();
+  // /es/ofertas/<slug>, /es/jobs/<slug>: URL canonica de la oferta (con pais). Tampoco se redirige.
+  if (JOB_CANONICAL_RE.test(req.path)) return next();
   const target = getRedirectPath(req.path);
   if (!target || target === req.path) return next();
   const qIndex = req.originalUrl.indexOf('?');
@@ -667,6 +713,326 @@ app.get('/cv/:slug', async (req, res, next) => {
   } catch (error) {
     console.error('[SEO] Error:', error.message);
     next(); // Continuar con el siguiente middleware
+  }
+});
+
+// ===== OFERTAS DE EMPLEO =====
+// /empleos/:slug (es) y /jobs/:slug (en): el servidor consulta la oferta (RPC publica
+// get_job_posting_detail) y entrega el HTML con titulo, descripcion, canonical, hreflang y
+// JSON-LD `JobPosting` (Google Empleos) ya puestos, como /cv/:slug con los perfiles.
+//  - Oferta inexistente: HTTP 404 REAL (con el index.html de la SPA, que pinta la pagina 404) y noindex.
+//  - Oferta cerrada o caducada: 200, noindex y sin JSON-LD (la SPA avisa y propone parecidas).
+//  - Error de base de datos: se deja pasar a la SPA (200) para no dar 404 por un fallo temporal.
+// /:pais/empleos (/mx/empleos): listado por pais; 404 si el codigo no es un pais de la bolsa.
+// Si cambias los campos del JSON-LD, cambia tambien lib/jobsJsonLd.ts (mismo objeto).
+
+const JOB_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,200}$/i;
+// URL canonica de la oferta: /<cc>/ofertas/<slug> (es) y /<cc>/jobs/<slug> (en). Misma forma que jobPath() en lib/jobsFormat.ts.
+const JOB_CANONICAL_RE = /^\/([a-z]{2})\/(ofertas|jobs)\/([^/]+)\/?$/i;
+
+// Paises de la tabla `countries` (respaldo si la tabla no responde o aun no existe)
+const JOB_COUNTRIES_FALLBACK = {
+  ES: 'España', MX: 'México', AR: 'Argentina', CL: 'Chile', CO: 'Colombia', PE: 'Perú', EC: 'Ecuador',
+  UY: 'Uruguay', PY: 'Paraguay', BO: 'Bolivia', VE: 'Venezuela', CR: 'Costa Rica', PA: 'Panamá',
+  DO: 'República Dominicana', GT: 'Guatemala', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua',
+  CU: 'Cuba', PR: 'Puerto Rico', GQ: 'Guinea Ecuatorial', DE: 'Alemania', FR: 'Francia', IT: 'Italia',
+  PT: 'Portugal', GB: 'Reino Unido', IE: 'Irlanda', NL: 'Países Bajos', BE: 'Bélgica', CH: 'Suiza',
+  AT: 'Austria', PL: 'Polonia', SE: 'Suecia', NO: 'Noruega', DK: 'Dinamarca', FI: 'Finlandia',
+  GR: 'Grecia', RO: 'Rumanía', CZ: 'Chequia', HU: 'Hungría',
+};
+let jobCountriesCache = { map: null, timestamp: 0 };
+
+async function getJobCountries() {
+  if (jobCountriesCache.map && Date.now() - jobCountriesCache.timestamp < 10 * 60 * 1000) return jobCountriesCache.map;
+  const map = new Map(Object.entries(JOB_COUNTRIES_FALLBACK));
+  try {
+    const { data } = await supabase.from('countries').select('code, name_es').eq('active', true);
+    for (const c of data || []) if (c.code && c.name_es) map.set(String(c.code).toUpperCase(), c.name_es);
+  } catch { /* se usa el respaldo */ }
+  jobCountriesCache = { map, timestamp: Date.now() };
+  return map;
+}
+
+/** Codigo de pais (minuscula) si la ruta es /xx/empleos y xx no es el idioma "en"; si no, null. */
+function jobsCountryFromPath(pathname) {
+  const m = /^\/([a-z]{2})\/empleos\/?$/.exec(pathname);
+  return m && m[1] !== 'en' ? m[1] : null;
+}
+
+const JOB_ALLOWED_TAGS = new Set(['p', 'br', 'ul', 'ol', 'li', 'strong', 'b', 'em', 'i', 'u', 'h2', 'h3', 'h4', 'blockquote']);
+
+function jobEscapeText(value) {
+  return String(value ?? '')
+    .replace(/&(?!#?[a-zA-Z0-9]+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** Descripcion de la oferta -> HTML con lista blanca de etiquetas y sin atributos (igual que lib/jobsHtml.ts). */
+function jobSafeHtml(input) {
+  const value = String(input ?? '').trim();
+  if (!value) return '';
+  if (!/<\/?[a-z][\s\S]*?>/i.test(value)) {
+    return value.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+      .map((p) => `<p>${jobEscapeText(p).replace(/\n/g, '<br>')}</p>`).join('');
+  }
+  const cleaned = value.replace(/<(script|style|iframe|object|embed|noscript|template)\b[\s\S]*?<\/\1\s*>/gi, '');
+  let out = '';
+  let last = 0;
+  const re = /<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g;
+  let m;
+  while ((m = re.exec(cleaned)) !== null) {
+    out += jobEscapeText(cleaned.slice(last, m.index));
+    const name = m[1].toLowerCase();
+    if (JOB_ALLOWED_TAGS.has(name)) out += m[0].startsWith('</') ? `</${name}>` : `<${name}>`;
+    last = m.index + m[0].length;
+  }
+  return out + jobEscapeText(cleaned.slice(last));
+}
+
+function jobPlainText(input, max) {
+  const text = String(input ?? '')
+    .replace(/<(script|style|iframe|object|embed|noscript|template)\b[\s\S]*?<\/\1\s*>/gi, ' ')
+    .replace(/<\/(p|li|h[1-6]|div|blockquote)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ').trim();
+  return max && text.length > max ? `${text.slice(0, max - 1).trim()}…` : text;
+}
+
+function jobListHtml(title, items) {
+  const clean = (items || []).map((i) => String(i || '').trim()).filter(Boolean);
+  if (!clean.length) return '';
+  return `<h3>${jobEscapeText(title)}</h3><ul>${clean.map((i) => `<li>${jobEscapeText(i)}</li>`).join('')}</ul>`;
+}
+
+function jobEmploymentTypes(job) {
+  const out = new Set();
+  if (job.schedule === 'PART_TIME' || job.schedule === 'HOURLY') out.add('PART_TIME');
+  else if (job.schedule === 'FULL_TIME') out.add('FULL_TIME');
+  for (const c of job.contract_types || []) {
+    if (c === 'TEMPORARY') out.add('TEMPORARY');
+    else if (c === 'PROJECT' || c === 'FREELANCE') out.add('CONTRACTOR');
+    else if (c === 'INTERNSHIP' || c === 'TRAINING') out.add('INTERN');
+    else if (c === 'VOLUNTEER') out.add('VOLUNTEER');
+  }
+  if (!out.size && job.employment_type) {
+    const legacy = { FULL_TIME: 'FULL_TIME', PART_TIME: 'PART_TIME', CONTRACT: 'CONTRACTOR', TEMPORARY: 'TEMPORARY', INTERNSHIP: 'INTERN', FREELANCE: 'CONTRACTOR' };
+    if (legacy[job.employment_type]) out.add(legacy[job.employment_type]);
+  }
+  if (!out.size) out.add('OTHER');
+  return [...out];
+}
+
+// education_min -> credentialCategory de schema.org/Google (igual que lib/jobsJsonLd.ts)
+const JOB_CREDENTIAL_CATEGORY = {
+  SECONDARY: 'high school', VOCATIONAL: 'professional certificate', BACHELOR: 'bachelor degree',
+  MASTER: 'postgraduate degree', DOCTORATE: 'postgraduate degree',
+};
+
+const JOB_SECTION_TITLES = {
+  es: { resp: 'Funciones', req: 'Requisitos', nice: 'Se valora', ben: 'Beneficios' },
+  en: { resp: 'Responsibilities', req: 'Requirements', nice: 'Nice to have', ben: 'Benefits' },
+};
+
+/** JSON-LD `JobPosting` (mismo objeto que lib/jobsJsonLd.ts). null si la oferta no admite candidaturas. */
+function buildJobPostingJsonLd(job, pageUrl, lang) {
+  if (!job.accepting_applications || !job.published_at) return null;
+  const sec = JOB_SECTION_TITLES[lang];
+  const description = [
+    jobSafeHtml(job.description),
+    jobListHtml(sec.resp, job.responsibilities),
+    jobListHtml(sec.req, job.requirements),
+    jobListHtml(sec.nice, job.nice_to_have),
+    jobListHtml(sec.ben, job.benefits),
+  ].filter(Boolean).join('');
+  if (!description) return null;
+
+  const isRemote = job.work_mode === 'REMOTE' || (!!job.is_remote && job.work_mode !== 'HYBRID' && job.work_mode !== 'ONSITE');
+  const country = String(job.country_code || job.location_country || '').toUpperCase() || undefined;
+
+  const ld = {
+    '@context': 'https://schema.org/',
+    '@type': 'JobPosting',
+    title: job.title,
+    description,
+    identifier: { '@type': 'PropertyValue', name: job.company_name, value: job.id },
+    datePosted: job.published_at,
+    employmentType: jobEmploymentTypes(job),
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: job.company_name,
+      ...(/^https?:[/][/]/i.test(job.company_website || '') ? { sameAs: job.company_website } : {}),
+      ...(/^https:[/][/]/i.test(job.company_logo_url || '') ? { logo: job.company_logo_url } : {}),
+    },
+    directApply: true,
+    url: pageUrl,
+  };
+  if (job.application_deadline) ld.validThrough = job.application_deadline;
+  if (job.vacancies > 0) ld.totalJobOpenings = job.vacancies;
+  if (job.experience_years > 0) {
+    ld.experienceRequirements = { '@type': 'OccupationalExperienceRequirements', monthsOfExperience: job.experience_years * 12 };
+  }
+  const credential = JOB_CREDENTIAL_CATEGORY[job.education_min || ''];
+  if (credential) ld.educationRequirements = { '@type': 'EducationalOccupationalCredential', credentialCategory: credential };
+  if (job.category) ld.occupationalCategory = job.category;
+
+  if (isRemote) {
+    ld.jobLocationType = 'TELECOMMUTE';
+    const codes = job.allowed_countries && job.allowed_countries.length ? job.allowed_countries : country ? [country] : [];
+    const allowed = codes.map((c) => ({ '@type': 'Country', name: String(c).toUpperCase() }));
+    if (allowed.length) ld.applicantLocationRequirements = allowed.length === 1 ? allowed[0] : allowed;
+  }
+  if (!isRemote || job.location_city) {
+    ld.jobLocation = {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        ...(job.location_city ? { addressLocality: job.location_city } : {}),
+        ...(job.location_state ? { addressRegion: job.location_state } : {}),
+        ...(country ? { addressCountry: country } : {}),
+      },
+    };
+  }
+
+  const min = job.salary_min;
+  const max = job.salary_max;
+  if (job.show_salary && (min != null || max != null) && job.salary_currency) {
+    const unit = { HOURLY: 'HOUR', MONTHLY: 'MONTH', YEARLY: 'YEAR' }[job.salary_period] || 'MONTH';
+    const value = { '@type': 'QuantitativeValue', unitText: unit };
+    if (min != null && max != null && min !== max) { value.minValue = min; value.maxValue = max; } else value.value = min ?? max;
+    ld.baseSalary = { '@type': 'MonetaryAmount', currency: job.salary_currency, value };
+  }
+  return ld;
+}
+
+/** JSON dentro de <script>: `<` escapado para que el texto de la oferta no pueda cerrar la etiqueta. */
+function jsonForScript(obj) {
+  return JSON.stringify(obj).replace(/</g, '\\u003c');
+}
+
+/**
+ * index.html con las metas de una pagina de ofertas. Las etiquetas llevan data-rh="true":
+ * al montar, react-helmet-async las sustituye (igual que scripts/generate-static-meta.mjs).
+ */
+function injectJobPageHead(html, { lang, title, description, url, alternates, robots, image, jsonLd }) {
+  const e = escapeHtml;
+  const set = (pattern, tag) => { html = html.replace(pattern, () => tag); };
+  set(/<html lang="[^"]*">/, `<html lang="${lang}">`);
+  set(/<title>[\s\S]*?<\/title>/i, `<title>${e(title)}</title>`);
+  set(/<meta name="description" content="[^"]*"\s*\/?>/i, `<meta name="description" content="${e(description)}" data-rh="true" />`);
+  set(/<meta property="og:title" content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${e(title)}" data-rh="true" />`);
+  set(/<meta property="og:description" content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${e(description)}" data-rh="true" />`);
+  set(/<meta property="og:image" content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${e(image || DEFAULT_OG_IMAGE)}" data-rh="true" />`);
+  set(/<meta name="twitter:title" content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${e(title)}" data-rh="true" />`);
+  set(/<meta name="twitter:description" content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${e(description)}" data-rh="true" />`);
+  set(/<meta name="robots" content="[^"]*"\s*\/?>/i, `<meta name="robots" content="${robots}" data-rh="true" />`);
+
+  const extra = [
+    `<link rel="canonical" href="${e(url)}" data-rh="true" />`,
+    `<meta property="og:url" content="${e(url)}" data-rh="true" />`,
+    `<meta property="og:locale" content="${lang === 'es' ? 'es_ES' : 'en_US'}" data-rh="true" />`,
+  ];
+  if (alternates) {
+    extra.push(
+      `<link rel="alternate" hreflang="en" href="${e(alternates.en)}" data-rh="true" />`,
+      `<link rel="alternate" hreflang="es" href="${e(alternates.es)}" data-rh="true" />`,
+      `<link rel="alternate" hreflang="x-default" href="${e(alternates.en)}" data-rh="true" />`,
+    );
+  }
+  if (jsonLd) extra.push(`<script type="application/ld+json" data-rh="true">${jsonForScript(jsonLd)}</script>`);
+  html = html.replace(/<\/head>/i, () => `    ${extra.join('\n    ')}\n</head>`);
+  return html;
+}
+
+/** HTTP 404 real con la SPA (que pinta su pagina 404) y noindex. */
+async function sendJobNotFound(res) {
+  let html = await fs.promises.readFile(INDEX_HTML, 'utf-8');
+  html = html.replace(/<meta name="robots" content="[^"]*"\s*\/?>/i, () => '<meta name="robots" content="noindex, nofollow" data-rh="true" />');
+  res.status(404);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.send(html);
+}
+
+app.get([JOB_CANONICAL_RE, '/empleos/:slug', '/jobs/:slug'], async (req, res, next) => {
+  const canon = JOB_CANONICAL_RE.exec(req.path);
+  const lang = canon ? (canon[2].toLowerCase() === 'ofertas' ? 'es' : 'en') : req.path.startsWith('/empleos/') ? 'es' : 'en';
+  try {
+    const slug = canon ? decodeURIComponent(canon[3]) : req.params.slug;
+    if (!JOB_SLUG_RE.test(slug)) return await sendJobNotFound(res);
+
+    const { data, error } = await supabase.rpc('get_job_posting_detail', { p_slug: slug });
+    if (error) {
+      console.error(`[SEO] get_job_posting_detail(${slug}):`, error.message);
+      return next();
+    }
+    const job = Array.isArray(data) ? data[0] : data;
+    if (!job) {
+      console.log(`[SEO] Job not found: ${slug}`);
+      return await sendJobNotFound(res);
+    }
+
+    const accepting = job.accepting_applications === true;
+    const encoded = encodeURIComponent(job.slug);
+    const cc = String(job.country_code || '').trim().toLowerCase();
+    const urls = /^[a-z]{2}$/.test(cc)
+      ? { es: `${SITE_URL}/${cc}/ofertas/${encoded}`, en: `${SITE_URL}/${cc}/jobs/${encoded}` }
+      : { es: `${SITE_URL}/empleos/${encoded}`, en: `${SITE_URL}/jobs/${encoded}` };
+    const description = jobPlainText(job.description, 155) || `${job.title} - ${job.company_name}`;
+    const logo = safeImageUrl(job.company_logo_url);
+
+    let html = await fs.promises.readFile(INDEX_HTML, 'utf-8');
+    html = injectJobPageHead(html, {
+      lang,
+      // Mismo titulo que pinta la SPA (JobDetailPage): «Titulo en Empresa» / «Title at Company»
+      title: `${job.title} ${lang === 'es' ? 'en' : 'at'} ${job.company_name} - YourCVPassport`,
+      description: description.length > 160 ? `${description.slice(0, 157)}...` : description,
+      url: urls[lang],
+      alternates: urls,
+      robots: accepting ? 'index, follow' : 'noindex, nofollow',
+      image: logo,
+      jsonLd: buildJobPostingJsonLd(job, urls[lang], lang),
+    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.send(html);
+  } catch (error) {
+    console.error('[SEO] Job error:', error.message);
+    next();
+  }
+});
+
+// Listado por pais: /es/empleos, /mx/empleos... 404 real si no es un pais de la bolsa
+app.get('/:cc/empleos', async (req, res, next) => {
+  const cc = jobsCountryFromPath(req.path);
+  if (!cc) return next();
+  try {
+    const countries = await getJobCountries();
+    const name = countries.get(cc.toUpperCase());
+    if (!name) return await sendJobNotFound(res);
+
+    const title = `Ofertas de empleo en ${name} - YourCVPassport`;
+    const description = `Ofertas de empleo en ${name} de empresas verificadas. Filtra por categoría, contrato, jornada y modalidad e inscríbete con tu perfil de YourCVPassport.`;
+    let html = await fs.promises.readFile(INDEX_HTML, 'utf-8');
+    html = injectJobPageHead(html, {
+      lang: 'es',
+      title,
+      description: description.length > 160 ? `${description.slice(0, 157)}...` : description,
+      url: `${SITE_URL}/${cc}/empleos`,
+      alternates: null,
+      robots: 'index, follow',
+      image: null,
+      jsonLd: null,
+    });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.send(html);
+  } catch (error) {
+    console.error('[SEO] Jobs country error:', error.message);
+    next();
   }
 });
 

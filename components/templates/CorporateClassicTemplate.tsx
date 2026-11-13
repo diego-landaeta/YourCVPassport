@@ -78,12 +78,12 @@ const CorporateClassicTemplate: React.FC<CorporateClassicTemplateProps> = ({ dat
                     <div className="space-y-6">
                         {experiences.map(exp => (
                             <div key={exp.id} className="border-l-4 pl-6" style={{ borderColor: accentColor }}>
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-wrap justify-between items-start gap-x-4 gap-y-1 mb-2">
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
                                         <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">{exp.company_name}</p>
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap ml-4">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap shrink-0">
                                         {new Date(exp.start_date).getFullYear()} - {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present}
                                     </p>
                                 </div>

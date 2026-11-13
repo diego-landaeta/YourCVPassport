@@ -2,44 +2,44 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1148,
-  title: "15 Errores Comunes en CVs en Espanol y Como Evitarlos",
+  title: "15 Errores Comunes en CVs en Español y Cómo Evitarlos",
   slug: "errores-comunes-cv-espanol",
-  summary: "Evita los errores mas frecuentes en curriculums en espanol. Formato, ortografia y contenido.",
-  content: `# 15 Errores Comunes en CVs en Espanol y Como Evitarlos
+  summary: "Evita los errores más frecuentes en currículums en español. Formato, ortografía y contenido.",
+  content: `# 15 Errores Comunes en CVs en Español y Cómo Evitarlos
 
-En el competitivo mercado laboral de 2026, dominar **errores comunes CV espanol** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **errores comunes CV español** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **errores comunes CV espanol** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **errores comunes CV español** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![errores comunes CV espanol](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre errores comunes CV espanol}
+![errores comunes CV español](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Guía completa sobre errores comunes CV español}
 
-## 1. Errores de formato y diseno
+## 1. Errores de formato y diseño
 2. Errores de contenido
-3. Faltas de ortografia
-4. Informacion innecesaria
-5. Falta de personalizacion
+3. Faltas de ortografía
+4. Información innecesaria
+5. Falta de personalización
 6. No optimizar para ATS
-7. Como YourCVPassport ayuda
+7. Cómo YourCVPassport ayuda
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de 1. errores de formato y diseno
+Cuando hablamos de **errores comunes CV español** en el contexto de 1. errores de formato y diseño
 2. errores de contenido
-3. faltas de ortografia
-4. informacion innecesaria
-5. falta de personalizacion
+3. faltas de ortografía
+4. información innecesaria
+5. falta de personalización
 6. no optimizar para ats
-7. como yourcvpassport ayuda, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+7. cómo yourcvpassport ayuda, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. errores de formato y diseno
+### Mejores prácticas para 1. errores de formato y diseño
 2. errores de contenido
-3. faltas de ortografia
-4. informacion innecesaria
-5. falta de personalizacion
+3. faltas de ortografía
+4. información innecesaria
+5. falta de personalización
 6. no optimizar para ats
-7. como yourcvpassport ayuda
+7. cómo yourcvpassport ayuda
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -47,15 +47,15 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. errores de formato y diseno
+### Errores frecuentes en 1. errores de formato y diseño
 2. errores de contenido
-3. faltas de ortografia
-4. informacion innecesaria
-5. falta de personalizacion
+3. faltas de ortografía
+4. información innecesaria
+5. falta de personalización
 6. no optimizar para ats
-7. como yourcvpassport ayuda
+7. cómo yourcvpassport ayuda
 
-Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -63,18 +63,18 @@ Evita estos errores que cometen la mayoría de candidatos con **errores comunes 
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre errores comunes CV espanol sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre errores comunes CV español sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -82,17 +82,17 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de errores comunes CV espanol](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de errores comunes CV espanol}
+![Aspectos avanzados de errores comunes CV español](https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&q=80){caption:Aspectos avanzados de errores comunes CV español}
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -100,9 +100,9 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de errores comunes cv espanol
+### Errores frecuentes en aspectos avanzados de errores comunes cv español
 
-Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -110,18 +110,18 @@ Evita estos errores que cometen la mayoría de candidatos con **errores comunes 
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de errores comunes CV espanol es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de errores comunes CV español es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -129,15 +129,15 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -145,30 +145,30 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de errores comunes cv espanol
+### Errores frecuentes en aspectos avanzados de errores comunes cv español
 
-Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de errores comunes CV espanol](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80){caption:Aspectos avanzados de errores comunes CV espanol}
+![Aspectos avanzados de errores comunes CV español](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80){caption:Aspectos avanzados de errores comunes CV español}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de errores comunes CV espanol para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de errores comunes CV español para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -176,15 +176,15 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -192,9 +192,9 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de errores comunes cv espanol
+### Errores frecuentes en aspectos avanzados de errores comunes cv español
 
-Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -206,15 +206,15 @@ Evita estos errores que cometen la mayoría de candidatos con **errores comunes 
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -222,17 +222,17 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de errores comunes CV espanol](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Aspectos avanzados de errores comunes CV espanol}
+![Aspectos avanzados de errores comunes CV español](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Aspectos avanzados de errores comunes CV español}
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -240,9 +240,9 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de errores comunes cv espanol
+### Errores frecuentes en aspectos avanzados de errores comunes cv español
 
-Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV espanol**:
+Evita estos errores que cometen la mayoría de candidatos con **errores comunes CV español**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -253,15 +253,15 @@ Evita estos errores que cometen la mayoría de candidatos con **errores comunes 
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de errores comunes cv espanol
+### Mejores prácticas para aspectos avanzados de errores comunes cv español
 
-Para destacar en **errores comunes CV espanol** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **errores comunes CV español** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -269,17 +269,17 @@ Para destacar en **errores comunes CV espanol** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de errores comunes CV espanol
+## Aspectos avanzados de errores comunes CV español
 
-Cuando hablamos de **errores comunes CV espanol** en el contexto de aspectos avanzados de errores comunes cv espanol, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **errores comunes CV español** en el contexto de aspectos avanzados de errores comunes cv español, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de errores comunes CV espanol](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de errores comunes CV espanol}
+![Aspectos avanzados de errores comunes CV español](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Aspectos avanzados de errores comunes CV español}
 
-## Cómo YourCVPassport te ayuda con errores comunes CV espanol
+## Cómo YourCVPassport te ayuda con errores comunes CV español
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **errores comunes CV espanol**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **errores comunes CV español**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -290,9 +290,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina errores comunes CV espanol y transforma tu carrera profesional
+## Conclusión: domina errores comunes CV español y transforma tu carrera profesional
 
-Dominar **errores comunes CV espanol** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **errores comunes CV español** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -301,8 +301,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-25T04:00:00.000Z",
-  meta_title: "15 Errores Comunes en CVs en Espanol y Como Evitarlos",
-  meta_description: "Evita los errores mas frecuentes en curriculums en espanol. Formato, ortografia y contenido.",
+  meta_title: "15 Errores Comunes en CVs en Español y Cómo Evitarlos",
+  meta_description: "Evita los errores más frecuentes en currículums en español. Formato, ortografía y contenido.",
   lang: "es",
 };
 

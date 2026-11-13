@@ -1,0 +1,777 @@
+
+##### 20261028_cerrar_email_queue: 0 nuevos, 2 cambiados, 0 eliminados
+chg rel|email_queue
+   antes:   r|rls=false|opt=|acl=anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+   despues: r|rls=true|opt=|acl=postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+chg fn|queue_email_notification(text,text,text,jsonb)
+   antes:   sd=false|cfg=|vol=v|res=void|acl==X/postgres,anon=X/postgres,authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=f85e4d49fe5bfc15e040407ace9c39a2
+   despues: sd=false|cfg=|vol=v|res=void|acl=postgres=X/postgres,service_role=X/postgres|src=f85e4d49fe5bfc15e040407ace9c39a2
+
+##### 20261029_legal_aceptaciones_idioma: 127 nuevos, 4 cambiados, 0 eliminados
+new rel|countries
+new rel|documentos_legales
+new rel|aceptaciones
+new rel|company_ai_reviews
+new col|documentos_legales.titulo
+new col|aceptaciones.user_email
+new col|countries.code
+new col|companies_full.contact_name
+new col|aceptaciones.user_agent
+new col|countries.currency
+new col|aceptaciones.casillas
+new col|profiles_full.fecha_nacimiento
+new col|companies.contact_position
+new col|aceptaciones.documento_id
+new col|aceptaciones.id
+new col|companies_full.idioma
+new col|countries.name_en
+new col|company_ai_reviews.modelo
+new col|company_ai_reviews.motivos
+new col|company_ai_reviews.id
+new col|aceptaciones.version
+new col|aceptaciones.ip
+new col|documentos_legales.tipo
+new col|company_ai_reviews.resultado
+new col|profiles.registro_idioma
+new col|documentos_legales.created_at
+new col|documentos_legales.borrador
+new col|company_ai_reviews.created_at
+new col|companies.country_code
+new col|documentos_legales.vigente_desde
+new col|companies.contact_name
+new col|countries.active
+new col|documentos_legales.id
+new col|documentos_legales.idioma
+new col|documentos_legales.audiencia
+new col|profiles.fecha_nacimiento
+new col|companies.idioma
+new col|documentos_legales.casillas_obligatorias
+new col|companies_full.contact_position
+new col|company_ai_reviews.company_id
+new col|aceptaciones.created_at
+new col|documentos_legales.version
+new col|aceptaciones.tipo
+new col|aceptaciones.oferta_id
+new col|aceptaciones.company_id
+new col|aceptaciones.contexto
+new col|company_ai_reviews.proveedor
+new col|documentos_legales.requiere_aceptacion
+new col|aceptaciones.user_id
+new col|documentos_legales.texto
+new col|profiles_full.registro_idioma
+new col|countries.name_es
+new col|companies_full.country_code
+new fn|documento_legal_vigente(uuid)
+new fn|documentos_legales_proteger()
+new fn|aceptaciones_inmutable()
+new fn|registrar_aceptacion(uuid[],jsonb,text,uuid,uuid)
+new fn|documentos_pendientes()
+chg fn|handle_new_user()
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=e9316b2390a3142926b057a77d835580
+   despues: sd=true|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=08f2c0b68e39f89591cbcbe03bfef0db
+new pol|countries|countries_select_publico
+new pol|countries|countries_admin_escribe
+new pol|documentos_legales|documentos_legales_select_vigentes
+new pol|documentos_legales|documentos_legales_admin_escribe
+new pol|aceptaciones|aceptaciones_select_propias
+new pol|documentos_legales|documentos_legales_select_aceptados
+new pol|aceptaciones|aceptaciones_select_admin
+new pol|company_ai_reviews|company_ai_reviews_select_admin
+new trg|documentos_legales|trg_documentos_legales_proteger
+new trg|aceptaciones|trg_aceptaciones_inmutable
+new trg|aceptaciones|trg_aceptaciones_no_truncate
+new con|profiles|profiles_registro_idioma_check
+new con|profiles|profiles_fecha_nacimiento_check
+new con|countries|countries_code_not_null
+new con|countries|countries_name_es_not_null
+new con|countries|countries_name_en_not_null
+new con|countries|countries_currency_not_null
+new con|countries|countries_active_not_null
+new con|countries|countries_pkey
+new con|companies|companies_country_code_fkey
+new con|companies|companies_idioma_check
+chg con|companies|companies_company_size_check
+   antes:   CHECK (((company_size)::text = ANY (ARRAY['1-10'::text, '11-50'::text, '51-200'::text, '201-500'::text, '501-1000'::text, '1000+'::text])))
+   despues: CHECK (((company_size IS NULL) OR ((company_size)::text = ANY (ARRAY['1-10'::text, '11-50'::text, '51-250'::text, '250+'::text]))))
+new con|documentos_legales|documentos_legales_pkey
+new con|documentos_legales|documentos_legales_tipo_version_idioma_key
+new con|documentos_legales|documentos_legales_tipo_check
+new con|documentos_legales|documentos_legales_version_check
+new con|documentos_legales|documentos_legales_idioma_check
+new con|documentos_legales|documentos_legales_audiencia_check
+new con|documentos_legales|documentos_legales_id_not_null
+new con|documentos_legales|documentos_legales_tipo_not_null
+new con|documentos_legales|documentos_legales_version_not_null
+new con|documentos_legales|documentos_legales_idioma_not_null
+new con|documentos_legales|documentos_legales_titulo_not_null
+new con|documentos_legales|documentos_legales_texto_not_null
+new con|documentos_legales|documentos_legales_audiencia_not_null
+new con|documentos_legales|documentos_legales_requiere_aceptacion_not_null
+new con|documentos_legales|documentos_legales_casillas_obligatorias_not_null
+new con|documentos_legales|documentos_legales_borrador_not_null
+new con|documentos_legales|documentos_legales_vigente_desde_not_null
+new con|documentos_legales|documentos_legales_created_at_not_null
+new con|aceptaciones|aceptaciones_contexto_check
+new con|aceptaciones|aceptaciones_id_not_null
+new con|aceptaciones|aceptaciones_documento_id_not_null
+new con|aceptaciones|aceptaciones_tipo_not_null
+new con|aceptaciones|aceptaciones_version_not_null
+new con|aceptaciones|aceptaciones_casillas_not_null
+new con|aceptaciones|aceptaciones_contexto_not_null
+new con|aceptaciones|aceptaciones_created_at_not_null
+new con|aceptaciones|aceptaciones_pkey
+new con|aceptaciones|aceptaciones_user_id_fkey
+new con|aceptaciones|aceptaciones_documento_id_fkey
+new con|aceptaciones|aceptaciones_oferta_id_fkey
+new con|aceptaciones|aceptaciones_company_id_fkey
+new con|company_ai_reviews|company_ai_reviews_resultado_check
+new con|company_ai_reviews|company_ai_reviews_id_not_null
+new con|company_ai_reviews|company_ai_reviews_company_id_not_null
+new con|company_ai_reviews|company_ai_reviews_resultado_not_null
+new con|company_ai_reviews|company_ai_reviews_motivos_not_null
+new con|company_ai_reviews|company_ai_reviews_created_at_not_null
+new con|company_ai_reviews|company_ai_reviews_pkey
+new con|company_ai_reviews|company_ai_reviews_company_id_fkey
+new idx|countries_pkey
+new idx|documentos_legales_pkey
+new idx|documentos_legales_tipo_version_idioma_key
+new idx|documentos_legales_tipo_idioma_idx
+new idx|aceptaciones_pkey
+new idx|aceptaciones_user_tipo_version_idx
+new idx|aceptaciones_documento_idx
+new idx|company_ai_reviews_pkey
+new idx|company_ai_reviews_company_idx
+chg view|profiles_full
+   antes:    SELECT id,
+    full_name,
+    headline,
+    summary,
+    slug,
+    meta_title,
+    meta_description,
+    template,
+    template_color,
+    availability,
+    location,
+    phone,
+    linkedin_url,
+    github_url,
+    gender,
+    portfolio_url,
+    job_seeking_status,
+    avatar_url,
+    open_to_remo
+   despues:  SELECT id,
+    full_name,
+    headline,
+    summary,
+    slug,
+    meta_title,
+    meta_description,
+    template,
+    template_color,
+    availability,
+    location,
+    phone,
+    linkedin_url,
+    github_url,
+    gender,
+    portfolio_url,
+    job_seeking_status,
+    avatar_url,
+    open_to_remo
+chg view|companies_full
+   antes:    SELECT id,
+    created_at,
+    updated_at,
+    company_name,
+    legal_name,
+    tax_id,
+    company_email,
+    company_phone,
+    website_url,
+    address_street,
+    address_city,
+    address_state,
+    address_country,
+    address_postal,
+    industry,
+    company_size,
+    description,
+    logo
+   despues:  SELECT id,
+    created_at,
+    updated_at,
+    company_name,
+    legal_name,
+    tax_id,
+    company_email,
+    company_phone,
+    website_url,
+    address_street,
+    address_city,
+    address_state,
+    address_country,
+    address_postal,
+    industry,
+    company_size,
+    description,
+    logo
+
+##### 20261030_ofertas_fase2: 182 nuevos, 7 cambiados, 1 eliminados
+new rel|email_outbox
+new rel|job_posting_status_history
+new rel|job_reports
+chg rel|job_postings
+   antes:   r|rls=true|opt=|acl=anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+   despues: r|rls=true|opt=|acl=anon=m/postgres,authenticated=arwdm/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+new colacl|job_postings.id
+new colacl|job_postings.created_at
+new colacl|job_postings.updated_at
+new colacl|job_postings.company_id
+new colacl|job_postings.title
+new colacl|job_postings.slug
+new colacl|job_postings.department
+new colacl|job_postings.employment_type
+new colacl|job_postings.work_mode
+new colacl|job_postings.experience_level
+new colacl|job_postings.location_city
+new colacl|job_postings.location_state
+new colacl|job_postings.location_country
+new colacl|job_postings.is_remote
+new colacl|job_postings.description
+new colacl|job_postings.responsibilities
+new colacl|job_postings.requirements
+new colacl|job_postings.nice_to_have
+new colacl|job_postings.benefits
+new colacl|job_postings.required_skills
+new colacl|job_postings.optional_skills
+new colacl|job_postings.salary_min
+new colacl|job_postings.salary_max
+new colacl|job_postings.salary_currency
+new colacl|job_postings.salary_period
+new colacl|job_postings.show_salary
+new colacl|job_postings.application_deadline
+new colacl|job_postings.application_email
+new colacl|job_postings.application_url
+new colacl|job_postings.application_instructions
+new colacl|job_postings.status
+new colacl|job_postings.published_at
+new colacl|job_postings.closed_at
+new colacl|job_postings.meta_title
+new colacl|job_postings.meta_description
+new colacl|job_postings.views_count
+new colacl|job_postings.applications_count
+new colacl|job_postings.country_code
+new colacl|job_postings.category
+new colacl|job_postings.category2
+new colacl|job_postings.vacancies
+new colacl|job_postings.contract_types
+new colacl|job_postings.schedule
+new colacl|job_postings.duration
+new colacl|job_postings.start_date
+new colacl|job_postings.start_immediate
+new colacl|job_postings.salary_mode
+new colacl|job_postings.education_min
+new colacl|job_postings.experience_years
+new colacl|job_postings.languages
+new colacl|job_postings.cover_letter_mode
+new colacl|job_postings.allowed_countries
+new col|job_posting_status_history.id
+new col|email_outbox.payload
+new col|job_postings.category
+new col|job_postings.reviewed_at
+new col|job_reports.id
+new col|job_postings.country_code
+new col|job_reports.reason
+new col|email_outbox.id
+new col|job_postings.salary_mode
+new col|job_postings.education_min
+new col|job_reports.resolved_by
+new col|job_reports.created_at
+new col|job_posting_status_history.job_id
+new col|email_outbox.to_email
+new col|email_outbox.send_after
+new col|job_postings.start_date
+new col|job_postings.closed_by
+new col|email_outbox.attempts
+new col|job_reports.reporter_id
+new col|job_postings.expires_notice_sent_at
+new col|email_outbox.sent_at
+new col|job_posting_status_history.changed_by
+new col|job_postings.category2
+new col|job_postings.reviewed_text_hash
+new col|job_reports.resolved_at
+new col|job_postings.review_reason
+new col|job_reports.status
+new col|job_postings.start_immediate
+new col|job_postings.contract_types
+new col|job_postings.reviewed_by
+new col|job_postings.cover_letter_mode
+new col|email_outbox.priority
+new col|job_postings.languages
+new col|job_postings.vacancies
+new col|job_reports.details
+new col|job_posting_status_history.created_at
+new col|email_outbox.lang
+new col|job_postings.notify_frequency
+new col|job_posting_status_history.source
+new col|job_postings.allowed_countries
+new col|job_posting_status_history.to_status
+new col|job_postings.experience_years
+new col|job_reports.job_id
+new col|job_posting_status_history.reason
+new col|job_postings.duration
+new col|job_posting_status_history.from_status
+new col|email_outbox.kind
+new col|job_postings.schedule
+new col|email_outbox.created_at
+new col|job_postings.notify_emails
+chg col|job_postings.credits_cost
+   antes:   integer|YES|30
+   despues: integer|YES|0
+chg fn|job_postings_proteger_publicacion()
+   antes:   sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=c6dd8c2aea9e5b0061b22b3d990cf5a9
+   despues: sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=eff90ca8412767c7936f330e464783ed
+new fn|job_posting_log_status()
+new fn|_outbox_enqueue(text,text,jsonb,text,integer,timestamp with time zone,text)
+new fn|submit_job_for_review(uuid)
+new fn|_job_notify_recipients(uuid)
+new fn|_job_company_lang(uuid)
+new fn|job_slugify(text)
+chg fn|generate_job_posting_slug()
+   antes:   sd=false|cfg=|vol=v|res=trigger|acl==X/postgres,anon=X/postgres,authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=514a2c87e3dcbc85a44bfc765b07e54f
+   despues: sd=true|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=c75d934afc5a6742b6a7fde722acb1eb
+new fn|job_reports_after_insert()
+new fn|_job_precheck(text,text)
+new fn|_job_submit(uuid,uuid,integer)
+chg fn|publish_job_posting(uuid,uuid,uuid,integer)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=b73d7d0e3c155d2b4285022bc82c5993
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=7a6139c82b874e06eda86045a09180df
+new fn|moderar_oferta(uuid,text,text)
+new fn|expire_job_postings()
+new fn|search_public_jobs_v2(text,text,text,text,text,numeric,integer,text,text,integer,integer)
+chg fn|get_job_posting_detail(character varying)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=TABLE(id uuid, title character varying, slug character varying, company_id uuid, department character varying, employment_type character varying, work_mode character varying, experience_level character varying, location_city character varying, location_stat
+   despues: sd=true|cfg={search_path=public}|vol=s|res=TABLE(id uuid, title character varying, slug character varying, company_id uuid, department character varying, employment_type character varying, work_mode character varying, experience_level character varying, location_city character varying, location_stat
+new pol|job_posting_status_history|Historial: miembros y admin leen
+new pol|job_reports|Denuncias: cualquier usuario con sesion denuncia
+new pol|job_reports|Denuncias: admin lee
+new pol|job_reports|Denuncias: admin gestiona
+new trg|job_postings|trg_job_postings_historial_ins
+new trg|job_postings|trg_job_postings_historial_upd
+new trg|job_reports|trg_job_reports_after_insert
+new con|email_outbox|email_outbox_id_not_null
+new con|email_outbox|email_outbox_kind_not_null
+new con|email_outbox|email_outbox_to_email_not_null
+new con|email_outbox|email_outbox_payload_not_null
+new con|email_outbox|email_outbox_lang_not_null
+new con|email_outbox|email_outbox_priority_not_null
+new con|email_outbox|email_outbox_send_after_not_null
+new con|email_outbox|email_outbox_attempts_not_null
+new con|email_outbox|email_outbox_created_at_not_null
+new con|email_outbox|email_outbox_pkey
+new con|job_posting_status_history|job_posting_status_history_id_not_null
+new con|job_posting_status_history|job_posting_status_history_job_id_not_null
+new con|job_posting_status_history|job_posting_status_history_to_status_not_null
+new con|job_posting_status_history|job_posting_status_history_source_not_null
+new con|job_posting_status_history|job_posting_status_history_created_at_not_null
+new con|job_posting_status_history|job_posting_status_history_pkey
+new con|job_posting_status_history|job_posting_status_history_job_id_fkey
+new con|job_posting_status_history|job_posting_status_history_changed_by_fkey
+new con|job_reports|job_reports_reason_check
+new con|job_reports|job_reports_details_check
+new con|job_reports|job_reports_status_check
+new con|job_reports|job_reports_id_not_null
+new con|job_reports|job_reports_job_id_not_null
+new con|job_reports|job_reports_reason_not_null
+new con|job_reports|job_reports_status_not_null
+new con|job_reports|job_reports_created_at_not_null
+new con|job_reports|job_reports_pkey
+new con|job_reports|job_reports_job_id_reporter_id_key
+new con|job_reports|job_reports_job_id_fkey
+new con|job_reports|job_reports_reporter_id_fkey
+new con|job_reports|job_reports_resolved_by_fkey
+new con|job_postings|job_postings_languages_not_null
+new con|job_postings|job_postings_cover_letter_mode_not_null
+new con|job_postings|job_postings_country_code_fkey
+new con|job_postings|job_postings_start_immediate_not_null
+new con|job_postings|job_postings_vacancies_not_null
+new con|job_postings|job_postings_vacancies_check
+new con|job_postings|job_postings_contract_types_check
+new con|job_postings|job_postings_schedule_check
+new con|job_postings|job_postings_salary_mode_check
+new con|job_postings|job_postings_experience_years_check
+new con|job_postings|job_postings_languages_check
+new con|job_postings|job_postings_cover_letter_mode_check
+new con|job_postings|job_postings_notify_frequency_not_null
+new con|job_postings|job_postings_notify_frequency_check
+new con|job_postings|job_postings_reviewed_by_fkey
+new con|job_postings|job_postings_closed_by_fkey
+chg con|job_postings|job_postings_status_check
+   antes:   CHECK (((status)::text = ANY (ARRAY['DRAFT'::text, 'PUBLISHED'::text, 'PAUSED'::text, 'CLOSED'::text, 'FILLED'::text])))
+   despues: CHECK (((status)::text = ANY (ARRAY['DRAFT'::text, 'AI_REVIEW'::text, 'MANUAL_REVIEW'::text, 'REJECTED'::text, 'PUBLISHED'::text, 'PAUSED'::text, 'CLOSED'::text, 'EXPIRED'::text, 'FILLED'::text])))
+new idx|email_outbox_pkey
+new idx|email_outbox_pending_idx
+new idx|email_outbox_dedupe_key
+new idx|idx_job_postings_country_pub
+new idx|idx_job_postings_category
+new idx|idx_job_postings_expiry
+new idx|job_posting_status_history_pkey
+new idx|job_posting_status_history_job_idx
+new idx|job_reports_pkey
+new idx|job_reports_job_id_reporter_id_key
+new idx|job_reports_job_idx
+del pol|job_postings|Company members can update their job postings
+
+##### 20261031_candidaturas_fase3: 136 nuevos, 5 cambiados, 12 eliminados
+chg rel|job_posting_questions
+   antes:   r|rls=true|opt=|acl=anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+   despues: r|rls=true|opt=|acl=authenticated=awd/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+chg rel|job_applications
+   antes:   r|rls=true|opt=|acl=anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+   despues: r|rls=true|opt=|acl=authenticated=r/postgres,postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres
+new rel|job_alert_subscriptions
+new rel|job_application_status_history
+new rel|my_job_applications
+new colacl|job_posting_questions.id
+new colacl|job_posting_questions.job_posting_id
+new colacl|job_posting_questions.question_text
+new colacl|job_posting_questions.question_type
+new colacl|job_posting_questions.options
+new colacl|job_posting_questions.is_required
+new colacl|job_posting_questions.order_index
+new colacl|job_posting_questions.created_at
+new colacl|job_posting_questions.is_knockout
+new colacl|job_applications.updated_at
+new colacl|job_applications.status
+new colacl|job_applications.internal_notes
+new colacl|job_applications.rating
+new colacl|job_alert_subscriptions.profile_id
+new colacl|job_alert_subscriptions.categories
+new colacl|job_alert_subscriptions.country
+new colacl|job_alert_subscriptions.keywords
+new colacl|job_alert_subscriptions.frequency
+new colacl|job_alert_subscriptions.active
+new col|job_alert_subscriptions.country
+new col|my_job_applications.created_at
+new col|my_job_applications.job_slug
+new col|my_job_applications.viewed_by_company
+new col|my_job_applications.resume_url
+new col|job_application_status_history.changed_by_role
+new col|my_job_applications.job_title
+new col|my_job_applications.answers
+new col|job_alert_subscriptions.id
+new col|job_posting_questions.is_knockout
+new col|job_alert_subscriptions.categories
+new col|my_job_applications.company_name
+new col|job_alert_subscriptions.active
+new col|job_alert_subscriptions.last_sent_at
+new col|job_alert_subscriptions.opted_in_at
+new col|job_application_status_history.created_at
+new col|job_application_status_history.from_status
+new col|my_job_applications.job_status
+new col|job_application_status_history.id
+new col|my_job_applications.profile_id
+new col|my_job_applications.company_logo_url
+new col|my_job_applications.viewed_at
+new col|my_job_applications.consent_at
+new col|job_alert_subscriptions.frequency
+new col|job_application_status_history.to_status
+new col|my_job_applications.company_id
+new col|job_application_status_history.application_id
+new col|job_applications.perfil_copia
+new col|job_alert_subscriptions.keywords
+new col|job_applications.consent_doc_version
+new col|my_job_applications.candidate_status
+new col|my_job_applications.status
+new col|my_job_applications.cover_letter
+new col|job_applications.consent_at
+new col|my_job_applications.match_score
+new col|my_job_applications.updated_at
+new col|job_applications.descartada_auto
+new col|job_alert_subscriptions.updated_at
+new col|my_job_applications.id
+new col|job_posting_questions.expected_answer
+new col|job_application_status_history.changed_by
+new col|my_job_applications.job_posting_id
+new col|job_alert_subscriptions.profile_id
+new col|my_job_applications.consent_doc_version
+new col|job_alert_subscriptions.created_at
+chg fn|calculate_job_match_score(uuid,uuid)
+   antes:   sd=true|cfg=|vol=v|res=integer|acl==X/postgres,anon=X/postgres,authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=d223ae2794f6e73c46a0dd44a408ef33
+   despues: sd=true|cfg={search_path=public}|vol=s|res=integer|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=3dcfca92ebe1c8c8d8a3beb75172b0c9
+new fn|preview_application_profile()
+new fn|jobs_answer_meets(text,text,text)
+new fn|jobs_edu_level(text)
+new fn|jobs_lang_key(text)
+new fn|jobs_lang_rank(text,boolean,integer)
+new fn|jobs_norm(text)
+new fn|jobs_enqueue_email(text,text,jsonb,text,integer,timestamp with time zone)
+new fn|job_posting_questions_tope()
+new fn|get_job_questions_for_company(uuid)
+new fn|job_application_status_history_fn()
+new fn|job_application_identity_unchanged(uuid,uuid,uuid,uuid)
+new fn|jobs_profile_gaps(jsonb)
+new fn|job_applications_proteger()
+new fn|jobs_profile_snapshot(uuid)
+new fn|jobs_profile_match_inputs(uuid)
+new fn|jobs_score_job(jsonb,jsonb)
+new fn|jobs_job_notify_emails(jsonb,text)
+new fn|apply_to_job(uuid,uuid,text,jsonb,boolean,text)
+chg fn|update_application_status(uuid,uuid,uuid,character varying,text,integer)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=ef3c7378d246aea99e5c38582e6e3690
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=857265692309e3712ff88c0148254bd1
+new fn|withdraw_application(uuid)
+new fn|mark_application_viewed(uuid)
+new fn|get_application_history(uuid)
+new fn|get_recommended_jobs(integer)
+new fn|job_alert_subscriptions_touch()
+new fn|queue_job_alerts()
+new pol|email_outbox|email_outbox solo service_role
+new pol|job_application_status_history|Empresa y admin leen el historial
+new pol|job_applications|Empresa lee sus candidaturas
+new pol|job_applications|Admin lee candidaturas
+new pol|job_applications|Empresa actualiza sus candidaturas
+new pol|job_applications|Admin actualiza candidaturas
+new pol|job_alert_subscriptions|Dueño gestiona su alerta
+new trg|job_posting_questions|trg_job_posting_questions_tope
+new trg|job_applications|trg_job_application_status_history_ins
+new trg|job_applications|trg_job_application_status_history
+new trg|job_applications|trg_job_applications_proteger
+new trg|job_alert_subscriptions|trg_job_alert_subscriptions_touch
+new con|job_posting_questions|job_posting_questions_is_knockout_not_null
+new con|job_posting_questions|job_posting_questions_knockout_expected_check
+new con|job_applications|job_applications_descartada_auto_not_null
+chg con|job_applications|job_applications_status_check
+   antes:   CHECK (((status)::text = ANY (ARRAY['NEW'::text, 'REVIEWING'::text, 'SHORTLISTED'::text, 'INTERVIEW'::text, 'OFFER'::text, 'HIRED'::text, 'REJECTED'::text, 'WITHDRAWN'::text])))
+   despues: CHECK (((status)::text = ANY (ARRAY['NEW'::text, 'REVIEWING'::text, 'SHORTLISTED'::text, 'INTERVIEW'::text, 'OFFER'::text, 'HIRED'::text, 'REJECTED'::text, 'WITHDRAWN'::text, 'NOT_QUALIFIED'::text])))
+new con|job_alert_subscriptions|job_alert_subscriptions_frequency_check
+new con|job_alert_subscriptions|job_alert_subscriptions_id_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_profile_id_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_categories_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_keywords_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_frequency_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_active_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_opted_in_at_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_created_at_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_updated_at_not_null
+new con|job_alert_subscriptions|job_alert_subscriptions_pkey
+new con|job_alert_subscriptions|job_alert_subscriptions_profile_id_key
+new con|job_alert_subscriptions|job_alert_subscriptions_profile_id_fkey
+new con|job_application_status_history|job_application_status_history_changed_by_role_check
+new con|job_application_status_history|job_application_status_history_id_not_null
+new con|job_application_status_history|job_application_status_history_application_id_not_null
+new con|job_application_status_history|job_application_status_history_to_status_not_null
+new con|job_application_status_history|job_application_status_history_changed_by_role_not_null
+new con|job_application_status_history|job_application_status_history_created_at_not_null
+new con|job_application_status_history|job_application_status_history_pkey
+new con|job_application_status_history|job_application_status_history_application_id_fkey
+new con|job_application_status_history|job_application_status_history_changed_by_fkey
+new idx|email_outbox_pendientes_idx
+new idx|job_applications_profile_idx
+new idx|job_applications_company_status_idx
+new idx|job_application_status_history_pkey
+new idx|job_application_status_history_app_idx
+new idx|job_alert_subscriptions_pkey
+new idx|job_alert_subscriptions_profile_id_key
+new view|my_job_applications
+del fn|notify_application_status_change()
+del fn|apply_to_job(uuid,uuid,text,jsonb)
+del fn|notify_new_job_application()
+del pol|job_applications|Candidates can create applications
+del pol|job_applications|Candidates can update their applications
+del pol|job_applications|Candidates can view their applications
+del pol|job_applications|Candidates can view their own applications
+del pol|job_applications|Company members can update application status
+del pol|job_applications|Company members can view applications
+del pol|job_applications|Company members can view applications to their jobs
+del trg|job_applications|on_application_status_change
+del trg|job_applications|on_new_job_application
+
+##### 20261032_correcciones_auditoria: 28 nuevos, 8 cambiados, 7 eliminados
+new colacl|job_posting_questions.is_active
+new col|aceptaciones.aceptado_declarado_en
+new col|job_application_status_history.note
+new col|email_outbox.last_error
+new col|job_posting_questions.is_active
+new fn|get_job_moderation_hash(uuid)
+new fn|moderar_oferta(uuid,text,text,text)
+chg fn|job_postings_proteger_publicacion()
+   antes:   sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=eff90ca8412767c7936f330e464783ed
+   despues: sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=f1d8104202b3d4b8760f9cb38df3a785
+chg fn|registrar_aceptacion(uuid[],jsonb,text,uuid,uuid)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=uuid[]|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=f9fd25b214483b6dfb88bfb7b86c4d0a
+   despues: sd=true|cfg={search_path=public}|vol=v|res=uuid[]|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=4dd774dc91815248ccbcb761f5c708f0
+chg fn|_job_submit(uuid,uuid,integer)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=postgres=X/postgres,service_role=X/postgres|src=38b863e76ffcc391a4213288cc69d19b
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=postgres=X/postgres,service_role=X/postgres|src=ecd76ad0f9f8b26f24dd5e8b8c6fb351
+chg fn|job_posting_questions_tope()
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=65af680897a1c7af5cd2a91ced696818
+   despues: sd=true|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=0475d2a7fa0e9c95e0444d89f038e92b
+chg fn|apply_to_job(uuid,uuid,text,jsonb,boolean,text)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=18fa62fcd2711b973ea0553114a9697f
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=94b49becb0d844bd0bd352af9d0f4a61
+new fn|profiles_proteger_fecha_nacimiento()
+new fn|_aceptacion_pendiente(uuid,text)
+new fn|_job_norm_field(jsonb,text)
+new fn|_job_moderation_hash_json(jsonb)
+new fn|job_moderation_hash(uuid)
+new fn|_edad_utc(date)
+new fn|set_my_birth_date(date)
+new fn|job_posting_questions_proteger()
+new fn|update_application_status(uuid,uuid,uuid,character varying,text,integer,boolean)
+new fn|send_application_message(uuid,text)
+new fn|search_public_jobs_v2(text,text,text,text,text,numeric,integer,text,text,integer,integer,integer)
+new pol|job_postings|Admin lee todas las ofertas
+new pol|job_posting_questions|Preguntas: miembros escriben (insert)
+new pol|job_posting_questions|Preguntas: miembros escriben (update)
+new pol|job_posting_questions|Preguntas: miembros escriben (delete)
+new pol|job_posting_questions|Preguntas: lectura publica de activas
+new pol|job_posting_questions|Preguntas: admin lee
+new trg|profiles|trg_profiles_proteger_fecha_nacimiento
+chg trg|job_posting_questions|trg_job_posting_questions_tope
+   antes:   O|CREATE TRIGGER trg_job_posting_questions_tope BEFORE INSERT OR UPDATE OF job_posting_id ON public.job_posting_questions FOR EACH ROW EXECUTE FUNCTION job_posting_questions_tope()
+   despues: O|CREATE TRIGGER trg_job_posting_questions_tope BEFORE INSERT OR UPDATE OF job_posting_id, is_active ON public.job_posting_questions FOR EACH ROW EXECUTE FUNCTION job_posting_questions_tope()
+new trg|job_posting_questions|trg_job_posting_questions_proteger
+new con|job_posting_questions|job_posting_questions_is_active_not_null
+chg con|job_posting_questions|job_posting_questions_question_type_check
+   antes:   CHECK (((question_type)::text = ANY (ARRAY['TEXT'::text, 'TEXTAREA'::text, 'YES_NO'::text, 'MULTIPLE_CHOICE'::text])))
+   despues: CHECK (((question_type)::text = ANY (ARRAY['TEXT'::text, 'TEXTAREA'::text, 'YES_NO'::text, 'MULTIPLE_CHOICE'::text, 'NUMBER'::text])))
+new con|job_postings|job_postings_description_max_length
+chg view|my_job_applications
+   antes:    SELECT ja.id,
+    ja.created_at,
+    ja.updated_at,
+    ja.job_posting_id,
+    ja.profile_id,
+    ja.company_id,
+    (
+        CASE
+            WHEN ((ja.status)::text = 'NOT_QUALIFIED'::text) THEN 'NEW'::character varying
+            ELSE ja.status
+        END)::character varying(50) AS status,
+  
+   despues:  SELECT ja.id,
+    ja.created_at,
+    ja.updated_at,
+    ja.job_posting_id,
+    ja.profile_id,
+    ja.company_id,
+    (
+        CASE
+            WHEN ((ja.status)::text = 'NOT_QUALIFIED'::text) THEN 'NEW'::character varying
+            ELSE ja.status
+        END)::character varying(50) AS status,
+  
+del fn|moderar_oferta(uuid,text,text)
+del fn|search_public_jobs_v2(text,text,text,text,text,numeric,integer,text,text,integer,integer)
+del fn|update_application_status(uuid,uuid,uuid,character varying,text,integer)
+del pol|job_posting_questions|Anyone can view questions for published jobs
+del pol|job_posting_questions|Company members can manage questions
+del pol|job_posting_questions|Company members manage questions
+del pol|job_posting_questions|Public can view questions of published jobs
+
+##### 20261033_pendientes_bolsa: 16 nuevos, 1 cambiados, 0 eliminados
+new col|profiles_full.consent_prefs_updated_at
+new col|profiles_full.consent_prefs
+new col|profiles.consent_prefs_updated_at
+new col|profiles.consent_prefs
+new fn|_legal_idioma_destino(text,text)
+new fn|documentos_legales_antelacion()
+new fn|legal_aviso_proximo()
+new fn|legal_encolar_aviso(text,text)
+new fn|legal_publicar_version(text,text,text,text,text,timestamp with time zone,text[],boolean)
+new fn|profiles_proteger_consent_prefs()
+new fn|save_consent_prefs(jsonb)
+new pol|documentos_legales|documentos_legales_select_proximas
+new trg|documentos_legales|trg_documentos_legales_antelacion
+new trg|profiles|trg_profiles_proteger_consent_prefs
+new con|profiles|profiles_consent_prefs_not_null
+new con|profiles|profiles_consent_prefs_object_check
+chg view|profiles_full
+   antes:    SELECT id,
+    full_name,
+    headline,
+    summary,
+    slug,
+    meta_title,
+    meta_description,
+    template,
+    template_color,
+    availability,
+    location,
+    phone,
+    linkedin_url,
+    github_url,
+    gender,
+    portfolio_url,
+    job_seeking_status,
+    avatar_url,
+    open_to_remo
+   despues:  SELECT id,
+    full_name,
+    headline,
+    summary,
+    slug,
+    meta_title,
+    meta_description,
+    template,
+    template_color,
+    availability,
+    location,
+    phone,
+    linkedin_url,
+    github_url,
+    gender,
+    portfolio_url,
+    job_seeking_status,
+    avatar_url,
+    open_to_remo
+
+##### 20261034_programacion_cron: 1 nuevos, 0 cambiados, 0 eliminados
+new fn|bolsa_llamar_funcion(text,jsonb)
+
+##### 20261035_cierre_final: 15 nuevos, 8 cambiados, 3 eliminados
+new col|job_alert_subscriptions.unsubscribe_token
+chg fn|_job_submit(uuid,uuid,integer)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=postgres=X/postgres,service_role=X/postgres|src=ecd76ad0f9f8b26f24dd5e8b8c6fb351
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=postgres=X/postgres,service_role=X/postgres|src=93559a3079dcfc6769513f83fb3e54e4
+chg fn|apply_to_job(uuid,uuid,text,jsonb,boolean,text)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=94b49becb0d844bd0bd352af9d0f4a61
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=767c893f74c5498f909eb67e565f0a8d
+chg fn|bolsa_llamar_funcion(text,jsonb)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=bigint|acl=postgres=X/postgres|src=97469c1af12720fe8fab5455273821aa
+   despues: sd=true|cfg={search_path=public}|vol=v|res=bigint|acl=postgres=X/postgres|src=901c252b6adc724f4ad1fed299359d0f
+new fn|company_duplicate_hint(text,text)
+new fn|email_outbox_country_code()
+new fn|job_alert_subscriptions_tope()
+chg fn|job_posting_questions_proteger()
+   antes:   sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=e851605594fad22057cb7718dd2a8675
+   despues: sd=false|cfg={search_path=public}|vol=v|res=trigger|acl=postgres=X/postgres,service_role=X/postgres|src=bc2a1f17f3d044852e159603dc68ea4a
+new fn|job_postings_moderacion_inmediata()
+chg fn|legal_encolar_aviso(text,text)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=integer|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=7b68ed71c94bcc1cc69bd1a9345d922a
+   despues: sd=true|cfg={search_path=public}|vol=v|res=integer|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=2175905f2f8ea9d16a2dd739e8a406cf
+chg fn|legal_publicar_version(text,text,text,text,text,timestamp with time zone,text[],boolean)
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=fd01e458ab1e485e83eb2bae082f6b61
+   despues: sd=true|cfg={search_path=public}|vol=v|res=jsonb|acl=authenticated=X/postgres,postgres=X/postgres,service_role=X/postgres|src=a6e849b9634a277156cbae0c5726f0f6
+new fn|queue_application_digests()
+chg fn|queue_job_alerts()
+   antes:   sd=true|cfg={search_path=public}|vol=v|res=integer|acl=postgres=X/postgres,service_role=X/postgres|src=eea183684c045a67fdea675fadc5a56b
+   despues: sd=true|cfg={search_path=public}|vol=v|res=integer|acl=postgres=X/postgres,service_role=X/postgres|src=3542b45ce594b9fb5eedfbcc8c0b62f8
+new fn|search_public_jobs_v2(text,text,text,text,text,numeric,integer,text,text,integer,integer,integer,text)
+new fn|unsubscribe_job_alerts(uuid)
+new trg|email_outbox|trg_email_outbox_country_code
+new trg|job_postings|trg_job_postings_moderacion_ins
+new trg|job_postings|trg_job_postings_moderacion_upd
+new trg|job_alert_subscriptions|trg_job_alert_subscriptions_tope
+new con|job_alert_subscriptions|job_alert_subscriptions_unsubscribe_token_not_null
+chg con|documentos_legales|documentos_legales_tipo_check
+   antes:   CHECK ((tipo = ANY (ARRAY['terminos_candidato'::text, 'terminos_empleador'::text, 'privacidad'::text, 'cookies'::text])))
+   despues: CHECK ((tipo = ANY (ARRAY['terminos_candidato'::text, 'terminos_empleador'::text, 'condiciones_publicacion'::text, 'privacidad'::text, 'cookies'::text])))
+new idx|job_alert_subscriptions_token_key
+new idx|job_alert_subscriptions_profile_idx
+del fn|search_public_jobs_v2(text,text,text,text,text,numeric,integer,text,text,integer,integer,integer)
+del con|job_alert_subscriptions|job_alert_subscriptions_profile_id_key
+del idx|job_alert_subscriptions_profile_id_key

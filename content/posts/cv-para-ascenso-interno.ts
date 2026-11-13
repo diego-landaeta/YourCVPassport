@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1243,
-  title: "Como Escribir un CV para un Ascenso Interno",
+  title: "Cómo Escribir un CV para un Ascenso Interno",
   slug: "cv-para-ascenso-interno",
-  summary: "Postulate a ascenso con CV que demuestre crecimiento y preparacion.",
-  content: `# Como Escribir un CV para un Ascenso Interno
+  summary: "Postúlate a ascenso con CV que demuestre crecimiento y preparación.",
+  content: `# Cómo Escribir un CV para un Ascenso Interno
 
 En el competitivo mercado laboral de 2026, dominar **CV ascenso interno** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,14 +13,14 @@ Esta guía completa sobre **CV ascenso interno** te proporciona estrategias comp
 
 ![CV ascenso interno](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV ascenso interno}
 
-## 1. Por que necesitas buen CV interno
+## 1. Por qué necesitas buen CV interno
 2. Documentar logros internos
 3. Recomendaciones de colegas
 4. Trayectoria de crecimiento
 5. Abordar brechas
 6. Credenciales verificadas
 
-Cuando hablamos de **CV ascenso interno** en el contexto de 1. por que necesitas buen cv interno
+Cuando hablamos de **CV ascenso interno** en el contexto de 1. por qué necesitas buen cv interno
 2. documentar logros internos
 3. recomendaciones de colegas
 4. trayectoria de crecimiento
@@ -29,7 +29,7 @@ Cuando hablamos de **CV ascenso interno** en el contexto de 1. por que necesitas
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que necesitas buen cv interno
+### Mejores prácticas para 1. por qué necesitas buen cv interno
 2. documentar logros internos
 3. recomendaciones de colegas
 4. trayectoria de crecimiento
@@ -44,7 +44,7 @@ Para destacar en **CV ascenso interno** dentro de esta área, aplica estas estra
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que necesitas buen cv interno
+### Errores frecuentes en 1. por qué necesitas buen cv interno
 2. documentar logros internos
 3. recomendaciones de colegas
 4. trayectoria de crecimiento
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-04T18:00:00.000Z",
-  meta_title: "Como Escribir un CV para un Ascenso Interno",
-  meta_description: "Postulate a ascenso con CV que demuestre crecimiento y preparacion.",
+  meta_title: "Cómo Escribir un CV para un Ascenso Interno",
+  meta_description: "Postúlate a ascenso con CV que demuestre crecimiento y preparación.",
   lang: "es",
 };
 
