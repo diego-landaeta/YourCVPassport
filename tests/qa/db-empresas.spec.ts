@@ -369,14 +369,34 @@ test.describe.serial('BD: columnas privadas de companies (fases 1 y 2)', () => {
     expect(r.rows![0].company_name).toBe('ACME');
   });
 
-  test('embed job_applications -> job_postings -> companies (useJobApplications) como candidata', async () => {
-    const r = await user(U.A, `SELECT ja.id, row_to_json(j.*) AS job_posting FROM job_applications ja
-      LEFT JOIN LATERAL (SELECT jp.id, jp.title, jp.company_id, row_to_json(c.*) AS company FROM job_postings jp
-        LEFT JOIN LATERAL (SELECT companies.id, companies.company_name, companies.logo_url FROM companies WHERE companies.id = jp.company_id) c ON true
-        WHERE jp.id = ja.job_posting_id) j ON true
-      WHERE ja.profile_id = $1`, [U.A]);
+  // La candidata ya NO lee job_applications con un embed (era la vía de useJobApplications): desde
+  // la fase 3 (20261031/20261032) lee la vista my_job_applications, que corre con los privilegios
+  // del dueño, filtra por auth.uid() y trae company_name/logo_url ya resueltos. Se prueba una copia
+  // reducida de esa vista (las columnas que existen en el esquema de este spec): lo que defiende
+  // este spec es que la candidata ve el nombre de la empresa sin tener acceso a las columnas privadas.
+  test('la candidata lee el nombre de empresa por la vista my_job_applications (useJobApplications)', async () => {
+    await bd.exec(`
+      CREATE OR REPLACE VIEW public.my_job_applications AS
+      SELECT ja.id, ja.job_posting_id, ja.profile_id, ja.company_id,
+             jp.title::text AS job_title, c.company_name::text AS company_name, c.logo_url::text AS company_logo_url
+        FROM public.job_applications ja
+        LEFT JOIN public.job_postings jp ON jp.id = ja.job_posting_id
+        LEFT JOIN public.companies c ON c.id = ja.company_id
+       WHERE ja.profile_id = auth.uid();
+      REVOKE ALL ON public.my_job_applications FROM PUBLIC, anon, authenticated;
+      GRANT SELECT ON public.my_job_applications TO authenticated, service_role;
+    `);
+    const r = await user(U.A, `SELECT id, company_name, company_logo_url FROM my_job_applications`);
     ok(r);
-    expect(r.rows![0]?.job_posting?.company?.company_name).toBe('ACME');
+    expect(r.rows).toHaveLength(1);
+    expect(r.rows![0]?.company_name).toBe('ACME');
+    // Otra candidata no ve candidaturas ajenas; anon no lee la vista
+    const otra = await user(U.OUT, `SELECT id FROM my_job_applications`);
+    ok(otra);
+    expect(otra.rows).toHaveLength(0);
+    esDenegado(await anon(`SELECT id FROM my_job_applications`));
+    // Y por la tabla companies sigue sin poder pedir columnas privadas
+    esDenegado(await user(U.A, `SELECT tax_id FROM companies WHERE id = $1`, [ACME]));
   });
 
   test('embed pidiendo tax_id como anon -> 42501', async () => {

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1123,
-  title: "Como Hacer un CV para Trabajar en Colombia en 2026",
+  title: "Cómo Hacer un CV para Trabajar en Colombia en 2026",
   slug: "como-hacer-cv-colombia",
-  summary: "CV efectivo para Colombia. Hoja de vida y requisitos especificos.",
-  content: `# Como Hacer un CV para Trabajar en Colombia en 2026
+  summary: "CV efectivo para Colombia. Hoja de vida y requisitos específicos.",
+  content: `# Cómo Hacer un CV para Trabajar en Colombia en 2026
 
 En el competitivo mercado laboral de 2026, dominar **CV para trabajar en Colombia** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,14 +14,14 @@ Esta guía completa sobre **CV para trabajar en Colombia** te proporciona estrat
 ![CV para trabajar en Colombia](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV para trabajar en Colombia}
 
 ## 1. Mercado laboral colombiano 2026
-2. Hoja de vida vs curriculum vitae
+2. Hoja de vida vs currículum vítae
 3. Formato y estructura recomendada
 4. Datos personales y documentos
 5. Bolsas de empleo en Colombia
 6. Sectores con mayor demanda — claves de CV para trabajar en Colombia
 
 Cuando hablamos de **CV para trabajar en Colombia** en el contexto de 1. mercado laboral colombiano 2026
-2. hoja de vida vs curriculum vitae
+2. hoja de vida vs currículum vítae
 3. formato y estructura recomendada
 4. datos personales y documentos
 5. bolsas de empleo en colombia
@@ -30,7 +30,7 @@ Cuando hablamos de **CV para trabajar en Colombia** en el contexto de 1. mercado
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. mercado laboral colombiano 2026
-2. hoja de vida vs curriculum vitae
+2. hoja de vida vs currículum vítae
 3. formato y estructura recomendada
 4. datos personales y documentos
 5. bolsas de empleo en colombia
@@ -45,7 +45,7 @@ Para destacar en **CV para trabajar en Colombia** dentro de esta área, aplica e
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. mercado laboral colombiano 2026
-2. hoja de vida vs curriculum vitae
+2. hoja de vida vs currículum vítae
 3. formato y estructura recomendada
 4. datos personales y documentos
 5. bolsas de empleo en colombia
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-04-22T18:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Colombia en 2026",
-  meta_description: "CV efectivo para Colombia. Hoja de vida y requisitos especificos.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Colombia en 2026",
+  meta_description: "CV efectivo para Colombia. Hoja de vida y requisitos específicos.",
   lang: "es",
 };
 

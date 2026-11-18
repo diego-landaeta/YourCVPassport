@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1285,
-  title: "Como Hacer un CV para Trabajar en Dubai siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Dubai siendo Hispano",
   slug: "como-hacer-cv-dubai-hispano",
-  summary: "CV para hispanos en Dubai y Emiratos Arabes. Formato, visa y expectativas.",
-  content: `# Como Hacer un CV para Trabajar en Dubai siendo Hispano
+  summary: "CV para hispanos en Dubai y Emiratos Árabes. Formato, visa y expectativas.",
+  content: `# Cómo Hacer un CV para Trabajar en Dubai siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Dubai hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -17,14 +17,14 @@ Esta guía completa sobre **CV trabajar Dubai hispano** te proporciona estrategi
 2. Formato de CV para EAU
 3. Foto y datos personales
 4. Visa de trabajo
-5. Ingles como idioma principal
+5. Inglés como idioma principal
 6. Perfil verificado internacional
 
 Cuando hablamos de **CV trabajar Dubai hispano** en el contexto de 1. mercado laboral de dubai
 2. formato de cv para eau
 3. foto y datos personales
 4. visa de trabajo
-5. ingles como idioma principal
+5. inglés como idioma principal
 6. perfil verificado internacional, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -33,7 +33,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 2. formato de cv para eau
 3. foto y datos personales
 4. visa de trabajo
-5. ingles como idioma principal
+5. inglés como idioma principal
 6. perfil verificado internacional
 
 Para destacar en **CV trabajar Dubai hispano** dentro de esta área, aplica estas estrategias probadas:
@@ -48,7 +48,7 @@ Para destacar en **CV trabajar Dubai hispano** dentro de esta área, aplica esta
 2. formato de cv para eau
 3. foto y datos personales
 4. visa de trabajo
-5. ingles como idioma principal
+5. inglés como idioma principal
 6. perfil verificado internacional
 
 Evita estos errores que cometen la mayoría de candidatos con **CV trabajar Dubai hispano**:
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-08T22:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Dubai siendo Hispano",
-  meta_description: "CV para hispanos en Dubai y Emiratos Arabes. Formato, visa y expectativas.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Dubai siendo Hispano",
+  meta_description: "CV para hispanos en Dubai y Emiratos Árabes. Formato, visa y expectativas.",
   lang: "es",
 };
 

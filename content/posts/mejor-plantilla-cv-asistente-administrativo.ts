@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1273,
   title: "Mejor Plantilla de CV para Asistentes Administrativos",
   slug: "mejor-plantilla-cv-asistente-administrativo",
-  summary: "Plantillas de CV para asistentes administrativos. Organizacion y gestion.",
+  summary: "Plantillas de CV para asistentes administrativos. Organización y gestión.",
   content: `# Mejor Plantilla de CV para Asistentes Administrativos
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV asistente administrativo** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -14,25 +14,25 @@ Esta guía completa sobre **plantilla CV asistente administrativo** te proporcio
 ![plantilla CV asistente administrativo](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre plantilla CV asistente administrativo}
 
 ## 1. CV especializado para asistentes
-2. Secciones: herramientas, gestion, logros
+2. Secciones: herramientas, gestión, logros
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes
 6. Plantillas verificadas
 
 Cuando hablamos de **plantilla CV asistente administrativo** en el contexto de 1. cv especializado para asistentes
-2. secciones: herramientas, gestion, logros
+2. secciones: herramientas, gestión, logros
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. cv especializado para asistentes
-2. secciones: herramientas, gestion, logros
+2. secciones: herramientas, gestión, logros
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
@@ -45,9 +45,9 @@ Para destacar en **plantilla CV asistente administrativo** dentro de esta área,
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. cv especializado para asistentes
-2. secciones: herramientas, gestion, logros
+2. secciones: herramientas, gestión, logros
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-05-07T18:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Asistentes Administrativos",
-  meta_description: "Plantillas de CV para asistentes administrativos. Organizacion y gestion.",
+  meta_description: "Plantillas de CV para asistentes administrativos. Organización y gestión.",
   lang: "es",
 };
 

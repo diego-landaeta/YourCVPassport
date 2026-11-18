@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1248,
-  title: "Como Hacer un CV Despues de un Ano Sabatico",
+  title: "Cómo Hacer un CV Después de un Año Sabático",
   slug: "cv-despues-ano-sabatico",
-  summary: "Convierte tu ano sabatico en activo del CV. Viajes y crecimiento personal.",
-  content: `# Como Hacer un CV Despues de un Ano Sabatico
+  summary: "Convierte tu año sabático en activo del CV. Viajes y crecimiento personal.",
+  content: `# Cómo Hacer un CV Después de un Año Sabático
 
-En el competitivo mercado laboral de 2026, dominar **CV despues ano sabatico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **CV después año sabático** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **CV despues ano sabatico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **CV después año sabático** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![CV despues ano sabatico](https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80){caption:Guía completa sobre CV despues ano sabatico}
+![CV después año sabático](https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80){caption:Guía completa sobre CV después año sabático}
 
-## 1. Anos sabaticos no son tabu
-2. Habilidades del sabatico
+## 1. Años sabáticos no son tabú
+2. Habilidades del sabático
 3. Presentar el periodo
 4. Voluntariado como desarrollo
 5. Conectar con metas
-6. Formato post-sabatico — claves de CV despues ano sabatico
+6. Formato post-sabático — claves de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de 1. anos sabaticos no son tabu
-2. habilidades del sabatico
+Cuando hablamos de **CV después año sabático** en el contexto de 1. años sabáticos no son tabú
+2. habilidades del sabático
 3. presentar el periodo
 4. voluntariado como desarrollo
 5. conectar con metas
-6. formato post-sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. formato post-sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. anos sabaticos no son tabu
-2. habilidades del sabatico
+### Mejores prácticas para 1. años sabáticos no son tabú
+2. habilidades del sabático
 3. presentar el periodo
 4. voluntariado como desarrollo
 5. conectar con metas
-6. formato post-sabatico
+6. formato post-sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. anos sabaticos no son tabu
-2. habilidades del sabatico
+### Errores frecuentes en 1. años sabáticos no son tabú
+2. habilidades del sabático
 3. presentar el periodo
 4. voluntariado como desarrollo
 5. conectar con metas
-6. formato post-sabatico
+6. formato post-sabático
 
-Evita estos errores que cometen la mayoría de candidatos con **CV despues ano sabatico**:
+Evita estos errores que cometen la mayoría de candidatos con **CV después año sabático**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV despues ano s
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV despues ano sabatico sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre CV después año sabático sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV despues ano sabatico](https://images.unsplash.com/photo-1484981138541-3d074aa97716?w=800&q=80){caption:Aspectos avanzados de CV despues ano sabatico}
+![Aspectos avanzados de CV después año sabático](https://images.unsplash.com/photo-1484981138541-3d074aa97716?w=800&q=80){caption:Aspectos avanzados de CV después año sabático}
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv despues ano sabatico
+### Errores frecuentes en aspectos avanzados de cv después año sabático
 
-Evita estos errores que cometen la mayoría de candidatos con **CV despues ano sabatico**:
+Evita estos errores que cometen la mayoría de candidatos con **CV después año sabático**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **CV despues ano s
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV despues ano sabatico es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de CV después año sabático es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv despues ano sabatico
+### Errores frecuentes en aspectos avanzados de cv después año sabático
 
-Evita estos errores que cometen la mayoría de candidatos con **CV despues ano sabatico**:
+Evita estos errores que cometen la mayoría de candidatos con **CV después año sabático**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de CV despues ano sabatico](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de CV despues ano sabatico}
+![Aspectos avanzados de CV después año sabático](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de CV después año sabático}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV despues ano sabatico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de CV después año sabático para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv despues ano sabatico
+### Errores frecuentes en aspectos avanzados de cv después año sabático
 
-Evita estos errores que cometen la mayoría de candidatos con **CV despues ano sabatico**:
+Evita estos errores que cometen la mayoría de candidatos con **CV después año sabático**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV despues ano s
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de CV despues ano sabatico](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de CV despues ano sabatico}
+![Aspectos avanzados de CV después año sabático](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de CV después año sabático}
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de cv despues ano sabatico
+### Errores frecuentes en aspectos avanzados de cv después año sabático
 
-Evita estos errores que cometen la mayoría de candidatos con **CV despues ano sabatico**:
+Evita estos errores que cometen la mayoría de candidatos con **CV después año sabático**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **CV despues ano s
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de cv despues ano sabatico
+### Mejores prácticas para aspectos avanzados de cv después año sabático
 
-Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **CV después año sabático** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **CV despues ano sabatico** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de CV despues ano sabatico
+## Aspectos avanzados de CV después año sabático
 
-Cuando hablamos de **CV despues ano sabatico** en el contexto de aspectos avanzados de cv despues ano sabatico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **CV después año sabático** en el contexto de aspectos avanzados de cv después año sabático, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de CV despues ano sabatico](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV despues ano sabatico}
+![Aspectos avanzados de CV después año sabático](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Aspectos avanzados de CV después año sabático}
 
-## Cómo YourCVPassport te ayuda con CV despues ano sabatico
+## Cómo YourCVPassport te ayuda con CV después año sabático
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV despues ano sabatico**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **CV después año sabático**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina CV despues ano sabatico y transforma tu carrera profesional
+## Conclusión: domina CV después año sabático y transforma tu carrera profesional
 
-Dominar **CV despues ano sabatico** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **CV después año sabático** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-05T04:00:00.000Z",
-  meta_title: "Como Hacer un CV Despues de un Ano Sabatico",
-  meta_description: "Convierte tu ano sabatico en activo del CV. Viajes y crecimiento personal.",
+  meta_title: "Cómo Hacer un CV Después de un Año Sabático",
+  meta_description: "Convierte tu año sabático en activo del CV. Viajes y crecimiento personal.",
   lang: "es",
 };
 

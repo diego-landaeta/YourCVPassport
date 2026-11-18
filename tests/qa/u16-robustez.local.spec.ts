@@ -92,7 +92,7 @@ test.describe('(a) blog: post inexistente', () => {
 // (b) Detalle de empleo: usuario que aún no se ha postulado
 // ---------------------------------------------------------------------------
 test.describe('(b) detalle de empleo', () => {
-  test('usuario no postulado: ve "Aplicar" y no hay 406', async ({ page, context }) => {
+  test('usuario no inscrito: ve "Inscribirme" y no hay 406', async ({ page, context }) => {
     test.setTimeout(90_000);
     const profiles = makeProfiles(5);
     const admin = profiles.find((p) => p.id === ADMIN_ID)!;
@@ -121,6 +121,9 @@ test.describe('(b) detalle de empleo', () => {
       application_url: null,
       application_instructions: null,
       published_at: '2026-09-01T00:00:00Z',
+      status: 'PUBLISHED',
+      accepting_applications: true,
+      country_code: 'ES',
       company_name: 'ACME U16',
       company_logo_url: null,
       company_website: null,
@@ -128,20 +131,20 @@ test.describe('(b) detalle de empleo', () => {
     };
     const mock = await mockSupabase(
       context,
-      { profiles, job_applications: [], job_posting_questions: [], company_users: [] },
+      { profiles, my_job_applications: [], job_posting_questions: [], company_users: [] },
       { rpc: { get_job_posting_detail: [job] } },
     );
     const w = watch(page);
 
     await page.goto('/empleos/data-engineer-u16', { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Data Engineer U16').first()).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByRole('button', { name: 'Aplicar ahora' })).toBeVisible();
-    await expect(page.getByText('Ya aplicaste')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Inscribirme' }).first()).toBeVisible();
+    await expect(page.getByText('Ya inscrito')).toHaveCount(0);
     await settle(page);
 
-    // Se comprobó la postulación (sin fila) y se leyó el perfil del usuario
-    await expect.poll(() => mock.requestsTo('job_applications').length).toBeGreaterThan(0);
-    expect(mock.requestsTo('profiles').some((r) => r.params.id?.[0] === `eq.${ADMIN_ID}`)).toBe(true);
+    // Se comprobó la inscripción en la vista del candidato (sin fila) y se leyó el perfil del usuario
+    await expect.poll(() => mock.requestsTo('my_job_applications').length).toBeGreaterThan(0);
+    expect([...mock.requestsTo('profiles'), ...mock.requestsTo('profiles_full')].some((r) => r.params.id?.[0] === `eq.${ADMIN_ID}`)).toBe(true);
     expect(w.responses406, 'respuestas 406').toEqual([]);
   });
 });

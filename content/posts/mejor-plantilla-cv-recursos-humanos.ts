@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1112,
   title: "Mejor Plantilla de CV para Recursos Humanos en 2026",
   slug: "mejor-plantilla-cv-recursos-humanos",
-  summary: "Mejores plantillas de CV para RRHH. Gestion del talento y herramientas HRIS.",
+  summary: "Mejores plantillas de CV para RRHH. Gestión del talento y herramientas HRIS.",
   content: `# Mejor Plantilla de CV para Recursos Humanos en 2026
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV recursos humanos** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -14,25 +14,25 @@ Esta guía completa sobre **plantilla CV recursos humanos** te proporciona estra
 ![plantilla CV recursos humanos](https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80){caption:Guía completa sobre plantilla CV recursos humanos}
 
 ## 1. CV especializado para RRHH
-2. Secciones: herramientas, certificaciones, metricas
+2. Secciones: herramientas, certificaciones, métricas
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV recursos humanos** en el contexto de 1. cv especializado para rrhh
-2. secciones: herramientas, certificaciones, metricas
+2. secciones: herramientas, certificaciones, métricas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. cv especializado para rrhh
-2. secciones: herramientas, certificaciones, metricas
+2. secciones: herramientas, certificaciones, métricas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -45,9 +45,9 @@ Para destacar en **plantilla CV recursos humanos** dentro de esta área, aplica 
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. cv especializado para rrhh
-2. secciones: herramientas, certificaciones, metricas
+2. secciones: herramientas, certificaciones, métricas
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-04-21T16:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Recursos Humanos en 2026",
-  meta_description: "Mejores plantillas de CV para RRHH. Gestion del talento y herramientas HRIS.",
+  meta_description: "Mejores plantillas de CV para RRHH. Gestión del talento y herramientas HRIS.",
   lang: "es",
 };
 

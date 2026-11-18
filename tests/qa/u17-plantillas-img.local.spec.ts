@@ -122,7 +122,7 @@ test.describe('U17 imagenes de plantillas', () => {
       await page.goto(url, { waitUntil: 'domcontentloaded' });
       await expect(page).toHaveURL(new RegExp(`${target}$`), { timeout: 45_000 });
       await expect(page.locator('h1')).toBeVisible({ timeout: 45_000 });
-      await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
+      await expect(page.getByText(/Algo ha fallado|Oops! Something went wrong/)).toHaveCount(0);
       await scrollThrough(page);
       const imgs = await loadTemplateImages(page);
       expect(imgs.length).toBeGreaterThan(5);
@@ -141,7 +141,7 @@ test.describe('U17 imagenes de plantillas', () => {
     await setup(context, 'es');
     await page.goto('/profesionales/plantillas', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h1')).toBeVisible({ timeout: 45_000 });
-    await expect(page.getByText('Oops! Something went wrong')).toHaveCount(0);
+    await expect(page.getByText(/Algo ha fallado|Oops! Something went wrong/)).toHaveCount(0);
     await scrollThrough(page);
     const imgs = await loadTemplateImages(page);
     expect(imgs.length).toBeGreaterThan(5);

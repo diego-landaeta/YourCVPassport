@@ -477,14 +477,14 @@ test.describe('#17/#19 Testing Hub', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Pagination compartida: CompanyTalentSearchPage (via /admin/search) sin cambios
+// Pagination compartida: CompanyTalentSearchPage (via /admin/search); textos en español desde el 15/10/2026
 // ---------------------------------------------------------------------------
 test.describe('Pagination en busqueda de talento', () => {
   test('mismos botones y navegacion que la version inline', async ({ context, page }, testInfo) => {
     test.setTimeout(90_000);
     const mock = await openApp(context, page, { theme: 'light', route: '/admin/search' });
     const pages = Math.ceil(DATA.filter(r => r.role !== 'admin').length / 30);
-    await expect(page.getByText(`Page 1 of ${pages}`)).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByText(`Página 1 de ${pages}`)).toBeVisible({ timeout: 45_000 });
     const nav = page.getByRole('navigation', { name: 'Paginación' });
     await expect(nav).toBeVisible();
     const numbers = nav.locator('button:not([aria-label="Página anterior"]):not([aria-label="Página siguiente"])');
@@ -493,15 +493,15 @@ test.describe('Pagination en busqueda de talento', () => {
     await expect(nav.locator('[aria-current="page"]')).toHaveText('1');
 
     await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Página siguiente' }));
-    await expect(page.getByText(`Page 2 of ${pages}`)).toBeVisible();
+    await expect(page.getByText(`Página 2 de ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['1', '2', '3']);
     expect(mock.requestsTo('profiles').some(r => r.params.offset?.[0] === '30' && r.params.limit?.[0] === '30')).toBe(true);
 
     await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Ir a la página 3' }));
-    await expect(page.getByText(`Page 3 of ${pages}`)).toBeVisible();
+    await expect(page.getByText(`Página 3 de ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['2', '3', '4']);
     await clickCenteredOrDispatch(nav.getByRole('button', { name: 'Página siguiente' }));
-    await expect(page.getByText(`Page ${pages} of ${pages}`)).toBeVisible();
+    await expect(page.getByText(`Página ${pages} de ${pages}`)).toBeVisible();
     await expect(numbers).toHaveText(['1', '3', '4']);
     await expect(nav.getByRole('button', { name: 'Página siguiente' })).toBeDisabled();
     await shot(page, testInfo, 'pagination-talent-search', nav);

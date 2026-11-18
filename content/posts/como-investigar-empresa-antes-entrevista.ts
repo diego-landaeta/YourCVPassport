@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1188,
-  title: "Como Investigar una Empresa Antes de tu Entrevista",
+  title: "Cómo Investigar una Empresa Antes de tu Entrevista",
   slug: "como-investigar-empresa-antes-entrevista",
-  summary: "Investiga a fondo antes de la entrevista. Ve mas alla del Acerca De.",
-  content: `# Como Investigar una Empresa Antes de tu Entrevista
+  summary: "Investiga a fondo antes de la entrevista. Ve más allá del Acerca De.",
+  content: `# Cómo Investigar una Empresa Antes de tu Entrevista
 
 En el competitivo mercado laboral de 2026, dominar **investigar empresa antes entrevista** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -17,14 +17,14 @@ Esta guía completa sobre **investigar empresa antes entrevista** te proporciona
 2. Informes y noticias
 3. Glassdoor y opiniones
 4. Redes sociales y cultura
-5. Analisis de competidores
+5. Análisis de competidores
 6. Formular preguntas inteligentes — claves de investigar empresa antes entrevista
 
 Cuando hablamos de **investigar empresa antes entrevista** en el contexto de 1. sitio web de la empresa
 2. informes y noticias
 3. glassdoor y opiniones
 4. redes sociales y cultura
-5. analisis de competidores
+5. análisis de competidores
 6. formular preguntas inteligentes, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -33,7 +33,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 2. informes y noticias
 3. glassdoor y opiniones
 4. redes sociales y cultura
-5. analisis de competidores
+5. análisis de competidores
 6. formular preguntas inteligentes
 
 Para destacar en **investigar empresa antes entrevista** dentro de esta área, aplica estas estrategias probadas:
@@ -48,7 +48,7 @@ Para destacar en **investigar empresa antes entrevista** dentro de esta área, a
 2. informes y noticias
 3. glassdoor y opiniones
 4. redes sociales y cultura
-5. analisis de competidores
+5. análisis de competidores
 6. formular preguntas inteligentes
 
 Evita estos errores que cometen la mayoría de candidatos con **investigar empresa antes entrevista**:
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Entrevista y Empleo",
   is_featured: false,
   published_at: "2026-04-29T04:00:00.000Z",
-  meta_title: "Como Investigar una Empresa Antes de tu Entrevista",
-  meta_description: "Investiga a fondo antes de la entrevista. Ve mas alla del Acerca De.",
+  meta_title: "Cómo Investigar una Empresa Antes de tu Entrevista",
+  meta_description: "Investiga a fondo antes de la entrevista. Ve más allá del Acerca De.",
   lang: "es",
 };
 

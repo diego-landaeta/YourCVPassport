@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1283,
-  title: "Como Hacer un CV para Trabajar en Alemania siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Alemania siendo Hispano",
   slug: "como-hacer-cv-alemania-hispano",
   summary: "Lebenslauf para hispanos en Alemania. Foto, formato y expectativas alemanas.",
-  content: `# Como Hacer un CV para Trabajar en Alemania siendo Hispano
+  content: `# Cómo Hacer un CV para Trabajar en Alemania siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Alemania hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,26 +13,26 @@ Esta guía completa sobre **CV trabajar Alemania hispano** te proporciona estrat
 
 ![CV trabajar Alemania hispano](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV trabajar Alemania hispano}
 
-## 1. Mercado laboral aleman
+## 1. Mercado laboral alemán
 2. Formato Lebenslauf
 3. Foto obligatoria
-4. Aleman como requisito
+4. Alemán como requisito
 5. Blue Card y permisos
 6. Perfil verificado europeo — claves de CV trabajar Alemania hispano
 
-Cuando hablamos de **CV trabajar Alemania hispano** en el contexto de 1. mercado laboral aleman
+Cuando hablamos de **CV trabajar Alemania hispano** en el contexto de 1. mercado laboral alemán
 2. formato lebenslauf
 3. foto obligatoria
-4. aleman como requisito
+4. alemán como requisito
 5. blue card y permisos
 6. perfil verificado europeo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral aleman
+### Mejores prácticas para 1. mercado laboral alemán
 2. formato lebenslauf
 3. foto obligatoria
-4. aleman como requisito
+4. alemán como requisito
 5. blue card y permisos
 6. perfil verificado europeo
 
@@ -44,10 +44,10 @@ Para destacar en **CV trabajar Alemania hispano** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral aleman
+### Errores frecuentes en 1. mercado laboral alemán
 2. formato lebenslauf
 3. foto obligatoria
-4. aleman como requisito
+4. alemán como requisito
 5. blue card y permisos
 6. perfil verificado europeo
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-08T18:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Alemania siendo Hispano",
+  meta_title: "Cómo Hacer un CV para Trabajar en Alemania siendo Hispano",
   meta_description: "Lebenslauf para hispanos en Alemania. Foto, formato y expectativas alemanas.",
   lang: "es",
 };

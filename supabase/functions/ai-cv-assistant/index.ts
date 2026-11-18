@@ -2,8 +2,8 @@
  * AI CV Assistant Edge Function
  *
  * Proxy de servidor para las funciones de IA del editor de perfil. Sustituye a las
- * llamadas directas a Google Gemini que hacia el navegador con una API key
- * incrustada en el bundle publico.
+ * llamadas directas a un proveedor de IA que hacia el navegador con una API key
+ * incrustada en el bundle publico. Desde el 29/10/2026 el proveedor es Claude (Anthropic).
  *
  * Endpoint: POST /functions/v1/ai-cv-assistant
  * Body:     { task: AITask, input: {...} }
@@ -17,12 +17,11 @@
  *   enviar prompts libres ni elegir modelo o endpoint.
  * - Limites de tamano por campo y por peticion.
  * - Limites del plan (check_feature_limit / record_usage) aplicados en servidor.
- * - La clave se lee de Deno.env (secreto GEMINI_API_KEY) y viaja en cabecera,
+ * - La clave se lee de Deno.env (secreto ANTHROPIC_API_KEY) y viaja en cabecera,
  *   nunca en la URL, para que no acabe en logs.
  *
- * Proveedor y modelos: los mismos que usaba lib/ai.ts en el cliente (Gemini con
- * la misma lista de modelos de respaldo y la configuracion de generacion por
- * defecto), para no cambiar el comportamiento visible.
+ * Proveedor y modelos: Claude via _shared/claude.ts (Haiku primero y Sonnet de respaldo).
+ * Los prompts son los de lib/ai.ts, sin cambios, para no cambiar el comportamiento visible.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -32,21 +31,16 @@ import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@2.0.3';
 // Lista de origenes compartida: yourcvpassport.com, www, localhost/127.0.0.1 y
 // CORS_EXTRA_ORIGINS opcional.
 import { getCorsHeaders, isAllowedOrigin } from '../_shared/cors.ts';
+// Cliente de la API de Anthropic (Claude): claves por cabecera, sin registrar el cuerpo del proveedor.
+import { callClaude, CLAUDE_MODELS_TO_TRY, ProviderAuthError } from '../_shared/claude.ts';
 
 // ==================================================
 // CONFIGURACION
 // ==================================================
 
-// Mismo orden de preferencia que tenia el cliente (lib/ai.ts).
-const MODELS_TO_TRY = [
-  'gemini-2.5-flash',
-  'gemini-2.5-pro',
-  'gemini-2.0-flash',
-  'gemini-2.0-flash-exp',
-  'gemini-exp-1206',
-] as const;
-
-const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+// Rapido primero (Haiku) y preciso de respaldo (Sonnet); ver _shared/claude.ts.
+const MODELS_TO_TRY = CLAUDE_MODELS_TO_TRY;
+const MAX_OUTPUT_TOKENS = 2048;
 
 const MAX_BODY_BYTES = 32 * 1024;      // peticion completa
 const MAX_PROMPT_CHARS = 24_000;       // prompt ya construido
@@ -349,45 +343,8 @@ async function checkRateLimit(userId: string): Promise<{ success: boolean; retry
 }
 
 // ==================================================
-// GEMINI
+// PROVEEDOR (Claude)
 // ==================================================
-
-class ProviderAuthError extends Error {}
-
-async function callGemini(apiKey: string, model: string, prompt: string, signal: AbortSignal): Promise<string> {
-  const response = await fetch(`${GEMINI_BASE_URL}/${model}:generateContent`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // En cabecera y no en ?key= para que la clave no quede en logs de URL.
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    }),
-    signal,
-  });
-
-  if (!response.ok) {
-    // No se registra el cuerpo del proveedor: puede reflejar datos de la peticion.
-    if (response.status === 401 || response.status === 403) {
-      throw new ProviderAuthError(`AI provider returned ${response.status}`);
-    }
-    throw new Error(`AI provider returned ${response.status}`);
-  }
-
-  const data = await response.json();
-  const parts = data?.candidates?.[0]?.content?.parts;
-  const text = Array.isArray(parts)
-    ? parts.map((p: { text?: unknown }) => (typeof p?.text === 'string' ? p.text : '')).join('')
-    : '';
-
-  if (!text.trim()) {
-    const reason = data?.candidates?.[0]?.finishReason ?? data?.promptFeedback?.blockReason ?? 'unknown';
-    throw new Error(`AI returned no usable text (${reason})`);
-  }
-  return text.trim();
-}
 
 async function generateWithFallback(apiKey: string, prompt: string): Promise<{ text: string; model: string }> {
   const started = Date.now();
@@ -399,7 +356,7 @@ async function generateWithFallback(apiKey: string, prompt: string): Promise<{ t
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), PER_MODEL_TIMEOUT_MS);
     try {
-      const text = await callGemini(apiKey, model, prompt, controller.signal);
+      const text = await callClaude({ apiKey, model, prompt, maxTokens: MAX_OUTPUT_TOKENS, signal: controller.signal });
       return { text, model };
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
@@ -543,9 +500,9 @@ serve(async (req: Request) => {
     }
 
     // ---- Proveedor ----
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
     if (!apiKey) {
-      console.error('[ai-cv-assistant] GEMINI_API_KEY no configurada');
+      console.error('[ai-cv-assistant] ANTHROPIC_API_KEY no configurada');
       return fail(503, 'ai_not_configured', 'AI service not configured', cors);
     }
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1297,
-  title: "Como Hacer un CV para Arabia Saudita siendo Hispano",
+  title: "Cómo Hacer un CV para Arabia Saudita siendo Hispano",
   slug: "cv-para-arabia-saudita-hispano",
-  summary: "CV para hispanos en Arabia Saudita. Vision 2030, iqama y formato.",
-  content: `# Como Hacer un CV para Arabia Saudita siendo Hispano
+  summary: "CV para hispanos en Arabia Saudita. Visión 2030, iqama y formato.",
+  content: `# Cómo Hacer un CV para Arabia Saudita siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Arabia Saudita hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,26 +14,26 @@ Esta guía completa sobre **CV trabajar Arabia Saudita hispano** te proporciona 
 ![CV trabajar Arabia Saudita hispano](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre CV trabajar Arabia Saudita hispano}
 
 ## 1. Mercado laboral saudita
-2. Vision 2030 y oportunidades
+2. Visión 2030 y oportunidades
 3. Formato CV saudita
 4. Iqama y datos requeridos
-5. Arabe e ingles
+5. Árabe e inglés
 6. Perfil verificado internacional
 
 Cuando hablamos de **CV trabajar Arabia Saudita hispano** en el contexto de 1. mercado laboral saudita
-2. vision 2030 y oportunidades
+2. visión 2030 y oportunidades
 3. formato cv saudita
 4. iqama y datos requeridos
-5. arabe e ingles
+5. árabe e inglés
 6. perfil verificado internacional, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. mercado laboral saudita
-2. vision 2030 y oportunidades
+2. visión 2030 y oportunidades
 3. formato cv saudita
 4. iqama y datos requeridos
-5. arabe e ingles
+5. árabe e inglés
 6. perfil verificado internacional
 
 Para destacar en **CV trabajar Arabia Saudita hispano** dentro de esta área, aplica estas estrategias probadas:
@@ -45,10 +45,10 @@ Para destacar en **CV trabajar Arabia Saudita hispano** dentro de esta área, ap
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. mercado laboral saudita
-2. vision 2030 y oportunidades
+2. visión 2030 y oportunidades
 3. formato cv saudita
 4. iqama y datos requeridos
-5. arabe e ingles
+5. árabe e inglés
 6. perfil verificado internacional
 
 Evita estos errores que cometen la mayoría de candidatos con **CV trabajar Arabia Saudita hispano**:
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-10T02:00:00.000Z",
-  meta_title: "Como Hacer un CV para Arabia Saudita siendo Hispano",
-  meta_description: "CV para hispanos en Arabia Saudita. Vision 2030, iqama y formato.",
+  meta_title: "Cómo Hacer un CV para Arabia Saudita siendo Hispano",
+  meta_description: "CV para hispanos en Arabia Saudita. Visión 2030, iqama y formato.",
   lang: "es",
 };
 

@@ -12,6 +12,7 @@ import PageSEO from './shared/PageSEO';
 import InlineCTA from './landing/InlineCTA';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
+import { organizationJsonLd, webSiteJsonLd } from '../lib/seoJsonLd';
 
 // SEO de la home: la misma URL sirve ambos idiomas, asi que no lleva hreflang.
 const HOME_SEO = {
@@ -40,6 +41,7 @@ const HomePage: React.FC = () => {
         keywords={HOME_SEO[lang].keywords}
         lang={lang}
         canonical="https://yourcvpassport.com/"
+        jsonLd={[organizationJsonLd(), webSiteJsonLd(lang)]}
       />
       <Hero />
       <Features />

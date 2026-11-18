@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1258,
-  title: "Como Usar IA para Personalizar tu CV para Cada Oferta",
+  title: "Cómo Usar IA para Personalizar tu CV para Cada Oferta",
   slug: "como-usar-ia-personalizar-cv",
-  summary: "Herramientas de IA para adaptar tu CV rapidamente a cada postulacion.",
-  content: `# Como Usar IA para Personalizar tu CV para Cada Oferta
+  summary: "Herramientas de IA para adaptar tu CV rápidamente a cada postulación.",
+  content: `# Cómo Usar IA para Personalizar tu CV para Cada Oferta
 
 En el competitivo mercado laboral de 2026, dominar **usar IA personalizar CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **usar IA personalizar CV** te proporciona estrategias
 
 ![usar IA personalizar CV](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Guía completa sobre usar IA personalizar CV}
 
-## 1. Por que personalizar importa
+## 1. Por qué personalizar importa
 2. Herramientas de IA
 3. Flujo de trabajo paso a paso
 4. Revisar contenido IA
 5. Mantener autenticidad
-6. Personalizacion en YourCVPassport — claves de usar IA personalizar CV
+6. Personalización en YourCVPassport — claves de usar IA personalizar CV
 
-Cuando hablamos de **usar IA personalizar CV** en el contexto de 1. por que personalizar importa
+Cuando hablamos de **usar IA personalizar CV** en el contexto de 1. por qué personalizar importa
 2. herramientas de ia
 3. flujo de trabajo paso a paso
 4. revisar contenido ia
 5. mantener autenticidad
-6. personalizacion en yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. personalización en yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que personalizar importa
+### Mejores prácticas para 1. por qué personalizar importa
 2. herramientas de ia
 3. flujo de trabajo paso a paso
 4. revisar contenido ia
 5. mantener autenticidad
-6. personalizacion en yourcvpassport
+6. personalización en yourcvpassport
 
 Para destacar en **usar IA personalizar CV** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **usar IA personalizar CV** dentro de esta área, aplica estas 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que personalizar importa
+### Errores frecuentes en 1. por qué personalizar importa
 2. herramientas de ia
 3. flujo de trabajo paso a paso
 4. revisar contenido ia
 5. mantener autenticidad
-6. personalizacion en yourcvpassport
+6. personalización en yourcvpassport
 
 Evita estos errores que cometen la mayoría de candidatos con **usar IA personalizar CV**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "ATS y Tecnología",
   is_featured: false,
   published_at: "2026-05-06T04:00:00.000Z",
-  meta_title: "Como Usar IA para Personalizar tu CV para Cada Oferta",
-  meta_description: "Herramientas de IA para adaptar tu CV rapidamente a cada postulacion.",
+  meta_title: "Cómo Usar IA para Personalizar tu CV para Cada Oferta",
+  meta_description: "Herramientas de IA para adaptar tu CV rápidamente a cada postulación.",
   lang: "es",
 };
 

@@ -20,7 +20,7 @@ interface MobileNavProps {
 const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSectionChange, isOpen, onToggle, profileCompleteness = 100 }) => {
   const translations = useTranslations();
   const menu = translations.dashboard.menu;
-  const { lang, setLang } = useLanguage();
+  const { lang, chooseLang } = useLanguage();
   const t = translations.dashboard.preferences.language;
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
@@ -328,8 +328,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
               <div className="flex gap-2">
                 <button
                   onClick={() => {
-                    setLang('en');
-                    localStorage.setItem('language', 'en');
+                    chooseLang('en');
                   }}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     lang === 'en'
@@ -341,8 +340,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ profile, activeSection, onSection
                 </button>
                 <button
                   onClick={() => {
-                    setLang('es');
-                    localStorage.setItem('language', 'es');
+                    chooseLang('es');
                   }}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     lang === 'es'

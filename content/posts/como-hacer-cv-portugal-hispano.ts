@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1286,
-  title: "Como Hacer un CV para Trabajar en Portugal siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Portugal siendo Hispano",
   slug: "como-hacer-cv-portugal-hispano",
-  summary: "CV para hispanos en Portugal. Ventaja del idioma y formato portugues.",
-  content: `# Como Hacer un CV para Trabajar en Portugal siendo Hispano
+  summary: "CV para hispanos en Portugal. Ventaja del idioma y formato portugués.",
+  content: `# Cómo Hacer un CV para Trabajar en Portugal siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Portugal hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,26 +13,26 @@ Esta guía completa sobre **CV trabajar Portugal hispano** te proporciona estrat
 
 ![CV trabajar Portugal hispano](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre CV trabajar Portugal hispano}
 
-## 1. Mercado laboral portugues
+## 1. Mercado laboral portugués
 2. Formato CV Portugal
-3. Ventaja del espanol
-4. Diferencias con el portugues
+3. Ventaja del español
+4. Diferencias con el portugués
 5. Permisos de trabajo UE
 6. Perfil verificado europeo
 
-Cuando hablamos de **CV trabajar Portugal hispano** en el contexto de 1. mercado laboral portugues
+Cuando hablamos de **CV trabajar Portugal hispano** en el contexto de 1. mercado laboral portugués
 2. formato cv portugal
-3. ventaja del espanol
-4. diferencias con el portugues
+3. ventaja del español
+4. diferencias con el portugués
 5. permisos de trabajo ue
 6. perfil verificado europeo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral portugues
+### Mejores prácticas para 1. mercado laboral portugués
 2. formato cv portugal
-3. ventaja del espanol
-4. diferencias con el portugues
+3. ventaja del español
+4. diferencias con el portugués
 5. permisos de trabajo ue
 6. perfil verificado europeo
 
@@ -44,10 +44,10 @@ Para destacar en **CV trabajar Portugal hispano** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral portugues
+### Errores frecuentes en 1. mercado laboral portugués
 2. formato cv portugal
-3. ventaja del espanol
-4. diferencias con el portugues
+3. ventaja del español
+4. diferencias con el portugués
 5. permisos de trabajo ue
 6. perfil verificado europeo
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T00:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Portugal siendo Hispano",
-  meta_description: "CV para hispanos en Portugal. Ventaja del idioma y formato portugues.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Portugal siendo Hispano",
+  meta_description: "CV para hispanos en Portugal. Ventaja del idioma y formato portugués.",
   lang: "es",
 };
 

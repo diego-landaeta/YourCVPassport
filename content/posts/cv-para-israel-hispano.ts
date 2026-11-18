@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1299,
-  title: "Como Hacer un CV para Israel siendo Hispano",
+  title: "Cómo Hacer un CV para Israel siendo Hispano",
   slug: "cv-para-israel-hispano",
   summary: "CV para hispanos en Israel. Cultura startup, formato y requisitos.",
-  content: `# Como Hacer un CV para Israel siendo Hispano
+  content: `# Cómo Hacer un CV para Israel siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Israel hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,26 +13,26 @@ Esta guía completa sobre **CV trabajar Israel hispano** te proporciona estrateg
 
 ![CV trabajar Israel hispano](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Guía completa sobre CV trabajar Israel hispano}
 
-## 1. Mercado laboral israeli
+## 1. Mercado laboral israelí
 2. Formato CV informal pero profesional
 3. Cultura startup
-4. Hebreo vs ingles
+4. Hebreo vs inglés
 5. Visa de trabajo
 6. Perfil verificado internacional
 
-Cuando hablamos de **CV trabajar Israel hispano** en el contexto de 1. mercado laboral israeli
+Cuando hablamos de **CV trabajar Israel hispano** en el contexto de 1. mercado laboral israelí
 2. formato cv informal pero profesional
 3. cultura startup
-4. hebreo vs ingles
+4. hebreo vs inglés
 5. visa de trabajo
 6. perfil verificado internacional, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral israeli
+### Mejores prácticas para 1. mercado laboral israelí
 2. formato cv informal pero profesional
 3. cultura startup
-4. hebreo vs ingles
+4. hebreo vs inglés
 5. visa de trabajo
 6. perfil verificado internacional
 
@@ -44,10 +44,10 @@ Para destacar en **CV trabajar Israel hispano** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral israeli
+### Errores frecuentes en 1. mercado laboral israelí
 2. formato cv informal pero profesional
 3. cultura startup
-4. hebreo vs ingles
+4. hebreo vs inglés
 5. visa de trabajo
 6. perfil verificado internacional
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-10T06:00:00.000Z",
-  meta_title: "Como Hacer un CV para Israel siendo Hispano",
+  meta_title: "Cómo Hacer un CV para Israel siendo Hispano",
   meta_description: "CV para hispanos en Israel. Cultura startup, formato y requisitos.",
   lang: "es",
 };

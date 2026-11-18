@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1157,
-  title: "CVs para el Ecosistema Startup en LATAM: Guia 2026",
+  title: "CVs para el Ecosistema Startup en LATAM: Guía 2026",
   slug: "startup-latam-cv-emprendedor",
   summary: "CV que atraiga a startups latinoamericanas. Mentalidad emprendedora y tech.",
-  content: `# CVs para el Ecosistema Startup en LATAM: Guia 2026
+  content: `# CVs para el Ecosistema Startup en LATAM: Guía 2026
 
 En el competitivo mercado laboral de 2026, dominar **CV startup LATAM** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,15 +14,15 @@ Esta guía completa sobre **CV startup LATAM** te proporciona estrategias compro
 ![CV startup LATAM](https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80){caption:Guía completa sobre CV startup LATAM}
 
 ## 1. Ecosistema startup LATAM 2026
-2. Que buscan las startups
-3. Habilidades mas valoradas
+2. Qué buscan las startups
+3. Habilidades más valoradas
 4. Formato para startups
 5. Cultura fit y valores
 6. Plataformas de empleo startup — claves de CV startup LATAM
 
 Cuando hablamos de **CV startup LATAM** en el contexto de 1. ecosistema startup latam 2026
-2. que buscan las startups
-3. habilidades mas valoradas
+2. qué buscan las startups
+3. habilidades más valoradas
 4. formato para startups
 5. cultura fit y valores
 6. plataformas de empleo startup, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
@@ -30,8 +30,8 @@ Cuando hablamos de **CV startup LATAM** en el contexto de 1. ecosistema startup 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. ecosistema startup latam 2026
-2. que buscan las startups
-3. habilidades mas valoradas
+2. qué buscan las startups
+3. habilidades más valoradas
 4. formato para startups
 5. cultura fit y valores
 6. plataformas de empleo startup
@@ -45,8 +45,8 @@ Para destacar en **CV startup LATAM** dentro de esta área, aplica estas estrate
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. ecosistema startup latam 2026
-2. que buscan las startups
-3. habilidades mas valoradas
+2. qué buscan las startups
+3. habilidades más valoradas
 4. formato para startups
 5. cultura fit y valores
 6. plataformas de empleo startup
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-26T02:00:00.000Z",
-  meta_title: "CVs para el Ecosistema Startup en LATAM: Guia 2026",
+  meta_title: "CVs para el Ecosistema Startup en LATAM: Guía 2026",
   meta_description: "CV que atraiga a startups latinoamericanas. Mentalidad emprendedora y tech.",
   lang: "es",
 };

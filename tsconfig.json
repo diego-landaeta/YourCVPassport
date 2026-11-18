@@ -10,6 +10,7 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "types": [
       "node"
     ],
@@ -53,7 +54,6 @@
     "**/*.test.tsx",
     "components/admin/AdminTestingHub.tsx",
     "components/admin/UserModeration.tsx",
-    "components/admin/JobPostingsManagement.tsx",
     "components/admin/CompanyManagementSection.tsx",
     "components/company/CompanyMessagesPage.tsx",
     "components/company/CompanyProfileViewPage.tsx",

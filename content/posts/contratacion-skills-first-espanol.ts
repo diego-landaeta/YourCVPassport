@@ -2,26 +2,26 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1259,
-  title: "Contratacion Skills-First: Como Cambia tu Estrategia de CV",
+  title: "Contratación Skills-First: Cómo Cambia tu Estrategia de CV",
   slug: "contratacion-skills-first-espanol",
-  summary: "Contratacion por habilidades reemplaza titulos. Adapta tu CV.",
-  content: `# Contratacion Skills-First: Como Cambia tu Estrategia de CV
+  summary: "Contratación por habilidades reemplaza títulos. Adapta tu CV.",
+  content: `# Contratación Skills-First: Cómo Cambia tu Estrategia de CV
 
-En el competitivo mercado laboral de 2026, dominar **contratacion skills first CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **contratación skills first CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **contratacion skills first CV** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **contratación skills first CV** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![contratacion skills first CV](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Guía completa sobre contratacion skills first CV}
+![contratación skills first CV](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Guía completa sobre contratación skills first CV}
 
-## 1. Fin de requisitos de titulo
-2. Que significa skills-first
+## 1. Fin de requisitos de título
+2. Qué significa skills-first
 3. CV basado en competencias
 4. Habilidades verificables y badges
 5. Empresas que lideran
-6. Credenciales de YourCVPassport — claves de contratacion skills first CV
+6. Credenciales de YourCVPassport — claves de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de 1. fin de requisitos de titulo
-2. que significa skills-first
+Cuando hablamos de **contratación skills first CV** en el contexto de 1. fin de requisitos de título
+2. qué significa skills-first
 3. cv basado en competencias
 4. habilidades verificables y badges
 5. empresas que lideran
@@ -29,14 +29,14 @@ Cuando hablamos de **contratacion skills first CV** en el contexto de 1. fin de 
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. fin de requisitos de titulo
-2. que significa skills-first
+### Mejores prácticas para 1. fin de requisitos de título
+2. qué significa skills-first
 3. cv basado en competencias
 4. habilidades verificables y badges
 5. empresas que lideran
 6. credenciales de yourcvpassport
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. fin de requisitos de titulo
-2. que significa skills-first
+### Errores frecuentes en 1. fin de requisitos de título
+2. qué significa skills-first
 3. cv basado en competencias
 4. habilidades verificables y badges
 5. empresas que lideran
 6. credenciales de yourcvpassport
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion skills first CV**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación skills first CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion ski
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre contratacion skills first CV sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre contratación skills first CV sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de contratacion skills first CV](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Aspectos avanzados de contratacion skills first CV}
+![Aspectos avanzados de contratación skills first CV](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Aspectos avanzados de contratación skills first CV}
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion skills first cv
+### Errores frecuentes en aspectos avanzados de contratación skills first cv
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion skills first CV**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación skills first CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion ski
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de contratacion skills first CV es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de contratación skills first CV es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion skills first cv
+### Errores frecuentes en aspectos avanzados de contratación skills first cv
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion skills first CV**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación skills first CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de contratacion skills first CV](https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80){caption:Aspectos avanzados de contratacion skills first CV}
+![Aspectos avanzados de contratación skills first CV](https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80){caption:Aspectos avanzados de contratación skills first CV}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de contratacion skills first CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de contratación skills first CV para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion skills first cv
+### Errores frecuentes en aspectos avanzados de contratación skills first cv
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion skills first CV**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación skills first CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion ski
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de contratacion skills first CV](https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80){caption:Aspectos avanzados de contratacion skills first CV}
+![Aspectos avanzados de contratación skills first CV](https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80){caption:Aspectos avanzados de contratación skills first CV}
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de contratacion skills first cv
+### Errores frecuentes en aspectos avanzados de contratación skills first cv
 
-Evita estos errores que cometen la mayoría de candidatos con **contratacion skills first CV**:
+Evita estos errores que cometen la mayoría de candidatos con **contratación skills first CV**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **contratacion ski
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de contratacion skills first cv
+### Mejores prácticas para aspectos avanzados de contratación skills first cv
 
-Para destacar en **contratacion skills first CV** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **contratación skills first CV** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **contratacion skills first CV** dentro de esta área, aplica e
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de contratacion skills first CV
+## Aspectos avanzados de contratación skills first CV
 
-Cuando hablamos de **contratacion skills first CV** en el contexto de aspectos avanzados de contratacion skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **contratación skills first CV** en el contexto de aspectos avanzados de contratación skills first cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de contratacion skills first CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Aspectos avanzados de contratacion skills first CV}
+![Aspectos avanzados de contratación skills first CV](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80){caption:Aspectos avanzados de contratación skills first CV}
 
-## Cómo YourCVPassport te ayuda con contratacion skills first CV
+## Cómo YourCVPassport te ayuda con contratación skills first CV
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **contratacion skills first CV**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **contratación skills first CV**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina contratacion skills first CV y transforma tu carrera profesional
+## Conclusión: domina contratación skills first CV y transforma tu carrera profesional
 
-Dominar **contratacion skills first CV** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **contratación skills first CV** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "ATS y Tecnología",
   is_featured: false,
   published_at: "2026-05-06T06:00:00.000Z",
-  meta_title: "Contratacion Skills-First: Como Cambia tu Estrategia de CV",
-  meta_description: "Contratacion por habilidades reemplaza titulos. Adapta tu CV.",
+  meta_title: "Contratación Skills-First: Cómo Cambia tu Estrategia de CV",
+  meta_description: "Contratación por habilidades reemplaza títulos. Adapta tu CV.",
   lang: "es",
 };
 

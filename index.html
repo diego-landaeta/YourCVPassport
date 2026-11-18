@@ -2,6 +2,18 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <!-- Google Consent Mode v2 (issue #11, cookies): todo denegado por defecto y,
+         si el visitante ya decidió, su decisión (lib/consent.ts). Hoy no hay
+         etiquetas de Google; así cualquiera que se añada respetará el consentimiento. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied', functionality_storage: 'denied', security_storage: 'granted', wait_for_update: 500 });
+      try {
+        var c = JSON.parse(localStorage.getItem('ycp_cookie_consent') || 'null');
+        if (c && c.v === 1) gtag('consent', 'update', { analytics_storage: c.analytics ? 'granted' : 'denied', functionality_storage: c.thirdParty ? 'granted' : 'denied' });
+      } catch (e) {}
+    </script>
     <!-- lang="es" es el idioma por defecto; LanguageContext lo actualiza en el primer render -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -42,6 +54,17 @@
 
     <!-- Robots -->
     <meta name="robots" content="index, follow" />
+
+    <!-- Las etiquetas de arriba son los valores por defecto: react-helmet-async solo sustituye las
+         que llevan data-rh. Se marcan aquí (el HTML que genera scripts/generate-static-meta.mjs las
+         conserva tal cual) para que Helmet las REEMPLACE y el DOM renderizado tenga una sola
+         meta robots, una sola description, un solo og:* y un solo twitter:* (auditoría SEO, hallazgo 14). -->
+    <script>
+      (function () {
+        var tags = document.head.querySelectorAll('meta[name="description"],meta[name="robots"],meta[property^="og:"],meta[name^="twitter:"]');
+        for (var i = 0; i < tags.length; i++) tags[i].setAttribute('data-rh', 'true');
+      })();
+    </script>
 
     <!-- El widget de Opynio (https://web.opynio.com/widget.js) lo inyectan bajo demanda
          Testimonials.tsx y SuccessStoriesPage.tsx: no se carga globalmente en todas las páginas -->

@@ -39,6 +39,15 @@ export default defineConfig({
     // En WebKit las peticiones que pasan por el Service Worker de la app se saltan
     // page.route y llegarian a la Supabase real.
     serviceWorkers: 'block',
+    // Aviso de cookies (issue #11): las specs arrancan con la decisión ya tomada, como
+    // en tests/qa/playwright.qa.config.ts; si no, el aviso tapa botones del panel.
+    storageState: {
+      cookies: [],
+      origins: [{
+        origin: localURL,
+        localStorage: [{ name: 'ycp_cookie_consent', value: JSON.stringify({ v: 1, date: '2026-10-15T00:00:00.000Z', analytics: true, thirdParty: true }) }],
+      }],
+    },
   },
 
   projects: [

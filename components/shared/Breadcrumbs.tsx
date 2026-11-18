@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { routeConfig } from '../../config/routeConfig';
 import { useTranslations } from '../../hooks/useTranslations';
 import { normalizeUrl } from '../../utils/canonicalUrl';
+import { canonicalSectionPath } from '../../lib/seoCanonicalPaths';
 
 const BASE_URL = 'https://yourcvpassport.com';
 
@@ -53,7 +54,8 @@ const Breadcrumbs: React.FC = () => {
             const sectionRoute = routeConfig.find(r => pathFor(r) === section);
             list.push({
                 label: labelFor(section),
-                to: sectionRoute && LINKABLE_SECTIONS.has(section) ? `/${section}` : undefined,
+                // A la URL canonica de la seccion (/producto -> /producto/resumen), no a la raiz duplicada
+                to: sectionRoute && LINKABLE_SECTIONS.has(section) ? canonicalSectionPath(section) : undefined,
             });
         }
         list.push({ label: labelFor(path) });

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1264,
-  title: "Que Ponerse para una Entrevista de Trabajo en 2026",
+  title: "Qué Ponerse para una Entrevista de Trabajo en 2026",
   slug: "que-ponerse-entrevista-trabajo-2026",
-  summary: "Vistete para el exito segun industria y formato de entrevista.",
-  content: `# Que Ponerse para una Entrevista de Trabajo en 2026
+  summary: "Vístete para el éxito según industria y formato de entrevista.",
+  content: `# Qué Ponerse para una Entrevista de Trabajo en 2026
 
 En el competitivo mercado laboral de 2026, dominar **que ponerse entrevista trabajo** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **que ponerse entrevista trabajo** te proporciona estr
 
 ![que ponerse entrevista trabajo](https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&q=80){caption:Guía completa sobre que ponerse entrevista trabajo}
 
-## 1. Evolucion de codigos de vestimenta
+## 1. Evolución de códigos de vestimenta
 2. Entrevistas corporativas
 3. Tech y startups
 4. Industrias creativas
 5. Entrevistas remotas
-6. Accesorios y presentacion — claves de que ponerse entrevista trabajo
+6. Accesorios y presentación — claves de que ponerse entrevista trabajo
 
-Cuando hablamos de **que ponerse entrevista trabajo** en el contexto de 1. evolucion de codigos de vestimenta
+Cuando hablamos de **que ponerse entrevista trabajo** en el contexto de 1. evolución de códigos de vestimenta
 2. entrevistas corporativas
 3. tech y startups
 4. industrias creativas
 5. entrevistas remotas
-6. accesorios y presentacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. accesorios y presentación, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. evolucion de codigos de vestimenta
+### Mejores prácticas para 1. evolución de códigos de vestimenta
 2. entrevistas corporativas
 3. tech y startups
 4. industrias creativas
 5. entrevistas remotas
-6. accesorios y presentacion
+6. accesorios y presentación
 
 Para destacar en **que ponerse entrevista trabajo** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **que ponerse entrevista trabajo** dentro de esta área, aplica
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. evolucion de codigos de vestimenta
+### Errores frecuentes en 1. evolución de códigos de vestimenta
 2. entrevistas corporativas
 3. tech y startups
 4. industrias creativas
 5. entrevistas remotas
-6. accesorios y presentacion
+6. accesorios y presentación
 
 Evita estos errores que cometen la mayoría de candidatos con **que ponerse entrevista trabajo**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Entrevista y Empleo",
   is_featured: false,
   published_at: "2026-05-06T20:00:00.000Z",
-  meta_title: "Que Ponerse para una Entrevista de Trabajo en 2026",
-  meta_description: "Vistete para el exito segun industria y formato de entrevista.",
+  meta_title: "Qué Ponerse para una Entrevista de Trabajo en 2026",
+  meta_description: "Vístete para el éxito según industria y formato de entrevista.",
   lang: "es",
 };
 

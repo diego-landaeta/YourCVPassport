@@ -111,9 +111,9 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                     <div className="space-y-8 pl-16">
                         {experiences.map(exp => (
                             <div key={exp.id}>
-                                <div className="flex justify-between items-baseline mb-2">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-2">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
-                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
+                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap shrink-0">
                                         {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.present}
                                     </span>
                                 </div>
@@ -137,9 +137,9 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                     <div className="space-y-6 pl-16">
                         {education.map(edu => (
                             <div key={edu.id}>
-                                <div className="flex justify-between items-baseline mb-1">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-1">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
-                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
+                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap shrink-0">
                                         {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.present}
                                     </span>
                                 </div>
@@ -160,9 +160,9 @@ const ProfessionalClassicTemplate: React.FC<ProfessionalClassicTemplateProps> = 
                     <div className="space-y-6 pl-16">
                         {education.map(edu => (
                             <div key={edu.id}>
-                                <div className="flex justify-between items-baseline mb-1">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-1">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
-                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
+                                    <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap shrink-0">
                                         {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : t.cvSections.present}
                                     </span>
                                 </div>

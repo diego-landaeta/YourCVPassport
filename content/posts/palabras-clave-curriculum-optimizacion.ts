@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1178,
-  title: "Palabras Clave en el Curriculum: Optimizar para Cada Oferta",
+  title: "Palabras Clave en el Currículum: Optimizar para Cada Oferta",
   slug: "palabras-clave-curriculum-optimizacion",
-  summary: "Optimizacion de palabras clave en tu CV. Extraer keywords y colocarlas estrategicamente.",
-  content: `# Palabras Clave en el Curriculum: Optimizar para Cada Oferta
+  summary: "Optimización de palabras clave en tu CV. Extraer keywords y colocarlas estratégicamente.",
+  content: `# Palabras Clave en el Currículum: Optimizar para Cada Oferta
 
-En el competitivo mercado laboral de 2026, dominar **palabras clave curriculum optimizacion** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **palabras clave currículum optimización** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **palabras clave curriculum optimizacion** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **palabras clave currículum optimización** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Guía completa sobre palabras clave curriculum optimizacion}
+![palabras clave currículum optimización](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Guía completa sobre palabras clave currículum optimización}
 
-## 1. Por que keywords determinan tu exito
+## 1. Por qué keywords determinan tu éxito
 2. Extraer keywords de ofertas
 3. Habilidades duras vs blandas
-4. Colocacion estrategica
+4. Colocación estratégica
 5. Evitar keyword stuffing
-6. Herramientas de IA — claves de palabras clave curriculum optimizacion
+6. Herramientas de IA — claves de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de 1. por que keywords determinan tu exito
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de 1. por qué keywords determinan tu éxito
 2. extraer keywords de ofertas
 3. habilidades duras vs blandas
-4. colocacion estrategica
+4. colocación estratégica
 5. evitar keyword stuffing
 6. herramientas de ia, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. por que keywords determinan tu exito
+### Mejores prácticas para 1. por qué keywords determinan tu éxito
 2. extraer keywords de ofertas
 3. habilidades duras vs blandas
-4. colocacion estrategica
+4. colocación estratégica
 5. evitar keyword stuffing
 6. herramientas de ia
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. por que keywords determinan tu exito
+### Errores frecuentes en 1. por qué keywords determinan tu éxito
 2. extraer keywords de ofertas
 3. habilidades duras vs blandas
-4. colocacion estrategica
+4. colocación estratégica
 5. evitar keyword stuffing
 6. herramientas de ia
 
-Evita estos errores que cometen la mayoría de candidatos con **palabras clave curriculum optimizacion**:
+Evita estos errores que cometen la mayoría de candidatos con **palabras clave currículum optimización**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **palabras clave c
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre palabras clave curriculum optimizacion sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre palabras clave currículum optimización sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
+![Aspectos avanzados de palabras clave currículum optimización](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Aspectos avanzados de palabras clave currículum optimización}
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de palabras clave curriculum optimizacion
+### Errores frecuentes en aspectos avanzados de palabras clave currículum optimización
 
-Evita estos errores que cometen la mayoría de candidatos con **palabras clave curriculum optimizacion**:
+Evita estos errores que cometen la mayoría de candidatos con **palabras clave currículum optimización**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **palabras clave c
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de palabras clave curriculum optimizacion es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de palabras clave currículum optimización es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de palabras clave curriculum optimizacion
+### Errores frecuentes en aspectos avanzados de palabras clave currículum optimización
 
-Evita estos errores que cometen la mayoría de candidatos con **palabras clave curriculum optimizacion**:
+Evita estos errores que cometen la mayoría de candidatos con **palabras clave currículum optimización**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
+![Aspectos avanzados de palabras clave currículum optimización](https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80){caption:Aspectos avanzados de palabras clave currículum optimización}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de palabras clave curriculum optimizacion para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de palabras clave currículum optimización para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de palabras clave curriculum optimizacion
+### Errores frecuentes en aspectos avanzados de palabras clave currículum optimización
 
-Evita estos errores que cometen la mayoría de candidatos con **palabras clave curriculum optimizacion**:
+Evita estos errores que cometen la mayoría de candidatos con **palabras clave currículum optimización**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **palabras clave c
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
+![Aspectos avanzados de palabras clave currículum optimización](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80){caption:Aspectos avanzados de palabras clave currículum optimización}
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de palabras clave curriculum optimizacion
+### Errores frecuentes en aspectos avanzados de palabras clave currículum optimización
 
-Evita estos errores que cometen la mayoría de candidatos con **palabras clave curriculum optimizacion**:
+Evita estos errores que cometen la mayoría de candidatos con **palabras clave currículum optimización**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **palabras clave c
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de palabras clave curriculum optimizacion
+### Mejores prácticas para aspectos avanzados de palabras clave currículum optimización
 
-Para destacar en **palabras clave curriculum optimizacion** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **palabras clave currículum optimización** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **palabras clave curriculum optimizacion** dentro de esta área
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de palabras clave curriculum optimizacion
+## Aspectos avanzados de palabras clave currículum optimización
 
-Cuando hablamos de **palabras clave curriculum optimizacion** en el contexto de aspectos avanzados de palabras clave curriculum optimizacion, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **palabras clave currículum optimización** en el contexto de aspectos avanzados de palabras clave currículum optimización, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de palabras clave curriculum optimizacion](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Aspectos avanzados de palabras clave curriculum optimizacion}
+![Aspectos avanzados de palabras clave currículum optimización](https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=800&q=80){caption:Aspectos avanzados de palabras clave currículum optimización}
 
-## Cómo YourCVPassport te ayuda con palabras clave curriculum optimizacion
+## Cómo YourCVPassport te ayuda con palabras clave currículum optimización
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **palabras clave curriculum optimizacion**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **palabras clave currículum optimización**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina palabras clave curriculum optimizacion y transforma tu carrera profesional
+## Conclusión: domina palabras clave currículum optimización y transforma tu carrera profesional
 
-Dominar **palabras clave curriculum optimizacion** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **palabras clave currículum optimización** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "ATS y Tecnología",
   is_featured: false,
   published_at: "2026-04-28T04:00:00.000Z",
-  meta_title: "Palabras Clave en el Curriculum: Optimizar para Cada Oferta",
-  meta_description: "Optimizacion de palabras clave en tu CV. Extraer keywords y colocarlas estrategicamente.",
+  meta_title: "Palabras Clave en el Currículum: Optimizar para Cada Oferta",
+  meta_description: "Optimización de palabras clave en tu CV. Extraer keywords y colocarlas estratégicamente.",
   lang: "es",
 };
 

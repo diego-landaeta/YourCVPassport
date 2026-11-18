@@ -104,9 +104,9 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                                 <div className="absolute left-0 top-0 w-3 h-3 rounded-full -translate-x-[7px]"
                                      style={{ backgroundColor: accentColor }}>
                                 </div>
-                                <div className="flex justify-between items-baseline mb-2">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-2">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.position}</h3>
-                                    <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap ml-4"
+                                    <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0"
                                           style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                         {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : L.present}
                                     </span>
@@ -134,9 +134,9 @@ const HealthcareProfessionalTemplate: React.FC<HealthcareProfessionalTemplatePro
                                 <div className="absolute left-0 top-0 w-3 h-3 rounded-full -translate-x-[7px]"
                                      style={{ backgroundColor: accentColor }}>
                                 </div>
-                                <div className="flex justify-between items-baseline mb-1">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-1">
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{edu.degree}</h3>
-                                    <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap ml-4"
+                                    <span className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap shrink-0"
                                           style={{ backgroundColor: `${accentColor}15`, color: accentColor }}>
                                         {new Date(edu.start_date).getFullYear()} – {edu.end_date ? new Date(edu.end_date).getFullYear() : L.present}
                                     </span>

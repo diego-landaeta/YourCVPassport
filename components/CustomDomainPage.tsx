@@ -59,9 +59,9 @@ const CustomDomainPage: React.FC = () => {
                                 <p className="mt-6 text-lg text-gray-600 dark:text-dark-text-secondary">
                                     {t.customDomain.subtitle}
                                 </p>
-                                <div className="mt-10 bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg p-2 flex items-center">
+                                <div className="mt-10 bg-white dark:bg-dark-bg-primary rounded-lg shadow-lg p-2 flex flex-wrap items-center min-w-0">
                                     <span className="text-gray-400 dark:text-dark-text-tertiary ml-4">https://</span>
-                                    <span className="text-cv-dark-gray dark:text-dark-text-primary font-semibold">yourcvpassport.com/cv/janedoe</span>
+                                    <span className="min-w-0 break-all text-cv-dark-gray dark:text-dark-text-primary font-semibold">yourcvpassport.com/cv/janedoe</span>
                                 </div>
                             </div>
                         </AnimatedWrapper>
@@ -160,9 +160,9 @@ const CustomDomainPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="mt-4 border-t border-gray-600 pt-4 text-sm">
-                                    <div className="flex justify-between items-end">
+                                    <div className="flex justify-between items-end gap-3">
                                         <p className="text-xs text-gray-500 font-mono">ID: a1b2c3d4</p>
-                                        <div className="text-right">
+                                        <div className="text-right min-w-0 break-all">
                                             <p className="text-cv-blue font-semibold">yourcvpassport.com/cv/{sampleCard.slug}</p>
                                             <p className="text-gray-400 dark:text-dark-text-tertiary">{sampleCard.email}</p>
                                         </div>
