@@ -192,7 +192,7 @@ const DesktopNavLink: React.FC<{ item: NavItem }> = ({ item }) => {
     return (
       <Link
         to={getPath(item.id)}
-        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-1.5 min-[1340px]:px-3 py-2 rounded-md text-[13px] min-[1340px]:text-sm font-medium transition-colors duration-200"
       >
         {item.name}
       </Link>
@@ -202,7 +202,7 @@ const DesktopNavLink: React.FC<{ item: NavItem }> = ({ item }) => {
   return (
     <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <button
-        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center focus:outline-none"
+        className="text-gray-700 dark:text-dark-text-primary hover:text-cv-blue dark:hover:text-cv-blue-light px-1.5 min-[1340px]:px-3 py-2 rounded-md text-[13px] min-[1340px]:text-sm font-medium transition-colors duration-200 flex items-center focus:outline-none"
       >
         {item.name}
         <svg className={`ml-1 h-4 w-4 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -324,7 +324,9 @@ const Header: React.FC = () => {
               YourCVPassport
             </Link>
           </div>
-          <nav className="hidden lg:flex items-center space-x-0.5 flex-1 justify-center">
+          {/* Hasta 1339 px los enlaces van a 13 px y con menos relleno: a 1280 px, con las fuentes de Linux, el menú se salía 4 px (CI de la PR #21; mismo arreglo que ya está en producción).
+              Entre 1024 y 1279 px sigue sin caber: eso lo arregla el paso del menú a xl de la PR #22 (issue #11). */}
+          <nav className="hidden lg:flex items-center space-x-0 min-[1340px]:space-x-0.5 flex-1 justify-center">
             {navLinks.map((item) => (
               <DesktopNavLink key={item.name} item={item} />
             ))}
