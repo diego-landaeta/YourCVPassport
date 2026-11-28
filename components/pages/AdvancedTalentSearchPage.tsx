@@ -633,9 +633,9 @@ const AdvancedTalentSearchPage: React.FC = () => {
                             </p>
                         </div>
                         
-                        <div className="grid lg:grid-cols-12 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             {/* Filters Sidebar */}
-                            <div className="lg:col-span-3">
+                            <div className="lg:col-span-3 min-w-0">
                                 <div className="sticky top-6">
                                     <FilterSection
                                         filters={filters}
@@ -696,7 +696,9 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 ) : (
                                     <>
                                         {/* Results Header */}
-                                        <div className="mb-6 flex items-center justify-between bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm">
+                                        {/* flex-wrap: en móvil «Traduciendo…» + «Actualizar» no caben junto al contador
+                                            y desbordaban la página mientras se traducía (+94 px a 320). */}
+                                        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-dark-bg-secondary rounded-xl p-4 shadow-sm">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-cv-blue/10 rounded-lg">
                                                     <svg className="w-5 h-5 text-cv-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -710,7 +712,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                                                 {/* Translation Indicator */}
                                                 {isTranslating && (
                                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 rounded-full border border-purple-200 dark:border-purple-700/50 animate-pulse">
@@ -806,7 +808,7 @@ const AdvancedTalentSearchPage: React.FC = () => {
                                 <div className="absolute inset-0 bg-gradient-to-br from-cv-blue/20 to-purple-500/20 rounded-2xl blur-3xl"></div>
                                 <div className="relative bg-white dark:bg-dark-bg-primary p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700">
                                     <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80" alt="AI matching illustration" className="rounded-lg w-full object-cover" />
-                                    <div className="absolute -bottom-6 right-2 sm:-right-6 bg-cv-blue text-white px-6 py-4 rounded-xl shadow-xl">
+                                    <div className="absolute -bottom-6 right-2 bg-cv-blue text-white px-6 py-4 rounded-xl shadow-xl">
                                         <div className="text-3xl font-bold">95%</div>
                                         <div className="text-sm opacity-90">Match Score</div>
                                     </div>

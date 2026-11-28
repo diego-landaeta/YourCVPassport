@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1104,
   title: "Mejor Plantilla de CV para Profesores en 2026",
   slug: "mejor-plantilla-cv-profesor",
-  summary: "Mejores plantillas de CV para profesores. Titulaciones y metodologias docentes.",
+  summary: "Mejores plantillas de CV para profesores. Titulaciones y metodologías docentes.",
   content: `# Mejor Plantilla de CV para Profesores en 2026
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV profesor** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -14,25 +14,25 @@ Esta guía completa sobre **plantilla CV profesor** te proporciona estrategias c
 ![plantilla CV profesor](https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80){caption:Guía completa sobre plantilla CV profesor}
 
 ## 1. CV especializado para profesores
-2. Secciones: titulacion, materias, metodologias
+2. Secciones: titulación, materias, metodologías
 3. Mejores plantillas con ejemplos
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV profesor** en el contexto de 1. cv especializado para profesores
-2. secciones: titulacion, materias, metodologias
+2. secciones: titulación, materias, metodologías
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. cv especializado para profesores
-2. secciones: titulacion, materias, metodologias
+2. secciones: titulación, materias, metodologías
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -45,9 +45,9 @@ Para destacar en **plantilla CV profesor** dentro de esta área, aplica estas es
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. cv especializado para profesores
-2. secciones: titulacion, materias, metodologias
+2. secciones: titulación, materias, metodologías
 3. mejores plantillas con ejemplos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-04-20T20:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Profesores en 2026",
-  meta_description: "Mejores plantillas de CV para profesores. Titulaciones y metodologias docentes.",
+  meta_description: "Mejores plantillas de CV para profesores. Titulaciones y metodologías docentes.",
   lang: "es",
 };
 

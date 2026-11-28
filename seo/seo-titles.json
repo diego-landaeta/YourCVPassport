@@ -1,0 +1,140 @@
+{
+  "_comment": "Titulos (seoTitle) y descripciones SEO escritos a mano para articulos del blog cuando el algoritmo de seo/seo-text.mjs no puede dar un titulo completo de 50-60 caracteres con la marca (el titulo original queda corto para ir solo y largo para ir con marca). Clave: slug. El campo title incluye la marca. Nunca llevan puntos suspensivos.",
+  "posts": {
+    "how-to-write-cv-for-canada": {
+      "title": "CV for Canada: Complete 2026 Guide - YourCVPassport"
+    },
+    "how-to-write-cv-for-france": {
+      "title": "CV for France: Complete 2026 Guide - YourCVPassport"
+    },
+    "first-job-cv-no-experience": {
+      "title": "Write Your First CV With No Experience - YourCVPassport"
+    },
+    "graduate-cv-template-guide": {
+      "title": "Graduate CV Template to Stand Out - YourCVPassport"
+    },
+    "internship-cv-guide": {
+      "title": "Write an Internship CV That Gets Noticed - YourCVPassport"
+    },
+    "cv-for-relocation-moving-abroad": {
+      "title": "How to Write a CV When Moving Abroad - YourCVPassport"
+    },
+    "how-to-list-soft-skills-on-cv": {
+      "title": "How to List Soft Skills on Your CV - YourCVPassport"
+    },
+    "how-ats-systems-work-2026": {
+      "title": "How ATS Systems Work: The Complete Guide - YourCVPassport"
+    },
+    "how-to-use-job-description-for-cv": {
+      "title": "Decode Job Descriptions and Tailor Your CV - YourCVPassport"
+    },
+    "how-to-explain-employment-gap": {
+      "title": "Explain an Employment Gap in Interviews - YourCVPassport"
+    },
+    "mejor-plantilla-cv-marketing-digital": {
+      "title": "Plantilla de CV para Marketing Digital - YourCVPassport"
+    },
+    "como-hacer-cv-venezuela-exterior": {
+      "title": "CV para Venezolanos en el Exterior - YourCVPassport"
+    },
+    "como-hacer-cv-costa-rica": {
+      "title": "Cómo Hacer un CV para Costa Rica: Guía - YourCVPassport"
+    },
+    "como-hacer-cv-el-salvador": {
+      "title": "Cómo Hacer un CV para El Salvador: Guía - YourCVPassport"
+    },
+    "como-hacer-cv-puerto-rico": {
+      "title": "Cómo Hacer un CV para Puerto Rico: Guía - YourCVPassport"
+    },
+    "como-hacer-cv-cuba-profesionales": {
+      "title": "CV para Profesionales Cubanos: Guía - YourCVPassport"
+    },
+    "economia-gig-latam-cv": {
+      "title": "Economía Gig en LATAM: Cómo Presentar tu CV - YourCVPassport"
+    },
+    "cv-para-maestria-aplicacion": {
+      "title": "Cómo Hacer un CV para una Maestría - YourCVPassport"
+    },
+    "como-responder-hablame-de-ti": {
+      "title": "Cómo Responder Háblame de Ti en Entrevista - YourCVPassport"
+    },
+    "como-manejar-rechazo-laboral": {
+      "title": "Cómo Manejar el Rechazo Laboral y Avanzar - YourCVPassport"
+    },
+    "side-hustle-cv-should-you-include": {
+      "title": "Should You Put a Side Hustle on Your CV? - YourCVPassport"
+    },
+    "freelance-to-agency-scaling": {
+      "title": "Freelancer to Agency: How Your CV Evolves - YourCVPassport"
+    },
+    "scholarship-application-cv": {
+      "title": "How to Write a CV for a Scholarship - YourCVPassport"
+    },
+    "masters-application-cv-guide": {
+      "title": "How to Write a CV for a Masters Degree - YourCVPassport"
+    },
+    "study-abroad-cv-guide": {
+      "title": "Include Study Abroad Experience on Your CV - YourCVPassport"
+    },
+    "cv-pdf-vs-docx-format": {
+      "title": "CV Format: PDF or DOCX, Which to Send? - YourCVPassport"
+    },
+    "video-resume-guide-2026": {
+      "title": "Video Resume Guide 2026: When to Use One - YourCVPassport"
+    },
+    "how-to-write-elevator-pitch": {
+      "title": "Write an Elevator Pitch for Job Seekers - YourCVPassport"
+    },
+    "second-interview-preparation": {
+      "title": "Second Interview Preparation Guide - YourCVPassport"
+    },
+    "work-life-balance-interview-questions": {
+      "title": "Work-Life Balance Questions for Interviews - YourCVPassport"
+    },
+    "how-to-research-company-interview": {
+      "title": "Research a Company Before Your Interview - YourCVPassport"
+    },
+    "portfolio-presentation-interviews": {
+      "title": "How to Present Your Portfolio in Interviews - YourCVPassport"
+    },
+    "how-to-list-project-management-cv": {
+      "title": "List Project Management Skills on Your CV - YourCVPassport"
+    },
+    "how-to-list-remote-work-skills": {
+      "title": "Highlight Remote Work Skills on Your CV - YourCVPassport"
+    },
+    "cv-emprendedor-volver-empleo": {
+      "title": "De Emprendedor a Empleado: Escribe tu CV - YourCVPassport"
+    },
+    "cv-transicion-academia-industria": {
+      "title": "De la Academia a la Industria: Adapta tu CV - YourCVPassport"
+    },
+    "cv-trabajo-medio-tiempo": {
+      "title": "CV para Trabajos de Medio Tiempo: Guía - YourCVPassport"
+    },
+    "cv-trabajador-independiente-autonomo": {
+      "title": "CV para Trabajadores Independientes - YourCVPassport"
+    },
+    "cv-militar-transicion-civil": {
+      "title": "CV para Militares que Pasan a la Vida Civil - YourCVPassport"
+    },
+    "video-curriculum-guia-2026": {
+      "title": "Video Currículum 2026: Cuándo y Cómo Usarlo - YourCVPassport"
+    },
+    "coaching-profesional-cv-entrevista": {
+      "title": "Coaching Profesional: CV y Entrevistas - YourCVPassport"
+    },
+    "mejor-plantilla-cv-chef-gastronomia": {
+      "title": "Plantilla de CV para Chefs y Gastronomía - YourCVPassport"
+    },
+    "mejor-plantilla-cv-trabajador-social": {
+      "title": "Plantilla de CV para Trabajadores Sociales - YourCVPassport"
+    },
+    "cv-para-emigrar-singapur-hispano": {
+      "title": "Cómo Hacer un CV para Singapur: Guía - YourCVPassport"
+    },
+    "cv-para-sudafrica-hispano": {
+      "title": "Cómo Hacer un CV para Sudáfrica: Guía - YourCVPassport"
+    }
+  }
+}

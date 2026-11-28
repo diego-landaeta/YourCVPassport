@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1288,
-  title: "Como Hacer un CV para Trabajar en Brasil siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Brasil siendo Hispano",
   slug: "cv-para-emigrar-brasil-hispano",
-  summary: "CV para hispanos en Brasil. Curriculo brasileiro y portunol.",
-  content: `# Como Hacer un CV para Trabajar en Brasil siendo Hispano
+  summary: "CV para hispanos en Brasil. Currículo brasileiro y portunol.",
+  content: `# Cómo Hacer un CV para Trabajar en Brasil siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Brasil hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,26 +13,26 @@ Esta guía completa sobre **CV trabajar Brasil hispano** te proporciona estrateg
 
 ![CV trabajar Brasil hispano](https://images.unsplash.com/photo-1504150558240-0b4fd8946624?w=800&q=80){caption:Guía completa sobre CV trabajar Brasil hispano}
 
-## 1. Mercado laboral brasileno
-2. Formato curriculo brasileiro
+## 1. Mercado laboral brasileño
+2. Formato currículo brasileiro
 3. CPF y datos requeridos
-4. Portugues brasileno
+4. Portugués brasileño
 5. Permisos Mercosur
 6. Perfil verificado para Brasil — claves de CV trabajar Brasil hispano
 
-Cuando hablamos de **CV trabajar Brasil hispano** en el contexto de 1. mercado laboral brasileno
-2. formato curriculo brasileiro
+Cuando hablamos de **CV trabajar Brasil hispano** en el contexto de 1. mercado laboral brasileño
+2. formato currículo brasileiro
 3. cpf y datos requeridos
-4. portugues brasileno
+4. portugués brasileño
 5. permisos mercosur
 6. perfil verificado para brasil, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. mercado laboral brasileno
-2. formato curriculo brasileiro
+### Mejores prácticas para 1. mercado laboral brasileño
+2. formato currículo brasileiro
 3. cpf y datos requeridos
-4. portugues brasileno
+4. portugués brasileño
 5. permisos mercosur
 6. perfil verificado para brasil
 
@@ -44,10 +44,10 @@ Para destacar en **CV trabajar Brasil hispano** dentro de esta área, aplica est
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. mercado laboral brasileno
-2. formato curriculo brasileiro
+### Errores frecuentes en 1. mercado laboral brasileño
+2. formato currículo brasileiro
 3. cpf y datos requeridos
-4. portugues brasileno
+4. portugués brasileño
 5. permisos mercosur
 6. perfil verificado para brasil
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T04:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Brasil siendo Hispano",
-  meta_description: "CV para hispanos en Brasil. Curriculo brasileiro y portunol.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Brasil siendo Hispano",
+  meta_description: "CV para hispanos en Brasil. Currículo brasileiro y portunol.",
   lang: "es",
 };
 

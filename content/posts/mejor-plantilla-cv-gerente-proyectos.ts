@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1110,
   title: "Mejor Plantilla de CV para Gerentes de Proyectos en 2026",
   slug: "mejor-plantilla-cv-gerente-proyectos",
-  summary: "Mejores plantillas de CV para gerentes de proyectos. PMP, metodologias y entrega.",
+  summary: "Mejores plantillas de CV para gerentes de proyectos. PMP, metodologías y entrega.",
   content: `# Mejor Plantilla de CV para Gerentes de Proyectos en 2026
 
 En el competitivo mercado laboral de 2026, dominar **plantilla CV gerente de proyectos** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -14,25 +14,25 @@ Esta guía completa sobre **plantilla CV gerente de proyectos** te proporciona e
 ![plantilla CV gerente de proyectos](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre plantilla CV gerente de proyectos}
 
 ## 1. CV especializado para PMs
-2. Secciones: certificaciones, metodologias, herramientas
+2. Secciones: certificaciones, metodologías, herramientas
 3. Cuantificar entrega de proyectos
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes a evitar
 6. Plantillas verificadas de YourCVPassport
 
 Cuando hablamos de **plantilla CV gerente de proyectos** en el contexto de 1. cv especializado para pms
-2. secciones: certificaciones, metodologias, herramientas
+2. secciones: certificaciones, metodologías, herramientas
 3. cuantificar entrega de proyectos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. cv especializado para pms
-2. secciones: certificaciones, metodologias, herramientas
+2. secciones: certificaciones, metodologías, herramientas
 3. cuantificar entrega de proyectos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -45,9 +45,9 @@ Para destacar en **plantilla CV gerente de proyectos** dentro de esta área, apl
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. cv especializado para pms
-2. secciones: certificaciones, metodologias, herramientas
+2. secciones: certificaciones, metodologías, herramientas
 3. cuantificar entrega de proyectos
-4. optimizacion ats
+4. optimización ats
 5. errores comunes a evitar
 6. plantillas verificadas de yourcvpassport
 
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-04-21T12:00:00.000Z",
   meta_title: "Mejor Plantilla de CV para Gerentes de Proyectos en 2026",
-  meta_description: "Mejores plantillas de CV para gerentes de proyectos. PMP, metodologias y entrega.",
+  meta_description: "Mejores plantillas de CV para gerentes de proyectos. PMP, metodologías y entrega.",
   lang: "es",
 };
 

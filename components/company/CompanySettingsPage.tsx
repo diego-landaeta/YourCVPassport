@@ -202,10 +202,10 @@ const CompanySettingsPage_NEW: React.FC = () => {
 
         {/* Tabs */}
         <div className="mb-6 border-b border-gray-200 dark:border-dark-border">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex gap-6 sm:gap-8 overflow-x-auto">
             <button
               onClick={() => setActiveTab('notifications')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
                 activeTab === 'notifications'
                   ? 'border-cv-blue text-cv-blue dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -216,7 +216,7 @@ const CompanySettingsPage_NEW: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('privacy')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
                 activeTab === 'privacy'
                   ? 'border-cv-blue text-cv-blue dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -227,7 +227,7 @@ const CompanySettingsPage_NEW: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('search')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
                 activeTab === 'search'
                   ? 'border-cv-blue text-cv-blue dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -238,7 +238,7 @@ const CompanySettingsPage_NEW: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('billing')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 transition-colors ${
                 activeTab === 'billing'
                   ? 'border-cv-blue text-cv-blue dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -265,8 +265,8 @@ const CompanySettingsPage_NEW: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-border">
-                  <div>
+                <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-dark-border">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                       {t.company.settings.notifications.emailNotifications}
                     </p>
@@ -275,9 +275,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.email_notifications)}
+                    aria-label={t.company.settings.notifications.emailNotifications}
                     onClick={() => toggleSetting('email_notifications')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.email_notifications ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -289,8 +293,8 @@ const CompanySettingsPage_NEW: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-border">
-                  <div>
+                <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-dark-border">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                       {t.company.settings.notifications.newMatches}
                     </p>
@@ -299,9 +303,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.new_matches_alert)}
+                    aria-label={t.company.settings.notifications.newMatches}
                     onClick={() => toggleSetting('new_matches_alert')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.new_matches_alert ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -313,8 +321,8 @@ const CompanySettingsPage_NEW: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-border">
-                  <div>
+                <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-dark-border">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                       {t.company.settings.notifications.creditLow}
                     </p>
@@ -323,9 +331,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.credit_low_alert)}
+                    aria-label={t.company.settings.notifications.creditLow}
                     onClick={() => toggleSetting('credit_low_alert')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.credit_low_alert ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -347,9 +359,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.weekly_summary)}
+                    aria-label={t.company.settings.notifications.weeklySummary}
                     onClick={() => toggleSetting('weekly_summary')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.weekly_summary ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -403,9 +419,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.allow_direct_messages)}
+                    aria-label={t.company.settings.privacy.allowMessages}
                     onClick={() => toggleSetting('allow_direct_messages')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.allow_direct_messages ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -433,8 +453,8 @@ const CompanySettingsPage_NEW: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-border">
-                  <div>
+                <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-dark-border">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                       {t.company.settings.searchPreferences.autoSave}
                     </p>
@@ -443,9 +463,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.auto_save_searches)}
+                    aria-label={t.company.settings.searchPreferences.autoSave}
                     onClick={() => toggleSetting('auto_save_searches')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.auto_save_searches ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
@@ -497,8 +521,8 @@ const CompanySettingsPage_NEW: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-border">
-                  <div>
+                <div className="flex items-center justify-between gap-4 py-3 border-b border-gray-200 dark:border-dark-border">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                       {t.company.settings.billing.autoRecharge}
                     </p>
@@ -507,9 +531,13 @@ const CompanySettingsPage_NEW: React.FC = () => {
                     </p>
                   </div>
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(settings.auto_recharge_enabled)}
+                    aria-label={t.company.settings.billing.autoRecharge}
                     onClick={() => toggleSetting('auto_recharge_enabled')}
                     disabled={!canEdit}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex flex-shrink-0 h-6 w-11 items-center rounded-full transition-colors ${
                       settings.auto_recharge_enabled ? 'bg-cv-blue' : 'bg-gray-200 dark:bg-gray-700'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >

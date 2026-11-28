@@ -86,9 +86,9 @@ const CreativeMinimalistTemplate: React.FC<CreativeMinimalistTemplateProps> = ({
                                 <div className="absolute left-0 top-0 w-3 h-3 rounded-full -translate-x-[7px]"
                                      style={{ backgroundColor: accentColor }}>
                                 </div>
-                                <div className="flex justify-between items-baseline mb-1">
+                                <div className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 mb-1">
                                     <h3 className="text-2xl font-light text-gray-900 dark:text-white">{exp.position}</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-light whitespace-nowrap ml-4">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-light whitespace-nowrap shrink-0">
                                         {new Date(exp.start_date).getFullYear()} – {exp.end_date ? new Date(exp.end_date).getFullYear() : t.cvSections.now}
                                     </p>
                                 </div>

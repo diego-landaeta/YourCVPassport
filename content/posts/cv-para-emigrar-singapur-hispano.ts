@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1291,
-  title: "Como Hacer un CV para Singapur siendo Hispano",
+  title: "Cómo Hacer un CV para Singapur siendo Hispano",
   slug: "cv-para-emigrar-singapur-hispano",
   summary: "CV para hispanos en Singapur. Work pass, formato y expectativas.",
-  content: `# Como Hacer un CV para Singapur siendo Hispano
+  content: `# Cómo Hacer un CV para Singapur siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Singapur hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,14 +16,14 @@ Esta guía completa sobre **CV trabajar Singapur hispano** te proporciona estrat
 ## 1. Mercado laboral de Singapur
 2. Formato CV
 3. Employment Pass
-4. Ingles como idioma de trabajo
+4. Inglés como idioma de trabajo
 5. Sectores en demanda
 6. Perfil verificado internacional
 
 Cuando hablamos de **CV trabajar Singapur hispano** en el contexto de 1. mercado laboral de singapur
 2. formato cv
 3. employment pass
-4. ingles como idioma de trabajo
+4. inglés como idioma de trabajo
 5. sectores en demanda
 6. perfil verificado internacional, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. mercado laboral de singapur
 2. formato cv
 3. employment pass
-4. ingles como idioma de trabajo
+4. inglés como idioma de trabajo
 5. sectores en demanda
 6. perfil verificado internacional
 
@@ -47,7 +47,7 @@ Para destacar en **CV trabajar Singapur hispano** dentro de esta área, aplica e
 ### Errores frecuentes en 1. mercado laboral de singapur
 2. formato cv
 3. employment pass
-4. ingles como idioma de trabajo
+4. inglés como idioma de trabajo
 5. sectores en demanda
 6. perfil verificado internacional
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T14:00:00.000Z",
-  meta_title: "Como Hacer un CV para Singapur siendo Hispano",
+  meta_title: "Cómo Hacer un CV para Singapur siendo Hispano",
   meta_description: "CV para hispanos en Singapur. Work pass, formato y expectativas.",
   lang: "es",
 };

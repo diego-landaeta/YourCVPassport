@@ -4,7 +4,7 @@ const post: BlogPostData = {
   id: 1250,
   title: "Credenciales Digitales y Blockchain: El Futuro del CV",
   slug: "credenciales-digitales-futuro-cv",
-  summary: "Blockchain y credenciales digitales transformando la verificacion de CVs.",
+  summary: "Blockchain y credenciales digitales transformando la verificación de CVs.",
   content: `# Credenciales Digitales y Blockchain: El Futuro del CV
 
 En el competitivo mercado laboral de 2026, dominar **credenciales digitales blockchain CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
@@ -14,26 +14,26 @@ Esta guía completa sobre **credenciales digitales blockchain CV** te proporcion
 ![credenciales digitales blockchain CV](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80){caption:Guía completa sobre credenciales digitales blockchain CV}
 
 ## 1. Problema del fraude en CVs
-2. Como funcionan credenciales digitales
-3. Verificacion blockchain
+2. Cómo funcionan credenciales digitales
+3. Verificación blockchain
 4. Badges y micro-credenciales
-5. Adopcion por empleadores
+5. Adopción por empleadores
 6. Sello digital de YourCVPassport
 
 Cuando hablamos de **credenciales digitales blockchain CV** en el contexto de 1. problema del fraude en cvs
-2. como funcionan credenciales digitales
-3. verificacion blockchain
+2. cómo funcionan credenciales digitales
+3. verificación blockchain
 4. badges y micro-credenciales
-5. adopcion por empleadores
+5. adopción por empleadores
 6. sello digital de yourcvpassport, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. problema del fraude en cvs
-2. como funcionan credenciales digitales
-3. verificacion blockchain
+2. cómo funcionan credenciales digitales
+3. verificación blockchain
 4. badges y micro-credenciales
-5. adopcion por empleadores
+5. adopción por empleadores
 6. sello digital de yourcvpassport
 
 Para destacar en **credenciales digitales blockchain CV** dentro de esta área, aplica estas estrategias probadas:
@@ -45,10 +45,10 @@ Para destacar en **credenciales digitales blockchain CV** dentro de esta área, 
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. problema del fraude en cvs
-2. como funcionan credenciales digitales
-3. verificacion blockchain
+2. cómo funcionan credenciales digitales
+3. verificación blockchain
 4. badges y micro-credenciales
-5. adopcion por empleadores
+5. adopción por empleadores
 6. sello digital de yourcvpassport
 
 Evita estos errores que cometen la mayoría de candidatos con **credenciales digitales blockchain CV**:
@@ -298,7 +298,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   is_featured: false,
   published_at: "2026-05-05T12:00:00.000Z",
   meta_title: "Credenciales Digitales y Blockchain: El Futuro del CV",
-  meta_description: "Blockchain y credenciales digitales transformando la verificacion de CVs.",
+  meta_description: "Blockchain y credenciales digitales transformando la verificación de CVs.",
   lang: "es",
 };
 

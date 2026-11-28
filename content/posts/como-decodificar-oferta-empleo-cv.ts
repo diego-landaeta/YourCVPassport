@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1185,
-  title: "Como Decodificar Ofertas de Empleo y Adaptar tu CV",
+  title: "Cómo Decodificar Ofertas de Empleo y Adaptar tu CV",
   slug: "como-decodificar-oferta-empleo-cv",
   summary: "Lee ofertas de empleo como un reclutador. Extrae keywords y adapta tu CV.",
-  content: `# Como Decodificar Ofertas de Empleo y Adaptar tu CV
+  content: `# Cómo Decodificar Ofertas de Empleo y Adaptar tu CV
 
 En el competitivo mercado laboral de 2026, dominar **decodificar oferta empleo adaptar CV** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,28 +13,28 @@ Esta guía completa sobre **decodificar oferta empleo adaptar CV** te proporcion
 
 ![decodificar oferta empleo adaptar CV](https://images.unsplash.com/photo-1526948531399-320e7e40f0ca?w=800&q=80){caption:Guía completa sobre decodificar oferta empleo adaptar CV}
 
-## 1. Anatomia de una oferta
+## 1. Anatomía de una oferta
 2. Requisitos obligatorios vs deseables
 3. Requisitos ocultos
 4. Extraer keywords ATS
-5. Adaptar CV seccion por seccion
-6. Herramientas de IA para analisis — claves de decodificar oferta empleo adaptar CV
+5. Adaptar CV sección por sección
+6. Herramientas de IA para análisis — claves de decodificar oferta empleo adaptar CV
 
-Cuando hablamos de **decodificar oferta empleo adaptar CV** en el contexto de 1. anatomia de una oferta
+Cuando hablamos de **decodificar oferta empleo adaptar CV** en el contexto de 1. anatomía de una oferta
 2. requisitos obligatorios vs deseables
 3. requisitos ocultos
 4. extraer keywords ats
-5. adaptar cv seccion por seccion
-6. herramientas de ia para analisis, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+5. adaptar cv sección por sección
+6. herramientas de ia para análisis, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. anatomia de una oferta
+### Mejores prácticas para 1. anatomía de una oferta
 2. requisitos obligatorios vs deseables
 3. requisitos ocultos
 4. extraer keywords ats
-5. adaptar cv seccion por seccion
-6. herramientas de ia para analisis
+5. adaptar cv sección por sección
+6. herramientas de ia para análisis
 
 Para destacar en **decodificar oferta empleo adaptar CV** dentro de esta área, aplica estas estrategias probadas:
 
@@ -44,12 +44,12 @@ Para destacar en **decodificar oferta empleo adaptar CV** dentro de esta área, 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. anatomia de una oferta
+### Errores frecuentes en 1. anatomía de una oferta
 2. requisitos obligatorios vs deseables
 3. requisitos ocultos
 4. extraer keywords ats
-5. adaptar cv seccion por seccion
-6. herramientas de ia para analisis
+5. adaptar cv sección por sección
+6. herramientas de ia para análisis
 
 Evita estos errores que cometen la mayoría de candidatos con **decodificar oferta empleo adaptar CV**:
 
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Entrevista y Empleo",
   is_featured: false,
   published_at: "2026-04-28T22:00:00.000Z",
-  meta_title: "Como Decodificar Ofertas de Empleo y Adaptar tu CV",
+  meta_title: "Cómo Decodificar Ofertas de Empleo y Adaptar tu CV",
   meta_description: "Lee ofertas de empleo como un reclutador. Extrae keywords y adapta tu CV.",
   lang: "es",
 };

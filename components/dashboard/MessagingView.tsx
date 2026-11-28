@@ -8,6 +8,44 @@ import {
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
 import { useA11yLabels, activateOnKey } from '../shared/a11y';
+import { useLanguage } from '../../contexts/LanguageContext';
+
+const TEXT = {
+  es: {
+    title: 'Mensajes',
+    conversations: (n: number) => `${n} ${n === 1 ? 'conversación' : 'conversaciones'}`,
+    noMessagesYet: 'Aún no hay mensajes',
+    conversationsHint: 'Tus conversaciones aparecerán aquí',
+    noMessages: 'Sin mensajes',
+    online: 'En línea',
+    startConversation: 'Empieza la conversación',
+    typeMessage: 'Escribe un mensaje…',
+    sendMessage: 'Enviar mensaje',
+    enterHint: 'Pulsa Intro para enviar y Mayús+Intro para un salto de línea',
+    selectConversation: 'Selecciona una conversación',
+    selectConversationHint: 'Elige una conversación de la lista para empezar a escribir',
+    loadError: 'Error al cargar los mensajes: ',
+    sendError: 'Error al enviar el mensaje: ',
+    unknownError: 'Error desconocido',
+  },
+  en: {
+    title: 'Messages',
+    conversations: (n: number) => `${n} conversation${n !== 1 ? 's' : ''}`,
+    noMessagesYet: 'No messages yet',
+    conversationsHint: 'Your conversations will appear here',
+    noMessages: 'No messages',
+    online: 'Online',
+    startConversation: 'Start the conversation',
+    typeMessage: 'Type a message...',
+    sendMessage: 'Send message',
+    enterHint: 'Press Enter to send, Shift+Enter for new line',
+    selectConversation: 'Select a conversation',
+    selectConversationHint: 'Choose a conversation from the list to start messaging',
+    loadError: 'Error loading messages: ',
+    sendError: 'Error sending the message: ',
+    unknownError: 'Unknown error',
+  },
+} as const;
 
 interface Message {
   id: string;
@@ -44,6 +82,9 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
   const { user, profile } = useAuth();
   const t = useTranslations();
   const toast = useToastContext();
+  const { lang } = useLanguage();
+  const tx = TEXT[lang];
+  const locale = lang === 'es' ? 'es-ES' : 'en-US';
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(initialLeadId || null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -144,7 +185,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
       }
       setMessages(data || []);
     } catch (err: any) {
-      toast.error('Error al cargar mensajes: ' + (err.message || 'Error desconocido'));
+      toast.error(tx.loadError + (err.message || tx.unknownError));
     }
   };
 
@@ -232,7 +273,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageContent); // Restore message
 
-      toast.error('Error al enviar el mensaje: ' + (err.message || 'Error desconocido'));
+      toast.error(tx.sendError + (err.message || tx.unknownError));
     } finally {
       setSending(false);
     }
@@ -267,10 +308,10 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-            Messages
+            {tx.title}
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+            {tx.conversations(conversations.length)}
           </p>
         </div>
 
@@ -283,8 +324,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">No messages yet</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Your conversations will appear here</p>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">{tx.noMessagesYet}</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{tx.conversationsHint}</p>
             </div>
           ) : (
             conversations.map((conv) => {
@@ -326,7 +367,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                           {otherPerson}
                         </h3>
                         <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                          {new Date(conv.last_message_at).toLocaleDateString('es-ES', { 
+                          {new Date(conv.last_message_at).toLocaleDateString(locale, { 
                             month: 'short', 
                             day: 'numeric' 
                           })}
@@ -340,7 +381,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                         {conv.subject}
                       </p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
-                        {conv.last_message || 'No messages'}
+                        {conv.last_message || tx.noMessages}
                       </p>
                     </div>
                   </div>
@@ -377,7 +418,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                   {isRealtimeConnected && (
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">Online</span>
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">{tx.online}</span>
                     </div>
                   )}
                   <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -397,8 +438,8 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 font-medium">No messages yet</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Start the conversation</p>
+                <p className="text-gray-500 dark:text-gray-400 font-medium">{tx.noMessagesYet}</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{tx.startConversation}</p>
               </div>
             ) : (
               <>
@@ -423,7 +464,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                           </p>
                         </div>
                         <p className={`text-xs text-gray-400 dark:text-gray-500 mt-1.5 px-1 ${isMe ? 'text-right' : 'text-left'}`}>
-                          {new Date(message.created_at).toLocaleTimeString('es-ES', {
+                          {new Date(message.created_at).toLocaleTimeString(locale, {
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
@@ -445,7 +486,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type a message..."
+                  placeholder={tx.typeMessage}
                   rows={1}
                   className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-dark-bg-tertiary text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   style={{ minHeight: '48px', maxHeight: '120px' }}
@@ -458,7 +499,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
                 onClick={sendMessage}
                 disabled={!newMessage.trim() || sending}
                 className="flex-shrink-0 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg disabled:hover:shadow-md flex items-center justify-center"
-                title="Send message"
+                title={tx.sendMessage}
               >
                 {sending ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -468,7 +509,7 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
               </button>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              Press Enter to send, Shift+Enter for new line
+              {tx.enterHint}
             </p>
           </div>
         </div>
@@ -481,10 +522,10 @@ const MessagingView: React.FC<MessagingViewProps> = ({ leadId: initialLeadId, on
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Select a conversation
+              {tx.selectConversation}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Choose a conversation from the list to start messaging
+              {tx.selectConversationHint}
             </p>
           </div>
         </div>

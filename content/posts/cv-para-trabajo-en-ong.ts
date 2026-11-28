@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1246,
-  title: "Como Hacer un CV para Trabajar en una ONG",
+  title: "Cómo Hacer un CV para Trabajar en una ONG",
   slug: "cv-para-trabajo-en-ong",
   summary: "CV alineado con ONGs. Valores, impacto social y experiencia de campo.",
-  content: `# Como Hacer un CV para Trabajar en una ONG
+  content: `# Cómo Hacer un CV para Trabajar en una ONG
 
 En el competitivo mercado laboral de 2026, dominar **CV para ONG** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -13,27 +13,27 @@ Esta guía completa sobre **CV para ONG** te proporciona estrategias comprobadas
 
 ![CV para ONG](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Guía completa sobre CV para ONG}
 
-## 1. Que buscan las ONGs
+## 1. Qué buscan las ONGs
 2. Experiencia de campo
 3. Idiomas y competencia intercultural
 4. Voluntariado y compromiso
-5. Gestion de proyectos
+5. Gestión de proyectos
 6. CVs verificados para organizaciones
 
-Cuando hablamos de **CV para ONG** en el contexto de 1. que buscan las ongs
+Cuando hablamos de **CV para ONG** en el contexto de 1. qué buscan las ongs
 2. experiencia de campo
 3. idiomas y competencia intercultural
 4. voluntariado y compromiso
-5. gestion de proyectos
+5. gestión de proyectos
 6. cvs verificados para organizaciones, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. que buscan las ongs
+### Mejores prácticas para 1. qué buscan las ongs
 2. experiencia de campo
 3. idiomas y competencia intercultural
 4. voluntariado y compromiso
-5. gestion de proyectos
+5. gestión de proyectos
 6. cvs verificados para organizaciones
 
 Para destacar en **CV para ONG** dentro de esta área, aplica estas estrategias probadas:
@@ -44,11 +44,11 @@ Para destacar en **CV para ONG** dentro de esta área, aplica estas estrategias 
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. que buscan las ongs
+### Errores frecuentes en 1. qué buscan las ongs
 2. experiencia de campo
 3. idiomas y competencia intercultural
 4. voluntariado y compromiso
-5. gestion de proyectos
+5. gestión de proyectos
 6. cvs verificados para organizaciones
 
 Evita estos errores que cometen la mayoría de candidatos con **CV para ONG**:
@@ -297,7 +297,7 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Desarrollo de Carrera",
   is_featured: false,
   published_at: "2026-05-05T00:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en una ONG",
+  meta_title: "Cómo Hacer un CV para Trabajar en una ONG",
   meta_description: "CV alineado con ONGs. Valores, impacto social y experiencia de campo.",
   lang: "es",
 };

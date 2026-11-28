@@ -45,7 +45,7 @@ const PLANTILLAS = [
 ];
 
 const COLORES = [
-  { hex: '#1E40AF', nombre: 'Azul ISEIE' },
+  { hex: '#1E40AF', nombre: 'Azul oscuro' },
   { hex: '#0D9488', nombre: 'Verde azulado' },
   { hex: '#2563EB', nombre: 'Azul marca' },
   { hex: '#7C3AED', nombre: 'Violeta' },

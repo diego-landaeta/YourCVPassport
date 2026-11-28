@@ -1,7 +1,7 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LEGAL_LAST_UPDATED, formatLegalDate } from './TermsPage';
+import LegalDocPage from './legal/LegalDocPage';
 
 // Textos por idioma (la ruta /privacidad es la version en espanol de /privacy).
 const CONTENT = {
@@ -34,28 +34,14 @@ const CONTENT = {
 const PrivacyPage: React.FC = () => {
   const { lang } = useLanguage();
   const c = CONTENT[lang] ?? CONTENT.en;
+  // Lee documentos_legales (privacidad); CONTENT es solo el respaldo si la lectura falla.
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Helmet>
-        <title>{`${c.title} | YourCVPassport`}</title>
-        <meta name="description" content={c.metaDescription} />
-      </Helmet>
-      <h1 className="text-3xl font-bold mb-6">{c.title}</h1>
-      <div className="prose prose-lg dark:prose-invert">
-        <p className="mb-4">{c.lastUpdated}: <time dateTime={LEGAL_LAST_UPDATED}>{formatLegalDate(lang)}</time></p>
-
-        <section className="mb-6">
-          <p className="mb-4">{c.intro}</p>
-        </section>
-
-        {c.sections.map(section => (
-          <section key={section.heading} className="mb-6">
-            <h2 className="text-2xl font-semibold mb-3">{section.heading}</h2>
-            <p className="mb-4">{section.body}</p>
-          </section>
-        ))}
-      </div>
-    </div>
+    <LegalDocPage
+      kind="privacy"
+      fallback={c}
+      fallbackDate={LEGAL_LAST_UPDATED}
+      fallbackDateLabel={formatLegalDate(lang)}
+    />
   );
 };
 

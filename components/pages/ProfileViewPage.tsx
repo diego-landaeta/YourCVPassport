@@ -30,6 +30,7 @@ import ModernProfessionalTemplate from '../templates/ModernProfessionalTemplate'
 import UrbanTemplate from '../templates/UrbanTemplate';
 import { AdminTemplateLoader, adminTemplatesList } from '../templates/AdminTemplateLoader';
 import SEOHead from '../shared/SEOHead';
+import excludedProfiles from '../../seo/excluded-profiles.json';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslatedProfile } from '../../hooks/useTranslatedProfile';
 import { TranslationProgressIndicator } from '../TranslationProgressIndicator';
@@ -262,7 +263,9 @@ const ProfileViewPage: React.FC = () => {
                         ) : (
                             <>
                                 <h1 className="text-3xl font-bold text-red-600 mb-4">{t.cvSections.profileNotFound}</h1>
-                                <p className="text-gray-600 dark:text-dark-text-secondary mb-6">{error}</p>
+                                <p className="text-gray-600 dark:text-dark-text-secondary mb-6">
+                                    {lang === 'es' ? 'Este CV no existe o ya no es público.' : 'This CV does not exist or is no longer public.'}
+                                </p>
                                 <Link
                                     to="/"
                                     className="inline-block px-6 py-3 bg-cv-blue text-white rounded-lg hover:bg-cv-blue-dark transition-colors font-medium"
@@ -300,6 +303,7 @@ const ProfileViewPage: React.FC = () => {
         <>
             {profileData && (
                 <SEOHead
+                    noindex={excludedProfiles.slugs.includes(String(profileData.profile?.slug || '').toLowerCase())}
                     profile={profileData.profile}
                     currentLang={lang}
                     canonicalUrl={canonicalUrl}

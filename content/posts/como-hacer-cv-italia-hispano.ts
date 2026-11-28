@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1287,
-  title: "Como Hacer un CV para Trabajar en Italia siendo Hispano",
+  title: "Cómo Hacer un CV para Trabajar en Italia siendo Hispano",
   slug: "como-hacer-cv-italia-hispano",
-  summary: "CV para hispanos en Italia. Europass, ciudadania italiana y formato.",
-  content: `# Como Hacer un CV para Trabajar en Italia siendo Hispano
+  summary: "CV para hispanos en Italia. Europass, ciudadanía italiana y formato.",
+  content: `# Cómo Hacer un CV para Trabajar en Italia siendo Hispano
 
 En el competitivo mercado laboral de 2026, dominar **CV trabajar Italia hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -15,14 +15,14 @@ Esta guía completa sobre **CV trabajar Italia hispano** te proporciona estrateg
 
 ## 1. Mercado laboral italiano
 2. Formato Europass en Italia
-3. Ciudadania italiana por descendencia
+3. Ciudadanía italiana por descendencia
 4. Italianismos y falsos amigos
 5. Permisos de trabajo
 6. Perfil verificado europeo — claves de CV trabajar Italia hispano
 
 Cuando hablamos de **CV trabajar Italia hispano** en el contexto de 1. mercado laboral italiano
 2. formato europass en italia
-3. ciudadania italiana por descendencia
+3. ciudadanía italiana por descendencia
 4. italianismos y falsos amigos
 5. permisos de trabajo
 6. perfil verificado europeo, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
@@ -31,7 +31,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 
 ### Mejores prácticas para 1. mercado laboral italiano
 2. formato europass en italia
-3. ciudadania italiana por descendencia
+3. ciudadanía italiana por descendencia
 4. italianismos y falsos amigos
 5. permisos de trabajo
 6. perfil verificado europeo
@@ -46,7 +46,7 @@ Para destacar en **CV trabajar Italia hispano** dentro de esta área, aplica est
 
 ### Errores frecuentes en 1. mercado laboral italiano
 2. formato europass en italia
-3. ciudadania italiana por descendencia
+3. ciudadanía italiana por descendencia
 4. italianismos y falsos amigos
 5. permisos de trabajo
 6. perfil verificado europeo
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "CV por País",
   is_featured: false,
   published_at: "2026-05-09T02:00:00.000Z",
-  meta_title: "Como Hacer un CV para Trabajar en Italia siendo Hispano",
-  meta_description: "CV para hispanos en Italia. Europass, ciudadania italiana y formato.",
+  meta_title: "Cómo Hacer un CV para Trabajar en Italia siendo Hispano",
+  meta_description: "CV para hispanos en Italia. Europass, ciudadanía italiana y formato.",
   lang: "es",
 };
 

@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1150,
-  title: "CV para Emigrar: Guia Completa para Profesionales Hispanos",
+  title: "CV para Emigrar: Guía Completa para Profesionales Hispanos",
   slug: "cv-para-emigrar-guia-completa",
-  summary: "Prepara tu CV para emigrar. Homologacion de titulos y formato internacional.",
-  content: `# CV para Emigrar: Guia Completa para Profesionales Hispanos
+  summary: "Prepara tu CV para emigrar. Homologación de títulos y formato internacional.",
+  content: `# CV para Emigrar: Guía Completa para Profesionales Hispanos
 
 En el competitivo mercado laboral de 2026, dominar **CV para emigrar** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -15,15 +15,15 @@ Esta guía completa sobre **CV para emigrar** te proporciona estrategias comprob
 
 ## 1. Decidir emigrar: consideraciones
 2. Investigar mercado del destino
-3. Adaptar CV al formato del pais
-4. Homologacion y apostilla
+3. Adaptar CV al formato del país
+4. Homologación y apostilla
 5. CV en otro idioma
 6. Perfil verificado para credibilidad
 
 Cuando hablamos de **CV para emigrar** en el contexto de 1. decidir emigrar: consideraciones
 2. investigar mercado del destino
-3. adaptar cv al formato del pais
-4. homologacion y apostilla
+3. adaptar cv al formato del país
+4. homologación y apostilla
 5. cv en otro idioma
 6. perfil verificado para credibilidad, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -31,8 +31,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 
 ### Mejores prácticas para 1. decidir emigrar: consideraciones
 2. investigar mercado del destino
-3. adaptar cv al formato del pais
-4. homologacion y apostilla
+3. adaptar cv al formato del país
+4. homologación y apostilla
 5. cv en otro idioma
 6. perfil verificado para credibilidad
 
@@ -46,8 +46,8 @@ Para destacar en **CV para emigrar** dentro de esta área, aplica estas estrateg
 
 ### Errores frecuentes en 1. decidir emigrar: consideraciones
 2. investigar mercado del destino
-3. adaptar cv al formato del pais
-4. homologacion y apostilla
+3. adaptar cv al formato del país
+4. homologación y apostilla
 5. cv en otro idioma
 6. perfil verificado para credibilidad
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-25T12:00:00.000Z",
-  meta_title: "CV para Emigrar: Guia Completa para Profesionales Hispanos",
-  meta_description: "Prepara tu CV para emigrar. Homologacion de titulos y formato internacional.",
+  meta_title: "CV para Emigrar: Guía Completa para Profesionales Hispanos",
+  meta_description: "Prepara tu CV para emigrar. Homologación de títulos y formato internacional.",
   lang: "es",
 };
 

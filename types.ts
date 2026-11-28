@@ -170,6 +170,9 @@ export interface Profile {
   photo_url?: string | null;
   email_verified?: boolean;
 
+  /** Idioma de la interfaz con el que se registró (es | en); la interfaz lo adopta al iniciar sesión. */
+  registro_idioma?: string | null;
+
   // Contact & Social
   country_code?: string | null;
   location?: string | null;
@@ -739,7 +742,7 @@ export interface LeadWithNotes extends Lead {
 
 export type CompanyStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
 export type CompanyUserRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
-export type CompanySize = '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+';
+export type CompanySize = '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+' | '51-250' | '250+';
 export type CreditTransactionType =
   | 'PURCHASE'
   | 'ADMIN_ADJUSTMENT'

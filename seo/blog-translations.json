@@ -1,0 +1,265 @@
+{
+  "_comment": "Pares de articulos del blog que son traduccion (o equivalente evidente por tema) el uno del otro: [es, en]. Emiten hreflang es/en/x-default reciprocos en ambas copias estaticas. Un par solo cuenta si ambos slugs existen y estan publicados (seo/blog-seo.mjs). Si no se puede garantizar el par, no se incluye.",
+  "pairs": [
+    {
+      "es": "cv-pdf-vs-docx-cual-enviar",
+      "en": "cv-pdf-vs-docx-format"
+    },
+    {
+      "es": "como-funcionan-sistemas-ats-espanol",
+      "en": "how-ats-systems-work-2026"
+    },
+    {
+      "es": "formato-cv-compatible-ats-espanol",
+      "en": "ats-friendly-cv-formatting-rules"
+    },
+    {
+      "es": "palabras-clave-curriculum-optimizacion",
+      "en": "resume-keywords-optimization-guide"
+    },
+    {
+      "es": "chatgpt-vs-gemini-escribir-cv",
+      "en": "chatgpt-vs-gemini-for-cv-writing"
+    },
+    {
+      "es": "cv-una-pagina-vs-dos-paginas",
+      "en": "one-page-vs-two-page-cv"
+    },
+    {
+      "es": "como-escribir-carta-presentacion-2026",
+      "en": "how-to-write-cover-letter-2026"
+    },
+    {
+      "es": "preguntas-entrevista-conductuales",
+      "en": "top-behavioral-interview-questions"
+    },
+    {
+      "es": "como-responder-hablame-de-ti",
+      "en": "how-to-answer-tell-me-about-yourself"
+    },
+    {
+      "es": "como-negociar-salario-espanol",
+      "en": "salary-negotiation-guide-2026"
+    },
+    {
+      "es": "estrategia-busqueda-empleo-2026",
+      "en": "job-search-strategy-2026"
+    },
+    {
+      "es": "como-decodificar-oferta-empleo-cv",
+      "en": "how-to-use-job-description-for-cv"
+    },
+    {
+      "es": "como-manejar-rechazo-laboral",
+      "en": "how-to-handle-rejection-job-search"
+    },
+    {
+      "es": "networking-introvertidos-espanol",
+      "en": "networking-for-introverts"
+    },
+    {
+      "es": "como-investigar-empresa-antes-entrevista",
+      "en": "how-to-research-company-interview"
+    },
+    {
+      "es": "buscar-empleo-mientras-trabajas",
+      "en": "job-search-when-employed"
+    },
+    {
+      "es": "credenciales-digitales-futuro-cv",
+      "en": "digital-credentials-blockchain-cv"
+    },
+    {
+      "es": "como-reclutadores-leen-cv-2026",
+      "en": "how-recruiters-screen-resumes-2026"
+    },
+    {
+      "es": "diseno-cv-tendencias-2026-espanol",
+      "en": "cv-design-trends-2026"
+    },
+    {
+      "es": "privacidad-cv-proteccion-datos",
+      "en": "cv-privacy-data-protection"
+    },
+    {
+      "es": "video-curriculum-guia-2026",
+      "en": "video-resume-guide-2026"
+    },
+    {
+      "es": "como-pedir-carta-recomendacion",
+      "en": "how-to-ask-for-reference-letter"
+    },
+    {
+      "es": "seguimiento-despues-entrevista-email",
+      "en": "how-to-follow-up-after-interview"
+    },
+    {
+      "es": "elevator-pitch-profesional-espanol",
+      "en": "how-to-write-elevator-pitch"
+    },
+    {
+      "es": "preparacion-feria-empleo-guia",
+      "en": "career-fair-preparation"
+    },
+    {
+      "es": "que-ponerse-entrevista-trabajo-2026",
+      "en": "what-to-wear-job-interview-2026"
+    },
+    {
+      "es": "cv-primer-empleo-sin-experiencia-es",
+      "en": "first-job-cv-no-experience"
+    },
+    {
+      "es": "cv-cambio-de-carrera-espanol",
+      "en": "career-change-resume-guide"
+    },
+    {
+      "es": "cv-ejecutivo-alta-direccion",
+      "en": "executive-cv-guide"
+    },
+    {
+      "es": "cv-practicas-profesionales-pasantia",
+      "en": "internship-cv-guide"
+    },
+    {
+      "es": "cv-recien-graduado-universidad",
+      "en": "graduate-cv-template-guide"
+    },
+    {
+      "es": "cv-para-beca-universitaria",
+      "en": "scholarship-application-cv"
+    },
+    {
+      "es": "cv-para-maestria-aplicacion",
+      "en": "masters-application-cv-guide"
+    },
+    {
+      "es": "cv-militar-transicion-civil",
+      "en": "cv-for-military-veterans"
+    },
+    {
+      "es": "cv-profesional-mayor-50-anos",
+      "en": "cv-for-senior-professionals-over-50"
+    },
+    {
+      "es": "nomada-digital-hispano-cv",
+      "en": "digital-nomad-cv-guide"
+    },
+    {
+      "es": "mejor-plantilla-cv-ingeniero-software",
+      "en": "best-cv-template-for-software-engineers"
+    },
+    {
+      "es": "mejor-plantilla-cv-medico",
+      "en": "best-cv-template-for-physicians"
+    },
+    {
+      "es": "mejor-plantilla-cv-abogado",
+      "en": "best-cv-template-for-lawyers"
+    },
+    {
+      "es": "mejor-plantilla-cv-enfermero",
+      "en": "best-cv-template-for-registered-nurses"
+    },
+    {
+      "es": "mejor-plantilla-cv-profesor",
+      "en": "best-cv-template-for-teachers"
+    },
+    {
+      "es": "mejor-plantilla-cv-psicologo",
+      "en": "best-cv-template-for-psychologists"
+    },
+    {
+      "es": "mejor-plantilla-cv-contador",
+      "en": "best-cv-template-for-accountants"
+    },
+    {
+      "es": "mejor-plantilla-cv-arquitecto",
+      "en": "best-cv-template-for-architects"
+    },
+    {
+      "es": "mejor-plantilla-cv-data-scientist",
+      "en": "best-cv-template-for-data-scientists"
+    },
+    {
+      "es": "mejor-plantilla-cv-gerente-proyectos",
+      "en": "best-cv-template-for-project-managers"
+    },
+    {
+      "es": "mejor-plantilla-cv-desarrollador-web",
+      "en": "best-cv-template-for-web-developers"
+    },
+    {
+      "es": "mejor-plantilla-cv-recursos-humanos",
+      "en": "best-cv-template-for-human-resources"
+    },
+    {
+      "es": "mejor-plantilla-cv-ingeniero-civil",
+      "en": "best-cv-template-for-civil-engineers"
+    },
+    {
+      "es": "mejor-plantilla-cv-ciberseguridad",
+      "en": "best-cv-template-for-cybersecurity-analysts"
+    },
+    {
+      "es": "mejor-plantilla-cv-diseno-grafico",
+      "en": "best-cv-template-for-graphic-designers"
+    },
+    {
+      "es": "mejor-plantilla-cv-analista-financiero",
+      "en": "best-cv-template-for-financial-analysts"
+    },
+    {
+      "es": "mejor-plantilla-cv-vendedor",
+      "en": "best-cv-template-for-sales-representatives"
+    },
+    {
+      "es": "como-hacer-cv-reino-unido-hispano",
+      "en": "how-to-write-cv-for-united-kingdom"
+    },
+    {
+      "es": "como-hacer-cv-alemania-hispano",
+      "en": "how-to-write-cv-for-germany"
+    },
+    {
+      "es": "cv-para-canada-desde-latam",
+      "en": "how-to-write-cv-for-canada"
+    },
+    {
+      "es": "cv-para-australia-desde-latam",
+      "en": "how-to-write-cv-for-australia"
+    },
+    {
+      "es": "como-hacer-cv-holanda-hispano",
+      "en": "how-to-write-cv-for-netherlands"
+    },
+    {
+      "es": "cv-para-suiza-hispano",
+      "en": "how-to-write-cv-for-switzerland"
+    },
+    {
+      "es": "como-hacer-cv-dubai-hispano",
+      "en": "how-to-write-cv-for-uae"
+    },
+    {
+      "es": "cv-para-emigrar-singapur-hispano",
+      "en": "how-to-write-cv-for-singapore"
+    },
+    {
+      "es": "como-hacer-cv-japon-hispano",
+      "en": "how-to-write-cv-for-japan"
+    },
+    {
+      "es": "como-hacer-cv-irlanda-hispano",
+      "en": "how-to-write-cv-for-ireland"
+    },
+    {
+      "es": "cv-para-sudafrica-hispano",
+      "en": "how-to-write-cv-for-south-africa"
+    },
+    {
+      "es": "cv-para-nueva-zelanda-hispano",
+      "en": "how-to-write-cv-for-new-zealand"
+    }
+  ]
+}

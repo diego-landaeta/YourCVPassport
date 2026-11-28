@@ -2,41 +2,41 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1277,
-  title: "Mejor Plantilla de CV para Farmaceuticos en 2026",
+  title: "Mejor Plantilla de CV para Farmacéuticos en 2026",
   slug: "mejor-plantilla-cv-farmaceutico",
-  summary: "Plantillas de CV para farmaceuticos. Licenciatura y regulacion.",
-  content: `# Mejor Plantilla de CV para Farmaceuticos en 2026
+  summary: "Plantillas de CV para farmacéuticos. Licenciatura y regulación.",
+  content: `# Mejor Plantilla de CV para Farmacéuticos en 2026
 
-En el competitivo mercado laboral de 2026, dominar **plantilla CV farmaceutico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
+En el competitivo mercado laboral de 2026, dominar **plantilla CV farmacéutico** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
-Esta guía completa sobre **plantilla CV farmaceutico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
+Esta guía completa sobre **plantilla CV farmacéutico** te proporciona estrategias comprobadas, ejemplos prácticos y herramientas que necesitas para transformar tu búsqueda de empleo. Según datos de LinkedIn, los profesionales que aplican estas técnicas reciben un 60% más de contactos de reclutadores.
 
-![plantilla CV farmaceutico](https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80){caption:Guía completa sobre plantilla CV farmaceutico}
+![plantilla CV farmacéutico](https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&q=80){caption:Guía completa sobre plantilla CV farmacéutico}
 
-## 1. CV especializado para farmaceuticos
+## 1. CV especializado para farmacéuticos
 2. Secciones: licencia, rotaciones
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes
 6. Plantillas verificadas
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de 1. cv especializado para farmaceuticos
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de 1. cv especializado para farmacéuticos
 2. secciones: licencia, rotaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para 1. cv especializado para farmaceuticos
+### Mejores prácticas para 1. cv especializado para farmacéuticos
 2. secciones: licencia, rotaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -44,14 +44,14 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en 1. cv especializado para farmaceuticos
+### Errores frecuentes en 1. cv especializado para farmacéuticos
 2. secciones: licencia, rotaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmaceutico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmacéutico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -59,18 +59,18 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV far
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::tip
-Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre plantilla CV farmaceutico sea visible de inmediato en el primer tercio del documento.
+Los reclutadores dedican un promedio de 7.4 segundos a la primera revisión de un CV. Asegúrate de que tu propuesta de valor sobre plantilla CV farmacéutico sea visible de inmediato en el primer tercio del documento.
 :::
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -78,17 +78,17 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV farmaceutico](https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmaceutico}
+![Aspectos avanzados de plantilla CV farmacéutico](https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmacéutico}
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -96,9 +96,9 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv farmaceutico
+### Errores frecuentes en aspectos avanzados de plantilla cv farmacéutico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmaceutico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmacéutico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -106,18 +106,18 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV far
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
 :::info
-El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de plantilla CV farmaceutico es esencial para superar este filtro.
+El 75% de los CVs son descartados por sistemas ATS antes de llegar a un reclutador humano. Optimizar tu perfil con las palabras clave correctas de plantilla CV farmacéutico es esencial para superar este filtro.
 :::
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -125,15 +125,15 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -141,30 +141,30 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv farmaceutico
+### Errores frecuentes en aspectos avanzados de plantilla cv farmacéutico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmaceutico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmacéutico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
 - Ignorar el formato y la legibilidad del documento
 - No incluir palabras clave que los sistemas ATS buscan automáticamente
 
-![Aspectos avanzados de plantilla CV farmaceutico](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmaceutico}
+![Aspectos avanzados de plantilla CV farmacéutico](https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmacéutico}
 
 :::warning
-No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV farmaceutico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
+No cometas el error de usar el mismo CV genérico para todas las aplicaciones. Personalizar tu enfoque de plantilla CV farmacéutico para cada empresa aumenta tus probabilidades de éxito hasta en un 60%.
 :::
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -172,15 +172,15 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -188,9 +188,9 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv farmaceutico
+### Errores frecuentes en aspectos avanzados de plantilla cv farmacéutico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmaceutico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmacéutico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -202,15 +202,15 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV far
 **Después**: "Incrementé las ventas en un 35% en 6 meses, generando +200K€ en nuevos contratos mediante estrategias de prospección digital y gestión de cuentas clave"
 :::
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -218,17 +218,17 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-![Aspectos avanzados de plantilla CV farmaceutico](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmaceutico}
+![Aspectos avanzados de plantilla CV farmacéutico](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmacéutico}
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -236,9 +236,9 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-### Errores frecuentes en aspectos avanzados de plantilla cv farmaceutico
+### Errores frecuentes en aspectos avanzados de plantilla cv farmacéutico
 
-Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmaceutico**:
+Evita estos errores que cometen la mayoría de candidatos con **plantilla CV farmacéutico**:
 
 - Usar el mismo CV para todas las aplicaciones sin personalizar
 - Incluir información irrelevante que distrae del mensaje principal
@@ -249,15 +249,15 @@ Evita estos errores que cometen la mayoría de candidatos con **plantilla CV far
 Incluir un enlace a tu perfil profesional verificado en YourCVPassport le da a los reclutadores acceso instantáneo a tus credenciales verificadas, aumentando significativamente tu credibilidad.
 :::
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-### Mejores prácticas para aspectos avanzados de plantilla cv farmaceutico
+### Mejores prácticas para aspectos avanzados de plantilla cv farmacéutico
 
-Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica estas estrategias probadas:
+Para destacar en **plantilla CV farmacéutico** dentro de esta área, aplica estas estrategias probadas:
 
 - **Investiga a fondo**: Antes de aplicar, estudia la empresa, su cultura y los requisitos específicos del puesto
 - **Personaliza siempre**: Un CV genérico no pasa los filtros ATS. Adapta cada sección a la oferta
@@ -265,17 +265,17 @@ Para destacar en **plantilla CV farmaceutico** dentro de esta área, aplica esta
 - **Optimiza para ATS**: Incluye las palabras clave exactas de la oferta de trabajo
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
-## Aspectos avanzados de plantilla CV farmaceutico
+## Aspectos avanzados de plantilla CV farmacéutico
 
-Cuando hablamos de **plantilla CV farmaceutico** en el contexto de aspectos avanzados de plantilla cv farmaceutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+Cuando hablamos de **plantilla CV farmacéutico** en el contexto de aspectos avanzados de plantilla cv farmacéutico, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
-![Aspectos avanzados de plantilla CV farmaceutico](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmaceutico}
+![Aspectos avanzados de plantilla CV farmacéutico](https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80){caption:Aspectos avanzados de plantilla CV farmacéutico}
 
-## Cómo YourCVPassport te ayuda con plantilla CV farmaceutico
+## Cómo YourCVPassport te ayuda con plantilla CV farmacéutico
 
-En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **plantilla CV farmaceutico**:
+En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas profesionales para que domines cada aspecto de **plantilla CV farmacéutico**:
 
 - **20+ plantillas profesionales** diseñadas por expertos en reclutamiento y optimizadas para ATS
 - **Asistente con IA** (Google Gemini) que te guía paso a paso en la creación de tu CV
@@ -286,9 +286,9 @@ En [YourCVPassport](https://yourcvpassport.com), hemos diseñado herramientas pr
 
 **[Crea tu CV verificado gratis →](https://yourcvpassport.com/signup)**
 
-## Conclusión: domina plantilla CV farmaceutico y transforma tu carrera profesional
+## Conclusión: domina plantilla CV farmacéutico y transforma tu carrera profesional
 
-Dominar **plantilla CV farmaceutico** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
+Dominar **plantilla CV farmacéutico** no es solo una ventaja competitiva — es una necesidad absoluta en el mercado laboral de 2026. Con las estrategias, herramientas y consejos prácticos que hemos compartido en esta guía, estás significativamente mejor preparado para crear un perfil profesional que realmente destaque entre la competencia.
 
 Recuerda: la clave del éxito está en la personalización constante, los datos concretos que respalden tus logros, y la mejora continua de tu perfil. Tu próximo gran paso profesional comienza con un CV excepcional que refleje tu verdadero valor.
 `,
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Guías Profesionales",
   is_featured: false,
   published_at: "2026-05-08T02:00:00.000Z",
-  meta_title: "Mejor Plantilla de CV para Farmaceuticos en 2026",
-  meta_description: "Plantillas de CV para farmaceuticos. Licenciatura y regulacion.",
+  meta_title: "Mejor Plantilla de CV para Farmacéuticos en 2026",
+  meta_description: "Plantillas de CV para farmacéuticos. Licenciatura y regulación.",
   lang: "es",
 };
 

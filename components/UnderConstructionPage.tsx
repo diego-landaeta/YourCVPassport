@@ -7,9 +7,20 @@ interface UnderConstructionPageProps {
   pageTitle: string;
 }
 
+/**
+ * routeConfig le pasa el titulo en ingles ('Resources') para las dos rutas (/recursos y /resources):
+ * el H1 sale en el idioma de la interfaz (auditoria SEO 25/10/2026, hallazgo 12).
+ */
+const PAGE_TITLES: Record<string, { es: string; en: string }> = {
+  resources: { es: 'Recursos', en: 'Resources' },
+  recursos: { es: 'Recursos', en: 'Resources' },
+};
+
 const UnderConstructionPage: React.FC<UnderConstructionPageProps> = ({ pageTitle }) => {
   const { lang } = useLanguage();
   const t = useTranslations();
+
+  const heading = PAGE_TITLES[pageTitle.trim().toLowerCase()]?.[lang] ?? pageTitle;
 
   const seoTitle = lang === 'es'
     ? 'Página en Construcción'
@@ -25,6 +36,7 @@ const UnderConstructionPage: React.FC<UnderConstructionPageProps> = ({ pageTitle
         title={seoTitle}
         description={seoDescription}
         lang={lang}
+        noindex
       />
       <section className="bg-cv-light-gray dark:bg-dark-bg-primary flex items-center justify-center min-h-[calc(100vh-128px)] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full mx-auto bg-white dark:bg-dark-bg-secondary rounded-xl shadow-2xl p-8 md:p-12 text-center transform hover:scale-[1.02] transition-transform duration-300">
@@ -45,7 +57,7 @@ const UnderConstructionPage: React.FC<UnderConstructionPageProps> = ({ pageTitle
 
         {/* Title */}
         <h1 className="text-3xl md:text-4xl font-bold text-cv-dark-gray dark:text-dark-text-primary mt-6">
-          {pageTitle}
+          {heading}
         </h1>
 
         {/* Primary Message */}

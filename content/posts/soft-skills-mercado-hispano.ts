@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1160,
-  title: "Soft Skills Mas Valoradas en el Mercado Hispano en 2026",
+  title: "Soft Skills Más Valoradas en el Mercado Hispano en 2026",
   slug: "soft-skills-mercado-hispano",
-  summary: "Habilidades blandas que valoran las empresas hispanas y como demostrarlas en tu CV.",
-  content: `# Soft Skills Mas Valoradas en el Mercado Hispano en 2026
+  summary: "Habilidades blandas que valoran las empresas hispanas y cómo demostrarlas en tu CV.",
+  content: `# Soft Skills Más Valoradas en el Mercado Hispano en 2026
 
 En el competitivo mercado laboral de 2026, dominar **soft skills mercado hispano** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -14,27 +14,27 @@ Esta guía completa sobre **soft skills mercado hispano** te proporciona estrate
 ![soft skills mercado hispano](https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80){caption:Guía completa sobre soft skills mercado hispano}
 
 ## 1. Habilidades blandas vs duras
-2. Comunicacion efectiva
+2. Comunicación efectiva
 3. Trabajo en equipo y liderazgo
 4. Adaptabilidad
 5. Inteligencia emocional
-6. Como demostrarlas en tu CV — claves de soft skills mercado hispano
+6. Cómo demostrarlas en tu CV — claves de soft skills mercado hispano
 
 Cuando hablamos de **soft skills mercado hispano** en el contexto de 1. habilidades blandas vs duras
-2. comunicacion efectiva
+2. comunicación efectiva
 3. trabajo en equipo y liderazgo
 4. adaptabilidad
 5. inteligencia emocional
-6. como demostrarlas en tu cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
+6. cómo demostrarlas en tu cv, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
 
 ### Mejores prácticas para 1. habilidades blandas vs duras
-2. comunicacion efectiva
+2. comunicación efectiva
 3. trabajo en equipo y liderazgo
 4. adaptabilidad
 5. inteligencia emocional
-6. como demostrarlas en tu cv
+6. cómo demostrarlas en tu cv
 
 Para destacar en **soft skills mercado hispano** dentro de esta área, aplica estas estrategias probadas:
 
@@ -45,11 +45,11 @@ Para destacar en **soft skills mercado hispano** dentro de esta área, aplica es
 - **Revisa y perfecciona**: Un solo error ortográfico puede costarte la entrevista
 
 ### Errores frecuentes en 1. habilidades blandas vs duras
-2. comunicacion efectiva
+2. comunicación efectiva
 3. trabajo en equipo y liderazgo
 4. adaptabilidad
 5. inteligencia emocional
-6. como demostrarlas en tu cv
+6. cómo demostrarlas en tu cv
 
 Evita estos errores que cometen la mayoría de candidatos con **soft skills mercado hispano**:
 
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-04-26T12:00:00.000Z",
-  meta_title: "Soft Skills Mas Valoradas en el Mercado Hispano en 2026",
-  meta_description: "Habilidades blandas que valoran las empresas hispanas y como demostrarlas en tu CV.",
+  meta_title: "Soft Skills Más Valoradas en el Mercado Hispano en 2026",
+  meta_description: "Habilidades blandas que valoran las empresas hispanas y cómo demostrarlas en tu CV.",
   lang: "es",
 };
 

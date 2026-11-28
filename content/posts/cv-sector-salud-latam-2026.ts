@@ -2,10 +2,10 @@ import { BlogPostData } from './types';
 
 const post: BlogPostData = {
   id: 1266,
-  title: "CV para el Sector Salud en LATAM: Guia 2026",
+  title: "CV para el Sector Salud en LATAM: Guía 2026",
   slug: "cv-sector-salud-latam-2026",
-  summary: "CV especializado para sector salud LATAM. Medicos, enfermeros y tecnicos.",
-  content: `# CV para el Sector Salud en LATAM: Guia 2026
+  summary: "CV especializado para sector salud LATAM. Médicos, enfermeros y técnicos.",
+  content: `# CV para el Sector Salud en LATAM: Guía 2026
 
 En el competitivo mercado laboral de 2026, dominar **CV sector salud LATAM** se ha convertido en una necesidad para cualquier profesional que quiera destacar. Los reclutadores reciben cientos de solicitudes por cada vacante, y solo aquellos candidatos que entienden cómo optimizar su perfil profesional logran pasar los filtros iniciales.
 
@@ -16,15 +16,15 @@ Esta guía completa sobre **CV sector salud LATAM** te proporciona estrategias c
 ## 1. Sector salud en LATAM: oportunidades
 2. Formato para salud
 3. Licencias y certificaciones
-4. Experiencia clinica
-5. Investigacion y publicaciones
+4. Experiencia clínica
+5. Investigación y publicaciones
 6. CV verificado para salud
 
 Cuando hablamos de **CV sector salud LATAM** en el contexto de 1. sector salud en latam: oportunidades
 2. formato para salud
 3. licencias y certificaciones
-4. experiencia clinica
-5. investigacion y publicaciones
+4. experiencia clínica
+5. investigación y publicaciones
 6. cv verificado para salud, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
 La clave está en combinar una presentación visual impecable con contenido estratégico que demuestre tu valor real. Veamos los aspectos específicos que debes dominar.
@@ -32,8 +32,8 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. sector salud en latam: oportunidades
 2. formato para salud
 3. licencias y certificaciones
-4. experiencia clinica
-5. investigacion y publicaciones
+4. experiencia clínica
+5. investigación y publicaciones
 6. cv verificado para salud
 
 Para destacar en **CV sector salud LATAM** dentro de esta área, aplica estas estrategias probadas:
@@ -47,8 +47,8 @@ Para destacar en **CV sector salud LATAM** dentro de esta área, aplica estas es
 ### Errores frecuentes en 1. sector salud en latam: oportunidades
 2. formato para salud
 3. licencias y certificaciones
-4. experiencia clinica
-5. investigacion y publicaciones
+4. experiencia clínica
+5. investigación y publicaciones
 6. cv verificado para salud
 
 Evita estos errores que cometen la mayoría de candidatos con **CV sector salud LATAM**:
@@ -297,8 +297,8 @@ Recuerda: la clave del éxito está en la personalización constante, los datos 
   category: "Tendencias Laborales",
   is_featured: false,
   published_at: "2026-05-07T00:00:00.000Z",
-  meta_title: "CV para el Sector Salud en LATAM: Guia 2026",
-  meta_description: "CV especializado para sector salud LATAM. Medicos, enfermeros y tecnicos.",
+  meta_title: "CV para el Sector Salud en LATAM: Guía 2026",
+  meta_description: "CV especializado para sector salud LATAM. Médicos, enfermeros y técnicos.",
   lang: "es",
 };
 

@@ -18,7 +18,7 @@ const AnimatedWrapper: React.FC<{children: React.ReactNode, threshold?: number, 
 
 const FeatureSection: React.FC<{ title: string; children: React.ReactNode; icon: React.ReactNode; reverse?: boolean; subFeatures?: string[]; imageUrl: string; }> = ({ title, children, icon, reverse, subFeatures, imageUrl }) => (
   <div className={`flex flex-col md:flex-row items-center gap-12 ${reverse ? 'md:flex-row-reverse' : ''}`}>
-    <div className="md:w-1/2">
+    <div className="w-full min-w-0 break-words md:w-1/2">
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg bg-cv-blue/10 mr-4">
             {icon}
@@ -33,13 +33,13 @@ const FeatureSection: React.FC<{ title: string; children: React.ReactNode; icon:
           {subFeatures.map(feature => (
             <h3 key={feature} className="text-xl font-semibold text-cv-dark-gray dark:text-dark-text-primary flex items-start">
               <svg className="w-6 h-6 mr-3 text-cv-green flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4"></path></svg>
-              <span>{feature}</span>
+              <span className="min-w-0 break-words">{feature}</span>
             </h3>
           ))}
         </div>
       )}
     </div>
-    <div className="md:w-1/2 flex justify-center items-center rounded-lg overflow-hidden shadow-xl min-h-[300px]">
+    <div className="w-full md:w-1/2 flex justify-center items-center rounded-lg overflow-hidden shadow-xl min-h-[300px]">
         <img src={imageUrl} alt={title} className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" />
     </div>
   </div>
@@ -192,7 +192,7 @@ const ProductOverviewPage: React.FC = () => {
                         {t.productOverview.comparison.subtitle}
                     </p>
                 </div>
-                <div className="overflow-x-auto shadow-lg rounded-lg">
+                <div className="w-full max-w-full overflow-x-auto shadow-lg rounded-lg">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr>

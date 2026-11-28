@@ -16,14 +16,14 @@ Esta guía completa sobre **plantilla CV trabajador social** te proporciona estr
 ## 1. CV especializado para trabajo social
 2. Secciones: intervenciones, poblaciones
 3. Mejores plantillas
-4. Optimizacion ATS
+4. Optimización ATS
 5. Errores comunes
 6. Plantillas verificadas
 
 Cuando hablamos de **plantilla CV trabajador social** en el contexto de 1. cv especializado para trabajo social
 2. secciones: intervenciones, poblaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas, es fundamental entender que cada detalle cuenta. Los profesionales más exitosos no dejan nada al azar: investigan las tendencias del mercado, analizan las ofertas de su sector y adaptan su perfil a cada oportunidad.
 
@@ -32,7 +32,7 @@ La clave está en combinar una presentación visual impecable con contenido estr
 ### Mejores prácticas para 1. cv especializado para trabajo social
 2. secciones: intervenciones, poblaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 
@@ -47,7 +47,7 @@ Para destacar en **plantilla CV trabajador social** dentro de esta área, aplica
 ### Errores frecuentes en 1. cv especializado para trabajo social
 2. secciones: intervenciones, poblaciones
 3. mejores plantillas
-4. optimizacion ats
+4. optimización ats
 5. errores comunes
 6. plantillas verificadas
 

@@ -105,7 +105,7 @@ const CITIES_BY_COUNTRY: Record<string, string[]> = {
 const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, onSave, onNext }) => {
   const a11y = useA11yLabels();
   const translations = useTranslations();
-  const { lang, setLang } = useLanguage();
+  const { lang, chooseLang } = useLanguage();
   const toast = useToastContext();
   const t = translations.dashboard.preferences;
   const [selectedCountry, setSelectedCountry] = React.useState<string>('');
@@ -200,8 +200,7 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ initialData, on
   };
 
   const handleLanguageChange = (newLang: 'en' | 'es') => {
-    setLang(newLang);
-    localStorage.setItem('language', newLang);
+    chooseLang(newLang);
   };
 
   // Validate salary input to prevent values greater than 1,000,000 (max 7 digits)
